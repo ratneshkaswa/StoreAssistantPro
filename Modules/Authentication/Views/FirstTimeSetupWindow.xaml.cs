@@ -1,0 +1,29 @@
+using System.Windows;
+using System.Windows.Controls;
+using StoreAssistantPro.Modules.Authentication.ViewModels;
+
+namespace StoreAssistantPro.Modules.Authentication.Views;
+
+public partial class FirstTimeSetupWindow : Window
+{
+    public FirstTimeSetupWindow(FirstTimeSetupViewModel vm)
+    {
+        InitializeComponent();
+        DataContext = vm;
+        vm.RequestClose = result => DialogResult = result;
+    }
+
+    private void OnPinChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not FirstTimeSetupViewModel vm) return;
+
+        if (sender == AdminPinBox)
+            vm.AdminPin = AdminPinBox.Password;
+        else if (sender == ManagerPinBox)
+            vm.ManagerPin = ManagerPinBox.Password;
+        else if (sender == UserPinBox)
+            vm.UserPin = UserPinBox.Password;
+        else if (sender == MasterPinBox)
+            vm.MasterPin = MasterPinBox.Password;
+    }
+}

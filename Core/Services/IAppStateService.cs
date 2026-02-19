@@ -1,0 +1,34 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using StoreAssistantPro.Models;
+
+namespace StoreAssistantPro.Core.Services;
+
+/// <summary>
+/// Single source of truth for application-wide state.
+/// ViewModels should read state and bind to properties.
+/// Only services should call mutation methods.
+/// </summary>
+public interface IAppStateService : INotifyPropertyChanged
+{
+    // ── Observable state (read by ViewModels, bound in XAML) ──
+
+    string FirmName { get; }
+    UserType CurrentUserType { get; }
+    bool IsLoggedIn { get; }
+    string CurrentTime { get; }
+    object? CurrentBillingSession { get; }
+    ObservableCollection<AppNotification> Notifications { get; }
+    int UnreadNotificationCount { get; }
+
+    // ── State mutations (called by services only) ──
+
+    void SetFirmInfo(string firmName);
+    void SetCurrentUser(UserType userType);
+    void SetLoggedIn(bool isLoggedIn);
+    void SetBillingSession(object? session);
+    void AddNotification(AppNotification notification);
+    void MarkNotificationRead(AppNotification notification);
+    void ClearNotifications();
+    void Reset();
+}

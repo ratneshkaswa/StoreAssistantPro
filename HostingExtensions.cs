@@ -1,12 +1,24 @@
+using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Navigation;
+using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Session;
+using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
-using StoreAssistantPro.Navigation;
-using StoreAssistantPro.Services;
-using StoreAssistantPro.Session;
-using StoreAssistantPro.ViewModels;
-using StoreAssistantPro.Views;
+using StoreAssistantPro.Modules.Authentication;
+using StoreAssistantPro.Modules.Billing;
+using StoreAssistantPro.Modules.Firm;
+using StoreAssistantPro.Modules.MainShell;
+using StoreAssistantPro.Modules.Products;
+using StoreAssistantPro.Modules.Sales;
+using StoreAssistantPro.Modules.Startup;
+using StoreAssistantPro.Modules.SystemSettings;
+using StoreAssistantPro.Modules.Users;
 
 namespace StoreAssistantPro;
 
@@ -25,39 +37,66 @@ internal static class HostingExtensions
         return services;
     }
 
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
-        services.AddSingleton<INavigationService, StoreAssistantPro.Navigation.NavigationService>();
+        services.AddSingleton<IAppStateService, AppStateService>();
+        services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<ISessionService, SessionService>();
-        services.AddSingleton<IProductService, ProductService>();
-        services.AddSingleton<ISalesService, SalesService>();
-        services.AddSingleton<IStartupService, StartupService>();
-        services.AddSingleton<ISetupService, SetupService>();
-        services.AddSingleton<ILoginService, LoginService>();
+        services.AddSingleton<IWindowRegistry, WindowRegistry>();
+        services.AddSingleton<IWorkflowManager, WorkflowManager>();
+        services.AddSingleton<ICommandBus, CommandBus>();
+        services.AddSingleton<IEventBus, EventBus>();
+        services.AddSingleton<IFeatureToggleService, FeatureToggleService>();
 
         return services;
     }
 
-    public static IServiceCollection AddViewModels(this IServiceCollection services)
+    public static IServiceCollection AddModules(this IServiceCollection services)
     {
-        services.AddTransient<MainViewModel>();
-        services.AddTransient<DashboardViewModel>();
-        services.AddTransient<ProductsViewModel>();
-        services.AddTransient<SalesViewModel>();
-        services.AddTransient<FirstTimeSetupViewModel>();
-        services.AddTransient<UserSelectionViewModel>();
-        services.AddTransient<PinLoginViewModel>();
+        var pageRegistry = new NavigationPageRegistry();
+        services.AddSingleton(pageRegistry);
+
+        services
+            .AddStartupModule()
+            .AddAuthenticationModule()
+            .AddMainShellModule(pageRegistry)
+            .AddProductsModule(pageRegistry)
+            .AddSalesModule(pageRegistry)
+            .AddFirmModule()
+            .AddUsersModule()
+            .AddSystemSettingsModule()
+            .AddBillingModule();
 
         return services;
     }
 
-    public static IServiceCollection AddViews(this IServiceCollection services)
+    /// <summary>
+    /// Registers a deferred dialog-key mapping. After the host is built and
+    /// <see cref="IWindowRegistry"/> is resolved, call
+    /// <see cref="ApplyDialogRegistrations"/> to push all mappings into it.
+    /// </summary>
+    public static IServiceCollection AddDialogRegistration<TWindow>(
+        this IServiceCollection services, string dialogKey) where TWindow : Window
     {
-        services.AddTransient<MainWindow>();
-        services.AddTransient<FirstTimeSetupWindow>();
-        services.AddTransient<UserSelectionWindow>();
-        services.AddTransient<PinLoginWindow>();
-
+        services.AddSingleton(new DialogRegistration(dialogKey, typeof(TWindow)));
         return services;
+    }
+
+    /// <summary>
+    /// Pushes all <see cref="DialogRegistration"/> entries collected during DI
+    /// setup into the <see cref="IWindowRegistry"/>.
+    /// </summary>
+    public static void ApplyDialogRegistrations(this IServiceProvider services)
+    {
+        var registry = services.GetRequiredService<IWindowRegistry>();
+        foreach (var entry in services.GetServices<DialogRegistration>())
+        {
+            var method = typeof(IWindowRegistry)
+                .GetMethod(nameof(IWindowRegistry.RegisterDialog))!
+                .MakeGenericMethod(entry.WindowType);
+            method.Invoke(registry, [entry.DialogKey]);
+        }
     }
 }
+
+internal sealed record DialogRegistration(string DialogKey, Type WindowType);

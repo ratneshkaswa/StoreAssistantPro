@@ -1,14 +1,13 @@
-ï»¿using System.Windows;
+using System.Windows;
 using System.Windows.Threading;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using StoreAssistantPro.Data;
-using StoreAssistantPro.Models;
-using StoreAssistantPro.Services;
-using StoreAssistantPro.Session;
-using StoreAssistantPro.ViewModels;
-using StoreAssistantPro.Views;
+using StoreAssistantPro.Core.Navigation;
+using StoreAssistantPro.Core.Session;
+using StoreAssistantPro.Core.Workflows;
+using StoreAssistantPro.Modules.Authentication.Workflows;
+using StoreAssistantPro.Modules.MainShell.Services;
+using StoreAssistantPro.Modules.Startup.Workflows;
 
 namespace StoreAssistantPro;
 
@@ -22,11 +21,16 @@ public partial class App : Application
 
         builder.Services
             .AddDataAccess(builder.Configuration)
-            .AddApplicationServices()
-            .AddViewModels()
-            .AddViews();
+            .AddCoreServices()
+            .AddModules();
 
         _host = builder.Build();
+
+        // Wire up string-key registrations collected during DI setup
+        var pageRegistry = _host.Services.GetRequiredService<NavigationPageRegistry>();
+        pageRegistry.ApplyTo(_host.Services.GetRequiredService<INavigationService>());
+
+        _host.Services.ApplyDialogRegistrations();
     }
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -35,18 +39,17 @@ public partial class App : Application
 
         await _host.StartAsync();
 
-        try
-        {
-            var dbFactory = _host.Services.GetRequiredService<IDbContextFactory<AppDbContext>>();
-            await using (var db = await dbFactory.CreateDbContextAsync())
-            {
-                await db.Database.EnsureCreatedAsync();
-            }
-        }
-        catch (Exception ex)
+        var workflowManager = _host.Services.GetRequiredService<IWorkflowManager>();
+        var session = _host.Services.GetRequiredService<ISessionService>();
+        var shellFlow = _host.Services.GetRequiredService<IMainShellFlow>();
+
+        // 1. Startup workflow — migrate DB, first-time setup, load firm
+        await workflowManager.StartWorkflowAsync(StartupWorkflow.WorkflowName);
+
+        if (workflowManager.Context.Has("Error"))
         {
             MessageBox.Show(
-                $"Cannot connect to the database.\n\nPlease check appsettings.json connection string.\n\n{ex.Message}",
+                $"Cannot connect to the database.\n\nPlease check appsettings.json connection string.\n\n{workflowManager.Context.Get<string>("Error")}",
                 "Database Connection Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
@@ -55,69 +58,25 @@ public partial class App : Application
             return;
         }
 
-        // 1. First-time setup
-        var startupService = _host.Services.GetRequiredService<IStartupService>();
-        if (!await startupService.IsAppInitializedAsync())
-        {
-            var setupWindow = _host.Services.GetRequiredService<FirstTimeSetupWindow>();
-            if (setupWindow.ShowDialog() != true)
-            {
-                Shutdown();
-                return;
-            }
-        }
-
-        // 2. Main app loop â€” supports logout back to user selection
-        var session = _host.Services.GetRequiredService<ISessionService>();
-
+        // 2. Main app loop — login ? main window ? logout
         while (true)
         {
-            // Login flow
-            if (!ShowLoginFlow(out var userType))
+            await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
+
+            if (!session.IsLoggedIn)
             {
                 Shutdown();
                 return;
             }
 
-            await session.LoginAsync(userType);
-
             // Show main window (blocks until closed)
-            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            var mainVm = _host.Services.GetRequiredService<MainViewModel>();
-            mainWindow.DataContext = mainVm;
-            mainWindow.ShowDialog();
-
-            // Check if user logged out or closed the window
-            if (!mainVm.IsLoggingOut)
+            if (!shellFlow.ShowMainWindow())
             {
                 Shutdown();
                 return;
             }
 
             session.Logout();
-        }
-    }
-
-    private bool ShowLoginFlow(out UserType userType)
-    {
-        userType = default;
-
-        while (true)
-        {
-            var selectionWindow = _host.Services.GetRequiredService<UserSelectionWindow>();
-            if (selectionWindow.ShowDialog() != true)
-                return false;
-
-            var selectedType = ((UserSelectionViewModel)selectionWindow.DataContext).SelectedUserType;
-
-            var pinWindow = _host.Services.GetRequiredService<PinLoginWindow>();
-            ((PinLoginViewModel)pinWindow.DataContext).UserType = selectedType;
-
-            if (pinWindow.ShowDialog() == true)
-            {
-                userType = selectedType;
-                return true;
-            }
         }
     }
 
