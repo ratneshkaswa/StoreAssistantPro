@@ -31,15 +31,29 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+
         await _host.StartAsync();
 
-        var dbFactory = _host.Services.GetRequiredService<IDbContextFactory<AppDbContext>>();
-        await using (var db = await dbFactory.CreateDbContextAsync())
+        try
         {
-            await db.Database.EnsureCreatedAsync();
+            var dbFactory = _host.Services.GetRequiredService<IDbContextFactory<AppDbContext>>();
+            await using (var db = await dbFactory.CreateDbContextAsync())
+            {
+                await db.Database.EnsureCreatedAsync();
+            }
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Cannot connect to the database.\n\nPlease check appsettings.json connection string.\n\n{ex.Message}",
+                "Database Connection Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
 
-        DispatcherUnhandledException += OnDispatcherUnhandledException;
+            Shutdown();
+            return;
+        }
 
         // 1. First-time setup
         var startupService = _host.Services.GetRequiredService<IStartupService>();
