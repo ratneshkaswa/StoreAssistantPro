@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Events;
 
@@ -9,7 +11,9 @@ namespace StoreAssistantPro.Modules.Authentication.Services;
 
 public class LoginService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IEventBus eventBus) : ILoginService
+    IEventBus eventBus,
+    IRegionalSettingsService regional,
+    ILogger<LoginService> logger) : ILoginService
 {
     private const int MaxFailedAttempts = 3;
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(2);
@@ -21,16 +25,21 @@ public class LoginService(
             .FirstOrDefaultAsync(c => c.UserType == userType);
 
         if (credential is null)
+        {
+            logger.LogWarning("Login attempt for non-existent user type {UserType}", userType);
             return LoginResult.Failed("User not found.", 0);
+        }
 
         var now = DateTime.UtcNow;
 
         // Active lockout — reject immediately
         if (credential.LockoutEndTime is not null && credential.LockoutEndTime > now)
         {
+            logger.LogWarning("Login rejected — {UserType} is locked out until {LockoutEnd:u}",
+                userType, credential.LockoutEndTime.Value);
             await eventBus.PublishAsync(new UserLockedOutEvent(
                 userType, now, credential.LockoutEndTime.Value));
-            return LoginResult.LockedOut(credential.LockoutEndTime.Value);
+            return LoginResult.LockedOut(regional.FormatTime(credential.LockoutEndTime.Value));
         }
 
         // Expired lockout — reset counters
@@ -46,6 +55,7 @@ public class LoginService(
             credential.LockoutEndTime = null;
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Login succeeded for {UserType}", userType);
             await eventBus.PublishAsync(new UserLoginSuccessEvent(userType, now));
             return LoginResult.Success();
         }
@@ -58,14 +68,18 @@ public class LoginService(
             credential.LockoutEndTime = now.Add(LockoutDuration);
             await context.SaveChangesAsync();
 
+            logger.LogWarning("Login failed — {UserType} locked out after {Attempts} attempts until {LockoutEnd:u}",
+                userType, credential.FailedAttempts, credential.LockoutEndTime.Value);
             await eventBus.PublishAsync(new UserLockedOutEvent(
                 userType, now, credential.LockoutEndTime.Value));
-            return LoginResult.LockedOut(credential.LockoutEndTime.Value);
+            return LoginResult.LockedOut(regional.FormatTime(credential.LockoutEndTime.Value));
         }
 
         await context.SaveChangesAsync();
         var remaining = MaxFailedAttempts - credential.FailedAttempts;
 
+        logger.LogWarning("Login failed for {UserType} — attempt {Attempts}/{MaxAttempts}, {Remaining} remaining",
+            userType, credential.FailedAttempts, MaxFailedAttempts, remaining);
         await eventBus.PublishAsync(new UserLoginFailedEvent(
             userType, now, credential.FailedAttempts, remaining));
         return LoginResult.Failed(
@@ -79,6 +93,13 @@ public class LoginService(
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
-        return config is not null && PinHasher.Verify(pin, config.MasterPinHash);
+        var isValid = config is not null && PinHasher.Verify(pin, config.MasterPinHash);
+
+        if (!isValid)
+            logger.LogWarning("Master PIN validation failed");
+        else
+            logger.LogInformation("Master PIN validated successfully");
+
+        return isValid;
     }
 }

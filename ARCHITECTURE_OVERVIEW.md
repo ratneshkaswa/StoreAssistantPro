@@ -273,3 +273,34 @@ Window (WPF)
     ├── PinLoginWindow                   ← Startup
     └── UserSelectionWindow              ← Startup
 ```
+
+## Regional Configuration
+
+```
+Global Culture: en-IN (set in App.xaml.cs before DI)
+    ├── Currency:  ₹ (Indian Rupee, lakhs/crores grouping)
+    ├── Date:      dd-MM-yyyy
+    ├── Time:      hh:mm tt
+    ├── Timezone:  Asia/Kolkata (IST, UTC+05:30)
+    └── FY:        April → March
+
+Formatting Pipeline:
+    XAML StringFormat=C  ──► CultureInfo.CurrentCulture (en-IN)
+    C# code              ──► IRegionalSettingsService.FormatCurrency/Date/Time/Number
+    Timestamps           ──► IRegionalSettingsService.Now (IST)
+    DB lockout fields    ──► DateTime.UtcNow (UTC — exception)
+```
+
+## Financial Transaction Rules
+
+```
+All financial writes MUST use:
+    ExecutionStrategy → BeginTransactionAsync → SaveChangesAsync → CommitAsync
+
+    SalesService.CreateSaleAsync     ✅ (sale + stock deduction in single transaction)
+    Future: RefundService            ← Must follow same pattern
+    Future: BillingService           ← Must follow same pattern
+    Future: PaymentService           ← Must follow same pattern
+
+Read-only queries (reports, history) → No transaction required
+```

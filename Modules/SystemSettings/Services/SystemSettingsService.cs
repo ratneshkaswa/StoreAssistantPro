@@ -1,6 +1,7 @@
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Services;
 
@@ -8,7 +9,8 @@ namespace StoreAssistantPro.Modules.SystemSettings.Services;
 
 public class SystemSettingsService(
     IDbContextFactory<AppDbContext> contextFactory,
-    ILoginService loginService) : ISystemSettingsService
+    ILoginService loginService,
+    IRegionalSettingsService regional) : ISystemSettingsService
 {
     public async Task ChangeMasterPinAsync(string currentPin, string newPin)
     {
@@ -24,24 +26,11 @@ public class SystemSettingsService(
         await context.SaveChangesAsync();
     }
 
-    public async Task<bool> CheckDatabaseConnectionAsync()
-    {
-        try
-        {
-            await using var context = await contextFactory.CreateDbContextAsync();
-            return await context.Database.CanConnectAsync();
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     public Task<string> BackupDatabaseAsync(string backupFolder)
     {
         // Architecture placeholder — implementation depends on SQL Server backup strategy.
         // Production: execute BACKUP DATABASE via raw SQL or use SqlClient directly.
-        var fileName = $"StoreAssistantPro_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.bak";
+        var fileName = $"StoreAssistantPro_Backup_{regional.Now:yyyyMMdd_HHmmss}.bak";
         var filePath = Path.Combine(backupFolder, fileName);
 
         // TODO: Execute SQL Server BACKUP DATABASE command

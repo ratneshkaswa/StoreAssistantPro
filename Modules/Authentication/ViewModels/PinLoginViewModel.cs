@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
 
@@ -22,13 +23,9 @@ public partial class PinLoginViewModel(ICommandBus commandBus) : BaseViewModel
     [RelayCommand]
     private async Task LoginAsync()
     {
-        ErrorMessage = string.Empty;
-
-        if (string.IsNullOrWhiteSpace(Pin))
-        {
-            ErrorMessage = "Please enter your PIN.";
+        if (!Validate(v => v
+            .Rule(InputValidator.IsRequired(Pin), "Please enter your PIN.")))
             return;
-        }
 
         var result = await commandBus.SendAsync(new LoginUserCommand(UserType, Pin));
 

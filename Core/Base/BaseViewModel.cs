@@ -4,8 +4,8 @@ namespace StoreAssistantPro.Core;
 
 /// <summary>
 /// Base class for all application ViewModels. Provides standardized
-/// infrastructure for busy-state tracking, error display, and a
-/// discoverable title.
+/// infrastructure for busy-state tracking, error display, validation,
+/// and a discoverable title.
 /// <para>
 /// <b>Architecture rule:</b> Every ViewModel in every module must derive
 /// from <see cref="BaseViewModel"/> to guarantee consistent behavior
@@ -31,7 +31,7 @@ public abstract partial class BaseViewModel : ObservableObject
 
     /// <summary>
     /// Last error message to display in the View. Set by
-    /// <see cref="RunAsync"/> on failure, or manually by the ViewModel.
+    /// <see cref="RunAsync"/> on failure, or by <see cref="Validate"/>.
     /// </summary>
     [ObservableProperty]
     public partial string ErrorMessage { get; set; } = string.Empty;
@@ -41,6 +41,53 @@ public abstract partial class BaseViewModel : ObservableObject
     /// Override in derived ViewModels for a custom display title.
     /// </summary>
     public virtual string Title => GetType().Name.Replace("ViewModel", "");
+
+    // ── Validation ──
+
+    /// <summary>
+    /// Runs a chain of validation rules. Sets <see cref="ErrorMessage"/>
+    /// to the first failure and returns <c>false</c>, or clears
+    /// <see cref="ErrorMessage"/> and returns <c>true</c> if all pass.
+    /// <para>Usage:</para>
+    /// <code>
+    /// if (!Validate(v => v
+    ///     .Rule(InputValidator.IsRequired(Name), "Name is required.")
+    ///     .Rule(InputValidator.IsValidUserPin(Pin), "PIN must be 4 digits.")))
+    ///     return;
+    /// </code>
+    /// </summary>
+    protected bool Validate(Action<ValidationBuilder> configure)
+    {
+        var builder = new ValidationBuilder();
+        configure(builder);
+
+        var error = builder.FirstError;
+
+        ErrorMessage = error ?? string.Empty;
+        return error is null;
+    }
+
+    /// <summary>
+    /// Fluent builder for chaining validation rules.
+    /// Short-circuits on the first failure.
+    /// </summary>
+    protected sealed class ValidationBuilder
+    {
+        internal string? FirstError { get; private set; }
+
+        /// <summary>
+        /// Add a validation rule. If <paramref name="condition"/> is
+        /// <c>false</c> and no prior rule has failed, record the error.
+        /// </summary>
+        public ValidationBuilder Rule(bool condition, string errorMessage)
+        {
+            if (FirstError is null && !condition)
+                FirstError = errorMessage;
+            return this;
+        }
+    }
+
+    // ── Async helpers ──
 
     /// <summary>
     /// Convenience helper that wraps an async action with

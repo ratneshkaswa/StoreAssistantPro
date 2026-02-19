@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Products.Commands;
@@ -123,11 +124,11 @@ public partial class ProductsViewModel(
     [RelayCommand]
     private async Task SaveProductAsync()
     {
-        ErrorMessage = string.Empty;
-
-        if (string.IsNullOrWhiteSpace(NewProductName)) return;
-        if (NewProductPrice < 0) { ErrorMessage = "Price cannot be negative."; return; }
-        if (NewProductQuantity < 0) { ErrorMessage = "Quantity cannot be negative."; return; }
+        if (!Validate(v => v
+            .Rule(InputValidator.IsRequired(NewProductName), "Product name is required.")
+            .Rule(InputValidator.IsNonNegative(NewProductPrice), "Price cannot be negative.")
+            .Rule(InputValidator.IsNonNegative(NewProductQuantity), "Quantity cannot be negative.")))
+            return;
 
         var result = await commandBus.SendAsync(new SaveProductCommand(
             NewProductName.Trim(), NewProductPrice, NewProductQuantity));
@@ -171,11 +172,12 @@ public partial class ProductsViewModel(
     [RelayCommand]
     private async Task SaveEditAsync()
     {
-        ErrorMessage = string.Empty;
-
-        if (SelectedProduct is null || string.IsNullOrWhiteSpace(EditProductName)) return;
-        if (EditProductPrice < 0) { ErrorMessage = "Price cannot be negative."; return; }
-        if (EditProductQuantity < 0) { ErrorMessage = "Quantity cannot be negative."; return; }
+        if (!Validate(v => v
+            .Rule(SelectedProduct is not null, "No product selected.")
+            .Rule(InputValidator.IsRequired(EditProductName), "Product name is required.")
+            .Rule(InputValidator.IsNonNegative(EditProductPrice), "Price cannot be negative.")
+            .Rule(InputValidator.IsNonNegative(EditProductQuantity), "Quantity cannot be negative.")))
+            return;
 
         var result = await commandBus.SendAsync(new UpdateProductCommand(
             SelectedProduct.Id, EditProductName.Trim(), EditProductPrice,

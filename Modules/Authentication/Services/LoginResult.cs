@@ -18,6 +18,6 @@ public sealed record LoginResult
     public static LoginResult Failed(string error, int remainingAttempts) =>
         new() { ErrorMessage = error, RemainingAttempts = remainingAttempts };
 
-    public static LoginResult LockedOut(DateTime lockoutEnd) =>
-        new() { IsLockedOut = true, ErrorMessage = $"Account locked. Try again after {lockoutEnd:hh:mm:ss tt}." };
+    public static LoginResult LockedOut(string formattedLockoutEnd) =>
+        new() { IsLockedOut = true, ErrorMessage = $"Account locked. Try again after {formattedLockoutEnd}." };
 }

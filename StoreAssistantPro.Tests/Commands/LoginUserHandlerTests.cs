@@ -45,7 +45,7 @@ public class LoginUserHandlerTests
     public async Task HandleAsync_LockedOut_ReturnsFailureWithLockoutMessage()
     {
         _loginService.ValidatePinAsync(UserType.Manager, "9999")
-            .Returns(LoginResult.LockedOut(DateTime.UtcNow.AddMinutes(2)));
+            .Returns(LoginResult.LockedOut("02:30 PM"));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.Manager, "9999"));
 

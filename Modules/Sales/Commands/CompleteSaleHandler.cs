@@ -1,6 +1,7 @@
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Sales.Events;
 using StoreAssistantPro.Modules.Sales.Services;
@@ -9,13 +10,14 @@ namespace StoreAssistantPro.Modules.Sales.Commands;
 
 public class CompleteSaleHandler(
     ISalesService salesService,
-    IEventBus eventBus) : BaseCommandHandler<CompleteSaleCommand>
+    IEventBus eventBus,
+    IRegionalSettingsService regional) : BaseCommandHandler<CompleteSaleCommand>
 {
     protected override async Task<CommandResult> ExecuteAsync(CompleteSaleCommand command)
     {
         var sale = new Sale
         {
-            SaleDate = DateTime.Now,
+            SaleDate = regional.Now,
             TotalAmount = command.TotalAmount,
             PaymentMethod = command.PaymentMethod,
             Items = command.Items.Select(i => new SaleItem

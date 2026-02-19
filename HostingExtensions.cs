@@ -2,6 +2,7 @@ using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Features;
@@ -28,17 +29,27 @@ internal static class HostingExtensions
     {
         services.AddDbContextFactory<AppDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
-                sqlOptions => sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 3,
-                    maxRetryDelay: TimeSpan.FromSeconds(5),
-                    errorNumbersToAdd: null)));
+                    configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions => sqlOptions
+                        .EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay: TimeSpan.FromSeconds(5),
+                            errorNumbersToAdd: null)
+                        .CommandTimeout(30))
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging(false));
 
         return services;
     }
 
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
+        services.AddLogging(logging =>
+        {
+            logging.ClearProviders();
+            logging.AddProvider(new FileLoggerProvider());
+        });
+
         services.AddSingleton<IAppStateService, AppStateService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<ISessionService, SessionService>();
@@ -49,6 +60,9 @@ internal static class HostingExtensions
         services.AddSingleton<IFeatureToggleService, FeatureToggleService>();
         services.AddSingleton<IMasterPinValidator, MasterPinValidator>();
         services.AddSingleton<IWindowSizingService, WindowSizingService>();
+        services.AddSingleton<IRegionalSettingsService, RegionalSettingsService>();
+        services.AddSingleton<ITransactionHelper, TransactionHelper>();
+        services.AddSingleton<IApplicationInfoService, ApplicationInfoService>();
 
         return services;
     }

@@ -1,5 +1,6 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Sales.Commands;
 using StoreAssistantPro.Modules.Sales.Events;
 using StoreAssistantPro.Modules.Sales.Services;
@@ -10,8 +11,14 @@ public class CompleteSaleHandlerTests
 {
     private readonly ISalesService _salesService = Substitute.For<ISalesService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
+    private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
-    private CompleteSaleHandler CreateSut() => new(_salesService, _eventBus);
+    public CompleteSaleHandlerTests()
+    {
+        _regional.Now.Returns(new DateTime(2026, 2, 19, 14, 30, 0));
+    }
+
+    private CompleteSaleHandler CreateSut() => new(_salesService, _eventBus, _regional);
 
     [Fact]
     public async Task HandleAsync_Success_CreatesSaleAndPublishesEvent()

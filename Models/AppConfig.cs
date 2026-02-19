@@ -19,4 +19,16 @@ public class AppConfig
 
     [Required]
     public string MasterPinHash { get; set; } = string.Empty;
+
+    // ── Indian business configuration ──
+
+    [MaxLength(10)]
+    public string CurrencyCode { get; set; } = "INR";
+
+    public int FinancialYearStartMonth { get; set; } = 4;  // April
+
+    public int FinancialYearEndMonth { get; set; } = 3;    // March
+
+    [MaxLength(20)]
+    public string? GSTNumber { get; set; }
 }

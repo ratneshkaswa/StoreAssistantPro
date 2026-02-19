@@ -25,15 +25,18 @@ namespace StoreAssistantPro.Core.Services;
 public partial class AppStateService : ObservableObject, IAppStateService
 {
     private readonly DispatcherTimer _clockTimer;
+    private readonly IRegionalSettingsService _regional;
 
-    public AppStateService()
+    public AppStateService(IRegionalSettingsService regional)
     {
+        _regional = regional;
+
         Notifications = [];
         Notifications.CollectionChanged += (_, _) =>
             OnPropertyChanged(nameof(UnreadNotificationCount));
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _clockTimer.Tick += (_, _) => CurrentTime = DateTime.Now.ToString("hh:mm:ss tt");
+        _clockTimer.Tick += (_, _) => CurrentTime = _regional.FormatTime(_regional.Now);
         _clockTimer.Start();
     }
 
@@ -49,7 +52,7 @@ public partial class AppStateService : ObservableObject, IAppStateService
     public partial bool IsLoggedIn { get; set; }
 
     [ObservableProperty]
-    public partial string CurrentTime { get; set; } = DateTime.Now.ToString("hh:mm:ss tt");
+    public partial string CurrentTime { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial object? CurrentBillingSession { get; set; }

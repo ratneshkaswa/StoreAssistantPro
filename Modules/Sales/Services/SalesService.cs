@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Sales.Services;
 
-public class SalesService(IDbContextFactory<AppDbContext> contextFactory) : ISalesService
+public class SalesService(
+    IDbContextFactory<AppDbContext> contextFactory,
+    ITransactionHelper transaction) : ISalesService
 {
     public async Task<IEnumerable<Sale>> GetAllAsync()
     {
@@ -29,16 +32,8 @@ public class SalesService(IDbContextFactory<AppDbContext> contextFactory) : ISal
 
     public async Task CreateSaleAsync(Sale sale)
     {
-        // A separate context obtains the execution strategy before the retryable
-        // lambda — the work context must be created inside so retries start clean.
-        await using var strategySource = await contextFactory.CreateDbContextAsync();
-        var strategy = strategySource.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        await transaction.ExecuteInTransactionAsync(async context =>
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
-            await using var transaction = await context.Database.BeginTransactionAsync();
-
             var saleItems = new List<SaleItem>();
             foreach (var item in sale.Items)
             {
@@ -65,18 +60,6 @@ public class SalesService(IDbContextFactory<AppDbContext> contextFactory) : ISal
                 PaymentMethod = sale.PaymentMethod,
                 Items = saleItems
             });
-
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new InvalidOperationException(
-                    "Stock was modified by another user during this sale. Please try again.");
-            }
-
-            await transaction.CommitAsync();
         });
     }
 

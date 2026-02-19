@@ -104,6 +104,7 @@ These components are **frozen**. Extend through the existing interfaces only.
 | `BaseCommandHandler` | `Core/Base/` | Base class for all command handlers |
 | `BaseDialogWindow` | `Core/Base/` | Base class for all dialog windows |
 | `WindowSizingService` | `Core/Services/` | Enterprise window sizing rules |
+| `RegionalSettingsService` | `Core/Services/` | Indian regional formatting (en-IN, IST) |
 
 ---
 
@@ -194,6 +195,93 @@ public partial class MyWindow : BaseDialogWindow
     <!-- content -->
 </core:BaseDialogWindow>
 ```
+
+---
+
+## Regional & Culture Rules — Indian Retail Defaults
+
+Global culture is set to `en-IN` in `App.xaml.cs` before any other code runs. **All formatting must go through `IRegionalSettingsService`.**
+
+### Global Culture (`App.xaml.cs → SetIndianCulture`)
+
+| Setting | Value | Scope |
+|---|---|---|
+| `CultureInfo.CurrentCulture` | `en-IN` | UI thread |
+| `CultureInfo.DefaultThreadCurrentCulture` | `en-IN` | All threads (Task.Run, async) |
+| `FrameworkElement.LanguageProperty` | `en-IN` | XAML `StringFormat` bindings |
+
+### RegionalSettingsService (singleton)
+
+| Helper | Example Output | Use Case |
+|---|---|---|
+| `FormatCurrency(1234567.89m)` | `₹12,34,567.89` | Prices, totals, invoices |
+| `FormatNumber(1234567)` | `12,34,567` | Quantities, counts |
+| `FormatQuantity(5.00m)` | `5` (drops `.00`) | Stock, cart items |
+| `FormatPercent(18.5m)` | `18.50 %` | GST, discounts |
+| `FormatDate(dt)` | `19-02-2026` | Sale dates, reports |
+| `FormatTime(dt)` | `02:30 PM` | Status bar, lockout messages |
+| `Now` | IST (`Asia/Kolkata`) | All timestamps |
+
+### Rules
+
+- **Never use `DateTime.Now`** in services or handlers — use `regional.Now` (IST)
+- `DateTime.UtcNow` is allowed **only** for DB-level comparisons (e.g., lockout expiry)
+- **Never hardcode format strings** like `"hh:mm tt"` or `"dd-MM-yyyy"` — use the service
+- XAML `StringFormat=C` / `StringFormat=g` is fine — it reads from the global `CultureInfo`
+- Indian number grouping (lakhs/crores) is automatic via `en-IN` culture
+- `RegionalSettingsService` is a **frozen singleton** — extend, never rewrite
+
+### AppConfig Business Fields
+
+| Field | Default | Purpose |
+|---|---|---|
+| `CurrencyCode` | `"INR"` | ISO 4217 currency code |
+| `FinancialYearStartMonth` | `4` (April) | Indian FY start |
+| `FinancialYearEndMonth` | `3` (March) | Indian FY end |
+| `GSTNumber` | `null` | Future: GSTIN for invoices |
+
+---
+
+## Financial Transaction Rules — Mandatory Before Billing
+
+All financial operations **must** execute inside a database transaction. No exceptions.
+
+### Required Pattern
+
+```csharp
+await using var strategySource = await contextFactory.CreateDbContextAsync();
+var strategy = strategySource.Database.CreateExecutionStrategy();
+
+await strategy.ExecuteAsync(async () =>
+{
+    await using var context = await contextFactory.CreateDbContextAsync();
+    await using var transaction = await context.Database.BeginTransactionAsync();
+
+    // ... all DB writes here ...
+
+    await context.SaveChangesAsync();
+    await transaction.CommitAsync();
+});
+```
+
+### Rules
+
+- **Every** operation that modifies financial data (sales, payments, stock adjustments, refunds) must use `BeginTransactionAsync` + `CommitAsync`
+- Transactions must be wrapped in `CreateExecutionStrategy().ExecuteAsync()` for SQL Server retry compatibility
+- The work context must be created **inside** the retry lambda so retries start with a clean context
+- Concurrency conflicts (`DbUpdateConcurrencyException`) must be caught and reported to the user
+- **Never** call `SaveChangesAsync()` outside a transaction for financial writes
+- Read-only queries (`GetAllAsync`, reports) do **not** need transactions
+
+### Operations Requiring Transactions
+
+| Operation | Service | Status |
+|---|---|---|
+| Create sale + deduct stock | `SalesService.CreateSaleAsync` | ✅ Implemented |
+| Process refund | Future `RefundService` | Requires transaction |
+| Adjust stock manually | Future `StockAdjustmentService` | Requires transaction |
+| Process payment | Future `PaymentService` | Requires transaction |
+| Billing invoice creation | Future `BillingService` | Requires transaction |
 
 ---
 

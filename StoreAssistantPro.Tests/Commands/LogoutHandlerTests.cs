@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
-using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
@@ -11,18 +11,17 @@ namespace StoreAssistantPro.Tests.Commands;
 public class LogoutHandlerTests
 {
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
-    private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
+    private readonly ILogger<LogoutHandler> _logger = Substitute.For<ILogger<LogoutHandler>>();
 
-    private LogoutHandler CreateSut() => new(_sessionService, _appState, _eventBus);
+    private LogoutHandler CreateSut() => new(_sessionService, _eventBus, _logger);
 
     [Fact]
-    public async Task HandleAsync_ClearsBillingSession()
+    public async Task HandleAsync_ReturnsSuccess()
     {
         var result = await CreateSut().HandleAsync(new LogoutCommand(UserType.Admin));
 
         Assert.True(result.Succeeded);
-        _appState.Received(1).SetBillingSession(null);
     }
 
     [Fact]
@@ -31,14 +30,6 @@ public class LogoutHandlerTests
         await CreateSut().HandleAsync(new LogoutCommand(UserType.Manager));
 
         _sessionService.Received(1).Logout();
-    }
-
-    [Fact]
-    public async Task HandleAsync_ClearsNotifications()
-    {
-        await CreateSut().HandleAsync(new LogoutCommand(UserType.User));
-
-        _appState.Received(1).ClearNotifications();
     }
 
     [Fact]
@@ -51,17 +42,15 @@ public class LogoutHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_ExecutesInCorrectOrder()
+    public async Task HandleAsync_LogoutBeforeEvent()
     {
         var order = new List<string>();
-        _appState.When(x => x.SetBillingSession(null)).Do(_ => order.Add("billing"));
-        _sessionService.When(x => x.Logout()).Do(_ => order.Add("session"));
-        _appState.When(x => x.ClearNotifications()).Do(_ => order.Add("notifications"));
+        _sessionService.When(x => x.Logout()).Do(_ => order.Add("logout"));
         _eventBus.PublishAsync(Arg.Any<UserLoggedOutEvent>())
             .Returns(ci => { order.Add("event"); return Task.CompletedTask; });
 
         await CreateSut().HandleAsync(new LogoutCommand(UserType.Admin));
 
-        Assert.Equal(["billing", "session", "notifications", "event"], order);
+        Assert.Equal(["logout", "event"], order);
     }
 }

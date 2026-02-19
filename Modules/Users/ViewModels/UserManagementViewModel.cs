@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Users.Commands;
 using StoreAssistantPro.Modules.Users.Services;
@@ -63,26 +64,13 @@ public partial class UserManagementViewModel(
     [RelayCommand]
     private async Task ChangePinAsync()
     {
-        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
-        if (SelectedUser is null)
-        {
-            ErrorMessage = "Please select a user.";
+        if (!Validate(v => v
+            .Rule(SelectedUser is not null, "Please select a user.")
+            .Rule(InputValidator.IsValidUserPin(NewPin), "New PIN must be exactly 4 digits.")
+            .Rule(InputValidator.AreEqual(NewPin, ConfirmPin), "PINs do not match.")))
             return;
-        }
-
-        if (!IsValidPin(NewPin))
-        {
-            ErrorMessage = "New PIN must be exactly 4 digits.";
-            return;
-        }
-
-        if (NewPin != ConfirmPin)
-        {
-            ErrorMessage = "PINs do not match.";
-            return;
-        }
 
         var result = await commandBus.SendAsync(new ChangePinCommand(
             SelectedUser.UserType, NewPin,
@@ -103,6 +91,4 @@ public partial class UserManagementViewModel(
         }
     }
 
-    private static bool IsValidPin(string pin) =>
-        pin.Length == 4 && pin.All(char.IsDigit);
-}
+    }

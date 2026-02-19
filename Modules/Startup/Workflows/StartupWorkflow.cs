@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Startup.Services;
@@ -13,7 +14,8 @@ namespace StoreAssistantPro.Modules.Startup.Workflows;
 /// </summary>
 public class StartupWorkflow(
     IStartupService startupService,
-    IAuthenticationFlow authFlow) : IWorkflow
+    IAuthenticationFlow authFlow,
+    ILogger<StartupWorkflow> logger) : IWorkflow
 {
     public const string WorkflowName = "Startup";
 
@@ -30,6 +32,8 @@ public class StartupWorkflow(
 
     public async Task<StepResult> ExecuteStepAsync(WorkflowStep step, WorkflowContext context)
     {
+        logger.LogInformation("Startup step: {Step}", step.Key);
+
         return step.Key switch
         {
             "MigrateDatabase" => await MigrateDatabaseAsync(context),
@@ -46,10 +50,12 @@ public class StartupWorkflow(
         try
         {
             await startupService.MigrateDatabaseAsync();
+            logger.LogInformation("Database migration completed");
             return StepResult.Continue;
         }
         catch (Exception ex)
         {
+            logger.LogCritical(ex, "Database migration failed");
             context.Set("Error", ex.Message);
             return StepResult.Cancel;
         }
@@ -59,28 +65,31 @@ public class StartupWorkflow(
     {
         var isInitialized = await startupService.IsAppInitializedAsync();
         context.Set("IsInitialized", isInitialized);
+        logger.LogInformation("App initialized: {IsInitialized}", isInitialized);
         return StepResult.Continue;
     }
 
     private StepResult RunFirstTimeSetup(WorkflowContext context)
     {
         if (context.Get<bool>("IsInitialized"))
-            return StepResult.Continue; // skip setup — already initialized
+            return StepResult.Continue;
 
-        return authFlow.RunFirstTimeSetup()
-            ? StepResult.Continue
-            : StepResult.Cancel;
+        var result = authFlow.RunFirstTimeSetup();
+        logger.LogInformation("First-time setup {Result}", result ? "completed" : "cancelled");
+        return result ? StepResult.Continue : StepResult.Cancel;
     }
 
     private async Task<StepResult> LoadFirmInfoAsync()
     {
         await startupService.LoadFirmInfoAsync();
+        logger.LogInformation("Firm info loaded");
         return StepResult.Continue;
     }
 
     private StepResult LoadFeatureFlags()
     {
         startupService.LoadFeatureFlags();
+        logger.LogInformation("Feature flags loaded");
         return StepResult.Complete;
     }
 
