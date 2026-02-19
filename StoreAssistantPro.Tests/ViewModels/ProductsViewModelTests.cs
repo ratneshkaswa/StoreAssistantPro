@@ -14,12 +14,14 @@ public class ProductsViewModelTests
     private readonly IProductService _productService = Substitute.For<IProductService>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
+    private readonly IMasterPinValidator _masterPinValidator = Substitute.For<IMasterPinValidator>();
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
 
     public ProductsViewModelTests()
     {
         _sessionService.CurrentUserType.Returns(UserType.Admin);
         _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>()).Returns(true);
+        _masterPinValidator.ValidateAsync(Arg.Any<string>()).Returns(true);
         _commandBus.SendAsync(Arg.Any<SaveProductCommand>())
             .Returns(CommandResult.Success());
         _commandBus.SendAsync(Arg.Any<UpdateProductCommand>())
@@ -29,7 +31,7 @@ public class ProductsViewModelTests
     }
 
     private ProductsViewModel CreateSut() =>
-        new(_productService, _sessionService, _dialogService, _commandBus);
+        new(_productService, _sessionService, _dialogService, _masterPinValidator, _commandBus);
 
     [Fact]
     public async Task LoadProducts_PopulatesProductsList()
@@ -257,5 +259,39 @@ public class ProductsViewModelTests
 
         await _commandBus.DidNotReceive().SendAsync(Arg.Any<DeleteProductCommand>());
         Assert.Single(sut.Products);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_MasterPinFailed_DoesNotDelete()
+    {
+        _masterPinValidator.ValidateAsync(Arg.Any<string>()).Returns(false);
+        var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
+        _productService.GetAllAsync().Returns(new List<Product> { product });
+
+        var sut = CreateSut();
+        await sut.LoadProductsCommand.ExecuteAsync(null);
+        sut.SelectedProduct = product;
+
+        await sut.DeleteProductCommand.ExecuteAsync(null);
+
+        await _commandBus.DidNotReceive().SendAsync(Arg.Any<DeleteProductCommand>());
+        Assert.Contains("Master PIN validation failed", sut.ErrorMessage);
+        Assert.Single(sut.Products);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_Success_CallsMasterPinValidator()
+    {
+        var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1] };
+        _productService.GetAllAsync().Returns(new List<Product> { product });
+
+        var sut = CreateSut();
+        await sut.LoadProductsCommand.ExecuteAsync(null);
+        sut.SelectedProduct = product;
+
+        await sut.DeleteProductCommand.ExecuteAsync(null);
+
+        await _masterPinValidator.Received(1).ValidateAsync(Arg.Any<string>());
+        await _commandBus.Received(1).SendAsync(Arg.Any<DeleteProductCommand>());
     }
 }

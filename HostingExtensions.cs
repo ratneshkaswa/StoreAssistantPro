@@ -47,6 +47,8 @@ internal static class HostingExtensions
         services.AddSingleton<ICommandBus, CommandBus>();
         services.AddSingleton<IEventBus, EventBus>();
         services.AddSingleton<IFeatureToggleService, FeatureToggleService>();
+        services.AddSingleton<IMasterPinValidator, MasterPinValidator>();
+        services.AddSingleton<IWindowSizingService, WindowSizingService>();
 
         return services;
     }

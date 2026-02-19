@@ -24,6 +24,7 @@ public static class AuthenticationModule
         // Command handlers
         services.AddTransient<ICommandHandler<CompleteFirstSetupCommand>, CompleteFirstSetupHandler>();
         services.AddTransient<ICommandHandler<LoginUserCommand>, LoginUserHandler>();
+        services.AddTransient<ICommandHandler<LogoutCommand>, LogoutHandler>();
 
         // ViewModels
         services.AddTransient<FirstTimeSetupViewModel>();

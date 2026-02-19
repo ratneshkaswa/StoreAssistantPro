@@ -1,13 +1,20 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Users.ViewModels;
 
 namespace StoreAssistantPro.Modules.Users.Views;
 
-public partial class UserManagementWindow : Window
+public partial class UserManagementWindow : BaseDialogWindow
 {
-    public UserManagementWindow(UserManagementViewModel vm)
+    protected override double DialogWidth => 500;
+    protected override double DialogHeight => 480;
+
+    public UserManagementWindow(
+        IWindowSizingService sizingService,
+        UserManagementViewModel vm) : base(sizingService)
     {
         InitializeComponent();
         DataContext = vm;

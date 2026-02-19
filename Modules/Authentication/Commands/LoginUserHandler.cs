@@ -12,9 +12,9 @@ public class LoginUserHandler(
 {
     protected override async Task<CommandResult> ExecuteAsync(LoginUserCommand command)
     {
-        var isValid = await loginService.ValidatePinAsync(command.UserType, command.Pin);
-        if (!isValid)
-            return CommandResult.Failure("Invalid PIN. Try again.");
+        var result = await loginService.ValidatePinAsync(command.UserType, command.Pin);
+        if (!result.Succeeded)
+            return CommandResult.Failure(result.ErrorMessage ?? "Login failed.");
 
         await eventBus.PublishAsync(new UserLoggedInEvent(command.UserType));
         return CommandResult.Success();

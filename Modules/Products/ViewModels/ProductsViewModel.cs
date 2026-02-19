@@ -15,6 +15,7 @@ public partial class ProductsViewModel(
     IProductService productService,
     ISessionService sessionService,
     IDialogService dialogService,
+    IMasterPinValidator masterPinValidator,
     ICommandBus commandBus) : BaseViewModel
 {
     private List<Product> _allProducts = [];
@@ -209,6 +210,12 @@ public partial class ProductsViewModel(
             $"Delete '{SelectedProduct.Name}'?\n\nThis action cannot be undone.",
             "Delete Product"))
             return;
+
+        if (!await masterPinValidator.ValidateAsync("Enter Master PIN to delete this product."))
+        {
+            ErrorMessage = "Master PIN validation failed. Delete cancelled.";
+            return;
+        }
 
         var result = await commandBus.SendAsync(
             new DeleteProductCommand(SelectedProduct.Id, SelectedProduct.RowVersion));

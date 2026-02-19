@@ -10,4 +10,8 @@ public class UserCredential
 
     [Required]
     public string PinHash { get; set; } = string.Empty;
+
+    public int FailedAttempts { get; set; }
+
+    public DateTime? LockoutEndTime { get; set; }
 }

@@ -4,9 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="750" Width="1200"
-        WindowStartupLocation="CenterScreen"
-        WindowState="Maximized">
+        Title="{Binding WindowTitle}">
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+D" Command="{Binding NavigateToDashboardCommand}"/>
         <KeyBinding Gesture="Ctrl+P" Command="{Binding NavigateToProductsCommand}"/>

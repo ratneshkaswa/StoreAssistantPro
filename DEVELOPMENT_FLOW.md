@@ -102,6 +102,8 @@ These components are **frozen**. Extend through the existing interfaces only.
 | `SessionService` | `Core/Session/` | Current user session state |
 | `BaseViewModel` | `Core/Base/` | Base class for all ViewModels |
 | `BaseCommandHandler` | `Core/Base/` | Base class for all command handlers |
+| `BaseDialogWindow` | `Core/Base/` | Base class for all dialog windows |
+| `WindowSizingService` | `Core/Services/` | Enterprise window sizing rules |
 
 ---
 
@@ -143,6 +145,55 @@ public static IServiceCollection AddMyModule(this IServiceCollection services)
 | **ViewModel** | Services (via DI), CommandBus, EventBus | DbContext, Views, other ViewModels |
 | **Service** | DbContext (via factory), other services | ViewModels, Views |
 | **Command Handler** | Services (via DI), EventBus | ViewModels, Views, DbContext |
+
+---
+
+## Window Sizing Rules — Do Not Override
+
+All window sizing is controlled by `IWindowSizingService`. **Never set `Height`, `Width`, `ResizeMode`, or `WindowStartupLocation` in XAML** for windows managed by the service.
+
+| Window Type | Size | Position | Resize | Base Class |
+|---|---|---|---|---|
+| **MainWindow** | 90% of screen working area | Centered on screen | Disabled | `Window` |
+| **Dialog windows** | Fixed (declared via `DialogWidth`/`DialogHeight`) | Centered over MainWindow | Disabled | `BaseDialogWindow` |
+| **Startup windows** | Fixed (passed to `ConfigureStartupWindow`) | Centered on screen | Disabled | `Window` |
+
+### Rules
+
+- All windows are **fixed size** — users cannot resize any window
+- MainWindow is always **90% of `SystemParameters.WorkArea`** (excludes taskbar)
+- MainWindow **auto-resizes** on display resolution/DPI changes
+- Dialog windows are always **smaller than MainWindow**
+- Dialog windows always have **MainWindow as Owner** (taskbar grouping + CenterOwner)
+- New dialog windows **must inherit `BaseDialogWindow`** and declare their size
+- Startup/auth windows use `ConfigureStartupWindow` (no owner exists during login)
+- `WindowSizingService` is a **frozen singleton** — extend, never rewrite
+
+### Creating a New Dialog Window
+
+```csharp
+// Code-behind:
+public partial class MyWindow : BaseDialogWindow
+{
+    protected override double DialogWidth => 500;
+    protected override double DialogHeight => 400;
+
+    public MyWindow(IWindowSizingService sizing, MyViewModel vm) : base(sizing)
+    {
+        InitializeComponent();
+        DataContext = vm;
+    }
+}
+```
+
+```xml
+<!-- XAML (no sizing attributes): -->
+<core:BaseDialogWindow x:Class="...MyWindow"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        Title="My Dialog">
+    <!-- content -->
+</core:BaseDialogWindow>
+```
 
 ---
 

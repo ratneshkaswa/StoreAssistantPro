@@ -1,11 +1,18 @@
 using System.Windows;
+using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Firm.ViewModels;
 
 namespace StoreAssistantPro.Modules.Firm.Views;
 
-public partial class FirmManagementWindow : Window
+public partial class FirmManagementWindow : BaseDialogWindow
 {
-    public FirmManagementWindow(FirmManagementViewModel vm)
+    protected override double DialogWidth => 450;
+    protected override double DialogHeight => 350;
+
+    public FirmManagementWindow(
+        IWindowSizingService sizingService,
+        FirmManagementViewModel vm) : base(sizingService)
     {
         InitializeComponent();
         DataContext = vm;

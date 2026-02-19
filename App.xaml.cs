@@ -76,7 +76,7 @@ public partial class App : Application
                 return;
             }
 
-            session.Logout();
+            // LogoutCommand already cleared session + AppState before window closed
         }
     }
 

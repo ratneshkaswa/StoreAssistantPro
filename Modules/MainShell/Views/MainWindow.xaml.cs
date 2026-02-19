@@ -1,13 +1,16 @@
 using System.Windows;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
 
 namespace StoreAssistantPro.Modules.MainShell.Views;
 
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(IWindowSizingService sizingService)
     {
         InitializeComponent();
+        sizingService.ConfigureMainWindow(this);
+
         DataContextChanged += (_, _) =>
         {
             if (DataContext is MainViewModel vm)

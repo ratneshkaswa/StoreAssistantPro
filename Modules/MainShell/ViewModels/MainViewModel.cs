@@ -3,12 +3,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
+using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Firm.Events;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
@@ -19,6 +21,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
     private readonly IWorkflowManager _workflowManager;
+    private readonly ICommandBus _commandBus;
     private readonly IEventBus _eventBus;
     private readonly IFeatureToggleService _features;
 
@@ -94,6 +97,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         IDialogService dialogService,
         IAppStateService appState,
         IWorkflowManager workflowManager,
+        ICommandBus commandBus,
         IEventBus eventBus,
         IFeatureToggleService features)
     {
@@ -101,21 +105,24 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _sessionService = sessionService;
         _dialogService = dialogService;
         _workflowManager = workflowManager;
+        _commandBus = commandBus;
         _eventBus = eventBus;
         _features = features;
         AppState = appState;
 
-        ((ObservableObject)_navigationService).PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(INavigationService.CurrentView))
-                OnPropertyChanged(nameof(CurrentView));
-        };
+        ((ObservableObject)_navigationService).PropertyChanged += OnNavigationPropertyChanged;
 
         AppState.PropertyChanged += OnAppStatePropertyChanged;
         _features.PropertyChanged += OnFeaturesPropertyChanged;
         _eventBus.Subscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
 
         _navigationService.NavigateTo(DashboardPage);
+    }
+
+    private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(INavigationService.CurrentView))
+            OnPropertyChanged(nameof(CurrentView));
     }
 
     private void OnAppStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -220,8 +227,10 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     // ── Logout ──
 
     [RelayCommand]
-    private void Logout()
+    private async Task LogoutAsync()
     {
+        var userType = AppState.CurrentUserType;
+        await _commandBus.SendAsync(new LogoutCommand(userType));
         IsLoggingOut = true;
         RequestClose?.Invoke();
     }
@@ -238,6 +247,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     public void Dispose()
     {
+        ((ObservableObject)_navigationService).PropertyChanged -= OnNavigationPropertyChanged;
         AppState.PropertyChanged -= OnAppStatePropertyChanged;
         _features.PropertyChanged -= OnFeaturesPropertyChanged;
         _eventBus.Unsubscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);

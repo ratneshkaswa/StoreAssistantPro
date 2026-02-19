@@ -7,5 +7,6 @@ namespace StoreAssistantPro.Core.Services;
 public interface IDialogService
 {
     bool Confirm(string message, string title = "Confirm");
+    string? PromptPassword(string message, string title = "Authentication Required");
     bool? ShowDialog(string dialogKey);
 }

@@ -18,7 +18,8 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task HandleAsync_ValidPin_ReturnsSuccessAndPublishesEvent()
     {
-        _loginService.ValidatePinAsync(UserType.Admin, "1234").Returns(true);
+        _loginService.ValidatePinAsync(UserType.Admin, "1234")
+            .Returns(LoginResult.Success());
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.Admin, "1234"));
 
@@ -28,14 +29,40 @@ public class LoginUserHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_InvalidPin_ReturnsFailure()
+    public async Task HandleAsync_InvalidPin_ReturnsFailureWithRemainingAttempts()
     {
-        _loginService.ValidatePinAsync(UserType.User, "0000").Returns(false);
+        _loginService.ValidatePinAsync(UserType.User, "0000")
+            .Returns(LoginResult.Failed("Invalid PIN. 2 attempt(s) remaining.", 2));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.User, "0000"));
 
         Assert.False(result.Succeeded);
-        Assert.Equal("Invalid PIN. Try again.", result.ErrorMessage);
+        Assert.Contains("2 attempt(s) remaining", result.ErrorMessage);
         await _eventBus.DidNotReceive().PublishAsync(Arg.Any<UserLoggedInEvent>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_LockedOut_ReturnsFailureWithLockoutMessage()
+    {
+        _loginService.ValidatePinAsync(UserType.Manager, "9999")
+            .Returns(LoginResult.LockedOut(DateTime.UtcNow.AddMinutes(2)));
+
+        var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.Manager, "9999"));
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("Account locked", result.ErrorMessage);
+        await _eventBus.DidNotReceive().PublishAsync(Arg.Any<UserLoggedInEvent>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_UserNotFound_ReturnsFailure()
+    {
+        _loginService.ValidatePinAsync(UserType.User, "1111")
+            .Returns(LoginResult.Failed("User not found.", 0));
+
+        var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.User, "1111"));
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("User not found.", result.ErrorMessage);
     }
 }

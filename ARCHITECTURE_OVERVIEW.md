@@ -254,6 +254,7 @@ ObservableObject (CommunityToolkit)
 ICommandHandler<T>
     └── BaseCommandHandler<T>            ← Core/Base/
         ├── LoginUserHandler
+        ├── LogoutHandler
         ├── CompleteFirstSetupHandler
         ├── SaveProductHandler
         ├── UpdateProductHandler
@@ -261,4 +262,14 @@ ICommandHandler<T>
         ├── CompleteSaleHandler
         ├── ChangePinHandler
         └── ChangeMasterPinHandler
+
+Window (WPF)
+    ├── MainWindow                       ← 90% screen, auto-resize on display change
+    ├── BaseDialogWindow                 ← Core/Base/ (fixed size, centered over owner)
+    │   ├── FirmManagementWindow
+    │   ├── UserManagementWindow
+    │   └── SystemSettingsWindow
+    ├── FirstTimeSetupWindow             ← Startup (centered on screen)
+    ├── PinLoginWindow                   ← Startup
+    └── UserSelectionWindow              ← Startup
 ```

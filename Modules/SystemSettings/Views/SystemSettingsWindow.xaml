@@ -1,9 +1,8 @@
-<Window x:Class="StoreAssistantPro.Modules.SystemSettings.Views.SystemSettingsWindow"
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.SystemSettings.Views.SystemSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="⚙ System Settings" Height="520" Width="780"
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize">
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        Title="⚙ System Settings">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -66,4 +65,4 @@
             <ContentControl Content="{Binding CurrentCategoryView}" Margin="0"/>
         </Border>
     </Grid>
-</Window>
+</core:BaseDialogWindow>
