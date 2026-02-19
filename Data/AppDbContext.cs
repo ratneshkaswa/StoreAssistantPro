@@ -5,12 +5,24 @@ namespace StoreAssistantPro.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<AppConfig> AppConfigs => Set<AppConfig>();
+    public DbSet<UserCredential> UserCredentials => Set<UserCredential>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AppConfig>(entity =>
+        {
+            entity.HasData(/* no seed — created by SetupService */);
+        });
+
+        modelBuilder.Entity<UserCredential>(entity =>
+        {
+            entity.HasIndex(c => c.UserType).IsUnique();
+        });
+
         modelBuilder.Entity<Product>(entity =>
         {
             entity.Property(p => p.Price).HasColumnType("decimal(18,2)");
