@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace StoreAssistantPro.Services;
+namespace StoreAssistantPro.Navigation;
 
 public partial class NavigationService(IServiceProvider serviceProvider) : ObservableObject, INavigationService
 {

@@ -13,11 +13,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AppConfig>(entity =>
-        {
-            entity.HasData(/* no seed — created by SetupService */);
-        });
-
         modelBuilder.Entity<UserCredential>(entity =>
         {
             entity.HasIndex(c => c.UserType).IsUnique();

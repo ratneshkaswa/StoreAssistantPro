@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Data;
+using StoreAssistantPro.Helpers;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Services;

@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StoreAssistantPro.Data;
+using StoreAssistantPro.Models;
 using StoreAssistantPro.Services;
+using StoreAssistantPro.Session;
 using StoreAssistantPro.ViewModels;
 using StoreAssistantPro.Views;
 
@@ -39,7 +41,7 @@ public partial class App : Application
 
         DispatcherUnhandledException += OnDispatcherUnhandledException;
 
-        // 1. First-time setup check
+        // 1. First-time setup
         var startupService = _host.Services.GetRequiredService<IStartupService>();
         if (!await startupService.IsAppInitializedAsync())
         {
@@ -51,23 +53,41 @@ public partial class App : Application
             }
         }
 
-        // 2. Login flow (loops until successful login or user exits)
-        if (!ShowLoginFlow())
+        // 2. Main app loop — supports logout back to user selection
+        var session = _host.Services.GetRequiredService<ISessionService>();
+
+        while (true)
         {
-            Shutdown();
-            return;
+            // Login flow
+            if (!ShowLoginFlow(out var userType))
+            {
+                Shutdown();
+                return;
+            }
+
+            await session.LoginAsync(userType);
+
+            // Show main window (blocks until closed)
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            var mainVm = _host.Services.GetRequiredService<MainViewModel>();
+            mainWindow.DataContext = mainVm;
+            mainWindow.ShowDialog();
+
+            // Check if user logged out or closed the window
+            if (!mainVm.IsLoggingOut)
+            {
+                Shutdown();
+                return;
+            }
+
+            session.Logout();
         }
-
-        // 3. Main application
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.DataContext = _host.Services.GetRequiredService<MainViewModel>();
-        mainWindow.Show();
-
-        base.OnStartup(e);
     }
 
-    private bool ShowLoginFlow()
+    private bool ShowLoginFlow(out UserType userType)
     {
+        userType = default;
+
         while (true)
         {
             var selectionWindow = _host.Services.GetRequiredService<UserSelectionWindow>();
@@ -80,7 +100,10 @@ public partial class App : Application
             ((PinLoginViewModel)pinWindow.DataContext).UserType = selectedType;
 
             if (pinWindow.ShowDialog() == true)
+            {
+                userType = selectedType;
                 return true;
+            }
         }
     }
 

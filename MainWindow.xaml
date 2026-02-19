@@ -7,22 +7,45 @@
         Title="Store Assistant Pro" Height="650" Width="1000"
         WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Sidebar Navigation -->
-        <Border Background="#2D2D30">
+        <!-- Top Header Bar -->
+        <Border Grid.ColumnSpan="2" Background="#1E1E1E" Padding="15,8">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Top" Margin="0,20,0,0">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                    <TextBlock Text="{Binding FirmName}" Foreground="White"
+                               FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Foreground="#B0B0B0" VerticalAlignment="Center" Margin="0,0,15,0">
+                        <Run Text="Logged in as: "/>
+                        <Run Text="{Binding CurrentUserDisplay}" FontWeight="SemiBold" Foreground="#4CAF50"/>
+                    </TextBlock>
+                    <Button Content="🔓 Logout" Command="{Binding LogoutCommand}"
+                            Foreground="#B0B0B0" Background="Transparent"
+                            BorderThickness="0" Cursor="Hand" Padding="8,4" FontSize="12"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Sidebar Navigation -->
+        <Border Grid.Row="1" Background="#2D2D30">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="0,15,0,0">
                     <TextBlock Text="Store Assistant"
                                Foreground="White" FontSize="18" FontWeight="Bold"
-                               HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                               HorizontalAlignment="Center" Margin="0,0,0,4"/>
                     <TextBlock Text="Pro"
                                Foreground="#007ACC" FontSize="12" FontWeight="SemiBold"
                                HorizontalAlignment="Center" Margin="0,0,0,15"/>
-                    <Separator Background="#3E3E42" Margin="10,0,10,15"/>
+                    <Separator Background="#3E3E42" Margin="10,0,10,10"/>
 
                     <Button Content="🏠  Dashboard"
                             Command="{Binding NavigateToDashboardCommand}"
@@ -46,6 +69,6 @@
         </Border>
 
         <!-- Main Content Area -->
-        <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
+        <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding CurrentView}"/>
     </Grid>
 </Window>

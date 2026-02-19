@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoreAssistantPro.Services;
+namespace StoreAssistantPro.Navigation;
 
 public interface INavigationService
 {

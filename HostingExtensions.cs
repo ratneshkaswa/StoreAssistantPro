@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Data;
+using StoreAssistantPro.Navigation;
 using StoreAssistantPro.Services;
+using StoreAssistantPro.Session;
 using StoreAssistantPro.ViewModels;
 using StoreAssistantPro.Views;
 
@@ -25,7 +27,8 @@ internal static class HostingExtensions
 
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<INavigationService, StoreAssistantPro.Navigation.NavigationService>();
+        services.AddSingleton<ISessionService, SessionService>();
         services.AddSingleton<IProductService, ProductService>();
         services.AddSingleton<ISalesService, SalesService>();
         services.AddSingleton<IStartupService, StartupService>();
@@ -50,7 +53,7 @@ internal static class HostingExtensions
 
     public static IServiceCollection AddViews(this IServiceCollection services)
     {
-        services.AddSingleton<MainWindow>();
+        services.AddTransient<MainWindow>();
         services.AddTransient<FirstTimeSetupWindow>();
         services.AddTransient<UserSelectionWindow>();
         services.AddTransient<PinLoginWindow>();

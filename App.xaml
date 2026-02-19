@@ -4,7 +4,7 @@
              xmlns:local="clr-namespace:StoreAssistantPro"
              xmlns:vm="clr-namespace:StoreAssistantPro.ViewModels"
              xmlns:views="clr-namespace:StoreAssistantPro.Views"
-             ShutdownMode="OnMainWindowClose">
+             ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace StoreAssistantPro.Services;
+namespace StoreAssistantPro.Helpers;
 
 public static class PinHasher
 {
