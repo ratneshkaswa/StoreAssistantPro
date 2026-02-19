@@ -1,0 +1,123 @@
+<UserControl x:Class="StoreAssistantPro.Views.ProductsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800"
+             Loaded="OnLoaded">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Products" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <Grid Margin="0,0,10,0">
+                <TextBox x:Name="SearchBox"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Width="250" Padding="5"
+                         VerticalContentAlignment="Center"/>
+                <TextBlock Text="🔍 Search products..." IsHitTestVisible="False"
+                           Foreground="#999" Padding="7,6" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            <Button Content="➕ Add" Command="{Binding ShowAddFormCommand}" Padding="10,5" Margin="0,0,5,0"/>
+            <Button Content="✏️ Edit" Command="{Binding ShowEditFormCommand}" Padding="10,5" Margin="0,0,5,0"/>
+            <Button Content="🗑 Delete" Command="{Binding DeleteProductCommand}" Padding="10,5"/>
+        </StackPanel>
+
+        <!-- Inline Add Product Form -->
+        <Border Grid.Row="2" Background="#F5F5F5" CornerRadius="6" Padding="15" Margin="0,0,0,10"
+                Visibility="{Binding IsAddFormVisible, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="New Product" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <WrapPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Name" FontSize="12" Margin="0,0,0,3"/>
+                        <TextBox Text="{Binding NewProductName, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="200" Padding="5"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Price" FontSize="12" Margin="0,0,0,3"/>
+                        <TextBox Text="{Binding NewProductPrice, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="100" Padding="5"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Quantity" FontSize="12" Margin="0,0,0,3"/>
+                        <TextBox Text="{Binding NewProductQuantity, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80" Padding="5"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="💾 Save" Command="{Binding SaveProductCommand}"
+                                    Padding="10,5" Margin="0,0,5,0"/>
+                            <Button Content="Cancel" Command="{Binding CancelAddCommand}" Padding="10,5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Inline Edit Product Form -->
+        <Border Grid.Row="3" Background="#E8F5E9" CornerRadius="6" Padding="15" Margin="0,0,0,10"
+                Visibility="{Binding IsEditFormVisible, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="Edit Product" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <WrapPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Name" FontSize="12" Margin="0,0,0,3"/>
+                        <TextBox Text="{Binding EditProductName, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="200" Padding="5"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Price" FontSize="12" Margin="0,0,0,3"/>
+                        <TextBox Text="{Binding EditProductPrice, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="100" Padding="5"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Quantity" FontSize="12" Margin="0,0,0,3"/>
+                        <TextBox Text="{Binding EditProductQuantity, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80" Padding="5"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="💾 Update" Command="{Binding SaveEditCommand}"
+                                    Padding="10,5" Margin="0,0,5,0"/>
+                            <Button Content="Cancel" Command="{Binding CancelEditCommand}" Padding="10,5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="4"
+                  ItemsSource="{Binding Products}"
+                  SelectedItem="{Binding SelectedProduct}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat=C}" Width="120"/>
+                <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
