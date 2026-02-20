@@ -20,7 +20,7 @@ public static class MainShellModule
 
         // Services
         services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IDashboardService, DashboardService>();
+        services.AddTransient<IDashboardService, DashboardService>();
         services.AddSingleton<IMainShellFlow, MainShellFlow>();
 
         // ViewModels

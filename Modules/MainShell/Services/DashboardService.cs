@@ -15,9 +15,9 @@ public class DashboardService(
 {
     public async Task<DashboardSummary> GetSummaryAsync()
     {
-        var products = (await productService.GetAllAsync()).ToList();
+        var products = (await productService.GetAllAsync().ConfigureAwait(false)).ToList();
         var todaysSales = (await salesService.GetSalesByDateRangeAsync(
-            DateTime.Today, DateTime.Today.AddDays(1))).ToList();
+            DateTime.Today, DateTime.Today.AddDays(1)).ConfigureAwait(false)).ToList();
 
         return new DashboardSummary(
             TotalProducts: products.Count,

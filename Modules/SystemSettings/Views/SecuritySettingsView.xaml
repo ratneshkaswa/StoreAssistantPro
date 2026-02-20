@@ -3,8 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d">
-    <Grid Margin="30">
+    <Grid Margin="30" h:KeyboardNav.DefaultCommand="{Binding ChangeMasterPinCommand}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,26 +24,23 @@
                    FontSize="13" Foreground="#666" Margin="0,0,0,14"/>
 
         <!-- Current Master PIN -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,12">
+        <StackPanel Grid.Row="2" Margin="0,0,0,12" MaxWidth="300" HorizontalAlignment="Left">
             <TextBlock Text="Current Master Password *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
             <PasswordBox x:Name="CurrentPinBox" MaxLength="6" Padding="8" FontSize="13"
-                         MaxWidth="300" HorizontalAlignment="Left" Width="300"
                          PasswordChanged="CurrentPinBox_PasswordChanged"/>
         </StackPanel>
 
         <!-- New Master PIN -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,12">
+        <StackPanel Grid.Row="3" Margin="0,0,0,12" MaxWidth="300" HorizontalAlignment="Left">
             <TextBlock Text="New Master Password *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
             <PasswordBox x:Name="NewPinBox" MaxLength="6" Padding="8" FontSize="13"
-                         MaxWidth="300" HorizontalAlignment="Left" Width="300"
                          PasswordChanged="NewPinBox_PasswordChanged"/>
         </StackPanel>
 
         <!-- Confirm New Master PIN -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,12">
+        <StackPanel Grid.Row="4" Margin="0,0,0,12" MaxWidth="300" HorizontalAlignment="Left">
             <TextBlock Text="Confirm New Master Password *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
             <PasswordBox x:Name="ConfirmPinBox" MaxLength="6" Padding="8" FontSize="13"
-                         MaxWidth="300" HorizontalAlignment="Left" Width="300"
                          PasswordChanged="ConfirmPinBox_PasswordChanged"/>
         </StackPanel>
 

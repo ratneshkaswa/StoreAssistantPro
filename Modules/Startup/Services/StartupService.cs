@@ -16,15 +16,15 @@ public class StartupService(
 {
     public async Task MigrateDatabaseAsync()
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
         // 1. Verify connectivity before attempting migration
-        if (!await context.Database.CanConnectAsync())
+        if (!await context.Database.CanConnectAsync().ConfigureAwait(false))
             throw new InvalidOperationException(
                 "Cannot connect to the database. Verify the connection string in appsettings.json.");
 
         // 2. Log pending migrations before applying
-        var pending = (await context.Database.GetPendingMigrationsAsync()).ToList();
+        var pending = (await context.Database.GetPendingMigrationsAsync().ConfigureAwait(false)).ToList();
 
         if (pending.Count == 0)
         {
@@ -37,22 +37,22 @@ public class StartupService(
 
         // 3. Apply with timeout protection
         context.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync().ConfigureAwait(false);
 
         logger.LogInformation("All migrations applied successfully");
     }
 
     public async Task<bool> IsAppInitializedAsync()
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.AppConfigs.FirstOrDefaultAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync().ConfigureAwait(false);
         return config?.IsInitialized == true;
     }
 
     public async Task LoadFirmInfoAsync()
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync().ConfigureAwait(false);
         appState.SetFirmInfo(config?.FirmName ?? string.Empty);
     }
 

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}">
     <Window.InputBindings>
@@ -10,6 +11,7 @@
         <KeyBinding Gesture="Ctrl+P" Command="{Binding NavigateToProductsCommand}"/>
         <KeyBinding Gesture="Ctrl+S" Command="{Binding NavigateToSalesCommand}"/>
         <KeyBinding Gesture="Ctrl+L" Command="{Binding LogoutCommand}"/>
+        <KeyBinding Gesture="F5" Command="{Binding RefreshCurrentViewCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -64,7 +66,8 @@
                 <MenuItem Header="System Settings" Command="{Binding OpenSystemSettingsCommand}"
                           Visibility="{Binding IsSystemSettingsEnabled, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator/>
-                <MenuItem Header="Refresh Data" Command="{Binding RefreshCurrentViewCommand}"/>
+                <MenuItem Header="Refresh Data" Command="{Binding RefreshCurrentViewCommand}"
+                          InputGestureText="F5"/>
             </MenuItem>
 
             <MenuItem Header="_Billing"
@@ -153,7 +156,7 @@
             </Border>
 
             <!-- MAIN CONTENT AREA -->
-            <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
+            <controls:ResponsiveContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
 
             <!-- SIDE PANELS (Notifications + Tasks) -->
             <Grid Grid.Column="2" Width="260"
@@ -219,7 +222,7 @@
             </StatusBarItem>
 
             <StatusBarItem Grid.Column="2" HorizontalContentAlignment="Center">
-                <TextBlock Text="{Binding StatusText}" Foreground="#888"/>
+                <TextBlock Text="{Binding StatusBar.Message}" Foreground="#888"/>
             </StatusBarItem>
 
             <StatusBarItem Grid.Column="3">

@@ -88,10 +88,11 @@ public class LoginService(
 
     public async Task<bool> ValidateMasterPinAsync(string pin)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
         var config = await context.AppConfigs
             .AsNoTracking()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false);
 
         var isValid = config is not null && PinHasher.Verify(pin, config.MasterPinHash);
 

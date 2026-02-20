@@ -7,6 +7,7 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Sales.Commands;
 using StoreAssistantPro.Modules.Sales.Services;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 
 namespace StoreAssistantPro.Modules.Sales.ViewModels;
@@ -15,7 +16,8 @@ public partial class SalesViewModel(
     ISalesService salesService,
     IProductService productService,
     ISessionService sessionService,
-    ICommandBus commandBus) : BaseViewModel
+    ICommandBus commandBus,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     // ── Role-based access ──
 
@@ -63,26 +65,27 @@ public partial class SalesViewModel(
     public partial decimal CartTotal { get; set; }
 
     [RelayCommand]
-    private async Task LoadSalesAsync()
+    private Task LoadSalesAsync() => RunLoadAsync(async ct =>
     {
-        IsLoading = true;
-        try
+        // Set date filters to current Indian date on first load.
+        var today = regional.Now.Date;
+        if (FilterFrom == DateTime.Today && FilterTo == DateTime.Today)
         {
-            var items = await salesService.GetAllAsync();
-            Sales = new ObservableCollection<Sale>(items);
+            FilterFrom = today;
+            FilterTo = today;
         }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+
+        var items = await salesService.GetAllAsync(ct);
+        Sales = new ObservableCollection<Sale>(items);
+    });
 
     [RelayCommand]
-    private async Task FilterByDateAsync()
+    private Task FilterByDateAsync() => RunLoadAsync(async ct =>
     {
-        var items = await salesService.GetSalesByDateRangeAsync(FilterFrom.Date, FilterTo.Date.AddDays(1));
+        var items = await salesService.GetSalesByDateRangeAsync(
+            FilterFrom.Date, FilterTo.Date.AddDays(1), ct);
         Sales = new ObservableCollection<Sale>(items);
-    }
+    });
 
     [RelayCommand]
     private async Task ShowNewSaleAsync()

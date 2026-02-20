@@ -40,8 +40,8 @@ public class ApplicationInfoService(
     {
         try
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
-            return await context.Database.CanConnectAsync();
+            await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+            return await context.Database.CanConnectAsync().ConfigureAwait(false);
         }
         catch
         {
@@ -53,8 +53,8 @@ public class ApplicationInfoService(
     {
         try
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
-            var pending = await context.Database.GetPendingMigrationsAsync();
+            await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+            var pending = await context.Database.GetPendingMigrationsAsync().ConfigureAwait(false);
             return pending.ToList().AsReadOnly();
         }
         catch

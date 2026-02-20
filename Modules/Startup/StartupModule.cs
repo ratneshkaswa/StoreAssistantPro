@@ -9,7 +9,7 @@ public static class StartupModule
 {
     public static IServiceCollection AddStartupModule(this IServiceCollection services)
     {
-        services.AddSingleton<IStartupService, StartupService>();
+        services.AddTransient<IStartupService, StartupService>();
         services.AddSingleton<IWorkflow, StartupWorkflow>();
 
         return services;

@@ -20,20 +20,18 @@
                    FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
         <!-- Firm Name -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,14">
+        <StackPanel Grid.Row="1" Margin="0,0,0,14" MaxWidth="400" HorizontalAlignment="Left">
             <TextBlock Text="Firm Name *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
             <TextBox Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
-                     Padding="8" FontSize="13" MaxLength="200" MaxWidth="400"
-                     HorizontalAlignment="Left" Width="400"/>
+                     Padding="8" FontSize="13" MaxLength="200"/>
         </StackPanel>
 
         <!-- Default Currency -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,14">
+        <StackPanel Grid.Row="2" Margin="0,0,0,14" MaxWidth="200" HorizontalAlignment="Left">
             <TextBlock Text="Default Currency" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
             <ComboBox ItemsSource="{Binding AvailableCurrencies}"
                       SelectedItem="{Binding DefaultCurrency}"
-                      Padding="8" FontSize="13" MaxWidth="200"
-                      HorizontalAlignment="Left" Width="200"/>
+                      Padding="8" FontSize="13"/>
         </StackPanel>
 
         <!-- Messages -->

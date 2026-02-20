@@ -14,16 +14,16 @@ public class SystemSettingsService(
 {
     public async Task ChangeMasterPinAsync(string currentPin, string newPin)
     {
-        var isValid = await loginService.ValidateMasterPinAsync(currentPin);
+        var isValid = await loginService.ValidateMasterPinAsync(currentPin).ConfigureAwait(false);
         if (!isValid)
             throw new InvalidOperationException("Current Master Password is incorrect.");
 
-        await using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.AppConfigs.FirstOrDefaultAsync()
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync().ConfigureAwait(false)
             ?? throw new InvalidOperationException("Application configuration not found.");
 
         config.MasterPinHash = PinHasher.Hash(newPin);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public Task<string> BackupDatabaseAsync(string backupFolder)

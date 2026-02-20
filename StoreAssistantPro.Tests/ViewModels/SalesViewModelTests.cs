@@ -1,5 +1,6 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
@@ -15,16 +16,18 @@ public class SalesViewModelTests
     private readonly IProductService _productService = Substitute.For<IProductService>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
+    private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
     public SalesViewModelTests()
     {
         _sessionService.CurrentUserType.Returns(UserType.Admin);
         _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
             .Returns(CommandResult.Success());
+        _regional.Now.Returns(new DateTime(2026, 1, 15, 10, 30, 0));
     }
 
     private SalesViewModel CreateSut() =>
-        new(_salesService, _productService, _sessionService, _commandBus);
+        new(_salesService, _productService, _sessionService, _commandBus, _regional);
 
     [Fact]
     public async Task LoadSales_PopulatesSalesList()

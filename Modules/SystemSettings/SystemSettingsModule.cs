@@ -17,7 +17,7 @@ public static class SystemSettingsModule
     public static IServiceCollection AddSystemSettingsModule(this IServiceCollection services)
     {
         // Services
-        services.AddSingleton<ISystemSettingsService, SystemSettingsService>();
+        services.AddTransient<ISystemSettingsService, SystemSettingsService>();
 
         // Workflows
         services.AddSingleton<IWorkflow, SettingsWorkflow>();

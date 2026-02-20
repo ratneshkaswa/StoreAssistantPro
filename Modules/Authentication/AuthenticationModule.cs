@@ -14,8 +14,8 @@ public static class AuthenticationModule
     public static IServiceCollection AddAuthenticationModule(this IServiceCollection services)
     {
         // Services
-        services.AddSingleton<ISetupService, SetupService>();
-        services.AddSingleton<ILoginService, LoginService>();
+        services.AddTransient<ISetupService, SetupService>();
+        services.AddTransient<ILoginService, LoginService>();
         services.AddSingleton<IAuthenticationFlow, AuthenticationFlow>();
 
         // Workflows

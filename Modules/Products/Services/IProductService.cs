@@ -4,9 +4,9 @@ namespace StoreAssistantPro.Modules.Products.Services;
 
 public interface IProductService
 {
-    Task<IEnumerable<Product>> GetAllAsync();
-    Task<Product?> GetByIdAsync(int id);
-    Task AddAsync(Product product);
-    Task UpdateAsync(Product product);
-    Task DeleteAsync(int id, byte[]? rowVersion);
+    Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default);
+    Task<Product?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task AddAsync(Product product, CancellationToken ct = default);
+    Task UpdateAsync(Product product, CancellationToken ct = default);
+    Task DeleteAsync(int id, byte[]? rowVersion, CancellationToken ct = default);
 }

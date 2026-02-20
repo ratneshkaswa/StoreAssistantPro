@@ -13,7 +13,7 @@ public static class FirmModule
     public static IServiceCollection AddFirmModule(this IServiceCollection services)
     {
         // Services
-        services.AddSingleton<IFirmService, FirmService>();
+        services.AddTransient<IFirmService, FirmService>();
 
         // ViewModels
         services.AddTransient<FirmManagementViewModel>();

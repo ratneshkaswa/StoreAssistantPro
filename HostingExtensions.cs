@@ -51,6 +51,7 @@ internal static class HostingExtensions
         });
 
         services.AddSingleton<IAppStateService, AppStateService>();
+        services.AddSingleton<IStatusBarService, StatusBarService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<ISessionService, SessionService>();
         services.AddSingleton<IWindowRegistry, WindowRegistry>();
@@ -61,8 +62,8 @@ internal static class HostingExtensions
         services.AddSingleton<IMasterPinValidator, MasterPinValidator>();
         services.AddSingleton<IWindowSizingService, WindowSizingService>();
         services.AddSingleton<IRegionalSettingsService, RegionalSettingsService>();
-        services.AddSingleton<ITransactionHelper, TransactionHelper>();
-        services.AddSingleton<IApplicationInfoService, ApplicationInfoService>();
+        services.AddTransient<ITransactionHelper, TransactionHelper>();
+        services.AddTransient<IApplicationInfoService, ApplicationInfoService>();
 
         return services;
     }

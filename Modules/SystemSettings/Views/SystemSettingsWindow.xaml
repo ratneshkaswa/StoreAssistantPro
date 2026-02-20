@@ -62,7 +62,9 @@
 
         <!-- ══════ RIGHT: Dynamic Content Area ══════ -->
         <Border Grid.Column="1" Background="#FAFAFA">
-            <ContentControl Content="{Binding CurrentCategoryView}" Margin="0"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
+                <ContentControl Content="{Binding CurrentCategoryView}" Margin="0"/>
+            </ScrollViewer>
         </Border>
     </Grid>
 </core:BaseDialogWindow>

@@ -24,6 +24,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private readonly ICommandBus _commandBus;
     private readonly IEventBus _eventBus;
     private readonly IFeatureToggleService _features;
+    private readonly IStatusBarService _statusBar;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -46,12 +47,11 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     public string WindowTitle => $"{AppState.FirmName} — Store Assistant Pro";
 
-    public string CurrentUserDisplay => AppState.CurrentUserType.ToString();
+    public string CurrentUserDisplay => $"👤 {AppState.CurrentUserType}";
 
     // ── Status bar ──
 
-    [ObservableProperty]
-    public partial string StatusText { get; set; } = "Ready";
+    public IStatusBarService StatusBar { get; }
 
     // ── Side panels ──
 
@@ -99,7 +99,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         IWorkflowManager workflowManager,
         ICommandBus commandBus,
         IEventBus eventBus,
-        IFeatureToggleService features)
+        IFeatureToggleService features,
+        IStatusBarService statusBar)
     {
         _navigationService = navigationService;
         _sessionService = sessionService;
@@ -108,7 +109,9 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _commandBus = commandBus;
         _eventBus = eventBus;
         _features = features;
+        _statusBar = statusBar;
         AppState = appState;
+        StatusBar = statusBar;
 
         ((ObservableObject)_navigationService).PropertyChanged += OnNavigationPropertyChanged;
 
@@ -163,7 +166,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     {
         _navigationService.NavigateTo(DashboardPage);
         CurrentPage = DashboardPage;
-        StatusText = "Dashboard";
+        _statusBar.SetPersistent("Dashboard");
     }
 
     [RelayCommand]
@@ -171,7 +174,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     {
         _navigationService.NavigateTo(ProductsPage);
         CurrentPage = ProductsPage;
-        StatusText = "Products";
+        _statusBar.SetPersistent("Products");
     }
 
     [RelayCommand]
@@ -179,7 +182,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     {
         _navigationService.NavigateTo(SalesPage);
         CurrentPage = SalesPage;
-        StatusText = "Sales";
+        _statusBar.SetPersistent("Sales");
     }
 
     // ── Menu commands ──
@@ -188,7 +191,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private void RefreshCurrentView()
     {
         _navigationService.NavigateTo(CurrentPage);
-        StatusText = "Data refreshed";
+        _statusBar.Post("Data refreshed");
     }
 
     [RelayCommand]
@@ -207,21 +210,21 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private void OpenFirmManagement()
     {
         _dialogService.ShowDialog(FirmManagementDialog);
-        StatusText = "Firm management";
+        _statusBar.Post("Firm management closed");
     }
 
     [RelayCommand]
     private void OpenUserManagement()
     {
         _dialogService.ShowDialog(UserManagementDialog);
-        StatusText = "User management";
+        _statusBar.Post("User management closed");
     }
 
     [RelayCommand]
     private async Task OpenSystemSettingsAsync()
     {
         await _workflowManager.StartWorkflowAsync(SettingsWorkflow);
-        StatusText = "System settings";
+        _statusBar.Post("Settings closed");
     }
 
     // ── Logout ──
@@ -240,7 +243,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private async Task OnFirmUpdatedAsync(FirmUpdatedEvent e)
     {
         await _sessionService.RefreshFirmNameAsync();
-        StatusText = $"Firm updated to '{e.FirmName}'";
+        _statusBar.Post($"Firm updated to '{e.FirmName}'");
     }
 
     // ── Cleanup ──

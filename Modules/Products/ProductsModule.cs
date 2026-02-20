@@ -19,7 +19,7 @@ public static class ProductsModule
         pageRegistry.Map<ProductsViewModel>(ProductsPage);
 
         // Services
-        services.AddSingleton<IProductService, ProductService>();
+        services.AddTransient<IProductService, ProductService>();
 
         // Command handlers
         services.AddTransient<ICommandHandler<SaveProductCommand>, SaveProductHandler>();

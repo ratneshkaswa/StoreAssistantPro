@@ -44,14 +44,14 @@ public class FirmManagementViewModelTests
     }
 
     [Fact]
-    public async Task SaveFirm_EmptyName_SetsError()
+    public async Task SaveFirm_EmptyName_HasValidationErrors()
     {
         var sut = CreateSut();
         sut.FirmName = "   ";
 
         await sut.SaveFirmCommand.ExecuteAsync(null);
 
-        Assert.Equal("Firm name is required.", sut.ErrorMessage);
+        Assert.True(sut.HasErrors);
         await _firmService.DidNotReceive().UpdateFirmAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }

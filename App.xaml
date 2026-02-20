@@ -11,11 +11,18 @@
              xmlns:salesViews="clr-namespace:StoreAssistantPro.Modules.Sales.Views"
              xmlns:settingsVm="clr-namespace:StoreAssistantPro.Modules.SystemSettings.ViewModels"
              xmlns:settingsViews="clr-namespace:StoreAssistantPro.Modules.SystemSettings.Views"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             xmlns:core="clr-namespace:StoreAssistantPro.Core"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
-        <helpers:EqualityConverter x:Key="EqualityConverter"/>
-        <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Core/Styles/GlobalStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+            <helpers:EqualityConverter x:Key="EqualityConverter"/>
+            <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:DashboardViewModel}">
@@ -45,6 +52,98 @@
         <DataTemplate DataType="{x:Type settingsVm:AppInfoViewModel}">
             <settingsViews:AppInfoView/>
         </DataTemplate>
+
+        <!-- Responsive content host: stretch-to-fill + scroll-on-overflow -->
+        <Style TargetType="{x:Type controls:ResponsiveContentControl}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type controls:ResponsiveContentControl}">
+                        <ScrollViewer x:Name="PART_ScrollViewer"
+                                      Focusable="False"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Padding="0">
+                            <controls:ViewportConstrainedPanel
+                                ViewportWidth="{Binding ViewportWidth, ElementName=PART_ScrollViewer}"
+                                ViewportHeight="{Binding ViewportHeight, ElementName=PART_ScrollViewer}">
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </controls:ViewportConstrainedPanel>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Base page layout: standard padding, title, error bar, loading overlay -->
+        <Style TargetType="{x:Type core:BasePage}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type core:BasePage}">
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Title bar: page title + optional header content -->
+                            <DockPanel x:Name="PART_TitleBar" Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="{TemplateBinding PageTitle}"
+                                           FontSize="24" FontWeight="Bold"
+                                           DockPanel.Dock="Left"
+                                           VerticalAlignment="Center"/>
+                                <ContentPresenter Content="{TemplateBinding HeaderContent}"
+                                                  DockPanel.Dock="Right"
+                                                  HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center"/>
+                            </DockPanel>
+
+                            <!-- Error message bar -->
+                            <TextBlock x:Name="PART_ErrorMessage" Grid.Row="1"
+                                       Text="{Binding ErrorMessage}"
+                                       Foreground="Red" TextWrapping="Wrap"
+                                       Margin="0,0,0,5"/>
+
+                            <!-- Page content + loading overlay -->
+                            <Grid Grid.Row="2">
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+
+                                <TextBlock x:Name="PART_Loading"
+                                           Text="⏳ Loading..." FontSize="14" Foreground="#888"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Collapse title bar when no title is set -->
+                            <Trigger Property="PageTitle" Value="">
+                                <Setter TargetName="PART_TitleBar" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <!-- Collapse error bar when empty -->
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <!-- Show loading overlay -->
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <!-- Sidebar navigation button style -->
         <Style x:Key="NavButtonStyle" TargetType="Button">
@@ -89,5 +188,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

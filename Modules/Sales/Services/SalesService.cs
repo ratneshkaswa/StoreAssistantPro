@@ -9,35 +9,37 @@ public class SalesService(
     IDbContextFactory<AppDbContext> contextFactory,
     ITransactionHelper transaction) : ISalesService
 {
-    public async Task<IEnumerable<Sale>> GetAllAsync()
+    public async Task<IEnumerable<Sale>> GetAllAsync(CancellationToken ct = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Sales
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
             .AsNoTracking()
             .OrderByDescending(s => s.SaleDate)
-            .ToListAsync();
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 
-    public async Task<Sale?> GetByIdAsync(int id)
+    public async Task<Sale?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Sales
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.Id == id);
+            .FirstOrDefaultAsync(s => s.Id == id, ct)
+            .ConfigureAwait(false);
     }
 
-    public async Task CreateSaleAsync(Sale sale)
+    public async Task CreateSaleAsync(Sale sale, CancellationToken ct = default)
     {
         await transaction.ExecuteInTransactionAsync(async context =>
         {
             var saleItems = new List<SaleItem>();
             foreach (var item in sale.Items)
             {
-                var product = await context.Products.FindAsync(item.ProductId)
+                var product = await context.Products.FindAsync([item.ProductId], ct)
                     ?? throw new InvalidOperationException($"Product {item.ProductId} not found.");
 
                 if (product.Quantity < item.Quantity)
@@ -60,18 +62,19 @@ public class SalesService(
                 PaymentMethod = sale.PaymentMethod,
                 Items = saleItems
             });
-        });
+        }).ConfigureAwait(false);
     }
 
-    public async Task<IEnumerable<Sale>> GetSalesByDateRangeAsync(DateTime from, DateTime to)
+    public async Task<IEnumerable<Sale>> GetSalesByDateRangeAsync(DateTime from, DateTime to, CancellationToken ct = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Sales
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
             .Where(s => s.SaleDate >= from && s.SaleDate < to)
             .AsNoTracking()
             .OrderByDescending(s => s.SaleDate)
-            .ToListAsync();
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 }

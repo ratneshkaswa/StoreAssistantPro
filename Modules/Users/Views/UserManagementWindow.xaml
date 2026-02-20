@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
         Title="User Management"
+        ConfirmCommand="{Binding ChangePinCommand}"
         Loaded="OnLoaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
     <Grid Margin="25">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -19,7 +20,7 @@
             <DataGrid ItemsSource="{Binding Users}"
                       SelectedItem="{Binding SelectedUser}"
                       AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single" Height="100"
+                      SelectionMode="Single" MaxHeight="100"
                       HeadersVisibility="Column" CanUserAddRows="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Role" Binding="{Binding UserType}" Width="*"/>
@@ -65,4 +66,5 @@
             </StackPanel>
         </GroupBox>
     </Grid>
+    </ScrollViewer>
 </core:BaseDialogWindow>

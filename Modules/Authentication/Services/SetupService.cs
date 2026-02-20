@@ -10,9 +10,9 @@ public class SetupService(IDbContextFactory<AppDbContext> contextFactory) : ISet
     public async Task InitializeAppAsync(
         string firmName, string adminPin, string managerPin, string userPin, string masterPin)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
-        if (await context.AppConfigs.AnyAsync())
+        if (await context.AppConfigs.AnyAsync().ConfigureAwait(false))
             throw new InvalidOperationException("Application has already been initialized.");
 
         context.AppConfigs.Add(new AppConfig
@@ -42,7 +42,7 @@ public class SetupService(IDbContextFactory<AppDbContext> contextFactory) : ISet
 
         try
         {
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (DbUpdateException)
         {

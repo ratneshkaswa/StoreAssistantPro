@@ -7,6 +7,9 @@
              mc:Ignorable="d"
              d:DesignHeight="550" d:DesignWidth="800"
              Loaded="OnLoaded">
+    <UserControl.InputBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding ShowNewSaleCommand}"/>
+    </UserControl.InputBindings>
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,21 +21,28 @@
 
         <TextBlock Text="Sales" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+        <WrapPanel Grid.Row="1" Margin="0,0,0,10">
             <Button Content="🛒 New Sale" Command="{Binding ShowNewSaleCommand}"
                     Padding="10,5" Margin="0,0,15,0" FontWeight="SemiBold"
+                    VerticalAlignment="Center"
                     Visibility="{Binding CanCreateSales, Converter={StaticResource BoolToVisibility}}"/>
             <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <DatePicker SelectedDate="{Binding FilterFrom}" Width="130" Margin="0,0,10,0"/>
+            <DatePicker SelectedDate="{Binding FilterFrom}" Width="130" Margin="0,0,10,0"
+                        VerticalAlignment="Center"/>
             <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <DatePicker SelectedDate="{Binding FilterTo}" Width="130" Margin="0,0,10,0"/>
-            <Button Content="Filter" Command="{Binding FilterByDateCommand}" Padding="10,5" Margin="0,0,5,0"/>
-            <Button Content="Load All" Command="{Binding LoadSalesCommand}" Padding="10,5"/>
-        </StackPanel>
+            <DatePicker SelectedDate="{Binding FilterTo}" Width="130" Margin="0,0,10,0"
+                        VerticalAlignment="Center"/>
+            <Button Content="Filter" Command="{Binding FilterByDateCommand}" Padding="10,5" Margin="0,0,5,0"
+                    VerticalAlignment="Center"/>
+            <Button Content="Load All" Command="{Binding LoadSalesCommand}" Padding="10,5"
+                    VerticalAlignment="Center"/>
+        </WrapPanel>
 
         <!-- New Sale Form -->
         <Border Grid.Row="2" Background="#F5F5F5" CornerRadius="6" Padding="15" Margin="0,0,0,10"
-                Visibility="{Binding IsNewSaleVisible, Converter={StaticResource BoolToVisibility}}">
+                Visibility="{Binding IsNewSaleVisible, Converter={StaticResource BoolToVisibility}}"
+                h:KeyboardNav.DefaultCommand="{Binding AddToCartCommand}"
+                h:KeyboardNav.EscapeCommand="{Binding CancelNewSaleCommand}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

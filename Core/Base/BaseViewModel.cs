@@ -7,12 +7,19 @@ namespace StoreAssistantPro.Core;
 /// infrastructure for busy-state tracking, error display, validation,
 /// and a discoverable title.
 /// <para>
+/// Extends <see cref="ObservableValidator"/> (which itself extends
+/// <see cref="ObservableObject"/>), giving every ViewModel built-in
+/// <see cref="INotifyDataErrorInfo"/> support for inline per-field
+/// validation.  The existing <see cref="Validate"/> helper for
+/// form-level validation continues to work alongside it.
+/// </para>
+/// <para>
 /// <b>Architecture rule:</b> Every ViewModel in every module must derive
 /// from <see cref="BaseViewModel"/> to guarantee consistent behavior
 /// and make cross-cutting concerns (logging, error handling) easy to add.
 /// </para>
 /// </summary>
-public abstract partial class BaseViewModel : ObservableObject
+public abstract partial class BaseViewModel : ObservableValidator
 {
     /// <summary>
     /// Indicates whether the ViewModel is performing a long-running operation.
@@ -89,25 +96,51 @@ public abstract partial class BaseViewModel : ObservableObject
 
     // ── Async helpers ──
 
+    private CancellationTokenSource? _cts;
+
     /// <summary>
-    /// Convenience helper that wraps an async action with
-    /// <see cref="IsBusy"/> management and error capture.
-    /// <para>Usage from a <c>[RelayCommand]</c> method:</para>
+    /// Creates a new <see cref="CancellationTokenSource"/>, cancelling
+    /// any previously active one.  Call at the start of every async
+    /// operation so navigating away or re-loading cancels stale work.
+    /// </summary>
+    private CancellationToken ResetCancellation()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        return _cts.Token;
+    }
+
+    /// <summary>
+    /// Wraps an async action with <see cref="IsBusy"/> management,
+    /// error capture, cancellation, and re-entrancy protection.
+    /// If the ViewModel is already busy, the call is silently ignored
+    /// — this prevents double-click / double-Enter from firing twice.
+    /// <para>The <see cref="CancellationToken"/> is passed to the
+    /// action; services should forward it to EF / HTTP calls.</para>
+    /// <para><b>Usage (mutating operations — save, delete, submit):</b></para>
     /// <code>
     /// [RelayCommand]
-    /// private Task SaveAsync() => RunAsync(async () =>
+    /// private Task SaveAsync() => RunAsync(async ct =>
     /// {
-    ///     await service.SaveAsync(...);
+    ///     await service.SaveAsync(item, ct);
     /// });
     /// </code>
     /// </summary>
-    protected async Task RunAsync(Func<Task> action)
+    protected async Task RunAsync(Func<CancellationToken, Task> action)
     {
+        if (IsBusy) return;
+
+        var ct = ResetCancellation();
         ErrorMessage = string.Empty;
         IsBusy = true;
         try
         {
-            await action();
+            await action(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            // Silently swallow — user navigated away or re-triggered.
         }
         catch (Exception ex)
         {
@@ -120,16 +153,24 @@ public abstract partial class BaseViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Same as <see cref="RunAsync(Func{Task})"/> but returns a result
-    /// of type <typeparamref name="T"/>, or <c>default</c> on failure.
+    /// Same as <see cref="RunAsync(Func{CancellationToken, Task})"/>
+    /// but returns a result of <typeparamref name="T"/>, or
+    /// <c>default</c> on failure or cancellation.
     /// </summary>
-    protected async Task<T?> RunAsync<T>(Func<Task<T>> action)
+    protected async Task<T?> RunAsync<T>(Func<CancellationToken, Task<T>> action)
     {
+        if (IsBusy) return default;
+
+        var ct = ResetCancellation();
         ErrorMessage = string.Empty;
         IsBusy = true;
         try
         {
-            return await action();
+            return await action(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            return default;
         }
         catch (Exception ex)
         {
@@ -139,6 +180,43 @@ public abstract partial class BaseViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Wraps an async data-loading action with <see cref="IsLoading"/>
+    /// management, error capture, cancellation, and re-entrancy
+    /// protection.  Calling again while already loading cancels the
+    /// previous load (e.g. rapid filter changes, page re-entry).
+    /// <para><b>Usage (data loading — list, refresh, initial load):</b></para>
+    /// <code>
+    /// [RelayCommand]
+    /// private Task LoadItemsAsync() => RunLoadAsync(async ct =>
+    /// {
+    ///     Items = await service.GetAllAsync(ct);
+    /// });
+    /// </code>
+    /// </summary>
+    protected async Task RunLoadAsync(Func<CancellationToken, Task> action)
+    {
+        var ct = ResetCancellation();
+        ErrorMessage = string.Empty;
+        IsLoading = true;
+        try
+        {
+            await action(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            // Silently swallow — superseded by a newer load.
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

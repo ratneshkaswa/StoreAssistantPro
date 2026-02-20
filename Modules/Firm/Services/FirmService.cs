@@ -8,20 +8,20 @@ public class FirmService(IDbContextFactory<AppDbContext> contextFactory) : IFirm
 {
     public async Task<AppConfig?> GetFirmAsync()
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
-        return await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        return await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync().ConfigureAwait(false);
     }
 
     public async Task UpdateFirmAsync(string firmName, string address, string phone)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.AppConfigs.FirstOrDefaultAsync()
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync().ConfigureAwait(false)
             ?? throw new InvalidOperationException("Firm configuration not found.");
 
         config.FirmName = firmName;
         config.Address = address;
         config.Phone = phone;
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync().ConfigureAwait(false);
     }
 }

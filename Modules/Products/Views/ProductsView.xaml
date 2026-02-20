@@ -7,6 +7,11 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              Loaded="OnLoaded">
+    <UserControl.InputBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding ShowAddFormCommand}"/>
+        <KeyBinding Gesture="Ctrl+E" Command="{Binding ShowEditFormCommand}"/>
+        <KeyBinding Gesture="Delete" Command="{Binding DeleteProductCommand}"/>
+    </UserControl.InputBindings>
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -49,7 +54,9 @@
 
         <!-- Inline Add Product Form -->
         <Border Grid.Row="2" Background="#F5F5F5" CornerRadius="6" Padding="15" Margin="0,0,0,10"
-                Visibility="{Binding IsAddFormVisible, Converter={StaticResource BoolToVisibility}}">
+                Visibility="{Binding IsAddFormVisible, Converter={StaticResource BoolToVisibility}}"
+                h:KeyboardNav.DefaultCommand="{Binding SaveProductCommand}"
+                h:KeyboardNav.EscapeCommand="{Binding CancelAddCommand}">
             <StackPanel>
                 <TextBlock Text="New Product" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
                 <WrapPanel>
@@ -83,7 +90,9 @@
 
         <!-- Inline Edit Product Form -->
         <Border Grid.Row="3" Background="#E8F5E9" CornerRadius="6" Padding="15" Margin="0,0,0,10"
-                Visibility="{Binding IsEditFormVisible, Converter={StaticResource BoolToVisibility}}">
+                Visibility="{Binding IsEditFormVisible, Converter={StaticResource BoolToVisibility}}"
+                h:KeyboardNav.DefaultCommand="{Binding SaveEditCommand}"
+                h:KeyboardNav.EscapeCommand="{Binding CancelEditCommand}">
             <StackPanel>
                 <TextBlock Text="Edit Product" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
                 <WrapPanel>

@@ -41,7 +41,7 @@ public class ProductsViewModelTests
             new() { Id = 1, Name = "Widget", Price = 9.99m, Quantity = 10 },
             new() { Id = 2, Name = "Gadget", Price = 19.99m, Quantity = 5 }
         };
-        _productService.GetAllAsync().Returns(products);
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -58,7 +58,7 @@ public class ProductsViewModelTests
             new() { Id = 2, Name = "Green Bean", Price = 2m, Quantity = 20 },
             new() { Id = 3, Name = "Red Pepper", Price = 3m, Quantity = 15 }
         };
-        _productService.GetAllAsync().Returns(products);
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -76,7 +76,7 @@ public class ProductsViewModelTests
             new() { Id = 1, Name = "Red Apple", Price = 1m, Quantity = 10 },
             new() { Id = 2, Name = "Green Bean", Price = 2m, Quantity = 20 }
         };
-        _productService.GetAllAsync().Returns(products);
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -90,7 +90,7 @@ public class ProductsViewModelTests
     [Fact]
     public async Task SaveProduct_CallsCommandBus()
     {
-        _productService.GetAllAsync().Returns(Enumerable.Empty<Product>());
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(Enumerable.Empty<Product>());
 
         var sut = CreateSut();
         sut.NewProductName = "New Item";
@@ -134,7 +134,7 @@ public class ProductsViewModelTests
     public async Task DeleteProduct_RemovesSelectedProduct()
     {
         var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1, 2, 3] };
-        _productService.GetAllAsync().Returns(new List<Product> { product });
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -249,7 +249,7 @@ public class ProductsViewModelTests
     {
         _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
         var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
-        _productService.GetAllAsync().Returns(new List<Product> { product });
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -266,7 +266,7 @@ public class ProductsViewModelTests
     {
         _masterPinValidator.ValidateAsync(Arg.Any<string>()).Returns(false);
         var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
-        _productService.GetAllAsync().Returns(new List<Product> { product });
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -283,7 +283,7 @@ public class ProductsViewModelTests
     public async Task DeleteProduct_Success_CallsMasterPinValidator()
     {
         var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1] };
-        _productService.GetAllAsync().Returns(new List<Product> { product });
+        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);

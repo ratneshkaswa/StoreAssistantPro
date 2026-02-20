@@ -19,7 +19,7 @@ public static class SalesModule
         pageRegistry.Map<SalesViewModel>(SalesPage);
 
         // Services
-        services.AddSingleton<ISalesService, SalesService>();
+        services.AddTransient<ISalesService, SalesService>();
 
         // Command handlers
         services.AddTransient<ICommandHandler<CompleteSaleCommand>, CompleteSaleHandler>();

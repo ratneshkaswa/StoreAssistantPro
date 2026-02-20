@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -12,6 +13,9 @@ public partial class FirmManagementViewModel(
     IEventBus eventBus) : BaseViewModel
 {
     [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [Required(ErrorMessage = "Firm name is required.")]
+    [MaxLength(200, ErrorMessage = "Firm name cannot exceed 200 characters.")]
     public partial string FirmName { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -50,11 +54,9 @@ public partial class FirmManagementViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(FirmName))
-        {
-            ErrorMessage = "Firm name is required.";
+        ValidateAllProperties();
+        if (HasErrors)
             return;
-        }
 
         try
         {

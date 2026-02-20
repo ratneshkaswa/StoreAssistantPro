@@ -15,7 +15,7 @@ public static class UsersModule
     public static IServiceCollection AddUsersModule(this IServiceCollection services)
     {
         // Services
-        services.AddSingleton<IUserService, UserService>();
+        services.AddTransient<IUserService, UserService>();
 
         // Command handlers
         services.AddTransient<ICommandHandler<ChangePinCommand>, ChangePinHandler>();

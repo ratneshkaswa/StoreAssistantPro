@@ -83,20 +83,12 @@ public partial class ProductsViewModel(
     }
 
     [RelayCommand]
-    private async Task LoadProductsAsync()
+    private Task LoadProductsAsync() => RunLoadAsync(async ct =>
     {
-        IsLoading = true;
-        try
-        {
-            var items = await productService.GetAllAsync();
-            _allProducts = items.ToList();
-            ApplyFilter(SearchText);
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+        var items = await productService.GetAllAsync(ct);
+        _allProducts = items.ToList();
+        ApplyFilter(SearchText);
+    });
 
     [RelayCommand]
     private void ShowAddForm()
@@ -110,7 +102,7 @@ public partial class ProductsViewModel(
         ErrorMessage = string.Empty;
         NewProductName = string.Empty;
         NewProductPrice = 0;
-        NewProductQuantity = 0;
+        NewProductQuantity = 1;
         IsEditFormVisible = false;
         IsAddFormVisible = true;
     }

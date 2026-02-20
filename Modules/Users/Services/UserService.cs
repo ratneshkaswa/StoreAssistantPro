@@ -9,21 +9,23 @@ public class UserService(IDbContextFactory<AppDbContext> contextFactory) : IUser
 {
     public async Task<IEnumerable<UserCredential>> GetAllUsersAsync()
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
         return await context.UserCredentials
             .AsNoTracking()
             .OrderBy(u => u.UserType)
-            .ToListAsync();
+            .ToListAsync()
+            .ConfigureAwait(false);
     }
 
     public async Task ChangePinAsync(UserType userType, string newPin)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
         var credential = await context.UserCredentials
             .FirstOrDefaultAsync(c => c.UserType == userType)
+            .ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Credential for {userType} not found.");
 
         credential.PinHash = PinHasher.Hash(newPin);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync().ConfigureAwait(false);
     }
 }

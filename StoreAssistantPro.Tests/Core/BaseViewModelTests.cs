@@ -4,14 +4,15 @@ namespace StoreAssistantPro.Tests.Core;
 
 public class BaseViewModelTests
 {
-    private sealed partial class TestViewModel : BaseViewModel
+    internal sealed partial class TestViewModel : BaseViewModel
     {
         public override string Title => "Custom Title";
-        public Task TestRunAsync(Func<Task> action) => RunAsync(action);
-        public Task<T?> TestRunAsync<T>(Func<Task<T>> action) => RunAsync(action);
+        public Task TestRunAsync(Func<CancellationToken, Task> action) => RunAsync(action);
+        public Task<T?> TestRunAsync<T>(Func<CancellationToken, Task<T>> action) => RunAsync(action);
+        public Task TestRunLoadAsync(Func<CancellationToken, Task> action) => RunLoadAsync(action);
     }
 
-    private sealed partial class DefaultTitleViewModel : BaseViewModel;
+    internal sealed partial class DefaultTitleViewModel : BaseViewModel;
 
     [Fact]
     public void Title_Default_StripsViewModelSuffix()
@@ -76,7 +77,7 @@ public class BaseViewModelTests
         var sut = new TestViewModel();
         var wasBusyDuring = false;
 
-        await sut.TestRunAsync(() =>
+        await sut.TestRunAsync(ct =>
         {
             wasBusyDuring = sut.IsBusy;
             return Task.CompletedTask;
@@ -92,7 +93,7 @@ public class BaseViewModelTests
     {
         var sut = new TestViewModel();
 
-        await sut.TestRunAsync(() => throw new InvalidOperationException("boom"));
+        await sut.TestRunAsync(ct => throw new InvalidOperationException("boom"));
 
         Assert.Equal("boom", sut.ErrorMessage);
         Assert.False(sut.IsBusy);
@@ -103,7 +104,7 @@ public class BaseViewModelTests
     {
         var sut = new TestViewModel();
 
-        var result = await sut.TestRunAsync(() => Task.FromResult(42));
+        var result = await sut.TestRunAsync(ct => Task.FromResult(42));
 
         Assert.Equal(42, result);
         Assert.Equal(string.Empty, sut.ErrorMessage);
@@ -114,7 +115,7 @@ public class BaseViewModelTests
     {
         var sut = new TestViewModel();
 
-        var result = await sut.TestRunAsync<int>(() =>
+        var result = await sut.TestRunAsync<int>(ct =>
             throw new InvalidOperationException("fail"));
 
         Assert.Equal(0, result);
@@ -155,5 +156,82 @@ public class BaseViewModelTests
         sut.IsBusy = true;
 
         Assert.Contains(nameof(BaseViewModel.IsBusy), changed);
+    }
+
+    [Fact]
+    public async Task RunLoadAsync_SetsAndClearsIsLoading()
+    {
+        var sut = new TestViewModel();
+        var wasLoadingDuring = false;
+
+        await sut.TestRunLoadAsync(ct =>
+        {
+            wasLoadingDuring = sut.IsLoading;
+            return Task.CompletedTask;
+        });
+
+        Assert.True(wasLoadingDuring);
+        Assert.False(sut.IsLoading);
+        Assert.Equal(string.Empty, sut.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task RunLoadAsync_Failure_CapturesErrorMessage()
+    {
+        var sut = new TestViewModel();
+
+        await sut.TestRunLoadAsync(ct => throw new InvalidOperationException("load fail"));
+
+        Assert.Equal("load fail", sut.ErrorMessage);
+        Assert.False(sut.IsLoading);
+    }
+
+    [Fact]
+    public async Task RunLoadAsync_Cancellation_SwallowsAndClearsLoading()
+    {
+        var sut = new TestViewModel();
+
+        await sut.TestRunLoadAsync(ct => throw new OperationCanceledException());
+
+        Assert.Equal(string.Empty, sut.ErrorMessage);
+        Assert.False(sut.IsLoading);
+    }
+
+    [Fact]
+    public async Task RunAsync_Cancellation_SwallowsAndClearsBusy()
+    {
+        var sut = new TestViewModel();
+
+        await sut.TestRunAsync(ct => throw new OperationCanceledException());
+
+        Assert.Equal(string.Empty, sut.ErrorMessage);
+        Assert.False(sut.IsBusy);
+    }
+
+    [Fact]
+    public async Task RunAsync_ReentrantCall_IsIgnored()
+    {
+        var sut = new TestViewModel();
+        var callCount = 0;
+        var tcs = new TaskCompletionSource();
+
+        var first = sut.TestRunAsync(async ct =>
+        {
+            Interlocked.Increment(ref callCount);
+            await tcs.Task;
+        });
+
+        // While first is still running, trigger another.
+        var second = sut.TestRunAsync(ct =>
+        {
+            Interlocked.Increment(ref callCount);
+            return Task.CompletedTask;
+        });
+
+        tcs.SetResult();
+        await first;
+        await second;
+
+        Assert.Equal(1, callCount);
     }
 }
