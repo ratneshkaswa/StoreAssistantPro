@@ -25,10 +25,11 @@
             <helpers:EqualityConverter x:Key="EqualityConverter"/>
             <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <helpers:PinDotConverter x:Key="PinDotConverter"/>
+            <helpers:BoolToActiveTextConverter x:Key="BoolToActiveText"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
-        <DataTemplate DataType="{x:Type shellVm:DashboardViewModel}">
-            <shellViews:DashboardView/>
+        <DataTemplate DataType="{x:Type shellVm:MainWorkspaceViewModel}">
+            <shellViews:MainWorkspaceView/>
         </DataTemplate>
 
         <!-- Products module -->

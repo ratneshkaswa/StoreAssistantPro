@@ -14,8 +14,9 @@ public class UpdateProductHandler(IProductService productService)
             return CommandResult.Failure("Product not found.");
 
         product.Name = command.Name;
-        product.Price = command.Price;
+        product.SalePrice = command.SalePrice;
         product.Quantity = command.Quantity;
+        product.TaxProfileId = command.TaxProfileId;
         product.RowVersion = command.RowVersion;
 
         await productService.UpdateAsync(product);

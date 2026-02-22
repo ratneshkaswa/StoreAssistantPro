@@ -18,6 +18,7 @@ public partial class SalesViewModel(
     IProductService productService,
     ISessionService sessionService,
     ICommandBus commandBus,
+    IBillCalculationService billCalculation,
     IRegionalSettingsService regional) : BaseViewModel
 {
     private const int PageSize = 50;
@@ -96,6 +97,61 @@ public partial class SalesViewModel(
     [ObservableProperty]
     public partial decimal CartTotal { get; set; }
 
+    // ── Bill-level discount (optional) ──
+
+    public DiscountType[] DiscountTypes { get; } =
+        [DiscountType.None, DiscountType.Amount, DiscountType.Percentage];
+
+    [ObservableProperty]
+    public partial DiscountType SelectedDiscountType { get; set; }
+
+    [ObservableProperty]
+    public partial decimal DiscountInput { get; set; }
+
+    [ObservableProperty]
+    public partial string DiscountReason { get; set; }
+
+    // ── Computed bill summary (driven by RecalculateBill) ──
+
+    [ObservableProperty]
+    public partial decimal BillDiscountAmount { get; set; }
+
+    [ObservableProperty]
+    public partial decimal BillFinalAmount { get; set; }
+
+    /// <summary>
+    /// <c>true</c> while a sale save is in progress.
+    /// Disables all cart-editing controls and the Complete Sale button,
+    /// and shows a processing indicator in the billing form.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCartLocked))]
+    [NotifyPropertyChangedFor(nameof(SavingStatusText))]
+    [NotifyCanExecuteChangedFor(nameof(CompleteSaleCommand))]
+    [NotifyCanExecuteChangedFor(nameof(AddToCartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveFromCartCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelNewSaleCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ShowNewSaleCommand))]
+    public partial bool IsSaving { get; set; }
+
+    /// <summary>
+    /// <c>true</c> when the billing form inputs should be disabled.
+    /// Bound to <c>IsEnabled</c> (via inverse) on all cart controls.
+    /// </summary>
+    public bool IsCartLocked => IsSaving;
+
+    /// <summary>
+    /// Text shown in the processing indicator overlay.
+    /// Empty when not saving (overlay hidden).
+    /// </summary>
+    public string SavingStatusText => IsSaving ? "Processing sale…" : string.Empty;
+
+    public bool HasDiscount => SelectedDiscountType != DiscountType.None && DiscountInput > 0;
+
+    partial void OnSelectedDiscountTypeChanged(DiscountType value) => RecalculateBill();
+
+    partial void OnDiscountInputChanged(decimal value) => RecalculateBill();
+
     [RelayCommand]
     private Task LoadSalesAsync()
     {
@@ -145,7 +201,7 @@ public partial class SalesViewModel(
         return LoadCurrentPageAsync();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditCart))]
     private async Task ShowNewSaleAsync()
     {
         if (!CanCreateSales)
@@ -162,16 +218,23 @@ public partial class SalesViewModel(
         CartQuantity = 1;
         PaymentMethod = "Cash";
         SelectedProduct = null;
+        SelectedDiscountType = DiscountType.None;
+        DiscountInput = 0;
+        DiscountReason = string.Empty;
+        BillDiscountAmount = 0;
+        BillFinalAmount = 0;
         IsNewSaleVisible = true;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditCart))]
     private void CancelNewSale()
     {
         IsNewSaleVisible = false;
     }
 
-    [RelayCommand]
+    private bool CanEditCart() => !IsSaving;
+
+    [RelayCommand(CanExecute = nameof(CanEditCart))]
     private void AddToCart()
     {
         ErrorMessage = string.Empty;
@@ -190,7 +253,7 @@ public partial class SalesViewModel(
         if (existing is not null)
         {
             existing.Quantity += CartQuantity;
-            existing.UnitPrice = SelectedProduct.Price;
+            existing.UnitPrice = SelectedProduct.SalePrice;
             CartItems = new ObservableCollection<SaleItem>(CartItems);
         }
         else
@@ -200,45 +263,91 @@ public partial class SalesViewModel(
                 ProductId = SelectedProduct.Id,
                 Product = SelectedProduct,
                 Quantity = CartQuantity,
-                UnitPrice = SelectedProduct.Price
+                UnitPrice = SelectedProduct.SalePrice
             });
         }
 
         CartTotal = CartItems.Sum(i => i.Subtotal);
+        RecalculateBill();
         CartQuantity = 1;
         SelectedProduct = null;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditCart))]
     private void RemoveFromCart(SaleItem? item)
     {
         if (item is null) return;
 
         CartItems.Remove(item);
         CartTotal = CartItems.Sum(i => i.Subtotal);
+        RecalculateBill();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanCompleteSale))]
     private async Task CompleteSaleAsync()
     {
         ErrorMessage = string.Empty;
 
         if (CartItems.Count == 0) return;
 
-        var items = CartItems.Select(i =>
-            new SaleItemDto(i.ProductId, i.Quantity, i.UnitPrice)).ToList();
-
-        var result = await commandBus.SendAsync(
-            new CompleteSaleCommand(CartTotal, PaymentMethod, items));
-
-        if (result.Succeeded)
+        IsSaving = true;
+        try
         {
-            IsNewSaleVisible = false;
-            await LoadSalesAsync();
+            var idempotencyKey = Guid.NewGuid();
+
+            var items = CartItems.Select(i =>
+                new SaleItemDto(i.ProductId, i.Quantity, i.UnitPrice)).ToList();
+
+            var discount = BuildDiscount();
+
+            var result = await commandBus.SendAsync(
+                new CompleteSaleCommand(idempotencyKey, BillFinalAmount, PaymentMethod, items, discount));
+
+            if (result.Succeeded)
+            {
+                IsNewSaleVisible = false;
+                await LoadSalesAsync();
+            }
+            else
+            {
+                ErrorMessage = result.ErrorMessage ?? "Sale failed.";
+            }
         }
-        else
+        finally
         {
-            ErrorMessage = result.ErrorMessage ?? "Sale failed.";
+            IsSaving = false;
         }
     }
+
+    private bool CanCompleteSale() => !IsSaving;
+
+    // ── Bill recalculation ──
+
+    private void RecalculateBill()
+    {
+        var discount = BuildDiscount();
+
+        try
+        {
+            var summary = billCalculation.Calculate(CartTotal, 0m, discount);
+            BillDiscountAmount = summary.DiscountAmount;
+            BillFinalAmount = summary.FinalAmount;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            BillDiscountAmount = 0;
+            BillFinalAmount = CartTotal;
+        }
+
+        OnPropertyChanged(nameof(HasDiscount));
+    }
+
+    private BillDiscount BuildDiscount() => SelectedDiscountType == DiscountType.None
+        ? BillDiscount.None
+        : new BillDiscount
+        {
+            Type = SelectedDiscountType,
+            Value = DiscountInput,
+            Reason = string.IsNullOrWhiteSpace(DiscountReason) ? null : DiscountReason.Trim()
+        };
 }

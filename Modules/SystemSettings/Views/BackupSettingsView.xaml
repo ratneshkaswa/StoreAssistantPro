@@ -5,42 +5,54 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              Loaded="OnLoaded">
-    <Grid Margin="30">
+    <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="💾 Backup &amp; Restore"
-                   FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+        <!-- Title -->
+        <TextBlock Text="💾 Backup &amp; Restore" Style="{StaticResource DialogTitleStyle}"/>
 
-        <!-- Backup Folder Display -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,20">
-            <TextBlock Text="Backup Folder" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <TextBox Text="{Binding BackupFolder, Mode=OneWay}" IsReadOnly="True"
-                     Padding="8" FontSize="12" Foreground="#555" Background="#F0F0F0"/>
-        </StackPanel>
+        <!-- Two-column form grid -->
+        <Grid Grid.Row="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                <ColumnDefinition Width="*" MaxWidth="500"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Action Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Backup Folder"
+                       Style="{StaticResource FormRowLabelStyle}"
+                       VerticalAlignment="Top" Margin="0,6,12,0"/>
+            <TextBox Grid.Row="0" Grid.Column="1"
+                     Text="{Binding BackupFolder, Mode=OneWay}" IsReadOnly="True"
+                     Background="#F0F0F0" Foreground="#555"/>
+        </Grid>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                    Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="📤 Backup Database" Command="{Binding BackupDatabaseCommand}"
                     IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBoolConverter}}"
-                    Padding="20,10" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,0"/>
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="📥 Restore Database" Command="{Binding RestoreDatabaseCommand}"
                     IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBoolConverter}}"
-                    Padding="20,10" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,0"/>
-            <Button Content="📂 Open Backup Folder" Command="{Binding OpenBackupFolderCommand}"
-                    Padding="20,10" FontSize="13"/>
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="📂 Open Folder" Command="{Binding OpenBackupFolderCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
         </StackPanel>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="3">
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap"/>
-            <TextBlock Text="{Binding SuccessMessage}" Foreground="#4CAF50" TextWrapping="Wrap"/>
+        <StackPanel Grid.Row="3" VerticalAlignment="Top" Margin="0,8,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
         </StackPanel>
     </Grid>
 </UserControl>

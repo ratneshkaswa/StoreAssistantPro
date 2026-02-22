@@ -4,6 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Commands.Logging;
+using StoreAssistantPro.Core.Commands.Offline;
+using StoreAssistantPro.Core.Commands.Performance;
+using StoreAssistantPro.Core.Commands.Transaction;
+using StoreAssistantPro.Core.Commands.Validation;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Navigation;
@@ -19,6 +24,7 @@ using StoreAssistantPro.Modules.Products;
 using StoreAssistantPro.Modules.Sales;
 using StoreAssistantPro.Modules.Startup;
 using StoreAssistantPro.Modules.SystemSettings;
+using StoreAssistantPro.Modules.Tax;
 using StoreAssistantPro.Modules.Users;
 
 namespace StoreAssistantPro;
@@ -62,14 +68,27 @@ internal static class HostingExtensions
         services.AddSingleton<IWindowRegistry, WindowRegistry>();
         services.AddSingleton<IWorkflowManager, WorkflowManager>();
         services.AddSingleton<ICommandBus, CommandBus>();
+        services.AddSingleton<ICommandExecutionPipeline, CommandExecutionPipeline>();
+        services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
+        services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(LoggingPipelineBehavior<,>));
+        services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(OfflinePipelineBehavior<,>));
+        services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(TransactionPipelineBehavior<,>));
+        services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(PerformancePipelineBehavior<,>));
         services.AddSingleton<IEventBus, EventBus>();
+        services.AddSingleton<IFocusLockService, FocusLockService>();
         services.AddSingleton<IFeatureToggleService, FeatureToggleService>();
         services.AddTransient<IMasterPinValidator, MasterPinValidator>();
         services.AddSingleton<IWindowSizingService, WindowSizingService>();
         services.AddSingleton<IRegionalSettingsService, RegionalSettingsService>();
         services.AddTransient<ITransactionHelper, TransactionHelper>();
+        services.AddTransient<ITransactionSafetyService, TransactionSafetyService>();
         services.AddTransient<IApplicationInfoService, ApplicationInfoService>();
         services.AddSingleton<IPerformanceMonitor, PerformanceMonitor>();
+        services.AddSingleton<ITaxCalculationService, TaxCalculationService>();
+        services.AddSingleton<IPricingCalculationService, PricingCalculationService>();
+        services.AddSingleton<IBillCalculationService, BillCalculationService>();
+        services.AddSingleton<IConnectivityMonitorService, ConnectivityMonitorService>();
+        services.AddSingleton<IOfflineModeService, OfflineModeService>();
 
         return services;
     }
@@ -88,7 +107,8 @@ internal static class HostingExtensions
             .AddFirmModule()
             .AddUsersModule()
             .AddSystemSettingsModule()
-            .AddBillingModule();
+            .AddBillingModule()
+            .AddTaxModule();
 
         return services;
     }

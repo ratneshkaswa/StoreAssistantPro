@@ -60,6 +60,14 @@ public partial class QuickAction : ObservableObject
     /// </summary>
     public IReadOnlyList<UserType> RequiredRoles { get; init; } = [];
 
+    /// <summary>
+    /// Feature flag that must be enabled for this action to appear.
+    /// <c>null</c> means the action is always available regardless of mode.
+    /// Checked by <c>IQuickActionService.GetVisibleActions</c> via
+    /// <see cref="Core.Features.IFeatureToggleService"/>.
+    /// </summary>
+    public string? RequiredFeature { get; init; }
+
     public QuickAction()
     {
         Title = string.Empty;

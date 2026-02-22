@@ -5,6 +5,7 @@ namespace StoreAssistantPro.Modules.Products.Commands;
 public sealed record UpdateProductCommand(
     int ProductId,
     string Name,
-    decimal Price,
+    decimal SalePrice,
     int Quantity,
+    int? TaxProfileId,
     byte[]? RowVersion) : ICommand;

@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 
@@ -34,13 +35,14 @@ public class QuickActionService : IQuickActionService
         }
     }
 
-    public IReadOnlyList<QuickAction> GetVisibleActions(UserType role)
+    public IReadOnlyList<QuickAction> GetVisibleActions(UserType role, IFeatureToggleService features)
     {
         lock (_lock)
         {
             return _actions
                 .Where(a => a.IsVisible)
                 .Where(a => a.RequiredRoles.Count == 0 || a.RequiredRoles.Contains(role))
+                .Where(a => a.RequiredFeature is null || features.IsEnabled(a.RequiredFeature))
                 .OrderBy(a => a.SortOrder)
                 .ToList()
                 .AsReadOnly();

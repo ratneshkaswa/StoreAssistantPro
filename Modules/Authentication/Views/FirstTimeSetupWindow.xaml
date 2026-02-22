@@ -3,57 +3,82 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         Title="Store Assistant Pro — First Time Setup">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-    <Grid Margin="30" h:KeyboardNav.DefaultCommand="{Binding SaveCommand}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          h:KeyboardNav.DefaultCommand="{Binding SaveCommand}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="First Time Setup" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+        <!-- Title -->
+        <TextBlock Text="First Time Setup" Style="{StaticResource DialogTitleStyle}"/>
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,10">
-            <TextBlock Text="Firm Name" FontSize="12" Margin="0,0,0,3"/>
-            <TextBox Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
-                     Padding="6" MaxLength="200"/>
-        </StackPanel>
+        <!-- Two-column form grid -->
+        <Grid Grid.Row="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="120"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="2" Margin="0,0,0,10">
-            <TextBlock Text="Admin PIN (4 digits)" FontSize="12" Margin="0,0,0,3"/>
-            <PasswordBox x:Name="AdminPinBox" MaxLength="4" Padding="6"
+            <!-- Row 0: Firm Name -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Firm Name"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBox Grid.Row="0" Grid.Column="1"
+                     Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="200"/>
+
+            <!-- Row 2: Admin PIN -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Admin PIN (4 digits)"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <PasswordBox Grid.Row="2" Grid.Column="1"
+                         x:Name="AdminPinBox" MaxLength="4"
                          PasswordChanged="OnPinChanged"/>
-        </StackPanel>
 
-        <StackPanel Grid.Row="3" Margin="0,0,0,10">
-            <TextBlock Text="Manager PIN (4 digits)" FontSize="12" Margin="0,0,0,3"/>
-            <PasswordBox x:Name="ManagerPinBox" MaxLength="4" Padding="6"
+            <!-- Row 4: Manager PIN -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Manager PIN (4 digits)"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <PasswordBox Grid.Row="4" Grid.Column="1"
+                         x:Name="ManagerPinBox" MaxLength="4"
                          PasswordChanged="OnPinChanged"/>
-        </StackPanel>
 
-        <StackPanel Grid.Row="4" Margin="0,0,0,10">
-            <TextBlock Text="User PIN (4 digits)" FontSize="12" Margin="0,0,0,3"/>
-            <PasswordBox x:Name="UserPinBox" MaxLength="4" Padding="6"
+            <!-- Row 6: User PIN -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="User PIN (4 digits)"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <PasswordBox Grid.Row="6" Grid.Column="1"
+                         x:Name="UserPinBox" MaxLength="4"
                          PasswordChanged="OnPinChanged"/>
-        </StackPanel>
 
-        <StackPanel Grid.Row="5" Margin="0,0,0,10">
-            <TextBlock Text="Master Password (6 digits)" FontSize="12" Margin="0,0,0,3"/>
-            <PasswordBox x:Name="MasterPinBox" MaxLength="6" Padding="6"
+            <!-- Row 8: Master Password -->
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Master Password (6 digits)"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <PasswordBox Grid.Row="8" Grid.Column="1"
+                         x:Name="MasterPinBox" MaxLength="6"
                          PasswordChanged="OnPinChanged"/>
+        </Grid>
+
+        <!-- Messages -->
+        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}"
+                   Style="{StaticResource ErrorMessageStyle}" Margin="0,4,0,0"/>
+
+        <!-- Action button — pinned to bottom -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="Complete Setup" Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
         </StackPanel>
-
-        <TextBlock Grid.Row="6" Text="{Binding ErrorMessage}" Foreground="Red"
-                   TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-        <Button Grid.Row="7" Content="Complete Setup" Command="{Binding SaveCommand}"
-                Padding="12,8" FontSize="14" FontWeight="SemiBold"
-                HorizontalAlignment="Stretch"/>
     </Grid>
-    </ScrollViewer>
 </Window>

@@ -51,8 +51,15 @@ public sealed class ViewportConstrainedPanel : Panel
 
         // Use the real viewport dimensions so the child sees a finite constraint,
         // preserving star-sized Grid rows/columns inside the hosted UserControl.
-        var width = ViewportWidth > 0 ? ViewportWidth : availableSize.Width;
-        var height = ViewportHeight > 0 ? ViewportHeight : availableSize.Height;
+        // Guard against Infinity: when the viewport hasn't been measured yet AND
+        // the ScrollViewer passes Infinity, clamp to zero so MeasureOverride
+        // never returns PositiveInfinity (which WPF forbids).
+        var width = ViewportWidth > 0
+            ? ViewportWidth
+            : (double.IsInfinity(availableSize.Width) ? 0 : availableSize.Width);
+        var height = ViewportHeight > 0
+            ? ViewportHeight
+            : (double.IsInfinity(availableSize.Height) ? 0 : availableSize.Height);
 
         child.Measure(new Size(width, height));
 

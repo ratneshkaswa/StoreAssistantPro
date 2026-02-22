@@ -1,10 +1,16 @@
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.ViewModels;
+using StoreAssistantPro.Modules.Billing.Views;
 
 namespace StoreAssistantPro.Modules.MainShell.Services;
 
-public class DialogService(IWindowRegistry windowRegistry) : IDialogService
+public class DialogService(
+    IWindowRegistry windowRegistry,
+    IServiceProvider serviceProvider) : IDialogService
 {
     public bool Confirm(string message, string title = "Confirm")
     {
@@ -84,4 +90,16 @@ public class DialogService(IWindowRegistry windowRegistry) : IDialogService
 
     public bool? ShowDialog(string dialogKey) =>
         windowRegistry.ShowDialog(dialogKey);
+
+    public bool ShowResumeBillingDialog(BillingSession session, UserType currentUserType)
+    {
+        var regional = serviceProvider.GetRequiredService<IRegionalSettingsService>();
+        var sizing = serviceProvider.GetRequiredService<IWindowSizingService>();
+
+        var vm = new ResumeBillingDialogViewModel(session, currentUserType, regional);
+        var dialog = new ResumeBillingDialog(sizing, vm);
+
+        dialog.ShowDialog();
+        return vm.UserChoseResume;
+    }
 }

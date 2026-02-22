@@ -35,6 +35,15 @@
     <!-- Gap between a field label and its associated control -->
     <Thickness x:Key="FieldLabelSpacing">0,0,0,4</Thickness>
 
+    <!-- Horizontal gap between label column and input column -->
+    <Thickness x:Key="FormColumnGap">0,0,12,0</Thickness>
+
+    <!-- Top margin above action-button bar in forms -->
+    <Thickness x:Key="FormActionBarSpacing">0,12,0,0</Thickness>
+
+    <!-- Vertical gap between rows in a two-column form grid -->
+    <GridLength x:Key="FormRowSpacing">8</GridLength>
+
     <!-- Toolbar / action-bar bottom margin -->
     <Thickness x:Key="ToolbarSpacing">0,0,0,12</Thickness>
 
@@ -52,6 +61,14 @@
 
     <!-- Card / inline-form border radius -->
     <CornerRadius x:Key="CardCornerRadius">6</CornerRadius>
+
+    <!-- Enterprise form density: standard control heights -->
+    <sys:Double x:Key="ControlHeight">32</sys:Double>
+    <sys:Double x:Key="ButtonHeight">34</sys:Double>
+    <sys:Double x:Key="ButtonHeightLarge">36</sys:Double>
+
+    <!-- Smooth ease-out for focus-lock panel dimming transitions -->
+    <CubicEase x:Key="PanelDimEase" EasingMode="EaseOut"/>
 
     <!-- ═══════════════════════════════════════════════════════════════
          TYPOGRAPHY SCALE
@@ -106,25 +123,32 @@
          ═══════════════════════════════════════════════════════════════ -->
 
     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="Padding" Value="{StaticResource ControlPadding}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="h:SelectOnFocus.IsEnabled" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
     <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="Padding" Value="{StaticResource ControlPadding}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
     <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="Padding" Value="{StaticResource ControlPadding}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
     <Style TargetType="DatePicker" BasedOn="{StaticResource {x:Type DatePicker}}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="Padding" Value="4"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
@@ -165,6 +189,16 @@
         <Setter Property="Margin" Value="{StaticResource FieldLabelSpacing}"/>
     </Style>
 
+    <!-- Inline form-row label (right-aligned, vertically centered) -->
+    <Style x:Key="FormRowLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#444"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="Margin" Value="{StaticResource FormColumnGap}"/>
+    </Style>
+
     <!-- ── Muted / caption label (12 px, secondary foreground) ────── -->
     <Style x:Key="CaptionLabelStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
@@ -175,15 +209,28 @@
 
     <!-- ── Toolbar / compact action button ────────────────────────── -->
     <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+        <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Padding" Value="{StaticResource ButtonPadding}"/>
         <Setter Property="Margin" Value="0,0,6,0"/>
     </Style>
 
     <!-- ── Primary action button (Save, Submit, Complete) ─────────── -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="MinHeight" Value="{StaticResource ButtonHeightLarge}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="{StaticResource ButtonPaddingLarge}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- Secondary action button (Close, Cancel) -->
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+        <Setter Property="MinHeight" Value="{StaticResource ButtonHeightLarge}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="{StaticResource ButtonPaddingLarge}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
     </Style>
 
     <!-- ── Inline form card border ────────────────────────────────── -->
@@ -275,6 +322,7 @@
     <Style TargetType="Window">
         <Setter Property="h:KeyboardNav.IsEnabled" Value="True"/>
         <Setter Property="h:AutoFocus.IsEnabled" Value="True"/>
+        <Setter Property="h:LayoutDiagnostics.IsEnabled" Value="True"/>
     </Style>
 
 </ResourceDictionary>

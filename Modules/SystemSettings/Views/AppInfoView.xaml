@@ -5,46 +5,58 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              Loaded="OnLoaded">
-    <Grid Margin="30">
+    <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="ℹ Application Info"
-                   FontSize="20" FontWeight="Bold" Margin="0,0,0,25"/>
+        <!-- Title -->
+        <TextBlock Text="ℹ Application Info" Style="{StaticResource DialogTitleStyle}"/>
 
-        <!-- App Version -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,16">
-            <TextBlock Text="Application Version" FontSize="12" FontWeight="SemiBold"
-                       Foreground="#888" Margin="0,0,0,2"/>
-            <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold"/>
-        </StackPanel>
+        <!-- Two-column info grid -->
+        <Grid Grid.Row="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="130"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Current User -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,16">
-            <TextBlock Text="Current User" FontSize="12" FontWeight="SemiBold"
-                       Foreground="#888" Margin="0,0,0,2"/>
-            <TextBlock Text="{Binding CurrentUser}" FontSize="16" FontWeight="SemiBold"/>
-        </StackPanel>
+            <!-- Row 0: Version -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Application Version"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBlock Grid.Row="0" Grid.Column="1"
+                       Text="{Binding AppVersion}" FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
 
-        <!-- Firm Name -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,16">
-            <TextBlock Text="Firm Name" FontSize="12" FontWeight="SemiBold"
-                       Foreground="#888" Margin="0,0,0,2"/>
-            <TextBlock Text="{Binding FirmName}" FontSize="16" FontWeight="SemiBold"/>
-        </StackPanel>
+            <!-- Row 2: Current User -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Current User"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBlock Grid.Row="2" Grid.Column="1"
+                       Text="{Binding CurrentUser}" FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
 
-        <!-- Database Connection -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,16">
-            <TextBlock Text="Database Connection" FontSize="12" FontWeight="SemiBold"
-                       Foreground="#888" Margin="0,0,0,2"/>
-            <StackPanel Orientation="Horizontal">
+            <!-- Row 4: Firm Name -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Firm Name"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBlock Grid.Row="4" Grid.Column="1"
+                       Text="{Binding FirmName}" FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
+
+            <!-- Row 6: Database Connection -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Database Connection"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal"
+                        VerticalAlignment="Center">
                 <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center">
                     <Ellipse.Style>
                         <Style TargetType="Ellipse">
@@ -60,12 +72,17 @@
                         </Style>
                     </Ellipse.Style>
                 </Ellipse>
-                <TextBlock Text="{Binding DatabaseStatus}" FontSize="16" FontWeight="SemiBold"
+                <TextBlock Text="{Binding DatabaseStatus}" FontWeight="SemiBold"
                            VerticalAlignment="Center"/>
             </StackPanel>
+        </Grid>
+
+        <!-- Action button -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="🔄 Refresh Connection" Command="{Binding CheckConnectionCommand}"
-                    Padding="12,6" FontSize="12" Margin="0,8,0,0"
-                    HorizontalAlignment="Left"/>
+                    Style="{StaticResource ToolbarButtonStyle}"/>
         </StackPanel>
     </Grid>
 </UserControl>

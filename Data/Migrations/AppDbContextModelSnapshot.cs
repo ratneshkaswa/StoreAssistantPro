@@ -72,6 +72,50 @@ namespace StoreAssistantPro.Data.Migrations
                     b.ToTable("AppConfigs");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.BillingSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SerializedBillData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("SessionId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "IsActive");
+
+                    b.ToTable("BillingSessions");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -80,13 +124,17 @@ namespace StoreAssistantPro.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("HSNCode")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<bool>("IsTaxInclusive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -96,7 +144,17 @@ namespace StoreAssistantPro.Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("TaxProfileId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("HSNCode");
+
+                    b.HasIndex("TaxProfileId");
 
                     b.ToTable("Products");
                 });
@@ -108,6 +166,22 @@ namespace StoreAssistantPro.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DiscountReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("DiscountType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("IdempotencyKey")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -126,6 +200,9 @@ namespace StoreAssistantPro.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
 
                     b.HasIndex("SaleDate");
 
@@ -161,6 +238,107 @@ namespace StoreAssistantPro.Data.Migrations
                     b.ToTable("SaleItems");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.TaxMaster", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("TaxName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("TaxName")
+                        .IsUnique();
+
+                    b.ToTable("TaxMasters");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.TaxProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ProfileName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ProfileName")
+                        .IsUnique();
+
+                    b.ToTable("TaxProfiles");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.TaxProfileItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("TaxMasterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaxProfileId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaxMasterId");
+
+                    b.HasIndex("TaxProfileId", "TaxMasterId")
+                        .IsUnique();
+
+                    b.ToTable("TaxProfileItems");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.UserCredential", b =>
                 {
                     b.Property<int>("Id")
@@ -190,6 +368,27 @@ namespace StoreAssistantPro.Data.Migrations
                     b.ToTable("UserCredentials");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.BillingSession", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.UserCredential", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.Product", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.TaxProfile", "TaxProfile")
+                        .WithMany()
+                        .HasForeignKey("TaxProfileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("TaxProfile");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.SaleItem", b =>
                 {
                     b.HasOne("StoreAssistantPro.Models.Product", "Product")
@@ -209,7 +408,36 @@ namespace StoreAssistantPro.Data.Migrations
                     b.Navigation("Sale");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.TaxProfileItem", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.TaxMaster", "TaxMaster")
+                        .WithMany("ProfileItems")
+                        .HasForeignKey("TaxMasterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StoreAssistantPro.Models.TaxProfile", "TaxProfile")
+                        .WithMany("Items")
+                        .HasForeignKey("TaxProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaxMaster");
+
+                    b.Navigation("TaxProfile");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Sale", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.TaxMaster", b =>
+                {
+                    b.Navigation("ProfileItems");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.TaxProfile", b =>
                 {
                     b.Navigation("Items");
                 });

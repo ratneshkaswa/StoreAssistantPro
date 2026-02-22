@@ -1,5 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Commands.Validation;
 using StoreAssistantPro.Core.Workflows;
+using StoreAssistantPro.Modules.Billing.Commands;
+using StoreAssistantPro.Modules.Billing.Services;
 using StoreAssistantPro.Modules.Billing.Workflows;
 
 namespace StoreAssistantPro.Modules.Billing;
@@ -20,12 +24,25 @@ public static class BillingModule
 {
     public static IServiceCollection AddBillingModule(this IServiceCollection services)
     {
+        // Services
+        services.AddSingleton<IBillingModeService, BillingModeService>();
+        services.AddSingleton<IBillingSessionService, BillingSessionService>();
+        services.AddSingleton<ISmartBillingModeService, SmartBillingModeService>();
+        services.AddSingleton<IBillingSessionPersistenceService, BillingSessionPersistenceService>();
+        services.AddSingleton<IBillingAutoSaveService, BillingAutoSaveService>();
+        services.AddSingleton<IBillingResumeService, BillingResumeService>();
+        services.AddSingleton<IBillingSessionRestoreService, BillingSessionRestoreService>();
+        services.AddSingleton<IStaleBillingSessionCleanupService, StaleBillingSessionCleanupService>();
+        services.AddSingleton<IBillingSaveLockService, BillingSaveLockService>();
+
+        // Command handlers (pipeline-aware)
+        services.AddTransient<ICommandRequestHandler<SaveBillCommand, int>, SaveBillCommandHandler>();
+
+        // Command validators
+        services.AddTransient<ICommandValidator<SaveBillCommand>, SaveBillCommandValidator>();
+
         // Workflows
         services.AddSingleton<IWorkflow, BillingWorkflow>();
-
-        // TODO: Register billing services, ViewModels, and Views when implemented.
-        // services.AddSingleton<IBillingService, BillingService>();
-        // services.AddTransient<BillingViewModel>();
 
         return services;
     }

@@ -72,13 +72,14 @@ public partial class UserManagementViewModel(
             .Rule(InputValidator.AreEqual(NewPin, ConfirmPin), "PINs do not match.")))
             return;
 
+        var user = SelectedUser!;
         var result = await commandBus.SendAsync(new ChangePinCommand(
-            SelectedUser.UserType, NewPin,
-            SelectedUser.UserType == UserType.Admin ? MasterPin : null));
+            user.UserType, NewPin,
+            user.UserType == UserType.Admin ? MasterPin : null));
 
         if (result.Succeeded)
         {
-            SuccessMessage = $"{SelectedUser.UserType} PIN changed successfully.";
+            SuccessMessage = $"{user.UserType} PIN changed successfully.";
             NewPin = string.Empty;
             ConfirmPin = string.Empty;
             MasterPin = string.Empty;
@@ -86,7 +87,7 @@ public partial class UserManagementViewModel(
         else
         {
             ErrorMessage = result.ErrorMessage ?? "PIN change failed.";
-            if (SelectedUser.UserType == UserType.Admin)
+            if (user.UserType == UserType.Admin)
                 MasterPin = string.Empty;
         }
     }

@@ -5,7 +5,7 @@ using StoreAssistantPro.Modules.MainShell.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
-public partial class DashboardViewModel(IDashboardService dashboardService) : BaseViewModel
+public partial class MainWorkspaceViewModel(IDashboardService dashboardService) : BaseViewModel
 {
     [ObservableProperty]
     public partial int TotalProducts { get; set; }
@@ -20,7 +20,7 @@ public partial class DashboardViewModel(IDashboardService dashboardService) : Ba
     public partial int TodaysTransactions { get; set; }
 
     [RelayCommand]
-    private Task LoadDashboardAsync() => RunLoadAsync(async _ =>
+    private Task LoadMainWorkspaceAsync() => RunLoadAsync(async _ =>
     {
         var summary = await dashboardService.GetSummaryAsync();
 

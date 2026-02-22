@@ -178,65 +178,56 @@ Every dialog inherits `BaseDialogWindow`. Sizing is controlled by
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
         Title="{Name}">
-    <Grid Margin="25">
+    <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>   <!-- Dialog title -->
-            <RowDefinition Height="*"/>      <!-- Scrollable body -->
-            <RowDefinition Height="Auto"/>   <!-- Validation -->
+            <RowDefinition Height="*"/>      <!-- Form fields -->
             <RowDefinition Height="Auto"/>   <!-- Action buttons -->
         </Grid.RowDefinitions>
 
         <!-- ── Row 0: Title ── -->
-        <TextBlock Grid.Row="0"
-                   Text="Dialog Title"
-                   FontSize="20" FontWeight="Bold"
-                   Margin="0,0,0,15"/>
+        <TextBlock Text="Dialog Title" Style="{StaticResource DialogTitleStyle}"/>
 
-        <!-- ── Row 1: Body in ScrollViewer ── -->
-        <ScrollViewer Grid.Row="1"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <StackPanel>
-                <StackPanel Margin="0,0,0,12">
-                    <TextBlock Text="Field Label *"
-                               FontSize="12" FontWeight="SemiBold"
-                               Margin="0,0,0,3"/>
-                    <TextBox Text="{Binding FieldValue,
-                                 UpdateSourceTrigger=PropertyChanged}"
-                             Padding="6" MaxLength="200"/>
-                </StackPanel>
+        <!-- ── Row 1: Form body — NO ScrollViewer ── -->
+        <StackPanel Grid.Row="1">
+            <Grid Margin="{StaticResource FieldGroupSpacing}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Field Label *"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Grid.Row="1"
+                         Text="{Binding FieldValue, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="200"/>
+            </Grid>
 
-                <StackPanel Margin="0,0,0,12">
-                    <TextBlock Text="Multiline Field"
-                               FontSize="12" FontWeight="SemiBold"
-                               Margin="0,0,0,3"/>
-                    <TextBox Text="{Binding MultilineValue,
-                                 UpdateSourceTrigger=PropertyChanged}"
-                             Padding="6" MaxLength="500"
-                             TextWrapping="Wrap" AcceptsReturn="True"
-                             MinHeight="50"
-                             VerticalScrollBarVisibility="Auto"/>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+            <Grid Margin="{StaticResource FieldGroupSpacing}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Multiline Field"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Grid.Row="1"
+                         Text="{Binding MultilineValue, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="500" TextWrapping="Wrap"
+                         AcceptsReturn="True" Height="50"
+                         VerticalScrollBarVisibility="Auto"/>
+            </Grid>
 
-        <!-- ── Row 2: Validation ── -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,5">
-            <TextBlock Text="{Binding ErrorMessage}"
-                       Foreground="Red" TextWrapping="Wrap"/>
-            <TextBlock Text="{Binding SuccessMessage}"
-                       Foreground="#4CAF50" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
         </StackPanel>
 
-        <!-- ── Row 3: Actions ── -->
-        <StackPanel Grid.Row="3"
-                    Orientation="Horizontal"
+        <!-- ── Row 2: Actions — pinned to bottom ── -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="💾 Save" Command="{Binding SaveCommand}"
-                    Padding="16,8" FontSize="13" FontWeight="SemiBold"
-                    Margin="0,0,8,0"/>
+                    Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
             <Button Content="Close" IsCancel="True"
-                    Padding="16,8" FontSize="13"/>
+                    Padding="{StaticResource ButtonPaddingLarge}"
+                    FontSize="{StaticResource FontSizeBody}"/>
         </StackPanel>
     </Grid>
 </core:BaseDialogWindow>
@@ -244,9 +235,10 @@ Every dialog inherits `BaseDialogWindow`. Sizing is controlled by
 
 ### Why this works
 
-- The `ScrollViewer` in Row 1 (`*`) ensures the form body scrolls when content exceeds the fixed dialog height — fields are never cropped.
-- Action buttons are pinned to the bottom via the `Auto`-sized Row 3.
-- `Margin="25"` matches the existing dialog padding convention.
+- The `*` row absorbs remaining space — form fields sit at the top, buttons stay pinned to the bottom.
+- Error/success messages are inside the `*` region — even multi-line validation errors won't push buttons off-screen.
+- Fixed-size dialogs (`BaseDialogWindow`) must never wrap their entire content in a `ScrollViewer`. The window's dimensions are explicitly set in code-behind to fit the content.
+- Only `TextBox` controls with `AcceptsReturn="True"` may have their own `VerticalScrollBarVisibility="Auto"` for internal text overflow.
 
 ---
 
@@ -260,13 +252,30 @@ Every dialog inherits `BaseDialogWindow`. Sizing is controlled by
         <ColumnDefinition Width="Auto" MinWidth="80"/>  <!-- Labels -->
         <ColumnDefinition Width="*"/>                    <!-- Inputs stretch -->
     </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+        <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
 
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Name"
-               VerticalAlignment="Center" Margin="0,0,10,8"/>
+               Style="{StaticResource FormRowLabelStyle}"/>
     <TextBox   Grid.Row="0" Grid.Column="1"
-               Text="{Binding Name}" Padding="6" Margin="0,0,0,8"/>
+               Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+
+    <TextBlock Grid.Row="2" Grid.Column="0" Text="Price"
+               Style="{StaticResource FormRowLabelStyle}"/>
+    <TextBox   Grid.Row="2" Grid.Column="1"
+               Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
 </Grid>
 ```
+
+**Rules:**
+- Labels use `FormRowLabelStyle` (provides font size, vertical alignment, right margin via `FormColumnGap`).
+- Spacer rows use `FormRowSpacing` (`GridLength`, 8px) — never use `Margin` between rows.
+- Action bar uses `FormActionBarSpacing` (`Thickness`, 12px top) and `InlineControlSpacing` between buttons.
+- Primary button: `PrimaryButtonStyle`. Secondary (Close/Cancel): `SecondaryButtonStyle`.
+- Outer padding: `DialogPadding` for dialogs/tabs, `PagePadding` for full pages.
 
 ### Multi-column data entry (equal weight)
 
@@ -582,4 +591,86 @@ Use this as the starting point for any new module view.
 - [ ] Inline forms use `Grid` with star/auto columns, not deeply nested `StackPanel`
 - [ ] `MinWidth`/`MinHeight` set on inputs and data controls
 - [ ] Dialogs inherit `BaseDialogWindow` — no sizing attributes in XAML
-- [ ] `Margin="20"` on root Grid for pages, `Margin="25"` for dialogs
+- [ ] Margin uses `{StaticResource DialogPadding}` for dialogs, `{StaticResource PagePadding}` for pages
+- [ ] **No `ScrollViewer` wrapping entire window/dialog** — see Enterprise Scroll Policy
+- [ ] `ScrollViewer` only wraps `DataGrid`, dynamic item lists, or report content
+
+---
+
+## Enterprise Scroll Policy
+
+> **Rule:** `ScrollViewer` must never wrap an entire Window, Dialog, or
+> UserControl root.  It is only permitted around **data-driven content**
+> that may grow beyond its container.
+
+### ✅ Allowed — ScrollViewer wraps data collections
+
+| Context | Example |
+|---|---|
+| `DataGrid` overflow | `<ScrollViewer Grid.Row="2"><DataGrid …/></ScrollViewer>` |
+| Long item lists | `<ScrollViewer><ItemsControl ItemsSource="{Binding Items}" …/></ScrollViewer>` |
+| Report / detail pane | `<ScrollViewer><StackPanel><!-- dynamic line items --></StackPanel></ScrollViewer>` |
+| Dynamic settings tabs | `<ScrollViewer><ContentControl Content="{Binding CurrentView}"/></ScrollViewer>` |
+| Multi-line `TextBox` | `<TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>` (internal only) |
+
+### ❌ Disallowed — ScrollViewer wraps entire window
+
+| Window type | Correct approach |
+|---|---|
+| Login / PIN screens | Fixed `Grid` with `*`-row for keypad area |
+| First-time setup | Fixed `Grid` — all fields fit within sized window |
+| Firm / User management | 3-row `Grid`: `Auto` title, `*` form, `Auto` buttons |
+| Settings dialogs | Split-panel: sidebar nav + `ScrollViewer` on content pane only |
+
+### Pattern: Fixed-size dialog (no scroll)
+
+```xml
+<Grid Margin="{StaticResource DialogPadding}">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>   <!-- Title -->
+        <RowDefinition Height="*"/>      <!-- Form body -->
+        <RowDefinition Height="Auto"/>   <!-- Buttons -->
+    </Grid.RowDefinitions>
+
+    <TextBlock Style="{StaticResource DialogTitleStyle}" …/>
+
+    <StackPanel Grid.Row="1">
+        <!-- fields + error messages -->
+    </StackPanel>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal"
+                HorizontalAlignment="Right">
+        <!-- action buttons -->
+    </StackPanel>
+</Grid>
+```
+
+### Pattern: Page with scrollable data area
+
+```xml
+<Grid Margin="{StaticResource PagePadding}">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>   <!-- Page header -->
+        <RowDefinition Height="Auto"/>   <!-- Toolbar / filters -->
+        <RowDefinition Height="*"/>      <!-- DataGrid (scrolls internally) -->
+        <RowDefinition Height="Auto"/>   <!-- Status bar -->
+    </Grid.RowDefinitions>
+
+    <!-- Row 2: DataGrid fills remaining space and scrolls internally -->
+    <DataGrid Grid.Row="2" ItemsSource="{Binding Items}" …/>
+</Grid>
+```
+
+### Current compliance audit
+
+| File | ScrollViewer | Status |
+|---|---|---|
+| `UnifiedLoginWindow.xaml` | None | ✅ |
+| `FirstTimeSetupWindow.xaml` | None | ✅ |
+| `FirmManagementWindow.xaml` | None | ✅ |
+| `UserManagementWindow.xaml` | None | ✅ |
+| `DashboardView.xaml` | None | ✅ |
+| `MainWindow.xaml` | None | ✅ |
+| `ProductsView.xaml` | Line 142: wraps DataGrid + inline forms | ✅ Data area |
+| `SalesView.xaml` | Line 77: cart DataGrid; Line 162: sale detail | ✅ Data area |
+| `SystemSettingsWindow.xaml` | Line 65: dynamic settings content pane | ✅ Content pane |

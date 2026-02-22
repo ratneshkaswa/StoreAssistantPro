@@ -4,22 +4,64 @@ using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Sales.Events;
+using StoreAssistantPro.Modules.Sales.Models;
 using StoreAssistantPro.Modules.Sales.Services;
 
 namespace StoreAssistantPro.Modules.Sales.Commands;
 
+/// <summary>
+/// Completes a sale via the online or offline path depending on
+/// current connectivity.
+/// <para>
+/// <b>Online:</b> Builds a <see cref="Sale"/> entity and persists it
+/// through <see cref="ISalesService.CreateSaleAsync"/> (transaction-safe,
+/// idempotent). Publishes <see cref="SaleCompletedEvent"/>.
+/// </para>
+/// <para>
+/// <b>Offline:</b> Builds a <see cref="CompleteSaleSnapshot"/> and
+/// enqueues it in <see cref="IOfflineBillingQueue"/>. Publishes
+/// <see cref="SaleQueuedOfflineEvent"/>. The bill will be synced to
+/// the server when connectivity is restored.
+/// </para>
+/// <para>
+/// The UI flow is identical in both cases — the caller receives
+/// <see cref="CommandResult.Success"/> and the sale form resets.
+/// </para>
+/// </summary>
 public class CompleteSaleHandler(
     ISalesService salesService,
     IEventBus eventBus,
-    IRegionalSettingsService regional) : BaseCommandHandler<CompleteSaleCommand>
+    IBillCalculationService billCalculation,
+    IRegionalSettingsService regional,
+    IOfflineModeService offlineMode,
+    IOfflineBillingQueue offlineQueue) : BaseCommandHandler<CompleteSaleCommand>
 {
     protected override async Task<CommandResult> ExecuteAsync(CompleteSaleCommand command)
     {
+        var lineSubtotal = command.Items.Sum(i => i.UnitPrice * i.Quantity);
+        var summary = billCalculation.Calculate(lineSubtotal, 0m, command.Discount);
+
+        if (offlineMode.IsOffline)
+            return await EnqueueOfflineAsync(command, summary);
+
+        return await SaveOnlineAsync(command, summary);
+    }
+
+    // ── Online path ────────────────────────────────────────────────
+
+    private async Task<CommandResult> SaveOnlineAsync(
+        CompleteSaleCommand command, BillSummary summary)
+    {
         var sale = new Sale
         {
+            IdempotencyKey = command.IdempotencyKey,
             SaleDate = regional.Now,
-            TotalAmount = command.TotalAmount,
+            TotalAmount = summary.FinalAmount,
             PaymentMethod = command.PaymentMethod,
+            DiscountType = command.Discount.Type,
+            DiscountValue = command.Discount.Value,
+            DiscountAmount = summary.DiscountAmount,
+            DiscountReason = command.Discount.Reason,
             Items = command.Items.Select(i => new SaleItem
             {
                 ProductId = i.ProductId,
@@ -28,8 +70,50 @@ public class CompleteSaleHandler(
             }).ToList()
         };
 
-        var saleId = await salesService.CreateSaleAsync(sale);
-        await eventBus.PublishAsync(new SaleCompletedEvent(saleId, sale.TotalAmount));
+        var result = await salesService.CreateSaleAsync(sale);
+
+        if (!result.Succeeded)
+        {
+            return result.IsConcurrencyConflict
+                ? CommandResult.Failure("Data was modified by another user. Please try again.")
+                : CommandResult.Failure(result.ErrorMessage ?? "Sale failed.");
+        }
+
+        await eventBus.PublishAsync(new SaleCompletedEvent(result.Value, sale.TotalAmount));
+        return CommandResult.Success();
+    }
+
+    // ── Offline path ───────────────────────────────────────────────
+
+    private async Task<CommandResult> EnqueueOfflineAsync(
+        CompleteSaleCommand command, BillSummary summary)
+    {
+        var bill = new OfflineBill
+        {
+            IdempotencyKey = command.IdempotencyKey,
+            CreatedTime = regional.Now,
+            Status = OfflineBillStatus.PendingSync,
+            Sale = new CompleteSaleSnapshot
+            {
+                TotalAmount = summary.FinalAmount,
+                PaymentMethod = command.PaymentMethod,
+                SaleDate = regional.Now,
+                DiscountType = command.Discount.Type,
+                DiscountValue = command.Discount.Value,
+                DiscountAmount = summary.DiscountAmount,
+                DiscountReason = command.Discount.Reason,
+                Items = command.Items.Select(i => new SaleItemSnapshot
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice
+                }).ToList()
+            }
+        };
+
+        await offlineQueue.EnqueueAsync(bill);
+        await eventBus.PublishAsync(
+            new SaleQueuedOfflineEvent(command.IdempotencyKey, summary.FinalAmount));
         return CommandResult.Success();
     }
 }

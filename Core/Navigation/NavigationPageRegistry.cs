@@ -18,6 +18,17 @@ public class NavigationPageRegistry
         return this;
     }
 
+    /// <summary>
+    /// Maps a page key to a feature flag. Navigation to this page is
+    /// blocked when <see cref="Core.Features.IFeatureToggleService.IsEnabled"/>
+    /// returns <c>false</c> for the given flag.
+    /// </summary>
+    public NavigationPageRegistry RequireFeature(string pageKey, string featureFlag)
+    {
+        _registrations.Add(nav => nav.MapFeature(pageKey, featureFlag));
+        return this;
+    }
+
     public void ApplyTo(INavigationService navigationService)
     {
         foreach (var registration in _registrations)

@@ -9,14 +9,14 @@ namespace StoreAssistantPro.Modules.MainShell;
 
 public static class MainShellModule
 {
-    public const string DashboardPage = "Dashboard";
+    public const string MainWorkspacePage = "MainWorkspace";
 
     public static IServiceCollection AddMainShellModule(
         this IServiceCollection services,
         NavigationPageRegistry pageRegistry)
     {
         // Page registration (string-key → ViewModel mapping)
-        pageRegistry.Map<DashboardViewModel>(DashboardPage);
+        pageRegistry.Map<MainWorkspaceViewModel>(MainWorkspacePage);
 
         // Services
         services.AddSingleton<IDialogService, DialogService>();
@@ -27,7 +27,7 @@ public static class MainShellModule
 
         // ViewModels
         services.AddTransient<MainViewModel>();
-        services.AddTransient<DashboardViewModel>();
+        services.AddTransient<MainWorkspaceViewModel>();
 
         // Views
         services.AddTransient<MainWindow>();

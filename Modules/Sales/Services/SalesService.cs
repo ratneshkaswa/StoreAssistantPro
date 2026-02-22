@@ -3,12 +3,14 @@ using StoreAssistantPro.Core.Data;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Services;
 
 namespace StoreAssistantPro.Modules.Sales.Services;
 
 public class SalesService(
     IDbContextFactory<AppDbContext> contextFactory,
-    ITransactionHelper transaction,
+    ITransactionSafetyService transactionSafety,
+    IBillingSaveLockService saveLock,
     IPerformanceMonitor perf) : ISalesService
 {
     public async Task<PagedResult<Sale>> GetPagedAsync(
@@ -69,39 +71,75 @@ public class SalesService(
             .ConfigureAwait(false);
     }
 
-    public async Task<int> CreateSaleAsync(Sale sale, CancellationToken ct = default)
+    public async Task<TransactionResult<int>> CreateSaleAsync(Sale sale, CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("SalesService.CreateSaleAsync");
-        return await transaction.ExecuteInTransactionAsync(async context =>
+
+        // Serialise billing saves — only one save runs at a time.
+        await using var guard = await saveLock.AcquireAsync(ct).ConfigureAwait(false);
+
+        // ── Pre-transaction: build entities (no DB, no locks) ──────
+        // Prepare detached SaleItem list and the Sale header before
+        // entering the transaction so that object allocation, LINQ
+        // projections, and validation that doesn't need a consistent
+        // DB snapshot all happen outside the lock window.
+        var saleItems = sale.Items.Select(i => new SaleItem
         {
-            var saleItems = new List<SaleItem>();
-            foreach (var item in sale.Items)
+            ProductId = i.ProductId,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice
+        }).ToList();
+
+        var newSale = new Sale
+        {
+            IdempotencyKey = sale.IdempotencyKey,
+            SaleDate = sale.SaleDate,
+            TotalAmount = sale.TotalAmount,
+            PaymentMethod = sale.PaymentMethod,
+            DiscountType = sale.DiscountType,
+            DiscountValue = sale.DiscountValue,
+            DiscountAmount = sale.DiscountAmount,
+            DiscountReason = sale.DiscountReason,
+            Items = saleItems
+        };
+
+        // ── Transaction: only DB reads + writes ────────────────────
+        return await transactionSafety.ExecuteSafeAsync(async context =>
+        {
+            // 0. Idempotency guard — must be inside transaction to
+            //    prevent TOCTOU race with the subsequent insert.
+            var existing = await context.Sales
+                .AsNoTracking()
+                .Where(s => s.IdempotencyKey == sale.IdempotencyKey)
+                .Select(s => (int?)s.Id)
+                .FirstOrDefaultAsync(ct)
+                .ConfigureAwait(false);
+
+            if (existing is not null)
+                return existing.Value;
+
+            // 1. Validate stock & deduct quantities — each FindAsync
+            //    takes a row-level lock (or snapshot read) that is
+            //    held only until commit.
+            foreach (var item in saleItems)
             {
                 var product = await context.Products.FindAsync([item.ProductId], ct)
-                    ?? throw new InvalidOperationException($"Product {item.ProductId} not found.");
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException(
+                        $"Product {item.ProductId} not found.");
 
                 if (product.Quantity < item.Quantity)
                     throw new InvalidOperationException(
-                        $"Insufficient stock for '{product.Name}'. Available: {product.Quantity}.");
+                        $"Insufficient stock for '{product.Name}'. " +
+                        $"Available: {product.Quantity}.");
 
                 product.Quantity -= item.Quantity;
-                saleItems.Add(new SaleItem
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice
-                });
             }
 
-            var newSale = new Sale
-            {
-                SaleDate = sale.SaleDate,
-                TotalAmount = sale.TotalAmount,
-                PaymentMethod = sale.PaymentMethod,
-                Items = saleItems
-            };
+            // 2. Attach pre-built Sale + Items (no allocation here)
             context.Sales.Add(newSale);
 
+            // SaveChanges + Commit handled by TransactionSafetyService
             return newSale.Id;
         }).ConfigureAwait(false);
     }

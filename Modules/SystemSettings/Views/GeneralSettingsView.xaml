@@ -5,45 +5,58 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              Loaded="OnLoaded">
-    <Grid Margin="30">
+    <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="🏪 General Settings"
-                   FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+        <!-- Title -->
+        <TextBlock Text="🏪 General Settings" Style="{StaticResource DialogTitleStyle}"/>
 
-        <!-- Firm Name -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,14" MaxWidth="400" HorizontalAlignment="Left">
-            <TextBlock Text="Firm Name *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <TextBox Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
-                     Padding="8" FontSize="13" MaxLength="200"/>
-        </StackPanel>
+        <!-- Two-column form grid -->
+        <Grid Grid.Row="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="120"/>
+                <ColumnDefinition Width="*" MaxWidth="400"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Default Currency -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,14" MaxWidth="200" HorizontalAlignment="Left">
-            <TextBlock Text="Default Currency" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <ComboBox ItemsSource="{Binding AvailableCurrencies}"
-                      SelectedItem="{Binding DefaultCurrency}"
-                      Padding="8" FontSize="13"/>
-        </StackPanel>
+            <!-- Row 0: Firm Name -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Firm Name *"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBox Grid.Row="0" Grid.Column="1"
+                     Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="200"/>
 
-        <!-- Messages -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,10">
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap"/>
-            <TextBlock Text="{Binding SuccessMessage}" Foreground="#4CAF50" TextWrapping="Wrap"/>
-        </StackPanel>
+            <!-- Row 2: Currency -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Currency"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <ComboBox Grid.Row="2" Grid.Column="1"
+                      ItemsSource="{Binding AvailableCurrencies}"
+                      SelectedItem="{Binding DefaultCurrency}"/>
 
-        <!-- Save Button -->
-        <StackPanel Grid.Row="5" Orientation="Horizontal">
-            <Button Content="💾 Save Settings" Command="{Binding SaveCommand}"
-                    Padding="20,10" FontSize="13" FontWeight="SemiBold"/>
+            <!-- Row 4: Messages -->
+            <StackPanel Grid.Row="4" Grid.Column="1">
+                <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+                <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Action button — pinned to bottom -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="💾 Save Settings"
+                    Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
         </StackPanel>
     </Grid>
 </UserControl>

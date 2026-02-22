@@ -74,8 +74,8 @@
                                  Width="200"/>
                     </StackPanel>
                     <StackPanel Margin="0,0,15,0">
-                        <TextBlock Text="Price" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox Text="{Binding NewProductPrice, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBlock Text="Sale Price" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewProductSalePrice, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsDecimalOnly="True"
                                  Width="100"/>
                     </StackPanel>
@@ -84,6 +84,13 @@
                         <TextBox Text="{Binding NewProductQuantity, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsIntegerOnly="True"
                                  Width="80"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Tax Profile" Style="{StaticResource FieldLabelStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableTaxProfiles}"
+                                  SelectedItem="{Binding NewProductTaxProfile}"
+                                  DisplayMemberPath="ProfileName"
+                                  Width="150"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
@@ -112,8 +119,8 @@
                                  Width="200"/>
                     </StackPanel>
                     <StackPanel Margin="0,0,15,0">
-                        <TextBlock Text="Price" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox Text="{Binding EditProductPrice, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBlock Text="Sale Price" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EditProductSalePrice, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsDecimalOnly="True"
                                  Width="100"/>
                     </StackPanel>
@@ -122,6 +129,13 @@
                         <TextBox Text="{Binding EditProductQuantity, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsIntegerOnly="True"
                                  Width="80"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,15,0">
+                        <TextBlock Text="Tax Profile" Style="{StaticResource FieldLabelStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableTaxProfiles}"
+                                  SelectedItem="{Binding EditProductTaxProfile}"
+                                  DisplayMemberPath="ProfileName"
+                                  Width="150"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
@@ -157,9 +171,10 @@
                           SelectedItem="{Binding SelectedProduct}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="300"/>
-                        <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat=C}" Width="120"/>
-                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="100"/>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Sale Price" Binding="{Binding SalePrice, StringFormat=C}" Width="110"/>
+                        <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="60"/>
+                        <DataGridTextColumn Header="Tax Profile" Binding="{Binding TaxProfile.ProfileName}" Width="130"/>
                     </DataGrid.Columns>
                 </DataGrid>
 

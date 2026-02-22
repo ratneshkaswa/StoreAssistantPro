@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 
@@ -23,12 +24,12 @@ public interface IQuickActionService
     IReadOnlyList<QuickAction> GetActions();
 
     /// <summary>
-    /// Returns actions that are visible and permitted for <paramref name="role"/>,
-    /// ordered by <see cref="QuickAction.SortOrder"/>.
-    /// Actions with an empty <see cref="QuickAction.RequiredRoles"/> list are
-    /// available to all roles.
+    /// Returns actions that are visible, permitted for <paramref name="role"/>,
+    /// and whose <see cref="QuickAction.RequiredFeature"/> (if set) is enabled
+    /// in <paramref name="features"/>.
+    /// Ordered by <see cref="QuickAction.SortOrder"/>.
     /// </summary>
-    IReadOnlyList<QuickAction> GetVisibleActions(UserType role);
+    IReadOnlyList<QuickAction> GetVisibleActions(UserType role, IFeatureToggleService features);
 
     /// <summary>
     /// Sets <see cref="QuickAction.IsVisible"/> for the action matching

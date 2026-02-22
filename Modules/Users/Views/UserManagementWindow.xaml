@@ -5,66 +5,93 @@
         Title="User Management"
         ConfirmCommand="{Binding ChangePinCommand}"
         Loaded="OnLoaded">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-    <Grid Margin="25">
+    <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="👤 User Management" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+        <!-- Title -->
+        <TextBlock Text="👤 User Management" Style="{StaticResource DialogTitleStyle}"/>
 
-        <!-- User List -->
-        <GroupBox Grid.Row="1" Header="Users" Margin="0,0,0,15" Padding="10">
-            <DataGrid ItemsSource="{Binding Users}"
-                      SelectedItem="{Binding SelectedUser}"
-                      AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single" MaxHeight="100"
-                      HeadersVisibility="Column" CanUserAddRows="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Role" Binding="{Binding UserType}" Width="*"/>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </GroupBox>
+        <!-- User list — fills available space -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Users}"
+                  SelectedItem="{Binding SelectedUser}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column" CanUserAddRows="False"
+                  Margin="0,0,0,8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Role" Binding="{Binding UserType}" Width="*"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
-        <!-- Change PIN Form -->
-        <GroupBox Grid.Row="2" Header="Change PIN" Margin="0,0,0,10" Padding="10">
-            <StackPanel>
-                <StackPanel Margin="0,0,0,8">
-                    <TextBlock Text="New PIN (4 digits)" FontSize="12" Margin="0,0,0,3"/>
-                    <PasswordBox x:Name="NewPinBox" MaxLength="4" Padding="6"
-                                 PasswordChanged="OnNewPinChanged"/>
-                </StackPanel>
+        <!-- Change PIN — two-column form -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="110"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                <StackPanel Margin="0,0,0,8">
-                    <TextBlock Text="Confirm PIN" FontSize="12" Margin="0,0,0,3"/>
-                    <PasswordBox x:Name="ConfirmPinBox" MaxLength="4" Padding="6"
-                                 PasswordChanged="OnConfirmPinChanged"/>
-                </StackPanel>
+            <!-- Row 0: Section header -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="Change PIN" Style="{StaticResource SectionHeaderStyle}"
+                       Margin="0"/>
 
-                <StackPanel Margin="0,0,0,8"
-                            Visibility="{Binding IsMasterPinRequired, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="Master Password (required for Admin)" FontSize="12"
-                               Margin="0,0,0,3" Foreground="#D32F2F" FontWeight="SemiBold"/>
-                    <PasswordBox x:Name="MasterPinBox" MaxLength="6" Padding="6"
-                                 PasswordChanged="OnMasterPinChanged"/>
-                </StackPanel>
+            <!-- Row 2: New PIN -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="New PIN (4 digits)"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <PasswordBox Grid.Row="2" Grid.Column="1"
+                         x:Name="NewPinBox" MaxLength="4"
+                         PasswordChanged="OnNewPinChanged"/>
 
-                <StackPanel Margin="0,0,0,5">
-                    <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap"/>
-                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#4CAF50" TextWrapping="Wrap"/>
-                </StackPanel>
+            <!-- Row 4: Confirm PIN -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Confirm PIN"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <PasswordBox Grid.Row="4" Grid.Column="1"
+                         x:Name="ConfirmPinBox" MaxLength="4"
+                         PasswordChanged="OnConfirmPinChanged"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0">
-                    <Button Content="🔑 Change PIN" Command="{Binding ChangePinCommand}"
-                            Padding="16,8" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,0"/>
-                    <Button Content="Close" IsCancel="True"
-                            Padding="16,8" FontSize="13"/>
-                </StackPanel>
-            </StackPanel>
-        </GroupBox>
+            <!-- Row 6: Master password (conditional) -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Master Password *"
+                       Style="{StaticResource FormRowLabelStyle}"
+                       Foreground="#D32F2F"
+                       Visibility="{Binding IsMasterPinRequired, Converter={StaticResource BoolToVisibility}}"/>
+            <PasswordBox Grid.Row="6" Grid.Column="1"
+                         x:Name="MasterPinBox" MaxLength="6"
+                         PasswordChanged="OnMasterPinChanged"
+                         Visibility="{Binding IsMasterPinRequired, Converter={StaticResource BoolToVisibility}}"/>
+        </Grid>
+
+        <!-- Messages -->
+        <StackPanel Grid.Row="3" Margin="0,4,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
+        </StackPanel>
+
+        <!-- Action buttons — pinned to bottom -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="🔑 Change PIN" Command="{Binding ChangePinCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </StackPanel>
     </Grid>
-    </ScrollViewer>
 </core:BaseDialogWindow>

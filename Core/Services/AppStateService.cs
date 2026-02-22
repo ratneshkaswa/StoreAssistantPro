@@ -14,7 +14,6 @@ namespace StoreAssistantPro.Core.Services;
 /// <para>
 /// <b>Future expansion points:</b>
 /// <list type="bullet">
-///   <item>Add <c>CurrentBillingSession</c> typed to a <c>BillingSession</c> model when billing is implemented.</item>
 ///   <item>Persist notifications to the database for cross-session history.</item>
 ///   <item>Add <c>ThemeName</c> / <c>CultureInfo</c> for runtime theming and localization.</item>
 ///   <item>Add <c>ConnectedDevices</c> collection for barcode scanners, receipt printers, etc.</item>
@@ -54,7 +53,16 @@ public partial class AppStateService : ObservableObject, IAppStateService
     public partial string CurrentTime { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial object? CurrentBillingSession { get; set; }
+    public partial BillingSessionState CurrentBillingSession { get; set; }
+
+    [ObservableProperty]
+    public partial OperationalMode CurrentMode { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsOfflineMode { get; set; }
+
+    [ObservableProperty]
+    public partial DateTime? LastConnectionCheck { get; set; }
 
     public ObservableCollection<AppNotification> Notifications { get; }
 
@@ -84,8 +92,17 @@ public partial class AppStateService : ObservableObject, IAppStateService
         }
     }
 
-    public void SetBillingSession(object? session) =>
+    public void SetBillingSession(BillingSessionState session) =>
         CurrentBillingSession = session;
+
+    public void SetMode(OperationalMode mode) =>
+        CurrentMode = mode;
+
+    public void SetConnectivity(bool isOffline, DateTime checkTime)
+    {
+        IsOfflineMode = isOffline;
+        LastConnectionCheck = checkTime;
+    }
 
     public void AddNotification(AppNotification notification) =>
         Notifications.Add(notification);
@@ -104,7 +121,10 @@ public partial class AppStateService : ObservableObject, IAppStateService
         FirmName = string.Empty;
         CurrentUserType = default;
         IsLoggedIn = false;
-        CurrentBillingSession = null;
+        CurrentMode = OperationalMode.Management;
+        CurrentBillingSession = BillingSessionState.None;
+        IsOfflineMode = false;
+        LastConnectionCheck = null;
         Notifications.Clear();
     }
 }

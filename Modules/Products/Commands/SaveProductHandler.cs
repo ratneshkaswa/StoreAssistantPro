@@ -13,8 +13,9 @@ public class SaveProductHandler(IProductService productService)
         var product = new Product
         {
             Name = command.Name,
-            Price = command.Price,
-            Quantity = command.Quantity
+            SalePrice = command.SalePrice,
+            Quantity = command.Quantity,
+            TaxProfileId = command.TaxProfileId
         };
 
         await productService.AddAsync(product);

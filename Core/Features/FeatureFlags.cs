@@ -13,4 +13,7 @@ public static class FeatureFlags
     public const string SystemSettings = "SystemSettings";
     public const string Reports = "Reports";
     public const string AdvancedBilling = "AdvancedBilling";
+    public const string UserManagement = "UserManagement";
+    public const string FirmManagement = "FirmManagement";
+    public const string TaxManagement = "TaxManagement";
 }

@@ -9,12 +9,14 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Products.Commands;
 using StoreAssistantPro.Modules.Products.Services;
+using StoreAssistantPro.Modules.Tax.Services;
 using StoreAssistantPro.Core.Session;
 
 namespace StoreAssistantPro.Modules.Products.ViewModels;
 
 public partial class ProductsViewModel(
     IProductService productService,
+    ITaxService taxService,
     ISessionService sessionService,
     IDialogService dialogService,
     IMasterPinValidator masterPinValidator,
@@ -73,7 +75,7 @@ public partial class ProductsViewModel(
     public partial string NewProductName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial decimal NewProductPrice { get; set; }
+    public partial decimal NewProductSalePrice { get; set; }
 
     [ObservableProperty]
     public partial int NewProductQuantity { get; set; }
@@ -88,10 +90,21 @@ public partial class ProductsViewModel(
     public partial string EditProductName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial decimal EditProductPrice { get; set; }
+    public partial decimal EditProductSalePrice { get; set; }
 
     [ObservableProperty]
     public partial int EditProductQuantity { get; set; }
+
+    // ── Tax profile selection ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<TaxProfile> AvailableTaxProfiles { get; set; } = [];
+
+    [ObservableProperty]
+    public partial TaxProfile? NewProductTaxProfile { get; set; }
+
+    [ObservableProperty]
+    public partial TaxProfile? EditProductTaxProfile { get; set; }
 
     // ── Search (server-side with debounce) ──
 
@@ -148,7 +161,7 @@ public partial class ProductsViewModel(
     }
 
     [RelayCommand]
-    private void ShowAddForm()
+    private async Task ShowAddFormAsync()
     {
         if (!CanManageProducts)
         {
@@ -157,9 +170,11 @@ public partial class ProductsViewModel(
         }
 
         ErrorMessage = string.Empty;
+        await LoadTaxProfilesAsync();
         NewProductName = string.Empty;
-        NewProductPrice = 0;
+        NewProductSalePrice = 0;
         NewProductQuantity = 1;
+        NewProductTaxProfile = AvailableTaxProfiles.FirstOrDefault(p => p.IsDefault);
         IsEditFormVisible = false;
         IsAddFormVisible = true;
     }
@@ -175,12 +190,13 @@ public partial class ProductsViewModel(
     {
         if (!Validate(v => v
             .Rule(InputValidator.IsRequired(NewProductName), "Product name is required.")
-            .Rule(InputValidator.IsNonNegative(NewProductPrice), "Price cannot be negative.")
+            .Rule(InputValidator.IsNonNegative(NewProductSalePrice), "Sale price cannot be negative.")
             .Rule(InputValidator.IsNonNegative(NewProductQuantity), "Quantity cannot be negative.")))
             return;
 
         var result = await commandBus.SendAsync(new SaveProductCommand(
-            NewProductName.Trim(), NewProductPrice, NewProductQuantity));
+            NewProductName.Trim(), NewProductSalePrice, NewProductQuantity,
+            NewProductTaxProfile?.Id));
 
         if (result.Succeeded)
         {
@@ -194,7 +210,7 @@ public partial class ProductsViewModel(
     }
 
     [RelayCommand]
-    private void ShowEditForm()
+    private async Task ShowEditFormAsync()
     {
         if (SelectedProduct is null) return;
 
@@ -205,9 +221,12 @@ public partial class ProductsViewModel(
         }
 
         ErrorMessage = string.Empty;
+        await LoadTaxProfilesAsync();
         EditProductName = SelectedProduct.Name;
-        EditProductPrice = SelectedProduct.Price;
+        EditProductSalePrice = SelectedProduct.SalePrice;
         EditProductQuantity = SelectedProduct.Quantity;
+        EditProductTaxProfile = AvailableTaxProfiles
+            .FirstOrDefault(p => p.Id == SelectedProduct.TaxProfileId);
         IsAddFormVisible = false;
         IsEditFormVisible = true;
     }
@@ -224,13 +243,14 @@ public partial class ProductsViewModel(
         if (!Validate(v => v
             .Rule(SelectedProduct is not null, "No product selected.")
             .Rule(InputValidator.IsRequired(EditProductName), "Product name is required.")
-            .Rule(InputValidator.IsNonNegative(EditProductPrice), "Price cannot be negative.")
+            .Rule(InputValidator.IsNonNegative(EditProductSalePrice), "Sale price cannot be negative.")
             .Rule(InputValidator.IsNonNegative(EditProductQuantity), "Quantity cannot be negative.")))
             return;
 
+        var product = SelectedProduct!;
         var result = await commandBus.SendAsync(new UpdateProductCommand(
-            SelectedProduct.Id, EditProductName.Trim(), EditProductPrice,
-            EditProductQuantity, SelectedProduct.RowVersion));
+            product.Id, EditProductName.Trim(), EditProductSalePrice,
+            EditProductQuantity, EditProductTaxProfile?.Id, product.RowVersion));
 
         if (result.Succeeded)
         {
@@ -281,5 +301,12 @@ public partial class ProductsViewModel(
             ErrorMessage = result.ErrorMessage ?? "Delete failed.";
             await LoadProductsAsync();
         }
+    }
+
+    private async Task LoadTaxProfilesAsync()
+    {
+        var profiles = await taxService.GetAllProfilesAsync();
+        AvailableTaxProfiles = new ObservableCollection<TaxProfile>(
+            profiles.Where(p => p.IsActive));
     }
 }

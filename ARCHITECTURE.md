@@ -153,17 +153,88 @@ fill the parent.
 </Grid.RowDefinitions>
 ```
 
-### 5.3  ScrollViewer for content areas
+### 5.3  Enterprise scroll policy
 
-- **Main content pages** are hosted in `ResponsiveContentControl`, which
-  provides a `ScrollViewer` + `ViewportConstrainedPanel`. Star-sized
-  rows work correctly and scrollbars appear only when content exceeds
-  the viewport.
-- **Dialog windows** must wrap their content `Grid` in a
-  `ScrollViewer VerticalScrollBarVisibility="Auto"` so that tight
-  layouts never clip.
-- **Settings / sub-window content areas** must also wrap the
-  `ContentControl` in a `ScrollViewer`.
+> **Rule:** `ScrollViewer` must never wrap an entire Window, Dialog, or
+> UserControl root. Scroll is only permitted around data-driven content
+> that can grow beyond its container.
+
+#### ✅ Allowed
+
+| Context | Why |
+|---|---|
+| `DataGrid` / `ListView` / `ListBox` in a `*`-sized row | Dynamic row count; grid scrolls internally |
+| `ItemsControl` bound to a collection | Dynamic item count |
+| Dynamic content pane (`ContentControl` in settings) | Content varies per tab |
+| `TextBox` with `AcceptsReturn="True"` + `VerticalScrollBarVisibility="Auto"` | Internal text overflow |
+| `ResponsiveContentControl` (main content area) | Shell-level host; `ViewportConstrainedPanel` keeps star rows working |
+
+#### ❌ Disallowed
+
+| Context | Correct approach |
+|---|---|
+| Login / PIN screen | Fixed `Grid` — keypad fills `*`-row |
+| First-time setup dialog | Fixed `Grid` — all fields fit within sized window |
+| Firm / User management dialogs | 3-row `Grid`: `Auto` title → `*` form → `Auto` buttons |
+| Settings window outer shell | Split-panel: sidebar nav + `ScrollViewer` on content pane only |
+| Dashboard page | `UniformGrid` cards in `*`-row — never scrolls |
+
+#### Layout pattern — fixed-size dialog (no scroll)
+
+```xml
+<Grid Margin="{StaticResource DialogPadding}">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>   <!-- Title -->
+        <RowDefinition Height="*"/>      <!-- Form body -->
+        <RowDefinition Height="Auto"/>   <!-- Buttons pinned to bottom -->
+    </Grid.RowDefinitions>
+
+    <TextBlock Style="{StaticResource DialogTitleStyle}" .../>
+
+    <StackPanel Grid.Row="1">
+        <!-- fields + error/success messages -->
+    </StackPanel>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal"
+                HorizontalAlignment="Right">
+        <!-- action buttons -->
+    </StackPanel>
+</Grid>
+```
+
+#### Layout pattern — page with scrollable data area
+
+```xml
+<Grid Margin="{StaticResource PagePadding}">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>   <!-- Page header -->
+        <RowDefinition Height="Auto"/>   <!-- Toolbar / filters -->
+        <RowDefinition Height="*"/>      <!-- DataGrid (scrolls internally) -->
+        <RowDefinition Height="Auto"/>   <!-- Status bar -->
+    </Grid.RowDefinitions>
+
+    <DataGrid Grid.Row="2" ItemsSource="{Binding Items}" .../>
+</Grid>
+```
+
+#### Development-time enforcement
+
+`LayoutDiagnostics` (attached behavior in `Core/Helpers/LayoutDiagnostics.cs`)
+runs **DEBUG-only** on every `Window.Loaded` event and writes warnings to
+the Visual Studio **Output → Debug** pane when it detects:
+
+- `ScrollViewer` as the `Window.Content` (wraps entire window).
+- `ScrollViewer` as a root-panel child spanning all rows.
+- `ScrollViewer` whose subtree contains only form controls (no
+  `DataGrid`/`ListView`/`ItemsControl`).
+
+Activated globally via `GlobalStyles.xaml`:
+
+```xml
+<Setter Property="h:LayoutDiagnostics.IsEnabled" Value="True"/>
+```
+
+Opt-out per window: `h:LayoutDiagnostics.IsEnabled="False"`.
 
 ### 5.4  No fixed sizes unless required
 
@@ -694,7 +765,62 @@ Events are the **only** mechanism for cross-module communication.
 
 ---
 
-## 12  Checklist for new features
+## 12  Pricing rules
+
+> **Single source of truth for how pricing, tax, and discounts work.**
+> Every billing feature, service, and UI must follow these rules.
+
+### Product pricing
+
+- `Product` contains only **`SalePrice`** (the base selling price).
+- No MRP, no product-level discount fields.
+- `TaxProfileId` (optional) links the product to a GST tax profile.
+- `IsTaxInclusive` indicates whether `SalePrice` already includes tax.
+
+### Discount policy
+
+- **Discounts are bill-level only.** Products carry zero discount logic.
+- A `BillDiscount` (value object) describes the intent:
+  - `DiscountType.None` — no discount.
+  - `DiscountType.Amount` — flat currency amount off the subtotal.
+  - `DiscountType.Percentage` — percentage off the subtotal (0–100).
+- Amount discounts are capped at the subtotal (never negative).
+- Discount is applied **before tax** (standard Indian GST trade-discount
+  treatment — Section 15, CGST Act).
+
+### Calculation flow
+
+```
+Product.SalePrice × Quantity
+  → IPricingCalculationService.CalculateLineTotal()   [per-line]
+  → LineTotal { Subtotal, TaxAmount, FinalAmount }
+
+Σ line subtotals
+  → IBillCalculationService.Calculate()               [whole bill]
+  → BillSummary { Subtotal, DiscountAmount, TaxableAmount, TaxAmount, FinalAmount }
+
+GST component split (for invoices)
+  → ITaxCalculationService.Calculate()
+  → TaxBreakdown { CGST, SGST, IGST }
+```
+
+### Service responsibilities
+
+| Service | Scope | Input | Output |
+|---|---|---|---|
+| `IPricingCalculationService` | Single line item | SalePrice, Qty, Rate, IsTaxInclusive | `LineTotal` |
+| `IBillCalculationService` | Entire bill | Subtotal, Rate, `BillDiscount?` | `BillSummary` |
+| `ITaxCalculationService` | Tax components | Amount, Rate, IsIntraState | `TaxBreakdown` |
+
+### Persistence
+
+- `Sale` stores `DiscountType`, `DiscountValue`, `DiscountAmount`,
+  `DiscountReason` for audit trail.
+- `Product` has no discount columns — never add them.
+
+---
+
+## 13  Checklist for new features
 
 1. Create the module folder under `Modules/<Name>/`.
 2. Add `<Name>Module.cs` with `Add<Name>Module()` extension method.

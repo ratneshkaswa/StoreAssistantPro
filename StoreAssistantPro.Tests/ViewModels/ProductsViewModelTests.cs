@@ -7,12 +7,14 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Commands;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Products.ViewModels;
+using StoreAssistantPro.Modules.Tax.Services;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
 public class ProductsViewModelTests
 {
     private readonly IProductService _productService = Substitute.For<IProductService>();
+    private readonly ITaxService _taxService = Substitute.For<ITaxService>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IMasterPinValidator _masterPinValidator = Substitute.For<IMasterPinValidator>();
@@ -29,10 +31,12 @@ public class ProductsViewModelTests
             .Returns(CommandResult.Success());
         _commandBus.SendAsync(Arg.Any<DeleteProductCommand>())
             .Returns(CommandResult.Success());
+        _taxService.GetAllProfilesAsync()
+            .Returns(new List<TaxProfile>());
     }
 
     private ProductsViewModel CreateSut() =>
-        new(_productService, _sessionService, _dialogService, _masterPinValidator, _commandBus);
+        new(_productService, _taxService, _sessionService, _dialogService, _masterPinValidator, _commandBus);
 
     private void SetupPagedReturn(IReadOnlyList<Product> items, int totalCount = -1)
     {
@@ -50,8 +54,8 @@ public class ProductsViewModelTests
     {
         var products = new List<Product>
         {
-            new() { Id = 1, Name = "Widget", Price = 9.99m, Quantity = 10 },
-            new() { Id = 2, Name = "Gadget", Price = 19.99m, Quantity = 5 }
+            new() { Id = 1, Name = "Widget", SalePrice = 9.99m, Quantity = 10 },
+            new() { Id = 2, Name = "Gadget", SalePrice = 19.99m, Quantity = 5 }
         };
         SetupPagedReturn(products);
 
@@ -66,7 +70,7 @@ public class ProductsViewModelTests
     {
         var products = new List<Product>
         {
-            new() { Id = 1, Name = "Widget", Price = 9.99m, Quantity = 10 }
+            new() { Id = 1, Name = "Widget", SalePrice = 9.99m, Quantity = 10 }
         };
         SetupPagedReturn(products, totalCount: 75);
 
@@ -113,13 +117,13 @@ public class ProductsViewModelTests
 
         var sut = CreateSut();
         sut.NewProductName = "New Item";
-        sut.NewProductPrice = 15.50m;
+        sut.NewProductSalePrice = 15.50m;
         sut.NewProductQuantity = 25;
 
         await sut.SaveProductCommand.ExecuteAsync(null);
 
         await _commandBus.Received(1).SendAsync(Arg.Is<SaveProductCommand>(c =>
-            c.Name == "New Item" && c.Price == 15.50m && c.Quantity == 25));
+            c.Name == "New Item" && c.SalePrice == 15.50m && c.Quantity == 25));
     }
 
     [Fact]
@@ -127,7 +131,7 @@ public class ProductsViewModelTests
     {
         var sut = CreateSut();
         sut.NewProductName = "   ";
-        sut.NewProductPrice = 10m;
+        sut.NewProductSalePrice = 10m;
         sut.NewProductQuantity = 1;
 
         await sut.SaveProductCommand.ExecuteAsync(null);
@@ -140,19 +144,19 @@ public class ProductsViewModelTests
     {
         var sut = CreateSut();
         sut.NewProductName = "Test";
-        sut.NewProductPrice = -5m;
+        sut.NewProductSalePrice = -5m;
         sut.NewProductQuantity = 1;
 
         await sut.SaveProductCommand.ExecuteAsync(null);
 
-        Assert.Equal("Price cannot be negative.", sut.ErrorMessage);
+        Assert.Equal("Sale price cannot be negative.", sut.ErrorMessage);
         await _commandBus.DidNotReceive().SendAsync(Arg.Any<SaveProductCommand>());
     }
 
     [Fact]
     public async Task DeleteProduct_ReloadsCurrentPage()
     {
-        var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1, 2, 3] };
+        var product = new Product { Id = 1, Name = "ToDelete", SalePrice = 5m, Quantity = 1, RowVersion = [1, 2, 3] };
         SetupPagedReturn([product]);
 
         var sut = CreateSut();
@@ -170,12 +174,12 @@ public class ProductsViewModelTests
     }
 
     [Fact]
-    public void ShowAddForm_TogglesVisibility()
+    public async Task ShowAddForm_TogglesVisibility()
     {
         var sut = CreateSut();
         Assert.False(sut.IsAddFormVisible);
 
-        sut.ShowAddFormCommand.Execute(null);
+        await sut.ShowAddFormCommand.ExecuteAsync(null);
         Assert.True(sut.IsAddFormVisible);
 
         sut.CancelAddCommand.Execute(null);
@@ -183,52 +187,52 @@ public class ProductsViewModelTests
     }
 
     [Fact]
-    public void ShowEditForm_WithoutSelection_DoesNotOpen()
+    public async Task ShowEditForm_WithoutSelection_DoesNotOpen()
     {
         var sut = CreateSut();
         sut.SelectedProduct = null;
 
-        sut.ShowEditFormCommand.Execute(null);
+        await sut.ShowEditFormCommand.ExecuteAsync(null);
 
         Assert.False(sut.IsEditFormVisible);
     }
 
     [Fact]
-    public void ShowEditForm_PopulatesEditFields()
+    public async Task ShowEditForm_PopulatesEditFields()
     {
         var sut = CreateSut();
-        sut.SelectedProduct = new Product { Id = 1, Name = "Test", Price = 9.99m, Quantity = 42 };
+        sut.SelectedProduct = new Product { Id = 1, Name = "Test", SalePrice = 9.99m, Quantity = 42 };
 
-        sut.ShowEditFormCommand.Execute(null);
+        await sut.ShowEditFormCommand.ExecuteAsync(null);
 
         Assert.True(sut.IsEditFormVisible);
         Assert.Equal("Test", sut.EditProductName);
-        Assert.Equal(9.99m, sut.EditProductPrice);
+        Assert.Equal(9.99m, sut.EditProductSalePrice);
         Assert.Equal(42, sut.EditProductQuantity);
     }
 
     // ── Role-based access tests ──
 
     [Fact]
-    public void ShowAddForm_AsUser_SetsErrorMessage()
+    public async Task ShowAddForm_AsUser_SetsErrorMessage()
     {
         _sessionService.CurrentUserType.Returns(UserType.User);
         var sut = CreateSut();
 
-        sut.ShowAddFormCommand.Execute(null);
+        await sut.ShowAddFormCommand.ExecuteAsync(null);
 
         Assert.False(sut.IsAddFormVisible);
         Assert.Contains("administrators and managers", sut.ErrorMessage);
     }
 
     [Fact]
-    public void ShowEditForm_AsUser_SetsErrorMessage()
+    public async Task ShowEditForm_AsUser_SetsErrorMessage()
     {
         _sessionService.CurrentUserType.Returns(UserType.User);
         var sut = CreateSut();
-        sut.SelectedProduct = new Product { Id = 1, Name = "Test", Price = 5m, Quantity = 1 };
+        sut.SelectedProduct = new Product { Id = 1, Name = "Test", SalePrice = 5m, Quantity = 1 };
 
-        sut.ShowEditFormCommand.Execute(null);
+        await sut.ShowEditFormCommand.ExecuteAsync(null);
 
         Assert.False(sut.IsEditFormVisible);
         Assert.Contains("administrators and managers", sut.ErrorMessage);
@@ -239,7 +243,7 @@ public class ProductsViewModelTests
     {
         _sessionService.CurrentUserType.Returns(UserType.Manager);
         var sut = CreateSut();
-        sut.SelectedProduct = new Product { Id = 1, Name = "Test", Price = 5m, Quantity = 1 };
+        sut.SelectedProduct = new Product { Id = 1, Name = "Test", SalePrice = 5m, Quantity = 1 };
 
         await sut.DeleteProductCommand.ExecuteAsync(null);
 
@@ -269,7 +273,7 @@ public class ProductsViewModelTests
     public async Task DeleteProduct_Cancelled_DoesNotDelete()
     {
         _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
-        var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
+        var product = new Product { Id = 1, Name = "Keep", SalePrice = 5m, Quantity = 1, RowVersion = [1] };
         SetupPagedReturn([product]);
 
         var sut = CreateSut();
@@ -286,7 +290,7 @@ public class ProductsViewModelTests
     public async Task DeleteProduct_MasterPinFailed_DoesNotDelete()
     {
         _masterPinValidator.ValidateAsync(Arg.Any<string>()).Returns(false);
-        var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
+        var product = new Product { Id = 1, Name = "Keep", SalePrice = 5m, Quantity = 1, RowVersion = [1] };
         SetupPagedReturn([product]);
 
         var sut = CreateSut();
@@ -303,7 +307,7 @@ public class ProductsViewModelTests
     [Fact]
     public async Task DeleteProduct_Success_CallsMasterPinValidator()
     {
-        var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1] };
+        var product = new Product { Id = 1, Name = "ToDelete", SalePrice = 5m, Quantity = 1, RowVersion = [1] };
         SetupPagedReturn([product]);
 
         var sut = CreateSut();

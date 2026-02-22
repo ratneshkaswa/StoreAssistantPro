@@ -4,18 +4,18 @@ using StoreAssistantPro.Modules.MainShell.ViewModels;
 
 namespace StoreAssistantPro.Modules.MainShell.Views;
 
-public partial class DashboardView : UserControl
+public partial class MainWorkspaceView : UserControl
 {
-    public DashboardView()
+    public MainWorkspaceView()
     {
         InitializeComponent();
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (DataContext is DashboardViewModel vm)
+        if (DataContext is MainWorkspaceViewModel vm)
         {
-            await vm.LoadDashboardCommand.ExecuteAsync(null);
+            await vm.LoadMainWorkspaceCommand.ExecuteAsync(null);
         }
     }
 }

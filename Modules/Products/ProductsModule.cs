@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.Products.Commands;
@@ -18,6 +19,7 @@ public static class ProductsModule
     {
         // Page registration
         pageRegistry.Map<ProductsViewModel>(ProductsPage);
+        pageRegistry.RequireFeature(ProductsPage, FeatureFlags.Products);
 
         // Services
         services.AddTransient<IProductService, ProductService>();

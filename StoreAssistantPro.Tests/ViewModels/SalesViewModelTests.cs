@@ -17,6 +17,7 @@ public class SalesViewModelTests
     private readonly IProductService _productService = Substitute.For<IProductService>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
+    private readonly IBillCalculationService _billCalculation = new BillCalculationService();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
     public SalesViewModelTests()
@@ -28,7 +29,7 @@ public class SalesViewModelTests
     }
 
     private SalesViewModel CreateSut() =>
-        new(_salesService, _productService, _sessionService, _commandBus, _regional);
+        new(_salesService, _productService, _sessionService, _commandBus, _billCalculation, _regional);
 
     private void SetupPagedReturn(IReadOnlyList<Sale> items, int totalCount = -1)
     {
@@ -113,7 +114,7 @@ public class SalesViewModelTests
     [Fact]
     public void AddToCart_AddsItemFromSelectedProduct()
     {
-        var product = new Product { Id = 1, Name = "Widget", Price = 10m, Quantity = 50 };
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
 
         var sut = CreateSut();
         sut.SelectedProduct = product;
@@ -143,7 +144,7 @@ public class SalesViewModelTests
     [Fact]
     public void AddToCart_ExceedingStock_SetsErrorMessage()
     {
-        var product = new Product { Id = 1, Name = "Limited", Price = 10m, Quantity = 2 };
+        var product = new Product { Id = 1, Name = "Limited", SalePrice = 10m, Quantity = 2 };
 
         var sut = CreateSut();
         sut.SelectedProduct = product;
@@ -158,7 +159,7 @@ public class SalesViewModelTests
     [Fact]
     public void AddToCart_SameProductTwice_IncrementsQuantity()
     {
-        var product = new Product { Id = 1, Name = "Widget", Price = 10m, Quantity = 50 };
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
 
         var sut = CreateSut();
         sut.SelectedProduct = product;
@@ -177,7 +178,7 @@ public class SalesViewModelTests
     [Fact]
     public void RemoveFromCart_RemovesItemAndUpdatesTotal()
     {
-        var product = new Product { Id = 1, Name = "Widget", Price = 10m, Quantity = 50 };
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
 
         var sut = CreateSut();
         sut.SelectedProduct = product;
@@ -204,7 +205,7 @@ public class SalesViewModelTests
     public async Task CompleteSale_CreatesAndReloads()
     {
         SetupPagedReturn([]);
-        var product = new Product { Id = 1, Name = "Widget", Price = 10m, Quantity = 50 };
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
 
         var sut = CreateSut();
         sut.SelectedProduct = product;
@@ -226,8 +227,8 @@ public class SalesViewModelTests
     {
         var products = new List<Product>
         {
-            new() { Id = 1, Name = "InStock", Price = 10m, Quantity = 5 },
-            new() { Id = 2, Name = "OutOfStock", Price = 20m, Quantity = 0 }
+            new() { Id = 1, Name = "InStock", SalePrice = 10m, Quantity = 5 },
+            new() { Id = 2, Name = "OutOfStock", SalePrice = 20m, Quantity = 0 }
         };
         _productService.GetAllAsync().Returns(products);
 
@@ -299,5 +300,428 @@ public class SalesViewModelTests
         var sut = CreateSut();
         sut.SelectedSale = null;
         Assert.False(sut.HasSelectedSale);
+    }
+
+    // ── Bill-level discount tests ──
+
+    [Fact]
+    public void AddToCart_RecalculatesBillFinalAmount()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 100m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 2;
+        sut.AddToCartCommand.Execute(null);
+
+        Assert.Equal(200m, sut.CartTotal);
+        Assert.Equal(200m, sut.BillFinalAmount);
+        Assert.Equal(0m, sut.BillDiscountAmount);
+    }
+
+    [Fact]
+    public void Discount_None_FinalEqualsSubtotal()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 100m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 5;
+        sut.AddToCartCommand.Execute(null);
+
+        sut.SelectedDiscountType = DiscountType.None;
+        sut.DiscountInput = 999m;
+
+        Assert.Equal(500m, sut.BillFinalAmount);
+        Assert.Equal(0m, sut.BillDiscountAmount);
+    }
+
+    [Fact]
+    public void Discount_Amount_SubtractedFromTotal()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 100m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 5;
+        sut.AddToCartCommand.Execute(null);
+
+        sut.SelectedDiscountType = DiscountType.Amount;
+        sut.DiscountInput = 50m;
+
+        Assert.Equal(50m, sut.BillDiscountAmount);
+        Assert.Equal(450m, sut.BillFinalAmount);
+    }
+
+    [Fact]
+    public void Discount_Percentage_CalculatesCorrectly()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 100m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 10;
+        sut.AddToCartCommand.Execute(null);
+
+        sut.SelectedDiscountType = DiscountType.Percentage;
+        sut.DiscountInput = 10m; // 10%
+
+        Assert.Equal(100m, sut.BillDiscountAmount);
+        Assert.Equal(900m, sut.BillFinalAmount);
+    }
+
+    [Fact]
+    public void Discount_ChangingType_RecalculatesInstantly()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 200m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+
+        sut.DiscountInput = 20m;
+        sut.SelectedDiscountType = DiscountType.Amount;
+        Assert.Equal(180m, sut.BillFinalAmount);
+
+        sut.SelectedDiscountType = DiscountType.Percentage;
+        Assert.Equal(160m, sut.BillFinalAmount); // 200 - 20% = 160
+    }
+
+    [Fact]
+    public void Discount_RemoveFromCart_RecalculatesWithDiscount()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 100m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 3;
+        sut.AddToCartCommand.Execute(null);
+
+        sut.SelectedDiscountType = DiscountType.Amount;
+        sut.DiscountInput = 50m;
+        Assert.Equal(250m, sut.BillFinalAmount);
+
+        sut.RemoveFromCartCommand.Execute(sut.CartItems[0]);
+        Assert.Equal(0m, sut.BillFinalAmount);
+        Assert.Equal(0m, sut.BillDiscountAmount);
+    }
+
+    [Fact]
+    public async Task ShowNewSale_ResetsDiscountFields()
+    {
+        _productService.GetAllAsync().Returns(new List<Product>());
+
+        var sut = CreateSut();
+        sut.SelectedDiscountType = DiscountType.Percentage;
+        sut.DiscountInput = 15m;
+        sut.DiscountReason = "Loyalty";
+
+        await sut.ShowNewSaleCommand.ExecuteAsync(null);
+
+        Assert.Equal(DiscountType.None, sut.SelectedDiscountType);
+        Assert.Equal(0m, sut.DiscountInput);
+        Assert.Equal(string.Empty, sut.DiscountReason);
+    }
+
+    [Fact]
+    public async Task CompleteSale_WithDiscount_PassesDiscountToCommand()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 100m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 2;
+        sut.AddToCartCommand.Execute(null);
+
+        sut.SelectedDiscountType = DiscountType.Amount;
+        sut.DiscountInput = 30m;
+        sut.DiscountReason = "VIP";
+        sut.PaymentMethod = "Cash";
+
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        await _commandBus.Received(1).SendAsync(Arg.Is<CompleteSaleCommand>(c =>
+            c.TotalAmount == 170m &&
+            c.Discount.Type == DiscountType.Amount &&
+            c.Discount.Value == 30m &&
+            c.Discount.Reason == "VIP"));
+    }
+
+    [Fact]
+    public async Task CompleteSale_NoDiscount_PassesDiscountNone()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 50m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        await _commandBus.Received(1).SendAsync(Arg.Is<CompleteSaleCommand>(c =>
+            c.TotalAmount == 50m &&
+            c.Discount.Type == DiscountType.None));
+    }
+
+    [Fact]
+    public async Task CompleteSale_GeneratesNonEmptyIdempotencyKey()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        await _commandBus.Received(1).SendAsync(Arg.Is<CompleteSaleCommand>(c =>
+            c.IdempotencyKey != Guid.Empty));
+    }
+
+    [Fact]
+    public async Task CompleteSale_TwoCallsGenerateDifferentKeys()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+
+        var capturedKeys = new List<Guid>();
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                capturedKeys.Add(ci.Arg<CompleteSaleCommand>().IdempotencyKey);
+                return CommandResult.Success();
+            });
+
+        var sut = CreateSut();
+
+        // First sale
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        // Second sale (re-add to cart since form resets)
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, capturedKeys.Count);
+        Assert.NotEqual(capturedKeys[0], capturedKeys[1]);
+    }
+
+    [Fact]
+    public async Task CompleteSale_IsSavingTrueDuringSave()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+
+        bool wasSavingDuringCall = false;
+        var sut = CreateSut();
+
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                wasSavingDuringCall = sut.IsSaving;
+                return CommandResult.Success();
+            });
+
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.True(wasSavingDuringCall);
+        Assert.False(sut.IsSaving); // reset after completion
+    }
+
+    [Fact]
+    public async Task CompleteSale_IsSavingResetOnFailure()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(CommandResult.Failure("boom"));
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.False(sut.IsSaving);
+        Assert.Equal("boom", sut.ErrorMessage);
+    }
+
+    // ── UI protection during billing transaction ──
+
+    [Fact]
+    public void IsCartLocked_WhenNotSaving_ReturnsFalse()
+    {
+        var sut = CreateSut();
+
+        Assert.False(sut.IsCartLocked);
+    }
+
+    [Fact]
+    public async Task IsCartLocked_DuringSave_ReturnsTrue()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+        bool wasLockedDuringSave = false;
+
+        var sut = CreateSut();
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                wasLockedDuringSave = sut.IsCartLocked;
+                return CommandResult.Success();
+            });
+
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.True(wasLockedDuringSave);
+        Assert.False(sut.IsCartLocked);
+    }
+
+    [Fact]
+    public async Task SavingStatusText_DuringSave_ShowsProcessing()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+        string? statusDuringSave = null;
+
+        var sut = CreateSut();
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                statusDuringSave = sut.SavingStatusText;
+                return CommandResult.Success();
+            });
+
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.False(string.IsNullOrEmpty(statusDuringSave));
+        Assert.Equal(string.Empty, sut.SavingStatusText);
+    }
+
+    [Fact]
+    public async Task AddToCartCommand_DisabledDuringSave()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+        bool canAddDuringSave = true;
+
+        var sut = CreateSut();
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                canAddDuringSave = sut.AddToCartCommand.CanExecute(null);
+                return CommandResult.Success();
+            });
+
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.False(canAddDuringSave);
+    }
+
+    [Fact]
+    public async Task CancelNewSaleCommand_DisabledDuringSave()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+        bool canCancelDuringSave = true;
+
+        var sut = CreateSut();
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                canCancelDuringSave = sut.CancelNewSaleCommand.CanExecute(null);
+                return CommandResult.Success();
+            });
+
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.False(canCancelDuringSave);
+    }
+
+    [Fact]
+    public async Task ShowNewSaleCommand_DisabledDuringSave()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+        bool canShowNewSaleDuringSave = true;
+
+        var sut = CreateSut();
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(ci =>
+            {
+                canShowNewSaleDuringSave = sut.ShowNewSaleCommand.CanExecute(null);
+                return CommandResult.Success();
+            });
+
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.False(canShowNewSaleDuringSave);
+    }
+
+    [Fact]
+    public async Task AllCartCommands_ReenabledAfterSave()
+    {
+        SetupPagedReturn([]);
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.True(sut.AddToCartCommand.CanExecute(null));
+        Assert.True(sut.CancelNewSaleCommand.CanExecute(null));
+        Assert.True(sut.ShowNewSaleCommand.CanExecute(null));
+        Assert.True(sut.CompleteSaleCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task AllCartCommands_ReenabledAfterFailure()
+    {
+        var product = new Product { Id = 1, Name = "Widget", SalePrice = 10m, Quantity = 50 };
+
+        _commandBus.SendAsync(Arg.Any<CompleteSaleCommand>())
+            .Returns(CommandResult.Failure("fail"));
+
+        var sut = CreateSut();
+        sut.SelectedProduct = product;
+        sut.CartQuantity = 1;
+        sut.AddToCartCommand.Execute(null);
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.True(sut.AddToCartCommand.CanExecute(null));
+        Assert.True(sut.CancelNewSaleCommand.CanExecute(null));
+        Assert.True(sut.ShowNewSaleCommand.CanExecute(null));
+        Assert.True(sut.CompleteSaleCommand.CanExecute(null));
+        Assert.False(sut.IsSaving);
     }
 }

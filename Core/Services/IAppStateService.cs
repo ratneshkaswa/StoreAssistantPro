@@ -17,16 +17,38 @@ public interface IAppStateService : INotifyPropertyChanged
     UserType CurrentUserType { get; }
     bool IsLoggedIn { get; }
     string CurrentTime { get; }
-    object? CurrentBillingSession { get; }
+    OperationalMode CurrentMode { get; }
+    BillingSessionState CurrentBillingSession { get; }
     ObservableCollection<AppNotification> Notifications { get; }
     int UnreadNotificationCount { get; }
+
+    /// <summary>
+    /// <c>true</c> when the database is unreachable. Driven by
+    /// <see cref="Events.ConnectionLostEvent"/> /
+    /// <see cref="Events.ConnectionRestoredEvent"/>.
+    /// </summary>
+    bool IsOfflineMode { get; }
+
+    /// <summary>
+    /// Timestamp of the most recent connectivity health check.
+    /// </summary>
+    DateTime? LastConnectionCheck { get; }
 
     // ── State mutations (called by services only) ──
 
     void SetFirmInfo(string firmName);
     void SetCurrentUser(UserType userType);
     void SetLoggedIn(bool isLoggedIn);
-    void SetBillingSession(object? session);
+    void SetMode(OperationalMode mode);
+    void SetBillingSession(BillingSessionState session);
+
+    /// <summary>
+    /// Updates the connectivity state. Called by
+    /// <see cref="IConnectivityMonitorService"/> when the database
+    /// status changes.
+    /// </summary>
+    void SetConnectivity(bool isOffline, DateTime checkTime);
+
     void AddNotification(AppNotification notification);
     void MarkNotificationRead(AppNotification notification);
     void ClearNotifications();
