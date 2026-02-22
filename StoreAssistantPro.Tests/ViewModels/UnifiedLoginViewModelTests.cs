@@ -1,0 +1,203 @@
+using NSubstitute;
+using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Authentication.Commands;
+using StoreAssistantPro.Modules.Authentication.ViewModels;
+
+namespace StoreAssistantPro.Tests.ViewModels;
+
+public class UnifiedLoginViewModelTests
+{
+    private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
+
+    private UnifiedLoginViewModel CreateSut()
+    {
+        var vm = new UnifiedLoginViewModel(_commandBus);
+        vm.Initialize();
+        return vm;
+    }
+
+    // ── User selection ───────────────────────────────────────────────
+
+    [Fact]
+    public void SelectUser_SetsSelectedUserType()
+    {
+        var sut = CreateSut();
+
+        sut.SelectUserCommand.Execute(UserType.Admin);
+
+        Assert.Equal(UserType.Admin, sut.SelectedUserType);
+        Assert.True(sut.IsUserSelected);
+    }
+
+    [Fact]
+    public void SelectUser_ClearsPinAndError()
+    {
+        var sut = CreateSut();
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.SelectUserCommand.Execute(UserType.Manager);
+
+        Assert.Empty(sut.PinPad.Pin);
+        Assert.Empty(sut.ErrorMessage);
+    }
+
+    // ── PIN pad commands ─────────────────────────────────────────────
+
+    [Fact]
+    public void PinDigit_AppendsDigit()
+    {
+        var sut = CreateSut();
+
+        sut.PinPad.AddDigitCommand.Execute("5");
+
+        Assert.Equal("5", sut.PinPad.Pin);
+        Assert.Equal(1, sut.PinPad.PinLength);
+    }
+
+    [Fact]
+    public void PinDigit_StopsAtFourDigits_WhenNoUserSelected()
+    {
+        var sut = CreateSut();
+
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+        sut.PinPad.AddDigitCommand.Execute("4");
+        sut.PinPad.AddDigitCommand.Execute("5");
+
+        Assert.Equal(4, sut.PinPad.PinLength);
+    }
+
+    [Fact]
+    public void PinBackspace_RemovesLastDigit()
+    {
+        var sut = CreateSut();
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+
+        sut.PinPad.BackspaceCommand.Execute(null);
+
+        Assert.Equal("1", sut.PinPad.Pin);
+    }
+
+    [Fact]
+    public void PinBackspace_DoesNothingWhenEmpty()
+    {
+        var sut = CreateSut();
+
+        sut.PinPad.BackspaceCommand.Execute(null);
+
+        Assert.Empty(sut.PinPad.Pin);
+    }
+
+    [Fact]
+    public void PinClear_ResetsPin()
+    {
+        var sut = CreateSut();
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+
+        sut.PinPad.ClearCommand.Execute(null);
+
+        Assert.Empty(sut.PinPad.Pin);
+    }
+
+    // ── Auto-login on 4th digit ──────────────────────────────────────
+
+    [Fact]
+    public async Task FourthDigit_WithUserSelected_AutoTriggersLogin()
+    {
+        bool? closeResult = null;
+        _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
+            .Returns(CommandResult.Success());
+
+        var sut = CreateSut();
+        sut.RequestClose = result => closeResult = result;
+        sut.SelectUserCommand.Execute(UserType.Admin);
+
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+        sut.PinPad.AddDigitCommand.Execute("4");
+
+        await Task.Delay(50);
+
+        Assert.True(closeResult);
+        await _commandBus.Received(1).SendAsync(
+            Arg.Is<LoginUserCommand>(c => c.UserType == UserType.Admin && c.Pin == "1234"));
+    }
+
+    // ── Login success ────────────────────────────────────────────────
+
+    [Fact]
+    public async Task Login_ValidPin_ClosesWithTrue()
+    {
+        bool? closeResult = null;
+        _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
+            .Returns(CommandResult.Success());
+
+        var sut = CreateSut();
+        sut.RequestClose = result => closeResult = result;
+        sut.SelectUserCommand.Execute(UserType.Manager);
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+        sut.PinPad.AddDigitCommand.Execute("4");
+        await Task.Delay(50);
+
+        Assert.True(closeResult);
+        Assert.Equal(UserType.Manager, sut.SelectedUserType);
+    }
+
+    // ── Login failure ────────────────────────────────────────────────
+
+    [Fact]
+    public async Task Login_InvalidPin_ShowsErrorAndClearsPin()
+    {
+        _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
+            .Returns(CommandResult.Failure("Invalid PIN. Try again."));
+
+        var sut = CreateSut();
+        sut.SelectUserCommand.Execute(UserType.User);
+        sut.PinPad.AddDigitCommand.Execute("0");
+        sut.PinPad.AddDigitCommand.Execute("0");
+        sut.PinPad.AddDigitCommand.Execute("0");
+        sut.PinPad.AddDigitCommand.Execute("0");
+
+        await Task.Delay(50);
+
+        Assert.Equal("Invalid PIN. Try again.", sut.ErrorMessage);
+        Assert.Empty(sut.PinPad.Pin);
+        Assert.Equal(UserType.User, sut.SelectedUserType);
+    }
+
+    // ── Login without user selected ──────────────────────────────────
+
+    [Fact]
+    public async Task Login_NoUserSelected_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+
+        await sut.LoginCommand.ExecuteAsync(null);
+
+        Assert.Equal("Please select a user.", sut.ErrorMessage);
+        await _commandBus.DidNotReceive().SendAsync(Arg.Any<LoginUserCommand>());
+    }
+
+    // ── Login without PIN ────────────────────────────────────────────
+
+    [Fact]
+    public async Task Login_EmptyPin_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.SelectUserCommand.Execute(UserType.Admin);
+
+        await sut.LoginCommand.ExecuteAsync(null);
+
+        Assert.Equal("Please enter your PIN.", sut.ErrorMessage);
+        await _commandBus.DidNotReceive().SendAsync(Arg.Any<LoginUserCommand>());
+    }
+}

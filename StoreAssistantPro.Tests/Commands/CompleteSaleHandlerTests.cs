@@ -41,7 +41,7 @@ public class CompleteSaleHandlerTests
     public async Task HandleAsync_ServiceThrows_ReturnsFailure()
     {
         _salesService.CreateSaleAsync(Arg.Any<Models.Sale>())
-            .Returns(Task.FromException(new InvalidOperationException("Stock insufficient")));
+            .Returns(Task.FromException<int>(new InvalidOperationException("Stock insufficient")));
 
         var command = new CompleteSaleCommand(10m, "Card", [new(1, 1, 10m)]);
 

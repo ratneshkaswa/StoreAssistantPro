@@ -28,13 +28,11 @@ public static class AuthenticationModule
 
         // ViewModels
         services.AddTransient<FirstTimeSetupViewModel>();
-        services.AddTransient<UserSelectionViewModel>();
-        services.AddTransient<PinLoginViewModel>();
+        services.AddTransient<UnifiedLoginViewModel>();
 
         // Views
         services.AddTransient<FirstTimeSetupWindow>();
-        services.AddTransient<UserSelectionWindow>();
-        services.AddTransient<PinLoginWindow>();
+        services.AddTransient<UnifiedLoginWindow>();
 
         return services;
     }

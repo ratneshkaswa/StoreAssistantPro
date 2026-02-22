@@ -14,7 +14,10 @@ public partial class MainWindow : Window
         DataContextChanged += (_, _) =>
         {
             if (DataContext is MainViewModel vm)
+            {
                 vm.RequestClose = Close;
+                vm.ApplyShortcuts(this);
+            }
         };
         Closed += (_, _) => (DataContext as IDisposable)?.Dispose();
     }

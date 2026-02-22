@@ -28,46 +28,30 @@ public partial class FirmManagementViewModel(
     public partial string SuccessMessage { get; set; } = string.Empty;
 
     [RelayCommand]
-    private async Task LoadFirmAsync()
+    private Task LoadFirmAsync() => RunLoadAsync(async _ =>
     {
-        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
-        try
-        {
-            var config = await firmService.GetFirmAsync();
-            if (config is null) return;
+        var config = await firmService.GetFirmAsync();
+        if (config is null) return;
 
-            FirmName = config.FirmName;
-            Address = config.Address;
-            Phone = config.Phone;
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-    }
+        FirmName = config.FirmName;
+        Address = config.Address;
+        Phone = config.Phone;
+    });
 
     [RelayCommand]
-    private async Task SaveFirmAsync()
+    private Task SaveFirmAsync() => RunAsync(async _ =>
     {
-        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
         ValidateAllProperties();
         if (HasErrors)
             return;
 
-        try
-        {
-            var trimmedName = FirmName.Trim();
-            await firmService.UpdateFirmAsync(trimmedName, Address.Trim(), Phone.Trim());
-            await eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName));
-            SuccessMessage = "Firm information saved.";
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-    }
+        var trimmedName = FirmName.Trim();
+        await firmService.UpdateFirmAsync(trimmedName, Address.Trim(), Phone.Trim());
+        await eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName));
+        SuccessMessage = "Firm information saved.";
+    });
 }

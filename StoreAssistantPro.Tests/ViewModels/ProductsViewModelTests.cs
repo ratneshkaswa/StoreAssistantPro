@@ -1,5 +1,6 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Data;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
@@ -33,6 +34,17 @@ public class ProductsViewModelTests
     private ProductsViewModel CreateSut() =>
         new(_productService, _sessionService, _dialogService, _masterPinValidator, _commandBus);
 
+    private void SetupPagedReturn(IReadOnlyList<Product> items, int totalCount = -1)
+    {
+        var count = totalCount < 0 ? items.Count : totalCount;
+        _productService.GetPagedAsync(Arg.Any<PagedQuery>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                var query = ci.Arg<PagedQuery>();
+                return new PagedResult<Product>(items, count, query.PageIndex, query.PageSize);
+            });
+    }
+
     [Fact]
     public async Task LoadProducts_PopulatesProductsList()
     {
@@ -41,7 +53,7 @@ public class ProductsViewModelTests
             new() { Id = 1, Name = "Widget", Price = 9.99m, Quantity = 10 },
             new() { Id = 2, Name = "Gadget", Price = 19.99m, Quantity = 5 }
         };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
+        SetupPagedReturn(products);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -50,47 +62,54 @@ public class ProductsViewModelTests
     }
 
     [Fact]
-    public async Task SearchText_FiltersProducts()
+    public async Task LoadProducts_UpdatesPagingState()
     {
         var products = new List<Product>
         {
-            new() { Id = 1, Name = "Red Apple", Price = 1m, Quantity = 10 },
-            new() { Id = 2, Name = "Green Bean", Price = 2m, Quantity = 20 },
-            new() { Id = 3, Name = "Red Pepper", Price = 3m, Quantity = 15 }
+            new() { Id = 1, Name = "Widget", Price = 9.99m, Quantity = 10 }
         };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
+        SetupPagedReturn(products, totalCount: 75);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
-        sut.SearchText = "Red";
 
-        Assert.Equal(2, sut.Products.Count);
-        Assert.All(sut.Products, p => Assert.Contains("Red", p.Name));
+        Assert.Equal(75, sut.TotalCount);
+        Assert.Equal(2, sut.TotalPages);
+        Assert.Equal(0, sut.PageIndex);
+        Assert.True(sut.HasNextPage);
+        Assert.False(sut.HasPreviousPage);
     }
 
     [Fact]
-    public async Task SearchText_ClearedShowsAllProducts()
+    public async Task LoadProducts_WithSearchText_PassesSearchToService()
     {
-        var products = new List<Product>
-        {
-            new() { Id = 1, Name = "Red Apple", Price = 1m, Quantity = 10 },
-            new() { Id = 2, Name = "Green Bean", Price = 2m, Quantity = 20 }
-        };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
+        SetupPagedReturn([]);
 
         var sut = CreateSut();
-        await sut.LoadProductsCommand.ExecuteAsync(null);
         sut.SearchText = "Red";
-        Assert.Single(sut.Products);
+        await sut.LoadProductsCommand.ExecuteAsync(null);
 
-        sut.SearchText = string.Empty;
-        Assert.Equal(2, sut.Products.Count);
+        await _productService.Received().GetPagedAsync(
+            Arg.Is<PagedQuery>(q => q.SearchTerm == "Red" && q.PageIndex == 0),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SearchText_ResetsPageIndex()
+    {
+        SetupPagedReturn([]);
+
+        var sut = CreateSut();
+        sut.PageIndex = 3;
+        sut.SearchText = "Apple";
+
+        Assert.Equal(0, sut.PageIndex);
     }
 
     [Fact]
     public async Task SaveProduct_CallsCommandBus()
     {
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(Enumerable.Empty<Product>());
+        SetupPagedReturn([]);
 
         var sut = CreateSut();
         sut.NewProductName = "New Item";
@@ -131,20 +150,22 @@ public class ProductsViewModelTests
     }
 
     [Fact]
-    public async Task DeleteProduct_RemovesSelectedProduct()
+    public async Task DeleteProduct_ReloadsCurrentPage()
     {
         var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1, 2, 3] };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
+        SetupPagedReturn([product]);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
 
         sut.SelectedProduct = product;
+
+        // After delete, reload returns empty page
+        SetupPagedReturn([]);
         await sut.DeleteProductCommand.ExecuteAsync(null);
 
         await _commandBus.Received(1).SendAsync(Arg.Is<DeleteProductCommand>(c =>
             c.ProductId == 1));
-        Assert.Empty(sut.Products);
         Assert.Null(sut.SelectedProduct);
     }
 
@@ -249,7 +270,7 @@ public class ProductsViewModelTests
     {
         _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
         var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
+        SetupPagedReturn([product]);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -266,7 +287,7 @@ public class ProductsViewModelTests
     {
         _masterPinValidator.ValidateAsync(Arg.Any<string>()).Returns(false);
         var product = new Product { Id = 1, Name = "Keep", Price = 5m, Quantity = 1, RowVersion = [1] };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
+        SetupPagedReturn([product]);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);
@@ -283,7 +304,7 @@ public class ProductsViewModelTests
     public async Task DeleteProduct_Success_CallsMasterPinValidator()
     {
         var product = new Product { Id = 1, Name = "ToDelete", Price = 5m, Quantity = 1, RowVersion = [1] };
-        _productService.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new List<Product> { product });
+        SetupPagedReturn([product]);
 
         var sut = CreateSut();
         await sut.LoadProductsCommand.ExecuteAsync(null);

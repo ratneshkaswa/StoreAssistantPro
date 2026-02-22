@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Data;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Sales.Commands;
@@ -19,10 +20,14 @@ public partial class SalesViewModel(
     ICommandBus commandBus,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private const int PageSize = 50;
+    private bool _isDateFiltered;
+
     // ── Role-based access ──
 
     public bool CanCreateSales =>
         sessionService.CurrentUserType is UserType.Admin or UserType.Manager;
+
     [ObservableProperty]
     public partial ObservableCollection<Sale> Sales { get; set; } = [];
 
@@ -35,12 +40,39 @@ public partial class SalesViewModel(
         OnPropertyChanged(nameof(HasSelectedSale));
 
     [ObservableProperty]
-    public partial DateTime FilterFrom { get; set; } = DateTime.Today;
+    public partial DateTime FilterFrom { get; set; }
 
     [ObservableProperty]
-    public partial DateTime FilterTo { get; set; } = DateTime.Today;
+    public partial DateTime FilterTo { get; set; }
 
-    // New Sale form
+    // ── Paging state ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyCanExecuteChangedFor(nameof(PreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
+    public partial int PageIndex { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
+    public partial int TotalPages { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplay))]
+    public partial int TotalCount { get; set; }
+
+    public string PageDisplay => TotalPages > 0
+        ? $"Page {PageIndex + 1} of {TotalPages} ({TotalCount} items)"
+        : "No results";
+
+    public bool HasPreviousPage => PageIndex > 0;
+    public bool HasNextPage => PageIndex < TotalPages - 1;
+
+    // ── New Sale form ──
     [ObservableProperty]
     public partial bool IsNewSaleVisible { get; set; }
 
@@ -65,27 +97,53 @@ public partial class SalesViewModel(
     public partial decimal CartTotal { get; set; }
 
     [RelayCommand]
-    private Task LoadSalesAsync() => RunLoadAsync(async ct =>
+    private Task LoadSalesAsync()
     {
-        // Set date filters to current Indian date on first load.
-        var today = regional.Now.Date;
-        if (FilterFrom == DateTime.Today && FilterTo == DateTime.Today)
-        {
-            FilterFrom = today;
-            FilterTo = today;
-        }
+        _isDateFiltered = false;
+        PageIndex = 0;
 
-        var items = await salesService.GetAllAsync(ct);
-        Sales = new ObservableCollection<Sale>(items);
-    });
+        var today = regional.Now.Date;
+        FilterFrom = today;
+        FilterTo = today;
+
+        return LoadCurrentPageAsync();
+    }
 
     [RelayCommand]
-    private Task FilterByDateAsync() => RunLoadAsync(async ct =>
+    private Task FilterByDateAsync()
     {
-        var items = await salesService.GetSalesByDateRangeAsync(
-            FilterFrom.Date, FilterTo.Date.AddDays(1), ct);
-        Sales = new ObservableCollection<Sale>(items);
+        _isDateFiltered = true;
+        PageIndex = 0;
+        return LoadCurrentPageAsync();
+    }
+
+    private Task LoadCurrentPageAsync() => RunLoadAsync(async ct =>
+    {
+        var from = _isDateFiltered ? (DateTime?)FilterFrom.Date : null;
+        var to = _isDateFiltered ? (DateTime?)FilterTo.Date.AddDays(1) : null;
+
+        var result = await salesService.GetPagedAsync(
+            new PagedQuery(PageIndex, PageSize), from, to, ct);
+
+        Sales = new ObservableCollection<Sale>(result.Items);
+        TotalPages = result.TotalPages;
+        TotalCount = result.TotalCount;
+        PageIndex = result.PageIndex;
     });
+
+    [RelayCommand(CanExecute = nameof(HasNextPage))]
+    private Task NextPageAsync()
+    {
+        PageIndex++;
+        return LoadCurrentPageAsync();
+    }
+
+    [RelayCommand(CanExecute = nameof(HasPreviousPage))]
+    private Task PreviousPageAsync()
+    {
+        PageIndex--;
+        return LoadCurrentPageAsync();
+    }
 
     [RelayCommand]
     private async Task ShowNewSaleAsync()

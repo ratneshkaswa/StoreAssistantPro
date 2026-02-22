@@ -6,7 +6,7 @@
         ConfirmCommand="{Binding SaveFirmCommand}"
         Loaded="OnLoaded">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-    <Grid Margin="25">
+    <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -16,38 +16,58 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="🏢 Firm Management" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+        <TextBlock Text="🏢 Firm Management" Style="{StaticResource DialogTitleStyle}" Margin="0,0,0,20"/>
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,12">
-            <TextBlock Text="Firm Name *" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,3"/>
-            <TextBox Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                     Padding="6" MaxLength="200"/>
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="{StaticResource FieldGroupSpacing}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Firm Name *" Style="{StaticResource FieldLabelStyle}"/>
+            <TextBox Grid.Row="1" Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                     MaxLength="200" HorizontalAlignment="Stretch"/>
+        </Grid>
 
-        <StackPanel Grid.Row="2" Margin="0,0,0,12">
-            <TextBlock Text="Address" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,3"/>
-            <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                     Padding="6" MaxLength="500" TextWrapping="Wrap"
-                     AcceptsReturn="True" Height="50" VerticalScrollBarVisibility="Auto"/>
-        </StackPanel>
+        <Grid Grid.Row="2" Margin="{StaticResource FieldGroupSpacing}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Address" Style="{StaticResource FieldLabelStyle}"/>
+            <TextBox Grid.Row="1" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="500" TextWrapping="Wrap"
+                     AcceptsReturn="True" Height="50" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch"/>
+        </Grid>
 
-        <StackPanel Grid.Row="3" Margin="0,0,0,12">
-            <TextBlock Text="Phone" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,3"/>
-            <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
-                     Padding="6" MaxLength="20"/>
-        </StackPanel>
+        <Grid Grid.Row="3" Margin="{StaticResource FieldGroupSpacing}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Phone" Style="{StaticResource FieldLabelStyle}"/>
+            <TextBox Grid.Row="1" Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="20" HorizontalAlignment="Stretch"/>
+        </Grid>
 
-        <StackPanel Grid.Row="4" Margin="0,0,0,5">
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap"/>
-            <TextBlock Text="{Binding SuccessMessage}" Foreground="#4CAF50" TextWrapping="Wrap"/>
-        </StackPanel>
+        <Grid Grid.Row="4" Margin="0,0,0,5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Grid.Row="1" Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
+        </Grid>
 
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="💾 Save" Command="{Binding SaveFirmCommand}"
-                    Padding="16,8" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,0"/>
-            <Button Content="Close" IsCancel="True"
-                    Padding="16,8" FontSize="13"/>
-        </StackPanel>
+        <Grid Grid.Row="5" HorizontalAlignment="Right">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="💾 Save" Command="{Binding SaveFirmCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
+            <Button Grid.Column="1" Content="Close" IsCancel="True"
+                    Padding="{StaticResource ButtonPaddingLarge}" FontSize="{StaticResource FontSizeBody}"/>
+        </Grid>
     </Grid>
     </ScrollViewer>
 </core:BaseDialogWindow>

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Navigation;
+using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.Products.Commands;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Products.ViewModels;
@@ -25,6 +26,9 @@ public static class ProductsModule
         services.AddTransient<ICommandHandler<SaveProductCommand>, SaveProductHandler>();
         services.AddTransient<ICommandHandler<UpdateProductCommand>, UpdateProductHandler>();
         services.AddTransient<ICommandHandler<DeleteProductCommand>, DeleteProductHandler>();
+
+        // Quick actions
+        services.AddSingleton<IQuickActionContributor, ProductsQuickActionContributor>();
 
         // ViewModels
         services.AddTransient<ProductsViewModel>();

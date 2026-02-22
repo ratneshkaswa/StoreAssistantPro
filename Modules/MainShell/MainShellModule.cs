@@ -20,6 +20,8 @@ public static class MainShellModule
 
         // Services
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IQuickActionService, QuickActionService>();
+        services.AddSingleton<IShortcutService, ShortcutService>();
         services.AddTransient<IDashboardService, DashboardService>();
         services.AddSingleton<IMainShellFlow, MainShellFlow>();
 

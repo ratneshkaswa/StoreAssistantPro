@@ -37,7 +37,6 @@ public partial class AppStateService : ObservableObject, IAppStateService
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => CurrentTime = _regional.FormatTime(_regional.Now);
-        _clockTimer.Start();
     }
 
     // ── Observable state ──
@@ -69,8 +68,21 @@ public partial class AppStateService : ObservableObject, IAppStateService
     public void SetCurrentUser(UserType userType) =>
         CurrentUserType = userType;
 
-    public void SetLoggedIn(bool isLoggedIn) =>
+    public void SetLoggedIn(bool isLoggedIn)
+    {
         IsLoggedIn = isLoggedIn;
+
+        // Start the clock on first login; stop when logged out.
+        if (isLoggedIn && !_clockTimer.IsEnabled)
+        {
+            CurrentTime = _regional.FormatTime(_regional.Now);
+            _clockTimer.Start();
+        }
+        else if (!isLoggedIn && _clockTimer.IsEnabled)
+        {
+            _clockTimer.Stop();
+        }
+    }
 
     public void SetBillingSession(object? session) =>
         CurrentBillingSession = session;

@@ -27,7 +27,12 @@ internal static class HostingExtensions
 {
     public static IServiceCollection AddDataAccess(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContextFactory<AppDbContext>(options =>
+        var isDevelopment = false;
+#if DEBUG
+        isDevelopment = true;
+#endif
+
+        services.AddPooledDbContextFactory<AppDbContext>(options =>
             options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
                     sqlOptions => sqlOptions
@@ -36,7 +41,7 @@ internal static class HostingExtensions
                             maxRetryDelay: TimeSpan.FromSeconds(5),
                             errorNumbersToAdd: null)
                         .CommandTimeout(30))
-                .EnableDetailedErrors()
+                .EnableDetailedErrors(isDevelopment)
                 .EnableSensitiveDataLogging(false));
 
         return services;
@@ -59,11 +64,12 @@ internal static class HostingExtensions
         services.AddSingleton<ICommandBus, CommandBus>();
         services.AddSingleton<IEventBus, EventBus>();
         services.AddSingleton<IFeatureToggleService, FeatureToggleService>();
-        services.AddSingleton<IMasterPinValidator, MasterPinValidator>();
+        services.AddTransient<IMasterPinValidator, MasterPinValidator>();
         services.AddSingleton<IWindowSizingService, WindowSizingService>();
         services.AddSingleton<IRegionalSettingsService, RegionalSettingsService>();
         services.AddTransient<ITransactionHelper, TransactionHelper>();
         services.AddTransient<IApplicationInfoService, ApplicationInfoService>();
+        services.AddSingleton<IPerformanceMonitor, PerformanceMonitor>();
 
         return services;
     }

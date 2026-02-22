@@ -21,24 +21,14 @@ public class AuthenticationFlow(
     {
         userType = default;
 
-        while (true)
-        {
-            var selectionWindow = serviceProvider.GetRequiredService<UserSelectionWindow>();
-            sizingService.ConfigureStartupWindow(selectionWindow, 350, 300);
-            if (selectionWindow.ShowDialog() != true)
-                return false;
+        var loginWindow = serviceProvider.GetRequiredService<UnifiedLoginWindow>();
+        sizingService.ConfigureStartupWindow(loginWindow, 420, 520);
 
-            var selectedType = ((UserSelectionViewModel)selectionWindow.DataContext).SelectedUserType;
+        if (loginWindow.ShowDialog() != true)
+            return false;
 
-            var pinWindow = serviceProvider.GetRequiredService<PinLoginWindow>();
-            sizingService.ConfigureStartupWindow(pinWindow, 320, 250);
-            ((PinLoginViewModel)pinWindow.DataContext).UserType = selectedType;
-
-            if (pinWindow.ShowDialog() == true)
-            {
-                userType = selectedType;
-                return true;
-            }
-        }
+        var vm = (UnifiedLoginViewModel)loginWindow.DataContext;
+        userType = vm.SelectedUserType!.Value;
+        return true;
     }
 }

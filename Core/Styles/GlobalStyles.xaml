@@ -208,6 +208,58 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
+         DATAGRID VIRTUALISATION & SCROLL PERFORMANCE
+
+         Implicit style:  baseline for every DataGrid in the app.
+         EnterpriseDataGridStyle:  full optimisation for grids that
+             display large / growing datasets (Products, Sales history,
+             future Billing grid).
+
+         Key settings:
+           ┌─ Row virtualisation ───── VirtualizingPanel.IsVirtualizing
+           │  Rows outside the viewport are never materialised.
+           ├─ Container recycling ──── VirtualizingPanel.VirtualizationMode
+           │  Reuses row containers instead of GC-ing and re-creating.
+           ├─ Column virtualisation ── EnableColumnVirtualization
+           │  Only measures / renders visible columns.
+           │  NOTE: Star-width (*) columns disable column virtualisation;
+           │  enterprise grids use fixed pixel widths instead.
+           ├─ Pixel scrolling ──────── VirtualizingPanel.ScrollUnit
+           │  Smooth, sub-row scroll offset (default is item-based).
+           ├─ Deferred scrolling ───── ScrollViewer.IsDeferredScrollingEnabled
+           │  Delays re-query while the thumb is dragged.
+           └─ Fixed row height ─────── RowHeight
+               Avoids per-row measure pass; critical for 10k+ rows.
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Baseline: every DataGrid gets virtualisation + recycling -->
+    <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+        <Setter Property="EnableRowVirtualization" Value="True"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+    </Style>
+
+    <!-- Full enterprise optimisation for primary data grids -->
+    <Style x:Key="EnterpriseDataGridStyle" TargetType="DataGrid"
+           BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+        <Setter Property="VirtualizingPanel.CacheLength" Value="2,2"/>
+        <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
+        <Setter Property="EnableRowVirtualization" Value="True"/>
+        <Setter Property="EnableColumnVirtualization" Value="True"/>
+        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
+        <Setter Property="RowHeight" Value="32"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
          KEYBOARD & FOCUS BEHAVIOR
 
          Enter       = DefaultCommand or next input

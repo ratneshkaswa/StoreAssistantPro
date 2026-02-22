@@ -1,0 +1,155 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SELECTABLE USER BUTTON
+
+         POS-style role selection button with visual highlight when
+         the button's Tag matches the ViewModel's SelectedUserType.
+
+         Usage:
+           <Button Style="{StaticResource SelectableUserButtonStyle}"
+                   Tag="{x:Static models:UserType.Admin}"
+                   Command="{Binding SelectUserCommand}"
+                   CommandParameter="{x:Static models:UserType.Admin}"
+                   Content="👤  Admin"/>
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="SelectableUserButtonStyle" TargetType="Button">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="12,16"/>
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="BorderBrush" Value="#B0B0B0"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Foreground" Value="#333"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#E3F2FD"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#007ACC"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#BBDEFB"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#005A9E"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         POS KEYPAD BUTTON
+
+         Large touch-friendly button for POS-style PIN entry.
+         Star-sized grid rows ensure buttons scale with the keypad area.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="PosKeypadButtonStyle" TargetType="Button">
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Margin" Value="4"/>
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="BorderBrush" Value="#B0B0B0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#333"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         QUICK ACTION BAR BUTTON
+
+         Enterprise POS toolbar button — large touch-friendly hit area
+         with vertically stacked icon, title, and shortcut hint.
+
+         Sizing follows Microsoft's 44 px minimum touch target guideline.
+         Spacing uses the project's 4 px base unit grid (see GlobalStyles).
+
+         Usage (inside ItemsControl.ItemTemplate):
+           <Button Style="{StaticResource QuickActionButtonStyle}"
+                   Command="{Binding Command}"/>
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="QuickActionButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="72"/>
+        <Setter Property="MinHeight" Value="64"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="#333"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="Margin" Value="4,0"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <TextBlock x:Name="IconText"
+                                       Text="{Binding Icon}"
+                                       FontSize="24"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="TitleText"
+                                       Text="{Binding Title}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,4,0,0"/>
+                            <TextBlock x:Name="ShortcutHint"
+                                       Text="{Binding ShortcutText}"
+                                       FontSize="10" Foreground="#999"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Empty shortcut → collapse the hint row -->
+                        <DataTrigger Binding="{Binding ShortcutText}" Value="">
+                            <Setter TargetName="ShortcutHint" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#E3F2FD"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#90CAF9"/>
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#BBDEFB"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#42A5F5"/>
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

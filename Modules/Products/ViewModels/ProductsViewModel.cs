@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Data;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Core.Services;
@@ -19,7 +20,8 @@ public partial class ProductsViewModel(
     IMasterPinValidator masterPinValidator,
     ICommandBus commandBus) : BaseViewModel
 {
-    private List<Product> _allProducts = [];
+    private const int PageSize = 50;
+    private CancellationTokenSource? _searchCts;
 
     // ── Role-based access ──
 
@@ -37,6 +39,35 @@ public partial class ProductsViewModel(
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
+
+    // ── Paging state ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyCanExecuteChangedFor(nameof(PreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
+    public partial int PageIndex { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    [NotifyCanExecuteChangedFor(nameof(NextPageCommand))]
+    public partial int TotalPages { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PageDisplay))]
+    public partial int TotalCount { get; set; }
+
+    public string PageDisplay => TotalPages > 0
+        ? $"Page {PageIndex + 1} of {TotalPages} ({TotalCount} items)"
+        : "No results";
+
+    public bool HasPreviousPage => PageIndex > 0;
+    public bool HasNextPage => PageIndex < TotalPages - 1;
+
+    // ── Add form ──
 
     [ObservableProperty]
     public partial string NewProductName { get; set; } = string.Empty;
@@ -62,33 +93,59 @@ public partial class ProductsViewModel(
     [ObservableProperty]
     public partial int EditProductQuantity { get; set; }
 
+    // ── Search (server-side with debounce) ──
+
     partial void OnSearchTextChanged(string value)
     {
-        ApplyFilter(value);
+        PageIndex = 0;
+        DebounceSearch();
     }
 
-    private void ApplyFilter(string filter)
+    private async void DebounceSearch()
     {
-        if (string.IsNullOrWhiteSpace(filter))
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = new CancellationTokenSource();
+        var ct = _searchCts.Token;
+
+        try
         {
-            Products = new ObservableCollection<Product>(_allProducts);
+            await Task.Delay(300, ct);
+            await LoadProductsAsync();
         }
-        else
+        catch (OperationCanceledException)
         {
-            var filtered = _allProducts
-                .Where(p => p.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            Products = new ObservableCollection<Product>(filtered);
+            // Debounce — superseded by newer keystroke.
         }
     }
+
+    // ── Data loading ──
 
     [RelayCommand]
     private Task LoadProductsAsync() => RunLoadAsync(async ct =>
     {
-        var items = await productService.GetAllAsync(ct);
-        _allProducts = items.ToList();
-        ApplyFilter(SearchText);
+        var result = await productService.GetPagedAsync(
+            new PagedQuery(PageIndex, PageSize, SearchText), ct);
+
+        Products = new ObservableCollection<Product>(result.Items);
+        TotalPages = result.TotalPages;
+        TotalCount = result.TotalCount;
+        PageIndex = result.PageIndex;
     });
+
+    [RelayCommand(CanExecute = nameof(HasNextPage))]
+    private Task NextPageAsync()
+    {
+        PageIndex++;
+        return LoadProductsAsync();
+    }
+
+    [RelayCommand(CanExecute = nameof(HasPreviousPage))]
+    private Task PreviousPageAsync()
+    {
+        PageIndex--;
+        return LoadProductsAsync();
+    }
 
     [RelayCommand]
     private void ShowAddForm()
@@ -216,9 +273,8 @@ public partial class ProductsViewModel(
 
         if (result.Succeeded)
         {
-            _allProducts.Remove(SelectedProduct);
-            Products.Remove(SelectedProduct);
             SelectedProduct = null;
+            await LoadProductsAsync();
         }
         else
         {

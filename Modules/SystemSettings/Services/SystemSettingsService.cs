@@ -10,10 +10,12 @@ namespace StoreAssistantPro.Modules.SystemSettings.Services;
 public class SystemSettingsService(
     IDbContextFactory<AppDbContext> contextFactory,
     ILoginService loginService,
-    IRegionalSettingsService regional) : ISystemSettingsService
+    IRegionalSettingsService regional,
+    IPerformanceMonitor perf) : ISystemSettingsService
 {
     public async Task ChangeMasterPinAsync(string currentPin, string newPin)
     {
+        using var _ = perf.BeginScope("SystemSettingsService.ChangeMasterPinAsync");
         var isValid = await loginService.ValidateMasterPinAsync(currentPin).ConfigureAwait(false);
         if (!isValid)
             throw new InvalidOperationException("Current Master Password is incorrect.");

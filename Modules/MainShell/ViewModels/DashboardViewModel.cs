@@ -20,7 +20,7 @@ public partial class DashboardViewModel(IDashboardService dashboardService) : Ba
     public partial int TodaysTransactions { get; set; }
 
     [RelayCommand]
-    private async Task LoadDashboardAsync()
+    private Task LoadDashboardAsync() => RunLoadAsync(async _ =>
     {
         var summary = await dashboardService.GetSummaryAsync();
 
@@ -28,5 +28,5 @@ public partial class DashboardViewModel(IDashboardService dashboardService) : Ba
         LowStockCount = summary.LowStockCount;
         TodaysSales = summary.TodaysSales;
         TodaysTransactions = summary.TodaysTransactions;
-    }
+    });
 }

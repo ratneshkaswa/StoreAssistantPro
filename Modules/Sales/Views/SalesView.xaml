@@ -10,7 +10,7 @@
     <UserControl.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding ShowNewSaleCommand}"/>
     </UserControl.InputBindings>
-    <Grid Margin="20">
+    <Grid Margin="{StaticResource PagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -19,12 +19,12 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Sales" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+        <TextBlock Text="Sales" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,10"/>
 
-        <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+        <WrapPanel Grid.Row="1" Margin="{StaticResource ToolbarSpacing}">
             <Button Content="🛒 New Sale" Command="{Binding ShowNewSaleCommand}"
-                    Padding="10,5" Margin="0,0,15,0" FontWeight="SemiBold"
-                    VerticalAlignment="Center"
+                    Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"
+                    VerticalAlignment="Center" Margin="0,0,15,0"
                     Visibility="{Binding CanCreateSales, Converter={StaticResource BoolToVisibility}}"/>
             <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <DatePicker SelectedDate="{Binding FilterFrom}" Width="130" Margin="0,0,10,0"
@@ -32,14 +32,16 @@
             <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <DatePicker SelectedDate="{Binding FilterTo}" Width="130" Margin="0,0,10,0"
                         VerticalAlignment="Center"/>
-            <Button Content="Filter" Command="{Binding FilterByDateCommand}" Padding="10,5" Margin="0,0,5,0"
+            <Button Content="Filter" Command="{Binding FilterByDateCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
                     VerticalAlignment="Center"/>
-            <Button Content="Load All" Command="{Binding LoadSalesCommand}" Padding="10,5"
+            <Button Content="Load All" Command="{Binding LoadSalesCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}" Margin="0"
                     VerticalAlignment="Center"/>
         </WrapPanel>
 
         <!-- New Sale Form -->
-        <Border Grid.Row="2" Background="#F5F5F5" CornerRadius="6" Padding="15" Margin="0,0,0,10"
+        <Border Grid.Row="2" Style="{StaticResource FormCardStyle}" Margin="0,0,0,10"
                 Visibility="{Binding IsNewSaleVisible, Converter={StaticResource BoolToVisibility}}"
                 h:KeyboardNav.DefaultCommand="{Binding AddToCartCommand}"
                 h:KeyboardNav.EscapeCommand="{Binding CancelNewSaleCommand}">
@@ -55,7 +57,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="New Sale" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"
+                <TextBlock Text="New Sale" Style="{StaticResource SectionHeaderStyle}"
                            Grid.ColumnSpan="2"/>
 
                 <!-- Product picker -->
@@ -66,59 +68,64 @@
                     <TextBlock Text="Qty:" VerticalAlignment="Center" Margin="0,0,5,0"/>
                     <TextBox Text="{Binding CartQuantity, UpdateSourceTrigger=PropertyChanged}"
                              h:NumericInput.IsIntegerOnly="True"
-                             Width="50" Padding="4" Margin="0,0,8,0" VerticalContentAlignment="Center"/>
-                    <Button Content="Add to Cart" Command="{Binding AddToCartCommand}" Padding="10,4"/>
+                             Width="50" Margin="0,0,8,0" VerticalContentAlignment="Center"/>
+                    <Button Content="Add to Cart" Command="{Binding AddToCartCommand}"
+                            Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
                 </StackPanel>
 
                 <!-- Cart -->
-                <DataGrid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,8"
-                          ItemsSource="{Binding CartItems}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          MaxHeight="150" SelectionMode="Single"
-                          CanUserAddRows="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
-                        <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="80"/>
-                        <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="50"/>
-                        <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="90"/>
-                        <DataGridTemplateColumn Header="" Width="Auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="✕" Padding="4,1"
-                                            Command="{Binding DataContext.RemoveFromCartCommand,
-                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            BorderThickness="0" Background="Transparent"
-                                            Foreground="Red" Cursor="Hand"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,8" VerticalScrollBarVisibility="Auto">
+                    <DataGrid ItemsSource="{Binding CartItems}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
+                            <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="80"/>
+                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="50"/>
+                            <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="90"/>
+                            <DataGridTemplateColumn Header="" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="✕" Padding="4,1"
+                                                Command="{Binding DataContext.RemoveFromCartCommand,
+                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                BorderThickness="0" Background="Transparent"
+                                                Foreground="Red" Cursor="Hand"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
 
                 <!-- Footer -->
                 <StackPanel Grid.Row="3" Orientation="Horizontal" Grid.ColumnSpan="2">
                     <TextBlock Text="Payment:" VerticalAlignment="Center" Margin="0,0,5,0"/>
                     <ComboBox ItemsSource="{Binding PaymentMethods}"
                              SelectedItem="{Binding PaymentMethod}" Width="100" Margin="0,0,15,0"/>
-                    <TextBlock VerticalAlignment="Center" Margin="0,0,15,0" FontSize="16" FontWeight="Bold">
+                    <TextBlock VerticalAlignment="Center" Margin="0,0,15,0"
+                               FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="Bold">
                         <Run Text="Total: "/>
                         <Run Text="{Binding CartTotal, StringFormat=C, Mode=OneWay}"/>
                     </TextBlock>
                     <Button Content="✅ Complete Sale" Command="{Binding CompleteSaleCommand}"
-                            Padding="12,5" Margin="0,0,5,0" FontWeight="SemiBold"/>
-                    <Button Content="Cancel" Command="{Binding CancelNewSaleCommand}" Padding="10,5"/>
+                            Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"/>
+                    <Button Content="Cancel" Command="{Binding CancelNewSaleCommand}"
+                            Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}" Foreground="Red"
-                   TextWrapping="Wrap" Margin="0,0,0,5"/>
+        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}"
+                   Style="{StaticResource ErrorMessageStyle}"/>
 
-        <!-- Sales history -->
+        <!-- Sales history: star-sized area -->
         <Grid Grid.Row="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
@@ -128,11 +135,9 @@
                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
 
             <DataGrid Grid.Row="0"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       ItemsSource="{Binding Sales}"
-                      SelectedItem="{Binding SelectedSale}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      SelectionMode="Single">
+                      SelectedItem="{Binding SelectedSale}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
                     <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=g}" Width="160"/>
@@ -142,35 +147,48 @@
                 </DataGrid.Columns>
             </DataGrid>
 
+            <!-- Paging Controls -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal"
+                        HorizontalAlignment="Center" Margin="0,8,0,0">
+                <Button Content="◀ Previous" Command="{Binding PreviousPageCommand}"
+                        Padding="8,4" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding PageDisplay}" VerticalAlignment="Center"
+                           FontSize="{StaticResource FontSizeLabel}" Foreground="#666" Margin="0,0,8,0"/>
+                <Button Content="Next ▶" Command="{Binding NextPageCommand}"
+                        Padding="8,4"/>
+            </StackPanel>
+
             <!-- Sale Detail Panel -->
-            <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0"
-                    Padding="12,8" MaxHeight="180"
-                    Visibility="{Binding HasSelectedSale, Converter={StaticResource BoolToVisibility}}">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
-                        <TextBlock Text="📋 Sale #" FontWeight="SemiBold" FontSize="13"/>
-                        <TextBlock Text="{Binding SelectedSale.Id}" FontWeight="SemiBold" FontSize="13"/>
-                        <TextBlock Text=" — " Foreground="#999"/>
-                        <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=g}" Foreground="#666"/>
-                        <TextBlock Text=" — " Foreground="#999"/>
-                        <TextBlock Text="{Binding SelectedSale.PaymentMethod}" Foreground="#666"/>
-                        <TextBlock Text=" — Total: " Foreground="#999" Margin="10,0,0,0"/>
-                        <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C}"
-                                   FontWeight="Bold" Foreground="#2196F3"/>
-                    </StackPanel>
-                    <DataGrid ItemsSource="{Binding SelectedSale.Items}"
-                              AutoGenerateColumns="False" IsReadOnly="True"
-                              HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                              BorderThickness="0" CanUserAddRows="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
-                            <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="100"/>
-                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="60"/>
-                            <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
-            </Border>
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding HasSelectedSale, Converter={StaticResource BoolToVisibility}}">
+                <Border Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0"
+                        Padding="12,8">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="📋 Sale #" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                            <TextBlock Text="{Binding SelectedSale.Id}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                            <TextBlock Text=" — " Foreground="#999"/>
+                            <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=g}" Foreground="#666"/>
+                            <TextBlock Text=" — " Foreground="#999"/>
+                            <TextBlock Text="{Binding SelectedSale.PaymentMethod}" Foreground="#666"/>
+                            <TextBlock Text=" — Total: " Foreground="#999" Margin="10,0,0,0"/>
+                            <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C}"
+                                       FontWeight="Bold" Foreground="#2196F3"/>
+                        </StackPanel>
+                        <DataGrid ItemsSource="{Binding SelectedSale.Items}"
+                                  AutoGenerateColumns="False" IsReadOnly="True"
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  BorderThickness="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
+                                <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="100"/>
+                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="60"/>
+                                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </UserControl>

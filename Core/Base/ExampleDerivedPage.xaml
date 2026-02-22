@@ -81,7 +81,7 @@
              ESC from any input    → executes CancelFormCommand.
              The commands on this Border override Window-level behavior,
              so the form has its own submit + cancel without closing. -->
-        <Border Grid.Row="0" Background="#F5F5F5" CornerRadius="6" Padding="16" Margin="0,0,0,12"
+        <Border Grid.Row="0" Style="{StaticResource FormCardStyle}"
                 h:KeyboardNav.DefaultCommand="{Binding SaveCommand}"
                 h:KeyboardNav.EscapeCommand="{Binding CancelFormCommand}">
             <Grid>
@@ -99,18 +99,18 @@
                 <!-- Row 0: Name + Value side by side.
                      TabIndex ensures Enter goes Name→Value→Notes→Save
                      even though the visual layout is two-column. -->
-                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
-                    <TextBlock Text="Name" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="{StaticResource FieldGroupSpacing}">
+                    <TextBlock Text="Name" Style="{StaticResource FieldLabelStyle}"/>
                     <TextBox TabIndex="0"/>
                 </StackPanel>
-                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12">
-                    <TextBlock Text="Value" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="{StaticResource FieldGroupSpacing}">
+                    <TextBlock Text="Value" Style="{StaticResource FieldLabelStyle}"/>
                     <TextBox TabIndex="1" h:NumericInput.IsDecimalOnly="True"/>
                 </StackPanel>
 
                 <!-- Row 1: Multi-line notes — Enter inserts newline (AcceptsReturn) -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,12">
-                    <TextBlock Text="Notes (multi-line — Enter adds a line)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="{StaticResource FieldGroupSpacing}">
+                    <TextBlock Text="Notes (multi-line — Enter adds a line)" Style="{StaticResource FieldLabelStyle}"/>
                     <TextBox TabIndex="2" AcceptsReturn="True" TextWrapping="Wrap"
                              Height="50" VerticalScrollBarVisibility="Auto"/>
                 </StackPanel>
@@ -118,25 +118,24 @@
                 <!-- Row 2: Buttons — Enter invokes the command, not focus-move -->
                 <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                             Orientation="Horizontal">
-                    <Button Content="💾 Save" TabIndex="3" Padding="12,6" Margin="0,0,6,0"
-                            FontWeight="SemiBold"/>
-                    <Button Content="Cancel" TabIndex="4" Padding="12,6"/>
+                    <Button Content="💾 Save" TabIndex="3"
+                            Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"/>
+                    <Button Content="Cancel" TabIndex="4"
+                            Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- ── Toolbar / action bar ───────────────────────────────── -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="➕ Add" Padding="10,5" Margin="0,0,5,0"/>
-            <Button Content="✏️ Edit" Padding="10,5" Margin="0,0,5,0"/>
-            <Button Content="🗑 Delete" Padding="10,5"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ToolbarSpacing}">
+            <Button Content="➕ Add" Style="{StaticResource ToolbarButtonStyle}"/>
+            <Button Content="✏️ Edit" Style="{StaticResource ToolbarButtonStyle}"/>
+            <Button Content="🗑 Delete" Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
         </StackPanel>
 
         <!-- Primary data region — star-sized row auto-resizes with the window -->
         <DataGrid Grid.Row="2"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  SelectionMode="Single">
+                  Style="{StaticResource EnterpriseDataGridStyle}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Width="60"/>
                 <DataGridTextColumn Header="Name" Width="*"/>

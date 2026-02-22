@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Sales.Services;
@@ -11,13 +12,17 @@ namespace StoreAssistantPro.Modules.MainShell.Services;
 /// </summary>
 public class DashboardService(
     IProductService productService,
-    ISalesService salesService) : IDashboardService
+    ISalesService salesService,
+    IRegionalSettingsService regional,
+    IPerformanceMonitor perf) : IDashboardService
 {
     public async Task<DashboardSummary> GetSummaryAsync()
     {
+        using var _ = perf.BeginScope("DashboardService.GetSummaryAsync");
+        var today = regional.Now.Date;
         var products = (await productService.GetAllAsync().ConfigureAwait(false)).ToList();
         var todaysSales = (await salesService.GetSalesByDateRangeAsync(
-            DateTime.Today, DateTime.Today.AddDays(1)).ConfigureAwait(false)).ToList();
+            today, today.AddDays(1)).ConfigureAwait(false)).ToList();
 
         return new DashboardSummary(
             TotalProducts: products.Count,

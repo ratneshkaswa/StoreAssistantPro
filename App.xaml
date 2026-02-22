@@ -18,11 +18,13 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Core/Styles/GlobalStyles.xaml"/>
+                <ResourceDictionary Source="Core/Styles/PosStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
             <helpers:EqualityConverter x:Key="EqualityConverter"/>
             <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <helpers:PinDotConverter x:Key="PinDotConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:DashboardViewModel}">
@@ -85,7 +87,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type core:BasePage}">
-                        <Grid Margin="20">
+                        <Grid Margin="{StaticResource PagePadding}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -93,9 +95,11 @@
                             </Grid.RowDefinitions>
 
                             <!-- Title bar: page title + optional header content -->
-                            <DockPanel x:Name="PART_TitleBar" Grid.Row="0" Margin="0,0,0,10">
+                            <DockPanel x:Name="PART_TitleBar" Grid.Row="0"
+                                       Margin="{StaticResource TitleSpacing}">
                                 <TextBlock Text="{TemplateBinding PageTitle}"
-                                           FontSize="24" FontWeight="Bold"
+                                           Style="{StaticResource PageTitleStyle}"
+                                           Margin="0"
                                            DockPanel.Dock="Left"
                                            VerticalAlignment="Center"/>
                                 <ContentPresenter Content="{TemplateBinding HeaderContent}"
@@ -107,8 +111,7 @@
                             <!-- Error message bar -->
                             <TextBlock x:Name="PART_ErrorMessage" Grid.Row="1"
                                        Text="{Binding ErrorMessage}"
-                                       Foreground="Red" TextWrapping="Wrap"
-                                       Margin="0,0,0,5"/>
+                                       Style="{StaticResource ErrorMessageStyle}"/>
 
                             <!-- Page content + loading overlay -->
                             <Grid Grid.Row="2">

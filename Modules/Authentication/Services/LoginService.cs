@@ -13,6 +13,7 @@ public class LoginService(
     IDbContextFactory<AppDbContext> contextFactory,
     IEventBus eventBus,
     IRegionalSettingsService regional,
+    IPerformanceMonitor perf,
     ILogger<LoginService> logger) : ILoginService
 {
     private const int MaxFailedAttempts = 3;
@@ -20,9 +21,10 @@ public class LoginService(
 
     public async Task<LoginResult> ValidatePinAsync(UserType userType, string pin)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        using var _ = perf.BeginScope($"LoginService.ValidatePinAsync({userType})");
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
         var credential = await context.UserCredentials
-            .FirstOrDefaultAsync(c => c.UserType == userType);
+            .FirstOrDefaultAsync(c => c.UserType == userType).ConfigureAwait(false);
 
         if (credential is null)
         {
@@ -53,7 +55,7 @@ public class LoginService(
         {
             credential.FailedAttempts = 0;
             credential.LockoutEndTime = null;
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync().ConfigureAwait(false);
 
             logger.LogInformation("Login succeeded for {UserType}", userType);
             await eventBus.PublishAsync(new UserLoginSuccessEvent(userType, now));
@@ -66,7 +68,7 @@ public class LoginService(
         if (credential.FailedAttempts >= MaxFailedAttempts)
         {
             credential.LockoutEndTime = now.Add(LockoutDuration);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync().ConfigureAwait(false);
 
             logger.LogWarning("Login failed — {UserType} locked out after {Attempts} attempts until {LockoutEnd:u}",
                 userType, credential.FailedAttempts, credential.LockoutEndTime.Value);
@@ -75,7 +77,7 @@ public class LoginService(
             return LoginResult.LockedOut(regional.FormatTime(credential.LockoutEndTime.Value));
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync().ConfigureAwait(false);
         var remaining = MaxFailedAttempts - credential.FailedAttempts;
 
         logger.LogWarning("Login failed for {UserType} — attempt {Attempts}/{MaxAttempts}, {Remaining} remaining",
@@ -88,6 +90,7 @@ public class LoginService(
 
     public async Task<bool> ValidateMasterPinAsync(string pin)
     {
+        using var _ = perf.BeginScope("LoginService.ValidateMasterPinAsync");
         await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
         var config = await context.AppConfigs
             .AsNoTracking()

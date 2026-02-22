@@ -5,7 +5,7 @@ namespace StoreAssistantPro.Models;
 public class Sale
 {
     public int Id { get; set; }
-    public DateTime SaleDate { get; set; } = DateTime.Now;
+    public DateTime SaleDate { get; set; }
     public decimal TotalAmount { get; set; }
 
     [Required, MaxLength(50)]

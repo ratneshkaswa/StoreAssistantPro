@@ -9,7 +9,8 @@ namespace StoreAssistantPro.Core.Services;
 
 public class ApplicationInfoService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IConfiguration configuration) : IApplicationInfoService
+    IConfiguration configuration,
+    IPerformanceMonitor perf) : IApplicationInfoService
 {
     public string AppVersion { get; } =
         Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
@@ -38,6 +39,7 @@ public class ApplicationInfoService(
 
     public async Task<bool> IsDatabaseConnectedAsync()
     {
+        using var _ = perf.BeginScope("ApplicationInfoService.IsDatabaseConnectedAsync");
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
@@ -51,6 +53,7 @@ public class ApplicationInfoService(
 
     public async Task<IReadOnlyList<string>> GetPendingMigrationsAsync()
     {
+        using var _ = perf.BeginScope("ApplicationInfoService.GetPendingMigrationsAsync");
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);

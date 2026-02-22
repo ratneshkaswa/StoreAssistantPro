@@ -1,5 +1,6 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Data;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
@@ -29,6 +30,18 @@ public class SalesViewModelTests
     private SalesViewModel CreateSut() =>
         new(_salesService, _productService, _sessionService, _commandBus, _regional);
 
+    private void SetupPagedReturn(IReadOnlyList<Sale> items, int totalCount = -1)
+    {
+        var count = totalCount < 0 ? items.Count : totalCount;
+        _salesService.GetPagedAsync(
+                Arg.Any<PagedQuery>(), Arg.Any<DateTime?>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                var query = ci.Arg<PagedQuery>();
+                return new PagedResult<Sale>(items, count, query.PageIndex, query.PageSize);
+            });
+    }
+
     [Fact]
     public async Task LoadSales_PopulatesSalesList()
     {
@@ -37,7 +50,7 @@ public class SalesViewModelTests
             new() { Id = 1, TotalAmount = 50m, PaymentMethod = "Cash", Items = [] },
             new() { Id = 2, TotalAmount = 75m, PaymentMethod = "Card", Items = [] }
         };
-        _salesService.GetAllAsync().Returns(sales);
+        SetupPagedReturn(sales);
 
         var sut = CreateSut();
         await sut.LoadSalesCommand.ExecuteAsync(null);
@@ -46,10 +59,43 @@ public class SalesViewModelTests
     }
 
     [Fact]
+    public async Task LoadSales_UpdatesPagingState()
+    {
+        var sales = new List<Sale>
+        {
+            new() { Id = 1, TotalAmount = 50m, PaymentMethod = "Cash", Items = [] }
+        };
+        SetupPagedReturn(sales, totalCount: 75);
+
+        var sut = CreateSut();
+        await sut.LoadSalesCommand.ExecuteAsync(null);
+
+        Assert.Equal(75, sut.TotalCount);
+        Assert.Equal(2, sut.TotalPages);
+        Assert.Equal(0, sut.PageIndex);
+        Assert.True(sut.HasNextPage);
+        Assert.False(sut.HasPreviousPage);
+    }
+
+    [Fact]
+    public async Task LoadSales_PassesNullDates_WhenNotFiltered()
+    {
+        SetupPagedReturn([]);
+
+        var sut = CreateSut();
+        await sut.LoadSalesCommand.ExecuteAsync(null);
+
+        await _salesService.Received(1).GetPagedAsync(
+            Arg.Any<PagedQuery>(),
+            null,
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task FilterByDate_CallsServiceWithDateRange()
     {
-        _salesService.GetSalesByDateRangeAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
-            .Returns(Enumerable.Empty<Sale>());
+        SetupPagedReturn([]);
 
         var sut = CreateSut();
         sut.FilterFrom = new DateTime(2026, 1, 1);
@@ -57,9 +103,11 @@ public class SalesViewModelTests
 
         await sut.FilterByDateCommand.ExecuteAsync(null);
 
-        await _salesService.Received(1).GetSalesByDateRangeAsync(
+        await _salesService.Received(1).GetPagedAsync(
+            Arg.Any<PagedQuery>(),
             new DateTime(2026, 1, 1),
-            new DateTime(2026, 2, 1));
+            new DateTime(2026, 2, 1),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -155,7 +203,7 @@ public class SalesViewModelTests
     [Fact]
     public async Task CompleteSale_CreatesAndReloads()
     {
-        _salesService.GetAllAsync().Returns(Enumerable.Empty<Sale>());
+        SetupPagedReturn([]);
         var product = new Product { Id = 1, Name = "Widget", Price = 10m, Quantity = 50 };
 
         var sut = CreateSut();

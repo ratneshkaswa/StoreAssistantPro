@@ -2,12 +2,14 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Threading;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
+using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Workflows;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
@@ -16,13 +18,25 @@ namespace StoreAssistantPro;
 
 public partial class App : Application
 {
-    private readonly IHost _host;
+    private IHost _host = null!;
     private ILogger<App>? _logger;
 
     public App()
     {
         SetIndianCulture();
+    }
 
+    protected override async void OnStartup(StartupEventArgs e)
+    {
+        // ?? Phase 1: Show splash immediately (no DI, no DB) ?????????
+        var splash = CreateSplashWindow();
+        splash.Show();
+
+        // Yield so the splash window paints before the synchronous
+        // DI container build occupies the UI thread.
+        await Dispatcher.Yield(DispatcherPriority.Render);
+
+        // ?? Phase 2: Build DI container ?????????????????????????????
         var builder = Host.CreateApplicationBuilder();
 
         builder.Services
@@ -37,10 +51,7 @@ public partial class App : Application
         pageRegistry.ApplyTo(_host.Services.GetRequiredService<INavigationService>());
 
         _host.Services.ApplyDialogRegistrations();
-    }
 
-    protected override async void OnStartup(StartupEventArgs e)
-    {
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
 
         // 1. UI thread exceptions (bindings, commands, event handlers)
@@ -54,14 +65,29 @@ public partial class App : Application
 
         _logger.LogInformation("Application starting");
 
-        await _host.StartAsync();
+        // ?? Phase 3: Pre-warm EF Core model on a background thread ??
+        // The first CreateDbContextAsync compiles the EF model (~500 ms
+        // cold start).  Kick it off in parallel with host startup so
+        // the migration step sees an already-warm factory.
+        var warmupTask = Task.Run(async () =>
+        {
+            var factory = _host.Services
+                .GetRequiredService<IDbContextFactory<AppDbContext>>();
+            await using var _ = await factory.CreateDbContextAsync()
+                .ConfigureAwait(false);
+        });
 
+        await _host.StartAsync();
+        await warmupTask;
+
+        // ?? Phase 4: Startup workflow (migrate, setup, load) ????????
         var workflowManager = _host.Services.GetRequiredService<IWorkflowManager>();
         var session = _host.Services.GetRequiredService<ISessionService>();
         var shellFlow = _host.Services.GetRequiredService<IMainShellFlow>();
 
-        // 1. Startup workflow — migrate DB, first-time setup, load firm
         await workflowManager.StartWorkflowAsync(StartupWorkflow.WorkflowName);
+
+        splash.Close();
 
         if (workflowManager.Context.Has("Error"))
         {
@@ -75,7 +101,7 @@ public partial class App : Application
             return;
         }
 
-        // 2. Main app loop — login ? main window ? logout
+        // ?? Phase 5: Main app loop — login ? main window ? logout ??
         while (true)
         {
             await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
@@ -104,6 +130,31 @@ public partial class App : Application
         _host.Dispose();
         base.OnExit(e);
     }
+
+    // ?? Splash ??
+
+    /// <summary>
+    /// Creates a minimal splash window with zero DI dependencies.
+    /// Shown before the DI container is built so the user sees
+    /// immediate visual feedback on launch.
+    /// </summary>
+    private static Window CreateSplashWindow() => new()
+    {
+        Title = "Store Assistant Pro",
+        Width = 360,
+        Height = 200,
+        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+        WindowStyle = WindowStyle.None,
+        ResizeMode = ResizeMode.NoResize,
+        Content = new System.Windows.Controls.TextBlock
+        {
+            Text = "Loading Store Assistant Pro…",
+            FontSize = 18,
+            FontWeight = FontWeights.SemiBold,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        }
+    };
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {

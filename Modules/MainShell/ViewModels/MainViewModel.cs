@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +13,8 @@ using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Firm.Events;
+using StoreAssistantPro.Modules.MainShell.Models;
+using StoreAssistantPro.Modules.MainShell.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
@@ -25,6 +28,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private readonly IEventBus _eventBus;
     private readonly IFeatureToggleService _features;
     private readonly IStatusBarService _statusBar;
+    private readonly IQuickActionService _quickActionService;
+    private readonly IShortcutService _shortcutService;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -67,6 +72,10 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     public bool IsAdmin => AppState.CurrentUserType == UserType.Admin;
 
+    // ── Quick Action Bar ──
+
+    public ObservableCollection<QuickAction> QuickActions { get; } = [];
+
     // ── Feature-gated visibility ──
 
     public bool IsProductsEnabled => _features.IsEnabled(FeatureFlags.Products);
@@ -100,7 +109,10 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         ICommandBus commandBus,
         IEventBus eventBus,
         IFeatureToggleService features,
-        IStatusBarService statusBar)
+        IStatusBarService statusBar,
+        IQuickActionService quickActionService,
+        IShortcutService shortcutService,
+        IEnumerable<IQuickActionContributor> contributors)
     {
         _navigationService = navigationService;
         _sessionService = sessionService;
@@ -110,6 +122,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _eventBus = eventBus;
         _features = features;
         _statusBar = statusBar;
+        _quickActionService = quickActionService;
+        _shortcutService = shortcutService;
         AppState = appState;
         StatusBar = statusBar;
 
@@ -118,6 +132,11 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         AppState.PropertyChanged += OnAppStatePropertyChanged;
         _features.PropertyChanged += OnFeaturesPropertyChanged;
         _eventBus.Subscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
+
+        RegisterQuickActions();
+        foreach (var contributor in contributors)
+            contributor.Contribute(_quickActionService);
+        RefreshQuickActions();
 
         _navigationService.NavigateTo(DashboardPage);
     }
@@ -138,6 +157,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
             case nameof(IAppStateService.CurrentUserType):
                 OnPropertyChanged(nameof(CurrentUserDisplay));
                 OnPropertyChanged(nameof(IsAdmin));
+                RefreshQuickActions();
                 break;
         }
     }
@@ -244,6 +264,79 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     {
         await _sessionService.RefreshFirmNameAsync();
         _statusBar.Post($"Firm updated to '{e.FirmName}'");
+    }
+
+    // ── Quick Action Bar ──
+
+    private void RegisterQuickActions()
+    {
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Dashboard", Icon = "📊",
+            Command = NavigateToDashboardCommand,
+            ShortcutText = "Ctrl+D", Gesture = "Ctrl+D", SortOrder = 0
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "New Bill", Icon = "🧾",
+            Command = NavigateToSalesCommand,
+            ShortcutText = "Ctrl+S", Gesture = "Ctrl+S", SortOrder = 10
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Products", Icon = "📦",
+            Command = NavigateToProductsCommand,
+            ShortcutText = "Ctrl+P", Gesture = "Ctrl+P", SortOrder = 20
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Firm", Icon = "🏢",
+            Command = OpenFirmManagementCommand,
+            SortOrder = 40,
+            RequiredRoles = [UserType.Admin]
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Users", Icon = "👥",
+            Command = OpenUserManagementCommand,
+            SortOrder = 50,
+            RequiredRoles = [UserType.Admin, UserType.Manager]
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Settings", Icon = "⚙️",
+            Command = OpenSystemSettingsCommand,
+            SortOrder = 80
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Refresh", Icon = "🔄",
+            Command = RefreshCurrentViewCommand,
+            ShortcutText = "F5", Gesture = "F5", SortOrder = 90
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Logout", Icon = "🚪",
+            Command = LogoutCommand,
+            ShortcutText = "Ctrl+L", Gesture = "Ctrl+L", SortOrder = 100
+        });
+    }
+
+    private void RefreshQuickActions()
+    {
+        QuickActions.Clear();
+        foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType))
+            QuickActions.Add(action);
+    }
+
+    /// <summary>
+    /// Syncs <see cref="QuickAction.Gesture"/>-based <c>KeyBinding</c>s
+    /// into the host window. Called once by <c>MainWindow</c> code-behind
+    /// after <c>DataContext</c> is assigned.
+    /// </summary>
+    public void ApplyShortcuts(System.Windows.Window window)
+    {
+        _shortcutService.Apply(window);
     }
 
     // ── Cleanup ──

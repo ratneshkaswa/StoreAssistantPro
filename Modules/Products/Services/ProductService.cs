@@ -1,11 +1,43 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Data;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Products.Services;
 
-public class ProductService(IDbContextFactory<AppDbContext> contextFactory) : IProductService
+public class ProductService(
+    IDbContextFactory<AppDbContext> contextFactory,
+    IPerformanceMonitor perf) : IProductService
 {
+    public async Task<PagedResult<Product>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        IQueryable<Product> q = context.Products.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            q = q.Where(p => p.Name.Contains(query.SearchTerm));
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var totalPages = query.PageSize > 0
+            ? (int)Math.Ceiling((double)totalCount / query.PageSize)
+            : 0;
+
+        var pageIndex = Math.Clamp(query.PageIndex, 0, Math.Max(0, totalPages - 1));
+
+        var items = await q
+            .OrderBy(p => p.Name)
+            .Skip(pageIndex * query.PageSize)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return new PagedResult<Product>(items, totalCount, pageIndex, query.PageSize);
+    }
+
     public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);

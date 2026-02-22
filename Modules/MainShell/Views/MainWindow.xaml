@@ -6,16 +6,12 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}">
-    <Window.InputBindings>
-        <KeyBinding Gesture="Ctrl+D" Command="{Binding NavigateToDashboardCommand}"/>
-        <KeyBinding Gesture="Ctrl+P" Command="{Binding NavigateToProductsCommand}"/>
-        <KeyBinding Gesture="Ctrl+S" Command="{Binding NavigateToSalesCommand}"/>
-        <KeyBinding Gesture="Ctrl+L" Command="{Binding LogoutCommand}"/>
-        <KeyBinding Gesture="F5" Command="{Binding RefreshCurrentViewCommand}"/>
-    </Window.InputBindings>
+
+    <!-- InputBindings are generated at runtime by ShortcutService -->
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -80,8 +76,27 @@
             </MenuItem>
         </Menu>
 
+        <!-- QUICK ACTION BAR -->
+        <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1" Padding="12,6">
+            <ItemsControl ItemsSource="{Binding QuickActions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Command="{Binding Command}"
+                                Style="{StaticResource QuickActionButtonStyle}"
+                                Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
         <!-- BODY: SIDEBAR + CONTENT + PANELS -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
@@ -193,7 +208,7 @@
         </Grid>
 
         <!-- BOTTOM STATUS BAR -->
-        <StatusBar Grid.Row="2" Background="#1E1E1E" Foreground="#B0B0B0" Padding="8,4">
+        <StatusBar Grid.Row="3" Background="#1E1E1E" Foreground="#B0B0B0" Padding="8,4">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>

@@ -6,19 +6,31 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              Loaded="OnLoaded">
-    <Grid Margin="20">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
+    <Grid Margin="{StaticResource PagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Margin="0,0,0,20">
-            <TextBlock Text="Dashboard" FontSize="24" FontWeight="Bold" DockPanel.Dock="Left"/>
+        <DockPanel Margin="{StaticResource SectionSpacing}">
+            <TextBlock Text="Dashboard" Style="{StaticResource PageTitleStyle}" Margin="0"
+                       DockPanel.Dock="Left"/>
             <Button Content="🔄 Refresh" Command="{Binding LoadDashboardCommand}"
-                    HorizontalAlignment="Right" Padding="12,6" FontSize="13"/>
+                    HorizontalAlignment="Right" Style="{StaticResource PrimaryButtonStyle}"/>
         </DockPanel>
 
-        <UniformGrid Grid.Row="1" Rows="1" Columns="4" Margin="0,0,0,20" VerticalAlignment="Top">
+        <!-- Loading Indicator -->
+        <TextBlock Grid.Row="1" Text="⏳ Loading..." FontSize="14" Foreground="#888"
+                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0"
+                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+
+        <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}"
+                   Style="{StaticResource ErrorMessageStyle}"
+                   VerticalAlignment="Top" Margin="0,20,0,0"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <UniformGrid Rows="1" Columns="4" VerticalAlignment="Top">
             <Border Background="#4CAF50" CornerRadius="8" Margin="5" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Total Products" Foreground="White" FontSize="14"/>
@@ -43,6 +55,8 @@
                     <TextBlock Text="{Binding TodaysTransactions}" Foreground="White" FontSize="32" FontWeight="Bold"/>
                 </StackPanel>
             </Border>
-        </UniformGrid>
+            </UniformGrid>
+        </ScrollViewer>
     </Grid>
+    </ScrollViewer>
 </UserControl>

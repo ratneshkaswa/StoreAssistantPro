@@ -28,8 +28,8 @@ public class CompleteSaleHandler(
             }).ToList()
         };
 
-        await salesService.CreateSaleAsync(sale);
-        await eventBus.PublishAsync(new SaleCompletedEvent(sale.Id, sale.TotalAmount));
+        var saleId = await salesService.CreateSaleAsync(sale);
+        await eventBus.PublishAsync(new SaleCompletedEvent(saleId, sale.TotalAmount));
         return CommandResult.Success();
     }
 }

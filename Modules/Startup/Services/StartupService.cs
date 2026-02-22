@@ -12,10 +12,12 @@ public class StartupService(
     IAppStateService appState,
     IConfiguration configuration,
     IFeatureToggleService featureToggle,
+    IPerformanceMonitor perf,
     ILogger<StartupService> logger) : IStartupService
 {
     public async Task MigrateDatabaseAsync()
     {
+        using var _ = perf.BeginScope("StartupService.MigrateDatabaseAsync", TimeSpan.FromSeconds(5));
         await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
         // 1. Verify connectivity before attempting migration
