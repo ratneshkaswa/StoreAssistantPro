@@ -7,9 +7,11 @@ namespace StoreAssistantPro.Core;
 /// try/catch → <see cref="CommandResult"/> pattern so handlers
 /// only contain business logic.
 /// <para>
-/// <b>Architecture rule:</b> Every <see cref="ICommandHandler{TCommand}"/>
-/// must inherit from <see cref="BaseCommandHandler{TCommand}"/> to
-/// guarantee uniform error handling across all modules.
+/// Implements both <see cref="ICommandHandler{TCommand}"/> (legacy
+/// contract kept for direct-call backward compatibility) and
+/// <see cref="ICommandRequestHandler{TCommand,TResult}"/> with
+/// <see cref="Unit"/> so the handler participates in the enterprise
+/// pipeline (behaviors → handler).
 /// </para>
 /// <para>Usage:</para>
 /// <code>
@@ -24,8 +26,10 @@ namespace StoreAssistantPro.Core;
 /// }
 /// </code>
 /// </summary>
-public abstract class BaseCommandHandler<TCommand> : ICommandHandler<TCommand>
-    where TCommand : ICommand
+public abstract class BaseCommandHandler<TCommand>
+    : ICommandHandler<TCommand>,
+      ICommandRequestHandler<TCommand, Unit>
+    where TCommand : ICommandRequest<Unit>
 {
     /// <summary>
     /// Template method: wraps <see cref="ExecuteAsync"/> in a
@@ -42,6 +46,21 @@ public abstract class BaseCommandHandler<TCommand> : ICommandHandler<TCommand>
         {
             return CommandResult.Failure(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Pipeline-compatible entry point. Delegates to
+    /// <see cref="HandleAsync(TCommand)"/> and wraps the untyped
+    /// <see cref="CommandResult"/> into a
+    /// <see cref="CommandResult{Unit}"/>.
+    /// </summary>
+    async Task<CommandResult<Unit>> ICommandRequestHandler<TCommand, Unit>.HandleAsync(
+        TCommand command, CancellationToken ct)
+    {
+        var result = await HandleAsync(command);
+        return result.Succeeded
+            ? CommandResult<Unit>.Success(Unit.Value)
+            : CommandResult<Unit>.Failure(result.ErrorMessage ?? "Unknown error");
     }
 
     /// <summary>

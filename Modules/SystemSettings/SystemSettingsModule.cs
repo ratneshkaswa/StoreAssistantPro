@@ -23,7 +23,7 @@ public static class SystemSettingsModule
         services.AddSingleton<IWorkflow, SettingsWorkflow>();
 
         // Command handlers
-        services.AddTransient<ICommandHandler<ChangeMasterPinCommand>, ChangeMasterPinHandler>();
+        services.AddTransient<ICommandRequestHandler<ChangeMasterPinCommand, Unit>, ChangeMasterPinHandler>();
 
         // ViewModels
         services.AddTransient<SystemSettingsViewModel>();

@@ -1,45 +1,22 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
 namespace StoreAssistantPro.Core.Commands;
 
 /// <summary>
-/// Resolves handlers from DI and delegates execution.
-/// <para>
-/// <b>Simple commands</b> (<see cref="ICommand"/>) are dispatched
-/// directly to <see cref="ICommandHandler{TCommand}"/>.
-/// </para>
-/// <para>
-/// <b>Enterprise commands</b> (<see cref="ICommandRequest{TResult}"/>)
-/// are dispatched through <see cref="ICommandExecutionPipeline"/>
-/// which chains all registered
+/// Thin dispatcher that routes every command through the
+/// <see cref="ICommandExecutionPipeline"/>. All registered
 /// <see cref="ICommandPipelineBehavior{TCommand,TResult}"/> behaviors
-/// around the inner handler.
-/// </para>
+/// execute before the inner handler is invoked.
 /// </summary>
-public class CommandBus(
-    IServiceProvider serviceProvider,
-    ICommandExecutionPipeline pipeline,
-    ILogger<CommandBus> logger) : ICommandBus
+public class CommandBus(ICommandExecutionPipeline pipeline) : ICommandBus
 {
     /// <inheritdoc/>
     public async Task<CommandResult> SendAsync<TCommand>(TCommand command)
-        where TCommand : ICommand
+        where TCommand : ICommandRequest<Unit>
     {
-        var commandName = typeof(TCommand).Name;
+        var result = await pipeline
+            .ExecuteAsync<TCommand, Unit>(command)
+            .ConfigureAwait(false);
 
-        var handler = serviceProvider.GetService<ICommandHandler<TCommand>>()
-            ?? throw new InvalidOperationException(
-                $"No handler registered for command '{commandName}'.");
-
-        logger.LogInformation("Dispatching {Command}", commandName);
-
-        var result = await handler.HandleAsync(command);
-
-        if (!result.Succeeded)
-            logger.LogWarning("Command {Command} failed: {Error}", commandName, result.ErrorMessage);
-
-        return result;
+        return result.ToBase();
     }
 
     /// <inheritdoc/>

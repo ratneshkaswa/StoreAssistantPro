@@ -6,4 +6,4 @@ public sealed record SaveProductCommand(
     string Name,
     decimal SalePrice,
     int Quantity,
-    int? TaxProfileId) : ICommand;
+    int? TaxProfileId) : ICommandRequest<Unit>;

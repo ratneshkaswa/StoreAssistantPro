@@ -13,7 +13,7 @@ public sealed record CompleteSaleCommand(
     decimal TotalAmount,
     string PaymentMethod,
     IReadOnlyList<SaleItemDto> Items,
-    BillDiscount Discount) : ICommand;
+    BillDiscount Discount) : ICommandRequest<Unit>;
 
 public sealed record SaleItemDto(
     int ProductId,

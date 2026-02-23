@@ -25,9 +25,9 @@ public static class ProductsModule
         services.AddTransient<IProductService, ProductService>();
 
         // Command handlers
-        services.AddTransient<ICommandHandler<SaveProductCommand>, SaveProductHandler>();
-        services.AddTransient<ICommandHandler<UpdateProductCommand>, UpdateProductHandler>();
-        services.AddTransient<ICommandHandler<DeleteProductCommand>, DeleteProductHandler>();
+        services.AddTransient<ICommandRequestHandler<SaveProductCommand, Unit>, SaveProductHandler>();
+        services.AddTransient<ICommandRequestHandler<UpdateProductCommand, Unit>, UpdateProductHandler>();
+        services.AddTransient<ICommandRequestHandler<DeleteProductCommand, Unit>, DeleteProductHandler>();
 
         // Quick actions
         services.AddSingleton<IQuickActionContributor, ProductsQuickActionContributor>();

@@ -18,7 +18,7 @@ public static class UsersModule
         services.AddTransient<IUserService, UserService>();
 
         // Command handlers
-        services.AddTransient<ICommandHandler<ChangePinCommand>, ChangePinHandler>();
+        services.AddTransient<ICommandRequestHandler<ChangePinCommand, Unit>, ChangePinHandler>();
 
         // ViewModels
         services.AddTransient<UserManagementViewModel>();

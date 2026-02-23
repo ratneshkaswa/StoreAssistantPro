@@ -8,4 +8,4 @@ public sealed record UpdateProductCommand(
     decimal SalePrice,
     int Quantity,
     int? TaxProfileId,
-    byte[]? RowVersion) : ICommand;
+    byte[]? RowVersion) : ICommandRequest<Unit>;

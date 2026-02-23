@@ -26,7 +26,7 @@ public static class SalesModule
         services.AddSingleton<IOfflineSyncService, OfflineSyncService>();
 
         // Command handlers
-        services.AddTransient<ICommandHandler<CompleteSaleCommand>, CompleteSaleHandler>();
+        services.AddTransient<ICommandRequestHandler<CompleteSaleCommand, Unit>, CompleteSaleHandler>();
 
         // ViewModels
         services.AddTransient<SalesViewModel>();

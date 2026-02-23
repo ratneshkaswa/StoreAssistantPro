@@ -22,9 +22,9 @@ public static class AuthenticationModule
         services.AddSingleton<IWorkflow, LoginWorkflow>();
 
         // Command handlers
-        services.AddTransient<ICommandHandler<CompleteFirstSetupCommand>, CompleteFirstSetupHandler>();
-        services.AddTransient<ICommandHandler<LoginUserCommand>, LoginUserHandler>();
-        services.AddTransient<ICommandHandler<LogoutCommand>, LogoutHandler>();
+        services.AddTransient<ICommandRequestHandler<CompleteFirstSetupCommand, Unit>, CompleteFirstSetupHandler>();
+        services.AddTransient<ICommandRequestHandler<LoginUserCommand, Unit>, LoginUserHandler>();
+        services.AddTransient<ICommandRequestHandler<LogoutCommand, Unit>, LogoutHandler>();
 
         // ViewModels
         services.AddTransient<FirstTimeSetupViewModel>();

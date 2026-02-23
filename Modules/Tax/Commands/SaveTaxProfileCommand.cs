@@ -6,4 +6,4 @@ public sealed record SaveTaxProfileCommand(
     int? ExistingId,
     string ProfileName,
     decimal TaxRate,
-    bool IsActive) : ICommand;
+    bool IsActive) : ICommandRequest<Unit>;

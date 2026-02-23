@@ -3,4 +3,4 @@ using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Authentication.Commands;
 
-public sealed record LoginUserCommand(UserType UserType, string Pin) : ICommand;
+public sealed record LoginUserCommand(UserType UserType, string Pin) : ICommandRequest<Unit>;

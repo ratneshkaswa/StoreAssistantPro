@@ -7,4 +7,4 @@ public sealed record CompleteFirstSetupCommand(
     string AdminPin,
     string ManagerPin,
     string UserPin,
-    string MasterPin) : ICommand;
+    string MasterPin) : ICommandRequest<Unit>;

@@ -5,7 +5,7 @@ namespace StoreAssistantPro.Tests.Core;
 
 public class BaseCommandHandlerTests
 {
-    private sealed record TestCommand(string Value) : ICommand;
+    private sealed record TestCommand(string Value) : ICommandRequest<Unit>;
 
     [Fact]
     public async Task HandleAsync_Success_ReturnsExecuteResult()
