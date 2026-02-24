@@ -5,5 +5,5 @@ namespace StoreAssistantPro.Modules.Firm.Services;
 public interface IFirmService
 {
     Task<AppConfig?> GetFirmAsync();
-    Task UpdateFirmAsync(string firmName, string address, string phone);
+    Task UpdateFirmAsync(string firmName, string address, string phone, string? gstNumber = null, string? currencyCode = null);
 }

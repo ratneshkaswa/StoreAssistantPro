@@ -6,4 +6,5 @@ public interface IUserService
 {
     Task<IEnumerable<UserCredential>> GetAllUsersAsync();
     Task ChangePinAsync(UserType userType, string newPin);
+    Task ClearLockoutAsync(UserType userType);
 }

@@ -42,6 +42,16 @@ public partial class ProductsViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial StockFilter SelectedStockFilter { get; set; } = StockFilter.All;
+
+    public StockFilter[] StockFilterOptions { get; } = Enum.GetValues<StockFilter>();
+
+    [ObservableProperty]
+    public partial ActiveFilter SelectedActiveFilter { get; set; } = ActiveFilter.All;
+
+    public ActiveFilter[] ActiveFilterOptions { get; } = Enum.GetValues<ActiveFilter>();
+
     // ── Paging state ──
 
     [ObservableProperty]
@@ -78,7 +88,28 @@ public partial class ProductsViewModel(
     public partial decimal NewProductSalePrice { get; set; }
 
     [ObservableProperty]
+    public partial decimal NewProductCostPrice { get; set; }
+
+    [ObservableProperty]
     public partial int NewProductQuantity { get; set; }
+
+    [ObservableProperty]
+    public partial string NewProductHSNCode { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string NewProductBarcode { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string NewProductUOM { get; set; } = "pcs";
+
+    [ObservableProperty]
+    public partial int NewProductMinStockLevel { get; set; }
+
+    [ObservableProperty]
+    public partial bool NewProductIsActive { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool NewProductIsTaxInclusive { get; set; }
 
     [ObservableProperty]
     public partial bool IsAddFormVisible { get; set; }
@@ -93,7 +124,28 @@ public partial class ProductsViewModel(
     public partial decimal EditProductSalePrice { get; set; }
 
     [ObservableProperty]
+    public partial decimal EditProductCostPrice { get; set; }
+
+    [ObservableProperty]
     public partial int EditProductQuantity { get; set; }
+
+    [ObservableProperty]
+    public partial string EditProductHSNCode { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EditProductBarcode { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EditProductUOM { get; set; } = "pcs";
+
+    [ObservableProperty]
+    public partial int EditProductMinStockLevel { get; set; }
+
+    [ObservableProperty]
+    public partial bool EditProductIsActive { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool EditProductIsTaxInclusive { get; set; }
 
     // ── Tax profile selection ──
 
@@ -109,6 +161,18 @@ public partial class ProductsViewModel(
     // ── Search (server-side with debounce) ──
 
     partial void OnSearchTextChanged(string value)
+    {
+        PageIndex = 0;
+        DebounceSearch();
+    }
+
+    partial void OnSelectedStockFilterChanged(StockFilter value)
+    {
+        PageIndex = 0;
+        DebounceSearch();
+    }
+
+    partial void OnSelectedActiveFilterChanged(ActiveFilter value)
     {
         PageIndex = 0;
         DebounceSearch();
@@ -138,7 +202,7 @@ public partial class ProductsViewModel(
     private Task LoadProductsAsync() => RunLoadAsync(async ct =>
     {
         var result = await productService.GetPagedAsync(
-            new PagedQuery(PageIndex, PageSize, SearchText), ct);
+            new PagedQuery(PageIndex, PageSize, SearchText, SelectedStockFilter, SelectedActiveFilter), ct);
 
         Products = new ObservableCollection<Product>(result.Items);
         TotalPages = result.TotalPages;
@@ -173,8 +237,44 @@ public partial class ProductsViewModel(
         await LoadTaxProfilesAsync();
         NewProductName = string.Empty;
         NewProductSalePrice = 0;
+        NewProductCostPrice = 0;
         NewProductQuantity = 1;
+        NewProductHSNCode = string.Empty;
+        NewProductBarcode = string.Empty;
+        NewProductUOM = "pcs";
+        NewProductMinStockLevel = 0;
+        NewProductIsActive = true;
+        NewProductIsTaxInclusive = false;
         NewProductTaxProfile = AvailableTaxProfiles.FirstOrDefault(p => p.IsDefault);
+        IsEditFormVisible = false;
+        IsAddFormVisible = true;
+    }
+
+    [RelayCommand]
+    private async Task DuplicateProductAsync()
+    {
+        if (SelectedProduct is null) return;
+
+        if (!CanManageProducts)
+        {
+            ErrorMessage = "Only administrators and managers can duplicate products.";
+            return;
+        }
+
+        ErrorMessage = string.Empty;
+        await LoadTaxProfilesAsync();
+        NewProductName = SelectedProduct.Name + " (Copy)";
+        NewProductSalePrice = SelectedProduct.SalePrice;
+        NewProductCostPrice = SelectedProduct.CostPrice;
+        NewProductQuantity = 0;
+        NewProductHSNCode = SelectedProduct.HSNCode ?? string.Empty;
+        NewProductBarcode = string.Empty;
+        NewProductUOM = SelectedProduct.UOM;
+        NewProductMinStockLevel = SelectedProduct.MinStockLevel;
+        NewProductIsActive = SelectedProduct.IsActive;
+        NewProductIsTaxInclusive = SelectedProduct.IsTaxInclusive;
+        NewProductTaxProfile = AvailableTaxProfiles
+            .FirstOrDefault(p => p.Id == SelectedProduct.TaxProfileId);
         IsEditFormVisible = false;
         IsAddFormVisible = true;
     }
@@ -195,8 +295,9 @@ public partial class ProductsViewModel(
             return;
 
         var result = await commandBus.SendAsync(new SaveProductCommand(
-            NewProductName.Trim(), NewProductSalePrice, NewProductQuantity,
-            NewProductTaxProfile?.Id));
+            NewProductName.Trim(), NewProductSalePrice, NewProductCostPrice, NewProductQuantity,
+            NewProductTaxProfile?.Id, NewProductHSNCode, NewProductBarcode, NewProductUOM,
+            NewProductMinStockLevel, NewProductIsActive, NewProductIsTaxInclusive));
 
         if (result.Succeeded)
         {
@@ -224,7 +325,14 @@ public partial class ProductsViewModel(
         await LoadTaxProfilesAsync();
         EditProductName = SelectedProduct.Name;
         EditProductSalePrice = SelectedProduct.SalePrice;
+        EditProductCostPrice = SelectedProduct.CostPrice;
         EditProductQuantity = SelectedProduct.Quantity;
+        EditProductHSNCode = SelectedProduct.HSNCode ?? string.Empty;
+        EditProductBarcode = SelectedProduct.Barcode ?? string.Empty;
+        EditProductUOM = SelectedProduct.UOM;
+        EditProductMinStockLevel = SelectedProduct.MinStockLevel;
+        EditProductIsActive = SelectedProduct.IsActive;
+        EditProductIsTaxInclusive = SelectedProduct.IsTaxInclusive;
         EditProductTaxProfile = AvailableTaxProfiles
             .FirstOrDefault(p => p.Id == SelectedProduct.TaxProfileId);
         IsAddFormVisible = false;
@@ -250,7 +358,9 @@ public partial class ProductsViewModel(
         var product = SelectedProduct!;
         var result = await commandBus.SendAsync(new UpdateProductCommand(
             product.Id, EditProductName.Trim(), EditProductSalePrice,
-            EditProductQuantity, EditProductTaxProfile?.Id, product.RowVersion));
+            EditProductCostPrice, EditProductQuantity, EditProductTaxProfile?.Id,
+            EditProductHSNCode, EditProductBarcode, EditProductUOM,
+            EditProductMinStockLevel, EditProductIsActive, EditProductIsTaxInclusive, product.RowVersion));
 
         if (result.Succeeded)
         {
@@ -309,4 +419,88 @@ public partial class ProductsViewModel(
         AvailableTaxProfiles = new ObservableCollection<TaxProfile>(
             profiles.Where(p => p.IsActive));
     }
+
+    [RelayCommand]
+    private async Task ImportProductsAsync()
+    {
+        if (!CanManageProducts)
+        {
+            ErrorMessage = "Only administrators and managers can import products.";
+            return;
+        }
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+            Title = "Import Products from CSV"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        ErrorMessage = string.Empty;
+        var result = await commandBus.SendAsync<ImportProductsCommand, ImportProductsResult>(
+            new ImportProductsCommand(dialog.FileName));
+
+        if (result.Succeeded && result.Value is { } importResult)
+        {
+            var msg = $"Imported {importResult.Imported} products.";
+            if (importResult.Skipped > 0)
+                msg += $" Skipped {importResult.Skipped} rows.";
+            ErrorMessage = msg;
+            await LoadProductsAsync();
+        }
+        else
+        {
+            ErrorMessage = result.ErrorMessage ?? "Import failed.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportProductsAsync()
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            Title = "Export Products to CSV",
+            FileName = "Products_Export.csv"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var allProducts = await productService.GetAllAsync();
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Name,SalePrice,CostPrice,Quantity,HSNCode,Barcode,UOM,MinStockLevel,IsActive,IsTaxInclusive");
+
+            foreach (var p in allProducts)
+            {
+                sb.AppendLine(string.Join(",",
+                    EscapeCsv(p.Name),
+                    p.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    p.CostPrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    p.Quantity,
+                    EscapeCsv(p.HSNCode ?? ""),
+                    EscapeCsv(p.Barcode ?? ""),
+                    EscapeCsv(p.UOM),
+                    p.MinStockLevel,
+                    p.IsActive,
+                    p.IsTaxInclusive));
+            }
+
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
+            ErrorMessage = $"Exported {allProducts.Count()} products to {System.IO.Path.GetFileName(dialog.FileName)}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+        }
+    }
+
+    private static string EscapeCsv(string value) =>
+        value.Contains(',') || value.Contains('"') || value.Contains('\n')
+            ? $"\"{value.Replace("\"", "\"\"")}\""
+            : value;
 }

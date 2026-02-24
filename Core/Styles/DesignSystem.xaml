@@ -228,11 +228,11 @@
          Fixed widths keep column virtualisation enabled (star
          widths disable it).  Use on EnterpriseDataGridStyle grids.
          ──────────────────────────────────────────────────────────── -->
-    <sys:Double x:Key="ColumnWidthId">60</sys:Double>
-    <sys:Double x:Key="ColumnWidthPrice">110</sys:Double>
-    <sys:Double x:Key="ColumnWidthQty">60</sys:Double>
-    <sys:Double x:Key="ColumnWidthStatus">100</sys:Double>
-    <sys:Double x:Key="ColumnWidthDate">120</sys:Double>
+    <DataGridLength x:Key="ColumnWidthId">60</DataGridLength>
+    <DataGridLength x:Key="ColumnWidthPrice">110</DataGridLength>
+    <DataGridLength x:Key="ColumnWidthQty">60</DataGridLength>
+    <DataGridLength x:Key="ColumnWidthStatus">100</DataGridLength>
+    <DataGridLength x:Key="ColumnWidthDate">120</DataGridLength>
 
 
     <!-- ═══════════════════════════════════════════════════════════════
@@ -261,15 +261,13 @@
     <!-- ═══════════════════════════════════════════════════════════════
          7. ANIMATION DURATIONS
 
-         Fast     = 83 ms   button hover, instant feedback
-         Normal   = 167 ms  focus indicator, panel reveal
-         PageFade = 150 ms  page content fade-in (no movement)
-         Slow     = 250 ms  view transitions, overlay fades
+         All durations set to 0 — animations disabled.
+         Original values preserved in comments for re-enabling.
          ═══════════════════════════════════════════════════════════════ -->
-    <Duration x:Key="FluentDurationFast">0:0:0.083</Duration>
-    <Duration x:Key="FluentDurationNormal">0:0:0.167</Duration>
-    <Duration x:Key="FluentDurationPageFade">0:0:0.15</Duration>
-    <Duration x:Key="FluentDurationSlow">0:0:0.25</Duration>
+    <Duration x:Key="FluentDurationFast">0:0:0</Duration>         <!-- was 0:0:0.083 -->
+    <Duration x:Key="FluentDurationNormal">0:0:0</Duration>       <!-- was 0:0:0.167 -->
+    <Duration x:Key="FluentDurationPageFade">0:0:0</Duration>     <!-- was 0:0:0.15  -->
+    <Duration x:Key="FluentDurationSlow">0:0:0</Duration>         <!-- was 0:0:0.25  -->
 
     <!-- Easing curve for panel dimming / focus-lock transitions -->
     <CubicEase x:Key="PanelDimEase" EasingMode="EaseOut"/>
@@ -297,18 +295,18 @@
     <CubicEase    x:Key="FluentEaseAccelerate" EasingMode="EaseIn"/>
     <QuadraticEase x:Key="FluentEasePoint"     EasingMode="EaseInOut"/>
 
-    <!-- Scale factors -->
-    <sys:Double x:Key="MotionScaleHoverFrom">0.985</sys:Double>
+    <!-- Scale factors — neutralized (1.0 = no scale) -->
+    <sys:Double x:Key="MotionScaleHoverFrom">1.0</sys:Double>       <!-- was 0.985 -->
     <sys:Double x:Key="MotionScaleHoverTo">1.0</sys:Double>
 
-    <!-- Button micro-interaction scale factors -->
-    <sys:Double x:Key="MotionButtonScaleHover">1.02</sys:Double>
-    <sys:Double x:Key="MotionButtonScalePressed">0.98</sys:Double>
+    <!-- Button micro-interaction scale factors — neutralized -->
+    <sys:Double x:Key="MotionButtonScaleHover">1.0</sys:Double>     <!-- was 1.02 -->
+    <sys:Double x:Key="MotionButtonScalePressed">1.0</sys:Double>   <!-- was 0.98 -->
     <sys:Double x:Key="MotionButtonScaleRest">1.0</sys:Double>
 
-    <!-- Slide offsets (pixels) -->
-    <sys:Double x:Key="MotionSlideOffsetSmall">12</sys:Double>
-    <sys:Double x:Key="MotionSlideOffsetNormal">20</sys:Double>
+    <!-- Slide offsets — neutralized (0 = no movement) -->
+    <sys:Double x:Key="MotionSlideOffsetSmall">0</sys:Double>       <!-- was 12 -->
+    <sys:Double x:Key="MotionSlideOffsetNormal">0</sys:Double>      <!-- was 20 -->
 
     <!-- ═══════════════════════════════════════════════════════════════
          9. TOOLTIP TIMING

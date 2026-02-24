@@ -53,7 +53,7 @@ public class FirmManagementViewModelTests
 
         Assert.True(sut.HasErrors);
         await _firmService.DidNotReceive().UpdateFirmAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class FirmManagementViewModelTests
 
         await sut.SaveFirmCommand.ExecuteAsync(null);
 
-        await _firmService.Received(1).UpdateFirmAsync("Updated Store", "456 Oak Ave", "555-0200");
+        await _firmService.Received(1).UpdateFirmAsync("Updated Store", "456 Oak Ave", "555-0200", Arg.Any<string>());
         await _eventBus.Received(1).PublishAsync(Arg.Is<FirmUpdatedEvent>(e =>
             e.FirmName == "Updated Store"));
         Assert.Equal("Firm information saved.", sut.SuccessMessage);
@@ -76,7 +76,7 @@ public class FirmManagementViewModelTests
     [Fact]
     public async Task SaveFirm_ServiceThrows_SetsError()
     {
-        _firmService.UpdateFirmAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+        _firmService.UpdateFirmAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(Task.FromException(new InvalidOperationException("DB error")));
 
         var sut = CreateSut();

@@ -20,12 +20,9 @@ public class StartupService(
         using var _ = perf.BeginScope("StartupService.MigrateDatabaseAsync", TimeSpan.FromSeconds(5));
         await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
-        // 1. Verify connectivity before attempting migration
-        if (!await context.Database.CanConnectAsync().ConfigureAwait(false))
-            throw new InvalidOperationException(
-                "Cannot connect to the database. Verify the connection string in appsettings.json.");
+        // 1. Apply migrations (creates the database if it doesn't exist)
+        context.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
 
-        // 2. Log pending migrations before applying
         var pending = (await context.Database.GetPendingMigrationsAsync().ConfigureAwait(false)).ToList();
 
         if (pending.Count == 0)
@@ -37,8 +34,6 @@ public class StartupService(
         logger.LogInformation("Applying {Count} pending migration(s): {Migrations}",
             pending.Count, string.Join(", ", pending));
 
-        // 3. Apply with timeout protection
-        context.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
         await context.Database.MigrateAsync().ConfigureAwait(false);
 
         logger.LogInformation("All migrations applied successfully");

@@ -75,3 +75,46 @@ These eight systems are frozen. Extend through existing interfaces only:
 - Each module exposes `Add<Name>Module()` called from `HostingExtensions`.
 - Page modules register via `NavigationPageRegistry.Map<TViewModel>()`.
 - Dialog modules register via `AddDialogRegistration<TWindow>()`.
+
+## Feature Catalogue
+
+### Core Features
+
+- **Total Unique Features**: 948
+- **Core Features**: 470 (focused on clothing retail, implement now)
+- **Expansion Features**: 478 (gated by triggers)
+
+### Current Progress
+
+- **Features Built**: 3 (CostPrice, Barcode, UOM) out of 948 total.
+- **Skipped Features**: 2 (MRP, SKU).
+- **Next Feature**: Feature #13 (MinStockLevel).
+- **Sprint 1 Focus**: Product model enrichment.
+- **Progress Display**: Count shown as X/948, with memory updated every 10-15 features.
+
+### Phases and Sprints
+
+- **Core Features Organization**: 6 phases / 28 sprints across 22 windows (12 new, 6 existing enrichment).
+- **Expansion Features Organization**: 22 gates:
+  - G1: Hardware (48)
+  - G2: AI (22)
+  - G3: Commercial (27)
+  - G4: Localization (23)
+  - G5: MultiStore (49)
+  - G6: Ecommerce (46)
+  - G7: API (21)
+  - G8: Mobile (11)
+  - G9: MultiCountry (9)
+  - G10: Niche Vertical (61)
+  - G11: Touch (11)
+  - G12: CRM (25)
+  - G13: HR (8)
+  - G14: Compliance (17)
+  - G15: UI Polish (18)
+  - G16: DB Admin (14)
+  - G17: Documents (9)
+  - G18: Workflows (8)
+  - G19: Preferences (19)
+  - G20: Payments (17)
+  - G21: Budgeting (6)
+  - G22: Reporting (9)

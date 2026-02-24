@@ -89,7 +89,7 @@ public partial class SalesViewModel(
     [ObservableProperty]
     public partial string PaymentMethod { get; set; } = "Cash";
 
-    public string[] PaymentMethods { get; } = ["Cash", "Card", "Transfer"];
+    public string[] PaymentMethods { get; } = ["Cash", "Card", "UPI", "Transfer"];
 
     [ObservableProperty]
     public partial ObservableCollection<SaleItem> CartItems { get; set; } = [];
@@ -332,6 +332,26 @@ public partial class SalesViewModel(
     private void RecalculateBill()
     {
         var discount = BuildDiscount();
+
+        if (discount.Type == DiscountType.Percentage && discount.Value > 100)
+        {
+            ErrorMessage = "Discount percentage cannot exceed 100%.";
+            BillDiscountAmount = 0;
+            BillFinalAmount = CartTotal;
+            OnPropertyChanged(nameof(HasDiscount));
+            return;
+        }
+
+        if (discount.Type == DiscountType.Amount && discount.Value > CartTotal)
+        {
+            ErrorMessage = "Discount amount cannot exceed the subtotal.";
+            BillDiscountAmount = 0;
+            BillFinalAmount = CartTotal;
+            OnPropertyChanged(nameof(HasDiscount));
+            return;
+        }
+
+        ErrorMessage = string.Empty;
 
         try
         {

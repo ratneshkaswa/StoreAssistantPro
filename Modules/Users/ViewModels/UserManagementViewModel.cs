@@ -18,9 +18,6 @@ public partial class UserManagementViewModel(
     public partial ObservableCollection<UserCredential> Users { get; set; } = [];
 
     [ObservableProperty]
-    public partial UserCredential? SelectedUser { get; set; }
-
-    [ObservableProperty]
     public partial string NewPin { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -35,6 +32,31 @@ public partial class UserManagementViewModel(
     [ObservableProperty]
     public partial string SuccessMessage { get; set; } = string.Empty;
 
+    // ── Lockout status (read-only display) ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSelectedUserLockedOut))]
+    [NotifyPropertyChangedFor(nameof(LockoutStatusText))]
+    public partial UserCredential? SelectedUser { get; set; }
+
+    public bool IsSelectedUserLockedOut =>
+        SelectedUser is not null
+        && SelectedUser.LockoutEndTime.HasValue
+        && SelectedUser.LockoutEndTime.Value > DateTime.UtcNow;
+
+    public string LockoutStatusText
+    {
+        get
+        {
+            if (SelectedUser is null) return string.Empty;
+            if (!IsSelectedUserLockedOut)
+                return SelectedUser.FailedAttempts > 0
+                    ? $"⚠ {SelectedUser.FailedAttempts} failed attempt(s)"
+                    : string.Empty;
+            return $"🔒 Locked until {SelectedUser.LockoutEndTime!.Value.ToLocalTime():HH:mm:ss}";
+        }
+    }
+
     partial void OnSelectedUserChanged(UserCredential? value)
     {
         NewPin = string.Empty;
@@ -43,6 +65,25 @@ public partial class UserManagementViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
         IsMasterPinRequired = value?.UserType == UserType.Admin;
+        OnPropertyChanged(nameof(IsSelectedUserLockedOut));
+        OnPropertyChanged(nameof(LockoutStatusText));
+    }
+
+    [RelayCommand]
+    private async Task UnlockUserAsync()
+    {
+        if (SelectedUser is null) return;
+
+        try
+        {
+            await userService.ClearLockoutAsync(SelectedUser.UserType);
+            SuccessMessage = $"{SelectedUser.UserType} account unlocked.";
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     [RelayCommand]

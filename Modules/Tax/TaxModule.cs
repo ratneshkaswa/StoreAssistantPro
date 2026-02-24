@@ -19,6 +19,7 @@ public static class TaxModule
         // Command handlers
         services.AddTransient<ICommandRequestHandler<SaveTaxProfileCommand, Unit>, SaveTaxProfileHandler>();
         services.AddTransient<ICommandRequestHandler<ToggleTaxProfileCommand, Unit>, ToggleTaxProfileHandler>();
+        services.AddTransient<ICommandRequestHandler<SetDefaultTaxProfileCommand, Unit>, SetDefaultTaxProfileHandler>();
 
         // ViewModels
         services.AddTransient<TaxManagementViewModel>();

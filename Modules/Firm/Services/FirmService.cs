@@ -16,7 +16,7 @@ public class FirmService(
         return await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync().ConfigureAwait(false);
     }
 
-    public async Task UpdateFirmAsync(string firmName, string address, string phone)
+    public async Task UpdateFirmAsync(string firmName, string address, string phone, string? gstNumber = null, string? currencyCode = null)
     {
         using var _ = perf.BeginScope("FirmService.UpdateFirmAsync");
         await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
@@ -26,6 +26,9 @@ public class FirmService(
         config.FirmName = firmName;
         config.Address = address;
         config.Phone = phone;
+        config.GSTNumber = string.IsNullOrWhiteSpace(gstNumber) ? null : gstNumber.Trim();
+        if (!string.IsNullOrWhiteSpace(currencyCode))
+            config.CurrencyCode = currencyCode.Trim();
 
         await context.SaveChangesAsync().ConfigureAwait(false);
     }

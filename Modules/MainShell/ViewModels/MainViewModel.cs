@@ -165,6 +165,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _features.PropertyChanged += OnFeaturesPropertyChanged;
         _eventBus.Subscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
         _eventBus.Subscribe<OperationalModeChangedEvent>(OnModeChangedAsync);
+        _eventBus.Subscribe<SaleCompletedEvent>(OnSaleCompletedAsync);
 
         RegisterQuickActions();
         foreach (var contributor in contributors)
@@ -384,6 +385,14 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     }
 
     // ── Event handlers ──
+
+    private async Task OnSaleCompletedAsync(SaleCompletedEvent e)
+    {
+        await _notificationService.PostAsync(
+            "Sale Completed",
+            $"Sale #{e.SaleId} — {e.TotalAmount:C} recorded successfully.",
+            AppNotificationLevel.Success);
+    }
 
     private async Task OnFirmUpdatedAsync(FirmUpdatedEvent e)
     {

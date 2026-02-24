@@ -17,7 +17,7 @@ public partial class GeneralSettingsViewModel(
     public partial string FirmName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string DefaultCurrency { get; set; } = "USD";
+    public partial string DefaultCurrency { get; set; } = "INR";
 
     [ObservableProperty]
     public partial string SuccessMessage { get; set; } = string.Empty;
@@ -42,7 +42,10 @@ public partial class GeneralSettingsViewModel(
         {
             var config = await firmService.GetFirmAsync();
             if (config is not null)
+            {
                 FirmName = config.FirmName;
+                DefaultCurrency = config.CurrencyCode;
+            }
         }
         catch (Exception ex)
         {
@@ -69,7 +72,9 @@ public partial class GeneralSettingsViewModel(
             await firmService.UpdateFirmAsync(
                 trimmedName,
                 config?.Address ?? string.Empty,
-                config?.Phone ?? string.Empty);
+                config?.Phone ?? string.Empty,
+                config?.GSTNumber,
+                DefaultCurrency);
 
             await eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName));
             SuccessMessage = "General settings saved.";

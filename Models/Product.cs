@@ -12,6 +12,12 @@ public class Product
     [Range(0, double.MaxValue)]
     public decimal SalePrice { get; set; }
 
+    /// <summary>
+    /// Purchase / cost price used for margin calculation.
+    /// </summary>
+    [Range(0, double.MaxValue)]
+    public decimal CostPrice { get; set; }
+
     [Range(0, int.MaxValue)]
     public int Quantity { get; set; }
 
@@ -31,6 +37,29 @@ public class Product
     /// is the base price and tax is added on top.
     /// </summary>
     public bool IsTaxInclusive { get; set; }
+
+    /// <summary>
+    /// Product barcode (EAN-13, Code128, or custom). Unique per product.
+    /// </summary>
+    [MaxLength(50)]
+    public string? Barcode { get; set; }
+
+    /// <summary>
+    /// Unit of measurement (e.g., pcs, meters, sets). Defaults to "pcs".
+    /// </summary>
+    [MaxLength(20)]
+    public string UOM { get; set; } = "pcs";
+
+    /// <summary>
+    /// Minimum stock level (reorder point). Low stock alerts trigger when Quantity falls below this.
+    /// </summary>
+    [Range(0, int.MaxValue)]
+    public int MinStockLevel { get; set; }
+
+    /// <summary>
+    /// When <c>false</c>, the product is hidden from billing and stock operations.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
 
     [Timestamp]
     public byte[]? RowVersion { get; set; }

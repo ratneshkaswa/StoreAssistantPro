@@ -232,6 +232,7 @@
                     <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=g}" Width="{StaticResource ColumnWidthDate}"/>
                     <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="{StaticResource ColumnWidthStatus}"/>
+                    <DataGridTextColumn Header="Cashier" Binding="{Binding CashierRole}" Width="{StaticResource ColumnWidthStatus}"/>
                     <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
                 </DataGrid.Columns>
             </DataGrid>

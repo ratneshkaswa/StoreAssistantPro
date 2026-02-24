@@ -47,6 +47,11 @@ public partial class TaxManagementViewModel(
 
     partial void OnIsEditingChanged(bool value) => OnPropertyChanged(nameof(FormTitle));
 
+    // ── Tax component breakdown (read-only) ──
+
+    [ObservableProperty]
+    public partial string TaxComponentBreakdown { get; set; } = string.Empty;
+
     // ── Selection → populate form ──
 
     partial void OnSelectedProfileChanged(TaxProfile? value)
@@ -64,6 +69,12 @@ public partial class TaxManagementViewModel(
         TaxRate = value.Items.Sum(i => i.TaxMaster?.TaxRate ?? 0).ToString("0.##");
         IsProfileActive = value.IsActive;
         IsEditing = true;
+
+        TaxComponentBreakdown = value.Items.Count > 0
+            ? string.Join(" + ", value.Items
+                .Where(i => i.TaxMaster is not null)
+                .Select(i => $"{i.TaxMaster!.TaxName} ({i.TaxMaster.TaxRate}%)"))
+            : string.Empty;
     }
 
     // ── Load ──
@@ -164,11 +175,45 @@ public partial class TaxManagementViewModel(
         ClearForm();
     }
 
+    // ── Set as default ──
+
+    [RelayCommand]
+    private async Task SetDefaultAsync()
+    {
+        SuccessMessage = string.Empty;
+
+        if (SelectedProfile is null)
+        {
+            ErrorMessage = "Select a tax profile first.";
+            return;
+        }
+
+        if (SelectedProfile.IsDefault)
+        {
+            ErrorMessage = "This profile is already the default.";
+            return;
+        }
+
+        var result = await commandBus.SendAsync(
+            new SetDefaultTaxProfileCommand(SelectedProfile.Id));
+
+        if (result.Succeeded)
+        {
+            SuccessMessage = $"'{SelectedProfile.ProfileName}' is now the default.";
+            await LoadProfilesAsync();
+        }
+        else
+        {
+            ErrorMessage = result.ErrorMessage ?? "Could not set default.";
+        }
+    }
+
     private void ClearForm()
     {
         ProfileName = string.Empty;
         TaxRate = string.Empty;
         IsProfileActive = true;
+        TaxComponentBreakdown = string.Empty;
         IsEditing = false;
         ErrorMessage = string.Empty;
     }

@@ -11,7 +11,8 @@ public class SetupService(
     IPerformanceMonitor perf) : ISetupService
 {
     public async Task InitializeAppAsync(
-        string firmName, string adminPin, string managerPin, string userPin, string masterPin)
+        string firmName, string address, string phone,
+        string adminPin, string managerPin, string userPin, string masterPin)
     {
         using var _ = perf.BeginScope("SetupService.InitializeAppAsync");
         await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
@@ -22,6 +23,8 @@ public class SetupService(
         context.AppConfigs.Add(new AppConfig
         {
             FirmName = firmName,
+            Address = address,
+            Phone = phone,
             IsInitialized = true,
             MasterPinHash = PinHasher.Hash(masterPin)
         });

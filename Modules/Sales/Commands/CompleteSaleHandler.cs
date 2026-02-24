@@ -2,6 +2,7 @@ using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Sales.Events;
 using StoreAssistantPro.Modules.Sales.Models;
@@ -12,21 +13,6 @@ namespace StoreAssistantPro.Modules.Sales.Commands;
 /// <summary>
 /// Completes a sale via the online or offline path depending on
 /// current connectivity.
-/// <para>
-/// <b>Online:</b> Builds a <see cref="Sale"/> entity and persists it
-/// through <see cref="ISalesService.CreateSaleAsync"/> (transaction-safe,
-/// idempotent). Publishes <see cref="SaleCompletedEvent"/>.
-/// </para>
-/// <para>
-/// <b>Offline:</b> Builds a <see cref="CompleteSaleSnapshot"/> and
-/// enqueues it in <see cref="IOfflineBillingQueue"/>. Publishes
-/// <see cref="SaleQueuedOfflineEvent"/>. The bill will be synced to
-/// the server when connectivity is restored.
-/// </para>
-/// <para>
-/// The UI flow is identical in both cases — the caller receives
-/// <see cref="CommandResult.Success"/> and the sale form resets.
-/// </para>
 /// </summary>
 public class CompleteSaleHandler(
     ISalesService salesService,
@@ -34,7 +20,8 @@ public class CompleteSaleHandler(
     IBillCalculationService billCalculation,
     IRegionalSettingsService regional,
     IOfflineModeService offlineMode,
-    IOfflineBillingQueue offlineQueue) : BaseCommandHandler<CompleteSaleCommand>
+    IOfflineBillingQueue offlineQueue,
+    ISessionService sessionService) : BaseCommandHandler<CompleteSaleCommand>
 {
     protected override async Task<CommandResult> ExecuteAsync(CompleteSaleCommand command)
     {
@@ -58,6 +45,7 @@ public class CompleteSaleHandler(
             SaleDate = regional.Now,
             TotalAmount = summary.FinalAmount,
             PaymentMethod = command.PaymentMethod,
+            CashierRole = sessionService.CurrentUserType.ToString(),
             DiscountType = command.Discount.Type,
             DiscountValue = command.Discount.Value,
             DiscountAmount = summary.DiscountAmount,
@@ -97,6 +85,7 @@ public class CompleteSaleHandler(
             {
                 TotalAmount = summary.FinalAmount,
                 PaymentMethod = command.PaymentMethod,
+                CashierRole = sessionService.CurrentUserType.ToString(),
                 SaleDate = regional.Now,
                 DiscountType = command.Discount.Type,
                 DiscountValue = command.Discount.Value,

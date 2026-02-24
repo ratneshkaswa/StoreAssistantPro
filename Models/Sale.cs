@@ -18,6 +18,14 @@ public class Sale
     [Required, MaxLength(50)]
     public string PaymentMethod { get; set; } = string.Empty;
 
+    /// <summary>
+    /// The user type (role) of the cashier who completed this sale.
+    /// Populated from <see cref="Core.Session.ISessionService.CurrentUserType"/>
+    /// at sale creation time for audit/attribution.
+    /// </summary>
+    [MaxLength(20)]
+    public string? CashierRole { get; set; }
+
     /// <summary>Discount type applied at bill level.</summary>
     public DiscountType DiscountType { get; set; }
 

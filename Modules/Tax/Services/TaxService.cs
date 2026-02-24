@@ -49,6 +49,26 @@ public class TaxService(IDbContextFactory<AppDbContext> contextFactory) : ITaxSe
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
+    public async Task SetDefaultAsync(int profileId)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+
+        // Clear existing default
+        var currentDefaults = await context.TaxProfiles
+            .Where(p => p.IsDefault)
+            .ToListAsync()
+            .ConfigureAwait(false);
+        foreach (var p in currentDefaults)
+            p.IsDefault = false;
+
+        // Set new default
+        var profile = await context.TaxProfiles.FindAsync(profileId).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Tax profile not found.");
+        profile.IsDefault = true;
+
+        await context.SaveChangesAsync().ConfigureAwait(false);
+    }
+
     public async Task<bool> IsProfileUsedByProductsAsync(int profileId)
     {
         await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);

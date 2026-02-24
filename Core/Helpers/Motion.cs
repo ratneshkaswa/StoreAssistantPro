@@ -67,11 +67,15 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(fe))
+            return;
+
         fe.Opacity = 0;
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
 
             var anim = new DoubleAnimation(0, 1, new Duration(duration))
@@ -103,10 +107,14 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(fe))
+            return;
+
         fe.Unloaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
             var duration = GetDuration(el, "FluentDurationNormal", TimeSpan.FromMilliseconds(167));
+            if (duration == TimeSpan.Zero) return;
             var ease = TryFindEase(el, "FluentEaseAccelerate");
 
             var anim = new DoubleAnimation(el.Opacity, 0, new Duration(duration))
@@ -136,6 +144,9 @@ public static class Motion
     private static void OnScaleHoverChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not FrameworkElement fe || e.NewValue is not true)
+            return;
+
+        if (IsMotionDisabled(fe))
             return;
 
         EnsureScaleTransform(fe);
@@ -172,6 +183,7 @@ public static class Motion
             return;
 
         var duration = GetDuration(el, "FluentDurationFast", TimeSpan.FromMilliseconds(83));
+        if (duration == TimeSpan.Zero) { st.ScaleX = to; st.ScaleY = to; return; }
         var ease = TryFindEase(el, "FluentEasePoint");
 
         var animX = new DoubleAnimation(to, new Duration(duration)) { EasingFunction = ease };
@@ -203,6 +215,9 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(fe))
+            return;
+
         EnsureTranslateTransform(fe);
         fe.Opacity = 0;
 
@@ -210,6 +225,7 @@ public static class Motion
         {
             var el = (FrameworkElement)sender;
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 12);
 
@@ -265,11 +281,15 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(fe))
+            return;
+
         fe.Opacity = 0;
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
             var duration = GetDuration(el, "FluentDurationPageFade", TimeSpan.FromMilliseconds(150));
+            if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
 
             var anim = new DoubleAnimation(0, 1, new Duration(duration))
@@ -304,11 +324,15 @@ public static class Motion
         if (d is not Window w || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(w))
+            return;
+
         w.Opacity = 0;
         w.ContentRendered += static (sender, _) =>
         {
             var win = (Window)sender;
             var duration = GetDuration(win, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            if (duration == TimeSpan.Zero) { win.Opacity = 1; return; }
             var ease = TryFindEase(win, "FluentEaseDecelerate");
 
             var anim = new DoubleAnimation(0, 1, new Duration(duration))
@@ -343,6 +367,9 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(fe))
+            return;
+
         EnsureTranslateTransform(fe);
 
         fe.IsVisibleChanged += static (sender, args) =>
@@ -352,6 +379,7 @@ public static class Motion
 
             var el = (FrameworkElement)sender;
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            if (duration == TimeSpan.Zero) return;
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 12);
 
@@ -402,6 +430,9 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not int index || index < 0)
             return;
 
+        if (IsMotionDisabled(fe))
+            return;
+
         EnsureTranslateTransform(fe);
         fe.Opacity = 0;
 
@@ -411,6 +442,7 @@ public static class Motion
             var idx = GetStaggerIndex(el);
             var delay = TimeSpan.FromMilliseconds(idx * 50);
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 12);
 
@@ -457,6 +489,12 @@ public static class Motion
         if (d is not FrameworkElement fe || e.NewValue is not true)
             return;
 
+        if (IsMotionDisabled(fe))
+        {
+            fe.Dispatcher.BeginInvoke(() => fe.SetCurrentValue(ShakeOnTriggerProperty, false));
+            return;
+        }
+
         EnsureTranslateTransform(fe);
 
         if (fe.RenderTransform is TranslateTransform tt)
@@ -483,6 +521,13 @@ public static class Motion
     // ═══════════════════════════════════════════════════════════════════
     //  Shared helpers
     // ═══════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Returns <c>true</c> when animation durations are zero in the design
+    /// system, meaning all motion should be skipped entirely.
+    /// </summary>
+    private static bool IsMotionDisabled(FrameworkElement fe) =>
+        GetDuration(fe, "FluentDurationSlow", TimeSpan.FromMilliseconds(250)) == TimeSpan.Zero;
 
     /// <summary>
     /// Resolves a <see cref="Duration"/> resource from the element's tree,

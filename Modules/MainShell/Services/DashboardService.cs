@@ -16,6 +16,8 @@ public class DashboardService(
     IRegionalSettingsService regional,
     IPerformanceMonitor perf) : IDashboardService
 {
+    private const int LowStockThreshold = 10;
+
     public async Task<DashboardSummary> GetSummaryAsync()
     {
         using var _ = perf.BeginScope("DashboardService.GetSummaryAsync");
@@ -25,7 +27,7 @@ public class DashboardService(
             today, today.AddDays(1)).ConfigureAwait(false)).ToList();
 
         var lowStockProducts = products
-            .Where(p => p.Quantity <= 5)
+            .Where(p => p.Quantity <= LowStockThreshold)
             .OrderBy(p => p.Quantity)
             .Take(10)
             .ToList();

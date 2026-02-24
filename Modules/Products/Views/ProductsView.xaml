@@ -11,6 +11,9 @@
     <UserControl.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding ShowAddFormCommand}"/>
         <KeyBinding Gesture="Ctrl+E" Command="{Binding ShowEditFormCommand}"/>
+        <KeyBinding Gesture="Ctrl+D" Command="{Binding DuplicateProductCommand}"/>
+        <KeyBinding Gesture="Ctrl+I" Command="{Binding ImportProductsCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+E" Command="{Binding ExportProductsCommand}"/>
         <KeyBinding Gesture="Delete" Command="{Binding DeleteProductCommand}"/>
     </UserControl.InputBindings>
     <Grid Margin="{StaticResource PagePadding}">
@@ -39,25 +42,57 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid Margin="{StaticResource InlineControlSpacing}" Grid.Column="0">
                 <TextBox x:Name="SearchBox"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         h:Watermark.Text="🔍 Search products..."
+                         h:Watermark.Text="🔍 Search by name, barcode, or HSN..."
                          VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
             </Grid>
-            <Button Grid.Column="1" Content="➕ Add" Command="{Binding ShowAddFormCommand}"
+            <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding StockFilterOptions}"
+                      SelectedItem="{Binding SelectedStockFilter}"
+                      Width="{StaticResource FieldWidthCompact}"
+                      Margin="{StaticResource InlineControlSpacing}"/>
+            <ComboBox Grid.Column="2"
+                      ItemsSource="{Binding ActiveFilterOptions}"
+                      SelectedItem="{Binding SelectedActiveFilter}"
+                      Width="{StaticResource FieldWidthCompact}"
+                      Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="3" Content="➕ Add" Command="{Binding ShowAddFormCommand}"
                     Style="{StaticResource ToolbarButtonStyle}"
                     h:HelpHint.HelpText="Add a new product to inventory"
                     h:HelpHint.Category="Products"
                     Visibility="{Binding CanManageProducts, Converter={StaticResource BoolToVisibility}}"/>
-            <Button Grid.Column="2" Content="✏️ Edit" Command="{Binding ShowEditFormCommand}"
+            <Button Grid.Column="4" Content="✏️ Edit" Command="{Binding ShowEditFormCommand}"
                     Style="{StaticResource ToolbarButtonStyle}"
                     h:HelpHint.ShortcutText="Double-click row"
                     h:HelpHint.HelpText="Edit the selected product"
                     h:HelpHint.Category="Products"
                     Visibility="{Binding CanManageProducts, Converter={StaticResource BoolToVisibility}}"/>
-            <Button Grid.Column="3" Content="🗑 Delete" Command="{Binding DeleteProductCommand}"
+            <Button Grid.Column="5" Content="📋 Clone" Command="{Binding DuplicateProductCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.ShortcutText="Ctrl+D"
+                    h:HelpHint.HelpText="Duplicate the selected product"
+                    h:HelpHint.Category="Products"
+                    Visibility="{Binding CanManageProducts, Converter={StaticResource BoolToVisibility}}"/>
+            <Button Grid.Column="6" Content="📥 Import" Command="{Binding ImportProductsCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.ShortcutText="Ctrl+I"
+                    h:HelpHint.HelpText="Import products from CSV file"
+                    h:HelpHint.Category="Products"
+                    Visibility="{Binding CanManageProducts, Converter={StaticResource BoolToVisibility}}"/>
+            <Button Grid.Column="7" Content="📤 Export" Command="{Binding ExportProductsCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.ShortcutText="Ctrl+Shift+E"
+                    h:HelpHint.HelpText="Export all products to CSV"
+                    h:HelpHint.Category="Products}"/>
+            <Button Grid.Column="8" Content="🗑 Delete" Command="{Binding DeleteProductCommand}"
                     Style="{StaticResource ToolbarButtonStyle}" Margin="0"
                     h:HelpHint.HelpText="Delete the selected product (requires Master PIN)"
                     h:HelpHint.Category="Products"
@@ -85,6 +120,12 @@
                                  Width="{StaticResource FieldWidthCompact}"/>
                     </StackPanel>
                     <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Cost Price" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewProductCostPrice, UpdateSourceTrigger=PropertyChanged}"
+                                 h:NumericInput.IsDecimalOnly="True"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
                         <TextBlock Text="Quantity" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding NewProductQuantity, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsIntegerOnly="True"
@@ -96,6 +137,44 @@
                                   SelectedItem="{Binding NewProductTaxProfile}"
                                   DisplayMemberPath="ProfileName"
                                   Width="{StaticResource FieldWidthStandard}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="HSN Code" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewProductHSNCode, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="8"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Barcode" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewProductBarcode, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="50"
+                                 Width="{StaticResource FieldWidthStandard}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="UOM" Style="{StaticResource FieldLabelStyle}"/>
+                        <ComboBox Text="{Binding NewProductUOM, UpdateSourceTrigger=PropertyChanged}"
+                                  IsEditable="True"
+                                  Width="{StaticResource FieldWidthCompact}">
+                            <ComboBoxItem Content="pcs"/>
+                            <ComboBoxItem Content="meters"/>
+                            <ComboBoxItem Content="sets"/>
+                            <ComboBoxItem Content="pairs"/>
+                            <ComboBoxItem Content="dozen"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Min Stock" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewProductMinStockLevel, UpdateSourceTrigger=PropertyChanged}"
+                                 h:NumericInput.IsIntegerOnly="True"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}" VerticalAlignment="Bottom">
+                        <CheckBox Content="Tax Inclusive"
+                                  IsChecked="{Binding NewProductIsTaxInclusive}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}" VerticalAlignment="Bottom">
+                        <CheckBox Content="Active"
+                                  IsChecked="{Binding NewProductIsActive}"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
@@ -131,6 +210,12 @@
                                  Width="{StaticResource FieldWidthCompact}"/>
                     </StackPanel>
                     <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Cost Price" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EditProductCostPrice, UpdateSourceTrigger=PropertyChanged}"
+                                 h:NumericInput.IsDecimalOnly="True"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
                         <TextBlock Text="Quantity" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding EditProductQuantity, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsIntegerOnly="True"
@@ -142,6 +227,44 @@
                                   SelectedItem="{Binding EditProductTaxProfile}"
                                   DisplayMemberPath="ProfileName"
                                   Width="{StaticResource FieldWidthStandard}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="HSN Code" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EditProductHSNCode, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="8"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Barcode" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EditProductBarcode, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="50"
+                                 Width="{StaticResource FieldWidthStandard}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="UOM" Style="{StaticResource FieldLabelStyle}"/>
+                        <ComboBox Text="{Binding EditProductUOM, UpdateSourceTrigger=PropertyChanged}"
+                                  IsEditable="True"
+                                  Width="{StaticResource FieldWidthCompact}">
+                            <ComboBoxItem Content="pcs"/>
+                            <ComboBoxItem Content="meters"/>
+                            <ComboBoxItem Content="sets"/>
+                            <ComboBoxItem Content="pairs"/>
+                            <ComboBoxItem Content="dozen"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Min Stock" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EditProductMinStockLevel, UpdateSourceTrigger=PropertyChanged}"
+                                 h:NumericInput.IsIntegerOnly="True"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}" VerticalAlignment="Bottom">
+                        <CheckBox Content="Tax Inclusive"
+                                  IsChecked="{Binding EditProductIsTaxInclusive}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}" VerticalAlignment="Bottom">
+                        <CheckBox Content="Active"
+                                  IsChecked="{Binding EditProductIsActive}"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
@@ -180,9 +303,16 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="{StaticResource ColumnWidthId}"/>
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="HSN" Binding="{Binding HSNCode}" Width="{StaticResource ColumnWidthId}"/>
+                        <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="{StaticResource ColumnWidthStatus}"/>
                         <DataGridTextColumn Header="Sale Price" Binding="{Binding SalePrice, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Cost Price" Binding="{Binding CostPrice, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="UOM" Binding="{Binding UOM}" Width="{StaticResource ColumnWidthQty}"/>
                         <DataGridTextColumn Header="Tax Profile" Binding="{Binding TaxProfile.ProfileName}" Width="{StaticResource ColumnWidthStatus}"/>
+                        <DataGridTextColumn Header="Status"
+                                            Binding="{Binding IsActive, Converter={StaticResource BoolToActiveText}}"
+                                            Width="{StaticResource ColumnWidthQty}"/>
                     </DataGrid.Columns>
                 </DataGrid>
 

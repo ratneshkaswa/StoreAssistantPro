@@ -1,6 +1,7 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Sales.Commands;
 using StoreAssistantPro.Modules.Sales.Events;
@@ -17,6 +18,7 @@ public class CompleteSaleHandlerTests
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
     private readonly IOfflineModeService _offlineMode = Substitute.For<IOfflineModeService>();
     private readonly IOfflineBillingQueue _offlineQueue = Substitute.For<IOfflineBillingQueue>();
+    private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
 
     public CompleteSaleHandlerTests()
     {
@@ -24,10 +26,11 @@ public class CompleteSaleHandlerTests
         _salesService.CreateSaleAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>())
             .Returns(TransactionResult<int>.Success(1));
         _offlineMode.IsOffline.Returns(false);
+        _sessionService.CurrentUserType.Returns(UserType.Admin);
     }
 
     private CompleteSaleHandler CreateSut() =>
-        new(_salesService, _eventBus, _billCalculation, _regional, _offlineMode, _offlineQueue);
+        new(_salesService, _eventBus, _billCalculation, _regional, _offlineMode, _offlineQueue, _sessionService);
 
     private static Guid NewKey() => Guid.NewGuid();
 

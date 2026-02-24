@@ -29,6 +29,10 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Profile Name"
                                     Binding="{Binding ProfileName}" Width="*"/>
+                <DataGridCheckBoxColumn Header="Default"
+                                        Binding="{Binding IsDefault, Mode=OneWay}"
+                                        IsReadOnly="True"
+                                        Width="{StaticResource ColumnWidthQty}"/>
                 <DataGridTextColumn Header="Status"
                                     Binding="{Binding IsActive, Converter={StaticResource BoolToActiveText}}"
                                     Width="{StaticResource ColumnWidthStatus}"/>
@@ -66,10 +70,15 @@
             <!-- Tax Rate -->
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Tax Rate (%)"
                        Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="4" Grid.Column="1"
-                     Text="{Binding TaxRate, UpdateSourceTrigger=PropertyChanged}"
-                     h:NumericInput.IsDecimalOnly="True"
-                     MaxLength="6"/>
+            <StackPanel Grid.Row="4" Grid.Column="1">
+                <TextBox Text="{Binding TaxRate, UpdateSourceTrigger=PropertyChanged}"
+                         h:NumericInput.IsDecimalOnly="True"
+                         MaxLength="6"/>
+                <TextBlock Text="{Binding TaxComponentBreakdown}"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
 
             <!-- Active checkbox -->
             <CheckBox Grid.Row="6" Grid.Column="1"
@@ -90,6 +99,9 @@
                     HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="➕ New" Command="{Binding NewProfileCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="⭐ Set Default" Command="{Binding SetDefaultCommand}"
                     Style="{StaticResource ToolbarButtonStyle}"
                     Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="🚫 Toggle Active" Command="{Binding ToggleActiveCommand}"

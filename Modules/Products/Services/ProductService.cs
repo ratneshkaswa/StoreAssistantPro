@@ -18,7 +18,27 @@ public class ProductService(
         IQueryable<Product> q = context.Products.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
-            q = q.Where(p => p.Name.Contains(query.SearchTerm));
+        {
+            var term = query.SearchTerm;
+            q = q.Where(p => p.Name.Contains(term)
+                           || (p.Barcode != null && p.Barcode.Contains(term))
+                           || (p.HSNCode != null && p.HSNCode.Contains(term)));
+        }
+
+        q = query.StockFilter switch
+        {
+            StockFilter.InStock => q.Where(p => p.Quantity > p.MinStockLevel),
+            StockFilter.LowStock => q.Where(p => p.Quantity > 0 && p.Quantity <= p.MinStockLevel),
+            StockFilter.OutOfStock => q.Where(p => p.Quantity == 0),
+            _ => q
+        };
+
+        q = query.ActiveFilter switch
+        {
+            ActiveFilter.ActiveOnly => q.Where(p => p.IsActive),
+            ActiveFilter.InactiveOnly => q.Where(p => !p.IsActive),
+            _ => q
+        };
 
         var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
 
@@ -61,6 +81,13 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         context.Products.Add(product);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<int> AddRangeAsync(IReadOnlyList<Product> products, CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        context.Products.AddRange(products);
+        return await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
     public async Task UpdateAsync(Product product, CancellationToken ct = default)

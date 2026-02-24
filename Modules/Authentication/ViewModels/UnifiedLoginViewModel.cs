@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -10,11 +11,10 @@ namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 
 /// <summary>
 /// Combined user-selection + PIN-entry ViewModel for the POS login screen.
-/// Replaces the separate <c>UserSelectionViewModel</c> and <c>PinLoginViewModel</c>.
 /// <para>
 /// Composes <see cref="PinPadViewModel"/> for reusable PIN pad logic.
 /// When the PIN reaches 4 digits and a user is selected, login executes
-/// automatically (POS auto-login).
+/// automatically (POS auto-login). Error is cleared on next digit input.
 /// </para>
 /// </summary>
 public partial class UnifiedLoginViewModel(ICommandBus commandBus) : BaseViewModel
@@ -28,11 +28,23 @@ public partial class UnifiedLoginViewModel(ICommandBus commandBus) : BaseViewMod
 
     public bool IsUserSelected => SelectedUserType is not null;
 
+    /// <summary>Application version displayed in the login footer.</summary>
+    public string AppVersion { get; } =
+        System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
+
     public Action<bool?>? RequestClose { get; set; }
 
     public void Initialize()
     {
         PinPad.PinCompleted += OnPinCompleted;
+        PinPad.PropertyChanged += OnPinPadPropertyChanged;
+    }
+
+    /// <summary>Clear error as soon as user starts typing a new PIN.</summary>
+    private void OnPinPadPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PinPadViewModel.PinLength) && PinPad.PinLength > 0 && HasError)
+            ErrorMessage = string.Empty;
     }
 
     private void OnPinCompleted()

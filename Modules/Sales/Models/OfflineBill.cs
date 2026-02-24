@@ -66,6 +66,7 @@ public sealed class CompleteSaleSnapshot
 {
     public decimal TotalAmount { get; init; }
     public string PaymentMethod { get; init; } = string.Empty;
+    public string? CashierRole { get; init; }
     public DateTime SaleDate { get; init; }
     public DiscountType DiscountType { get; init; }
     public decimal DiscountValue { get; init; }

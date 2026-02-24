@@ -12,4 +12,6 @@ namespace StoreAssistantPro.Core.Data;
 public sealed record PagedQuery(
     int PageIndex = 0,
     int PageSize = 50,
-    string? SearchTerm = null);
+    string? SearchTerm = null,
+    StockFilter StockFilter = StockFilter.All,
+    ActiveFilter ActiveFilter = ActiveFilter.All);

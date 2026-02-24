@@ -9,5 +9,6 @@ public interface ITaxService
     Task AddProfileAsync(TaxProfile profile);
     Task UpdateProfileAsync(TaxProfile profile);
     Task SetActiveAsync(int profileId, bool isActive);
+    Task SetDefaultAsync(int profileId);
     Task<bool> IsProfileUsedByProductsAsync(int profileId);
 }

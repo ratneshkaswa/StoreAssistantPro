@@ -13,7 +13,7 @@ public class AuthenticationFlow(
     public bool RunFirstTimeSetup()
     {
         var window = serviceProvider.GetRequiredService<FirstTimeSetupWindow>();
-        sizingService.ConfigureStartupWindow(window, 400, 480);
+        sizingService.ConfigureStartupWindow(window, 460, 560);
         return window.ShowDialog() == true;
     }
 
@@ -22,7 +22,7 @@ public class AuthenticationFlow(
         userType = default;
 
         var loginWindow = serviceProvider.GetRequiredService<UnifiedLoginWindow>();
-        sizingService.ConfigureStartupWindow(loginWindow, 420, 520);
+        sizingService.ConfigureStartupWindow(loginWindow, 420, 600);
 
         if (loginWindow.ShowDialog() != true)
             return false;

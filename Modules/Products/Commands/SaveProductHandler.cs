@@ -14,8 +14,15 @@ public class SaveProductHandler(IProductService productService)
         {
             Name = command.Name,
             SalePrice = command.SalePrice,
+            CostPrice = command.CostPrice,
             Quantity = command.Quantity,
-            TaxProfileId = command.TaxProfileId
+            TaxProfileId = command.TaxProfileId,
+            HSNCode = string.IsNullOrWhiteSpace(command.HSNCode) ? null : command.HSNCode.Trim(),
+            Barcode = string.IsNullOrWhiteSpace(command.Barcode) ? null : command.Barcode.Trim(),
+            UOM = string.IsNullOrWhiteSpace(command.UOM) ? "pcs" : command.UOM.Trim(),
+            MinStockLevel = command.MinStockLevel,
+            IsActive = command.IsActive,
+            IsTaxInclusive = command.IsTaxInclusive
         };
 
         await productService.AddAsync(product);

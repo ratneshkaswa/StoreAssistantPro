@@ -25,8 +25,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Product>(entity =>
         {
             entity.Property(p => p.SalePrice).HasColumnType("decimal(18,2)");
+            entity.Property(p => p.CostPrice).HasColumnType("decimal(18,2)");
             entity.Property(p => p.HSNCode).HasMaxLength(8);
+            entity.Property(p => p.Barcode).HasMaxLength(50);
+            entity.Property(p => p.UOM).HasMaxLength(20).HasDefaultValue("pcs");
             entity.HasIndex(p => p.HSNCode);
+            entity.HasIndex(p => p.Barcode).IsUnique().HasFilter("[Barcode] IS NOT NULL");
             entity.HasOne(p => p.TaxProfile)
                   .WithMany()
                   .HasForeignKey(p => p.TaxProfileId)

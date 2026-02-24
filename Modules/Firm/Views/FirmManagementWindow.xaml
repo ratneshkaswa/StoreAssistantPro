@@ -29,6 +29,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Row 0: Firm Name -->
@@ -55,6 +57,13 @@
                      Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                      h:NumericInput.IsIntegerOnly="True"
                      MaxLength="20"/>
+
+            <!-- Row 6: GST Number -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="GST Number"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBox Grid.Row="6" Grid.Column="1"
+                     Text="{Binding GSTNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                     MaxLength="15"/>
         </Grid>
 
         <!-- Messages -->

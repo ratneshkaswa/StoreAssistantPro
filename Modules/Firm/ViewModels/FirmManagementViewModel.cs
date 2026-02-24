@@ -25,6 +25,11 @@ public partial class FirmManagementViewModel(
     public partial string Phone { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(15, ErrorMessage = "GST Number cannot exceed 15 characters.")]
+    public partial string GSTNumber { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial string SuccessMessage { get; set; } = string.Empty;
 
     [RelayCommand]
@@ -38,6 +43,7 @@ public partial class FirmManagementViewModel(
         FirmName = config.FirmName;
         Address = config.Address;
         Phone = config.Phone;
+        GSTNumber = config.GSTNumber ?? string.Empty;
     });
 
     [RelayCommand]
@@ -50,7 +56,7 @@ public partial class FirmManagementViewModel(
             return;
 
         var trimmedName = FirmName.Trim();
-        await firmService.UpdateFirmAsync(trimmedName, Address.Trim(), Phone.Trim());
+        await firmService.UpdateFirmAsync(trimmedName, Address.Trim(), Phone.Trim(), GSTNumber.Trim());
         await eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName));
         SuccessMessage = "Firm information saved.";
     });
