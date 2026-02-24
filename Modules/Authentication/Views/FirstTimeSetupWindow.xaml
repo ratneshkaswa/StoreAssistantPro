@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
-        Title="Store Assistant Pro — First Time Setup">
+        Title="Store Assistant Pro — First Time Setup"
+        h:Motion.WindowFadeIn="True">
     <Grid Margin="{StaticResource DialogPadding}"
           h:KeyboardNav.DefaultCommand="{Binding SaveCommand}">
         <Grid.RowDefinitions>
@@ -71,7 +72,7 @@
 
         <!-- Messages -->
         <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}"
-                   Style="{StaticResource ErrorMessageStyle}" Margin="0,4,0,0"/>
+                   Style="{StaticResource ErrorMessageStyle}" Margin="{StaticResource FieldLabelSpacing}"/>
 
         <!-- Action button — pinned to bottom -->
         <StackPanel Grid.Row="3" Orientation="Horizontal"

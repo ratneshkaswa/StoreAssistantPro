@@ -41,7 +41,14 @@ public abstract partial class BaseViewModel : ObservableValidator
     /// <see cref="RunAsync"/> on failure, or by <see cref="Validate"/>.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasError))]
     public partial string ErrorMessage { get; set; } = string.Empty;
+
+    /// <summary>
+    /// <c>true</c> when <see cref="ErrorMessage"/> is non-empty.
+    /// Useful for triggering shake animations or error indicators in the View.
+    /// </summary>
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     /// <summary>
     /// Human-readable title derived from the class name by default.

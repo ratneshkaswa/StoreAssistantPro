@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.Firm.Services;
 
@@ -9,6 +10,7 @@ namespace StoreAssistantPro.Modules.SystemSettings.ViewModels;
 
 public partial class GeneralSettingsViewModel(
     IFirmService firmService,
+    IAppStateService appState,
     IEventBus eventBus) : BaseViewModel
 {
     [ObservableProperty]
@@ -20,13 +22,21 @@ public partial class GeneralSettingsViewModel(
     [ObservableProperty]
     public partial string SuccessMessage { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial bool SmartTooltipsEnabled { get; set; }
+
     public string[] AvailableCurrencies { get; } = ["USD", "EUR", "GBP", "INR", "CAD", "AUD"];
+
+    partial void OnSmartTooltipsEnabledChanged(bool value) =>
+        appState.SetSmartTooltipsEnabled(value);
 
     [RelayCommand]
     private async Task LoadAsync()
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+
+        SmartTooltipsEnabled = appState.SmartTooltipsEnabled;
 
         try
         {

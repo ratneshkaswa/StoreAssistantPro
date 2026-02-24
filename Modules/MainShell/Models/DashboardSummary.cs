@@ -1,3 +1,5 @@
+using StoreAssistantPro.Models;
+
 namespace StoreAssistantPro.Modules.MainShell.Models;
 
 /// <summary>
@@ -8,4 +10,6 @@ public sealed record DashboardSummary(
     int TotalProducts,
     int LowStockCount,
     decimal TodaysSales,
-    int TodaysTransactions);
+    int TodaysTransactions,
+    IReadOnlyList<Sale> RecentSales,
+    IReadOnlyList<Product> LowStockProducts);

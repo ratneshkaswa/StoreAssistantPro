@@ -8,34 +8,359 @@
 
 ---
 
+## 0  High-level overview
+
+### System architecture
+
+```mermaid
+graph TB
+    subgraph Views ["Views (XAML)"]
+        MW[MainWindow]
+        MWV[MainWorkspaceView]
+        PV[ProductsView]
+        SV[SalesView]
+        FW[FirmManagementWindow]
+        UW[UserManagementWindow]
+        SW[SystemSettingsWindow]
+        TW[TaxManagementWindow]
+        TWK[TasksWindow]
+        RBD[ResumeBillingDialog]
+        ULW[UnifiedLoginWindow]
+        FTSW[FirstTimeSetupWindow]
+    end
+
+    subgraph ViewModels ["ViewModels (BaseViewModel)"]
+        MVM[MainViewModel]
+        MWVM[MainWorkspaceViewModel]
+        PVM[ProductsViewModel]
+        SVM[SalesViewModel]
+        FVM[FirmManagementViewModel]
+        UVM[UserManagementViewModel]
+        SSVM[SecuritySettingsViewModel]
+        GVM[GeneralSettingsViewModel]
+        BSVM[BackupSettingsViewModel]
+        AIVM[AppInfoViewModel]
+        SYSVM[SystemSettingsViewModel]
+        TMVM[TaxManagementViewModel]
+        TSKVM[TasksViewModel]
+        RBVM[ResumeBillingDialogViewModel]
+        ULVM[UnifiedLoginViewModel]
+        FTSVM[FirstTimeSetupViewModel]
+    end
+
+    subgraph Core ["Core Infrastructure — Do Not Redesign"]
+        CB[CommandBus]
+        CP[CommandPipeline]
+        EB[EventBus]
+        WM[WorkflowManager]
+        NS[NavigationService]
+        AS[AppStateService]
+        FT[FeatureToggleService]
+        SS[SessionService]
+        FL[FocusLockService]
+        CM[ConnectivityMonitorService]
+        OM[OfflineModeService]
+    end
+
+    subgraph Commands ["Command Handlers"]
+        LH[LoginUserHandler]
+        LOH[LogoutHandler]
+        FSH[CompleteFirstSetupHandler]
+        SPH[SaveProductHandler]
+        UPH[UpdateProductHandler]
+        DPH[DeleteProductHandler]
+        CSH[CompleteSaleHandler]
+        CPH[ChangePinHandler]
+        MPH[ChangeMasterPinHandler]
+        SBH[SaveBillCommandHandler]
+        STPH[SaveTaxProfileHandler]
+        TTPH[ToggleTaxProfileHandler]
+    end
+
+    subgraph Events ["Events (IEvent)"]
+        ULE[UserLoggedInEvent]
+        ULOE[UserLoggedOutEvent]
+        SCE[SaleCompletedEvent]
+        FUE[FirmUpdatedEvent]
+        PCE[PinChangedEvent]
+        BSE[BillingSession Events]
+        OME[OperationalModeChangedEvent]
+        OFE[OfflineModeChangedEvent]
+        HCE[HelpContextChangedEvent]
+    end
+
+    subgraph Services ["Services (Business Logic)"]
+        PS[ProductService]
+        SLS[SalesService]
+        FS[FirmService]
+        US[UserService]
+        LS[LoginService]
+        SUS[SetupService]
+        SSS[SystemSettingsService]
+        DS[DashboardService]
+        STS[StartupService]
+        TS[TaxService]
+        BMS[BillingModeService]
+        BSS[BillingSessionService]
+        SBMS[SmartBillingModeService]
+        QAS[QuickActionService]
+    end
+
+    subgraph Data ["Data Layer"]
+        DB[(SQL Server<br/>AppDbContext)]
+    end
+
+    %% View → ViewModel binding
+    MW --> MVM
+    MWV --> MWVM
+    PV --> PVM
+    SV --> SVM
+    ULW --> ULVM
+    FTSW --> FTSVM
+
+    %% ViewModel → Core
+    MVM --> NS
+    MVM --> EB
+    MVM --> FT
+    MVM --> AS
+    PVM --> CB
+    SVM --> CB
+    UVM --> CB
+
+    %% CommandBus → Pipeline → Handlers
+    CB --> CP
+    CP --> LH
+    CP --> LOH
+    CP --> FSH
+    CP --> SPH
+    CP --> UPH
+    CP --> DPH
+    CP --> CSH
+    CP --> CPH
+    CP --> MPH
+    CP --> SBH
+    CP --> STPH
+    CP --> TTPH
+
+    %% Handlers → Services
+    LH --> LS
+    FSH --> SUS
+    SPH --> PS
+    UPH --> PS
+    DPH --> PS
+    CSH --> SLS
+    CPH --> US
+    MPH --> SSS
+    SBH --> SLS
+    STPH --> TS
+    TTPH --> TS
+
+    %% Handlers → EventBus
+    LH -.-> ULE
+    LOH -.-> ULOE
+    CSH -.-> SCE
+    CPH -.-> PCE
+
+    %% EventBus dispatches
+    ULE -.-> EB
+    ULOE -.-> EB
+    SCE -.-> EB
+    FUE -.-> EB
+    PCE -.-> EB
+    BSE -.-> EB
+    OME -.-> EB
+    OFE -.-> EB
+    HCE -.-> EB
+
+    %% EventBus → ViewModel subscribers
+    EB -.-> MVM
+    EB -.-> MWVM
+
+    %% Services → Database
+    PS --> DB
+    SLS --> DB
+    FS --> DB
+    US --> DB
+    LS --> DB
+    SUS --> DB
+    SSS --> DB
+    DS --> DB
+    STS --> DB
+    TS --> DB
+
+    %% Workflows
+    WM --> STS
+    WM --> LS
+
+    %% Connectivity chain
+    CM --> OM
+    OM --> AS
+
+    %% Session
+    SS --> AS
+
+    %% Billing chain
+    SBMS --> BMS
+    SBMS --> BSS
+    SBMS --> FL
+
+    classDef core fill:#1a73e8,stroke:#0d47a1,color:#fff
+    classDef vm fill:#34a853,stroke:#1b5e20,color:#fff
+    classDef handler fill:#ea8600,stroke:#e65100,color:#fff
+    classDef event fill:#ab47bc,stroke:#6a1b9a,color:#fff
+    classDef service fill:#5f6368,stroke:#37474f,color:#fff
+    classDef data fill:#d32f2f,stroke:#b71c1c,color:#fff
+    classDef view fill:#00897b,stroke:#004d40,color:#fff
+
+    class CB,CP,EB,WM,NS,AS,FT,SS,FL,CM,OM core
+    class MVM,MWVM,PVM,SVM,FVM,UVM,SSVM,GVM,BSVM,AIVM,SYSVM,TMVM,TSKVM,RBVM,ULVM,FTSVM vm
+    class LH,LOH,FSH,SPH,UPH,DPH,CSH,CPH,MPH,SBH,STPH,TTPH handler
+    class ULE,ULOE,SCE,FUE,PCE,BSE,OME,OFE,HCE event
+    class PS,SLS,FS,US,LS,SUS,SSS,DS,STS,TS,BMS,BSS,SBMS,QAS service
+    class DB data
+    class MW,MWV,PV,SV,FW,UW,SW,TW,TWK,RBD,ULW,FTSW view
+```
+
+### Data flow summary
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        WRITE PATH                               │
+│                                                                 │
+│  View ──bind──► ViewModel ──► CommandBus ──► Handler ──► Service│
+│                                                │                │
+│                                           EventBus              │
+│                                                │                │
+│                                    Other ViewModels (subscribe) │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        READ PATH                                │
+│                                                                 │
+│  View ──bind──► ViewModel ──► Service ──► DbContext ──► SQL     │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                     WORKFLOW PATH                                │
+│                                                                 │
+│  App.xaml.cs ──► WorkflowManager ──► IWorkflow.ExecuteStepAsync │
+│                       │                    │                    │
+│                       │              Services / Dialogs         │
+│                       │                                         │
+│                  StepResult: Continue → next step               │
+│                              Complete → OnCompletedAsync        │
+│                              Cancel   → OnCancelledAsync        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Inheritance hierarchy
+
+```
+ObservableObject (CommunityToolkit)
+    └── BaseViewModel                    ← Core/Base/
+        ├── MainViewModel
+        ├── MainWorkspaceViewModel
+        ├── ProductsViewModel
+        ├── SalesViewModel
+        ├── FirmManagementViewModel
+        ├── UserManagementViewModel
+        ├── UnifiedLoginViewModel
+        ├── FirstTimeSetupViewModel
+        ├── SystemSettingsViewModel
+        ├── GeneralSettingsViewModel
+        ├── SecuritySettingsViewModel
+        ├── BackupSettingsViewModel
+        ├── AppInfoViewModel
+        ├── TaxManagementViewModel
+        ├── TasksViewModel
+        └── ResumeBillingDialogViewModel
+
+    └── PinPadViewModel                  ← Core/Base/ (reusable PIN pad logic)
+
+ICommandHandler<T>
+    └── BaseCommandHandler<T>            ← Core/Base/
+        ├── LoginUserHandler
+        ├── LogoutHandler
+        ├── CompleteFirstSetupHandler
+        ├── SaveProductHandler
+        ├── UpdateProductHandler
+        ├── DeleteProductHandler
+        ├── CompleteSaleHandler
+        ├── ChangePinHandler
+        └── ChangeMasterPinHandler
+
+ICommandRequestHandler<TCommand, TResult>  ← Core/Commands/ (pipeline-aware)
+        ├── SaveBillCommandHandler
+        ├── SaveTaxProfileHandler
+        └── ToggleTaxProfileHandler
+
+Window (WPF)
+    ├── MainWindow                       ← 90% screen, auto-resize on display change
+    ├── BaseDialogWindow                 ← Core/Base/ (fixed size, centered over owner)
+    │   ├── FirmManagementWindow
+    │   ├── UserManagementWindow
+    │   ├── SystemSettingsWindow
+    │   ├── TaxManagementWindow
+    │   ├── TasksWindow
+    │   └── ResumeBillingDialog
+    ├── UnifiedLoginWindow               ← Authentication (centered on screen)
+    └── FirstTimeSetupWindow             ← Startup (centered on screen)
+```
+
+---
+
 ## 1  Solution layout
 
 ```
 StoreAssistantPro/
 ├── Core/                         # Shared infrastructure (no module dependencies)
-│   ├── Base/                     #   BaseViewModel, BasePage, BaseDialogWindow, BaseCommand
-│   ├── Commands/                 #   ICommandBus, ICommandHandler, CommandResult
-│   ├── Controls/                 #   ResponsiveContentControl, ViewportConstrainedPanel
-│   ├── Events/                   #   IEventBus, IEvent
+│   ├── Base/                     #   BaseViewModel, PinPadViewModel, BasePage, BaseDialogWindow, BaseCommand
+│   ├── Commands/                 #   ICommandBus, ICommandHandler, ICommandRequestHandler, CommandResult, Pipeline
+│   │   ├── Logging/              #     LoggingPipelineBehavior
+│   │   ├── Offline/              #     OfflinePipelineBehavior
+│   │   ├── Performance/          #     PerformancePipelineBehavior
+│   │   ├── Transaction/          #     TransactionPipelineBehavior
+│   │   └── Validation/           #     ValidationPipelineBehavior, ICommandValidator
+│   ├── Controls/                 #   ResponsiveContentControl, ViewportConstrainedPanel, InlineTipBanner
+│   ├── Data/                     #   PagedResult, PagedQuery
+│   ├── Events/                   #   IEventBus, IEvent, OperationalModeChangedEvent, OfflineModeChangedEvent …
 │   ├── Features/                 #   FeatureFlags, IFeatureToggleService
-│   ├── Helpers/                  #   Converters, InputValidator, PinHasher, NumericInput
+│   ├── Helpers/                  #   KeyboardNav, AutoFocus, SelectOnFocus, NumericInput, Motion,
+│   │                             #   SmartTooltip, HelpHint, TipBannerAutoState, Watermark, AutoDismiss,
+│   │                             #   BillingDimBehavior, BillingFocusBehavior, NotificationBadgeBehavior,
+│   │                             #   StatusPillTransition, StyleComplianceDiagnostics, LayoutDiagnostics,
+│   │                             #   InputValidator, PinHasher, Converters (PinDot, Equality, InverseBool …)
 │   ├── Navigation/               #   INavigationService, NavigationPageRegistry
-│   ├── Services/                 #   WindowSizingService, DialogService, AppStateService …
+│   ├── Services/                 #   AppStateService, WindowSizingService, StatusBarService,
+│   │                             #   FocusLockService, ConnectivityMonitorService, OfflineModeService,
+│   │                             #   TransactionSafetyService, TransactionHelper, ContextHelpService,
+│   │                             #   TipRotationService, TipRegistryService, TipStateService,
+│   │                             #   OnboardingJourneyService, UserInteractionTracker, OnboardingTipRegistrar,
+│   │                             #   NotificationService, PerformanceMonitor, RegionalSettingsService,
+│   │                             #   PricingCalculationService, BillCalculationService, TaxCalculationService,
+│   │                             #   WindowRegistry, MasterPinValidator, ApplicationInfoService, FileLoggerProvider
 │   ├── Session/                  #   ISessionService, SessionService
-│   ├── Styles/                   #   GlobalStyles.xaml (spacing, typography, named styles)
-│   └── Workflows/                #   IWorkflow, WorkflowManager, WorkflowStep, StepResult
-├── Data/                         # EF Core DbContext + Migrations
-├── Models/                       # Domain entities (Product, Sale, SaleItem, UserCredential …)
+│   ├── Styles/                   #   DesignSystem.xaml, FluentTheme.xaml, MotionSystem.xaml,
+│   │                             #   GlobalStyles.xaml, PosStyles.xaml
+│   └── Workflows/                #   IWorkflow, WorkflowManager, WorkflowStep, StepResult, WorkflowContext
+├── Data/                         # EF Core AppDbContext + Migrations
+├── Models/                       # Domain entities (Product, Sale, SaleItem, UserCredential, BillingSession,
+│                                 #   TaxProfile, TaxMaster, TaxProfileItem, AppConfig, AppNotification,
+│                                 #   OperationalMode, BillDiscount, BillSummary, LineTotal, TaxBreakdown,
+│                                 #   TipDefinition, TipLevel, HelpContext, UserExperienceProfile,
+│                                 #   UserExperienceLevel, UserType, BillingSessionState)
 ├── Modules/                      # Vertical feature slices
-│   ├── Authentication/           #   Login, first-time setup, user selection
-│   ├── Billing/                  #   Billing workflows
+│   ├── Authentication/           #   UnifiedLoginWindow, FirstTimeSetupWindow, login/setup workflows
+│   ├── Billing/                  #   Billing mode, session lifecycle, auto-save, resume, save-lock
 │   ├── Firm/                     #   Firm management dialog
-│   ├── MainShell/                #   MainWindow, DashboardView, shell services
-│   ├── Products/                 #   Product CRUD
-│   ├── Sales/                    #   Sale entry + history
+│   ├── MainShell/                #   MainWindow, MainWorkspaceView, Dashboard, TasksWindow, shell services
+│   ├── Products/                 #   Product CRUD + QuickActionContributor
+│   ├── Sales/                    #   Sale entry + history + offline billing queue
 │   ├── Startup/                  #   App bootstrap workflow
-│   ├── SystemSettings/           #   Settings window + category views
+│   ├── SystemSettings/           #   Settings window + General/Security/Backup/AppInfo views
+│   ├── Tax/                      #   Tax profile management dialog
 │   └── Users/                    #   User management dialog
+├── Templates/                    # XAML scaffolding templates (PageViewTemplate, DialogWindowTemplate)
 ├── App.xaml / App.xaml.cs        # Resource dictionaries, DataTemplates, startup
 ├── HostingExtensions.cs          # DI registration helpers
 ├── app.manifest                  # PerMonitorV2 DPI awareness
@@ -52,6 +377,7 @@ Each module is a self-contained vertical slice:
 Modules/<ModuleName>/
 ├── Commands/       # ICommand + ICommandHandler pairs
 ├── Events/         # Module-specific IEvent types
+├── Models/         # Module-specific DTOs and value objects (optional)
 ├── Services/       # Module services (interface + implementation)
 ├── ViewModels/     # ViewModels (derive from BaseViewModel)
 ├── Views/          # XAML views (derive from BasePage or BaseDialogWindow)
@@ -75,10 +401,13 @@ Modules/<ModuleName>/
 |---|---|
 | ViewModel → View | Implicit `DataTemplate` in `App.xaml` |
 | Page navigation | `INavigationService.NavigateTo<TViewModel>()` |
-| Business actions | `ICommandBus.SendAsync<TCommand>(command)` |
+| Business actions (legacy) | `ICommandBus.SendAsync<TCommand>(command)` |
+| Business actions (pipeline) | `ICommandBus.SendAsync<TCommand, TResult>(command)` |
+| Command validation | `ICommandValidator<TCommand>` (pre-execution, auto-resolved) |
 | Cross-module events | `IEventBus.PublishAsync<TEvent>(event)` |
 | Multi-step flows | `IWorkflowManager.StartAsync(workflowName)` |
 | Feature gating | `IFeatureToggleService.IsEnabled(FeatureFlags.X)` |
+| Dialog display | `IDialogService.ShowDialogAsync(dialogKey)` |
 
 ---
 
@@ -93,6 +422,16 @@ Every ViewModel must inherit `BaseViewModel`. It provides:
 - `Validate(builder => ...)` — fluent rule-chain validation.
 - `RunAsync(Func<Task>)` — guarded async execution with error capture.
 - `Title` — auto-derived from the class name.
+
+### `PinPadViewModel`
+
+Reusable PIN entry base for any dialog requiring numeric PIN input.
+Inherits from `BaseViewModel`. Provides:
+
+- Digit entry, backspace, clear commands.
+- Max-length enforcement.
+- `PinCompleted` callback — fires when PIN reaches `MaxLength` digits.
+- `PinDisplay` — masked display string (dots).
 
 ### `BasePage`
 
@@ -122,6 +461,34 @@ Sizing is set in code-behind only — never in XAML:
 ```csharp
 protected override double DialogWidth  => 500;
 protected override double DialogHeight => 400;
+```
+
+### `ICommandRequestHandler<TCommand, TResult>` (pipeline-aware)
+
+New command handlers should implement `ICommandRequestHandler<TCommand, TResult>`
+instead of `BaseCommandHandler<T>`. Pipeline behaviors wrap automatically:
+
+```csharp
+// Command record:
+public record SaveBillCommand(...) : ICommandRequest<int>, ITransactionalCommand;
+
+// Handler:
+public class SaveBillCommandHandler(ISalesService sales)
+    : ICommandRequestHandler<SaveBillCommand, int>
+{
+    public async Task<CommandResult<int>> HandleAsync(
+        SaveBillCommand command, CancellationToken ct)
+    {
+        var saleId = await sales.CreateSaleAsync(...);
+        return CommandResult<int>.Success(saleId);
+    }
+}
+
+// Validator (optional):
+public class SaveBillCommandValidator : ICommandValidator<SaveBillCommand>
+{
+    public ValidationResult Validate(SaveBillCommand command) { ... }
+}
 ```
 
 ---
@@ -265,7 +632,7 @@ Opt-out per window: `h:LayoutDiagnostics.IsEnabled="False"`.
   alignment) — use layout panels, `HorizontalAlignment`, and
   `VerticalAlignment`.
 - All font sizes, spacing, and padding use the token system in
-  `GlobalStyles.xaml` which scales naturally at any DPI.
+  `DesignSystem.xaml` which scales naturally at any DPI.
 
 ### 5.6  Keyboard navigation
 
@@ -658,13 +1025,32 @@ provides the full enterprise dialog standard automatically:
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
         Title="Edit Item"
         ConfirmCommand="{Binding SaveCommand}">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-    <Grid Margin="25">
-        <!-- form fields -->
-        <Button Content="Save" Command="{Binding SaveCommand}"/>
-        <Button Content="Cancel" IsCancel="True"/>
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Title -->
+        <TextBlock Text="Edit Item" Style="{StaticResource DialogTitleStyle}"/>
+
+        <!-- Row 1: Form body -->
+        <StackPanel Grid.Row="1">
+            <!-- form fields -->
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+        </StackPanel>
+
+        <!-- Row 2: Actions -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="💾 Save" Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </StackPanel>
     </Grid>
-    </ScrollViewer>
 </core:BaseDialogWindow>
 ```
 
@@ -716,6 +1102,25 @@ ResponsiveContentControl          ← stretches to fill, defines ScrollViewer
 - This eliminates the classic WPF problem of `*` rows collapsing
   inside a plain `ScrollViewer`.
 
+### Workspace transition animation
+
+When `Content` changes (page navigation, billing-mode toggle, etc.)
+`ResponsiveContentControl.OnContentChanged` triggers a combined
+fade + slide-up animation:
+
+| Phase | Property | Animation | Duration | Easing |
+|-------|----------|-----------|----------|--------|
+| Fade  | `PART_ScrollViewer.Opacity` | 0 → 1 | FluentDurationSlow (250 ms) | FluentEaseDecelerate |
+| Slide | `PART_SlideTransform.Y` | 12 px → 0 | FluentDurationSlow (250 ms) | FluentEaseDecelerate |
+
+- The slide is opt-in via `EnableSlideTransition="True"` (default).
+- Animations are **non-blocking** — the new content receives input
+  immediately; the visual transition is purely cosmetic.
+- Scroll position resets to top on every content change.
+- The initial `Loaded` fade-in is handled by the template's
+  `EventTrigger`; subsequent transitions use code-behind for
+  reliable content-change detection.
+
 ---
 
 ## 9  Dependency injection
@@ -724,7 +1129,11 @@ ResponsiveContentControl          ← stretches to fill, defines ScrollViewer
 - Each module registers itself via `Add<Name>Module()`.
 - **Lifetimes**:
   - Services (state, session, settings): `Singleton`.
-  - Command handlers: `Transient`.
+  - Legacy command handlers (`ICommandHandler<T>`): `Transient`.
+  - Pipeline-aware handlers (`ICommandRequestHandler<,>`): `Transient`.
+  - Command validators (`ICommandValidator<T>`): `Transient`.
+  - Pipeline behaviors (`ICommandPipelineBehavior<,>`): `Transient` (open generic).
+  - Workflows (`IWorkflow`): `Singleton`.
   - ViewModels: `Transient`.
   - Views / Windows: `Transient`.
   - `DbContextFactory`: `Singleton`; individual `DbContext`: short-lived scoped usage.
@@ -733,7 +1142,7 @@ ResponsiveContentControl          ← stretches to fill, defines ScrollViewer
 
 ## 10  Command / event bus
 
-### Commands (one-to-one)
+### Commands (legacy — one-to-one, no pipeline)
 
 ```
 ViewModel  →  ICommandBus.SendAsync<SaveProductCommand>(cmd)
@@ -741,6 +1150,23 @@ ViewModel  →  ICommandBus.SendAsync<SaveProductCommand>(cmd)
               ICommandHandler<SaveProductCommand>.HandleAsync(cmd)
                   ↓
               CommandResult (Success / Failure + message)
+```
+
+### Commands (pipeline-aware — one-to-one, full middleware)
+
+```
+ViewModel  →  ICommandBus.SendAsync<SaveBillCommand, int>(cmd)
+                  ↓
+              CommandExecutionPipeline
+                  ├─ ValidationPipelineBehavior   (validates via ICommandValidator<T>)
+                  ├─ LoggingPipelineBehavior       (logs name, duration, outcome)
+                  ├─ OfflinePipelineBehavior       (rejects if offline + requires DB)
+                  ├─ TransactionPipelineBehavior   (wraps in transaction if [Transactional])
+                  └─ PerformancePipelineBehavior   (warns on slow commands)
+                  ↓
+              ICommandRequestHandler<SaveBillCommand, int>.HandleAsync(cmd)
+                  ↓
+              CommandResult<int> (Success + value / Failure + message)
 ```
 
 ### Events (one-to-many)
@@ -752,6 +1178,37 @@ Handler / Service  →  IEventBus.PublishAsync(new SaleCompletedEvent(...))
 ```
 
 Events are the **only** mechanism for cross-module communication.
+
+### Registered events
+
+| Event | Publisher | Purpose |
+|---|---|---|
+| `UserLoggedInEvent` | `LoginUserHandler` | User authenticated; session started |
+| `UserLoggedOutEvent` | `LogoutHandler` | User logged out; session cleared |
+| `UserLoginSuccessEvent` | `LoginUserHandler` | Successful login (analytics) |
+| `UserLoginFailedEvent` | `LoginUserHandler` | Failed login attempt |
+| `UserLockedOutEvent` | `LoginUserHandler` | Account locked after max attempts |
+| `SaleCompletedEvent` | `CompleteSaleHandler` | Sale finalized; stock deducted |
+| `SaleQueuedOfflineEvent` | `CompleteSaleHandler` | Sale queued for offline sync |
+| `FirmUpdatedEvent` | `FirmService` | Firm details changed |
+| `PinChangedEvent` | `ChangePinHandler` | User PIN updated |
+| `OperationalModeChangedEvent` | `AppStateService` | Mode switched (Management ↔ Billing) |
+| `OfflineModeChangedEvent` | `OfflineModeService` | Connectivity state changed |
+| `ConnectionLostEvent` | `ConnectivityMonitorService` | DB heartbeat failed |
+| `ConnectionRestoredEvent` | `ConnectivityMonitorService` | DB heartbeat recovered |
+| `HelpContextChangedEvent` | `ContextHelpService` | Help text refreshed |
+| `ExperienceLevelPromotedEvent` | `OnboardingJourneyService` | Operator experience level promoted |
+| `BillingSessionStartedEvent` | `BillingSessionService` | Billing session created |
+| `BillingSessionCompletedEvent` | `BillingSessionService` | Billing session completed |
+| `BillingSessionCancelledEvent` | `BillingSessionService` | Billing session cancelled |
+| `BillingSessionStateChangedEvent` | `BillingSessionService` | Session state transitioned |
+| `CartChangedEvent` | `BillingSessionService` | Cart items modified |
+| `PaymentStartedEvent` | `SmartBillingModeService` | Payment processing began |
+| `TransactionStartedEvent` | `TransactionSafetyService` | DB transaction opened |
+| `TransactionCommittedEvent` | `TransactionSafetyService` | DB transaction committed |
+| `TransactionFailedEvent` | `TransactionSafetyService` | DB transaction failed |
+| `NotificationPostedEvent` | `NotificationService` | In-app notification created |
+| `NotificationsChangedEvent` | `NotificationService` | Notification list changed |
 
 ---
 
@@ -825,19 +1282,82 @@ GST component split (for invoices)
 1. Create the module folder under `Modules/<Name>/`.
 2. Add `<Name>Module.cs` with `Add<Name>Module()` extension method.
 3. Register in `HostingExtensions`.
-4. ViewModels inherit `BaseViewModel`.
+4. ViewModels inherit `BaseViewModel`. PIN dialogs inherit `PinPadViewModel`.
 5. Content pages use `BasePage` as root element.
 6. Dialog windows inherit `BaseDialogWindow`.
 7. Set `ConfirmCommand="{Binding SaveCommand}"` on the dialog window
    element (binds Enter to the primary action).
-8. Wrap dialog content in `ScrollViewer`.
-8. Use `Grid` with `Auto` + `*` row definitions.
-9. Use spacing tokens from `GlobalStyles.xaml` — no magic numbers.
+8. Use `Grid` with `Auto` + `*` row definitions — exactly one `Height="*"` row.
+9. Use spacing tokens from `DesignSystem.xaml` — no magic numbers.
 10. Use `MaxWidth` on parent `StackPanel` for constrained fields — no
     fixed `Width` on the control itself.
 11. Add implicit `DataTemplate` in `App.xaml` for ViewModel → View mapping.
 12. Add commands via `ICommandBus`, events via `IEventBus`.
+    For new commands, prefer `ICommandRequestHandler<TCommand, TResult>`
+    (pipeline-aware) with `ICommandValidator<TCommand>`.
 13. Gate visibility behind `IFeatureToggleService` if applicable.
 14. Set `TabIndex` on form controls when the visual layout doesn't match
     the desired keyboard navigation order. Enter-key navigation is
     automatic — do not add per-window key handlers.
+15. Add `InlineTipBanner` in page Row 1 with `TipBannerAutoState.TipKey`
+    and `ContextKey`. Register tip definition in module registrar.
+16. Add `h:SmartTooltip.*` properties on key controls for context-aware
+    help. Register help keys in `ContextHelpService` rule pipeline.
+17. No `ScrollViewer` wrapping entire window — only around data-driven
+    content (see `UI_RULES.md §6`).
+
+---
+
+## 14  Architecture freeze
+
+> **CORE SYSTEMS FINALIZED — DO NOT MODIFY**
+>
+> The architecture described in this document is the production
+> baseline. All eight foundation systems listed below are fully
+> implemented, tested, and frozen. New features **must integrate
+> with** the existing architecture — never bypass, replace, or
+> duplicate any of these systems.
+
+### Frozen systems
+
+| # | System | Primary interface(s) | Purpose |
+|---|---|---|---|
+| 1 | Operational Modes | `IAppStateService.CurrentMode` | Dual-mode shell driving visibility, navigation, and shortcuts |
+| 2 | Smart Billing Mode | `SmartBillingModeService`, `IBillingSessionService` | Session lifecycle with safety interlocks |
+| 3 | Focus Lock | `IFocusLockService` | Module-level navigation gating during active billing |
+| 4 | Offline Safety | `IConnectivityMonitorService`, `IOfflineModeService`, `OfflinePipelineBehavior` | Connectivity monitoring and graceful degradation |
+| 5 | Transaction Safety | `ITransactionSafetyService`, `ITransactionHelper`, `TransactionPipelineBehavior` | Mandatory transaction boundaries for financial writes |
+| 6 | Command Pipeline | `ICommandPipelineBehavior<,>` (Validation → Logging → Offline → Transaction → Performance) | Automatic cross-cutting concerns on every command |
+| 7 | Smart Help System | `IContextHelpService`, `ITipRotationService`, `IOnboardingJourneyService` | Context-aware guidance, tip banners, experience-level adaptation |
+| 8 | Modern UI System | `DesignSystem.xaml` → `FluentTheme.xaml` → `MotionSystem.xaml` → `GlobalStyles.xaml` → `PosStyles.xaml` | Centralized tokens, motion, compliance diagnostics |
+
+### What this means for new development
+
+| ✅ Allowed | ❌ Prohibited |
+|---|---|
+| New modules under `Modules/` that consume existing interfaces | Rewriting or forking any frozen service |
+| New `ICommandPipelineBehavior<,>` implementations registered in DI | Removing or reordering existing pipeline behaviors |
+| New `IEvent` types published through `IEventBus` | Direct service calls from ViewModels (bypass `ICommandBus`) |
+| New pages registering in `NavigationPageRegistry` | Direct `DbContext` usage outside `IDbContextFactory` |
+| New tip definitions via `ITipRegistryService` | Inline colors, margins, font sizes, or storyboards in views |
+| Extending `IAppStateService` state with new observable properties | Replacing `IAppStateService` with a different state container |
+| New `[Transactional]` commands using the pipeline | Financial writes without a transaction boundary |
+
+### Extending the baseline
+
+To add capabilities to a frozen system, follow the existing extension
+points — never modify the implementations directly.
+
+| Extension point | How to use |
+|---|---|
+| New operational mode variant | Add to `OperationalMode` enum; subscribe to `OperationalModeChangedEvent` |
+| New pipeline behavior | Implement `ICommandPipelineBehavior<,>` and register in `HostingExtensions` |
+| New help context rule | Add a rule class to `ContextHelpService` pipeline; register in `OnboardingTipRegistrar` |
+| New motion preset | Add storyboard to `MotionSystem.xaml` and behavior to `Motion.cs` |
+| New design token | Add to `DesignSystem.xaml` — never hard-code at the call site |
+| New tip banner | `InlineTipBanner` in page Row 1 with `TipBannerAutoState.TipKey` and `ContextKey` |
+
+> **Cross-reference:** The full component inventory with locations and
+> DI registrations is in [`DEVELOPMENT_FLOW.md` §Enterprise Architecture
+> Baseline](DEVELOPMENT_FLOW.md). The summarised ruleset is in
+> [`MASTER_RULES.md`](MASTER_RULES.md).

@@ -66,6 +66,10 @@ public partial class App : Application
         // cart-change and session events before any billing starts.
         _host.Services.GetRequiredService<IBillingAutoSaveService>();
 
+        // Eagerly resolve the onboarding tip registrar so all first-time
+        // tips are registered before any view loads.
+        _host.Services.GetRequiredService<OnboardingTipRegistrar>();
+
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
 
         // 1. UI thread exceptions (bindings, commands, event handlers)

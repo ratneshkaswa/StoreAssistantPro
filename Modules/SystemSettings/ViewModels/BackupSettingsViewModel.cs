@@ -2,11 +2,14 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.SystemSettings.Services;
 
 namespace StoreAssistantPro.Modules.SystemSettings.ViewModels;
 
-public partial class BackupSettingsViewModel(ISystemSettingsService settingsService) : BaseViewModel
+public partial class BackupSettingsViewModel(
+    ISystemSettingsService settingsService,
+    IDialogService dialogService) : BaseViewModel
 {
     [ObservableProperty]
     public partial string BackupFolder { get; set; } = string.Empty;
@@ -54,6 +57,12 @@ public partial class BackupSettingsViewModel(ISystemSettingsService settingsServ
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+
+        if (!dialogService.Confirm(
+            "Restore will overwrite the current database.\n\nThis action cannot be undone. Continue?",
+            "Confirm Restore"))
+            return;
+
         IsRunning = true;
 
         try

@@ -89,6 +89,14 @@ internal static class HostingExtensions
         services.AddSingleton<IBillCalculationService, BillCalculationService>();
         services.AddSingleton<IConnectivityMonitorService, ConnectivityMonitorService>();
         services.AddSingleton<IOfflineModeService, OfflineModeService>();
+        services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<ITipStateService, TipStateService>();
+        services.AddSingleton<ITipRegistryService, TipRegistryService>();
+        services.AddSingleton<IOnboardingJourneyService, OnboardingJourneyService>();
+        services.AddSingleton<IUserInteractionTracker, UserInteractionTracker>();
+        services.AddSingleton<IContextHelpService, ContextHelpService>();
+        services.AddSingleton<ITipRotationService, TipRotationService>();
+        services.AddSingleton<OnboardingTipRegistrar>();
 
         return services;
     }

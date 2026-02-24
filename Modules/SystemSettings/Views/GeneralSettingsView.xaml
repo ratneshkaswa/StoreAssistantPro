@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
              Loaded="OnLoaded">
     <Grid Margin="{StaticResource DialogPadding}">
@@ -27,6 +28,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Row 0: Firm Name -->
@@ -39,14 +42,31 @@
             <!-- Row 2: Currency -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Currency"
                        Style="{StaticResource FormRowLabelStyle}"/>
-            <ComboBox Grid.Row="2" Grid.Column="1"
-                      ItemsSource="{Binding AvailableCurrencies}"
-                      SelectedItem="{Binding DefaultCurrency}"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                <ComboBox ItemsSource="{Binding AvailableCurrencies}"
+                          SelectedItem="{Binding DefaultCurrency}"
+                          Width="{StaticResource FieldWidthCompact}"/>
+                <TextBlock VerticalAlignment="Center" Margin="{StaticResource FormColumnGap}"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <Run Text="Preview: 1,234.56"/>
+                    <Run Text="{Binding DefaultCurrency, StringFormat=' ({0})', Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
 
-            <!-- Row 4: Messages -->
-            <StackPanel Grid.Row="4" Grid.Column="1">
+            <!-- Row 4: Smart Tooltips -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Smart Tooltips"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <CheckBox Grid.Row="4" Grid.Column="1"
+                      Content="Show tooltips on hover"
+                      IsChecked="{Binding SmartTooltipsEnabled}"
+                      Style="{StaticResource FluentCheckBoxStyle}"/>
+
+            <!-- Row 6: Messages -->
+            <StackPanel Grid.Row="6" Grid.Column="1">
                 <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
-                <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
+                <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                           h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
             </StackPanel>
         </Grid>
 

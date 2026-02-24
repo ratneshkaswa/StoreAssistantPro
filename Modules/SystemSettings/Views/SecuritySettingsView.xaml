@@ -37,7 +37,7 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                        Text="Change Master Password (6-digit numeric)"
                        Style="{StaticResource CaptionLabelStyle}"
-                       HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                       HorizontalAlignment="Left" Margin="{StaticResource FieldLabelSpacing}"/>
 
             <!-- Row 2: Current password -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Current Password *"
@@ -62,9 +62,10 @@
         </Grid>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="2" VerticalAlignment="Top" Margin="0,8,0,0">
+        <StackPanel Grid.Row="2" VerticalAlignment="Top" Margin="{StaticResource MessageBarSpacing}">
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
-            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
         </StackPanel>
 
         <!-- Action button — pinned to bottom -->

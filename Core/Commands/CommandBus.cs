@@ -5,6 +5,11 @@ namespace StoreAssistantPro.Core.Commands;
 /// <see cref="ICommandExecutionPipeline"/>. All registered
 /// <see cref="ICommandPipelineBehavior{TCommand,TResult}"/> behaviors
 /// execute before the inner handler is invoked.
+/// <para>
+/// <b>Threading:</b> Public methods do NOT use ConfigureAwait(false)
+/// so that ViewModel callers resume on the UI thread and can safely
+/// update bindings / close windows after awaiting.
+/// </para>
 /// </summary>
 public class CommandBus(ICommandExecutionPipeline pipeline) : ICommandBus
 {
@@ -13,17 +18,16 @@ public class CommandBus(ICommandExecutionPipeline pipeline) : ICommandBus
         where TCommand : ICommandRequest<Unit>
     {
         var result = await pipeline
-            .ExecuteAsync<TCommand, Unit>(command)
-            .ConfigureAwait(false);
+            .ExecuteAsync<TCommand, Unit>(command);
 
         return result.ToBase();
     }
 
     /// <inheritdoc/>
-    public Task<CommandResult<TResult>> SendAsync<TCommand, TResult>(
+    public async Task<CommandResult<TResult>> SendAsync<TCommand, TResult>(
         TCommand command, CancellationToken ct = default)
         where TCommand : ICommandRequest<TResult>
     {
-        return pipeline.ExecuteAsync<TCommand, TResult>(command, ct);
+        return await pipeline.ExecuteAsync<TCommand, TResult>(command, ct);
     }
 }

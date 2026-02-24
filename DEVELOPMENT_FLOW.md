@@ -5,6 +5,197 @@
 
 ---
 
+## Enterprise Architecture Baseline
+
+> **MANDATORY BASELINE — DO NOT MODIFY**
+>
+> The following eight systems form the architectural foundation of
+> StoreAssistantPro. They are fully implemented, production-tested,
+> and frozen. New features **must build on top of** these systems
+> using the existing interfaces. Never redesign, replace, or bypass
+> any baseline component.
+
+### 1. Operational Modes
+
+Dual-mode architecture drives feature visibility, navigation, toolbar
+composition, and keyboard shortcut sets across the entire shell.
+
+| Component | Location | Role |
+|---|---|---|
+| `OperationalMode` | `Models/` | `Management` · `Billing` enum |
+| `IAppStateService` | `Core/Services/` | Stores current mode; publishes `OperationalModeChangedEvent` |
+| `IBillingModeService` | `Modules/Billing/Services/` | Executes mode transitions (enter/exit billing) |
+
+**Rules:**
+- All mode-dependent visibility is driven by `IAppStateService.CurrentMode`.
+- Mode changes flow through `IEventBus` — never poll for state.
+- Navigation, sidebar, and toolbar react automatically via event subscriptions.
+
+### 2. Smart Billing Mode
+
+State-machine-driven billing session lifecycle with safety interlocks
+that prevent data loss during active sales.
+
+| Component | Location | Role |
+|---|---|---|
+| `SmartBillingModeService` | `Modules/Billing/Services/` | Reacts to session events; drives `IBillingModeService` |
+| `IBillingSessionService` | `Modules/Billing/Services/` | Manages `BillingSessionState` lifecycle |
+| `BillingAutoSaveService` | `Modules/Billing/Services/` | Debounced cart persistence; immediate flush on payment |
+| `IBillingResumeService` | `Modules/Billing/Services/` | Recovers interrupted sessions on login |
+| `IStaleBillingSessionCleanupService` | `Modules/Billing/Services/` | Archives abandoned sessions at startup |
+
+**Safety interlocks:**
+- Active-session guard — cannot exit Billing while session is active.
+- Payment lock — mode transitions blocked during payment processing.
+- Focus lock hold — UI navigation frozen mid-payment.
+- Serialized transitions — `SemaphoreSlim` prevents race conditions.
+
+### 3. Focus Lock
+
+Module-level UI focus locking that prevents accidental context switches
+during active billing sessions.
+
+| Component | Location | Role |
+|---|---|---|
+| `IFocusLockService` | `Core/Services/` | `IsFocusLocked` · `ActiveModule` · `IsReleaseHeld` |
+| `FocusLockService` | `Core/Services/` | Implements lock/release/hold lifecycle |
+
+**Rules:**
+- ViewModels read `IsFocusLocked` and `ActiveModule` to gate navigation.
+- Only `SmartBillingModeService` and `FocusLockService` control transitions.
+- `HoldRelease()` defers unlock during payment; `LiftReleaseHold()` flushes.
+- Implements `INotifyPropertyChanged` so XAML can bind directly.
+
+### 4. Offline Safety
+
+Database connectivity monitoring with automatic mode switching and
+graceful degradation during outages.
+
+| Component | Location | Role |
+|---|---|---|
+| `IConnectivityMonitorService` | `Core/Services/` | Background heartbeat timer; publishes `ConnectionLost`/`Restored` events |
+| `IOfflineModeService` | `Core/Services/` | Reacts to connectivity events; updates `IAppStateService.IsOfflineMode` |
+| `OfflinePipelineBehavior` | `Core/Commands/Offline/` | Rejects DB-dependent commands when offline |
+
+**Rules:**
+- Connectivity events flow through `IEventBus` — never poll.
+- `OfflineModeChangedEvent` drives help text suffixes, tip banners, and status bar messages.
+- Billing continues locally with auto-save; syncs on reconnect.
+
+### 5. Transaction Safety
+
+Structured database transaction boundaries with result-based error
+reporting for all financial operations.
+
+| Component | Location | Role |
+|---|---|---|
+| `ITransactionHelper` | `Core/Services/` | Exception-based: begin → commit or throw |
+| `ITransactionSafetyService` | `Core/Services/` | Result-based: returns `TransactionResult` (no exceptions) |
+| `TransactionPipelineBehavior` | `Core/Commands/Transaction/` | Automatic transaction wrapping for commands marked `[Transactional]` |
+
+**Rules:**
+- All financial writes use execution strategy + transaction (begin → commit).
+- Work context created inside retry lambda for clean retry.
+- `DbUpdateConcurrencyException` caught and reported to user.
+- Read-only queries do not need transactions.
+
+### 6. Command Pipeline
+
+Middleware-based command execution with cross-cutting concerns applied
+in registration order as a Russian-doll chain.
+
+| Behavior | Location | Order | Purpose |
+|---|---|---|---|
+| `ValidationPipelineBehavior` | `Core/Commands/Validation/` | 1 | Validates command properties; short-circuits on failure |
+| `LoggingPipelineBehavior` | `Core/Commands/Logging/` | 2 | Logs command name, duration, success/failure |
+| `OfflinePipelineBehavior` | `Core/Commands/Offline/` | 3 | Rejects DB-dependent commands when offline |
+| `TransactionPipelineBehavior` | `Core/Commands/Transaction/` | 4 | Wraps `[Transactional]` commands in safe boundary |
+| `PerformancePipelineBehavior` | `Core/Commands/Performance/` | 5 | Measures execution time; warns on slow commands |
+
+**Rules:**
+- Behaviors are cross-cutting — no business logic specific to one command.
+- Behaviors must call `next()` exactly once (or return early to short-circuit).
+- Registered as open generics: `services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(...))`.
+- Execution order matches DI registration order.
+
+### 7. Smart Help System
+
+Context-aware help, onboarding guidance, and experience-level adaptive
+content across tooltips, tip banners, and help overlays.
+
+| Component | Location | Role |
+|---|---|---|
+| `IContextHelpService` | `Core/Services/` | Rule pipeline → context-specific help text; experience-level adaptation |
+| `ITipRotationService` | `Core/Services/` | Selects next tip per window; experience-gated frequency |
+| `ITipRegistryService` | `Core/Services/` | Stores all `TipDefinition` registrations |
+| `IOnboardingJourneyService` | `Core/Services/` | Tracks milestones; auto-promotes experience level |
+| `IUserInteractionTracker` | `Core/Services/` | Counts distinct windows/sessions for promotion |
+| `ITipStateService` | `Core/Services/` | Persists per-tip dismiss state to JSON file |
+| `OnboardingTipRegistrar` | `Core/Services/` | Registers beginner onboarding tips at startup |
+| `SmartTooltip` | `Core/Helpers/` | Context-aware tooltips via attached properties |
+| `InlineTipBanner` | `Core/Controls/` | Per-page tip banners with dismiss persistence |
+| `TipBannerAutoState` | `Core/Helpers/` | Attached behavior connecting banners to state/help services |
+
+**Rules:**
+- Help text auto-refreshes on `OperationalModeChangedEvent`, `OfflineModeChangedEvent`,
+  `ExperienceLevelPromotedEvent`, and `FocusLockService.PropertyChanged`.
+- Tip banners always in page Row 1 (below title, above toolbar).
+- Onboarding tips: `TipLevel.Beginner`, `Priority = 90`, `IsOneTime = true`.
+- New help keys require rule pipeline entry + `ExperienceLevelAdapter` entries.
+
+### 8. Modern UI System
+
+Fluent-inspired design system with centralized tokens, motion system,
+and development-time compliance enforcement.
+
+| Component | Location | Role |
+|---|---|---|
+| `DesignSystem.xaml` | `Core/Styles/` | Pure tokens: colors, spacing, sizing, typography, motion |
+| `FluentTheme.xaml` | `Core/Styles/` | Keyed control templates consuming tokens |
+| `MotionSystem.xaml` | `Core/Styles/` | Reusable storyboards + motion styles |
+| `GlobalStyles.xaml` | `Core/Styles/` | Implicit styles + named app styles (`BasedOn` Fluent) |
+| `PosStyles.xaml` | `Core/Styles/` | POS-specific templates (keypad, role buttons) |
+| `Motion.cs` | `Core/Helpers/` | `h:Motion.*` attached behaviors (fade, slide, scale) |
+| `StyleComplianceDiagnostics.cs` | `Core/Helpers/` | DEBUG-only: detects inline colors, margins, font sizes |
+| `LayoutDiagnostics.cs` | `Core/Helpers/` | DEBUG-only: detects illegal `ScrollViewer` wrapping |
+
+**Rules:**
+- All visual values from `DesignSystem.xaml` — zero inline colors, margins, font sizes.
+- Styles loaded in strict order: DesignSystem → FluentTheme → MotionSystem → GlobalStyles → PosStyles.
+- `StaticResource` only (not `DynamicResource`) for tokens.
+- Animations use `h:Motion.*` behaviors or `MotionSystem.xaml` storyboards — never inline.
+- Every view uses `EnterpriseDataGridStyle`, named button styles, and card styles.
+
+### Baseline integration map
+
+```
+┌─ Operational Modes ────────────────────────────────────────────┐
+│  AppStateService.CurrentMode                                   │
+│       │                                                        │
+│       ├──▶ Smart Billing Mode (session lifecycle + interlocks) │
+│       │        │                                               │
+│       │        ├──▶ Focus Lock (navigation gating)             │
+│       │        └──▶ Auto-Save (debounced cart persistence)     │
+│       │                                                        │
+│       ├──▶ Offline Safety (connectivity → graceful degrade)    │
+│       │                                                        │
+│       ├──▶ Smart Help System (context-aware guidance)          │
+│       │        ├── ContextHelpService (rule pipeline)          │
+│       │        ├── TipRotationService (experience-gated)       │
+│       │        └── OnboardingJourneyService (auto-promote)     │
+│       │                                                        │
+│       └──▶ Modern UI System (mode-driven visibility)           │
+│                                                                │
+├─ Command Pipeline ─────────────────────────────────────────────┤
+│  Validation → Logging → Offline Guard → Transaction → Perf     │
+│                                                                │
+├─ Transaction Safety ───────────────────────────────────────────┤
+│  ExecutionStrategy → BeginTransaction → Commit/Rollback        │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Development Checklist
 
 | # | Step | Output |
@@ -12,14 +203,17 @@
 | 1 | Create module folder | `Modules/{ModuleName}/` |
 | 2 | Create models | `Models/` or `Modules/{Module}/Models/` |
 | 3 | Create service interface + implementation | `Modules/{Module}/Services/I{Name}Service.cs` + `{Name}Service.cs` |
-| 4 | Create commands + handlers | `Modules/{Module}/Commands/{Name}Command.cs` + `{Name}Handler.cs` |
-| 5 | Create ViewModel | `Modules/{Module}/ViewModels/{Name}ViewModel.cs` — inherits `BaseViewModel` |
-| 6 | Create View | `Modules/{Module}/Views/{Name}View.xaml` + `.xaml.cs` |
-| 7 | Register in DI | `Modules/{Module}/{Module}Module.cs` — services, handlers, ViewModels, Views |
-| 8 | Add navigation / dialog entry | Register page in `NavigationPageRegistry` or dialog in `IWindowRegistry` |
-| 9 | Add events if needed | `Modules/{Module}/Events/{Name}Event.cs` — publish from handler, subscribe from ViewModel |
-| 10 | Add feature flag | `Core/Features/FeatureFlags.cs` + `appsettings.json` → bind visibility in XAML |
-| 11 | Write tests | `Tests/Commands/`, `Tests/ViewModels/` — one test class per handler + ViewModel |
+| 4 | Create commands + handlers | `{Name}Command.cs` : `ICommandRequest<TResult>` + `{Name}Handler.cs` : `ICommandRequestHandler<,>` |
+| 5 | Create command validator (if needed) | `{Name}Validator.cs` : `ICommandValidator<TCommand>` |
+| 6 | Create ViewModel | `Modules/{Module}/ViewModels/{Name}ViewModel.cs` — inherits `BaseViewModel` |
+| 7 | Create View | `Modules/{Module}/Views/{Name}View.xaml` + `.xaml.cs` |
+| 8 | Register in DI | `Modules/{Module}/{Module}Module.cs` — services, handlers, validators, ViewModels, Views |
+| 9 | Add navigation / dialog entry | Register page in `NavigationPageRegistry` or dialog via `AddDialogRegistration<TWindow>()` |
+| 10 | Add events if needed | `Modules/{Module}/Events/{Name}Event.cs` — publish from handler, subscribe from ViewModel |
+| 11 | Add tip banner + help keys | `InlineTipBanner` in page Row 1; register tip definition; add `SmartTooltip` properties |
+| 12 | Add DataTemplate | Implicit `DataTemplate` in `App.xaml` for ViewModel → View mapping (pages only) |
+| 13 | Add feature flag | `Core/Features/FeatureFlags.cs` + `appsettings.json` → bind visibility in XAML |
+| 14 | Write tests | `Tests/Commands/`, `Tests/ViewModels/` — one test class per handler + ViewModel |
 
 ---
 
@@ -30,8 +224,9 @@ Modules/
 └── {ModuleName}/
     ├── {ModuleName}Module.cs        ← DI registration
     ├── Commands/
-    │   ├── {Action}Command.cs       ← ICommand record
-    │   └── {Action}Handler.cs       ← BaseCommandHandler<T>
+    │   ├── {Action}Command.cs       ← ICommandRequest<TResult> record (pipeline) or ICommand (legacy)
+    │   ├── {Action}Handler.cs       ← ICommandRequestHandler<,> (pipeline) or BaseCommandHandler<T> (legacy)
+    │   └── {Action}Validator.cs     ← ICommandValidator<T> (optional, pipeline only)
     ├── Events/
     │   └── {Name}Event.cs           ← IEvent record
     ├── Models/                      ← Module-specific DTOs (optional)
@@ -53,9 +248,13 @@ Modules/
 
 ### Writes (Commands)
 ```
-View → ViewModel → CommandBus.SendAsync() → BaseCommandHandler → Service → DB
-                                                    ↓
-                                               EventBus.PublishAsync() → Subscribers
+View → ViewModel → CommandBus.SendAsync()
+                        ↓
+                   Pipeline (Validation → Logging → Offline → Transaction → Performance)
+                        ↓
+                   Handler.ExecuteAsync() → Service → DB
+                        ↓
+                   EventBus.PublishAsync() → Subscribers
 ```
 
 ### Reads (Queries)
@@ -79,11 +278,22 @@ Module A (Handler) → publishes Event → EventBus → Module B (ViewModel subs
 - Use `IsBusy` from base — never redeclare
 - Use `RunAsync()` for automatic busy/error management
 
-### BaseCommandHandler (all handlers)
+### BaseCommandHandler (legacy handlers)
 - Inherit `BaseCommandHandler<TCommand>` — never `ICommandHandler<T>` directly
 - Implement `ExecuteAsync()` — never `HandleAsync()`
 - Return `CommandResult.Success()` or `CommandResult.Failure()` for expected outcomes
 - Let the base catch unexpected exceptions
+
+### ICommandRequestHandler (pipeline-aware handlers)
+- Implement `ICommandRequestHandler<TCommand, TResult>` for new commands
+- Commands implement `ICommandRequest<TResult>`
+- Pipeline behaviors (validation, logging, offline, transaction, perf) wrap automatically
+- Use `ICommandValidator<TCommand>` for pre-execution validation
+- Use `[Transactional]` marker interface for automatic transaction wrapping
+
+### PinPadViewModel (PIN entry reuse)
+- Inherit `PinPadViewModel` for any dialog requiring numeric PIN entry
+- Provides digit entry, backspace, clear, max-length enforcement, `PinCompleted` callback
 
 ---
 
@@ -93,18 +303,44 @@ These components are **frozen**. Extend through the existing interfaces only.
 
 | Component | Location | Purpose |
 |---|---|---|
-| `AppStateService` | `Core/Services/` | Single source of truth for global state |
+| `AppStateService` | `Core/Services/` | Single source of truth for global state (mode, offline, session) |
 | `EventBus` | `Core/Events/` | Pub/sub for cross-module events |
-| `CommandBus` | `Core/Commands/` | Dispatches commands to handlers |
+| `CommandBus` | `Core/Commands/` | Dispatches commands to handlers via pipeline |
+| `CommandExecutionPipeline` | `Core/Commands/` | Ordered middleware chain (validation → logging → offline → transaction → perf) |
 | `WorkflowManager` | `Core/Workflows/` | Orchestrates multi-step user flows |
 | `NavigationService` | `Core/Navigation/` | Page switching inside MainWindow |
 | `FeatureToggleService` | `Core/Features/` | Feature flag management |
 | `SessionService` | `Core/Session/` | Current user session state |
+| `FocusLockService` | `Core/Services/` | Module-level UI focus locking |
+| `ConnectivityMonitorService` | `Core/Services/` | Background DB heartbeat; connectivity events |
+| `OfflineModeService` | `Core/Services/` | Offline mode switching; status bar messages |
+| `TransactionSafetyService` | `Core/Services/` | Result-based safe transaction boundaries |
+| `TransactionHelper` | `Core/Services/` | Exception-based transaction helper |
+| `ContextHelpService` | `Core/Services/` | Context-aware help rule pipeline; experience-level adaptation |
+| `TipRotationService` | `Core/Services/` | Experience-gated tip selection per window |
+| `TipRegistryService` | `Core/Services/` | Stores all `TipDefinition` registrations |
+| `OnboardingJourneyService` | `Core/Services/` | Milestone tracking; auto-promotes experience level |
+| `UserInteractionTracker` | `Core/Services/` | Counts distinct windows/sessions for promotion |
+| `TipStateService` | `Core/Services/` | Persists per-tip dismiss state to JSON |
+| `OnboardingTipRegistrar` | `Core/Services/` | Registers beginner onboarding tips at startup |
+| `NotificationService` | `Core/Services/` | In-app notification management |
+| `StatusBarService` | `Core/Services/` | Status bar message posting with auto-clear |
+| `PerformanceMonitor` | `Core/Services/` | Runtime performance measurement |
+| `WindowRegistry` | `Core/Services/` | Dialog-key → Window-type mapping for `IDialogService` |
+| `DialogService` | `Modules/MainShell/Services/` | Shows modal dialogs by key via `IWindowRegistry` |
+| `FileLoggerProvider` | `Core/Services/` | File-based log provider |
+| `MasterPinValidator` | `Core/Services/` | Validates master PIN for admin operations |
+| `ApplicationInfoService` | `Core/Services/` | App version, build info |
 | `BaseViewModel` | `Core/Base/` | Base class for all ViewModels |
-| `BaseCommandHandler` | `Core/Base/` | Base class for all command handlers |
+| `PinPadViewModel` | `Core/Base/` | Reusable PIN pad logic |
+| `BaseCommandHandler` | `Core/Base/` | Base class for legacy command handlers |
 | `BaseDialogWindow` | `Core/Base/` | Base class for all dialog windows |
+| `BasePage` | `Core/Base/` | Base class for all content pages |
 | `WindowSizingService` | `Core/Services/` | Enterprise window sizing rules |
 | `RegionalSettingsService` | `Core/Services/` | Indian regional formatting (en-IN, IST) |
+| `PricingCalculationService` | `Core/Services/` | Per-line price/tax calculation |
+| `BillCalculationService` | `Core/Services/` | Whole-bill subtotal/discount/tax |
+| `TaxCalculationService` | `Core/Services/` | GST component split (CGST/SGST/IGST) |
 
 ---
 
@@ -129,6 +365,20 @@ public static IServiceCollection AddMyModule(
 public static IServiceCollection AddMyModule(this IServiceCollection services)
 {
     services.AddSingleton<IMyService, MyService>();
+    services.AddTransient<MyViewModel>();
+    services.AddTransient<MyWindow>();
+    services.AddDialogRegistration<MyWindow>("MyDialog");
+    return services;
+}
+```
+
+### Pipeline-Aware Module (with command validation)
+```csharp
+public static IServiceCollection AddMyModule(this IServiceCollection services)
+{
+    services.AddTransient<IMyService, MyService>();
+    services.AddTransient<ICommandRequestHandler<MyCommand, Unit>, MyCommandHandler>();
+    services.AddTransient<ICommandValidator<MyCommand>, MyCommandValidator>();
     services.AddTransient<MyViewModel>();
     services.AddTransient<MyWindow>();
     services.AddDialogRegistration<MyWindow>("MyDialog");
@@ -242,11 +492,19 @@ Global culture is set to `en-IN` in `App.xaml.cs` before any other code runs. **
 
 ---
 
-## Financial Transaction Rules — Mandatory Before Billing
+## Financial Transaction Rules
 
 All financial operations **must** execute inside a database transaction. No exceptions.
 
-### Required Pattern
+### Available approaches
+
+| Approach | Service | Error model | Use when |
+|---|---|---|---|
+| **Pipeline** | `TransactionPipelineBehavior` | `CommandResult.Failure` | Command marked `[Transactional]` — automatic |
+| **Result-based** | `ITransactionSafetyService` | `TransactionResult` (inspect `.Succeeded`) | Service-layer orchestration with structured results |
+| **Exception-based** | `ITransactionHelper` | Throws on failure | Legacy pattern; still valid |
+
+### Manual pattern (when not using pipeline or safety service)
 
 ```csharp
 await using var strategySource = await contextFactory.CreateDbContextAsync();
@@ -272,6 +530,7 @@ await strategy.ExecuteAsync(async () =>
 - Concurrency conflicts (`DbUpdateConcurrencyException`) must be caught and reported to the user
 - **Never** call `SaveChangesAsync()` outside a transaction for financial writes
 - Read-only queries (`GetAllAsync`, reports) do **not** need transactions
+- Prefer `[Transactional]` attribute on commands for automatic pipeline wrapping
 
 ### Operations Requiring Transactions
 

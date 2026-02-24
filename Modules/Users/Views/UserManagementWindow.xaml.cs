@@ -1,6 +1,8 @@
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Users.ViewModels;
@@ -19,6 +21,11 @@ public partial class UserManagementWindow : BaseDialogWindow
         InitializeComponent();
         DataContext = vm;
         vm.PropertyChanged += OnViewModelPropertyChanged;
+
+        // 7a: Enforce numeric-only input on PIN PasswordBoxes
+        NewPinBox.PreviewTextInput += OnPreviewNumericOnly;
+        ConfirmPinBox.PreviewTextInput += OnPreviewNumericOnly;
+        MasterPinBox.PreviewTextInput += OnPreviewNumericOnly;
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -57,4 +64,13 @@ public partial class UserManagementWindow : BaseDialogWindow
         else if (e.PropertyName == nameof(UserManagementViewModel.MasterPin) && vm.MasterPin != MasterPinBox.Password)
             MasterPinBox.Password = vm.MasterPin;
     }
+
+    /// <summary>7a: Only allow digit characters in PIN fields.</summary>
+    private static void OnPreviewNumericOnly(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = !DigitsOnlyRegex().IsMatch(e.Text);
+    }
+
+    [GeneratedRegex(@"^\d+$")]
+    private static partial Regex DigitsOnlyRegex();
 }

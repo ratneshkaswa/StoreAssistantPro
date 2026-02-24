@@ -30,6 +30,12 @@ public interface IAppStateService : INotifyPropertyChanged
     bool IsOfflineMode { get; }
 
     /// <summary>
+    /// <c>true</c> when Smart Tooltips are enabled application-wide.
+    /// Toggled from System Settings → General.
+    /// </summary>
+    bool SmartTooltipsEnabled { get; }
+
+    /// <summary>
     /// Timestamp of the most recent connectivity health check.
     /// </summary>
     DateTime? LastConnectionCheck { get; }
@@ -48,6 +54,7 @@ public interface IAppStateService : INotifyPropertyChanged
     /// status changes.
     /// </summary>
     void SetConnectivity(bool isOffline, DateTime checkTime);
+    void SetSmartTooltipsEnabled(bool enabled);
 
     void AddNotification(AppNotification notification);
     void MarkNotificationRead(AppNotification notification);

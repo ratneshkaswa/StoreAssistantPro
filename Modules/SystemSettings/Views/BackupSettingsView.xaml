@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
              Loaded="OnLoaded">
     <Grid Margin="{StaticResource DialogPadding}">
@@ -31,7 +32,8 @@
                        VerticalAlignment="Top" Margin="0,6,12,0"/>
             <TextBox Grid.Row="0" Grid.Column="1"
                      Text="{Binding BackupFolder, Mode=OneWay}" IsReadOnly="True"
-                     Background="#F0F0F0" Foreground="#555"/>
+                     Background="{StaticResource FluentSurfaceElevated}"
+                     Foreground="{StaticResource FluentTextSecondary}"/>
         </Grid>
 
         <!-- Action buttons -->
@@ -47,12 +49,19 @@
                     Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="📂 Open Folder" Command="{Binding OpenBackupFolderCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"/>
+
+            <!-- 12a: Progress spinner while running -->
+            <TextBlock Text="⏳ Working…" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold"
+                       Foreground="{StaticResource FluentAccentDefault}"
+                       VerticalAlignment="Center" Margin="{StaticResource FormColumnGap}"
+                       Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}"/>
         </StackPanel>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="3" VerticalAlignment="Top" Margin="0,8,0,0">
+        <StackPanel Grid.Row="3" VerticalAlignment="Top" Margin="{StaticResource MessageBarSpacing}">
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
-            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
         </StackPanel>
     </Grid>
 </UserControl>

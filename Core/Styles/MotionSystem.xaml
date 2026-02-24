@@ -1,0 +1,184 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MOTION SYSTEM — Fluent 2 Reusable Animations
+         ═══════════════════════════════════════════════════════════════
+
+         Provides XAML-only Storyboards that can be referenced from
+         Trigger.EnterActions / ExitActions in any ControlTemplate or
+         Style, plus ready-made styles that compose common motions.
+
+         All timings come from DesignSystem.xaml tokens:
+           FluentDurationFast    83 ms   hover, instant feedback
+           FluentDurationNormal  167 ms  focus, panel reveal
+           FluentDurationSlow    250 ms  view transitions, fades
+           FluentEaseDecelerate  CubicEase EaseOut  (entrances)
+           FluentEaseAccelerate  CubicEase EaseIn   (exits)
+           FluentEasePoint       QuadraticEase EaseInOut (scale)
+
+         For code-driven animations use the h:Motion attached
+         behaviors in Core/Helpers/Motion.cs.
+         ═══════════════════════════════════════════════════════════════ -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         1. REUSABLE STORYBOARDS
+
+         Reference from triggers:
+           <Trigger.EnterActions>
+               <BeginStoryboard Storyboard="{StaticResource MotionFadeIn}"/>
+           </Trigger.EnterActions>
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Fade In: Opacity 0 → 1 (250 ms decelerate) -->
+    <Storyboard x:Key="MotionFadeIn">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1"
+                         Duration="{StaticResource FluentDurationSlow}"
+                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+    </Storyboard>
+
+    <!-- Fade Out: Opacity → 0 (167 ms accelerate) -->
+    <Storyboard x:Key="MotionFadeOut">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         To="0"
+                         Duration="{StaticResource FluentDurationNormal}"
+                         EasingFunction="{StaticResource FluentEaseAccelerate}"/>
+    </Storyboard>
+
+    <!-- Page Fade In: Opacity 0 → 1 (150 ms — page content entrance) -->
+    <Storyboard x:Key="MotionPageFadeIn">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1"
+                         Duration="{StaticResource FluentDurationPageFade}"
+                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+    </Storyboard>
+
+    <!-- Quick Fade In: Opacity 0 → 1 (83 ms — hover feedback) -->
+    <Storyboard x:Key="MotionFadeInFast">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1"
+                         Duration="{StaticResource FluentDurationFast}"
+                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+    </Storyboard>
+
+    <!-- Quick Fade Out: Opacity → 0 (83 ms) -->
+    <Storyboard x:Key="MotionFadeOutFast">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         To="0"
+                         Duration="{StaticResource FluentDurationFast}"
+                         EasingFunction="{StaticResource FluentEaseAccelerate}"/>
+    </Storyboard>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         2. SCALE HOVER STORYBOARDS
+
+         For ControlTemplate triggers on elements with a named
+         ScaleTransform (x:Name="HoverScale"):
+
+           <Trigger Property="IsMouseOver" Value="True">
+               <Trigger.EnterActions>
+                   <BeginStoryboard Storyboard="{StaticResource MotionScaleHoverEnter}"/>
+               </Trigger.EnterActions>
+               <Trigger.ExitActions>
+                   <BeginStoryboard Storyboard="{StaticResource MotionScaleHoverLeave}"/>
+               </Trigger.ExitActions>
+           </Trigger>
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <Storyboard x:Key="MotionScaleHoverEnter">
+        <DoubleAnimation Storyboard.TargetName="HoverScale"
+                         Storyboard.TargetProperty="ScaleX"
+                         To="1.0"
+                         Duration="{StaticResource FluentDurationFast}"
+                         EasingFunction="{StaticResource FluentEasePoint}"/>
+        <DoubleAnimation Storyboard.TargetName="HoverScale"
+                         Storyboard.TargetProperty="ScaleY"
+                         To="1.0"
+                         Duration="{StaticResource FluentDurationFast}"
+                         EasingFunction="{StaticResource FluentEasePoint}"/>
+    </Storyboard>
+
+    <Storyboard x:Key="MotionScaleHoverLeave">
+        <DoubleAnimation Storyboard.TargetName="HoverScale"
+                         Storyboard.TargetProperty="ScaleX"
+                         To="{StaticResource MotionScaleHoverFrom}"
+                         Duration="{StaticResource FluentDurationFast}"
+                         EasingFunction="{StaticResource FluentEasePoint}"/>
+        <DoubleAnimation Storyboard.TargetName="HoverScale"
+                         Storyboard.TargetProperty="ScaleY"
+                         To="{StaticResource MotionScaleHoverFrom}"
+                         Duration="{StaticResource FluentDurationFast}"
+                         EasingFunction="{StaticResource FluentEasePoint}"/>
+    </Storyboard>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         3. SLIDE FADE STORYBOARDS
+
+         For ControlTemplate triggers on elements with a named
+         TranslateTransform (x:Name="SlideTransform"):
+
+           <EventTrigger RoutedEvent="Loaded">
+               <BeginStoryboard Storyboard="{StaticResource MotionSlideFadeIn}"/>
+           </EventTrigger>
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Slide up 12 px + fade in (250 ms decelerate) -->
+    <Storyboard x:Key="MotionSlideFadeIn">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1"
+                         Duration="{StaticResource FluentDurationSlow}"
+                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+        <DoubleAnimation Storyboard.TargetName="SlideTransform"
+                         Storyboard.TargetProperty="Y"
+                         From="{StaticResource MotionSlideOffsetSmall}" To="0"
+                         Duration="{StaticResource FluentDurationSlow}"
+                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+    </Storyboard>
+
+    <!-- Slide down 12 px + fade out (167 ms accelerate) -->
+    <Storyboard x:Key="MotionSlideFadeOut">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         To="0"
+                         Duration="{StaticResource FluentDurationNormal}"
+                         EasingFunction="{StaticResource FluentEaseAccelerate}"/>
+        <DoubleAnimation Storyboard.TargetName="SlideTransform"
+                         Storyboard.TargetProperty="Y"
+                         To="{StaticResource MotionSlideOffsetSmall}"
+                         Duration="{StaticResource FluentDurationNormal}"
+                         EasingFunction="{StaticResource FluentEaseAccelerate}"/>
+    </Storyboard>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         4. READY-MADE STYLES
+
+         Apply directly to any FrameworkElement — no code needed.
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Fade in on Loaded -->
+    <Style x:Key="MotionFadeInStyle" TargetType="FrameworkElement">
+        <Setter Property="h:Motion.FadeIn" Value="True"/>
+    </Style>
+
+    <!-- Slide-up + fade in on Loaded -->
+    <Style x:Key="MotionSlideFadeInStyle" TargetType="FrameworkElement">
+        <Setter Property="h:Motion.SlideFadeIn" Value="True"/>
+    </Style>
+
+    <!-- Subtle scale pulse on hover -->
+    <Style x:Key="MotionScaleHoverStyle" TargetType="FrameworkElement">
+        <Setter Property="h:Motion.ScaleHover" Value="True"/>
+    </Style>
+
+    <!-- Combined: scale hover + fade in -->
+    <Style x:Key="MotionCardStyle" TargetType="FrameworkElement">
+        <Setter Property="h:Motion.FadeIn" Value="True"/>
+        <Setter Property="h:Motion.ScaleHover" Value="True"/>
+    </Style>
+
+</ResourceDictionary>

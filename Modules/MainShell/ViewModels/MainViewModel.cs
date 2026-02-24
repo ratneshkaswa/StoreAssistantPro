@@ -34,6 +34,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private readonly IShortcutService _shortcutService;
     private readonly IBillingModeService _billingModeService;
     private readonly IFocusLockService _focusLock;
+    private readonly INotificationService _notificationService;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -44,6 +45,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private const string FirmManagementDialog = "FirmManagement";
     private const string UserManagementDialog = "UserManagement";
     private const string TaxManagementDialog = "TaxManagement";
+    private const string TasksDialog = "Tasks";
 
     // ── Well-known workflow names ──
 
@@ -73,9 +75,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     [ObservableProperty]
     public partial bool IsNotificationsPanelVisible { get; set; }
 
-    [ObservableProperty]
-    public partial bool IsTasksPanelVisible { get; set; }
-
     // ── Role-based visibility ──
 
     public bool IsAdmin => AppState.CurrentUserType == UserType.Admin;
@@ -95,7 +94,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     public bool IsFirmManagementEnabled => _features.IsEnabled(FeatureFlags.FirmManagement);
     public bool IsTaxManagementEnabled => _features.IsEnabled(FeatureFlags.TaxManagement);
 
-    // ── Combined role + feature visibility (used by menu/sidebar) ──
+    // ── Combined role + feature visibility (used by menu items) ──
 
     public bool IsFirmManagementVisible => IsAdmin && IsFirmManagementEnabled;
     public bool IsUserManagementVisible => IsAdmin && IsUserManagementEnabled;
@@ -111,8 +110,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     // ── Navigation ──
 
-    [ObservableProperty]
-    public partial string CurrentPage { get; set; } = MainWorkspacePage;
+    /// <summary>Tracks the current page key for mode-change fallback logic.</summary>
+    private string _currentPage = MainWorkspacePage;
 
     public ObservableObject CurrentView => _navigationService.CurrentView;
 
@@ -140,6 +139,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         IDashboardService dashboardService,
         IBillingModeService billingModeService,
         IFocusLockService focusLock,
+        INotificationService notificationService,
         IEnumerable<IQuickActionContributor> contributors)
     {
         _navigationService = navigationService;
@@ -154,6 +154,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _shortcutService = shortcutService;
         _billingModeService = billingModeService;
         _focusLock = focusLock;
+        _notificationService = notificationService;
         AppState = appState;
         StatusBar = statusBar;
         DashboardSummary = new DashboardSummaryViewModel(appState, eventBus, dashboardService);
@@ -211,15 +212,32 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         RefreshQuickActions();
     }
 
-    // ── Side panel change notifications ──
+    // ── Notification popup ──
 
     [RelayCommand]
     private void ToggleNotificationsPanel() =>
         IsNotificationsPanelVisible = !IsNotificationsPanelVisible;
 
     [RelayCommand]
-    private void ToggleTasksPanel() =>
-        IsTasksPanelVisible = !IsTasksPanelVisible;
+    private async Task MarkAllNotificationsReadAsync()
+    {
+        await _notificationService.MarkAllReadAsync();
+    }
+
+    /// <summary>2d: Click a single notification to mark it as read.</summary>
+    [RelayCommand]
+    private async Task MarkNotificationReadAsync(AppNotification? notification)
+    {
+        if (notification is not null)
+            await _notificationService.MarkReadAsync(notification);
+    }
+
+    [RelayCommand]
+    private async Task ClearNotificationsAsync()
+    {
+        await _notificationService.ClearAsync();
+        IsNotificationsPanelVisible = false;
+    }
 
     // ── Billing mode toggle ──
 
@@ -238,10 +256,10 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         RefreshQuickActions();
 
         // If the current page is no longer available, fall back to Home
-        if (!IsPageEnabledForCurrentMode(CurrentPage))
+        if (!IsPageEnabledForCurrentMode(_currentPage))
         {
             _navigationService.NavigateTo(MainWorkspacePage);
-            CurrentPage = MainWorkspacePage;
+            _currentPage = MainWorkspacePage;
         }
 
         var label = e.NewMode == OperationalMode.Billing ? "Billing" : "Management";
@@ -278,7 +296,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private void NavigateToMainWorkspace()
     {
         _navigationService.NavigateTo(MainWorkspacePage);
-        CurrentPage = MainWorkspacePage;
+        _currentPage = MainWorkspacePage;
         _statusBar.SetPersistent("Home");
     }
 
@@ -286,7 +304,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private void NavigateToProducts()
     {
         _navigationService.NavigateTo(ProductsPage);
-        CurrentPage = ProductsPage;
+        _currentPage = ProductsPage;
         _statusBar.SetPersistent("Products");
     }
 
@@ -294,7 +312,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private void NavigateToSales()
     {
         _navigationService.NavigateTo(SalesPage);
-        CurrentPage = SalesPage;
+        _currentPage = SalesPage;
         _statusBar.SetPersistent("Sales");
     }
 
@@ -303,7 +321,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     [RelayCommand]
     private void RefreshCurrentView()
     {
-        _navigationService.NavigateTo(CurrentPage);
+        _navigationService.NavigateTo(_currentPage);
         _statusBar.Post("Data refreshed");
     }
 
@@ -341,6 +359,13 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     }
 
     [RelayCommand]
+    private void OpenTasks()
+    {
+        _dialogService.ShowDialog(TasksDialog);
+        _statusBar.Post("Tasks closed");
+    }
+
+    [RelayCommand]
     private async Task OpenSystemSettingsAsync()
     {
         await _workflowManager.StartWorkflowAsync(SettingsWorkflow);
@@ -373,12 +398,16 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _quickActionService.Register(new QuickAction
         {
             Title = "Home", Icon = "🏠",
+            Description = "Go to the main dashboard",
+            HelpKey = "Home",
             Command = NavigateToMainWorkspaceCommand,
             ShortcutText = "Ctrl+D", Gesture = "Ctrl+D", SortOrder = 0
         });
         _quickActionService.Register(new QuickAction
         {
             Title = "New Bill", Icon = "🧾",
+            Description = "Start a new billing session",
+            HelpKey = "NewBill",
             Command = NavigateToSalesCommand,
             ShortcutText = "Ctrl+S", Gesture = "Ctrl+S", SortOrder = 10,
             RequiredFeature = FeatureFlags.Sales
@@ -386,6 +415,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _quickActionService.Register(new QuickAction
         {
             Title = "Products", Icon = "📦",
+            Description = "Manage product catalog and inventory",
+            HelpKey = "Products",
             Command = NavigateToProductsCommand,
             ShortcutText = "Ctrl+P", Gesture = "Ctrl+P", SortOrder = 20,
             RequiredFeature = FeatureFlags.Products
@@ -393,6 +424,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _quickActionService.Register(new QuickAction
         {
             Title = "Firm", Icon = "🏢",
+            Description = "Edit firm details and address",
+            HelpKey = "Firm",
             Command = OpenFirmManagementCommand,
             SortOrder = 40,
             RequiredRoles = [UserType.Admin],
@@ -401,6 +434,8 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _quickActionService.Register(new QuickAction
         {
             Title = "Users", Icon = "👥",
+            Description = "Manage users, roles, and PINs",
+            HelpKey = "Users",
             Command = OpenUserManagementCommand,
             SortOrder = 50,
             RequiredRoles = [UserType.Admin, UserType.Manager],
@@ -408,7 +443,27 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         });
         _quickActionService.Register(new QuickAction
         {
+            Title = "Tax", Icon = "💲",
+            Description = "Configure tax rates and rules",
+            HelpKey = "Tax",
+            Command = OpenTaxManagementCommand,
+            SortOrder = 60,
+            RequiredRoles = [UserType.Admin],
+            RequiredFeature = FeatureFlags.TaxManagement
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Tasks", Icon = "📋",
+            Description = "View pending tasks and reminders",
+            HelpKey = "Tasks",
+            Command = OpenTasksCommand,
+            ShortcutText = "F6", Gesture = "F6", SortOrder = 70
+        });
+        _quickActionService.Register(new QuickAction
+        {
             Title = "Settings", Icon = "⚙️",
+            Description = "Open system settings and preferences",
+            HelpKey = "Settings",
             Command = OpenSystemSettingsCommand,
             SortOrder = 80,
             RequiredFeature = FeatureFlags.SystemSettings
@@ -416,18 +471,24 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _quickActionService.Register(new QuickAction
         {
             Title = "Refresh", Icon = "🔄",
+            Description = "Reload the current view data",
+            HelpKey = "Refresh",
             Command = RefreshCurrentViewCommand,
             ShortcutText = "F5", Gesture = "F5", SortOrder = 90
         });
         _quickActionService.Register(new QuickAction
         {
             Title = "Toggle Mode", Icon = "🔀",
+            Description = "Switch between management and billing mode",
+            HelpKey = "ToggleMode",
             Command = ToggleBillingModeCommand,
             ShortcutText = "F8", Gesture = "F8", SortOrder = 5
         });
         _quickActionService.Register(new QuickAction
         {
             Title = "Logout", Icon = "🚪",
+            Description = "Sign out and return to the login screen",
+            HelpKey = "Logout",
             Command = LogoutCommand,
             ShortcutText = "Ctrl+L", Gesture = "Ctrl+L", SortOrder = 100
         });

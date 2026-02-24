@@ -1,0 +1,157 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     DIALOG WINDOW TEMPLATE — Visual Consistency Lock
+     ═══════════════════════════════════════════════════════════════════════
+
+     Copy this file when creating a new modal dialog window.
+     Follow the numbered instructions below to customize.
+
+     Visual consistency is enforced by:
+       ✓ FluentWindowStyle           — background, font, pixel snapping
+       ✓ BaseDialogWindow            — sizing, centering, ESC/Enter keys
+       ✓ DesignSystem.xaml tokens    — all spacing, colors, typography
+       ✓ GlobalStyles.xaml           — implicit + named control styles
+       ✓ StyleComplianceDiagnostics  — runtime warnings in Debug
+       ✓ StyleComplianceTests        — CI enforcement
+
+     Rules:
+       • Zero inline colors         → use {StaticResource Fluent…}
+       • Zero inline margins        → use spacing tokens
+       • Zero inline font sizes     → use FontSize… tokens or named styles
+       • No Width/Height/ResizeMode → BaseDialogWindow handles sizing
+       • Card style for sections    → FormCardStyle / SectionCardStyle
+       • Named styles for buttons   → PrimaryButtonStyle / SecondaryButtonStyle
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ┌─────────────────────────────────────────────────────────────────────┐
+     │  1. XAML — Replace the x:Class, Title, and ConfirmCommand          │
+     └─────────────────────────────────────────────────────────────────────┘ -->
+
+<core:BaseDialogWindow
+        x:Class="StoreAssistantPro.Modules.MODULENAME.Views.WINDOWNAME"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        Title="WINDOW TITLE"
+        ConfirmCommand="{Binding SaveCommand}">
+
+    <!-- Root Grid — standard dialog padding, structured rows -->
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- Row 0: Title           -->
+            <RowDefinition Height="*"/>      <!-- Row 1: Body / card(s)  -->
+            <RowDefinition Height="Auto"/>   <!-- Row 2: Messages        -->
+            <RowDefinition Height="Auto"/>   <!-- Row 3: Action buttons  -->
+        </Grid.RowDefinitions>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 0 — Dialog title
+             ═══════════════════════════════════════════════════════════ -->
+        <TextBlock Text="📝 Dialog Title"
+                   Style="{StaticResource DialogTitleStyle}"/>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 1 — Body content (pick ONE pattern below)
+             ═══════════════════════════════════════════════════════════ -->
+
+        <!-- ── PATTERN A: Two-column form (simple dialogs) ─────────── -->
+        <Grid Grid.Row="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Field 1 -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name *"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBox   Grid.Row="0" Grid.Column="1"
+                       Text="{Binding Name, UpdateSourceTrigger=PropertyChanged,
+                              ValidatesOnNotifyDataErrors=True}"/>
+
+            <!-- Field 2 -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Description"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBox   Grid.Row="2" Grid.Column="1"
+                       Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Field 3 (numeric) -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Amount"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <TextBox   Grid.Row="4" Grid.Column="1"
+                       Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
+                       h:NumericInput.IsDecimalOnly="True"
+                       Width="{StaticResource FieldWidthCompact}"
+                       HorizontalAlignment="Left"/>
+        </Grid>
+
+        <!--
+        ── PATTERN B: DataGrid + form (list-detail dialogs) ─────────
+
+        Uncomment this block and remove Pattern A above when the
+        dialog needs a data list above the form.
+
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Items}"
+                  SelectedItem="{Binding SelectedItem}"
+                  Style="{StaticResource EnterpriseDataGridStyle}"
+                  Margin="{StaticResource ItemSpacing}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Status"
+                    Binding="{Binding IsActive, Converter={StaticResource BoolToActiveText}}"
+                    Width="{StaticResource ColumnWidthStatus}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        -->
+
+        <!--
+        ── PATTERN C: Card-wrapped content ──────────────────────────
+
+        Use when the body is informational or needs visual grouping.
+
+        <Border Grid.Row="1" Style="{StaticResource FormCardStyle}">
+            <StackPanel>
+                <TextBlock Text="Section Header"
+                           Style="{StaticResource SectionHeaderStyle}"/>
+                <TextBlock Text="{Binding DetailText}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+        -->
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 2 — Error / success messages
+             ═══════════════════════════════════════════════════════════ -->
+        <StackPanel Grid.Row="2" Margin="{StaticResource MessageBarSpacing}">
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}"
+                       Style="{StaticResource SuccessMessageStyle}"/>
+        </StackPanel>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 3 — Action buttons (right-aligned)
+             ═══════════════════════════════════════════════════════════ -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="💾 Save" Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </StackPanel>
+
+    </Grid>
+</core:BaseDialogWindow>

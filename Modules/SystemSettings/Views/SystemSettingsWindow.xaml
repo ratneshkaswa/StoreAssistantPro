@@ -5,18 +5,18 @@
         Title="⚙ System Settings">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="{StaticResource SidebarNavWidth}"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ══════ LEFT: Category Navigation ══════ -->
-        <Border Grid.Column="0" Background="#2D2D30">
+        <Border Grid.Column="0" Style="{StaticResource SidebarNavStyle}">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top"
                            Text="⚙ Settings"
-                           Foreground="White" FontSize="18" FontWeight="Bold"
-                           HorizontalAlignment="Center" Margin="0,20,0,10"/>
-                <Separator DockPanel.Dock="Top" Background="#3E3E42" Margin="10,0,10,10"/>
+                           Foreground="{StaticResource FluentTextPrimary}" FontSize="{StaticResource FontSizeDialogTitle}" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="{StaticResource DialogPadding}"/>
+                <Separator DockPanel.Dock="Top" Background="{StaticResource FluentSurfaceStroke}" Margin="{StaticResource PanelPadding}"/>
 
                 <ListBox DockPanel.Dock="Top"
                          ItemsSource="{Binding Categories}"
@@ -25,9 +25,9 @@
                          HorizontalContentAlignment="Stretch">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="Foreground" Value="#B0B0B0"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="Padding" Value="20,12"/>
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                            <Setter Property="Padding" Value="{StaticResource SidebarNavItemPadding}"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Setter Property="Template">
                                 <Setter.Value>
@@ -35,18 +35,30 @@
                                         <Border x:Name="Bd"
                                                 Background="Transparent"
                                                 Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="3"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border x:Name="AccentBar" Width="3"
+                                                        CornerRadius="1.5" Background="Transparent"
+                                                        VerticalAlignment="Stretch" Margin="0,2"/>
+                                                <ContentPresenter Grid.Column="1"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Margin="8,0,0,0"/>
+                                            </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bd" Property="Background" Value="#3E3E42"/>
-                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource FluentSubtleHover}"/>
+                                                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="Bd" Property="Background" Value="#007ACC"/>
-                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource FluentSubtlePressed}"/>
+                                                <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter TargetName="AccentBar" Property="Background" Value="{StaticResource FluentAccentDefault}"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -61,7 +73,7 @@
         </Border>
 
         <!-- ══════ RIGHT: Dynamic Content Area ══════ -->
-        <Border Grid.Column="1" Background="#FAFAFA">
+        <Border Grid.Column="1" Background="{StaticResource FluentBackgroundPrimary}">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
                 <ContentControl Content="{Binding CurrentCategoryView}" Margin="0"/>
             </ScrollViewer>

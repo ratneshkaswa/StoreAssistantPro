@@ -24,10 +24,23 @@ public class DashboardService(
         var todaysSales = (await salesService.GetSalesByDateRangeAsync(
             today, today.AddDays(1)).ConfigureAwait(false)).ToList();
 
+        var lowStockProducts = products
+            .Where(p => p.Quantity <= 5)
+            .OrderBy(p => p.Quantity)
+            .Take(10)
+            .ToList();
+
+        var recentSales = todaysSales
+            .OrderByDescending(s => s.SaleDate)
+            .Take(10)
+            .ToList();
+
         return new DashboardSummary(
             TotalProducts: products.Count,
-            LowStockCount: products.Count(p => p.Quantity <= 5),
+            LowStockCount: lowStockProducts.Count,
             TodaysSales: todaysSales.Sum(s => s.TotalAmount),
-            TodaysTransactions: todaysSales.Count);
+            TodaysTransactions: todaysSales.Count,
+            RecentSales: recentSales,
+            LowStockProducts: lowStockProducts);
     }
 }

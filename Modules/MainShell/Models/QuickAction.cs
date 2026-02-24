@@ -55,6 +55,20 @@ public partial class QuickAction : ObservableObject
     public partial int SortOrder { get; set; }
 
     /// <summary>
+    /// Help text shown in the SmartTooltip when the user hovers the toolbar button.
+    /// Rendered as the tooltip description line below the title.
+    /// </summary>
+    [ObservableProperty]
+    public partial string Description { get; set; }
+
+    /// <summary>
+    /// Stable key used by <see cref="Core.Services.IContextHelpService"/> to
+    /// resolve context-aware help text and usage tips. When <c>null</c>,
+    /// context help resolution is skipped for this action.
+    /// </summary>
+    public string? HelpKey { get; init; }
+
+    /// <summary>
     /// Roles that may see this action. Empty means all roles.
     /// Used by <c>IQuickActionService.GetVisibleActions</c> for role filtering.
     /// </summary>
@@ -73,6 +87,7 @@ public partial class QuickAction : ObservableObject
         Title = string.Empty;
         Icon = string.Empty;
         ShortcutText = string.Empty;
+        Description = string.Empty;
         IsVisible = true;
     }
 }

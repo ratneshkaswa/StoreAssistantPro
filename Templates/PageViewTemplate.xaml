@@ -1,0 +1,196 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PAGE VIEW TEMPLATE — Visual Consistency Lock
+     ═══════════════════════════════════════════════════════════════════════
+
+     Copy this file when creating a new page view (UserControl) that
+     is displayed inside MainWindow's workspace ContentControl.
+
+     Page views navigate via ViewModel → DataTemplate mapping in App.xaml.
+
+     Layout structure (UI_RULES.md §5.4):
+       Row 0  Auto   Page title
+       Row 1  Auto   Tip banner (InlineTipBanner, closable)
+       Row 2  Auto   Toolbar / filters
+       Row 3  Auto   Inline form (FormCardStyle, collapsible)
+       Row 4  Auto   Error / success messages
+       Row 5  *      Primary data area (DataGrid or scroll content)
+
+     Rules:
+       • Root Grid uses PagePadding (20 px)
+       • Exactly one row must use Height="*"
+       • Inline forms wrapped in FormCardStyle
+       • Toolbar buttons use ToolbarButtonStyle
+       • DataGrid uses EnterpriseDataGridStyle for primary tables
+       • No inline colors, margins, or font sizes
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<UserControl x:Class="StoreAssistantPro.Modules.MODULENAME.Views.VIEWNAME"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="960"
+             Loaded="OnLoaded">
+
+    <!-- Optional: keyboard shortcuts for the page -->
+    <!--
+    <UserControl.InputBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding ShowAddFormCommand}"/>
+        <KeyBinding Gesture="Delete" Command="{Binding DeleteCommand}"/>
+    </UserControl.InputBindings>
+    -->
+
+    <Grid Margin="{StaticResource PagePadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Row 0: Title + refresh  -->
+            <RowDefinition Height="Auto"/>  <!-- Row 1: Tip banner       -->
+            <RowDefinition Height="Auto"/>  <!-- Row 2: Toolbar          -->
+            <RowDefinition Height="Auto"/>  <!-- Row 3: Inline form      -->
+            <RowDefinition Height="Auto"/>  <!-- Row 4: Messages         -->
+            <RowDefinition Height="*"/>     <!-- Row 5: Data area        -->
+        </Grid.RowDefinitions>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 0 — Page title bar
+             ═══════════════════════════════════════════════════════════ -->
+        <DockPanel Margin="{StaticResource SectionSpacing}">
+            <TextBlock Text="Page Title"
+                       Style="{StaticResource PageTitleStyle}" Margin="0"
+                       DockPanel.Dock="Left"/>
+            <Button Content="🔄 Refresh" Command="{Binding LoadCommand}"
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+        </DockPanel>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 1 — Tip banner (standard placement)
+
+             Top of content area, below title, above toolbar.
+             Closable + persisted via TipBannerAutoState.
+             Context-adaptive via ContextKey.
+             Collapses to zero height when dismissed.
+             ═══════════════════════════════════════════════════════════ -->
+        <controls:InlineTipBanner Grid.Row="1"
+            h:TipBannerAutoState.TipKey="MODULENAME.PageTip"
+            h:TipBannerAutoState.ContextKey="CONTEXTKEY"
+            Title="Quick tip"
+            TipText="Describe the tip here."/>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 2 — Toolbar (search + action buttons)
+             ═══════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2" Margin="{StaticResource ToolbarSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{StaticResource FieldWidthWide}"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Search box with placeholder -->
+            <Grid Grid.Column="0" Margin="{StaticResource InlineControlSpacing}">
+                <TextBox x:Name="SearchBox"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="🔍 Search…" IsHitTestVisible="False"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           Padding="7,6" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <Button Grid.Column="1" Content="➕ Add"
+                    Command="{Binding ShowAddFormCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"/>
+            <Button Grid.Column="2" Content="🗑 Delete"
+                    Command="{Binding DeleteCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
+        </Grid>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 3 — Inline add/edit form (card wrapped, collapsible)
+             ═══════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="3" Style="{StaticResource FormCardStyle}"
+                Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibility}}"
+                h:KeyboardNav.DefaultCommand="{Binding SaveCommand}"
+                h:KeyboardNav.EscapeCommand="{Binding CancelCommand}">
+            <StackPanel>
+                <TextBlock Text="New Item"
+                           Style="{StaticResource SectionHeaderStyle}"/>
+                <WrapPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Name"
+                                   Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="{StaticResource FieldWidthStandard}"/>
+                    </StackPanel>
+                    <StackPanel Margin="{StaticResource WrapFieldGap}">
+                        <TextBlock Text="Amount"
+                                   Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding NewAmount, UpdateSourceTrigger=PropertyChanged}"
+                                 h:NumericInput.IsDecimalOnly="True"
+                                 Width="{StaticResource FieldWidthCompact}"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="💾 Save"
+                                    Command="{Binding SaveCommand}"
+                                    Style="{StaticResource ToolbarButtonStyle}"/>
+                            <Button Content="Cancel"
+                                    Command="{Binding CancelCommand}"
+                                    Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 4 — Feedback messages
+             ═══════════════════════════════════════════════════════════ -->
+        <StackPanel Grid.Row="4">
+            <TextBlock Text="⏳ Loading…"
+                       Foreground="{StaticResource FluentTextTertiary}"
+                       HorizontalAlignment="Center"
+                       Margin="{StaticResource ItemSpacing}"
+                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}"
+                       Style="{StaticResource SuccessMessageStyle}"/>
+        </StackPanel>
+
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROW 5 — Primary data area (star-sized, fills space)
+             ═══════════════════════════════════════════════════════════ -->
+        <DataGrid Grid.Row="5"
+                  ItemsSource="{Binding Items}"
+                  SelectedItem="{Binding SelectedItem}"
+                  Style="{StaticResource EnterpriseDataGridStyle}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat=C}"
+                                    Width="{StaticResource ColumnWidthPrice}"/>
+                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}"
+                                    Width="{StaticResource ColumnWidthQty}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</UserControl>

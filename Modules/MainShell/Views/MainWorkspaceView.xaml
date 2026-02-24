@@ -3,56 +3,230 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="600" d:DesignWidth="960"
              Loaded="OnLoaded">
     <Grid Margin="{StaticResource PagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Row 0: Title bar -->
         <DockPanel Margin="{StaticResource SectionSpacing}">
             <TextBlock Text="Home" Style="{StaticResource PageTitleStyle}" Margin="0"
                        DockPanel.Dock="Left"/>
-            <Button Content="🔄 Refresh" Command="{Binding LoadMainWorkspaceCommand}"
-                    HorizontalAlignment="Right" Style="{StaticResource PrimaryButtonStyle}"/>
+            <Button Command="{Binding LoadMainWorkspaceCommand}"
+                    HorizontalAlignment="Right" Style="{StaticResource PrimaryButtonStyle}"
+                    h:HelpHint.HelpText="Reload dashboard data"
+                    h:HelpHint.Category="Dashboard">
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏳ " Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="🔄 Refresh"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                            <Setter Property="Text" Value="Loading…"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Button.Content>
+            </Button>
         </DockPanel>
 
-        <!-- Loading Indicator -->
-        <TextBlock Grid.Row="1" Text="⏳ Loading..." FontSize="14" Foreground="#888"
-                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0"
-                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+        <!-- Row 1: Loading / error feedback -->
+        <StackPanel Grid.Row="1">
+            <TextBlock Text="⏳ Loading..." FontSize="{StaticResource FontSizeSectionHeader}"
+                       Foreground="{StaticResource FluentTextTertiary}"
+                       HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}"
+                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Style="{StaticResource ErrorMessageStyle}"/>
+        </StackPanel>
 
-        <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}"
-                   Style="{StaticResource ErrorMessageStyle}"
-                   VerticalAlignment="Top" Margin="0,20,0,0"/>
+        <!-- Row 2: Summary stat cards (wraps to 2 columns on narrow windows) -->
+        <ItemsControl Grid.Row="2" Margin="{StaticResource SectionSpacing}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <Border Style="{StaticResource StatCardStyle}"
+                    Background="{StaticResource FluentKpiGreen}" Margin="{StaticResource StatCardGap}"
+                    MinWidth="180"
+                    h:Motion.StaggerIndex="0"
+                    h:HelpHint.HelpText="Total number of active products in inventory"
+                    h:HelpHint.Category="Dashboard">
+                <StackPanel>
+                    <TextBlock Text="📦 Total Products"
+                               Foreground="{StaticResource FluentKpiGreenMuted}"
+                               FontSize="{StaticResource FontSizeLabel}"/>
+                    <TextBlock Text="{Binding TotalProducts}"
+                               Foreground="{StaticResource FluentTextOnAccent}"
+                               FontSize="{StaticResource FontSizeKpi}" FontWeight="Bold" Margin="{StaticResource KpiValueSpacing}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource StatCardStyle}"
+                    Background="{StaticResource FluentKpiOrange}" Margin="{StaticResource StatCardGap}"
+                    MinWidth="180"
+                    h:Motion.StaggerIndex="1"
+                    h:HelpHint.HelpText="Products with quantity below the low-stock threshold"
+                    h:HelpHint.Category="Dashboard">
+                <StackPanel>
+                    <TextBlock Text="⚠ Low Stock"
+                               Foreground="{StaticResource FluentKpiOrangeMuted}"
+                               FontSize="{StaticResource FontSizeLabel}"/>
+                    <TextBlock Text="{Binding LowStockCount}"
+                               Foreground="{StaticResource FluentTextOnAccent}"
+                               FontSize="{StaticResource FontSizeKpi}" FontWeight="Bold" Margin="{StaticResource KpiValueSpacing}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource StatCardStyle}"
+                    Background="{StaticResource FluentKpiBlue}" Margin="{StaticResource StatCardGap}"
+                    MinWidth="180"
+                    h:Motion.StaggerIndex="2">
+                <StackPanel>
+                    <TextBlock Text="💰 Today's Sales"
+                               Foreground="{StaticResource FluentKpiBlueMuted}"
+                               FontSize="{StaticResource FontSizeLabel}"/>
+                    <TextBlock Text="{Binding TodaysSales, StringFormat=C}"
+                               Foreground="{StaticResource FluentTextOnAccent}"
+                               FontSize="{StaticResource FontSizeKpi}" FontWeight="Bold" Margin="{StaticResource KpiValueSpacing}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource StatCardStyle}"
+                    Background="{StaticResource FluentKpiPurple}" Margin="{StaticResource StatCardGap}"
+                    MinWidth="180"
+                    h:Motion.StaggerIndex="3">
+                <StackPanel>
+                    <TextBlock Text="🧾 Transactions"
+                               Foreground="{StaticResource FluentKpiPurpleMuted}"
+                               FontSize="{StaticResource FontSizeLabel}"/>
+                    <TextBlock Text="{Binding TodaysTransactions}"
+                               Foreground="{StaticResource FluentTextOnAccent}"
+                               FontSize="{StaticResource FontSizeKpi}" FontWeight="Bold" Margin="{StaticResource KpiValueSpacing}"/>
+                </StackPanel>
+            </Border>
+        </ItemsControl>
 
-        <UniformGrid Grid.Row="1" Rows="1" Columns="4" VerticalAlignment="Top">
-            <Border Background="#4CAF50" CornerRadius="8" Margin="5" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Total Products" Foreground="White" FontSize="14"/>
-                    <TextBlock Text="{Binding TotalProducts}" Foreground="White" FontSize="32" FontWeight="Bold"/>
-                </StackPanel>
+        <!-- Row 3: Detail panels — fill remaining space -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Recent sales -->
+            <Border Grid.Column="0" Style="{StaticResource SectionCardStyle}"
+                    h:Motion.StaggerIndex="4">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Style="{StaticResource SectionCardHeaderStyle}">
+                        <TextBlock Text="💰 Recent Sales" FontWeight="SemiBold"
+                                   FontSize="{StaticResource FontSizeBody}"/>
+                    </Border>
+
+                    <!-- Empty state -->
+                    <TextBlock Text="No sales recorded today"
+                               Foreground="{StaticResource FluentTextTertiary}" FontStyle="Italic"
+                               FontSize="{StaticResource FontSizeBody}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Margin="{StaticResource EmptyStatePadding}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RecentSales.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <DataGrid ItemsSource="{Binding RecentSales}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                              BorderThickness="0" Background="Transparent"
+                              RowHeight="32" FontSize="{StaticResource FontSizeBody}"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time"
+                                                Binding="{Binding SaleDate, StringFormat=HH:mm}"
+                                                Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Amount"
+                                                Binding="{Binding TotalAmount, StringFormat=C}"
+                                                Width="*"/>
+                            <DataGridTextColumn Header="Payment"
+                                                Binding="{Binding PaymentMethod}"
+                                                Width="{StaticResource ColumnWidthStatus}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
             </Border>
-            <Border Background="#FF9800" CornerRadius="8" Margin="5" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Low Stock Items" Foreground="White" FontSize="14"/>
-                    <TextBlock Text="{Binding LowStockCount}" Foreground="White" FontSize="32" FontWeight="Bold"/>
-                </StackPanel>
+
+            <!-- Low stock alerts -->
+            <Border Grid.Column="2" Style="{StaticResource SectionCardStyle}"
+                    h:Motion.StaggerIndex="5">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Style="{StaticResource SectionCardHeaderStyle}">
+                        <TextBlock Text="⚠ Low Stock Alerts" FontWeight="SemiBold"
+                                   FontSize="{StaticResource FontSizeBody}"/>
+                    </Border>
+
+                    <!-- Empty state -->
+                    <TextBlock Text="All products are well stocked"
+                               Foreground="{StaticResource FluentTextTertiary}" FontStyle="Italic"
+                               FontSize="{StaticResource FontSizeBody}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Margin="{StaticResource EmptyStatePadding}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding LowStockProducts.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <DataGrid ItemsSource="{Binding LowStockProducts}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                              BorderThickness="0" Background="Transparent"
+                              RowHeight="32" FontSize="{StaticResource FontSizeBody}"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product"
+                                                Binding="{Binding Name}"
+                                                Width="*"/>
+                            <DataGridTextColumn Header="Qty"
+                                                Binding="{Binding Quantity}"
+                                                Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Price"
+                                                Binding="{Binding SalePrice, StringFormat=C}"
+                                                Width="{StaticResource ColumnWidthPrice}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
             </Border>
-            <Border Background="#2196F3" CornerRadius="8" Margin="5" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Today's Sales" Foreground="White" FontSize="14"/>
-                    <TextBlock Text="{Binding TodaysSales, StringFormat=C}" Foreground="White" FontSize="32" FontWeight="Bold"/>
-                </StackPanel>
-            </Border>
-            <Border Background="#9C27B0" CornerRadius="8" Margin="5" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Transactions" Foreground="White" FontSize="14"/>
-                    <TextBlock Text="{Binding TodaysTransactions}" Foreground="White" FontSize="32" FontWeight="Bold"/>
-                </StackPanel>
-            </Border>
-            </UniformGrid>
+        </Grid>
     </Grid>
 </UserControl>

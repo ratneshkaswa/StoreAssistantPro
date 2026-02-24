@@ -1,108 +1,24 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-                    xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers">
+                    xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+                    xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls">
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         SPACING SCALE  (4 px base unit)
+    <!-- All design tokens moved to DesignSystem.xaml -->
 
-         xs  =  4    label → control gap, tight insets
-         sm  =  8    inline control gap, compact separators
-         md  = 12    form-field group bottom, toolbar gap, card gap
-         lg  = 16    section separator, title bottom margin
-         xl  = 20    page padding (main content area)
-         xxl = 24    dialog / sub-window padding
-         ═══════════════════════════════════════════════════════════════ -->
-    <sys:Double x:Key="SpacingXs">4</sys:Double>
-    <sys:Double x:Key="SpacingSm">8</sys:Double>
-    <sys:Double x:Key="SpacingMd">12</sys:Double>
-    <sys:Double x:Key="SpacingLg">16</sys:Double>
-    <sys:Double x:Key="SpacingXl">20</sys:Double>
-    <sys:Double x:Key="SpacingXxl">24</sys:Double>
-
-    <!-- ── Pre-built Thickness values ─────────────────────────────── -->
-
-    <!-- Outer page / dialog padding -->
-    <Thickness x:Key="PagePadding">20</Thickness>
-    <Thickness x:Key="DialogPadding">24</Thickness>
-
-    <!-- Vertical separation between major visual sections -->
-    <Thickness x:Key="SectionSpacing">0,0,0,16</Thickness>
-
-    <!-- Vertical gap between form-field groups (label + control) -->
-    <Thickness x:Key="FieldGroupSpacing">0,0,0,12</Thickness>
-
-    <!-- Gap between a field label and its associated control -->
-    <Thickness x:Key="FieldLabelSpacing">0,0,0,4</Thickness>
-
-    <!-- Horizontal gap between label column and input column -->
-    <Thickness x:Key="FormColumnGap">0,0,12,0</Thickness>
-
-    <!-- Top margin above action-button bar in forms -->
-    <Thickness x:Key="FormActionBarSpacing">0,12,0,0</Thickness>
-
-    <!-- Vertical gap between rows in a two-column form grid -->
-    <GridLength x:Key="FormRowSpacing">8</GridLength>
-
-    <!-- Toolbar / action-bar bottom margin -->
-    <Thickness x:Key="ToolbarSpacing">0,0,0,12</Thickness>
-
-    <!-- Horizontal gap between inline controls inside a toolbar -->
-    <Thickness x:Key="InlineControlSpacing">0,0,8,0</Thickness>
-
-    <!-- Title block bottom margin -->
-    <Thickness x:Key="TitleSpacing">0,0,0,16</Thickness>
-
-    <!-- ── Control-internal padding ───────────────────────────────── -->
-    <Thickness x:Key="ControlPadding">6</Thickness>
-    <Thickness x:Key="ButtonPadding">12,6</Thickness>
-    <Thickness x:Key="ButtonPaddingLarge">16,8</Thickness>
-    <Thickness x:Key="CardPadding">16</Thickness>
-
-    <!-- Card / inline-form border radius -->
-    <CornerRadius x:Key="CardCornerRadius">6</CornerRadius>
-
-    <!-- Enterprise form density: standard control heights -->
-    <sys:Double x:Key="ControlHeight">32</sys:Double>
-    <sys:Double x:Key="ButtonHeight">34</sys:Double>
-    <sys:Double x:Key="ButtonHeightLarge">36</sys:Double>
-
-    <!-- Smooth ease-out for focus-lock panel dimming transitions -->
-    <CubicEase x:Key="PanelDimEase" EasingMode="EaseOut"/>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         TYPOGRAPHY SCALE
-         ═══════════════════════════════════════════════════════════════ -->
-    <sys:Double x:Key="FontSizePageTitle">24</sys:Double>
-    <sys:Double x:Key="FontSizeDialogTitle">20</sys:Double>
-    <sys:Double x:Key="FontSizeSectionHeader">16</sys:Double>
-    <sys:Double x:Key="FontSizeBody">13</sys:Double>
-    <sys:Double x:Key="FontSizeLabel">12</sys:Double>
-    <sys:Double x:Key="FontSizeCaption">11</sys:Double>
-
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- =================================================================
          VALIDATION ERROR TEMPLATE
-
-         Replaces WPF's default red-border-only ErrorTemplate with an
-         inline error message below the control.  Activates automatically
-         when a binding's INotifyDataErrorInfo reports errors.
-
-         Structure:
-           ┌ red border (1.5 px) ─────────┐
-           │  [control]                    │
-           └───────────────────────────────┘
-           ⚠ Error message text               ← inline, below control
-         ═══════════════════════════════════════════════════════════════ -->
+         ================================================================= -->
     <ControlTemplate x:Key="InlineValidationErrorTemplate">
         <StackPanel>
-            <Border BorderBrush="#D32F2F" BorderThickness="1.5" CornerRadius="3">
+            <Border BorderBrush="{StaticResource FluentStrokeError}" BorderThickness="1.5"
+                    CornerRadius="{StaticResource FluentCornerSmall}">
                 <AdornedElementPlaceholder/>
             </Border>
             <ItemsControl ItemsSource="{Binding}" Margin="2,3,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding ErrorContent}"
-                                   Foreground="#D32F2F" FontSize="11"
+                                   Foreground="{StaticResource FluentError}" FontSize="11"
                                    TextWrapping="Wrap"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -113,87 +29,104 @@
     <!-- ═══════════════════════════════════════════════════════════════
          IMPLICIT CONTROL STYLES
 
-         Set baseline padding / alignment so every new control looks
-         correct without per-instance Padding="…" attributes.
-         Existing explicit values on controls still win (local > style).
-
-         Validation.ErrorTemplate provides inline error display with
-         a red border and error text below the control — activates
-         automatically when INotifyDataErrorInfo reports errors.
+         Each implicit style inherits its Fluent base template from
+         FluentTheme.xaml, then adds app-specific setters (MinHeight,
+         behaviors, validation).  All controls automatically get
+         rounded corners, Fluent colors, and focus indicators.
          ═══════════════════════════════════════════════════════════════ -->
 
-    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+    <!-- Button inherits FluentStandardButtonStyle (rounded, animated hover) -->
+    <Style TargetType="Button" BasedOn="{StaticResource FluentStandardButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
-        <Setter Property="Padding" Value="{StaticResource ControlPadding}"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+    </Style>
+
+    <!-- TextBox inherits FluentTextBoxStyle (rounded, accent-focus) -->
+    <Style TargetType="TextBox" BasedOn="{StaticResource FluentTextBoxStyle}">
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="h:SelectOnFocus.IsEnabled" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
-    <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
-        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
-        <Setter Property="Padding" Value="{StaticResource ControlPadding}"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+    <!-- PasswordBox inherits FluentPasswordBoxStyle (rounded, accent-focus) -->
+    <Style TargetType="PasswordBox" BasedOn="{StaticResource FluentPasswordBoxStyle}">
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
-    <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
-        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
-        <Setter Property="Padding" Value="{StaticResource ControlPadding}"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+    <!-- ComboBox inherits FluentComboBoxStyle (rounded, accent-focus, Fluent dropdown) -->
+    <Style TargetType="ComboBox" BasedOn="{StaticResource FluentComboBoxStyle}">
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
+
+    <!-- ComboBoxItem inherits FluentComboBoxItemStyle (subtle hover/selection) -->
+    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource FluentComboBoxItemStyle}"/>
+
+    <!-- CheckBox inherits FluentCheckBoxStyle (accent fill, rounded box, glyph) -->
+    <Style TargetType="CheckBox" BasedOn="{StaticResource FluentCheckBoxStyle}"/>
+
+    <!-- GroupBox inherits FluentGroupBoxStyle (card container, header region) -->
+    <Style TargetType="GroupBox" BasedOn="{StaticResource FluentGroupBoxStyle}"/>
 
     <Style TargetType="DatePicker" BasedOn="{StaticResource {x:Type DatePicker}}">
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
-        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
          NAMED STYLES
 
-         Use via Style="{StaticResource XxxStyle}" on individual
-         controls.  Provides semantic roles that map to the spacing
-         and typography scale above.
+         Each named button/card style inherits its Fluent base
+         template, then adds app-specific sizing overrides.
+         All existing Style="{StaticResource XxxStyle}" references
+         across 12+ views continue to work unchanged.
          ═══════════════════════════════════════════════════════════════ -->
 
     <!-- ── Page title (24 px bold — main content pages) ───────────── -->
     <Style x:Key="PageTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizePageTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="Margin" Value="{StaticResource TitleSpacing}"/>
     </Style>
 
     <!-- ── Dialog / sub-window title (20 px bold) ─────────────────── -->
     <Style x:Key="DialogTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeDialogTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="Margin" Value="{StaticResource TitleSpacing}"/>
     </Style>
 
     <!-- ── Section header (14 px semi-bold, inside forms/cards) ───── -->
     <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
     </Style>
 
     <!-- ── Field label (12 px semi-bold, sits above its control) ──── -->
     <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="Margin" Value="{StaticResource FieldLabelSpacing}"/>
     </Style>
 
     <!-- Inline form-row label (right-aligned, vertically centered) -->
     <Style x:Key="FormRowLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="#444"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="Margin" Value="{StaticResource FormColumnGap}"/>
@@ -201,61 +134,100 @@
 
     <!-- ── Muted / caption label (12 px, secondary foreground) ────── -->
     <Style x:Key="CaptionLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="#888"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
         <Setter Property="Margin" Value="0,0,0,2"/>
     </Style>
 
-    <!-- ── Toolbar / compact action button ────────────────────────── -->
-    <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+    <!-- ── Toolbar / compact action button (inherits FluentSubtle) ── -->
+    <Style x:Key="ToolbarButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource FluentSubtleButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Padding" Value="{StaticResource ButtonPadding}"/>
         <Setter Property="Margin" Value="0,0,6,0"/>
     </Style>
 
-    <!-- ── Primary action button (Save, Submit, Complete) ─────────── -->
-    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+    <!-- ── Primary action button (inherits FluentAccent) ──────────── -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource FluentAccentButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ButtonHeightLarge}"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="{StaticResource ButtonPaddingLarge}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
-    <!-- Secondary action button (Close, Cancel) -->
-    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+    <!-- Secondary action button (inherits FluentStandard) -->
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource FluentStandardButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ButtonHeightLarge}"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="{StaticResource ButtonPaddingLarge}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
     </Style>
 
-    <!-- ── Inline form card border ────────────────────────────────── -->
-    <Style x:Key="FormCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="#F5F5F5"/>
-        <Setter Property="CornerRadius" Value="{StaticResource CardCornerRadius}"/>
+    <!-- ── Inline form card border (inherits FluentCard + shadow) ─── -->
+    <Style x:Key="FormCardStyle" TargetType="Border"
+           BasedOn="{StaticResource FluentCardStyle}">
         <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
         <Setter Property="Margin" Value="{StaticResource FieldGroupSpacing}"/>
     </Style>
 
+    <!-- Section panel card (list panels, detail panels) -->
+    <Style x:Key="SectionCardStyle" TargetType="Border"
+           BasedOn="{StaticResource FluentCardStyle}">
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <!-- Section card header bar (colored banner at top of card) -->
+    <Style x:Key="SectionCardHeaderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
+        <Setter Property="CornerRadius" Value="8,8,0,0"/>
+        <Setter Property="Padding" Value="12,8"/>
+    </Style>
+
+    <!-- Detail panel (bottom split pane, sale detail, etc.) -->
+    <Style x:Key="DetailPanelStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        <Setter Property="Padding" Value="12,8"/>
+    </Style>
+
+    <!-- Processing / loading overlay card -->
+    <Style x:Key="OverlayCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="#D0FFFFFF"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerSmall}"/>
+    </Style>
+
+    <!-- Settings sidebar navigation panel -->
+    <Style x:Key="SidebarNavStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    </Style>
+
+    <!-- KPI stat card (dashboard summary tiles) -->
+    <Style x:Key="StatCardStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="{StaticResource CardCornerRadius}"/>
+        <Setter Property="Padding" Value="16,12"/>
+        <Setter Property="Effect" Value="{StaticResource FluentShadowSmall}"/>
+    </Style>
+
     <!-- ── Error message bar ──────────────────────────────────────── -->
     <Style x:Key="ErrorMessageStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="Red"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
         <Setter Property="Margin" Value="0,0,0,4"/>
     </Style>
 
     <!-- ── Success message bar ────────────────────────────────────── -->
     <Style x:Key="SuccessMessageStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="#4CAF50"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         DATAGRID VIRTUALISATION & SCROLL PERFORMANCE
+         DATAGRID VIRTUALISATION &amp; SCROLL PERFORMANCE
 
          Implicit style:  baseline for every DataGrid in the app.
          EnterpriseDataGridStyle:  full optimisation for grids that
@@ -279,8 +251,13 @@
                Avoids per-row measure pass; critical for 10k+ rows.
          ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- Baseline: every DataGrid gets virtualisation + recycling -->
+    <!-- Baseline: every DataGrid gets virtualisation + Fluent colors -->
     <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="VerticalGridLinesBrush" Value="{StaticResource FluentSurfaceStroke}"/>
         <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
         <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
         <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
@@ -306,23 +283,374 @@
         <Setter Property="AutoGenerateColumns" Value="False"/>
     </Style>
 
+    <!-- DataGrid column header: Fluent elevated surface, semi-bold text -->
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+
+    <!-- DataGrid row: subtle hover, accent selection -->
+    <Style TargetType="DataGridRow">
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource FluentSubtleHover}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource FluentSubtlePressed}"/>
+                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- DataGrid cell: clean padding, no focus rectangle -->
+    <Style TargetType="DataGridCell">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- ═══════════════════════════════════════════════════════════════
-         KEYBOARD & FOCUS BEHAVIOR
+         BASE WINDOW + KEYBOARD &amp; FOCUS BEHAVIOR
 
-         Enter       = DefaultCommand or next input
-         Shift+Enter = move backward
-         Escape      = EscapeCommand, clear focus, or IsCancel
-         Tab         = standard WPF order
-         AutoFocus   = first input receives focus on load
+         Inherits FluentWindowStyle from FluentTheme.xaml which sets:
+           Background, Foreground, FontFamily, FontSize, BorderThickness,
+           SnapsToDevicePixels, UseLayoutRounding, TextFormattingMode,
+           TextRenderingMode.
 
-         Applied globally to every Window via the implicit style below.
+         This implicit style layers on app-specific behaviors:
+           Enter       = DefaultCommand or next input
+           Shift+Enter = move backward
+           Escape      = EscapeCommand, clear focus, or IsCancel
+           Tab         = standard WPF order
+           AutoFocus   = first input receives focus on load
+
+         Applied automatically to every Window (MainWindow, login,
+         setup, and all BaseDialogWindow subclasses).
          To opt-out: h:KeyboardNav.IsEnabled="False"
                      h:AutoFocus.IsEnabled="False"
          ═══════════════════════════════════════════════════════════════ -->
-    <Style TargetType="Window">
+    <Style TargetType="Window" BasedOn="{StaticResource FluentWindowStyle}">
         <Setter Property="h:KeyboardNav.IsEnabled" Value="True"/>
         <Setter Property="h:AutoFocus.IsEnabled" Value="True"/>
         <Setter Property="h:LayoutDiagnostics.IsEnabled" Value="True"/>
+        <Setter Property="h:StyleComplianceDiagnostics.IsEnabled" Value="True"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PAGE VIEW FADE-IN
+
+         Every UserControl (page view) automatically fades in on
+         Loaded via the Motion.PageFadeIn attached behavior.
+         Duration: FluentDurationPageFade (150 ms), no movement,
+         zero layout cost (Opacity is GPU-composited).
+
+         To opt-out on a specific view: h:Motion.PageFadeIn="False"
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style TargetType="UserControl">
+        <Setter Property="h:Motion.PageFadeIn" Value="True"/>
+    </Style>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SMART TOOLTIP  (Fluent 2 styled)
+
+         Modern tooltip with:
+           • Soft 6 px rounded corners (TooltipCornerRadius token)
+           • Light frosted background (TooltipBackground token)
+           • 1 px outer stroke + 1 px inner highlight inset for the
+             Fluent 2 "smoke glass" layered look
+           • Purpose-built lightweight shadow (TooltipShadow — 12 px
+             blur, 0.10 opacity — softer than FluentShadowMedium)
+           • Compact 10/7/10/8 padding that stays dense on short text
+             but breathes on multi-line help
+           • Segoe UI Variable at FontSizeLabel (12 px) for body text
+           • Animated entrance: 167 ms fade + 4 px slide-up (Decelerate)
+           • Animated exit:     120 ms fade-out (Accelerate)
+           • Max width 320 px to keep text scannable
+
+         Content is built programmatically by SmartTooltip.cs /
+         HelpHint.cs — header (SemiBold, FluentTextPrimary, Body size)
+         sits above description (Regular, FluentTextSecondary, Label
+         size) inside a StackPanel.
+
+         Usage:
+           Automatic — SmartTooltip.cs resolves "SmartTooltipStyle"
+           from the element's resource tree at show time.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="SmartTooltipStyle" TargetType="ToolTip">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Background"      Value="{StaticResource TooltipBackground}"/>
+        <Setter Property="Foreground"       Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush"      Value="{StaticResource TooltipBorder}"/>
+        <Setter Property="BorderThickness"  Value="1"/>
+        <Setter Property="Padding"          Value="{StaticResource TooltipPadding}"/>
+        <Setter Property="FontFamily"       Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"         Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="MaxWidth"         Value="{StaticResource TooltipMaxWidth}"/>
+        <Setter Property="HasDropShadow"    Value="False"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <!-- Outer chrome: border + shadow -->
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource TooltipCornerRadius}"
+                            Effect="{StaticResource TooltipShadow}"
+                            SnapsToDevicePixels="True"
+                            Opacity="0"
+                            RenderTransformOrigin="0.5,0">
+                        <Border.RenderTransform>
+                            <TranslateTransform Y="4"/>
+                        </Border.RenderTransform>
+
+                        <!-- Inner highlight — 1 px white inset (Fluent smoke) -->
+                        <Border CornerRadius="{StaticResource TooltipCornerRadius}"
+                                BorderBrush="{StaticResource TooltipInnerHighlight}"
+                                BorderThickness="1"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Entrance: fade-in + slide-up -->
+                        <EventTrigger RoutedEvent="Opened">
+                            <BeginStoryboard x:Name="OpenStoryboard">
+                                <Storyboard>
+                                    <DoubleAnimation
+                                        Storyboard.TargetName="Root"
+                                        Storyboard.TargetProperty="Opacity"
+                                        From="0" To="1"
+                                        Duration="{StaticResource FluentDurationNormal}">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation
+                                        Storyboard.TargetName="Root"
+                                        Storyboard.TargetProperty="RenderTransform.Y"
+                                        From="4" To="0"
+                                        Duration="{StaticResource FluentDurationNormal}">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+
+                        <!-- Exit: quick fade-out -->
+                        <EventTrigger RoutedEvent="Closed">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                        Storyboard.TargetName="Root"
+                                        Storyboard.TargetProperty="Opacity"
+                                        To="0" Duration="0:0:0.12">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseIn"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═════════════════════════════════════════════════════════════════
+         INLINE TIP BANNER
+
+         Soft, non-distracting inline guidance banner that blends
+         with the page surface.  Follows the Fluent 2 TeachingTip
+         visual language:
+
+           • Near-white background (TipBannerBackground) with a
+             subtle cool undertone — reads as "neutral surface"
+             rather than "alert".
+           • Neutral-cool 1 px border (TipBannerBorder) matching
+             the card/panel stroke family.
+           • 3 px left accent bar (TipBannerAccent) in muted sky
+             blue — provides the info semantic signal without
+             competing with content.
+           • Icon uses accent foreground — the single color pop.
+           • Title at FontSizeLabel (12 px) SemiBold in near-black
+             (TipBannerTitleForeground); body at FontSizeBody
+             (13 px) in medium-grey (TipBannerBodyForeground).
+           • 8 px rounded corners (FluentCornerMedium).
+           • Compact 36 px min-height, 12,8 inner padding.
+           • Slide-fade entrance, fade-out dismiss.
+           • Subtle hover tint (TipBannerBackgroundHover) for
+             "alive" feel without competing with content.
+
+         Visual weight: below FormCardStyle, above plain text.
+         The banner should feel like a helpful whisper, not a shout.
+
+         Usage:
+           <controls:InlineTipBanner
+               Title="Quick tip"
+               TipText="Use Ctrl+N to start a new sale."
+               IsDismissed="{Binding IsTipDismissed, Mode=TwoWay}"/>
+         ═════════════════════════════════════════════════════════════════ -->
+    <Style TargetType="controls:InlineTipBanner">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="Margin" Value="{StaticResource FieldGroupSpacing}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:InlineTipBanner">
+                    <Border x:Name="PART_Root"
+                            Background="{StaticResource TipBannerBackground}"
+                            BorderBrush="{StaticResource TipBannerBorder}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="0"
+                            SnapsToDevicePixels="True"
+                            h:Motion.SlideFadeIn="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <!-- Left accent bar -->
+                                <ColumnDefinition Width="Auto"/>
+                                <!-- Icon -->
+                                <ColumnDefinition Width="Auto"/>
+                                <!-- Text -->
+                                <ColumnDefinition Width="*"/>
+                                <!-- Close -->
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left accent indicator (3 px bar, muted) -->
+                            <Border Grid.Column="0"
+                                    Width="3" Margin="0,6"
+                                    CornerRadius="1.5"
+                                    Background="{StaticResource TipBannerAccent}"/>
+
+                            <!-- Bulb icon (accent-colored) -->
+                            <TextBlock Grid.Column="1" Text="💡"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TipBannerIconForeground}"
+                                       VerticalAlignment="Center"
+                                       Margin="10,0,6,0"/>
+
+                            <!-- Title + tip text -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center"
+                                        Margin="0,7,0,7">
+                                <TextBlock FontFamily="{StaticResource FluentFontFamily}"
+                                           FontSize="{StaticResource FontSizeLabel}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TipBannerTitleForeground}"
+                                           Text="{TemplateBinding Title}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock FontFamily="{StaticResource FluentFontFamily}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           Foreground="{StaticResource TipBannerBodyForeground}"
+                                           Text="{TemplateBinding TipText}"
+                                           TextWrapping="Wrap"
+                                           LineHeight="18"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <!-- Close button -->
+                            <Button x:Name="PART_CloseButton"
+                                    Grid.Column="3"
+                                    Content="✕"
+                                    FontSize="10"
+                                    Padding="5,3"
+                                    Margin="6,0,8,0"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="{StaticResource FluentTextDisabled}"
+                                    Cursor="Hand"
+                                    VerticalAlignment="Center"
+                                    Focusable="False"
+                                    Opacity="0"
+                                    IsHitTestVisible="True">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="CloseBd"
+                                                Background="Transparent"
+                                                CornerRadius="{StaticResource FluentCornerSmall}"
+                                                Padding="{TemplateBinding Padding}"
+                                                SnapsToDevicePixels="True">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="CloseBd" Property="Background"
+                                                        Value="{StaticResource FluentSubtleHover}"/>
+                                                <Setter Property="Foreground"
+                                                        Value="{StaticResource FluentTextSecondary}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="CloseBd" Property="Background"
+                                                        Value="{StaticResource FluentSubtlePressed}"/>
+                                                <Setter Property="Foreground"
+                                                        Value="{StaticResource FluentTextPrimary}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Banner-level hover: tint background + reveal close button -->
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="PART_Root" Property="Background"
+                                    Value="{StaticResource TipBannerBackgroundHover}"/>
+                            <Setter TargetName="PART_CloseButton" Property="Opacity"
+                                    Value="1"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsDismissed" Value="True">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

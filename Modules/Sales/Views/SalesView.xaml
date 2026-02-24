@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              mc:Ignorable="d"
              d:DesignHeight="550" d:DesignWidth="800"
              Loaded="OnLoaded">
@@ -12,39 +13,58 @@
     </UserControl.InputBindings>
     <Grid Margin="{StaticResource PagePadding}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>  <!-- Row 0: Title          -->
+            <RowDefinition Height="Auto"/>  <!-- Row 1: Tip banner     -->
+            <RowDefinition Height="Auto"/>  <!-- Row 2: Toolbar        -->
+            <RowDefinition Height="Auto"/>  <!-- Row 3: New sale form  -->
+            <RowDefinition Height="Auto"/>  <!-- Row 4: Messages       -->
+            <RowDefinition Height="*"/>     <!-- Row 5: Sales history  -->
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Sales" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,10"/>
+        <TextBlock Text="Sales" Style="{StaticResource PageTitleStyle}"/>
 
-        <WrapPanel Grid.Row="1" Margin="{StaticResource ToolbarSpacing}">
+        <!-- Tip banner — standard slot: top of content, below title -->
+        <controls:InlineTipBanner Grid.Row="1"
+            h:TipBannerAutoState.TipKey="SalesView.QuickTip"
+            h:TipBannerAutoState.ContextKey="NewSale"
+            Title="Quick tip"
+            TipText="Start a new sale transaction."/>
+
+        <WrapPanel Grid.Row="2" Margin="{StaticResource ToolbarSpacing}">
             <Button Content="🛒 New Sale" Command="{Binding ShowNewSaleCommand}"
                     Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"
-                    VerticalAlignment="Center" Margin="0,0,15,0"
+                    VerticalAlignment="Center"
+                    h:HelpHint.ShortcutText="Ctrl+N"
+                    h:HelpHint.HelpText="Start a new sale transaction"
+                    h:HelpHint.Category="Sales"
+                    h:SmartTooltip.ContextKey="NewSale"
                     Visibility="{Binding CanCreateSales, Converter={StaticResource BoolToVisibility}}"/>
-            <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <DatePicker SelectedDate="{Binding FilterFrom}" Width="130" Margin="0,0,10,0"
-                        VerticalAlignment="Center"/>
-            <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <DatePicker SelectedDate="{Binding FilterTo}" Width="130" Margin="0,0,10,0"
-                        VerticalAlignment="Center"/>
+            <TextBlock Text="From:" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+            <DatePicker SelectedDate="{Binding FilterFrom}" Width="{StaticResource FieldWidthStandard}"
+                        VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+            <TextBlock Text="To:" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+            <DatePicker SelectedDate="{Binding FilterTo}" Width="{StaticResource FieldWidthStandard}"
+                        VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Filter" Command="{Binding FilterByDateCommand}"
                     Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.HelpText="Filter sales by date range"
+                    h:HelpHint.Category="Sales"
+                    h:SmartTooltip.ContextKey="FilterSales"
                     VerticalAlignment="Center"/>
             <Button Content="Load All" Command="{Binding LoadSalesCommand}"
                     Style="{StaticResource ToolbarButtonStyle}" Margin="0"
+                    h:HelpHint.HelpText="Clear date filter and show all sales"
+                    h:HelpHint.Category="Sales"
+                    h:SmartTooltip.ContextKey="LoadAllSales"
                     VerticalAlignment="Center"/>
         </WrapPanel>
 
         <!-- New Sale Form -->
-        <Border Grid.Row="2" Style="{StaticResource FormCardStyle}" Margin="0,0,0,10"
+        <Border Grid.Row="3" Style="{StaticResource FormCardStyle}"
                 Visibility="{Binding IsNewSaleVisible, Converter={StaticResource BoolToVisibility}}"
                 h:KeyboardNav.DefaultCommand="{Binding AddToCartCommand}"
-                h:KeyboardNav.EscapeCommand="{Binding CancelNewSaleCommand}">
+                h:KeyboardNav.EscapeCommand="{Binding CancelNewSaleCommand}"
+                h:Motion.SlideFadeReveal="True">
             <Grid>
                 <!-- Main form content -->
                 <Grid IsEnabled="{Binding IsCartLocked, Converter={StaticResource InverseBoolConverter}}">
@@ -63,38 +83,38 @@
                                Grid.ColumnSpan="2"/>
 
                     <!-- Product picker -->
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8" Grid.ColumnSpan="2">
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}" Grid.ColumnSpan="2">
                         <ComboBox ItemsSource="{Binding AvailableProducts}"
                                   SelectedItem="{Binding SelectedProduct}"
-                                  DisplayMemberPath="Name" Width="200" Margin="0,0,8,0"/>
-                        <TextBlock Text="Qty:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                  DisplayMemberPath="Name" Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <TextBlock Text="Qty:" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
                         <TextBox Text="{Binding CartQuantity, UpdateSourceTrigger=PropertyChanged}"
                                  h:NumericInput.IsIntegerOnly="True"
-                                 Width="50" Margin="0,0,8,0" VerticalContentAlignment="Center"/>
+                                 Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}" VerticalContentAlignment="Center"/>
                         <Button Content="Add to Cart" Command="{Binding AddToCartCommand}"
-                                Style="{StaticResource ToolbarButtonStyle}" Margin="0"/>
+                                Style="{StaticResource ToolbarButtonStyle}" Margin="0"
+                                h:SmartTooltip.ContextKey="Cart"/>
                     </StackPanel>
 
                     <!-- Cart -->
-                    <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,8" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="2" Grid.ColumnSpan="2" Margin="{StaticResource ItemSpacing}" VerticalScrollBarVisibility="Auto">
                         <DataGrid ItemsSource="{Binding CartItems}"
                                   AutoGenerateColumns="False" IsReadOnly="True"
                                   SelectionMode="Single"
                                   CanUserAddRows="False">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
-                                <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="80"/>
-                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="50"/>
-                                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="90"/>
+                                <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
                                 <DataGridTemplateColumn Header="" Width="Auto">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button Content="✕" Padding="4,1"
+                                            <Button Content="✕"
+                                                    Style="{StaticResource CartRemoveButtonStyle}"
                                                     Command="{Binding DataContext.RemoveFromCartCommand,
                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    BorderThickness="0" Background="Transparent"
-                                                    Foreground="Red" Cursor="Hand"/>
+                                                    CommandParameter="{Binding}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -109,18 +129,20 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Discount row (compact inline) -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBlock Text="Discount:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <!-- Discount row (compact inline, expands when type selected) -->
+                        <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+                            <TextBlock Text="Discount:" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
                             <ComboBox ItemsSource="{Binding DiscountTypes}"
                                       SelectedItem="{Binding SelectedDiscountType}"
-                                      Width="100" Margin="0,0,8,0"/>
+                                      Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
                             <TextBox Text="{Binding DiscountInput, UpdateSourceTrigger=PropertyChanged}"
                                      h:NumericInput.IsDecimalOnly="True"
-                                     Width="80" Margin="0,0,8,0" VerticalContentAlignment="Center"/>
+                                     h:Watermark.Text="Value"
+                                     Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}" VerticalContentAlignment="Center"/>
                             <TextBox Text="{Binding DiscountReason, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="120" Margin="0,0,8,0" VerticalContentAlignment="Center"/>
-                            <TextBlock VerticalAlignment="Center" Foreground="#E65100"
+                                     h:Watermark.Text="Reason (optional)"
+                                     Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}" VerticalContentAlignment="Center"/>
+                            <TextBlock VerticalAlignment="Center" Foreground="{StaticResource FluentWarning}"
                                        Visibility="{Binding HasDiscount, Converter={StaticResource BoolToVisibility}}">
                                 <Run Text="−"/>
                                 <Run Text="{Binding BillDiscountAmount, StringFormat=C, Mode=OneWay}"/>
@@ -129,21 +151,23 @@
 
                         <!-- Totals + action buttons -->
                         <StackPanel Grid.Row="1" Orientation="Horizontal">
-                            <TextBlock Text="Payment:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="Payment:" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
                             <ComboBox ItemsSource="{Binding PaymentMethods}"
-                                     SelectedItem="{Binding PaymentMethod}" Width="100" Margin="0,0,15,0"/>
-                            <TextBlock VerticalAlignment="Center" Margin="0,0,5,0" Foreground="#999"
+                                     SelectedItem="{Binding PaymentMethod}" Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource WrapFieldGap}"/>
+                            <TextBlock VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"
+                                       Foreground="{StaticResource FluentTextTertiary}"
                                        Visibility="{Binding HasDiscount, Converter={StaticResource BoolToVisibility}}">
                                 <Run Text="Subtotal: "/>
                                 <Run Text="{Binding CartTotal, StringFormat=C, Mode=OneWay}"/>
                             </TextBlock>
-                            <TextBlock VerticalAlignment="Center" Margin="0,0,15,0"
+                            <TextBlock VerticalAlignment="Center" Margin="{StaticResource WrapFieldGap}"
                                        FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="Bold">
                                 <Run Text="Total: "/>
                                 <Run Text="{Binding BillFinalAmount, StringFormat=C, Mode=OneWay}"/>
                             </TextBlock>
                             <Button Command="{Binding CompleteSaleCommand}"
-                                    Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold">
+                                    Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"
+                                    h:SmartTooltip.ContextKey="CompleteSale">
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="⏳ " Visibility="{Binding IsSaving, Converter={StaticResource BoolToVisibility}}"/>
@@ -169,23 +193,24 @@
                 </Grid>
 
                 <!-- Processing overlay — shown during save -->
-                <Border Background="#D0FFFFFF" CornerRadius="4"
+                <Border Style="{StaticResource OverlayCardStyle}"
                         Visibility="{Binding IsSaving, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="⏳" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                        <TextBlock Text="⏳" FontSize="{StaticResource FontSizePageTitle}" HorizontalAlignment="Center" Margin="{StaticResource CompactItemSpacing}"/>
                         <TextBlock Text="{Binding SavingStatusText}"
-                                   FontSize="14" FontWeight="SemiBold" Foreground="#1976D2"
+                                   FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentAccentDefault}"
                                    HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}"
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}"
                    Style="{StaticResource ErrorMessageStyle}"/>
 
         <!-- Sales history: star-sized area -->
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
@@ -193,7 +218,8 @@
             </Grid.RowDefinitions>
 
             <!-- Loading Indicator -->
-            <TextBlock Grid.Row="0" Text="⏳ Loading..." FontSize="14" Foreground="#888"
+            <TextBlock Grid.Row="0" Text="⏳ Loading..." FontSize="{StaticResource FontSizeSectionHeader}"
+                       Foreground="{StaticResource FluentTextTertiary}"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
 
@@ -202,41 +228,66 @@
                       ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
-                    <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=g}" Width="160"/>
-                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="120"/>
-                    <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="120"/>
-                    <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="80"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="{StaticResource ColumnWidthId}"/>
+                    <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=g}" Width="{StaticResource ColumnWidthDate}"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="{StaticResource ColumnWidthStatus}"/>
+                    <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
                 </DataGrid.Columns>
             </DataGrid>
 
+            <!-- Empty state -->
+            <TextBlock Grid.Row="0" Text="💰  No sales found"
+                       Foreground="{StaticResource FluentTextTertiary}" FontStyle="Italic"
+                       FontSize="{StaticResource FontSizeBody}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Margin="{StaticResource EmptyStatePadding}" IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Sales.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <!-- Paging Controls -->
             <StackPanel Grid.Row="1" Orientation="Horizontal"
-                        HorizontalAlignment="Center" Margin="0,8,0,0">
+                        HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}">
                 <Button Content="◀ Previous" Command="{Binding PreviousPageCommand}"
-                        Padding="8,4" Margin="0,0,8,0"/>
+                        Style="{StaticResource ToolbarButtonStyle}"
+                        Padding="{StaticResource PagingButtonPadding}"/>
                 <TextBlock Text="{Binding PageDisplay}" VerticalAlignment="Center"
-                           FontSize="{StaticResource FontSizeLabel}" Foreground="#666" Margin="0,0,8,0"/>
+                           FontSize="{StaticResource FontSizeLabel}"
+                           Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Content="Next ▶" Command="{Binding NextPageCommand}"
-                        Padding="8,4"/>
+                        Style="{StaticResource ToolbarButtonStyle}"
+                        Padding="{StaticResource PagingButtonPadding}" Margin="0"/>
             </StackPanel>
 
             <!-- Sale Detail Panel -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                          Visibility="{Binding HasSelectedSale, Converter={StaticResource BoolToVisibility}}">
-                <Border Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0"
-                        Padding="12,8">
+                          Visibility="{Binding HasSelectedSale, Converter={StaticResource BoolToVisibility}}"
+                          h:Motion.SlideFadeReveal="True">
+                <Border Style="{StaticResource DetailPanelStyle}">
                     <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="{StaticResource CompactItemSpacing}">
                             <TextBlock Text="📋 Sale #" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                             <TextBlock Text="{Binding SelectedSale.Id}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text=" — " Foreground="#999"/>
-                            <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=g}" Foreground="#666"/>
-                            <TextBlock Text=" — " Foreground="#999"/>
-                            <TextBlock Text="{Binding SelectedSale.PaymentMethod}" Foreground="#666"/>
-                            <TextBlock Text=" — Total: " Foreground="#999" Margin="10,0,0,0"/>
+                            <TextBlock Text=" — " Foreground="{StaticResource FluentTextTertiary}"/>
+                            <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=g}"
+                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                            <TextBlock Text=" — " Foreground="{StaticResource FluentTextTertiary}"/>
+                            <TextBlock Text="{Binding SelectedSale.PaymentMethod}"
+                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                            <TextBlock Text=" — Total: "
+                                       Foreground="{StaticResource FluentTextTertiary}"
+                                       Margin="{StaticResource StatusBarStatGap}"/>
                             <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C}"
-                                       FontWeight="Bold" Foreground="#2196F3"/>
+                                       FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
                         </StackPanel>
                         <DataGrid ItemsSource="{Binding SelectedSale.Items}"
                                   AutoGenerateColumns="False" IsReadOnly="True"
@@ -244,9 +295,9 @@
                                   BorderThickness="0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
-                                <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="100"/>
-                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="60"/>
-                                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="100"/>
+                                <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </DockPanel>

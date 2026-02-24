@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**;Templates\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +25,10 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
   </ItemGroup>
 
 </Project>

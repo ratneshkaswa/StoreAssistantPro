@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
              Loaded="OnLoaded">
     <Grid Margin="{StaticResource DialogPadding}">
@@ -57,16 +58,16 @@
                        Style="{StaticResource FormRowLabelStyle}"/>
             <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal"
                         VerticalAlignment="Center">
-                <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center">
+                <Ellipse Width="10" Height="10" Margin="{StaticResource InlineControlSpacing}" VerticalAlignment="Center">
                     <Ellipse.Style>
                         <Style TargetType="Ellipse">
-                            <Setter Property="Fill" Value="#999"/>
+                            <Setter Property="Fill" Value="{StaticResource FluentTextTertiary}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDatabaseConnected}" Value="True">
-                                    <Setter Property="Fill" Value="#4CAF50"/>
+                                    <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsDatabaseConnected}" Value="False">
-                                    <Setter Property="Fill" Value="#F44336"/>
+                                    <Setter Property="Fill" Value="{StaticResource FluentError}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -77,12 +78,22 @@
             </StackPanel>
         </Grid>
 
-        <!-- Action button -->
+        <!-- Action buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="🔄 Refresh Connection" Command="{Binding CheckConnectionCommand}"
-                    Style="{StaticResource ToolbarButtonStyle}"/>
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.HelpText="Test the database connection"
+                    h:HelpHint.Category="Settings"/>
+            <TextBlock Text="⏳ Checking…" FontSize="{StaticResource FontSizeLabel}"
+                       Foreground="{StaticResource FluentAccentDefault}"
+                       VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"
+                       Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"/>
+            <Button Content="📋 Copy Info" Click="OnCopyInfoClick"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.HelpText="Copy application info to clipboard"
+                    h:HelpHint.Category="Settings"/>
         </StackPanel>
     </Grid>
 </UserControl>

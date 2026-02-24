@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;
@@ -29,6 +30,8 @@ public partial class AppStateService : ObservableObject, IAppStateService
     public AppStateService(IRegionalSettingsService regional)
     {
         _regional = regional;
+
+        SmartTooltipsEnabled = true;
 
         Notifications = [];
         Notifications.CollectionChanged += (_, _) =>
@@ -60,6 +63,9 @@ public partial class AppStateService : ObservableObject, IAppStateService
 
     [ObservableProperty]
     public partial bool IsOfflineMode { get; set; }
+
+    [ObservableProperty]
+    public partial bool SmartTooltipsEnabled { get; set; }
 
     [ObservableProperty]
     public partial DateTime? LastConnectionCheck { get; set; }
@@ -104,6 +110,12 @@ public partial class AppStateService : ObservableObject, IAppStateService
         LastConnectionCheck = checkTime;
     }
 
+    public void SetSmartTooltipsEnabled(bool enabled)
+    {
+        SmartTooltipsEnabled = enabled;
+        SmartTooltip.GlobalEnabled = enabled;
+    }
+
     public void AddNotification(AppNotification notification) =>
         Notifications.Add(notification);
 
@@ -125,6 +137,8 @@ public partial class AppStateService : ObservableObject, IAppStateService
         CurrentBillingSession = BillingSessionState.None;
         IsOfflineMode = false;
         LastConnectionCheck = null;
+        SmartTooltipsEnabled = true;
+        SmartTooltip.GlobalEnabled = true;
         Notifications.Clear();
     }
 }

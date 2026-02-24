@@ -168,6 +168,12 @@ public partial class SalesViewModel(
     [RelayCommand]
     private Task FilterByDateAsync()
     {
+        if (FilterFrom > FilterTo)
+        {
+            ErrorMessage = "\"From\" date cannot be after \"To\" date.";
+            return Task.CompletedTask;
+        }
+
         _isDateFiltered = true;
         PageIndex = 0;
         return LoadCurrentPageAsync();

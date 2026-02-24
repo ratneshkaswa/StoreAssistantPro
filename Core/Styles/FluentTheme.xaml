@@ -1,0 +1,1078 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FLUENT THEME — Control Templates & Chrome Styles
+         ═══════════════════════════════════════════════════════════════
+
+         All primitive design tokens (colors, radii, shadows, spacing,
+         typography, sizing) now live in DesignSystem.xaml which is
+         loaded before this dictionary.
+
+         This file provides:
+           • Full control templates (Button, TextBox, ComboBox, etc.)
+           • Animated hover / press / focus state transitions
+           • Chrome styles (Menu, Toolbar, StatusBar)
+           • Card and separator primitives
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — TEXTBOX
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background"              Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness"         Value="1"/>
+        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"                Value="13"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="CaretBrush"              Value="{StaticResource FluentAccentDefault}"/>
+        <Setter Property="SelectionBrush"          Value="{StaticResource FluentAccentDefault}"/>
+        <Setter Property="SnapsToDevicePixels"     Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid>
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource FluentCornerMedium}"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Focusable="False"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          Padding="{TemplateBinding Padding}"/>
+                        </Border>
+                        <!-- Bottom accent line (Fluent 2 focus indicator) -->
+                        <Border x:Name="FocusIndicator"
+                                Height="2" VerticalAlignment="Bottom"
+                                CornerRadius="0,0,8,8"
+                                Background="{StaticResource FluentAccentDefault}"
+                                Opacity="0" Margin="2,0,2,0"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentTextTertiary}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentStrokeFocus}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FluentSurfaceElevated}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentSurfaceStroke}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — COMBOBOX
+
+         Rounded border with accent focus indicator matching TextBox.
+         Drop-down toggle glyph aligned right, chevron rotates.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="Background"              Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness"         Value="1"/>
+        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"                Value="13"/>
+        <Setter Property="MinHeight"               Value="32"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="SnapsToDevicePixels"     Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="32"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Main border -->
+                        <Border x:Name="Bd" Grid.ColumnSpan="2"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource FluentCornerMedium}"
+                                SnapsToDevicePixels="True"/>
+
+                        <!-- Bottom accent line (focus indicator) -->
+                        <Border x:Name="FocusIndicator" Grid.ColumnSpan="2"
+                                Height="2" VerticalAlignment="Bottom"
+                                CornerRadius="0,0,8,8"
+                                Background="{StaticResource FluentAccentDefault}"
+                                Opacity="0" Margin="2,0,2,0"/>
+
+                        <!-- Drop-down toggle (covers entire control) -->
+                        <ToggleButton x:Name="ToggleButton" Grid.ColumnSpan="2"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                          RelativeSource={RelativeSource TemplatedParent}}"
+                                      Focusable="False" ClickMode="Press"
+                                      Background="Transparent" BorderThickness="0">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent"/>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <!-- Chevron glyph -->
+                        <Path x:Name="Arrow" Grid.Column="1"
+                              Data="M 0,0 L 4,4 L 8,0"
+                              Stroke="{StaticResource FluentTextSecondary}"
+                              StrokeThickness="1.5" StrokeLineJoin="Round"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                              IsHitTestVisible="False"/>
+
+                        <!-- Selected item display -->
+                        <ContentPresenter x:Name="ContentSite" Grid.Column="0"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"
+                                          IsHitTestVisible="False"/>
+
+                        <!-- Editable TextBox (visible only when IsEditable) -->
+                        <TextBox x:Name="PART_EditableTextBox" Grid.Column="0"
+                                 Visibility="Hidden" Focusable="True"
+                                 Background="Transparent" BorderThickness="0"
+                                 Padding="{TemplateBinding Padding}"
+                                 FontFamily="{TemplateBinding FontFamily}"
+                                 FontSize="{TemplateBinding FontSize}"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 VerticalContentAlignment="Center"
+                                 CaretBrush="{StaticResource FluentAccentDefault}"
+                                 SelectionBrush="{StaticResource FluentAccentDefault}"
+                                 IsReadOnly="{TemplateBinding IsReadOnly}"/>
+
+                        <!-- Drop-down popup -->
+                        <Popup x:Name="PART_Popup" Grid.ColumnSpan="2"
+                               Placement="Bottom" AllowsTransparency="True"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               Focusable="False" PopupAnimation="Slide">
+                            <Border x:Name="DropDownBorder"
+                                    MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                    Background="{StaticResource FluentSurface}"
+                                    BorderBrush="{StaticResource FluentSurfaceStroke}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource FluentCornerMedium}"
+                                    Margin="0,2,0,0" Padding="0,4"
+                                    Effect="{StaticResource FluentShadowMedium}">
+                                <ScrollViewer SnapsToDevicePixels="True">
+                                    <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentTextTertiary}"/>
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentStrokeFocus}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentStrokeFocus}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentSurfaceStroke}"/>
+                            <Setter TargetName="Arrow" Property="Stroke"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ComboBoxItem — Fluent hover/selection highlight -->
+    <Style x:Key="FluentComboBoxItemStyle" TargetType="ComboBoxItem">
+        <Setter Property="Padding"             Value="10,6"/>
+        <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"            Value="13"/>
+        <Setter Property="Foreground"          Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            CornerRadius="{StaticResource FluentCornerSmall}"
+                            Padding="{TemplateBinding Padding}"
+                            Margin="4,1" SnapsToDevicePixels="True">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSubtleHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSubtleHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSubtlePressed}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — PASSWORDBOX
+
+         Matches FluentTextBoxStyle: rounded corners, accent focus
+         indicator, enterprise density (32 px min-height).
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentPasswordBoxStyle" TargetType="PasswordBox">
+        <Setter Property="Background"              Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness"         Value="1"/>
+        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"                Value="13"/>
+        <Setter Property="MinHeight"               Value="32"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="CaretBrush"              Value="{StaticResource FluentAccentDefault}"/>
+        <Setter Property="SelectionBrush"          Value="{StaticResource FluentAccentDefault}"/>
+        <Setter Property="SnapsToDevicePixels"     Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Grid>
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource FluentCornerMedium}"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Focusable="False"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          Padding="{TemplateBinding Padding}"/>
+                        </Border>
+                        <Border x:Name="FocusIndicator"
+                                Height="2" VerticalAlignment="Bottom"
+                                CornerRadius="0,0,8,8"
+                                Background="{StaticResource FluentAccentDefault}"
+                                Opacity="0" Margin="2,0,2,0"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentTextTertiary}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentStrokeFocus}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0" Duration="{StaticResource FluentDurationNormal}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FluentSurfaceElevated}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentSurfaceStroke}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — BUTTON (Fluent Accent / Primary)
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentAccentButtonStyle" TargetType="Button">
+        <Setter Property="Background"              Value="{StaticResource FluentAccentDefault}"/>
+        <Setter Property="Foreground"              Value="{StaticResource FluentTextOnAccent}"/>
+        <Setter Property="BorderThickness"         Value="0"/>
+        <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"                Value="13"/>
+        <Setter Property="FontWeight"              Value="SemiBold"/>
+        <Setter Property="Padding"                 Value="16,8"/>
+        <Setter Property="Cursor"                  Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels"     Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#0067C0" Duration="{StaticResource FluentDurationFast}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            Duration="{StaticResource FluentDurationFast}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleRest}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleRest}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentAccentPressed}"/>
+                            <Setter Property="Foreground" Value="#CCFFFFFF"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScalePressed}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScalePressed}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentAccentDisabled}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextOnAccent}"/>
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — BUTTON (Fluent Standard / Secondary)
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentStandardButtonStyle" TargetType="Button">
+        <Setter Property="Background"              Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness"         Value="1"/>
+        <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"                Value="13"/>
+        <Setter Property="Padding"                 Value="16,8"/>
+        <Setter Property="Cursor"                  Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels"     Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#FAFAFA" Duration="{StaticResource FluentDurationFast}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Bd"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            Duration="{StaticResource FluentDurationFast}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleRest}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleRest}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentTextTertiary}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSubtlePressed}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextSecondary}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScalePressed}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScalePressed}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSurfaceElevated}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentSurfaceStroke}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — BUTTON (Fluent Subtle / Transparent)
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentSubtleButtonStyle" TargetType="Button">
+        <Setter Property="Background"              Value="Transparent"/>
+        <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderThickness"         Value="0"/>
+        <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"                Value="13"/>
+        <Setter Property="Padding"                 Value="10,6"/>
+        <Setter Property="Cursor"                  Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels"     Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Bd"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" Duration="{StaticResource FluentDurationFast}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleRest}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleRest}"
+                                            Duration="{StaticResource FluentDurationNormal}"
+                                            EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSubtleHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource FluentSubtlePressed}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextSecondary}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScalePressed}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScalePressed}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleX"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                            Storyboard.TargetProperty="ScaleY"
+                                            To="{StaticResource MotionButtonScaleHover}"
+                                            Duration="{StaticResource FluentDurationFast}"
+                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — CHECKBOX
+
+         Fluent 2 toggle-style checkbox: 18×18 rounded box with accent
+         fill when checked, animated checkmark glyph, subtle hover.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentCheckBoxStyle" TargetType="CheckBox">
+        <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"            Value="13"/>
+        <Setter Property="Foreground"          Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="Background"          Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush"         Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness"     Value="1"/>
+        <Setter Property="Padding"             Value="8,0,0,0"/>
+        <Setter Property="Cursor"              Value="Hand"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid SnapsToDevicePixels="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Check box outline -->
+                        <Border x:Name="CheckBorder" Grid.Column="0"
+                                Width="18" Height="18"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource FluentCornerSmall}"
+                                VerticalAlignment="Center"
+                                SnapsToDevicePixels="True">
+                            <!-- Checkmark glyph -->
+                            <Path x:Name="CheckGlyph"
+                                  Data="M 3,8 L 7,12 L 13,4"
+                                  Stroke="{StaticResource FluentTextOnAccent}"
+                                  StrokeThickness="1.5"
+                                  StrokeLineJoin="Round"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Stretch="None"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Opacity="0"/>
+                        </Border>
+
+                        <!-- Label content -->
+                        <ContentPresenter Grid.Column="1"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBorder" Property="BorderBrush"
+                                    Value="{StaticResource FluentTextTertiary}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckBorder" Property="Background"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="CheckBorder" Property="BorderBrush"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="CheckGlyph" Property="Opacity" Value="1"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="CheckBorder" Property="Background"
+                                    Value="{StaticResource FluentAccentHover}"/>
+                            <Setter TargetName="CheckBorder" Property="BorderBrush"
+                                    Value="{StaticResource FluentAccentHover}"/>
+                        </MultiTrigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="CheckBorder" Property="Background"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="CheckBorder" Property="BorderBrush"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="CheckGlyph" Property="Data"
+                                    Value="M 4,9 L 12,9"/>
+                            <Setter TargetName="CheckGlyph" Property="Opacity" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter TargetName="CheckBorder" Property="Background"
+                                    Value="{StaticResource FluentSurfaceElevated}"/>
+                            <Setter TargetName="CheckBorder" Property="BorderBrush"
+                                    Value="{StaticResource FluentSurfaceStroke}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CONTROL TEMPLATES — GROUPBOX
+
+         Fluent card-style GroupBox: rounded container with a subtle
+         header region separated by a thin stroke. Replaces WPF's
+         default legacy chrome with modern flat appearance.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentGroupBoxStyle" TargetType="GroupBox">
+        <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"            Value="13"/>
+        <Setter Property="Foreground"          Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="Background"          Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush"         Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness"     Value="1"/>
+        <Setter Property="Padding"             Value="12"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GroupBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Header -->
+                            <Border Grid.Row="0"
+                                    Background="{StaticResource FluentSurfaceElevated}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="12,8">
+                                <ContentPresenter ContentSource="Header"
+                                                  TextBlock.FontWeight="SemiBold"
+                                                  TextBlock.FontSize="13"
+                                                  TextBlock.Foreground="{StaticResource FluentTextPrimary}"/>
+                            </Border>
+
+                            <!-- Stroke between header and content -->
+                            <Border Grid.Row="0" VerticalAlignment="Bottom"
+                                    Height="1"
+                                    Background="{StaticResource FluentSurfaceStroke}"/>
+
+                            <!-- Content -->
+                            <ContentPresenter Grid.Row="1"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CARD — Fluent elevated container with soft shadow
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentCardStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="{StaticResource FluentCornerMedium}"/>
+        <Setter Property="Padding"         Value="16"/>
+        <Setter Property="Effect"          Value="{StaticResource FluentShadowSmall}"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         ELEVATED CARD — Higher elevation (popups, dialogs)
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentCardElevatedStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="{StaticResource FluentCornerLarge}"/>
+        <Setter Property="Padding"         Value="20"/>
+        <Setter Property="Effect"          Value="{StaticResource FluentShadowMedium}"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SEPARATOR — subtle horizontal divider
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentSeparatorStyle" TargetType="Separator">
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="Height"     Value="1"/>
+        <Setter Property="Margin"     Value="0,8"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MENU BAR — Fluent top-level navigation strip
+
+         Chromeless Menu with Fluent font, subtle bottom stroke, and
+         clean flat appearance. The custom template strips the default
+         WPF menu chrome. Top-level items use FluentTextSecondary
+         with a subtle hover fill.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentMenuBarStyle" TargetType="Menu">
+        <Setter Property="Background"          Value="{StaticResource FluentMenuBarBackground}"/>
+        <Setter Property="Foreground"          Value="{StaticResource FluentMenuBarForeground}"/>
+        <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"            Value="12"/>
+        <Setter Property="Padding"             Value="6,2"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Menu">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource FluentSurfaceStroke}"
+                            BorderThickness="0,0,0,1"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ItemsPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Top-level menu item (Fluent subtle hover) -->
+    <Style x:Key="FluentMenuBarItemStyle" TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"   Value="12"/>
+        <Setter Property="Padding"    Value="8,4"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TOOLBAR — Fluent elevated quick-action strip
+
+         White surface with a subtle bottom stroke and small shadow
+         for slight elevation above the workspace content below.
+         Modern 12,6 padding keeps compact enterprise density.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentToolbarStyle" TargetType="Border">
+        <Setter Property="Background"         Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush"        Value="{StaticResource FluentToolbarBorder}"/>
+        <Setter Property="BorderThickness"    Value="0,0,0,1"/>
+        <Setter Property="Padding"            Value="12,6"/>
+        <Setter Property="Effect"             Value="{StaticResource FluentShadowSmall}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         STATUS BAR — Fluent chrome strip
+
+         Clean chromeless StatusBar with subtle top-stroke separation,
+         Segoe UI Variable 11 px, calm #FAFAFA surface.  The custom
+         ControlTemplate strips the default WPF resize grip, system
+         chrome, and separator rendering to produce a flat, modern bar.
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentStatusBarStyle" TargetType="StatusBar">
+        <Setter Property="Background"          Value="{StaticResource FluentStatusBarBackground}"/>
+        <Setter Property="Foreground"          Value="{StaticResource FluentStatusBarForeground}"/>
+        <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"            Value="11"/>
+        <Setter Property="Padding"             Value="10,5"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="StatusBar">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource FluentSurfaceStroke}"
+                            BorderThickness="0,1,0,0"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ItemsPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- StatusBarItem — chromeless container for status bar content -->
+    <Style x:Key="FluentStatusBarItemStyle" TargetType="StatusBarItem">
+        <Setter Property="Padding"    Value="0"/>
+        <Setter Property="Margin"     Value="0"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"   Value="11"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentStatusBarForeground}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="StatusBarItem">
+                    <ContentPresenter Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="Center"
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Vertical divider for status bar item separation -->
+    <Style x:Key="FluentStatusBarSeparatorStyle" TargetType="Border">
+        <Setter Property="Width"      Value="1"/>
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="Margin"     Value="8,3"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         BASE WINDOW — Fluent visual foundation for every Window
+
+         Establishes the modern light appearance, default typography,
+         pixel-perfect rendering for fixed-resolution displays, and
+         clean borderless content area.  Applied to all windows
+         (MainWindow, login/setup windows, and BaseDialogWindow
+         subclasses) via the implicit style in GlobalStyles.xaml.
+
+         Rendering settings:
+           UseLayoutRounding    = True   eliminates sub-pixel blur
+           SnapsToDevicePixels  = True   crisp edges at 100 % DPI
+           TextFormattingMode   = Display   sharp small text (11-13 px)
+           TextRenderingMode    = ClearType  LCD-optimised glyphs
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style x:Key="FluentWindowStyle" TargetType="Window">
+        <Setter Property="Background"           Value="{StaticResource FluentBackgroundPrimary}"/>
+        <Setter Property="Foreground"           Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="FontFamily"           Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"             Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="BorderThickness"      Value="0"/>
+        <Setter Property="SnapsToDevicePixels"  Value="True"/>
+        <Setter Property="UseLayoutRounding"    Value="True"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="TextOptions.TextRenderingMode"  Value="ClearType"/>
+    </Style>
+
+</ResourceDictionary>
