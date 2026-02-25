@@ -15,12 +15,26 @@ public class MainWorkspaceViewModelTests
     private static DashboardSummary MakeSummary(
         int totalProducts = 0,
         int lowStockCount = 0,
+        int outOfStockCount = 0,
+        int overstockCount = 0,
+        decimal inventoryValue = 0m,
+        decimal inventoryValueAtSale = 0m,
         decimal todaysSales = 0m,
         int todaysTransactions = 0,
         IReadOnlyList<Sale>? recentSales = null,
-        IReadOnlyList<Product>? lowStockProducts = null) =>
-        new(totalProducts, lowStockCount, todaysSales, todaysTransactions,
-            recentSales ?? [], lowStockProducts ?? []);
+        IReadOnlyList<Product>? lowStockProducts = null,
+        IReadOnlyList<BrandLowStockCount>? lowStockByBrand = null,
+        IReadOnlyList<Product>? outOfStockProducts = null,
+        IReadOnlyList<BrandInventoryValue>? inventoryValueByBrand = null,
+        IReadOnlyList<PaymentMethodSales>? salesByPaymentMethod = null,
+        IReadOnlyList<TopSellingProduct>? topSellingProducts = null) =>
+        new(totalProducts, lowStockCount, outOfStockCount, overstockCount, inventoryValue, inventoryValueAtSale, todaysSales, todaysTransactions,
+            todaysTransactions > 0 ? todaysSales / todaysTransactions : 0,
+            recentSales ?? [], lowStockProducts ?? [], lowStockByBrand ?? [],
+            outOfStockProducts ?? [], inventoryValueByBrand ?? [],
+            0m,
+            salesByPaymentMethod ?? [],
+            topSellingProducts ?? []);
 
     [Fact]
     public async Task LoadMainWorkspace_SetsTotalProducts()

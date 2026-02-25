@@ -18,11 +18,13 @@ using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication;
 using StoreAssistantPro.Modules.Billing;
+using StoreAssistantPro.Modules.Brands;
 using StoreAssistantPro.Modules.Firm;
 using StoreAssistantPro.Modules.MainShell;
 using StoreAssistantPro.Modules.Products;
 using StoreAssistantPro.Modules.Sales;
 using StoreAssistantPro.Modules.Startup;
+using StoreAssistantPro.Modules.Suppliers;
 using StoreAssistantPro.Modules.SystemSettings;
 using StoreAssistantPro.Modules.Tax;
 using StoreAssistantPro.Modules.Users;
@@ -111,7 +113,9 @@ internal static class HostingExtensions
             .AddAuthenticationModule()
             .AddMainShellModule(pageRegistry)
             .AddProductsModule(pageRegistry)
+            .AddBrandsModule(pageRegistry)
             .AddSalesModule(pageRegistry)
+            .AddSuppliersModule(pageRegistry)
             .AddFirmModule()
             .AddUsersModule()
             .AddSystemSettingsModule()

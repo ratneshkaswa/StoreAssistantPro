@@ -8,6 +8,7 @@ using StoreAssistantPro.Modules.Products.Commands;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Products.ViewModels;
 using StoreAssistantPro.Modules.Tax.Services;
+using StoreAssistantPro.Modules.Brands.Services;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
@@ -15,9 +16,11 @@ public class ProductsViewModelTests
 {
     private readonly IProductService _productService = Substitute.For<IProductService>();
     private readonly ITaxService _taxService = Substitute.For<ITaxService>();
+    private readonly IBrandService _brandService = Substitute.For<IBrandService>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IMasterPinValidator _masterPinValidator = Substitute.For<IMasterPinValidator>();
+    private readonly INotificationService _notificationService = Substitute.For<INotificationService>();
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
 
     public ProductsViewModelTests()
@@ -33,10 +36,12 @@ public class ProductsViewModelTests
             .Returns(CommandResult.Success());
         _taxService.GetAllProfilesAsync()
             .Returns(new List<TaxProfile>());
+        _brandService.GetAllAsync(Arg.Any<CancellationToken>())
+            .Returns(new List<Brand>());
     }
 
     private ProductsViewModel CreateSut() =>
-        new(_productService, _taxService, _sessionService, _dialogService, _masterPinValidator, _commandBus);
+        new(_productService, _taxService, _brandService, _sessionService, _dialogService, _masterPinValidator, _notificationService, _commandBus);
 
     private void SetupPagedReturn(IReadOnlyList<Product> items, int totalCount = -1)
     {

@@ -10,6 +10,7 @@
              Loaded="OnLoaded">
     <UserControl.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding ShowNewSaleCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+E" Command="{Binding ExportSalesCommand}"/>
     </UserControl.InputBindings>
     <Grid Margin="{StaticResource PagePadding}">
         <Grid.RowDefinitions>
@@ -31,6 +32,12 @@
             TipText="Start a new sale transaction."/>
 
         <WrapPanel Grid.Row="2" Margin="{StaticResource ToolbarSpacing}">
+            <Button Content="🖨 Reprint Last" Command="{Binding ReprintLastInvoiceCommand}" Style="{StaticResource ToolbarButtonStyle}" Margin="0,0,8,0"/>
+            <Button Content="📄 Export All Items" Command="{Binding ExportAllSaleItemsCommand}" Style="{StaticResource ToolbarButtonStyle}" Margin="0,0,8,0"/>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Width="{StaticResource FieldWidthWide}"
+                     h:Watermark.Text="🔍 Search sales..."
+                     VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
             <Button Content="🛒 New Sale" Command="{Binding ShowNewSaleCommand}"
                     Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"
                     VerticalAlignment="Center"
@@ -57,6 +64,35 @@
                     h:HelpHint.Category="Sales"
                     h:SmartTooltip.ContextKey="LoadAllSales"
                     VerticalAlignment="Center"/>
+            <Button Content="📤 Export" Command="{Binding ExportSalesCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.ShortcutText="Ctrl+Shift+E"
+                    h:HelpHint.HelpText="Export all sales to CSV"
+                    h:HelpHint.Category="Sales"
+                    VerticalAlignment="Center"/>
+            <Button Content="📤 Export Filtered" Command="{Binding ExportFilteredSalesCommand}"
+                    Style="{StaticResource ToolbarButtonStyle}"
+                    h:HelpHint.HelpText="Export only the currently visible/filtered sales to CSV"
+                    h:HelpHint.Category="Sales"
+                    VerticalAlignment="Center"/>
+            <ComboBox SelectedItem="{Binding SelectedPaymentMethod, Mode=TwoWay}"
+                      Width="{StaticResource FieldWidthCompact}"
+                      Margin="{StaticResource InlineControlSpacing}"
+                      VerticalAlignment="Center"
+                      ToolTip="Filter by payment method"
+                      ItemsSource="{Binding PaymentMethodFilterOptions}"/>
+            <ComboBox SelectedItem="{Binding SelectedCashierFilter, Mode=TwoWay}"
+                      Width="{StaticResource FieldWidthCompact}"
+                      Margin="{StaticResource InlineControlSpacing}"
+                      VerticalAlignment="Center"
+                      ToolTip="Filter by cashier role"
+                      ItemsSource="{Binding CashierFilterOptions}"/>
+            <ComboBox ItemsSource="{Binding PageSizeOptions}"
+                      SelectedItem="{Binding PageSize, Mode=TwoWay}"
+                      Width="{StaticResource FieldWidthCompact}"
+                      Margin="{StaticResource InlineControlSpacing}"
+                      VerticalAlignment="Center"
+                      ToolTip="Page size"/>
         </WrapPanel>
 
         <!-- New Sale Form -->
@@ -226,14 +262,47 @@
             <DataGrid Grid.Row="0"
                       Style="{StaticResource EnterpriseDataGridStyle}"
                       ItemsSource="{Binding Sales}"
-                      SelectedItem="{Binding SelectedSale}">
+                      SelectedItem="{Binding SelectedSale}"
+                      Sorting="OnSorting">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="{StaticResource ColumnWidthId}"/>
-                    <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=g}" Width="{StaticResource ColumnWidthDate}"/>
-                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="{StaticResource ColumnWidthStatus}"/>
-                    <DataGridTextColumn Header="Cashier" Binding="{Binding CashierRole}" Width="{StaticResource ColumnWidthStatus}"/>
-                    <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" SortMemberPath="Id" Width="{StaticResource ColumnWidthId}"/>
+                    <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceNumber}" SortMemberPath="InvoiceNumber" Width="{StaticResource ColumnWidthStatus}"/>
+                    <DataGridTemplateColumn Header="Date" SortMemberPath="SaleDate" Width="{StaticResource ColumnWidthDate}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding SaleDate, StringFormat=g}" VerticalAlignment="Center"
+                                           ToolTip="{Binding SaleDate, StringFormat='dddd, dd MMM yyyy hh:mm:ss tt'}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=C}" SortMemberPath="TotalAmount" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTemplateColumn Header="Discount" SortMemberPath="DiscountAmount" Width="{StaticResource ColumnWidthPrice}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DiscountAmount, StringFormat=C}" VerticalAlignment="Center"
+                                           ToolTip="{Binding DiscountSummary}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" SortMemberPath="PaymentMethod" Width="{StaticResource ColumnWidthStatus}"/>
+                    <DataGridTextColumn Header="Cashier" Binding="{Binding CashierRole}" SortMemberPath="CashierRole" Width="{StaticResource ColumnWidthStatus}"/>
+                    <DataGridTemplateColumn Header="Ref #" SortMemberPath="PaymentReference" Width="{StaticResource ColumnWidthStatus}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PaymentReference}" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding PaymentReference}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Items" SortMemberPath="ItemCount" Width="{StaticResource ColumnWidthQty}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Items.Count}" VerticalAlignment="Center"
+                                           ToolTip="{Binding ItemsSummary}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -275,20 +344,47 @@
                           h:Motion.SlideFadeReveal="True">
                 <Border Style="{StaticResource DetailPanelStyle}">
                     <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="{StaticResource CompactItemSpacing}">
-                            <TextBlock Text="📋 Sale #" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text="{Binding SelectedSale.Id}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text=" — " Foreground="{StaticResource FluentTextTertiary}"/>
-                            <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=g}"
-                                       Foreground="{StaticResource FluentTextSecondary}"/>
-                            <TextBlock Text=" — " Foreground="{StaticResource FluentTextTertiary}"/>
-                            <TextBlock Text="{Binding SelectedSale.PaymentMethod}"
-                                       Foreground="{StaticResource FluentTextSecondary}"/>
-                            <TextBlock Text=" — Total: "
-                                       Foreground="{StaticResource FluentTextTertiary}"
-                                       Margin="{StaticResource StatusBarStatGap}"/>
-                            <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C}"
-                                       FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="{StaticResource CompactItemSpacing}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📋 Invoice #" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding SelectedSale.InvoiceNumber}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedSale.InvoiceNumber}" Value="">
+                                                    <Setter Property="Text" Value="{Binding SelectedSale.Id}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text=" — " Foreground="{StaticResource FluentTextTertiary}"/>
+                                <TextBlock Text="{Binding SelectedSale.SaleDate, StringFormat=g}"
+                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                                <TextBlock Text=" — " Foreground="{StaticResource FluentTextTertiary}"/>
+                                <TextBlock Text="{Binding SelectedSale.PaymentMethod}"
+                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                                <TextBlock Text=" — Total: "
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           Margin="{StaticResource StatusBarStatGap}"/>
+                                <TextBlock Text="{Binding SelectedSale.TotalAmount, StringFormat=C}"
+                                           FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Text="Reference: " FontWeight="SemiBold" FontSize="{StaticResource FontSizeLabel}" Visibility="{Binding SelectedSale.PaymentReference, Converter={StaticResource BoolToVisibility}}"/>
+                                <TextBlock Text="{Binding SelectedSale.PaymentReference}" FontSize="{StaticResource FontSizeLabel}" Foreground="{StaticResource FluentTextSecondary}" Visibility="{Binding SelectedSale.PaymentReference, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0"
+                                        Visibility="{Binding SelectedSale.DiscountAmount, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Discount: " FontWeight="SemiBold" FontSize="{StaticResource FontSizeLabel}"/>
+                                <TextBlock Text="{Binding SelectedSale.DiscountSummary}" FontSize="{StaticResource FontSizeLabel}" Foreground="{StaticResource FluentWarning}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="🖨 Print" Command="{Binding PrintInvoiceCommand}" Style="{StaticResource ToolbarButtonStyle}" Margin="0,0,8,0"/>
+                                <Button Content="↩ Refund" Command="{Binding RefundSaleCommand}" Style="{StaticResource ToolbarButtonStyle}" Margin="0,0,8,0"/>
+                                <Button Content="📄 Export Items" Command="{Binding ExportSaleItemsCommand}" Style="{StaticResource ToolbarButtonStyle}"/>
+                            </StackPanel>
                         </StackPanel>
                         <DataGrid ItemsSource="{Binding SelectedSale.Items}"
                                   AutoGenerateColumns="False" IsReadOnly="True"

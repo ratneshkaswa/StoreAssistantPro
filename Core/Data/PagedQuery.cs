@@ -14,4 +14,10 @@ public sealed record PagedQuery(
     int PageSize = 50,
     string? SearchTerm = null,
     StockFilter StockFilter = StockFilter.All,
-    ActiveFilter ActiveFilter = ActiveFilter.All);
+    ActiveFilter ActiveFilter = ActiveFilter.All,
+    int? BrandId = null,
+    string? SortColumn = null,
+    bool SortDescending = false,
+    string? ColorFilter = null,
+    int? TaxProfileId = null,
+    string? UomFilter = null);

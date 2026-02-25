@@ -21,7 +21,23 @@ public partial class SalesViewModel(
     IBillCalculationService billCalculation,
     IRegionalSettingsService regional) : BaseViewModel
 {
-    private const int PageSize = 50;
+    private int _pageSize = 50;
+    public int PageSize
+    {
+        get => _pageSize;
+        set
+        {
+            if (_pageSize != value)
+            {
+                _pageSize = value;
+                OnPropertyChanged();
+                PageIndex = 0;
+                _ = LoadCurrentPageAsync();
+            }
+        }
+    }
+
+    public int[] PageSizeOptions { get; } = new[] { 25, 50, 100, 200 };
     private bool _isDateFiltered;
 
     // ── Role-based access ──
@@ -29,8 +45,82 @@ public partial class SalesViewModel(
     public bool CanCreateSales =>
         sessionService.CurrentUserType is UserType.Admin or UserType.Manager;
 
+
+    // ── Search ──
+    private IReadOnlyList<Sale> _allSales = [];
+
     [ObservableProperty]
     public partial ObservableCollection<Sale> Sales { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
+    partial void OnSearchTextChanged(string value) => ApplyFilter();
+
+    // ── Payment method filter ──
+
+    [ObservableProperty]
+    public partial string? SelectedPaymentMethod { get; set; }
+
+    partial void OnSelectedPaymentMethodChanged(string? value) => ApplyFilter();
+
+    public string[] PaymentMethodFilterOptions { get; } = ["All", "Cash", "Card", "UPI", "Transfer"];
+
+    // ── Cashier filter ──
+
+    [ObservableProperty]
+    public partial string? SelectedCashierFilter { get; set; }
+
+    partial void OnSelectedCashierFilterChanged(string? value) => ApplyFilter();
+
+    public string[] CashierFilterOptions { get; } = ["All", "Admin", "Manager", "User"];
+
+    // ── Sorting ──
+
+    [ObservableProperty]
+    public partial string? SortColumn { get; set; }
+
+    [ObservableProperty]
+    public partial bool SortDescending { get; set; }
+
+    [RelayCommand]
+    private Task SortByColumnAsync(string columnName)
+    {
+        if (string.Equals(SortColumn, columnName, StringComparison.OrdinalIgnoreCase))
+        {
+            SortDescending = !SortDescending;
+        }
+        else
+        {
+            SortColumn = columnName;
+            SortDescending = false;
+        }
+        PageIndex = 0;
+        return LoadCurrentPageAsync();
+    }
+
+    private void ApplyFilter()
+    {
+        IEnumerable<Sale> filtered = _allSales;
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            filtered = filtered.Where(s =>
+                (!string.IsNullOrEmpty(s.InvoiceNumber) && s.InvoiceNumber.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrEmpty(s.PaymentMethod) && s.PaymentMethod.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrEmpty(s.CashierRole) && s.CashierRole.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+        if (!string.IsNullOrWhiteSpace(SelectedPaymentMethod) && SelectedPaymentMethod != "All")
+        {
+            filtered = filtered.Where(s => s.PaymentMethod == SelectedPaymentMethod);
+        }
+        if (!string.IsNullOrWhiteSpace(SelectedCashierFilter) && SelectedCashierFilter != "All")
+        {
+            filtered = filtered.Where(s =>
+                !string.IsNullOrEmpty(s.CashierRole) && s.CashierRole.Equals(SelectedCashierFilter, StringComparison.OrdinalIgnoreCase));
+        }
+        Sales = new ObservableCollection<Sale>(filtered.ToList());
+    }
 
     [ObservableProperty]
     public partial Sale? SelectedSale { get; set; }
@@ -185,9 +275,10 @@ public partial class SalesViewModel(
         var to = _isDateFiltered ? (DateTime?)FilterTo.Date.AddDays(1) : null;
 
         var result = await salesService.GetPagedAsync(
-            new PagedQuery(PageIndex, PageSize), from, to, ct);
+            new PagedQuery(PageIndex, PageSize, null, StockFilter.All, ActiveFilter.All, null, SortColumn, SortDescending), from, to, ct);
 
-        Sales = new ObservableCollection<Sale>(result.Items);
+        _allSales = result.Items;
+        ApplyFilter();
         TotalPages = result.TotalPages;
         TotalCount = result.TotalCount;
         PageIndex = result.PageIndex;
@@ -327,6 +418,98 @@ public partial class SalesViewModel(
 
     private bool CanCompleteSale() => !IsSaving;
 
+    // ── Export ──
+
+    [RelayCommand]
+    private async Task ExportSalesAsync()
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            Title = "Export Sales to CSV",
+            FileName = "Sales_Export.csv"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var allSales = await salesService.GetAllAsync();
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("InvoiceNumber,Date,Total,Payment,Cashier,ItemCount");
+
+            foreach (var s in allSales)
+            {
+                sb.AppendLine(string.Join(",",
+                    EscapeCsv(s.InvoiceNumber),
+                    s.SaleDate.ToString("g", System.Globalization.CultureInfo.InvariantCulture),
+                    s.TotalAmount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    EscapeCsv(s.PaymentMethod ?? ""),
+                    EscapeCsv(s.CashierRole ?? ""),
+                    s.Items?.Count ?? 0));
+            }
+
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
+            ErrorMessage = $"Exported {allSales.Count()} sales to {System.IO.Path.GetFileName(dialog.FileName)}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportFilteredSalesAsync()
+    {
+        if (Sales.Count == 0)
+        {
+            ErrorMessage = "No filtered sales to export.";
+            return;
+        }
+
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            Title = "Export Filtered Sales to CSV",
+            FileName = "Sales_Filtered_Export.csv"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("InvoiceNumber,Date,Total,Payment,Cashier,ItemCount");
+
+            foreach (var s in Sales)
+            {
+                sb.AppendLine(string.Join(",",
+                    EscapeCsv(s.InvoiceNumber),
+                    s.SaleDate.ToString("g", System.Globalization.CultureInfo.InvariantCulture),
+                    s.TotalAmount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    EscapeCsv(s.PaymentMethod ?? ""),
+                    EscapeCsv(s.CashierRole ?? ""),
+                    s.Items?.Count ?? 0));
+            }
+
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
+            ErrorMessage = $"Exported {Sales.Count} filtered sales to {System.IO.Path.GetFileName(dialog.FileName)}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+        }
+    }
+
+    private static string EscapeCsv(string value) =>
+        value.Contains(',') || value.Contains('"') || value.Contains('\n')
+            ? $"\"{value.Replace("\"", "\"\"")}\""
+            : value;
+
     // ── Bill recalculation ──
 
     private void RecalculateBill()
@@ -376,4 +559,121 @@ public partial class SalesViewModel(
             Value = DiscountInput,
             Reason = string.IsNullOrWhiteSpace(DiscountReason) ? null : DiscountReason.Trim()
         };
+
+    // ── Sale detail panel actions ──
+
+    [RelayCommand]
+    private void PrintInvoice()
+    {
+        if (SelectedSale is null)
+        {
+            ErrorMessage = "No sale selected.";
+            return;
+        }
+        // TODO: Replace with real print logic
+        ErrorMessage = $"Print invoice for {SelectedSale.InvoiceNumber ?? SelectedSale.Id.ToString()} (stub).";
+    }
+
+    [RelayCommand]
+    private void RefundSale()
+    {
+        if (SelectedSale is null)
+        {
+            ErrorMessage = "No sale selected.";
+            return;
+        }
+        // TODO: Replace with real refund workflow
+        ErrorMessage = $"Refund workflow for {SelectedSale.InvoiceNumber ?? SelectedSale.Id.ToString()} (stub).";
+    }
+
+    [RelayCommand]
+    private async Task ExportSaleItemsAsync()
+    {
+        if (SelectedSale is null)
+        {
+            ErrorMessage = "No sale selected.";
+            return;
+        }
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            Title = "Export Sale Items to CSV",
+            FileName = $"Sale_{SelectedSale.InvoiceNumber ?? SelectedSale.Id.ToString()}_Items.csv"
+        };
+        if (dialog.ShowDialog() != true) return;
+        try
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Product,UnitPrice,Quantity,Subtotal");
+            foreach (var item in SelectedSale.Items)
+            {
+                sb.AppendLine(string.Join(",",
+                    EscapeCsv(item.Product?.Name ?? ""),
+                    item.UnitPrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    item.Quantity,
+                    (item.UnitPrice * item.Quantity).ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            }
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
+            ErrorMessage = $"Exported {SelectedSale.Items.Count} items to {System.IO.Path.GetFileName(dialog.FileName)}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+        }
+    }
+
+    // ── Toolbar actions: Reprint Last, Export All Items ──
+    [RelayCommand]
+    private void ReprintLastInvoice()
+    {
+        var last = Sales.OrderByDescending(s => s.SaleDate).FirstOrDefault();
+        if (last is null)
+        {
+            ErrorMessage = "No sales to reprint.";
+            return;
+        }
+        // TODO: Replace with real print logic
+        ErrorMessage = $"Reprint invoice for {last.InvoiceNumber ?? last.Id.ToString()} (stub).";
+    }
+
+    [RelayCommand]
+    private async Task ExportAllSaleItemsAsync()
+    {
+        if (Sales.Count == 0)
+        {
+            ErrorMessage = "No sales to export.";
+            return;
+        }
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            Title = "Export All Sale Items to CSV",
+            FileName = "AllSaleItems_Export.csv"
+        };
+        if (dialog.ShowDialog() != true) return;
+        try
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("InvoiceNumber,Date,Product,UnitPrice,Quantity,Subtotal");
+            foreach (var sale in Sales)
+            {
+                foreach (var item in sale.Items)
+                {
+                    sb.AppendLine(string.Join(",",
+                        EscapeCsv(sale.InvoiceNumber),
+                        sale.SaleDate.ToString("g", System.Globalization.CultureInfo.InvariantCulture),
+                        EscapeCsv(item.Product?.Name ?? ""),
+                        item.UnitPrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        item.Quantity,
+                        (item.UnitPrice * item.Quantity).ToString(System.Globalization.CultureInfo.InvariantCulture)));
+                }
+            }
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
+            ErrorMessage = $"Exported all sale items to {System.IO.Path.GetFileName(dialog.FileName)}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+        }
+    }
 }

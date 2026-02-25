@@ -116,6 +116,35 @@ namespace StoreAssistantPro.Data.Migrations
                     b.ToTable("BillingSessions");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.Brand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Brands");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -124,12 +153,38 @@ namespace StoreAssistantPro.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BrandId1")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("HSNCode")
                         .HasMaxLength(8)
                         .HasColumnType("nvarchar(8)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsTaxInclusive")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MaxStockLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinStockLevel")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -150,7 +205,22 @@ namespace StoreAssistantPro.Data.Migrations
                     b.Property<int?>("TaxProfileId")
                         .HasColumnType("int");
 
+                    b.Property<string>("UOM")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("pcs");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Barcode")
+                        .IsUnique()
+                        .HasFilter("[Barcode] IS NOT NULL");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("BrandId1");
 
                     b.HasIndex("HSNCode");
 
@@ -167,6 +237,10 @@ namespace StoreAssistantPro.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CashierRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -182,6 +256,11 @@ namespace StoreAssistantPro.Data.Migrations
 
                     b.Property<Guid>("IdempotencyKey")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -381,10 +460,21 @@ namespace StoreAssistantPro.Data.Migrations
 
             modelBuilder.Entity("StoreAssistantPro.Models.Product", b =>
                 {
+                    b.HasOne("StoreAssistantPro.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("StoreAssistantPro.Models.Brand", null)
+                        .WithMany("Products")
+                        .HasForeignKey("BrandId1");
+
                     b.HasOne("StoreAssistantPro.Models.TaxProfile", "TaxProfile")
                         .WithMany()
                         .HasForeignKey("TaxProfileId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Brand");
 
                     b.Navigation("TaxProfile");
                 });
@@ -425,6 +515,11 @@ namespace StoreAssistantPro.Data.Migrations
                     b.Navigation("TaxMaster");
 
                     b.Navigation("TaxProfile");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.Brand", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.Sale", b =>

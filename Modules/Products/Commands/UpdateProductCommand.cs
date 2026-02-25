@@ -9,10 +9,13 @@ public sealed record UpdateProductCommand(
     decimal CostPrice,
     int Quantity,
     int? TaxProfileId,
+    int? BrandId,
     string? HSNCode,
     string? Barcode,
     string UOM,
     int MinStockLevel,
+    int MaxStockLevel,
     bool IsActive,
     bool IsTaxInclusive,
+    string? Color,
     byte[]? RowVersion) : ICommandRequest<Unit>;

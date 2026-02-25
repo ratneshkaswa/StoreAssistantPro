@@ -8,9 +8,12 @@ public sealed record SaveProductCommand(
     decimal CostPrice,
     int Quantity,
     int? TaxProfileId,
+    int? BrandId,
     string? HSNCode,
     string? Barcode,
     string UOM,
     int MinStockLevel,
+    int MaxStockLevel,
     bool IsActive,
-    bool IsTaxInclusive) : ICommandRequest<Unit>;
+    bool IsTaxInclusive,
+    string? Color) : ICommandRequest<Unit>;

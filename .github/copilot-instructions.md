@@ -78,6 +78,8 @@ These eight systems are frozen. Extend through existing interfaces only:
 
 ## Feature Catalogue
 
+> **Full catalogue**: [`FEATURE_CATALOGUE.md`](../FEATURE_CATALOGUE.md) — all 948 features with status.
+
 ### Core Features
 
 - **Total Unique Features**: 948
@@ -86,10 +88,10 @@ These eight systems are frozen. Extend through existing interfaces only:
 
 ### Current Progress
 
-- **Features Built**: 3 (CostPrice, Barcode, UOM) out of 948 total.
+- **Features Built**: 241 out of 948 total (25.4%).
 - **Skipped Features**: 2 (MRP, SKU).
-- **Next Feature**: Feature #13 (MinStockLevel).
-- **Sprint 1 Focus**: Product model enrichment.
+- **Current Phase**: Phase 3 — Inventory & Stock Management.
+- **Next Features**: #182–#184 (Row highlights), #185+ (Stock management), #194+ (Purchase Orders).
 - **Progress Display**: Count shown as X/948, with memory updated every 10-15 features.
 
 ### Phases and Sprints

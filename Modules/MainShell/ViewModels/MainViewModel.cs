@@ -40,7 +40,9 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     private const string MainWorkspacePage = "MainWorkspace";
     private const string ProductsPage = "Products";
+    private const string BrandsPage = "Brands";
     private const string SalesPage = "Sales";
+    private const string SuppliersPage = "Suppliers";
 
     private const string FirmManagementDialog = "FirmManagement";
     private const string UserManagementDialog = "UserManagement";
@@ -307,6 +309,14 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _navigationService.NavigateTo(ProductsPage);
         _currentPage = ProductsPage;
         _statusBar.SetPersistent("Products");
+    }
+
+    [RelayCommand]
+    private void NavigateToBrands()
+    {
+        _navigationService.NavigateTo(BrandsPage);
+        _currentPage = BrandsPage;
+        _statusBar.SetPersistent("Brands");
     }
 
     [RelayCommand]

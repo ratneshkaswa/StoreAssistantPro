@@ -10,6 +10,7 @@ using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Products.Commands;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Tax.Services;
+using StoreAssistantPro.Modules.Brands.Services;
 using StoreAssistantPro.Core.Session;
 
 namespace StoreAssistantPro.Modules.Products.ViewModels;
@@ -17,13 +18,16 @@ namespace StoreAssistantPro.Modules.Products.ViewModels;
 public partial class ProductsViewModel(
     IProductService productService,
     ITaxService taxService,
+    IBrandService brandService,
     ISessionService sessionService,
     IDialogService dialogService,
     IMasterPinValidator masterPinValidator,
+    INotificationService notificationService,
     ICommandBus commandBus) : BaseViewModel
 {
     private const int PageSize = 50;
     private CancellationTokenSource? _searchCts;
+    private int _lastLowStockCount = -1;
 
     // ── Role-based access ──
 
@@ -37,7 +41,10 @@ public partial class ProductsViewModel(
     public partial ObservableCollection<Product> Products { get; set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedProduct))]
     public partial Product? SelectedProduct { get; set; }
+
+    public bool HasSelectedProduct => SelectedProduct is not null;
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
@@ -51,6 +58,54 @@ public partial class ProductsViewModel(
     public partial ActiveFilter SelectedActiveFilter { get; set; } = ActiveFilter.All;
 
     public ActiveFilter[] ActiveFilterOptions { get; } = Enum.GetValues<ActiveFilter>();
+
+    // ── Brand filter ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<BrandFilterItem> BrandFilterOptions { get; set; } = [];
+
+    [ObservableProperty]
+    public partial BrandFilterItem? SelectedBrandFilter { get; set; }
+
+    // ── Color filter ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<string> ColorFilterOptions { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string? SelectedColorFilter { get; set; }
+
+    // ── Tax Profile filter ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<TaxProfileFilterItem> TaxProfileFilterOptions { get; set; } = [];
+
+    [ObservableProperty]
+    public partial TaxProfileFilterItem? SelectedTaxProfileFilter { get; set; }
+
+    // ── UOM filter ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<string> UomFilterOptions { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string? SelectedUomFilter { get; set; }
+
+    // ── Multi-select for bulk operations ──
+
+    private IReadOnlyList<Product> _selectedProductsForBulkDelete = [];
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(BulkDeleteProductsCommand))]
+    public partial int SelectedProductCount { get; set; }
+
+    public bool CanBulkDelete => CanDeleteProducts && SelectedProductCount >= 2;
+
+    public void UpdateSelectedProducts(System.Collections.IList items)
+    {
+        _selectedProductsForBulkDelete = items.OfType<Product>().ToList();
+        SelectedProductCount = _selectedProductsForBulkDelete.Count;
+    }
 
     // ── Paging state ──
 
@@ -106,16 +161,39 @@ public partial class ProductsViewModel(
     public partial int NewProductMinStockLevel { get; set; }
 
     [ObservableProperty]
+    public partial int NewProductMaxStockLevel { get; set; }
+
+    [ObservableProperty]
     public partial bool NewProductIsActive { get; set; } = true;
 
     [ObservableProperty]
     public partial bool NewProductIsTaxInclusive { get; set; }
 
     [ObservableProperty]
+    public partial string NewProductColor { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial bool IsAddFormVisible { get; set; }
 
     [ObservableProperty]
     public partial bool IsEditFormVisible { get; set; }
+
+    // ── Stock adjustment form ──
+
+    [ObservableProperty]
+    public partial bool IsStockAdjustFormVisible { get; set; }
+
+    [ObservableProperty]
+    public partial string AdjustStockProductName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int AdjustStockCurrentQty { get; set; }
+
+    [ObservableProperty]
+    public partial int AdjustStockQty { get; set; }
+
+    [ObservableProperty]
+    public partial string AdjustStockReason { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string EditProductName { get; set; } = string.Empty;
@@ -142,10 +220,16 @@ public partial class ProductsViewModel(
     public partial int EditProductMinStockLevel { get; set; }
 
     [ObservableProperty]
+    public partial int EditProductMaxStockLevel { get; set; }
+
+    [ObservableProperty]
     public partial bool EditProductIsActive { get; set; } = true;
 
     [ObservableProperty]
     public partial bool EditProductIsTaxInclusive { get; set; }
+
+    [ObservableProperty]
+    public partial string EditProductColor { get; set; } = string.Empty;
 
     // ── Tax profile selection ──
 
@@ -157,6 +241,42 @@ public partial class ProductsViewModel(
 
     [ObservableProperty]
     public partial TaxProfile? EditProductTaxProfile { get; set; }
+
+    // ── Brand selection ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<Brand> AvailableBrands { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Brand? NewProductBrand { get; set; }
+
+    [ObservableProperty]
+    public partial Brand? EditProductBrand { get; set; }
+
+    // ── Sorting ──
+
+    [ObservableProperty]
+    public partial string? SortColumn { get; set; }
+
+    [ObservableProperty]
+    public partial bool SortDescending { get; set; }
+
+    [RelayCommand]
+    private Task SortByColumnAsync(string columnName)
+    {
+        if (string.Equals(SortColumn, columnName, StringComparison.OrdinalIgnoreCase))
+        {
+            SortDescending = !SortDescending;
+        }
+        else
+        {
+            SortColumn = columnName;
+            SortDescending = false;
+        }
+
+        PageIndex = 0;
+        return LoadProductsAsync();
+    }
 
     // ── Search (server-side with debounce) ──
 
@@ -173,6 +293,30 @@ public partial class ProductsViewModel(
     }
 
     partial void OnSelectedActiveFilterChanged(ActiveFilter value)
+    {
+        PageIndex = 0;
+        DebounceSearch();
+    }
+
+    partial void OnSelectedBrandFilterChanged(BrandFilterItem? value)
+    {
+        PageIndex = 0;
+        DebounceSearch();
+    }
+
+    partial void OnSelectedColorFilterChanged(string? value)
+    {
+        PageIndex = 0;
+        DebounceSearch();
+    }
+
+    partial void OnSelectedTaxProfileFilterChanged(TaxProfileFilterItem? value)
+    {
+        PageIndex = 0;
+        DebounceSearch();
+    }
+
+    partial void OnSelectedUomFilterChanged(string? value)
     {
         PageIndex = 0;
         DebounceSearch();
@@ -201,13 +345,31 @@ public partial class ProductsViewModel(
     [RelayCommand]
     private Task LoadProductsAsync() => RunLoadAsync(async ct =>
     {
+        if (BrandFilterOptions.Count == 0)
+            await LoadBrandFiltersAsync();
+
+        if (ColorFilterOptions.Count == 0)
+            await LoadColorFiltersAsync();
+
+        if (TaxProfileFilterOptions.Count == 0)
+            await LoadTaxProfileFiltersAsync();
+
+        if (UomFilterOptions.Count == 0)
+            await LoadUomFiltersAsync();
+
         var result = await productService.GetPagedAsync(
-            new PagedQuery(PageIndex, PageSize, SearchText, SelectedStockFilter, SelectedActiveFilter), ct);
+            new PagedQuery(PageIndex, PageSize, SearchText, SelectedStockFilter, SelectedActiveFilter,
+                SelectedBrandFilter?.BrandId, SortColumn, SortDescending,
+                SelectedColorFilter is "All Colors" ? null : SelectedColorFilter,
+                SelectedTaxProfileFilter?.TaxProfileId,
+                SelectedUomFilter is "All UOM" ? null : SelectedUomFilter), ct);
 
         Products = new ObservableCollection<Product>(result.Items);
         TotalPages = result.TotalPages;
         TotalCount = result.TotalCount;
         PageIndex = result.PageIndex;
+
+        await CheckLowStockAsync(ct);
     });
 
     [RelayCommand(CanExecute = nameof(HasNextPage))]
@@ -235,6 +397,7 @@ public partial class ProductsViewModel(
 
         ErrorMessage = string.Empty;
         await LoadTaxProfilesAsync();
+        await LoadBrandsAsync();
         NewProductName = string.Empty;
         NewProductSalePrice = 0;
         NewProductCostPrice = 0;
@@ -243,10 +406,14 @@ public partial class ProductsViewModel(
         NewProductBarcode = string.Empty;
         NewProductUOM = "pcs";
         NewProductMinStockLevel = 0;
+        NewProductMaxStockLevel = 0;
         NewProductIsActive = true;
         NewProductIsTaxInclusive = false;
+        NewProductColor = string.Empty;
         NewProductTaxProfile = AvailableTaxProfiles.FirstOrDefault(p => p.IsDefault);
+        NewProductBrand = null;
         IsEditFormVisible = false;
+        IsStockAdjustFormVisible = false;
         IsAddFormVisible = true;
     }
 
@@ -263,6 +430,7 @@ public partial class ProductsViewModel(
 
         ErrorMessage = string.Empty;
         await LoadTaxProfilesAsync();
+        await LoadBrandsAsync();
         NewProductName = SelectedProduct.Name + " (Copy)";
         NewProductSalePrice = SelectedProduct.SalePrice;
         NewProductCostPrice = SelectedProduct.CostPrice;
@@ -271,11 +439,16 @@ public partial class ProductsViewModel(
         NewProductBarcode = string.Empty;
         NewProductUOM = SelectedProduct.UOM;
         NewProductMinStockLevel = SelectedProduct.MinStockLevel;
+        NewProductMaxStockLevel = SelectedProduct.MaxStockLevel;
         NewProductIsActive = SelectedProduct.IsActive;
         NewProductIsTaxInclusive = SelectedProduct.IsTaxInclusive;
+        NewProductColor = SelectedProduct.Color ?? string.Empty;
         NewProductTaxProfile = AvailableTaxProfiles
             .FirstOrDefault(p => p.Id == SelectedProduct.TaxProfileId);
+        NewProductBrand = AvailableBrands
+            .FirstOrDefault(b => b.Id == SelectedProduct.BrandId);
         IsEditFormVisible = false;
+        IsStockAdjustFormVisible = false;
         IsAddFormVisible = true;
     }
 
@@ -296,8 +469,8 @@ public partial class ProductsViewModel(
 
         var result = await commandBus.SendAsync(new SaveProductCommand(
             NewProductName.Trim(), NewProductSalePrice, NewProductCostPrice, NewProductQuantity,
-            NewProductTaxProfile?.Id, NewProductHSNCode, NewProductBarcode, NewProductUOM,
-            NewProductMinStockLevel, NewProductIsActive, NewProductIsTaxInclusive));
+            NewProductTaxProfile?.Id, NewProductBrand?.Id, NewProductHSNCode, NewProductBarcode, NewProductUOM,
+            NewProductMinStockLevel, NewProductMaxStockLevel, NewProductIsActive, NewProductIsTaxInclusive, NewProductColor));
 
         if (result.Succeeded)
         {
@@ -323,6 +496,7 @@ public partial class ProductsViewModel(
 
         ErrorMessage = string.Empty;
         await LoadTaxProfilesAsync();
+        await LoadBrandsAsync();
         EditProductName = SelectedProduct.Name;
         EditProductSalePrice = SelectedProduct.SalePrice;
         EditProductCostPrice = SelectedProduct.CostPrice;
@@ -331,11 +505,16 @@ public partial class ProductsViewModel(
         EditProductBarcode = SelectedProduct.Barcode ?? string.Empty;
         EditProductUOM = SelectedProduct.UOM;
         EditProductMinStockLevel = SelectedProduct.MinStockLevel;
+        EditProductMaxStockLevel = SelectedProduct.MaxStockLevel;
         EditProductIsActive = SelectedProduct.IsActive;
         EditProductIsTaxInclusive = SelectedProduct.IsTaxInclusive;
+        EditProductColor = SelectedProduct.Color ?? string.Empty;
         EditProductTaxProfile = AvailableTaxProfiles
             .FirstOrDefault(p => p.Id == SelectedProduct.TaxProfileId);
+        EditProductBrand = AvailableBrands
+            .FirstOrDefault(b => b.Id == SelectedProduct.BrandId);
         IsAddFormVisible = false;
+        IsStockAdjustFormVisible = false;
         IsEditFormVisible = true;
     }
 
@@ -359,8 +538,9 @@ public partial class ProductsViewModel(
         var result = await commandBus.SendAsync(new UpdateProductCommand(
             product.Id, EditProductName.Trim(), EditProductSalePrice,
             EditProductCostPrice, EditProductQuantity, EditProductTaxProfile?.Id,
-            EditProductHSNCode, EditProductBarcode, EditProductUOM,
-            EditProductMinStockLevel, EditProductIsActive, EditProductIsTaxInclusive, product.RowVersion));
+            EditProductBrand?.Id, EditProductHSNCode, EditProductBarcode, EditProductUOM,
+            EditProductMinStockLevel, EditProductMaxStockLevel, EditProductIsActive, EditProductIsTaxInclusive,
+            EditProductColor, product.RowVersion));
 
         if (result.Succeeded)
         {
@@ -413,11 +593,136 @@ public partial class ProductsViewModel(
         }
     }
 
+    // ── Stock adjustment ──
+
+    [RelayCommand]
+    private void ShowStockAdjustForm()
+    {
+        if (SelectedProduct is null) return;
+
+        if (!CanManageProducts)
+        {
+            ErrorMessage = "Only administrators and managers can adjust stock.";
+            return;
+        }
+
+        ErrorMessage = string.Empty;
+        AdjustStockProductName = SelectedProduct.Name;
+        AdjustStockCurrentQty = SelectedProduct.Quantity;
+        AdjustStockQty = 0;
+        AdjustStockReason = string.Empty;
+        IsAddFormVisible = false;
+        IsEditFormVisible = false;
+        IsStockAdjustFormVisible = true;
+    }
+
+    [RelayCommand]
+    private void CancelStockAdjust()
+    {
+        IsStockAdjustFormVisible = false;
+    }
+
+    [RelayCommand]
+    private async Task SaveStockAdjustAsync()
+    {
+        if (!Validate(v => v
+            .Rule(SelectedProduct is not null, "No product selected.")
+            .Rule(AdjustStockQty != 0, "Adjustment quantity cannot be zero.")))
+            return;
+
+        var product = SelectedProduct!;
+        var result = await commandBus.SendAsync(new AdjustStockCommand(
+            product.Id, AdjustStockQty,
+            string.IsNullOrWhiteSpace(AdjustStockReason) ? null : AdjustStockReason.Trim(),
+            product.RowVersion));
+
+        if (result.Succeeded)
+        {
+            IsStockAdjustFormVisible = false;
+            await LoadProductsAsync();
+        }
+        else
+        {
+            ErrorMessage = result.ErrorMessage ?? "Stock adjustment failed.";
+            await LoadProductsAsync();
+        }
+    }
+
     private async Task LoadTaxProfilesAsync()
     {
         var profiles = await taxService.GetAllProfilesAsync();
         AvailableTaxProfiles = new ObservableCollection<TaxProfile>(
             profiles.Where(p => p.IsActive));
+    }
+
+    private async Task LoadBrandsAsync()
+    {
+        var brands = await brandService.GetAllAsync();
+        AvailableBrands = new ObservableCollection<Brand>(
+            brands.Where(b => b.IsActive));
+    }
+
+    private async Task LoadBrandFiltersAsync()
+    {
+        var brands = await brandService.GetAllAsync();
+        var items = new List<BrandFilterItem> { new(null, "All Brands") };
+        items.AddRange(brands
+            .Where(b => b.IsActive)
+            .Select(b => new BrandFilterItem(b.Id, b.Name)));
+        BrandFilterOptions = new ObservableCollection<BrandFilterItem>(items);
+        SelectedBrandFilter ??= BrandFilterOptions[0];
+    }
+
+    private async Task LoadColorFiltersAsync()
+    {
+        var allProducts = await productService.GetAllAsync();
+        var colors = allProducts
+            .Where(p => !string.IsNullOrWhiteSpace(p.Color))
+            .Select(p => p.Color!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(c => c)
+            .ToList();
+        colors.Insert(0, "All Colors");
+        ColorFilterOptions = new ObservableCollection<string>(colors);
+        SelectedColorFilter ??= ColorFilterOptions[0];
+    }
+
+    private async Task LoadTaxProfileFiltersAsync()
+    {
+        var profiles = await taxService.GetAllProfilesAsync();
+        var items = new List<TaxProfileFilterItem> { new(null, "All Tax Profiles") };
+        items.AddRange(profiles
+            .Where(p => p.IsActive)
+            .Select(p => new TaxProfileFilterItem(p.Id, p.ProfileName)));
+        TaxProfileFilterOptions = new ObservableCollection<TaxProfileFilterItem>(items);
+        SelectedTaxProfileFilter ??= TaxProfileFilterOptions[0];
+    }
+
+    private async Task LoadUomFiltersAsync()
+    {
+        var allProducts = await productService.GetAllAsync();
+        var uoms = allProducts
+            .Select(p => p.UOM)
+            .Where(u => !string.IsNullOrWhiteSpace(u))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(u => u)
+            .ToList();
+        uoms.Insert(0, "All UOM");
+        UomFilterOptions = new ObservableCollection<string>(uoms);
+        SelectedUomFilter ??= UomFilterOptions[0];
+    }
+
+    private async Task CheckLowStockAsync(CancellationToken ct)
+    {
+        var count = await productService.GetLowStockCountAsync(ct);
+        if (count != _lastLowStockCount && count > 0)
+        {
+            await notificationService.PostAsync(
+                "Low Stock Alert",
+                $"⚠ {count} product{(count == 1 ? " is" : "s are")} below minimum stock level.",
+                AppNotificationLevel.Warning);
+        }
+        _lastLowStockCount = count;
     }
 
     [RelayCommand]
@@ -473,7 +778,7 @@ public partial class ProductsViewModel(
         {
             var allProducts = await productService.GetAllAsync();
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("Name,SalePrice,CostPrice,Quantity,HSNCode,Barcode,UOM,MinStockLevel,IsActive,IsTaxInclusive");
+            sb.AppendLine("Name,SalePrice,CostPrice,Quantity,HSNCode,Barcode,UOM,MinStockLevel,MaxStockLevel,IsActive,IsTaxInclusive,Brand,Color");
 
             foreach (var p in allProducts)
             {
@@ -486,8 +791,11 @@ public partial class ProductsViewModel(
                     EscapeCsv(p.Barcode ?? ""),
                     EscapeCsv(p.UOM),
                     p.MinStockLevel,
+                    p.MaxStockLevel,
                     p.IsActive,
-                    p.IsTaxInclusive));
+                    p.IsTaxInclusive,
+                    EscapeCsv(p.Brand?.Name ?? ""),
+                    EscapeCsv(p.Color ?? "")));
             }
 
             await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
@@ -503,4 +811,111 @@ public partial class ProductsViewModel(
         value.Contains(',') || value.Contains('"') || value.Contains('\n')
             ? $"\"{value.Replace("\"", "\"\"")}\""
             : value;
+
+    [RelayCommand]
+    private async Task ExportLowStockAsync()
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            Title = "Export Low Stock Products to CSV",
+            FileName = "LowStock_Export.csv"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var allProducts = await productService.GetAllAsync();
+            var lowStock = allProducts.Where(p => p.IsActive && p.IsLowStock).ToList();
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Name,SalePrice,CostPrice,Quantity,MinStockLevel,Barcode,UOM,Brand,Color");
+
+            foreach (var p in lowStock)
+            {
+                sb.AppendLine(string.Join(",",
+                    EscapeCsv(p.Name),
+                    p.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    p.CostPrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    p.Quantity,
+                    p.MinStockLevel,
+                    EscapeCsv(p.Barcode ?? ""),
+                    EscapeCsv(p.UOM),
+                    EscapeCsv(p.Brand?.Name ?? ""),
+                    EscapeCsv(p.Color ?? "")));
+            }
+
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, sb.ToString());
+            ErrorMessage = $"Exported {lowStock.Count} low-stock products to {System.IO.Path.GetFileName(dialog.FileName)}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanBulkDelete))]
+    private async Task BulkDeleteProductsAsync()
+    {
+        ErrorMessage = string.Empty;
+
+        if (_selectedProductsForBulkDelete.Count < 2) return;
+
+        if (!CanDeleteProducts)
+        {
+            ErrorMessage = "Only administrators can delete products.";
+            return;
+        }
+
+        if (!dialogService.Confirm(
+            $"Delete {_selectedProductsForBulkDelete.Count} products?\n\nThis action cannot be undone.",
+            "Bulk Delete Products"))
+            return;
+
+        if (!await masterPinValidator.ValidateAsync("Enter Master PIN to bulk-delete products."))
+        {
+            ErrorMessage = "Master PIN validation failed. Bulk delete cancelled.";
+            return;
+        }
+
+        var items = _selectedProductsForBulkDelete
+            .Select(p => new BulkDeleteItem(p.Id, p.Name, p.RowVersion))
+            .ToList();
+
+        var result = await commandBus.SendAsync<BulkDeleteProductsCommand, BulkDeleteProductsResult>(
+            new BulkDeleteProductsCommand(items));
+
+        if (result.Succeeded && result.Value is { } bulkResult)
+        {
+            var msg = $"Deleted {bulkResult.Deleted} products.";
+            if (bulkResult.Failed > 0)
+                msg += $" {bulkResult.Failed} could not be deleted (modified by another user): {string.Join(", ", bulkResult.FailedNames)}.";
+            ErrorMessage = msg;
+            SelectedProduct = null;
+            await LoadProductsAsync();
+        }
+        else
+        {
+            ErrorMessage = result.ErrorMessage ?? "Bulk delete failed.";
+            await LoadProductsAsync();
+        }
+    }
+}
+
+/// <summary>
+/// Item for the brand filter dropdown. <c>BrandId == null</c> means "All Brands".
+/// </summary>
+public sealed record BrandFilterItem(int? BrandId, string DisplayName)
+{
+    public override string ToString() => DisplayName;
+}
+
+/// <summary>
+/// Item for the tax profile filter dropdown. <c>TaxProfileId == null</c> means "All Tax Profiles".
+/// </summary>
+public sealed record TaxProfileFilterItem(int? TaxProfileId, string DisplayName)
+{
+    public override string ToString() => DisplayName;
 }

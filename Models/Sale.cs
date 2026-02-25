@@ -5,6 +5,14 @@ namespace StoreAssistantPro.Models;
 public class Sale
 {
     public int Id { get; set; }
+
+    /// <summary>
+    /// Human-readable invoice number (e.g., INV-20250101-0001).
+    /// Generated at sale creation time.
+    /// </summary>
+    [MaxLength(30)]
+    public string InvoiceNumber { get; set; } = string.Empty;
+
     public DateTime SaleDate { get; set; }
     public decimal TotalAmount { get; set; }
 
@@ -39,8 +47,29 @@ public class Sale
     [MaxLength(200)]
     public string? DiscountReason { get; set; }
 
+
+    /// <summary>
+    /// Optional payment reference/transaction ID for digital payments.
+    /// </summary>
+    [MaxLength(100)]
+    public string? PaymentReference { get; set; }
+
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 
     public ICollection<SaleItem> Items { get; set; } = [];
+
+    /// <summary>
+    /// Summary of item names for tooltip display.
+    /// </summary>
+    public string ItemsSummary => Items.Count == 0
+        ? "No items"
+        : string.Join("\n", Items.Select(i => $"{i.Product?.Name ?? "?"} ×{i.Quantity}"));
+
+    /// <summary>
+    /// Human-readable discount summary for detail panel display.
+    /// </summary>
+    public string DiscountSummary => DiscountType == DiscountType.None
+        ? string.Empty
+        : $"{DiscountType}: {DiscountValue}{(DiscountType == DiscountType.Percentage ? "%" : "")} = −{DiscountAmount:C}{(string.IsNullOrEmpty(DiscountReason) ? "" : $" ({DiscountReason})")}";
 }

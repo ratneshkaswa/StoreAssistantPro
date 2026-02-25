@@ -20,7 +20,7 @@ public class DashboardSummaryViewModelTests
     {
         // Default stubs so the constructor's RefreshStatsAsync doesn't throw
         _dashboardService.GetSummaryAsync().Returns(
-            new DashboardSummary(10, 2, 500m, 5, [], []));
+            new DashboardSummary(10, 2, 0, 0, 0m, 0m, 500m, 5, 100m, [], [], [], [], [], 0m, [], []));
         _appState.Notifications.Returns(new ObservableCollection<AppNotification>());
     }
 
@@ -149,7 +149,7 @@ public class DashboardSummaryViewModelTests
     public async Task RefreshStats_PopulatesProperties()
     {
         _dashboardService.GetSummaryAsync().Returns(
-            new DashboardSummary(42, 3, 1250.50m, 15, [], []));
+            new DashboardSummary(42, 3, 1, 0, 5000m, 0m, 1250.50m, 15, 83.37m, [], [], [], [], [], 0m, [], []));
 
         var sut = CreateSut();
         await sut.RefreshStatsAsync();

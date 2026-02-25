@@ -7,6 +7,8 @@
              xmlns:shellViews="clr-namespace:StoreAssistantPro.Modules.MainShell.Views"
              xmlns:productsVm="clr-namespace:StoreAssistantPro.Modules.Products.ViewModels"
              xmlns:productsViews="clr-namespace:StoreAssistantPro.Modules.Products.Views"
+             xmlns:brandsVm="clr-namespace:StoreAssistantPro.Modules.Brands.ViewModels"
+             xmlns:brandsViews="clr-namespace:StoreAssistantPro.Modules.Brands.Views"
              xmlns:salesVm="clr-namespace:StoreAssistantPro.Modules.Sales.ViewModels"
              xmlns:salesViews="clr-namespace:StoreAssistantPro.Modules.Sales.Views"
              xmlns:settingsVm="clr-namespace:StoreAssistantPro.Modules.SystemSettings.ViewModels"
@@ -38,6 +40,11 @@
         <!-- Products module -->
         <DataTemplate DataType="{x:Type productsVm:ProductsViewModel}">
             <productsViews:ProductsView/>
+        </DataTemplate>
+
+        <!-- Brands module -->
+        <DataTemplate DataType="{x:Type brandsVm:BrandsViewModel}">
+            <brandsViews:BrandsView/>
         </DataTemplate>
 
         <!-- Sales module -->

@@ -77,6 +77,12 @@ public partial class DashboardSummaryViewModel : ObservableObject, IDisposable
     public partial int LowStockCount { get; set; }
 
     [ObservableProperty]
+    public partial int OutOfStockCount { get; set; }
+
+    [ObservableProperty]
+    public partial decimal InventoryValue { get; set; }
+
+    [ObservableProperty]
     public partial decimal TodaysSales { get; set; }
 
     [ObservableProperty]
@@ -127,6 +133,8 @@ public partial class DashboardSummaryViewModel : ObservableObject, IDisposable
             var summary = await _dashboardService.GetSummaryAsync();
             ProductCount = summary.TotalProducts;
             LowStockCount = summary.LowStockCount;
+            OutOfStockCount = summary.OutOfStockCount;
+            InventoryValue = summary.InventoryValue;
             TodaysSales = summary.TodaysSales;
             TodaysTransactions = summary.TodaysTransactions;
         }

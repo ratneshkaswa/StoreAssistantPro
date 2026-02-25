@@ -31,6 +31,9 @@ public class Product
     public int? TaxProfileId { get; set; }
     public TaxProfile? TaxProfile { get; set; }
 
+    public int? BrandId { get; set; }
+    public Brand? Brand { get; set; }
+
     /// <summary>
     /// When <c>true</c>, <see cref="Price"/> includes tax and the tax amount
     /// must be back-calculated. When <c>false</c> (default), <see cref="Price"/>
@@ -57,9 +60,54 @@ public class Product
     public int MinStockLevel { get; set; }
 
     /// <summary>
+    /// <c>true</c> when <see cref="Quantity"/> is at or below <see cref="MinStockLevel"/>
+    /// and MinStockLevel is configured (greater than zero).
+    /// </summary>
+    public bool IsLowStock => MinStockLevel > 0 && Quantity <= MinStockLevel;
+
+    /// <summary>
+    /// Computed stock value at cost: <see cref="CostPrice"/> × <see cref="Quantity"/>.
+    /// </summary>
+    public decimal StockValue => CostPrice * Quantity;
+
+    /// <summary>
+    /// Computed margin per unit: <see cref="SalePrice"/> − <see cref="CostPrice"/>.
+    /// </summary>
+    public decimal Margin => SalePrice - CostPrice;
+
+    /// <summary>
+    /// Computed margin percentage: (SalePrice − CostPrice) / SalePrice × 100.
+    /// Returns 0 when SalePrice is zero.
+    /// </summary>
+    public decimal MarginPercent => SalePrice > 0 ? Math.Round((SalePrice - CostPrice) / SalePrice * 100, 1) : 0;
+
+    /// <summary>
+    /// Computed retail value: <see cref="SalePrice"/> × <see cref="Quantity"/>.
+    /// </summary>
+    public decimal RetailValue => SalePrice * Quantity;
+
+    /// <summary>
+    /// <c>true</c> when <see cref="Quantity"/> exceeds <see cref="MaxStockLevel"/>
+    /// and MaxStockLevel is configured (greater than zero).
+    /// </summary>
+    public bool IsOverStock => MaxStockLevel > 0 && Quantity > MaxStockLevel;
+
+    /// <summary>
+    /// Maximum stock level (overstock threshold). 0 means unlimited.
+    /// </summary>
+    [Range(0, int.MaxValue)]
+    public int MaxStockLevel { get; set; }
+
+    /// <summary>
     /// When <c>false</c>, the product is hidden from billing and stock operations.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Product color (e.g., Red, Blue, Multi). Essential for clothing retail.
+    /// </summary>
+    [MaxLength(50)]
+    public string? Color { get; set; }
 
     [Timestamp]
     public byte[]? RowVersion { get; set; }

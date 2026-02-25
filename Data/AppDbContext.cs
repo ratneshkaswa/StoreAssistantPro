@@ -13,7 +13,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<TaxMaster> TaxMasters => Set<TaxMaster>();
     public DbSet<TaxProfile> TaxProfiles => Set<TaxProfile>();
     public DbSet<TaxProfileItem> TaxProfileItems => Set<TaxProfileItem>();
+    public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<BillingSession> BillingSessions => Set<BillingSession>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +38,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(p => p.TaxProfile)
                   .WithMany()
                   .HasForeignKey(p => p.TaxProfileId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(p => p.Brand)
+                  .WithMany()
+                  .HasForeignKey(p => p.BrandId)
                   .OnDelete(DeleteBehavior.SetNull);
         });
 
@@ -79,6 +87,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(i => new { i.TaxProfileId, i.TaxMasterId }).IsUnique();
         });
 
+        modelBuilder.Entity<Brand>(entity =>
+        {
+            entity.HasIndex(b => b.Name).IsUnique();
+        });
+
         modelBuilder.Entity<BillingSession>(entity =>
         {
             entity.HasIndex(b => b.SessionId).IsUnique();
@@ -89,6 +102,36 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(b => b.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.HasIndex(s => s.Name);
+            entity.HasIndex(s => s.GSTIN).HasFilter("[GSTIN] IS NOT NULL");
+        });
+
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.Property(p => p.OrderNumber).HasMaxLength(30);
+            entity.HasIndex(p => p.OrderNumber).IsUnique();
+            entity.HasIndex(p => p.OrderDate);
+            entity.HasOne(p => p.Supplier)
+                  .WithMany()
+                  .HasForeignKey(p => p.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PurchaseOrderItem>(entity =>
+        {
+            entity.Property(i => i.UnitCost).HasColumnType("decimal(18,2)");
+            entity.HasOne(i => i.PurchaseOrder)
+                  .WithMany(p => p.Items)
+                  .HasForeignKey(i => i.PurchaseOrderId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.Product)
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

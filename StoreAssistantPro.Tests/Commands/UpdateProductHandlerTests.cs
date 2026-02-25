@@ -18,7 +18,7 @@ public class UpdateProductHandlerTests
         _productService.GetByIdAsync(1).Returns(existing);
 
         var result = await CreateSut().HandleAsync(
-            new UpdateProductCommand(1, "New", 10m, 0m, 20, null, null, null, "pcs", 0, true, false, [1, 2]));
+            new UpdateProductCommand(1, "New", 10m, 0m, 20, null, null, null, null, "pcs", 0, 0, true, false, null, [1, 2]));
 
         Assert.True(result.Succeeded);
         await _productService.Received(1).UpdateAsync(Arg.Is<Product>(p =>
@@ -31,7 +31,7 @@ public class UpdateProductHandlerTests
         _productService.GetByIdAsync(99).Returns((Product?)null);
 
         var result = await CreateSut().HandleAsync(
-            new UpdateProductCommand(99, "X", 1m, 0m, 1, null, null, null, "pcs", 0, true, false, null));
+            new UpdateProductCommand(99, "X", 1m, 0m, 1, null, null, null, null, "pcs", 0, 0, true, false, null, null));
 
         Assert.False(result.Succeeded);
         Assert.Equal("Product not found.", result.ErrorMessage);
@@ -47,7 +47,7 @@ public class UpdateProductHandlerTests
             .Returns(Task.FromException(new InvalidOperationException("Concurrency")));
 
         var result = await CreateSut().HandleAsync(
-            new UpdateProductCommand(1, "P2", 2m, 0m, 2, null, null, null, "pcs", 0, true, false, null));
+            new UpdateProductCommand(1, "P2", 2m, 0m, 2, null, null, null, null, "pcs", 0, 0, true, false, null, null));
 
         Assert.False(result.Succeeded);
         Assert.Equal("Concurrency", result.ErrorMessage);

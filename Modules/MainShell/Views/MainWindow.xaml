@@ -32,10 +32,14 @@
                           InputGestureText="Ctrl+P"
                           h:SmartTooltip.ContextKey="Products"
                           Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="_Brands" Command="{Binding NavigateToBrandsCommand}"
+                          h:SmartTooltip.ContextKey="Brands"
+                          Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
                 <MenuItem Header="_Sales" Command="{Binding NavigateToSalesCommand}"
                           InputGestureText="Ctrl+S"
                           h:SmartTooltip.ContextKey="NewBill"
                           Visibility="{Binding IsSalesEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="S_uppliers" Command="{Binding NavigateToSuppliersCommand}"/>
                 <Separator/>
                 <MenuItem Header="_Logout" Command="{Binding LogoutCommand}"
                           InputGestureText="Ctrl+L"
@@ -50,10 +54,14 @@
                           InputGestureText="Ctrl+P"
                           h:SmartTooltip.ContextKey="Products"
                           Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Brands" Command="{Binding NavigateToBrandsCommand}"
+                          h:SmartTooltip.ContextKey="Brands"
+                          Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
                 <MenuItem Header="Sales History" Command="{Binding NavigateToSalesCommand}"
                           InputGestureText="Ctrl+S"
                           h:SmartTooltip.ContextKey="NewBill"
                           Visibility="{Binding IsSalesEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Suppliers" Command="{Binding NavigateToSuppliersCommand}"/>
             </MenuItem>
 
             <MenuItem Header="_Tools">
@@ -543,6 +551,12 @@
                     <TextBlock Text="⚠" Margin="{StaticResource StatusBarStatGap}"/>
                     <TextBlock Text="{Binding DashboardSummary.LowStockCount}"
                                Foreground="{StaticResource FluentKpiOrange}" FontWeight="SemiBold"/>
+                    <TextBlock Text="🚫" Margin="{StaticResource StatusBarStatGap}"/>
+                    <TextBlock Text="{Binding DashboardSummary.OutOfStockCount}"
+                               Foreground="{StaticResource FluentKpiRed}" FontWeight="SemiBold"/>
+                    <TextBlock Text="🏷" Margin="{StaticResource StatusBarStatGap}"/>
+                    <TextBlock Text="{Binding DashboardSummary.InventoryValue, StringFormat=C}"
+                               Foreground="{StaticResource FluentKpiTeal}" FontWeight="SemiBold"/>
                     <TextBlock Text="💰" Margin="{StaticResource StatusBarStatGap}"/>
                     <TextBlock Text="{Binding DashboardSummary.TodaysSales, StringFormat=C}"
                                Foreground="{StaticResource FluentKpiBlue}" FontWeight="SemiBold"/>

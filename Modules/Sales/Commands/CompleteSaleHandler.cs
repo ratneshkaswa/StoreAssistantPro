@@ -42,6 +42,7 @@ public class CompleteSaleHandler(
         var sale = new Sale
         {
             IdempotencyKey = command.IdempotencyKey,
+            InvoiceNumber = GenerateInvoiceNumber(regional.Now),
             SaleDate = regional.Now,
             TotalAmount = summary.FinalAmount,
             PaymentMethod = command.PaymentMethod,
@@ -105,4 +106,7 @@ public class CompleteSaleHandler(
             new SaleQueuedOfflineEvent(command.IdempotencyKey, summary.FinalAmount));
         return CommandResult.Success();
     }
+
+    private static string GenerateInvoiceNumber(DateTime now) =>
+        $"INV-{now:yyyyMMdd}-{now:HHmmss}-{Guid.NewGuid().ToString("N")[..4].ToUpperInvariant()}";
 }

@@ -38,8 +38,8 @@ public class SalesService(
 
         var pageIndex = Math.Clamp(query.PageIndex, 0, Math.Max(0, totalPages - 1));
 
-        var items = await q
-            .OrderByDescending(s => s.SaleDate)
+        var sorted = ApplySort(q, query.SortColumn, query.SortDescending);
+        var items = await sorted
             .Skip(pageIndex * query.PageSize)
             .Take(query.PageSize)
             .ToListAsync(ct)
@@ -93,6 +93,7 @@ public class SalesService(
         var newSale = new Sale
         {
             IdempotencyKey = sale.IdempotencyKey,
+            InvoiceNumber = sale.InvoiceNumber,
             SaleDate = sale.SaleDate,
             TotalAmount = sale.TotalAmount,
             PaymentMethod = sale.PaymentMethod,
@@ -155,5 +156,20 @@ public class SalesService(
             .OrderByDescending(s => s.SaleDate)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+    }
+
+    private static IOrderedQueryable<Sale> ApplySort(IQueryable<Sale> query, string? sortColumn, bool descending)
+    {
+        return sortColumn?.ToLowerInvariant() switch
+        {
+            "id" => descending ? query.OrderByDescending(s => s.Id) : query.OrderBy(s => s.Id),
+            "invoicenumber" => descending ? query.OrderByDescending(s => s.InvoiceNumber) : query.OrderBy(s => s.InvoiceNumber),
+            "saledate" => descending ? query.OrderByDescending(s => s.SaleDate) : query.OrderBy(s => s.SaleDate),
+            "totalamount" => descending ? query.OrderByDescending(s => s.TotalAmount) : query.OrderBy(s => s.TotalAmount),
+            "paymentmethod" => descending ? query.OrderByDescending(s => s.PaymentMethod) : query.OrderBy(s => s.PaymentMethod),
+            "cashierrole" => descending ? query.OrderByDescending(s => s.CashierRole) : query.OrderBy(s => s.CashierRole),
+            "itemcount" => descending ? query.OrderByDescending(s => s.Items.Count) : query.OrderBy(s => s.Items.Count),
+            _ => query.OrderByDescending(s => s.SaleDate)
+        };
     }
 }

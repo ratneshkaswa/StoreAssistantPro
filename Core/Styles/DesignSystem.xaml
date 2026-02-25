@@ -103,6 +103,10 @@
     <SolidColorBrush x:Key="FluentKpiBlueMuted"        Color="#D6EBFF"/>
     <SolidColorBrush x:Key="FluentKpiPurple"           Color="#7719AA"/>
     <SolidColorBrush x:Key="FluentKpiPurpleMuted"      Color="#F0E6FA"/>
+    <SolidColorBrush x:Key="FluentKpiRed"              Color="#C42B1C"/>
+    <SolidColorBrush x:Key="FluentKpiRedMuted"         Color="#FDE7E9"/>
+    <SolidColorBrush x:Key="FluentKpiTeal"             Color="#0E7A6B"/>
+    <SolidColorBrush x:Key="FluentKpiTealMuted"        Color="#D1F0EB"/>
 
 
     <!-- ═══════════════════════════════════════════════════════════════

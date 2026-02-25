@@ -30,4 +30,30 @@ public partial class ProductsView : UserControl
             vm.ShowEditFormCommand.Execute(null);
         }
     }
+
+    /// <summary>Sync DataGrid multi-select to ViewModel for bulk operations.</summary>
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is ProductsViewModel vm && sender is DataGrid grid)
+        {
+            vm.UpdateSelectedProducts(grid.SelectedItems);
+        }
+    }
+
+    /// <summary>Route column-header sort clicks to ViewModel server-side sort.</summary>
+    private void OnSorting(object sender, DataGridSortingEventArgs e)
+    {
+        e.Handled = true;
+
+        if (DataContext is ProductsViewModel vm
+            && e.Column.SortMemberPath is { Length: > 0 } sortPath
+            && vm.SortByColumnCommand.CanExecute(sortPath))
+        {
+            vm.SortByColumnCommand.Execute(sortPath);
+
+            e.Column.SortDirection = vm.SortDescending
+                ? System.ComponentModel.ListSortDirection.Descending
+                : System.ComponentModel.ListSortDirection.Ascending;
+        }
+    }
 }
