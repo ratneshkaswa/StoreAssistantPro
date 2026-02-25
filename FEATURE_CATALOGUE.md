@@ -1,1253 +1,818 @@
-# StoreAssistantPro — Feature Catalogue (948 Features)
+# StoreAssistantPro — Complete Feature Catalogue (948 Features)
 
-> **Indian Clothing Retail Desktop POS** · .NET 10 · WPF · MVVM
->
-> 470 Core Features (6 Phases / 28 Sprints) + 478 Expansion Features (22 Gates)
->
-> Status: ✅ Done · ⏭ Skipped · ⏳ Pending
+> **470 Core Features** (6 phases / 28 sprints) + **478 Expansion Features** (22 gates)
 
 ---
 
-## Phase 1 — Foundation & Product Model
+## PART A: CORE FEATURES (470)
 
-### Sprint 1: Product Model Enrichment (Window: Products)
+### Phase 1: Product Foundation (Sprint 1–5) — 95 features
 
-| # | Feature | Status |
-|---|---|---|
-| 1 | Product: CostPrice field | ✅ |
-| 2 | Product: Barcode field | ✅ |
-| 3 | Product: UOM field (unit of measure) | ✅ |
-| 4 | Product: MRP field (maximum retail price) | ⏭ |
-| 5 | Product: SKU field (stock keeping unit) | ⏭ |
-| 6 | Product: HSN Code field (tax classification) | ✅ |
-| 7 | Product: IsActive toggle (soft delete) | ✅ |
-| 8 | Product: IsTaxInclusive flag | ✅ |
-| 9 | Product: Color field | ✅ |
-| 10 | Product: SalePrice field | ✅ |
-| 11 | Product: Quantity field | ✅ |
-| 12 | Product: BrandId foreign key | ✅ |
-| 13 | Product: MinStockLevel field | ✅ |
-| 14 | Product: MaxStockLevel field | ✅ |
-| 15 | Product: IsLowStock computed property | ✅ |
-| 16 | Product: IsOverStock computed property | ✅ |
-| 17 | Product: StockValue computed (CostPrice × Qty) | ✅ |
-| 18 | Product: TaxProfileId foreign key | ✅ |
-| 19 | Product: RowVersion concurrency token | ✅ |
-| 20 | Product: Margin computed (SalePrice − CostPrice) | ✅ |
+#### Sprint 1: Product Model Enrichment (Window: ProductsView) — 27 features
 
-### Sprint 2: Product Management UX (Window: Products)
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 1 | Product Name | P0 | Required text field, max 200 chars |
+| 2 | Sale Price | P0 | Decimal price shown to customer |
+| 3 | Quantity | P0 | Integer stock count |
+| 4 | Tax Profile FK | P0 | Link product to a GST tax profile |
+| 5 | HSN Code | P0 | 4-8 digit Harmonized System code for GST invoices |
+| 6 | Tax Inclusive flag | P0 | Whether sale price includes or excludes tax |
+| 7 | RowVersion (concurrency) | P0 | Optimistic concurrency via EF timestamp |
+| 8 | Cost Price | P0 | Purchase/landing cost for margin calculation |
+| 9 | MRP (Maximum Retail Price) | P0 | Legal max price printed on product (Indian regulation) |
+| 10 | SKU / Item Code | P0 | Unique store-assigned product code |
+| 11 | Barcode | P0 | EAN-13 / Code128 barcode string, unique index |
+| 12 | Unit of Measurement | P1 | pcs, meters, sets, pairs, dozen — editable ComboBox |
+| 13 | Minimum Stock Level | P1 | Reorder point; triggers low-stock alerts |
+| 14 | Active/Inactive toggle | P1 | Hide inactive products from billing |
+| 15 | Description / Notes | P2 | Free-text notes, max 500 chars |
+| 16 | Product Image path | P2 | File path to product photo |
+| 17 | Created / Modified date | P2 | Auto-set timestamps using IST |
+| 18 | Duplicate / Clone product | P1 | Prefill Add form from selected product |
+| 19 | Search by Barcode | P0 | Extend search to match barcode field |
+| 20 | Search by SKU | P0 | Extend search to match SKU field |
+| 21 | Filter by Category | P1 | Dropdown filter in toolbar (depends on #30) |
+| 22 | Filter by Brand | P1 | Dropdown filter in toolbar (depends on #32) |
+| 23 | Filter by Stock Status | P1 | All / In Stock / Low Stock / Out of Stock |
+| 24 | Filter by Active/Inactive | P1 | All / Active Only / Inactive Only |
+| 25 | Sale Price ≤ MRP enforcement | P1 | Validation rule preventing price above MRP |
+| 26 | Bulk Import (CSV) | P1 | Parse CSV, bulk-insert products |
+| 27 | Bulk Export (CSV) | P1 | Export all products to CSV file |
 
-| # | Feature | Status |
-|---|---|---|
-| 21 | Products: Inline Add form | ✅ |
-| 22 | Products: Inline Edit form | ✅ |
-| 23 | Products: Delete with Master PIN | ✅ |
-| 24 | Products: Bulk Delete command | ✅ |
-| 25 | Products: Duplicate/Clone product | ✅ |
-| 26 | Products: Stock Adjustment form | ✅ |
-| 27 | Products: Search by name/barcode/HSN | ✅ |
-| 28 | Products: Stock filter (All/Low/Normal/Out) | ✅ |
-| 29 | Products: Active filter (All/Active/Inactive) | ✅ |
-| 30 | Products: Brand filter ComboBox | ✅ |
-| 31 | Products: Color filter ComboBox | ✅ |
-| 32 | Products: Tax Profile filter ComboBox | ✅ |
-| 33 | Products: UOM filter ComboBox | ✅ |
-| 34 | Products: Server-side paging | ✅ |
-| 35 | Products: Server-side sorting | ✅ |
-| 36 | Products: Import from CSV | ✅ |
-| 37 | Products: Export to CSV | ✅ |
-| 38 | Products: Export Low Stock to CSV | ✅ |
+#### Sprint 2: Categories & Brands (Window: CategoriesView + BrandsView) — 20 features
 
-### Sprint 3: Product DataGrid Enrichment (Window: Products)
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 28 | Category model | P0 | Id, Name, Description, IsActive, ParentCategoryId |
+| 29 | Category CRUD | P0 | Add / Edit / Delete categories |
+| 30 | Product → Category FK | P0 | Link each product to one category |
+| 31 | Category hierarchy (parent/child) | P2 | Self-referencing tree for subcategories |
+| 32 | Brand model | P1 | Id, Name, LogoPath, IsActive |
+| 33 | Brand CRUD | P1 | Add / Edit / Delete brands |
+| 34 | Product → Brand FK | P1 | Link each product to one brand |
+| 35 | Category search | P1 | Text search in category list |
+| 36 | Category paging | P1 | Server-side paging for category list |
+| 37 | Brand search | P1 | Text search in brand list |
+| 38 | Brand paging | P1 | Server-side paging for brand list |
+| 39 | Default category | P2 | Auto-assign new products to "Uncategorized" |
+| 40 | Category product count | P2 | Show number of products per category |
+| 41 | Brand product count | P2 | Show number of products per brand |
+| 42 | Bulk assign category | P2 | Multi-select products → assign category |
+| 43 | Bulk assign brand | P2 | Multi-select products → assign brand |
+| 44 | Category import (CSV) | P2 | Bulk import categories |
+| 45 | Category export (CSV) | P2 | Export categories to CSV |
+| 46 | Brand import (CSV) | P2 | Bulk import brands |
+| 47 | Brand export (CSV) | P2 | Export brands to CSV |
 
-| # | Feature | Status |
-|---|---|---|
-| 39 | Products: ID column | ✅ |
-| 40 | Products: Name column (star width) | ✅ |
-| 41 | Products: Brand column with tooltip showing product count | ✅ |
-| 42 | Products: Color column | ✅ |
-| 43 | Products: HSN column | ✅ |
-| 44 | Products: Barcode column | ✅ |
-| 45 | Products: Sale Price column (currency) | ✅ |
-| 46 | Products: Cost Price column (currency) | ✅ |
-| 47 | Products: Qty column with low/overstock indicators | ✅ |
-| 48 | Products: UOM column | ✅ |
-| 49 | Products: Min Stock column | ✅ |
-| 50 | Products: Max Stock column | ✅ |
-| 51 | Products: Stock Value column (currency) | ✅ |
-| 52 | Products: Tax Profile column | ✅ |
-| 53 | Products: Status column (Active/Inactive) | ✅ |
-| 54 | Products: Margin column (Sale − Cost) | ✅ |
-| 55 | Products: Empty state message | ✅ |
+#### Sprint 3: Product Variants & Sizes (Window: ProductsView enrichment) — 18 features
 
-### Sprint 4: Brands & Tax (Windows: Brands, Tax)
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 48 | Size model | P0 | Id, Name (S/M/L/XL/XXL/Free), SortOrder |
+| 49 | Color model | P0 | Id, Name, HexCode |
+| 50 | Product Variant model | P0 | ProductId + SizeId + ColorId + Barcode + Qty + AdditionalPrice |
+| 51 | Variant CRUD | P0 | Add / Edit / Delete variants per product |
+| 52 | Variant stock tracking | P0 | Each variant has its own quantity |
+| 53 | Variant barcode (unique) | P0 | Unique barcode per variant |
+| 54 | Variant price adjustment | P1 | ± price offset from base product price |
+| 55 | Size master CRUD | P1 | Manage available sizes |
+| 56 | Color master CRUD | P1 | Manage available colors |
+| 57 | Size group templates | P2 | "Shirt sizes", "Trouser sizes" quick-fill |
+| 58 | Variant grid view | P1 | Size × Color matrix showing stock |
+| 59 | Variant search in billing | P0 | Scan variant barcode → add to cart |
+| 60 | Variant low stock alert | P1 | Per-variant min stock check |
+| 61 | Bulk variant creation | P1 | Select sizes + colors → auto-create all combos |
+| 62 | Variant import (CSV) | P2 | Bulk import variants |
+| 63 | Variant export (CSV) | P2 | Export variants to CSV |
+| 64 | Variant image per color | P2 | Different photo per color variant |
+| 65 | Variant inactive toggle | P2 | Deactivate specific size/color combos |
 
-| # | Feature | Status |
-|---|---|---|
-| 56 | Brand: Name field | ✅ |
-| 57 | Brand: IsActive flag | ✅ |
-| 58 | Brand: RowVersion concurrency token | ✅ |
-| 59 | Brand: Products navigation collection | ✅ |
-| 60 | Brand: ProductCount computed property | ✅ |
-| 61 | Brands: Inline Add form | ✅ |
-| 62 | Brands: Inline Edit form | ✅ |
-| 63 | Brands: Delete brand | ✅ |
-| 64 | Brands: Search by name | ✅ |
-| 65 | Brands: DataGrid with columns | ✅ |
-| 66 | Brands: Empty state message | ✅ |
-| 67 | Tax: TaxProfile model | ✅ |
-| 68 | Tax: ProfileName field | ✅ |
-| 69 | Tax: CGST rate field | ✅ |
-| 70 | Tax: SGST rate field | ✅ |
-| 71 | Tax: IsDefault flag | ✅ |
-| 72 | Tax: Management view with CRUD | ✅ |
+#### Sprint 4: Inventory Basics (Window: InventoryView — new) — 15 features
 
----
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 66 | Stock adjustment (manual +/-) | P0 | Increase or decrease stock with reason |
+| 67 | Adjustment reason codes | P0 | Damage, Theft, Correction, Return, Transfer |
+| 68 | Stock adjustment log | P0 | Audit trail of all adjustments with timestamp/user |
+| 69 | Stock take / physical count | P1 | Record physical count, auto-calculate difference |
+| 70 | Low stock alert dashboard | P0 | List products where Qty ≤ MinStockLevel |
+| 71 | Out of stock alert | P0 | List products where Qty = 0 |
+| 72 | Stock value report | P1 | Total inventory value (Qty × CostPrice) |
+| 73 | Stock movement history | P1 | Timeline of all stock changes per product |
+| 74 | Opening stock entry | P1 | Set initial stock when onboarding |
+| 75 | Stock freeze (period lock) | P2 | Lock stock edits during audit |
+| 76 | Batch stock adjustment | P1 | Adjust multiple products at once |
+| 77 | Stock adjustment approval | P2 | Manager PIN required for large adjustments |
+| 78 | Inventory export (CSV) | P1 | Export current stock snapshot |
+| 79 | Inventory import (CSV) | P1 | Bulk update stock from CSV |
+| 80 | Dead stock report | P2 | Products with zero sales in N days |
 
-## Phase 2 — Sales & Billing
+#### Sprint 5: Supplier / Vendor Management (Window: SuppliersView — new) — 15 features
 
-### Sprint 5: Sale Model & Core (Window: Sales)
-
-| # | Feature | Status |
-|---|---|---|
-| 73 | Sale: Id primary key | ✅ |
-| 74 | Sale: InvoiceNumber generation | ✅ |
-| 75 | Sale: SaleDate timestamp | ✅ |
-| 76 | Sale: TotalAmount field | ✅ |
-| 77 | Sale: IdempotencyKey (duplicate prevention) | ✅ |
-| 78 | Sale: PaymentMethod field | ✅ |
-| 79 | Sale: CashierRole audit field | ✅ |
-| 80 | Sale: DiscountType enum field | ✅ |
-| 81 | Sale: DiscountValue field | ✅ |
-| 82 | Sale: DiscountAmount computed field | ✅ |
-| 83 | Sale: DiscountReason field | ✅ |
-| 84 | Sale: PaymentReference field | ✅ |
-| 85 | Sale: RowVersion concurrency token | ✅ |
-| 86 | Sale: Items navigation collection | ✅ |
-| 87 | Sale: ItemsSummary computed property | ✅ |
-| 88 | SaleItem: ProductId foreign key | ✅ |
-| 89 | SaleItem: Quantity field | ✅ |
-| 90 | SaleItem: UnitPrice field | ✅ |
-
-### Sprint 6: Cart & Checkout (Window: Sales)
-
-| # | Feature | Status |
-|---|---|---|
-| 91 | SaleItem: Subtotal computed (Qty × Price) | ✅ |
-| 92 | Sales: New Sale toggle form | ✅ |
-| 93 | Sales: Product picker ComboBox | ✅ |
-| 94 | Sales: Cart quantity input | ✅ |
-| 95 | Sales: Add to Cart command | ✅ |
-| 96 | Sales: Remove from Cart command | ✅ |
-| 97 | Sales: Cart DataGrid (Product/Price/Qty/Subtotal) | ✅ |
-| 98 | Sales: Cart total calculation | ✅ |
-| 99 | Sales: Duplicate cart item merge (quantity add) | ✅ |
-| 100 | Sales: Stock availability check on add | ✅ |
-| 101 | Sales: Payment method selector | ✅ |
-| 102 | Sales: Complete Sale command with save | ✅ |
-| 103 | Sales: Cancel New Sale command | ✅ |
-| 104 | Sales: Processing overlay during save | ✅ |
-| 105 | Sales: Saving status text feedback | ✅ |
-| 106 | Sales: Cart lock during payment | ✅ |
-| 107 | Sales: Error message display | ✅ |
-| 108 | Sales: Cart remove button (✕) per row | ✅ |
-
-### Sprint 7: Sales History & Detail (Window: Sales)
-
-| # | Feature | Status |
-|---|---|---|
-| 109 | Sales: History DataGrid with columns | ✅ |
-| 110 | Dashboard: Top Selling Products Panel | ✅ |
-| 111 | Sales: Export Filtered Sales to CSV | ✅ |
-| 112 | Sales: Date column with full-date tooltip | ✅ |
-| 113 | Sales: Total column (currency) | ✅ |
-| 114 | Sales: Payment method column | ✅ |
-| 115 | Sales: Cashier column | ✅ |
-| 116 | Sales: Items column with summary tooltip | ✅ |
-| 117 | Sales: Sale Detail Panel (invoice header) | ✅ |
-| 118 | Sales: Detail Panel — item DataGrid | ✅ |
-| 119 | Sales: Print Invoice stub command | ✅ |
-| 120 | Sales: Payment Reference tooltip on Ref # column | ✅ |
-| 121 | Sales: Refund Sale stub command | ✅ |
-| 122 | Sales: Discount column in history DataGrid | ✅ |
-| 123 | Sales: Export Sale Items command | ✅ |
-| 124 | Sales: Reference row in Detail Panel | ✅ |
-| 125 | Sales: Empty state message | ✅ |
-
-### Sprint 8: Sales Filtering & Paging (Window: Sales)
-
-| # | Feature | Status |
-|---|---|---|
-| 126 | Sales: Search by invoice/payment/cashier | ✅ |
-| 127 | Sales: Filter by date range (From/To) | ✅ |
-| 128 | Sales: Load All (clear filters) | ✅ |
-| 129 | Sales: Payment method filter ComboBox | ✅ |
-| 130 | Sales: Sort indicator arrows on column headers | ✅ |
-| 131 | Sales: Cashier filter ComboBox | ✅ |
-| 132 | Sales: Server-side paging | ✅ |
-| 133 | Sales: Page size selector | ✅ |
-| 134 | Sales: Previous/Next page commands | ✅ |
-| 135 | Sales: Page display text (Page X of Y) | ✅ |
-| 136 | Sales: Server-side column sorting | ✅ |
-| 137 | Sales: Export All Sales to CSV | ✅ |
-| 138 | Sales: Reprint Last Invoice stub | ✅ |
-| 139 | Sales: Export All Sale Items command | ✅ |
-| 140 | Sales: Keyboard shortcut Ctrl+N (New Sale) | ✅ |
-| 141 | Sales: Keyboard shortcut Ctrl+Shift+E (Export) | ✅ |
-| 142 | Sales: Escape to cancel new sale form | ✅ |
-
-### Sprint 9: Discounts & Bill Calculation (Window: Sales)
-
-| # | Feature | Status |
-|---|---|---|
-| 143 | Sales: Discount type selector (None/Percentage/Amount) | ✅ |
-| 144 | Sales: Discount value input | ✅ |
-| 145 | Sales: Discount reason input | ✅ |
-| 146 | Sales: Discount amount display (−₹X) | ✅ |
-| 147 | Sales: Bill final amount with discount | ✅ |
-| 148 | Sales: Subtotal display when discount active | ✅ |
-| 149 | Sales: Percentage discount cap (max 100%) | ✅ |
-| 150 | Sales: Amount discount cap (max subtotal) | ✅ |
-| 151 | Sales: BillCalculationService | ✅ |
-| 152 | Sales: CompleteSaleHandler (command pipeline) | ✅ |
-| 153 | Sales: Invoice number auto-generation | ✅ |
-| 154 | Sales: Stock decrement on sale | ✅ |
-| 155 | Sales: Idempotency key duplicate check | ✅ |
-| 156 | Sales: Transaction safety on sale save | ✅ |
-| 157 | Sales: Discount info in Detail Panel | ✅ |
-| 158 | Sales: Discount reason tooltip on Discount column | ✅ |
-| 159 | Sales: Total record count display near paging | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 81 | Supplier model | P0 | Id, Name, ContactPerson, Phone, Email, GSTIN, Address |
+| 82 | Supplier CRUD | P0 | Add / Edit / Delete / Search / Page |
+| 83 | Product → Supplier FK | P1 | Link product to primary supplier |
+| 84 | Supplier active/inactive | P1 | Deactivate without deleting |
+| 85 | Supplier search | P1 | Search by name, phone, GSTIN |
+| 86 | Supplier GSTIN validation | P1 | 15-char Indian GSTIN format check |
+| 87 | Supplier ledger | P2 | Running balance of purchases/payments |
+| 88 | Supplier import (CSV) | P2 | Bulk import suppliers |
+| 89 | Supplier export (CSV) | P2 | Export suppliers to CSV |
+| 90 | Supplier payment tracking | P2 | Record payments made to supplier |
+| 91 | Supplier due alerts | P2 | Alert when payment is overdue |
+| 92 | Multiple suppliers per product | P2 | Many-to-many product-supplier mapping |
+| 93 | Supplier price list | P2 | Cost price per supplier per product |
+| 94 | Supplier notes | P2 | Free-text notes per supplier |
+| 95 | Supplier product count | P2 | Show products supplied per vendor |
 
 ---
 
-## Phase 3 — Inventory & Stock Management
+### Phase 2: Billing & Sales (Sprint 6–10) — 95 features
 
-### Sprint 10: Dashboard KPIs (Window: Dashboard)
+#### Sprint 6: Billing Core (Window: SalesView enrichment) — 20 features
 
-| # | Feature | Status |
-|---|---|---|
-| 160 | Dashboard: Total Products KPI card | ✅ |
-| 161 | Dashboard: Low Stock Count KPI card | ✅ |
-| 162 | Dashboard: Out of Stock Count KPI card | ✅ |
-| 163 | Dashboard: Overstock Count KPI card | ✅ |
-| 164 | Dashboard: Inventory Value (at cost) KPI card | ✅ |
-| 165 | Dashboard: Inventory Value (at sale price) KPI card | ✅ |
-| 166 | Dashboard: Today's Sales KPI card | ✅ |
-| 167 | Dashboard: Today's Transactions KPI card | ✅ |
-| 168 | Dashboard: Average Sale KPI card | ✅ |
-| 169 | Dashboard: Today's Total Discount KPI | ✅ |
-| 170 | Dashboard: Recent Sales panel | ✅ |
-| 171 | Dashboard: Low Stock Products panel | ✅ |
-| 172 | Dashboard: Low Stock by Brand panel | ✅ |
-| 173 | Dashboard: Out of Stock Products panel | ✅ |
-| 174 | Dashboard: Inventory Value by Brand panel | ✅ |
-| 175 | Dashboard: Sales by Payment Method panel | ✅ |
-| 176 | Dashboard: Top Selling Products panel | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 96 | Add product to cart by name search | P0 | Type-ahead search in billing |
+| 97 | Add product by barcode scan | P0 | Barcode input → instant add |
+| 98 | Cart line: quantity edit | P0 | Change qty per line item |
+| 99 | Cart line: remove item | P0 | Delete line from cart |
+| 100 | Cart line: price override | P1 | Change sale price (manager PIN) |
+| 101 | Cart subtotal display | P0 | Sum of all line totals |
+| 102 | Cart tax display | P0 | Total tax (CGST + SGST or IGST) |
+| 103 | Cart grand total | P0 | Subtotal + Tax − Discount |
+| 104 | Bill-level discount (₹) | P0 | Flat rupee discount on bill |
+| 105 | Bill-level discount (%) | P0 | Percentage discount on bill |
+| 106 | Line-level discount (₹) | P1 | Flat discount per line item |
+| 107 | Line-level discount (%) | P1 | Percentage discount per line item |
+| 108 | Payment: Cash | P0 | Accept cash payment |
+| 109 | Payment: Cash + change calculation | P0 | Auto-calculate change due |
+| 110 | Complete sale → deduct stock | P0 | Atomic: save sale + reduce product qty |
+| 111 | Sale number auto-generation | P0 | Sequential invoice number |
+| 112 | Sale timestamp (IST) | P0 | Record sale date/time in IST |
+| 113 | Sale → User tracking | P0 | Which user made the sale |
+| 114 | Cart clear / cancel bill | P0 | Discard entire cart |
+| 115 | Billing keyboard shortcuts | P0 | F2=New, F5=Pay, Esc=Cancel, etc. |
 
-### Sprint 11: Stock Management (Window: Products)
+#### Sprint 7: Payment Methods & Receipts (Window: SalesView + ReceiptView) — 20 features
 
-| # | Feature | Status |
-|---|---|---|
-| 177 | Products: Margin percentage column | ✅ |
-| 178 | Products: Retail Value column (SalePrice × Qty) | ✅ |
-| 179 | Products: Tax Inclusive badge column | ✅ |
-| 180 | Products: Barcode tooltip with full value | ✅ |
-| 181 | Products: HSN tooltip with full value | ✅ |
-| 182 | Products: Row highlight for low stock | ✅ |
-| 183 | Products: Row highlight for out of stock | ✅ |
-| 184 | Products: Row highlight for inactive | ✅ |
-| 185 | Products: Bulk stock adjustment | ⏳ |
-| 186 | Products: Stock adjustment history log | ⏳ |
-| 187 | Products: Stock adjustment reason codes | ⏳ |
-| 188 | Products: Reorder level auto-suggestion | ⏳ |
-| 189 | Products: Batch stock import from CSV | ⏳ |
-| 190 | Products: Stock snapshot export | ⏳ |
-| 191 | Products: Product detail panel (read-only summary) | ✅ |
-| 192 | Products: Quick price update inline | ⏳ |
-| 193 | Products: Duplicate barcode validation | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 116 | Payment: UPI | P0 | Record UPI payment reference |
+| 117 | Payment: Card (credit/debit) | P0 | Record card last-4 digits |
+| 118 | Payment: Split payment | P1 | Part cash + part UPI/card |
+| 119 | Payment: Credit (on account) | P1 | Sale on customer credit |
+| 120 | Receipt generation (thermal 80mm) | P0 | Format receipt for thermal printer |
+| 121 | Receipt: firm name + address | P0 | Print store details on receipt |
+| 122 | Receipt: GSTIN on receipt | P0 | Print store GSTIN |
+| 123 | Receipt: line items with tax | P0 | Print each item with price/qty/tax |
+| 124 | Receipt: total / discount / tax summary | P0 | Print bill summary |
+| 125 | Receipt: payment method | P0 | Print how customer paid |
+| 126 | Receipt: thank you message | P1 | Configurable footer text |
+| 127 | Receipt preview before print | P1 | On-screen preview |
+| 128 | Receipt reprint | P1 | Reprint past receipt from sale history |
+| 129 | Receipt: QR code | P2 | QR code with sale ID or UPI link |
+| 130 | Receipt: barcode | P2 | Barcode of invoice number |
+| 131 | A4 invoice format | P1 | Full-page tax invoice for B2B |
+| 132 | Invoice: HSN-wise tax summary | P0 | GST-compliant HSN summary table |
+| 133 | Invoice: CGST/SGST/IGST split | P0 | Show tax components separately |
+| 134 | Invoice: customer details | P1 | Print buyer name/address/GSTIN |
+| 135 | Email invoice (PDF) | P2 | Send invoice as PDF attachment |
 
-### Sprint 12: Purchase Orders (Window: Purchase Orders — NEW)
+#### Sprint 8: Sale History & Returns (Window: SalesView enrichment + ReturnsView) — 18 features
 
-| # | Feature | Status |
-|---|---|---|
-| 194 | PurchaseOrder model: Id, OrderNumber, Date | ⏳ |
-| 195 | PurchaseOrder: SupplierId foreign key | ⏳ |
-| 196 | PurchaseOrder: Status enum (Draft/Ordered/Received/Cancelled) | ⏳ |
-| 197 | PurchaseOrder: TotalAmount computed | ⏳ |
-| 198 | PurchaseOrder: Notes field | ⏳ |
-| 199 | PurchaseOrderItem: ProductId, Quantity, UnitCost | ⏳ |
-| 200 | Purchase Orders: List view with DataGrid | ⏳ |
-| 201 | Purchase Orders: Create new order form | ⏳ |
-| 202 | Purchase Orders: Add items to order | ⏳ |
-| 203 | Purchase Orders: Remove items from order | ⏳ |
-| 204 | Purchase Orders: Submit order (Draft → Ordered) | ⏳ |
-| 205 | Purchase Orders: Receive order (stock increment) | ⏳ |
-| 206 | Purchase Orders: Cancel order | ⏳ |
-| 207 | Purchase Orders: Search by order number | ⏳ |
-| 208 | Purchase Orders: Filter by status | ⏳ |
-| 209 | Purchase Orders: Filter by supplier | ⏳ |
-| 210 | Purchase Orders: Export to CSV | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 136 | Sale history list | P0 | Paged list of all past sales |
+| 137 | Sale history search by date | P0 | Filter sales by date range |
+| 138 | Sale history search by invoice # | P0 | Find sale by invoice number |
+| 139 | Sale detail view | P0 | View all line items of a past sale |
+| 140 | Sale history export (CSV) | P1 | Export sales data |
+| 141 | Sale return (full) | P0 | Return entire sale → restore stock |
+| 142 | Sale return (partial) | P0 | Return specific items from a sale |
+| 143 | Return reason code | P1 | Defective, Wrong size, Customer changed mind |
+| 144 | Return → stock restoration | P0 | Auto-add returned qty back to product |
+| 145 | Return → refund amount calc | P0 | Calculate refund based on returned items |
+| 146 | Credit note generation | P1 | Issue credit note for returns |
+| 147 | Exchange (return + new sale) | P1 | Return items and bill new items in one flow |
+| 148 | Return approval (Manager PIN) | P1 | Require manager authorization for returns |
+| 149 | Return history list | P1 | View all past returns |
+| 150 | Return receipt print | P1 | Print return/credit note receipt |
+| 151 | Daily return summary | P2 | Total returns per day |
+| 152 | Return against original invoice | P0 | Link return to original sale ID |
+| 153 | No-bill return (manager only) | P2 | Return without original invoice |
 
-### Sprint 13: Supplier Management (Window: Suppliers — NEW)
+#### Sprint 9: Customer Management (Window: CustomersView — new) — 20 features
 
-| # | Feature | Status |
-|---|---|---|
-| 211 | Supplier model: Id, Name, ContactPerson | ⏳ |
-| 212 | Supplier: Phone field | ⏳ |
-| 213 | Supplier: Email field | ⏳ |
-| 214 | Supplier: Address field | ⏳ |
-| 215 | Supplier: GSTIN field | ⏳ |
-| 216 | Supplier: IsActive flag | ⏳ |
-| 217 | Supplier: Notes field | ⏳ |
-| 218 | Suppliers: List view with DataGrid | ⏳ |
-| 219 | Suppliers: Inline Add form | ⏳ |
-| 220 | Suppliers: Inline Edit form | ⏳ |
-| 221 | Suppliers: Delete supplier | ⏳ |
-| 222 | Suppliers: Search by name/phone/GSTIN | ⏳ |
-| 223 | Suppliers: Active filter | ⏳ |
-| 224 | Suppliers: Export to CSV | ⏳ |
-| 225 | Suppliers: Paging controls | ⏳ |
-| 226 | Suppliers: Empty state message | ⏳ |
-| 227 | Suppliers: Supplier detail panel | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 154 | Customer model | P0 | Id, Name, Phone, Email, Address, GSTIN, CreatedDate |
+| 155 | Customer CRUD | P0 | Add / Edit / Delete / Search / Page |
+| 156 | Customer search by phone | P0 | Quick lookup by mobile number |
+| 157 | Customer → Sale linking | P0 | Attach customer to a sale |
+| 158 | Walk-in customer (default) | P0 | Sales without named customer |
+| 159 | Customer purchase history | P1 | View all purchases by a customer |
+| 160 | Customer outstanding balance | P1 | Total credit/unpaid amount |
+| 161 | Customer payment collection | P1 | Record payment against outstanding |
+| 162 | Customer loyalty points | P2 | Earn points on purchase, redeem on next |
+| 163 | Customer tier (Regular/Silver/Gold) | P2 | Auto-tier based on spend |
+| 164 | Customer birthday tracking | P2 | Date field for promotions |
+| 165 | Customer anniversary tracking | P2 | Date field for promotions |
+| 166 | Customer notes | P2 | Free-text notes per customer |
+| 167 | Customer import (CSV) | P2 | Bulk import customers |
+| 168 | Customer export (CSV) | P2 | Export customer list |
+| 169 | Customer duplicate detection | P1 | Warn on same phone number |
+| 170 | Customer active/inactive | P1 | Deactivate without deleting |
+| 171 | Customer GSTIN validation | P1 | 15-char format check for B2B |
+| 172 | Customer group/tag | P2 | Group customers for targeting |
+| 173 | Customer credit limit | P2 | Max outstanding balance allowed |
 
-### Sprint 14: Stock Alerts & Reorder (Window: Products, Dashboard)
+#### Sprint 10: Discount & Promotion Engine (Window: DiscountsView — new) — 17 features
 
-| # | Feature | Status |
-|---|---|---|
-| 228 | Products: Low stock notification badge in sidebar | ⏳ |
-| 229 | Products: Auto-reorder suggestion list | ⏳ |
-| 230 | Products: Reorder point calculation | ⏳ |
-| 231 | Products: Stock aging indicator (days since last sale) | ⏳ |
-| 232 | Products: Dead stock identification | ⏳ |
-| 233 | Products: Stock turnover rate display | ⏳ |
-| 234 | Products: Min/Max stock validation on save | ⏳ |
-| 235 | Dashboard: Low stock alert banner | ⏳ |
-| 236 | Dashboard: Reorder suggestions panel | ⏳ |
-| 237 | Dashboard: Stock health summary (healthy/warning/critical) | ⏳ |
-| 238 | Products: Export reorder list to CSV | ⏳ |
-| 239 | Products: Bulk update min stock levels | ⏳ |
-| 240 | Products: Bulk update max stock levels | ⏳ |
-| 241 | Products: Stock movement history per product | ⏳ |
-| 242 | Products: Last purchase date display | ⏳ |
-| 243 | Products: Last sale date display | ⏳ |
-| 244 | Products: Average daily sales rate | ⏳ |
-
----
-
-## Phase 4 — Customer & Relationships
-
-### Sprint 15: Customer Management (Window: Customers — NEW)
-
-| # | Feature | Status |
-|---|---|---|
-| 245 | Customer model: Id, Name, Phone | ⏳ |
-| 246 | Customer: Email field | ⏳ |
-| 247 | Customer: Address field | ⏳ |
-| 248 | Customer: GSTIN field (for B2B) | ⏳ |
-| 249 | Customer: DateJoined timestamp | ⏳ |
-| 250 | Customer: IsActive flag | ⏳ |
-| 251 | Customer: Notes field | ⏳ |
-| 252 | Customer: TotalPurchases computed | ⏳ |
-| 253 | Customers: List view with DataGrid | ⏳ |
-| 254 | Customers: Inline Add form | ⏳ |
-| 255 | Customers: Inline Edit form | ⏳ |
-| 256 | Customers: Delete customer | ⏳ |
-| 257 | Customers: Search by name/phone/email | ⏳ |
-| 258 | Customers: Active filter | ⏳ |
-| 259 | Customers: Paging controls | ⏳ |
-| 260 | Customers: Export to CSV | ⏳ |
-| 261 | Customers: Empty state message | ⏳ |
-
-### Sprint 16: Customer Loyalty (Window: Customers, Sales)
-
-| # | Feature | Status |
-|---|---|---|
-| 262 | Customer: LoyaltyPoints field | ⏳ |
-| 263 | Customer: LoyaltyTier computed (Bronze/Silver/Gold/Platinum) | ⏳ |
-| 264 | Customer: Purchase history panel | ⏳ |
-| 265 | Customer: Total spend display | ⏳ |
-| 266 | Customer: Average order value display | ⏳ |
-| 267 | Customer: Last visit date | ⏳ |
-| 268 | Customer: Visit frequency | ⏳ |
-| 269 | Sales: Assign customer to sale | ⏳ |
-| 270 | Sales: Customer search/picker in new sale form | ⏳ |
-| 271 | Sales: Walk-in customer default | ⏳ |
-| 272 | Sales: Customer name on invoice | ⏳ |
-| 273 | Sales: Loyalty points earn on sale | ⏳ |
-| 274 | Sales: Loyalty points redeem on sale | ⏳ |
-| 275 | Customers: Loyalty tier badge in DataGrid | ⏳ |
-| 276 | Customers: Points balance column | ⏳ |
-| 277 | Customers: Birthday field | ⏳ |
-| 278 | Customers: Anniversary field | ⏳ |
-
-### Sprint 17: Returns & Refunds (Window: Returns — NEW)
-
-| # | Feature | Status |
-|---|---|---|
-| 279 | Return model: Id, ReturnNumber, Date | ⏳ |
-| 280 | Return: OriginalSaleId reference | ⏳ |
-| 281 | Return: Reason field | ⏳ |
-| 282 | Return: RefundAmount field | ⏳ |
-| 283 | Return: RefundMethod (Cash/Credit/Exchange) | ⏳ |
-| 284 | Return: Status enum (Pending/Approved/Completed) | ⏳ |
-| 285 | ReturnItem: ProductId, Quantity, UnitPrice | ⏳ |
-| 286 | Returns: List view with DataGrid | ⏳ |
-| 287 | Returns: Create return from sale | ⏳ |
-| 288 | Returns: Select items to return | ⏳ |
-| 289 | Returns: Quantity validation (≤ sold qty) | ⏳ |
-| 290 | Returns: Stock increment on return | ⏳ |
-| 291 | Returns: Approve/complete workflow | ⏳ |
-| 292 | Returns: Search by return number | ⏳ |
-| 293 | Returns: Filter by date range | ⏳ |
-| 294 | Returns: Export to CSV | ⏳ |
-| 295 | Returns: Return detail panel | ⏳ |
-
-### Sprint 18: Expense Tracking (Window: Expenses — NEW)
-
-| # | Feature | Status |
-|---|---|---|
-| 296 | Expense model: Id, Date, Amount, Category | ⏳ |
-| 297 | Expense: Description field | ⏳ |
-| 298 | Expense: PaymentMethod field | ⏳ |
-| 299 | Expense: ReceiptReference field | ⏳ |
-| 300 | Expense: Category enum (Rent/Salary/Utilities/Stock/Marketing/Other) | ⏳ |
-| 301 | Expenses: List view with DataGrid | ⏳ |
-| 302 | Expenses: Inline Add form | ⏳ |
-| 303 | Expenses: Inline Edit form | ⏳ |
-| 304 | Expenses: Delete expense | ⏳ |
-| 305 | Expenses: Search by description | ⏳ |
-| 306 | Expenses: Filter by category | ⏳ |
-| 307 | Expenses: Filter by date range | ⏳ |
-| 308 | Expenses: Monthly total summary | ⏳ |
-| 309 | Expenses: Export to CSV | ⏳ |
-| 310 | Expenses: Paging controls | ⏳ |
-| 311 | Expenses: Empty state message | ⏳ |
-
-### Sprint 19: Promotions & Offers (Window: Promotions — NEW)
-
-| # | Feature | Status |
-|---|---|---|
-| 312 | Promotion model: Id, Name, StartDate, EndDate | ⏳ |
-| 313 | Promotion: DiscountType (Percentage/Flat/BuyXGetY) | ⏳ |
-| 314 | Promotion: DiscountValue field | ⏳ |
-| 315 | Promotion: MinPurchaseAmount field | ⏳ |
-| 316 | Promotion: ApplicableProducts (all or specific) | ⏳ |
-| 317 | Promotion: ApplicableBrands filter | ⏳ |
-| 318 | Promotion: IsActive computed (date-based) | ⏳ |
-| 319 | Promotions: List view with DataGrid | ⏳ |
-| 320 | Promotions: Create promotion form | ⏳ |
-| 321 | Promotions: Edit promotion form | ⏳ |
-| 322 | Promotions: Delete promotion | ⏳ |
-| 323 | Promotions: Active/expired filter | ⏳ |
-| 324 | Sales: Auto-apply active promotions | ⏳ |
-| 325 | Sales: Promotion badge on applicable products | ⏳ |
-| 326 | Sales: Promotion discount line on bill | ⏳ |
-| 327 | Promotions: Export to CSV | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 174 | Flat discount on bill | P0 | ₹ off total bill |
+| 175 | Percentage discount on bill | P0 | % off total bill |
+| 176 | Line-item flat discount | P0 | ₹ off specific item |
+| 177 | Line-item percentage discount | P0 | % off specific item |
+| 178 | Discount approval (PIN) | P1 | Manager PIN for discounts above threshold |
+| 179 | Maximum discount limit | P1 | Cap discount at configurable % |
+| 180 | Buy X Get Y free | P2 | Promotional combo deal |
+| 181 | Combo / bundle pricing | P2 | Special price for product set |
+| 182 | Seasonal sale discount | P2 | Time-bound automatic discount |
+| 183 | Category-wide discount | P2 | % off all products in category |
+| 184 | Brand-wide discount | P2 | % off all products of a brand |
+| 185 | Customer-specific discount | P2 | Special price for loyal customers |
+| 186 | Coupon code support | P2 | Enter code → apply discount |
+| 187 | Discount history log | P1 | Audit trail of all discounts given |
+| 188 | Discount report (daily) | P1 | Total discounts given per day |
+| 189 | Minimum bill for discount | P2 | Discount only if bill > threshold |
+| 190 | Discount stacking rules | P2 | Control whether discounts combine |
 
 ---
 
-## Phase 5 — Reports & Analytics
+### Phase 3: Financial & Tax (Sprint 11–15) — 80 features
 
-### Sprint 20: Sales Reports (Window: Reports — NEW)
+#### Sprint 11: GST Tax Engine (Window: TaxManagementWindow enrichment) — 18 features
 
-| # | Feature | Status |
-|---|---|---|
-| 328 | Reports: Sales by date range | ⏳ |
-| 329 | Reports: Sales by payment method | ⏳ |
-| 330 | Reports: Sales by cashier | ⏳ |
-| 331 | Reports: Sales by product | ⏳ |
-| 332 | Reports: Sales by brand | ⏳ |
-| 333 | Reports: Sales by customer | ⏳ |
-| 334 | Reports: Daily sales summary | ⏳ |
-| 335 | Reports: Weekly sales summary | ⏳ |
-| 336 | Reports: Monthly sales summary | ⏳ |
-| 337 | Reports: Sales growth comparison (vs previous period) | ⏳ |
-| 338 | Reports: Top 10 selling products | ⏳ |
-| 339 | Reports: Bottom 10 selling products | ⏳ |
-| 340 | Reports: Average basket size | ⏳ |
-| 341 | Reports: Discount utilization report | ⏳ |
-| 342 | Reports: Hourly sales heatmap data | ⏳ |
-| 343 | Reports: Sales trend line data | ⏳ |
-| 344 | Reports: Export any report to CSV | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 191 | Tax Profile CRUD | P0 | Create tax rate profiles (5%, 12%, 18%, 28%) |
+| 192 | CGST + SGST split | P0 | Intra-state tax: half CGST + half SGST |
+| 193 | IGST for inter-state | P0 | Full rate as IGST for inter-state sales |
+| 194 | Tax-inclusive price back-calc | P0 | Extract tax from inclusive price |
+| 195 | Tax-exclusive price add-on | P0 | Add tax on top of base price |
+| 196 | HSN-wise tax summary on invoice | P0 | Group tax by HSN code |
+| 197 | Cess support | P1 | Additional cess on specific goods |
+| 198 | Tax exemption flag | P1 | Mark product as tax-exempt |
+| 199 | Composition scheme support | P2 | Flat rate for small businesses |
+| 200 | Reverse charge mechanism | P2 | Buyer pays tax directly to govt |
+| 201 | Tax profile active/inactive | P1 | Deactivate obsolete tax rates |
+| 202 | Default tax profile | P1 | Auto-assign to new products |
+| 203 | Tax rate change audit log | P1 | Track when rates were changed |
+| 204 | Multi-tax-profile per product | P2 | Different rates for different states |
+| 205 | Tax report (monthly) | P1 | Total tax collected per month |
+| 206 | Tax report by HSN | P1 | Tax grouped by HSN code |
+| 207 | GSTR-1 data export | P2 | Export data for GST return filing |
+| 208 | GSTR-3B summary | P2 | Generate summary for monthly return |
 
-### Sprint 21: Inventory Reports (Window: Reports)
+#### Sprint 12: Purchase Orders (Window: PurchaseOrdersView — new) — 16 features
 
-| # | Feature | Status |
-|---|---|---|
-| 345 | Reports: Current stock valuation (at cost) | ⏳ |
-| 346 | Reports: Current stock valuation (at sale price) | ⏳ |
-| 347 | Reports: Low stock report | ⏳ |
-| 348 | Reports: Out of stock report | ⏳ |
-| 349 | Reports: Overstock report | ⏳ |
-| 350 | Reports: Dead stock report (no sales in X days) | ⏳ |
-| 351 | Reports: Stock movement report (in/out/adjust) | ⏳ |
-| 352 | Reports: Stock by brand | ⏳ |
-| 353 | Reports: Stock by category/UOM | ⏳ |
-| 354 | Reports: Stock aging report | ⏳ |
-| 355 | Reports: Stock turnover report | ⏳ |
-| 356 | Reports: Purchase order summary | ⏳ |
-| 357 | Reports: Supplier-wise purchase report | ⏳ |
-| 358 | Reports: Stock adjustment audit report | ⏳ |
-| 359 | Reports: Reorder report | ⏳ |
-| 360 | Reports: Product profitability report | ⏳ |
-| 361 | Reports: Brand-wise profitability report | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 209 | Purchase Order model | P1 | PO#, SupplierId, Date, Status, Items |
+| 210 | PO creation | P1 | Create PO with line items |
+| 211 | PO → Supplier linking | P1 | Each PO linked to a supplier |
+| 212 | PO line items | P1 | Product, Qty ordered, Unit cost |
+| 213 | PO status workflow | P1 | Draft → Sent → Partial → Received → Closed |
+| 214 | PO receive goods | P1 | Mark items received → update stock |
+| 215 | PO partial receipt | P1 | Receive some items, rest pending |
+| 216 | PO cost price update | P1 | Update product cost from PO |
+| 217 | PO search / filter | P1 | Search by PO#, supplier, date |
+| 218 | PO paging | P1 | Server-side paging |
+| 219 | PO print | P2 | Print purchase order for supplier |
+| 220 | PO history | P1 | View past purchase orders |
+| 221 | PO duplicate / reorder | P2 | Clone previous PO |
+| 222 | PO auto-generate from low stock | P2 | Suggest PO for products below min stock |
+| 223 | PO import (CSV) | P2 | Bulk create PO from file |
+| 224 | PO export (CSV) | P2 | Export POs to file |
 
-### Sprint 22: Financial Reports (Window: Reports)
+#### Sprint 13: Expense Tracking (Window: ExpensesView — new) — 14 features
 
-| # | Feature | Status |
-|---|---|---|
-| 362 | Reports: Daily cash summary | ⏳ |
-| 363 | Reports: Revenue vs expense | ⏳ |
-| 364 | Reports: Gross profit report | ⏳ |
-| 365 | Reports: Net profit report (revenue − expense − COGS) | ⏳ |
-| 366 | Reports: Payment method breakdown | ⏳ |
-| 367 | Reports: GST collection report (CGST + SGST) | ⏳ |
-| 368 | Reports: Tax liability summary | ⏳ |
-| 369 | Reports: Discount given report | ⏳ |
-| 370 | Reports: Refund report | ⏳ |
-| 371 | Reports: Customer outstanding/dues | ⏳ |
-| 372 | Reports: Supplier payment due | ⏳ |
-| 373 | Reports: Monthly P&L statement | ⏳ |
-| 374 | Reports: Yearly comparison | ⏳ |
-| 375 | Reports: Cash flow summary | ⏳ |
-| 376 | Reports: Expense by category | ⏳ |
-| 377 | Reports: Day-end register report | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 225 | Expense model | P1 | Id, Date, Category, Amount, PaymentMethod, Notes |
+| 226 | Expense CRUD | P1 | Add / Edit / Delete expenses |
+| 227 | Expense categories | P1 | Rent, Utilities, Salary, Transport, Misc |
+| 228 | Expense category CRUD | P1 | Manage expense categories |
+| 229 | Expense search by date | P1 | Date range filter |
+| 230 | Expense search by category | P1 | Filter by expense type |
+| 231 | Daily expense summary | P1 | Total expenses per day |
+| 232 | Monthly expense report | P1 | Total expenses per month |
+| 233 | Expense receipt photo | P2 | Attach photo of receipt |
+| 234 | Recurring expense | P2 | Auto-create monthly expenses (rent) |
+| 235 | Expense approval | P2 | Manager approval for large expenses |
+| 236 | Expense paging | P1 | Server-side paging |
+| 237 | Expense import (CSV) | P2 | Bulk import expenses |
+| 238 | Expense export (CSV) | P2 | Export expenses to CSV |
 
-### Sprint 23: Dashboard Analytics (Window: Dashboard)
+#### Sprint 14: Cash Register / Day End (Window: CashRegisterView — new) — 16 features
 
-| # | Feature | Status |
-|---|---|---|
-| 378 | Dashboard: Sales trend sparkline (7-day) | ⏳ |
-| 379 | Dashboard: Revenue vs last week comparison | ⏳ |
-| 380 | Dashboard: Top brand by revenue | ⏳ |
-| 381 | Dashboard: Customer count (today) | ⏳ |
-| 382 | Dashboard: New customers (this month) | ⏳ |
-| 383 | Dashboard: Return rate percentage | ⏳ |
-| 384 | Dashboard: Gross margin percentage | ⏳ |
-| 385 | Dashboard: Active promotions count | ⏳ |
-| 386 | Dashboard: Pending purchase orders count | ⏳ |
-| 387 | Dashboard: Expense today | ⏳ |
-| 388 | Dashboard: Net revenue today (sales − returns − discounts) | ⏳ |
-| 389 | Dashboard: Stock health pie (healthy/warning/critical) | ⏳ |
-| 390 | Dashboard: Quick actions panel | ⏳ |
-| 391 | Dashboard: Refresh all stats command | ✅ |
-| 392 | Dashboard: Auto-refresh on navigation | ✅ |
-| 393 | Dashboard: Loading indicator | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 239 | Opening cash balance | P0 | Record cash in drawer at start of day |
+| 240 | Cash in / cash out entries | P0 | Record manual cash additions/removals |
+| 241 | Cash in/out reason | P0 | Reason code for each entry |
+| 242 | Expected cash balance | P0 | Opening + Sales(cash) − Returns − CashOut + CashIn |
+| 243 | Actual cash count (day end) | P0 | User enters physical count |
+| 244 | Cash variance | P0 | Difference: actual − expected |
+| 245 | Day end report | P0 | Summary of day's transactions |
+| 246 | Day close / lockdown | P1 | Close day, prevent further edits |
+| 247 | Day-wise cash history | P1 | View past day summaries |
+| 248 | Payment method breakdown | P1 | Cash / UPI / Card totals for the day |
+| 249 | Denomination entry | P2 | Count notes: ₹500×__, ₹200×__, etc. |
+| 250 | Shift support | P2 | Multiple shifts per day per user |
+| 251 | Cash register export | P2 | Export day summary to CSV |
+| 252 | Cash variance alert | P1 | Warn if variance exceeds threshold |
+| 253 | Cash register approval | P2 | Manager sign-off on day close |
+| 254 | Cash register audit log | P1 | Full history of cash movements |
 
-### Sprint 24: Export & Print Infrastructure (Cross-cutting)
+#### Sprint 15: Profit & Loss Basics (Window: ReportsView — new) — 16 features
 
-| # | Feature | Status |
-|---|---|---|
-| 394 | Export: CSV encoding (UTF-8 with BOM) | ✅ |
-| 395 | Export: CSV field escaping (commas/quotes) | ✅ |
-| 396 | Export: SaveFileDialog integration | ✅ |
-| 397 | Export: Success message with filename | ✅ |
-| 398 | Export: Error handling on write failure | ✅ |
-| 399 | Export: Products full export | ✅ |
-| 400 | Export: Sales full export | ✅ |
-| 401 | Export: Filtered sales export | ✅ |
-| 402 | Export: Sale items export | ✅ |
-| 403 | Export: Low stock export | ✅ |
-| 404 | Print: Invoice layout stub | ✅ |
-| 405 | Print: Reprint last invoice stub | ✅ |
-| 406 | Reports: Print report stub | ⏳ |
-| 407 | Reports: PDF export stub | ⏳ |
-| 408 | Export: All sale items (cross-sale) | ✅ |
-| 409 | Export: Column header row in all CSVs | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 255 | Daily sales summary | P0 | Total sales, returns, net for the day |
+| 256 | Monthly sales summary | P0 | Aggregate by month |
+| 257 | Product-wise sales report | P0 | Qty sold + revenue per product |
+| 258 | Category-wise sales report | P1 | Revenue per category |
+| 259 | Brand-wise sales report | P1 | Revenue per brand |
+| 260 | Profit margin per product | P1 | (Sale − Cost) per product |
+| 261 | Gross profit report | P1 | Total revenue − total cost |
+| 262 | Net profit (sales − expenses) | P1 | Gross profit − expenses |
+| 263 | Best selling products | P1 | Top N by qty or revenue |
+| 264 | Slow moving products | P1 | Bottom N by sales velocity |
+| 265 | Sales by user report | P1 | Revenue per salesperson |
+| 266 | Sales by payment method | P1 | Cash vs UPI vs Card breakdown |
+| 267 | Sales by hour of day | P2 | Peak hour analysis |
+| 268 | Customer-wise sales report | P2 | Revenue per customer |
+| 269 | Report date range picker | P0 | Custom date range for all reports |
+| 270 | Report export (CSV) | P1 | Export any report to CSV |
 
 ---
 
-## Phase 6 — Settings & Administration
+### Phase 4: Users & Security (Sprint 16–19) — 65 features
 
-### Sprint 25: User Management (Window: User Management — NEW)
+#### Sprint 16: User Role Enrichment (Window: UserManagementWindow enrichment) — 18 features
 
-| # | Feature | Status |
-|---|---|---|
-| 410 | UserType enum: Admin, Manager, User | ✅ |
-| 411 | Login: PIN-based authentication | ✅ |
-| 412 | Login: Master PIN for admin | ✅ |
-| 413 | Session: Current user tracking | ✅ |
-| 414 | Session: Role-based visibility | ✅ |
-| 415 | Users: User list view | ⏳ |
-| 416 | Users: Create user form | ⏳ |
-| 417 | Users: Edit user form | ⏳ |
-| 418 | Users: Deactivate user | ⏳ |
-| 419 | Users: Reset PIN | ⏳ |
-| 420 | Users: Role assignment | ⏳ |
-| 421 | Users: Last login display | ⏳ |
-| 422 | Users: Activity log per user | ⏳ |
-| 423 | Products: CanManageProducts role gate | ✅ |
-| 424 | Products: CanDeleteProducts role gate | ✅ |
-| 425 | Sales: CanCreateSales role gate | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 271 | Admin role | P0 | Full access to all features |
+| 272 | Manager role | P0 | All except system settings |
+| 273 | User/Cashier role | P0 | Billing only, no management |
+| 274 | Role-based menu visibility | P0 | Hide menu items per role |
+| 275 | Role-based button visibility | P0 | Hide action buttons per role |
+| 276 | PIN change (self) | P0 | User changes own PIN |
+| 277 | PIN reset (admin) | P0 | Admin resets another user's PIN |
+| 278 | User activity log | P1 | Login/logout timestamps |
+| 279 | User session tracking | P1 | Current active sessions |
+| 280 | User sales performance | P1 | Sales totals per user |
+| 281 | User profile (name, photo) | P2 | Basic profile info |
+| 282 | Multiple users per role | P0 | Multiple cashiers, managers |
+| 283 | User active/inactive | P1 | Deactivate without deleting |
+| 284 | User creation (admin only) | P0 | Admin creates new users |
+| 285 | User deletion (admin only) | P0 | Soft-delete or deactivate |
+| 286 | User search | P1 | Search by name |
+| 287 | User import (CSV) | P2 | Bulk create users |
+| 288 | User export (CSV) | P2 | Export user list |
 
-### Sprint 26: App Settings (Window: Settings — NEW)
+#### Sprint 17: Permissions & Audit (Window: SecuritySettingsView enrichment) — 16 features
 
-| # | Feature | Status |
-|---|---|---|
-| 426 | Settings: Store name configuration | ⏳ |
-| 427 | Settings: Store address | ⏳ |
-| 428 | Settings: Store phone | ⏳ |
-| 429 | Settings: Store GSTIN | ⏳ |
-| 430 | Settings: Store logo path | ⏳ |
-| 431 | Settings: Invoice prefix configuration | ⏳ |
-| 432 | Settings: Invoice number reset policy | ⏳ |
-| 433 | Settings: Default payment method | ⏳ |
-| 434 | Settings: Default tax profile | ⏳ |
-| 435 | Settings: Low stock threshold global default | ⏳ |
-| 436 | Settings: Currency display (₹) | ✅ |
-| 437 | Settings: Date format (dd/MM/yyyy) | ✅ |
-| 438 | Settings: Culture (en-IN) | ✅ |
-| 439 | Settings: Timezone (IST) | ✅ |
-| 440 | Settings: Theme preference | ⏳ |
-| 441 | Settings: Sidebar collapse state persistence | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 289 | Permission matrix (role × feature) | P1 | Configurable permissions per role |
+| 290 | Master PIN for destructive ops | P0 | Delete product/sale/user requires master PIN |
+| 291 | Audit log model | P1 | Who did what, when, from where |
+| 292 | Audit: product changes | P1 | Log product CRUD |
+| 293 | Audit: sale completion | P0 | Log every completed sale |
+| 294 | Audit: price override | P0 | Log any price change during billing |
+| 295 | Audit: discount given | P0 | Log discounts with amount and reason |
+| 296 | Audit: return processed | P1 | Log returns with reason |
+| 297 | Audit: user login/logout | P1 | Login tracking |
+| 298 | Audit: settings changed | P1 | Track config changes |
+| 299 | Audit log viewer | P1 | Searchable, paged audit log UI |
+| 300 | Audit log export | P2 | Export audit log to CSV |
+| 301 | Failed login tracking | P1 | Count failed PIN attempts |
+| 302 | Account lockout | P2 | Lock after N failed attempts |
+| 303 | Session timeout | P2 | Auto-logout after inactivity |
+| 304 | PIN complexity rules | P2 | Prevent weak PINs (1234, 0000) |
 
-### Sprint 27: Audit & Security (Window: Audit Log — NEW)
+#### Sprint 18: Firm / Store Settings (Window: FirmManagementWindow enrichment) — 16 features
 
-| # | Feature | Status |
-|---|---|---|
-| 442 | AuditLog model: Id, Timestamp, UserId, Action, Entity | ⏳ |
-| 443 | AuditLog: OldValue / NewValue fields | ⏳ |
-| 444 | Audit: Log product create | ⏳ |
-| 445 | Audit: Log product edit | ⏳ |
-| 446 | Audit: Log product delete | ⏳ |
-| 447 | Audit: Log sale complete | ⏳ |
-| 448 | Audit: Log return/refund | ⏳ |
-| 449 | Audit: Log stock adjustment | ⏳ |
-| 450 | Audit: Log user login/logout | ⏳ |
-| 451 | Audit: Log settings change | ⏳ |
-| 452 | Audit Log: List view with DataGrid | ⏳ |
-| 453 | Audit Log: Filter by action type | ⏳ |
-| 454 | Audit Log: Filter by user | ⏳ |
-| 455 | Audit Log: Filter by date range | ⏳ |
-| 456 | Audit Log: Export to CSV | ⏳ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 305 | Firm name | P0 | Store name on receipts/invoices |
+| 306 | Firm address | P0 | Full address |
+| 307 | Firm phone | P0 | Contact number |
+| 308 | Firm GSTIN | P0 | GST identification number |
+| 309 | Firm PAN | P1 | PAN card number |
+| 310 | Firm email | P1 | Contact email |
+| 311 | Firm logo | P1 | Logo for receipts/invoices |
+| 312 | Firm bank details | P2 | Bank name, account, IFSC |
+| 313 | Invoice prefix config | P1 | Custom invoice number prefix |
+| 314 | Invoice numbering reset | P2 | Reset counter annually/monthly |
+| 315 | Receipt footer text | P1 | Custom message on receipts |
+| 316 | Receipt header text | P2 | Additional header info |
+| 317 | Currency symbol config | P1 | ₹ (Indian Rupee default) |
+| 318 | Financial year start | P1 | April 1 (Indian FY) |
+| 319 | Decimal places config | P2 | 0 or 2 decimal places |
+| 320 | Store hours | P2 | Opening/closing time |
 
-### Sprint 28: Backup, Maintenance & Polish (Cross-cutting)
+#### Sprint 19: Backup & Data Safety (Window: BackupSettingsView enrichment) — 15 features
 
-| # | Feature | Status |
-|---|---|---|
-| 457 | Database: SQLite backup to file | ⏳ |
-| 458 | Database: Restore from backup | ⏳ |
-| 459 | Database: Auto-backup on app close | ⏳ |
-| 460 | Database: Backup schedule configuration | ⏳ |
-| 461 | App: Startup data integrity check | ⏳ |
-| 462 | App: Stale billing session cleanup | ✅ |
-| 463 | App: Connectivity monitor service | ✅ |
-| 464 | App: Offline mode service | ✅ |
-| 465 | App: Feature toggle service | ✅ |
-| 466 | App: Window sizing service | ✅ |
-| 467 | App: Focus lock service | ✅ |
-| 468 | App: Context help service | ✅ |
-| 469 | App: Tip rotation service | ✅ |
-| 470 | App: Onboarding journey service | ✅ |
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 321 | Manual database backup | P0 | One-click SQLite backup to file |
+| 322 | Auto backup on day close | P0 | Automatic backup at end of day |
+| 323 | Backup location config | P0 | Choose backup folder |
+| 324 | Backup history list | P1 | View past backups |
+| 325 | Restore from backup | P0 | Restore database from backup file |
+| 326 | Backup to USB | P1 | Direct backup to USB drive |
+| 327 | Scheduled backup (hourly) | P2 | Background periodic backup |
+| 328 | Backup encryption | P2 | Password-protect backup files |
+| 329 | Cloud backup (OneDrive/GDrive) | P2 | Upload backup to cloud |
+| 330 | Backup size tracking | P2 | Show backup file sizes |
+| 331 | Old backup cleanup | P2 | Auto-delete backups older than N days |
+| 332 | Backup notification | P1 | Remind if no backup in 24h |
+| 333 | Data export (full) | P2 | Export all data as JSON/CSV |
+| 334 | Data import (migration) | P2 | Import from another store instance |
+| 335 | Database integrity check | P2 | Verify DB isn't corrupted |
 
 ---
 
-## Expansion Features (Gates G1–G22)
+### Phase 5: Advanced Billing & Operations (Sprint 20–24) — 75 features
+
+#### Sprint 20: Hold & Recall Bills (Window: SalesView enrichment) — 12 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 336 | Hold current bill | P0 | Park active cart for later |
+| 337 | Recall held bill | P0 | Resume a parked cart |
+| 338 | Multiple held bills | P0 | Hold up to N bills simultaneously |
+| 339 | Held bill timeout | P2 | Auto-discard after configurable time |
+| 340 | Held bill indicator | P1 | Badge showing count of held bills |
+| 341 | Held bill customer tag | P1 | Attach customer name to held bill |
+| 342 | Held bill notes | P2 | Add note to parked bill |
+| 343 | Held bill history | P2 | Log of all hold/recall actions |
+| 344 | Quick switch between held bills | P1 | Keyboard shortcut to cycle |
+| 345 | Held bill auto-save | P0 | Persist held bills to DB |
+| 346 | Held bill stale cleanup | P1 | Clean abandoned held bills on startup |
+| 347 | Held bill limit per user | P2 | Max held bills per cashier |
+
+#### Sprint 21: Quotation / Estimate (Window: QuotationsView — new) — 14 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 348 | Quotation model | P1 | Id, Customer, Date, Items, Total, Status, ValidUntil |
+| 349 | Quotation creation | P1 | Create quote with line items |
+| 350 | Quotation print | P1 | Print formatted quotation |
+| 351 | Quotation → Sale conversion | P1 | Convert accepted quote to sale |
+| 352 | Quotation status | P1 | Draft → Sent → Accepted → Expired → Rejected |
+| 353 | Quotation search | P1 | Search by customer, date, number |
+| 354 | Quotation paging | P1 | Server-side paging |
+| 355 | Quotation validity period | P1 | Auto-expire after N days |
+| 356 | Quotation revision | P2 | Create revised version |
+| 357 | Quotation duplicate | P2 | Clone existing quotation |
+| 358 | Quotation history | P1 | View past quotations |
+| 359 | Quotation export (CSV) | P2 | Export quotations |
+| 360 | Quotation email | P2 | Email quotation PDF to customer |
+| 361 | Quotation terms & conditions | P2 | Configurable T&C text |
+
+#### Sprint 22: Purchase Receive & GRN (Window: GRNView — new) — 14 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 362 | Goods Received Note model | P1 | GRN#, PO#, Date, Items, Supplier |
+| 363 | GRN creation from PO | P1 | Receive against purchase order |
+| 364 | GRN without PO | P2 | Direct receive (walk-in purchase) |
+| 365 | GRN line items | P1 | Product, qty received, qty rejected |
+| 366 | GRN → stock update | P1 | Auto-increase stock on confirm |
+| 367 | GRN → cost price update | P1 | Update product cost from GRN |
+| 368 | GRN quality check | P2 | Accept/reject per item |
+| 369 | GRN search | P1 | Search by GRN#, PO#, supplier |
+| 370 | GRN paging | P1 | Server-side paging |
+| 371 | GRN print | P2 | Print GRN document |
+| 372 | GRN history | P1 | View past GRNs |
+| 373 | GRN export (CSV) | P2 | Export GRNs |
+| 374 | Purchase return to supplier | P2 | Return defective goods to supplier |
+| 375 | Debit note generation | P2 | Debit note for supplier returns |
+
+#### Sprint 23: Barcode Operations (Window: BarcodeView — new) — 12 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 376 | Barcode label printing | P1 | Print barcode labels for products |
+| 377 | Barcode label template | P1 | Configurable label layout |
+| 378 | Barcode: product name on label | P1 | Print name below barcode |
+| 379 | Barcode: price on label | P1 | Print sale price on label |
+| 380 | Barcode: MRP on label | P1 | Print MRP on label |
+| 381 | Barcode: size/color on label | P2 | Print variant info |
+| 382 | Batch barcode printing | P1 | Print N labels at once |
+| 383 | Barcode scanner input handling | P0 | Detect scanner input vs keyboard |
+| 384 | Barcode auto-generate | P2 | Generate barcode if not assigned |
+| 385 | Barcode format selection | P2 | EAN-13 / Code128 / Code39 |
+| 386 | Barcode label paper size | P2 | Configure label sheet dimensions |
+| 387 | Barcode lookup (scan → show product) | P1 | Quick product info via scan |
+
+#### Sprint 24: Dashboard & Analytics (Window: DashboardView enrichment) — 23 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 388 | Today's sales total | P0 | Real-time daily sales |
+| 389 | Today's return total | P0 | Daily returns |
+| 390 | Today's net sales | P0 | Sales − Returns |
+| 391 | Today's profit | P1 | Net sales − COGS |
+| 392 | Today's transaction count | P0 | Number of bills |
+| 393 | Average bill value | P1 | Total / count |
+| 394 | Top 5 products today | P1 | Best sellers widget |
+| 395 | Low stock alerts count | P0 | Badge on dashboard |
+| 396 | Out of stock count | P0 | Badge on dashboard |
+| 397 | Pending payments count | P1 | Customer credit outstanding |
+| 398 | Monthly sales trend | P1 | Bar/line chart for 30 days |
+| 399 | Monthly expense trend | P2 | Bar chart for expenses |
+| 400 | Category-wise sales pie | P2 | Pie chart by category |
+| 401 | Payment method pie | P1 | Cash/UPI/Card split |
+| 402 | Year-over-year comparison | P2 | Compare to same month last year |
+| 403 | Sales target vs actual | P2 | Configurable monthly target |
+| 404 | Quick action tiles | P0 | New Sale, Add Product, View Reports |
+| 405 | Recent sales list | P1 | Last 10 transactions |
+| 406 | Upcoming tasks | P2 | Pending POs, overdue payments |
+| 407 | Dashboard auto-refresh | P1 | Refresh every 60 seconds |
+| 408 | Dashboard widget layout | P2 | Configurable widget positions |
+| 409 | Dashboard print | P2 | Print daily summary |
+| 410 | Dashboard date selector | P1 | View dashboard for past dates |
+
+---
+
+### Phase 6: Polish & UX (Sprint 25–28) — 60 features
+
+#### Sprint 25: Keyboard Navigation & Accessibility — 15 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 411 | Full keyboard navigation in billing | P0 | Tab through all fields |
+| 412 | F-key shortcuts for all actions | P0 | F1=Help, F2=New, etc. |
+| 413 | Ctrl+key shortcuts | P0 | Ctrl+N, Ctrl+S, Ctrl+P |
+| 414 | Shortcut cheat sheet overlay | P1 | F1 shows all shortcuts |
+| 415 | Focus visible indicator | P0 | Clear visual focus ring |
+| 416 | Tab order optimization | P0 | Logical tab sequence |
+| 417 | Escape to cancel/close | P0 | Escape key on all forms/dialogs |
+| 418 | Enter to confirm/save | P0 | Enter key submits active form |
+| 419 | Arrow keys in DataGrid | P0 | Navigate rows with arrows |
+| 420 | Quick search focus (Ctrl+F) | P1 | Focus search box |
+| 421 | Screen reader labels | P2 | AutomationProperties on controls |
+| 422 | High contrast mode | P2 | Alternative color theme |
+| 423 | Font size scaling | P2 | Configurable font scale |
+| 424 | Keyboard-only billing flow | P0 | Complete a sale without mouse |
+| 425 | Input focus restore | P1 | Restore focus after dialog close |
+
+#### Sprint 26: Error Handling & Validation — 14 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 426 | Required field validation | P0 | Red border + message for empty required fields |
+| 427 | Numeric field validation | P0 | Prevent non-numeric in price/qty |
+| 428 | Max length enforcement | P0 | Truncate/warn at max length |
+| 429 | Duplicate barcode prevention | P0 | Unique constraint error → friendly message |
+| 430 | Concurrency conflict handling | P0 | Reload + retry on optimistic lock failure |
+| 431 | Network error graceful handling | P0 | Offline mode → queued operations |
+| 432 | Validation summary panel | P1 | Show all errors at once |
+| 433 | Field-level error tooltips | P1 | Tooltip on invalid field |
+| 434 | Auto-retry on transient DB errors | P1 | EF Core retry strategy |
+| 435 | Friendly error messages | P0 | No stack traces shown to user |
+| 436 | Error logging to file | P0 | All exceptions logged |
+| 437 | Unhandled exception handler | P0 | Global handler prevents crash |
+| 438 | Confirmation dialogs | P0 | Confirm before delete/discard |
+| 439 | Undo last action | P2 | Undo last delete (within session) |
+
+#### Sprint 27: Print & Report Templates — 16 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 440 | Thermal receipt (58mm) | P1 | Narrow thermal printer format |
+| 441 | Thermal receipt (80mm) | P0 | Standard thermal printer format |
+| 442 | A4 tax invoice | P1 | Full-page GST invoice |
+| 443 | A5 half-page invoice | P2 | Compact invoice |
+| 444 | Delivery challan print | P2 | Goods dispatch document |
+| 445 | Barcode label sheet | P1 | Multiple labels per A4 sheet |
+| 446 | Price tag printing | P2 | Product name + price labels |
+| 447 | Daily sales report print | P1 | Printable daily summary |
+| 448 | Monthly sales report print | P1 | Printable monthly summary |
+| 449 | Stock report print | P1 | Current inventory printout |
+| 450 | Customer statement print | P2 | Outstanding balance letter |
+| 451 | Purchase order print | P2 | Printable PO |
+| 452 | Quotation print | P2 | Printable estimate |
+| 453 | Credit note print | P2 | Return credit document |
+| 454 | Print preview for all | P1 | Preview before every print |
+| 455 | Print settings (printer selection) | P1 | Choose default printer |
+
+#### Sprint 28: System Settings & Config — 15 features
+
+| # | Feature | Priority | Description |
+|---|---------|----------|-------------|
+| 456 | App version display | P0 | About screen with version info |
+| 457 | Theme: Light/Dark | P2 | Color theme switching |
+| 458 | Language: English (default) | P0 | English UI |
+| 459 | Date format config | P1 | dd/MM/yyyy (Indian default) |
+| 460 | Currency format config | P1 | ₹1,23,456.00 (Indian lakh format) |
+| 461 | Page size config | P2 | 25/50/100 rows per page |
+| 462 | Auto-logout timer | P2 | Configurable inactivity timeout |
+| 463 | Sound effects toggle | P2 | Beep on scan, alert sounds |
+| 464 | Startup mode config | P2 | Start in Billing or Management mode |
+| 465 | License key / activation | P2 | License management |
+| 466 | Update check | P2 | Check for new versions |
+| 467 | System health monitor | P2 | DB size, memory usage |
+| 468 | Reset to factory defaults | P2 | Clear all data (master PIN required) |
+| 469 | Feature flags management | P1 | Enable/disable features |
+| 470 | Onboarding wizard (first run) | P0 | First-time setup flow |
+
+---
+
+## PART B: EXPANSION FEATURES (478)
 
 ### G1: Hardware Integration (48 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 471 | Barcode scanner: USB HID input support | ⏳ |
-| 472 | Barcode scanner: Auto-detect scan vs keyboard | ⏳ |
-| 473 | Barcode scanner: Scan-to-add in cart | ⏳ |
-| 474 | Barcode scanner: Scan-to-search in products | ⏳ |
-| 475 | Barcode scanner: Scan-to-find in stock adjust | ⏳ |
-| 476 | Barcode printer: Label layout designer | ⏳ |
-| 477 | Barcode printer: Print single label | ⏳ |
-| 478 | Barcode printer: Batch print labels | ⏳ |
-| 479 | Barcode printer: QR code generation | ⏳ |
-| 480 | Barcode printer: Price tag format | ⏳ |
-| 481 | Receipt printer: Thermal printer driver | ⏳ |
-| 482 | Receipt printer: 58mm format | ⏳ |
-| 483 | Receipt printer: 80mm format | ⏳ |
-| 484 | Receipt printer: Auto-print on sale | ⏳ |
-| 485 | Receipt printer: Logo on receipt | ⏳ |
-| 486 | Receipt printer: Receipt footer text | ⏳ |
-| 487 | Receipt printer: GST details on receipt | ⏳ |
-| 488 | Receipt printer: Barcode on receipt | ⏳ |
-| 489 | Cash drawer: Open on sale complete | ⏳ |
-| 490 | Cash drawer: Manual open command | ⏳ |
-| 491 | Cash drawer: Status indicator | ⏳ |
-| 492 | Weighing scale: Serial port integration | ⏳ |
-| 493 | Weighing scale: Auto-read weight | ⏳ |
-| 494 | Weighing scale: Weight-based pricing | ⏳ |
-| 495 | Customer display: Pole display support | ⏳ |
-| 496 | Customer display: Show item added | ⏳ |
-| 497 | Customer display: Show total | ⏳ |
-| 498 | Customer display: Idle message | ⏳ |
-| 499 | UPS/battery: Low battery warning | ⏳ |
-| 500 | UPS/battery: Auto-save on power loss | ⏳ |
-| 501 | Fingerprint reader: Biometric login | ⏳ |
-| 502 | Fingerprint reader: Transaction auth | ⏳ |
-| 503 | RFID reader: Tag scanning | ⏳ |
-| 504 | RFID reader: Bulk inventory count | ⏳ |
-| 505 | Camera: Product image capture | ⏳ |
-| 506 | Camera: Customer ID scan | ⏳ |
-| 507 | Signature pad: Digital signature capture | ⏳ |
-| 508 | Signature pad: Refund authorization | ⏳ |
-| 509 | NFC reader: Contactless card detect | ⏳ |
-| 510 | NFC reader: Quick pay trigger | ⏳ |
-| 511 | Multi-monitor: Dual screen support | ⏳ |
-| 512 | Multi-monitor: Customer-facing display | ⏳ |
-| 513 | Printer: A4 invoice printing | ⏳ |
-| 514 | Printer: Gift receipt format | ⏳ |
-| 515 | Printer: Delivery challan format | ⏳ |
-| 516 | Hardware: Device health monitor | ⏳ |
-| 517 | Hardware: Auto-reconnect on disconnect | ⏳ |
-| 518 | Hardware: Configuration wizard | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 471–478 | Barcode scanner integration | USB/serial scanner detection, continuous scan mode, scan-to-field routing, multi-scanner support, scan sound feedback, scan error handling, scanner config UI, wireless scanner |
+| 479–486 | Thermal printer integration | Auto-detect printer, ESC/POS commands, logo printing, barcode on receipt, cash drawer kick, paper cut command, printer status, dual printer support |
+| 487–494 | Cash drawer | Auto-open on sale, manual open (manager PIN), drawer status, multiple drawers, drawer assignment per register, open count tracking, drawer close alert, USB/serial support |
+| 495–502 | Weighing scale | USB scale integration, auto-read weight, weight-to-qty mapping, tare support, scale config, multi-scale support, weight display, weight-based pricing |
+| 503–510 | Label printer | Dedicated label printer, Zebra/TSC support, label templates, auto-feed, batch print, preview, printer config, wireless label printing |
+| 511–518 | Customer display | Pole display support, LCD display, item-by-item display, total display, idle message, customer-facing screen, dual monitor, promotional content |
 
-### G2: AI & Intelligence (22 features)
+### G2: AI & Smart Features (22 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 519 | AI: Demand forecasting per product | ⏳ |
-| 520 | AI: Optimal reorder quantity suggestion | ⏳ |
-| 521 | AI: Price optimization suggestion | ⏳ |
-| 522 | AI: Customer churn prediction | ⏳ |
-| 523 | AI: Product recommendation engine | ⏳ |
-| 524 | AI: Sales anomaly detection | ⏳ |
-| 525 | AI: Fraud detection (unusual discounts) | ⏳ |
-| 526 | AI: Smart search (fuzzy matching) | ⏳ |
-| 527 | AI: Auto-categorize products from name | ⏳ |
-| 528 | AI: Seasonal trend detection | ⏳ |
-| 529 | AI: Bundle/combo suggestions | ⏳ |
-| 530 | AI: Customer segmentation | ⏳ |
-| 531 | AI: Inventory health score | ⏳ |
-| 532 | AI: Dynamic discount suggestions | ⏳ |
-| 533 | AI: Natural language report queries | ⏳ |
-| 534 | AI: Image-based product search | ⏳ |
-| 535 | AI: Voice command support | ⏳ |
-| 536 | AI: Chatbot assistant | ⏳ |
-| 537 | AI: Auto-fill product details from barcode | ⏳ |
-| 538 | AI: Predict peak sales hours | ⏳ |
-| 539 | AI: Smart alert prioritization | ⏳ |
-| 540 | AI: Auto-generate product descriptions | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 519–522 | Demand forecasting | Sales trend prediction, seasonal demand, reorder suggestions, stock optimization |
+| 523–526 | Smart pricing | Competitor price tracking, dynamic pricing rules, markdown optimization, price elasticity |
+| 527–530 | Customer insights | Purchase pattern analysis, churn prediction, segment auto-detection, next-purchase prediction |
+| 531–534 | Smart search | Fuzzy search, phonetic matching, recent/frequent suggestions, barcode OCR from camera |
+| 535–540 | Anomaly detection | Unusual transaction alerts, theft detection patterns, inventory shrinkage alerts, price anomaly, discount abuse detection, void pattern detection |
 
-### G3: Commercial & Licensing (27 features)
+### G3: Commercial / Licensing (27 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 541 | License: Key validation | ⏳ |
-| 542 | License: Trial period (30 days) | ⏳ |
-| 543 | License: Feature tier (Basic/Pro/Enterprise) | ⏳ |
-| 544 | License: Online activation | ⏳ |
-| 545 | License: Offline activation | ⏳ |
-| 546 | License: Expiry warning | ⏳ |
-| 547 | License: Grace period | ⏳ |
-| 548 | License: User count limit | ⏳ |
-| 549 | License: Store count limit | ⏳ |
-| 550 | Subscription: Monthly billing | ⏳ |
-| 551 | Subscription: Annual billing | ⏳ |
-| 552 | Subscription: Usage analytics | ⏳ |
-| 553 | Update: Auto-check for updates | ⏳ |
-| 554 | Update: In-app update notification | ⏳ |
-| 555 | Update: Delta update download | ⏳ |
-| 556 | Update: Changelog display | ⏳ |
-| 557 | Telemetry: Anonymous usage stats | ⏳ |
-| 558 | Telemetry: Error reporting | ⏳ |
-| 559 | Telemetry: Feature usage tracking | ⏳ |
-| 560 | Branding: White-label support | ⏳ |
-| 561 | Branding: Custom splash screen | ⏳ |
-| 562 | Branding: Custom color scheme | ⏳ |
-| 563 | Support: In-app ticket submission | ⏳ |
-| 564 | Support: Remote assist connection | ⏳ |
-| 565 | Support: Knowledge base link | ⏳ |
-| 566 | Support: Video tutorial links | ⏳ |
-| 567 | Support: Feedback form | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 541–548 | License management | License key validation, trial period, feature-gated tiers (Basic/Pro/Enterprise), license renewal, offline grace period, license transfer, usage analytics, subscription billing |
+| 549–556 | Multi-tier plans | Free tier limits, Basic features, Pro features, Enterprise features, plan comparison, upgrade flow, downgrade handling, trial-to-paid conversion |
+| 557–567 | White labeling | Custom branding, logo replacement, color theme, app name, splash screen, about screen, receipt branding, installer branding, URL removal, custom help text, custom onboarding |
 
 ### G4: Localization (23 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 568 | L10n: Hindi (हिन्दी) UI translation | ⏳ |
-| 569 | L10n: Tamil (தமிழ்) UI translation | ⏳ |
-| 570 | L10n: Telugu (తెలుగు) UI translation | ⏳ |
-| 571 | L10n: Kannada (ಕನ್ನಡ) UI translation | ⏳ |
-| 572 | L10n: Malayalam (മലയാളം) UI translation | ⏳ |
-| 573 | L10n: Marathi (मराठी) UI translation | ⏳ |
-| 574 | L10n: Bengali (বাংলা) UI translation | ⏳ |
-| 575 | L10n: Gujarati (ગુજરાતી) UI translation | ⏳ |
-| 576 | L10n: Punjabi (ਪੰਜਾਬੀ) UI translation | ⏳ |
-| 577 | L10n: Language switcher in settings | ⏳ |
-| 578 | L10n: RTL layout support (Urdu) | ⏳ |
-| 579 | L10n: Bilingual invoice (English + regional) | ⏳ |
-| 580 | L10n: Number formatting per locale | ⏳ |
-| 581 | L10n: Date formatting per locale | ⏳ |
-| 582 | L10n: Currency symbol per locale | ⏳ |
-| 583 | L10n: Resource file (.resx) architecture | ⏳ |
-| 584 | L10n: Fallback to English | ⏳ |
-| 585 | L10n: Regional tax labels (CGST/SGST/IGST) | ⏳ |
-| 586 | L10n: Regional receipt format | ⏳ |
-| 587 | L10n: Unicode font support | ⏳ |
-| 588 | L10n: Transliteration input | ⏳ |
-| 589 | L10n: SMS templates per language | ⏳ |
-| 590 | L10n: Error messages per language | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 568–575 | Indian languages | Hindi, Tamil, Telugu, Kannada, Malayalam, Bengali, Marathi, Gujarati UI translation |
+| 576–580 | Regional formats | Indian number format (lakhs/crores), regional date formats, regional calendar, state-wise tax labels, regional receipt templates |
+| 581–590 | Translation infrastructure | Resource files (.resx), runtime language switch, RTL support placeholder, translated tooltips, translated validation messages, translated reports, translated receipts, translated email templates, translated help content, language auto-detect |
 
 ### G5: Multi-Store (49 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 591 | Store model: Id, Name, Code, Address | ⏳ |
-| 592 | Store: Phone, Email fields | ⏳ |
-| 593 | Store: GSTIN per store | ⏳ |
-| 594 | Store: IsActive flag | ⏳ |
-| 595 | Store: Central database sync | ⏳ |
-| 596 | Multi-store: Store selector on login | ⏳ |
-| 597 | Multi-store: Store-scoped products | ⏳ |
-| 598 | Multi-store: Store-scoped sales | ⏳ |
-| 599 | Multi-store: Store-scoped inventory | ⏳ |
-| 600 | Multi-store: Store-scoped users | ⏳ |
-| 601 | Multi-store: Cross-store product catalog | ⏳ |
-| 602 | Multi-store: Stock transfer request | ⏳ |
-| 603 | Multi-store: Stock transfer approval | ⏳ |
-| 604 | Multi-store: Stock transfer receipt | ⏳ |
-| 605 | Multi-store: Transfer tracking | ⏳ |
-| 606 | Multi-store: Inter-store pricing | ⏳ |
-| 607 | Multi-store: Consolidated reports | ⏳ |
-| 608 | Multi-store: Store comparison report | ⏳ |
-| 609 | Multi-store: Central product management | ⏳ |
-| 610 | Multi-store: Central pricing rules | ⏳ |
-| 611 | Multi-store: Central promotion management | ⏳ |
-| 612 | Multi-store: Store performance dashboard | ⏳ |
-| 613 | Multi-store: Franchise model support | ⏳ |
-| 614 | Multi-store: Warehouse/distribution center | ⏳ |
-| 615 | Multi-store: Auto-replenishment from warehouse | ⏳ |
-| 616 | Multi-store: Store-level profit center | ⏳ |
-| 617 | Sync: Conflict resolution strategy | ⏳ |
-| 618 | Sync: Offline queue with retry | ⏳ |
-| 619 | Sync: Incremental sync | ⏳ |
-| 620 | Sync: Full sync on demand | ⏳ |
-| 621 | Sync: Sync status indicator | ⏳ |
-| 622 | Sync: Last sync timestamp | ⏳ |
-| 623 | Sync: Sync log viewer | ⏳ |
-| 624 | Multi-store: Store grouping (region/zone) | ⏳ |
-| 625 | Multi-store: Regional manager view | ⏳ |
-| 626 | Multi-store: Head office admin view | ⏳ |
-| 627 | Multi-store: Store opening/closing wizard | ⏳ |
-| 628 | Multi-store: Store audit checklist | ⏳ |
-| 629 | Multi-store: Inventory reconciliation | ⏳ |
-| 630 | Multi-store: Price override per store | ⏳ |
-| 631 | Multi-store: Customer shared across stores | ⏳ |
-| 632 | Multi-store: Loyalty shared across stores | ⏳ |
-| 633 | Multi-store: Return at any store | ⏳ |
-| 634 | Multi-store: Gift card redeemable anywhere | ⏳ |
-| 635 | Multi-store: Consolidated GST filing | ⏳ |
-| 636 | Multi-store: Store-level notifications | ⏳ |
-| 637 | Multi-store: Real-time stock visibility | ⏳ |
-| 638 | Multi-store: Store ranking dashboard | ⏳ |
-| 639 | Multi-store: Bulk product push to stores | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 591–600 | Store management | Store model, store CRUD, store switch, store-wise data isolation, store config, store-wise users, store address, store GSTIN, store-wise numbering, store hierarchy |
+| 601–610 | Inter-store operations | Stock transfer, transfer request/approve, transfer tracking, inter-store pricing, consolidated reports, inter-store returns, shared product catalog, store comparison reports, store-wise dashboard, store-wise P&L |
+| 611–620 | Central management | Central admin dashboard, central product master, central price management, central user management, central reports, central settings push, central backup, central alert management, franchise management, royalty tracking |
+| 621–639 | Data sync | Cloud sync engine, conflict resolution, offline-first sync, sync queue, sync status, sync retry, selective sync, bandwidth optimization, delta sync, sync log, real-time sync, sync scheduling, sync encryption, multi-device sync, sync health monitor, central database, sync authentication, sync compression, partial sync |
 
 ### G6: E-commerce Integration (46 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 640 | Ecom: WooCommerce connector | ⏳ |
-| 641 | Ecom: Shopify connector | ⏳ |
-| 642 | Ecom: Amazon Seller connector | ⏳ |
-| 643 | Ecom: Flipkart Seller connector | ⏳ |
-| 644 | Ecom: Myntra Seller connector | ⏳ |
-| 645 | Ecom: Product catalog sync (push) | ⏳ |
-| 646 | Ecom: Price sync (push) | ⏳ |
-| 647 | Ecom: Stock level sync (push) | ⏳ |
-| 648 | Ecom: Order import (pull) | ⏳ |
-| 649 | Ecom: Order status update | ⏳ |
-| 650 | Ecom: Shipping label generation | ⏳ |
-| 651 | Ecom: Return/refund sync | ⏳ |
-| 652 | Ecom: Channel-wise sales report | ⏳ |
-| 653 | Ecom: Channel-wise inventory allocation | ⏳ |
-| 654 | Ecom: Marketplace fee tracking | ⏳ |
-| 655 | Ecom: SKU mapping (POS ↔ marketplace) | ⏳ |
-| 656 | Ecom: Image sync | ⏳ |
-| 657 | Ecom: Bulk listing update | ⏳ |
-| 658 | Ecom: Order fulfillment workflow | ⏳ |
-| 659 | Ecom: Pick-pack-ship process | ⏳ |
-| 660 | Ecom: AWB (airway bill) tracking | ⏳ |
-| 661 | Ecom: Courier partner integration | ⏳ |
-| 662 | Ecom: Delhivery connector | ⏳ |
-| 663 | Ecom: Shiprocket connector | ⏳ |
-| 664 | Ecom: Delivery status tracking | ⏳ |
-| 665 | Ecom: COD reconciliation | ⏳ |
-| 666 | Ecom: Omnichannel inventory view | ⏳ |
-| 667 | Ecom: Online-offline price parity | ⏳ |
-| 668 | Ecom: Channel priority for stock allocation | ⏳ |
-| 669 | Ecom: Order notification | ⏳ |
-| 670 | Ecom: Abandoned cart data (Shopify/Woo) | ⏳ |
-| 671 | Ecom: Customer import from channels | ⏳ |
-| 672 | Ecom: Review/rating import | ⏳ |
-| 673 | Ecom: SEO metadata for products | ⏳ |
-| 674 | Ecom: Discount coupon sync | ⏳ |
-| 675 | Ecom: Flash sale scheduling | ⏳ |
-| 676 | Ecom: Variant management (size/color) | ⏳ |
-| 677 | Ecom: Bundle/kit products | ⏳ |
-| 678 | Ecom: Pre-order support | ⏳ |
-| 679 | Ecom: Backorder support | ⏳ |
-| 680 | Ecom: Wish list data import | ⏳ |
-| 681 | Ecom: Gift wrapping option | ⏳ |
-| 682 | Ecom: Digital invoice via email | ⏳ |
-| 683 | Ecom: Webhook listener | ⏳ |
-| 684 | Ecom: Rate limiting & throttling | ⏳ |
-| 685 | Ecom: Sync dashboard | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 640–652 | Product sync | Push products to Shopify/WooCommerce, pull orders, inventory sync, price sync, image sync, variant sync, category mapping, SKU mapping, bulk sync, sync scheduling, sync error handling, webhook receiver, API rate limiting |
+| 653–662 | Order management | Online order list, order → sale conversion, order fulfillment, shipping tracking, order status sync, cancellation handling, return from online, refund processing, multi-channel orders, order priority |
+| 663–672 | Marketplace integration | Amazon, Flipkart, Meesho connectors, listing management, order import, inventory push, pricing rules, commission tracking, review management, marketplace analytics |
+| 673–685 | Own webstore | Product catalog page, shopping cart, checkout, payment gateway, order notifications, customer accounts, wishlist, search, filters, reviews, SEO basics, mobile responsive, coupon support |
 
 ### G7: API & Integration (21 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 686 | API: REST endpoint — GET products | ⏳ |
-| 687 | API: REST endpoint — GET sales | ⏳ |
-| 688 | API: REST endpoint — POST sale | ⏳ |
-| 689 | API: REST endpoint — GET inventory | ⏳ |
-| 690 | API: REST endpoint — GET customers | ⏳ |
-| 691 | API: REST endpoint — GET reports | ⏳ |
-| 692 | API: Authentication (API key) | ⏳ |
-| 693 | API: Rate limiting | ⏳ |
-| 694 | API: Swagger/OpenAPI documentation | ⏳ |
-| 695 | API: Webhook outbound (sale complete) | ⏳ |
-| 696 | API: Webhook outbound (stock change) | ⏳ |
-| 697 | API: Tally ERP integration | ⏳ |
-| 698 | API: Busy Accounting integration | ⏳ |
-| 699 | API: WhatsApp Business API | ⏳ |
-| 700 | API: SMS gateway (MSG91/Twilio) | ⏳ |
-| 701 | API: Email gateway (SendGrid/SMTP) | ⏳ |
-| 702 | API: Google Sheets export | ⏳ |
-| 703 | API: Zapier/Make connector | ⏳ |
-| 704 | API: Power BI connector | ⏳ |
-| 705 | API: Excel add-in support | ⏳ |
-| 706 | API: Health check endpoint | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 686–692 | REST API | Product API, Sale API, Customer API, Inventory API, API authentication (JWT), API rate limiting, API documentation (Swagger) |
+| 693–699 | Accounting integration | Tally export, QuickBooks sync, Zoho Books sync, journal entry export, ledger mapping, auto-posting, reconciliation |
+| 700–706 | Communication | SMS API (OTP, alerts), Email API (invoices, reports), WhatsApp Business API, push notifications, webhook support, Slack/Teams alerts, notification templates |
 
 ### G8: Mobile Companion (11 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 707 | Mobile: Owner dashboard app (read-only) | ⏳ |
-| 708 | Mobile: Real-time sales notification | ⏳ |
-| 709 | Mobile: Stock alerts push notification | ⏳ |
-| 710 | Mobile: Daily summary push | ⏳ |
-| 711 | Mobile: Quick stock check | ⏳ |
-| 712 | Mobile: Quick price lookup | ⏳ |
-| 713 | Mobile: Approve refund request | ⏳ |
-| 714 | Mobile: Approve stock transfer | ⏳ |
-| 715 | Mobile: View today's sales chart | ⏳ |
-| 716 | Mobile: Remote store monitoring | ⏳ |
-| 717 | Mobile: Camera barcode scan | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 707–717 | Mobile app | Dashboard view, stock check, sales summary, barcode scan (camera), price lookup, low stock alerts, daily report, customer lookup, quick sale, offline mode, push notifications |
 
 ### G9: Multi-Country (9 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 718 | Country: Tax regime configuration | ⏳ |
-| 719 | Country: VAT support (non-GST) | ⏳ |
-| 720 | Country: Sales tax support (US) | ⏳ |
-| 721 | Country: Multi-currency support | ⏳ |
-| 722 | Country: Exchange rate management | ⏳ |
-| 723 | Country: Address format per country | ⏳ |
-| 724 | Country: Phone format validation | ⏳ |
-| 725 | Country: Regional compliance rules | ⏳ |
-| 726 | Country: Country selector on setup | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 718–726 | Country support | Multi-currency, country-specific tax (VAT/GST/Sales Tax), address format, phone format, date/time format, tax registration number format, invoice compliance per country, currency exchange rates, country-specific reports |
 
-### G10: Niche Vertical — Clothing Retail (61 features)
+### G10: Niche Vertical Extensions (61 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 727 | Product: Size field | ⏳ |
-| 728 | Product: Size chart (S/M/L/XL/XXL) | ⏳ |
-| 729 | Product: Size-wise stock tracking | ⏳ |
-| 730 | Product: Color-size matrix (SKU grid) | ⏳ |
-| 731 | Product: Fabric/material field | ⏳ |
-| 732 | Product: Season field (Summer/Winter/Monsoon/AllSeason) | ⏳ |
-| 733 | Product: Style code field | ⏳ |
-| 734 | Product: Design/pattern field | ⏳ |
-| 735 | Product: Gender (Men/Women/Kids/Unisex) | ⏳ |
-| 736 | Product: Occasion (Casual/Formal/Party/Wedding) | ⏳ |
-| 737 | Product: Fit type (Slim/Regular/Loose) | ⏳ |
-| 738 | Product: Sleeve type (Full/Half/Sleeveless) | ⏳ |
-| 739 | Product: Neck type (Round/V/Collar) | ⏳ |
-| 740 | Product: Wash care instructions | ⏳ |
-| 741 | Product: Manufacturer/importer field | ⏳ |
-| 742 | Product: Country of origin | ⏳ |
-| 743 | Product: Product image gallery | ⏳ |
-| 744 | Product: Variant grouping (parent-child) | ⏳ |
-| 745 | Product: Combo/set products | ⏳ |
-| 746 | Product: Alteration tracking | ⏳ |
-| 747 | Product: Alteration charges | ⏳ |
-| 748 | Sales: Size selection in cart | ⏳ |
-| 749 | Sales: Color-size picker modal | ⏳ |
-| 750 | Sales: Trial room tracking | ⏳ |
-| 751 | Sales: Alteration order creation | ⏳ |
-| 752 | Sales: Alteration delivery date | ⏳ |
-| 753 | Sales: Gift wrapping option | ⏳ |
-| 754 | Sales: Gift message field | ⏳ |
-| 755 | Sales: Exchange mode (return + new sale) | ⏳ |
-| 756 | Sales: Advance payment/layaway | ⏳ |
-| 757 | Sales: Credit sale (pay later) | ⏳ |
-| 758 | Inventory: Size-wise reorder | ⏳ |
-| 759 | Inventory: Color-wise reorder | ⏳ |
-| 760 | Inventory: Season end clearance tagging | ⏳ |
-| 761 | Inventory: Dead stock by season | ⏳ |
-| 762 | Reports: Size-wise sales analysis | ⏳ |
-| 763 | Reports: Color-wise sales analysis | ⏳ |
-| 764 | Reports: Season performance report | ⏳ |
-| 765 | Reports: Gender-wise sales split | ⏳ |
-| 766 | Reports: Style code performance | ⏳ |
-| 767 | Reports: Alteration revenue report | ⏳ |
-| 768 | Reports: Exchange/return rate by category | ⏳ |
-| 769 | Barcode: Style-Color-Size encoded | ⏳ |
-| 770 | Label: Price tag with size/color | ⏳ |
-| 771 | Label: Wash care symbol printing | ⏳ |
-| 772 | Display: Mannequin/display stock tracking | ⏳ |
-| 773 | Display: Display stock lock (non-sellable) | ⏳ |
-| 774 | Loyalty: Birthday discount auto-apply | ⏳ |
-| 775 | Loyalty: Anniversary offer | ⏳ |
-| 776 | Loyalty: Festival-linked promotions | ⏳ |
-| 777 | Seasonal: Diwali sale template | ⏳ |
-| 778 | Seasonal: Eid sale template | ⏳ |
-| 779 | Seasonal: Christmas sale template | ⏳ |
-| 780 | Seasonal: Republic Day sale template | ⏳ |
-| 781 | Seasonal: End of season sale wizard | ⏳ |
-| 782 | Consignment: Vendor consignment tracking | ⏳ |
-| 783 | Consignment: Commission calculation | ⏳ |
-| 784 | Consignment: Unsold return to vendor | ⏳ |
-| 785 | Catalogue: Digital lookbook generation | ⏳ |
-| 786 | Catalogue: WhatsApp catalogue share | ⏳ |
-| 787 | Catalogue: PDF catalogue export | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 727–738 | Tailoring / Alteration | Measurement capture, alteration orders, alteration tracking, delivery date, fitting notes, alteration pricing, alteration receipt, tailor assignment, alteration status, alteration history, alteration charges on bill, alteration reports |
+| 739–748 | Rental / Lease | Rental product flag, rental period, rental pricing, return tracking, late fee calc, rental agreement print, deposit management, rental calendar, availability check, rental reports |
+| 749–758 | Wholesale / B2B | Wholesale pricing tiers, bulk discounts, credit terms, purchase orders from customers, delivery challan, B2B invoice format, GST B2B compliance, trade discounts, volume pricing, B2B customer portal |
+| 759–768 | Consignment | Consignment stock tracking, consignor management, commission calculation, consignment settlement, unsold return, consignment reports, consignment agreement, stock aging per consignor, consignment invoice, consignment reconciliation |
+| 769–778 | Fashion seasonal | Season model, season-wise collections, markdown calendar, end-of-season sale, season comparison reports, seasonal inventory planning, lookbook management, trend tracking, season archive, season P&L |
+| 779–787 | Gift & loyalty | Gift card issuance, gift card redemption, gift card balance check, gift card expiry, loyalty program rules, points earning rules, points redemption, loyalty tier benefits, loyalty reports |
 
 ### G11: Touch & Kiosk (11 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 788 | Touch: Large button billing mode | ⏳ |
-| 789 | Touch: On-screen numpad | ⏳ |
-| 790 | Touch: Swipe to delete cart item | ⏳ |
-| 791 | Touch: Pinch-zoom on reports | ⏳ |
-| 792 | Touch: Touch-friendly ComboBox | ⏳ |
-| 793 | Touch: Full-screen kiosk mode | ⏳ |
-| 794 | Touch: Auto-hide title bar | ⏳ |
-| 795 | Kiosk: Customer self-checkout | ⏳ |
-| 796 | Kiosk: Product browsing | ⏳ |
-| 797 | Kiosk: Price check station | ⏳ |
-| 798 | Kiosk: Locked-down Windows shell | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 788–798 | Touch optimization | Large touch targets, on-screen numpad, swipe gestures, pinch-to-zoom on reports, touch-friendly DataGrid, full-screen kiosk mode, auto-hide taskbar, touch keyboard integration, gesture shortcuts, touch-optimized billing, customer self-checkout kiosk |
 
-### G12: CRM — Customer Relationship (25 features)
+### G12: CRM (25 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 799 | CRM: Customer 360° view | ⏳ |
-| 800 | CRM: Purchase history timeline | ⏳ |
-| 801 | CRM: Communication log | ⏳ |
-| 802 | CRM: Customer tags/labels | ⏳ |
-| 803 | CRM: Customer groups/segments | ⏳ |
-| 804 | CRM: RFM analysis (Recency/Frequency/Monetary) | ⏳ |
-| 805 | CRM: Targeted promotion by segment | ⏳ |
-| 806 | CRM: SMS campaign builder | ⏳ |
-| 807 | CRM: WhatsApp message template | ⏳ |
-| 808 | CRM: Email campaign builder | ⏳ |
-| 809 | CRM: Campaign performance tracking | ⏳ |
-| 810 | CRM: Feedback collection | ⏳ |
-| 811 | CRM: NPS (Net Promoter Score) tracking | ⏳ |
-| 812 | CRM: Complaint management | ⏳ |
-| 813 | CRM: Gift card issuance | ⏳ |
-| 814 | CRM: Gift card redemption | ⏳ |
-| 815 | CRM: Gift card balance check | ⏳ |
-| 816 | CRM: Store credit management | ⏳ |
-| 817 | CRM: Referral program | ⏳ |
-| 818 | CRM: Customer import from Excel | ⏳ |
-| 819 | CRM: Duplicate customer merge | ⏳ |
-| 820 | CRM: Customer export | ⏳ |
-| 821 | CRM: Wishlist tracking | ⏳ |
-| 822 | CRM: Follow-up reminders | ⏳ |
-| 823 | CRM: VIP customer flagging | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 799–808 | Customer engagement | SMS campaigns, email campaigns, birthday greetings auto-send, anniversary offers, abandoned cart reminders, feedback collection, NPS surveys, customer segmentation, targeted promotions, campaign analytics |
+| 809–818 | Customer service | Complaint tracking, complaint resolution, service request, follow-up reminders, customer satisfaction score, escalation rules, SLA tracking, service history, warranty tracking, after-sales support |
+| 819–823 | Communication templates | SMS templates, email templates, WhatsApp templates, template personalization, template scheduling |
 
-### G13: HR & Staff (8 features)
+### G13: HR / Staff (8 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 824 | HR: Employee profile model | ⏳ |
-| 825 | HR: Attendance clock-in/clock-out | ⏳ |
-| 826 | HR: Shift management | ⏳ |
-| 827 | HR: Sales target per employee | ⏳ |
-| 828 | HR: Commission calculation | ⏳ |
-| 829 | HR: Performance report per cashier | ⏳ |
-| 830 | HR: Leave management | ⏳ |
-| 831 | HR: Salary/commission payout report | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 824–831 | Staff management | Staff attendance, shift scheduling, salary/commission tracking, leave management, performance metrics (sales/hour), staff targets, overtime tracking, payroll export |
 
-### G14: Compliance & Legal (17 features)
+### G14: Compliance (17 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 832 | GST: GSTR-1 data preparation | ⏳ |
-| 833 | GST: GSTR-3B data preparation | ⏳ |
-| 834 | GST: HSN-wise summary | ⏳ |
-| 835 | GST: B2B invoice format | ⏳ |
-| 836 | GST: B2C invoice format | ⏳ |
-| 837 | GST: E-invoice generation (IRN) | ⏳ |
-| 838 | GST: E-way bill generation | ⏳ |
-| 839 | GST: Credit/debit note | ⏳ |
-| 840 | GST: Reverse charge mechanism | ⏳ |
-| 841 | GST: Composition scheme support | ⏳ |
-| 842 | Legal: Consumer protection compliance | ⏳ |
-| 843 | Legal: MRP display enforcement | ⏳ |
-| 844 | Legal: Weights & measures compliance | ⏳ |
-| 845 | Legal: Data privacy (customer consent) | ⏳ |
-| 846 | Legal: Digital signature on invoices | ⏳ |
-| 847 | Legal: Audit trail immutability | ⏳ |
-| 848 | Legal: FSSAI compliance (if applicable) | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 832–840 | GST compliance | GSTR-1 auto-fill, GSTR-3B summary, GSTR-2A reconciliation, e-Way bill generation, e-Invoice generation (IRN), QR code on invoice (mandate), HSN summary report, tax payment tracker, GST annual return data |
+| 841–848 | Legal compliance | Digital signature on invoices, data retention policy, GDPR-like data deletion, consumer protection disclaimers, return policy display, price display regulations, weight/measure compliance, anti-profiteering compliance |
 
-### G15: UI Polish & Accessibility (18 features)
+### G15: UI Polish (18 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 849 | UI: Dark mode theme | ⏳ |
-| 850 | UI: Light mode theme | ✅ |
-| 851 | UI: High contrast mode | ⏳ |
-| 852 | UI: Font size scaling (Small/Normal/Large) | ⏳ |
-| 853 | UI: Keyboard-only navigation (all views) | ✅ |
-| 854 | UI: Screen reader compatibility | ⏳ |
-| 855 | UI: Tab order optimization | ⏳ |
-| 856 | UI: Tooltip system | ✅ |
-| 857 | UI: Loading skeleton placeholders | ⏳ |
-| 858 | UI: Micro-animations (slide/fade) | ✅ |
-| 859 | UI: Empty state illustrations | ⏳ |
-| 860 | UI: Success/error toast notifications | ⏳ |
-| 861 | UI: Confirmation dialogs (delete/exit) | ✅ |
-| 862 | UI: Breadcrumb navigation | ⏳ |
-| 863 | UI: Sidebar collapse/expand animation | ✅ |
-| 864 | UI: Responsive layout (resize) | ✅ |
-| 865 | UI: Print preview before print | ⏳ |
-| 866 | UI: Drag-drop column reorder | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 849–858 | Animations & transitions | Page transition animations, form reveal animations, success/error toast notifications, loading skeletons, progress indicators, smooth scrolling, card hover effects, DataGrid row animations, dialog open/close animations, splash screen animation |
+| 859–866 | Visual refinements | Icon library (Fluent/Segoe), consistent spacing audit, responsive layout (window resize), high-DPI support, print-specific styles, empty state illustrations, color-coded status badges, data visualization charts |
 
-### G16: Database Administration (14 features)
+### G16: DB Administration (14 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 867 | DB: SQLite → SQL Server migration tool | ⏳ |
-| 868 | DB: Data export (full dump) | ⏳ |
-| 869 | DB: Data import (full restore) | ⏳ |
-| 870 | DB: Table row count dashboard | ⏳ |
-| 871 | DB: Database size display | ⏳ |
-| 872 | DB: Index health check | ⏳ |
-| 873 | DB: Vacuum/compact SQLite | ⏳ |
-| 874 | DB: Scheduled backup to cloud | ⏳ |
-| 875 | DB: Backup to USB drive | ⏳ |
-| 876 | DB: Version migration runner | ✅ |
-| 877 | DB: Seed data for demo mode | ⏳ |
-| 878 | DB: Data anonymization tool | ⏳ |
-| 879 | DB: Connection string configuration | ⏳ |
-| 880 | DB: Multi-tenant schema support | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 867–880 | Database tools | DB size monitor, DB vacuum/optimize, migration manager, seed data tool, data purge (old records), archive old sales, index rebuild, query performance log, DB export (JSON), DB import (JSON), schema version display, connection pool monitor, deadlock detection, automatic maintenance |
 
-### G17: Documents & Templates (9 features)
+### G17: Document Management (9 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 881 | Doc: Invoice template editor | ⏳ |
-| 882 | Doc: Receipt template editor | ⏳ |
-| 883 | Doc: Quotation/estimate template | ⏳ |
-| 884 | Doc: Purchase order template | ⏳ |
-| 885 | Doc: Delivery challan template | ⏳ |
-| 886 | Doc: Credit note template | ⏳ |
-| 887 | Doc: Barcode label template editor | ⏳ |
-| 888 | Doc: Letterhead configuration | ⏳ |
-| 889 | Doc: Terms & conditions text | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 881–889 | Documents | PDF invoice generation, PDF receipt generation, PDF report generation, document storage, document search, document email, document print queue, document template editor, batch document generation |
 
-### G18: Workflows & Automation (8 features)
+### G18: Workflow Automation (8 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 890 | Workflow: Low stock auto-purchase order | ⏳ |
-| 891 | Workflow: Sale complete → print + email | ⏳ |
-| 892 | Workflow: Return → manager approval | ⏳ |
-| 893 | Workflow: Day-end auto-report email | ⏳ |
-| 894 | Workflow: Scheduled report generation | ⏳ |
-| 895 | Workflow: Price change approval | ⏳ |
-| 896 | Workflow: Bulk operation approval | ⏳ |
-| 897 | Workflow: Custom trigger builder | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 890–897 | Workflows | Low stock → auto PO creation, Day end → auto backup, Sale complete → auto receipt print, Customer credit limit → auto alert, Inventory → auto reorder, Expiry → auto markdown, Milestone → auto loyalty upgrade, Schedule → auto report email |
 
-### G19: Preferences & Personalization (19 features)
+### G19: User Preferences (19 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 898 | Pref: Default landing page | ⏳ |
-| 899 | Pref: Sidebar pinned items | ⏳ |
-| 900 | Pref: DataGrid column visibility toggle | ⏳ |
-| 901 | Pref: DataGrid column order persistence | ⏳ |
-| 902 | Pref: Default page size per view | ⏳ |
-| 903 | Pref: Default sort per view | ⏳ |
-| 904 | Pref: Quick action bar customization | ⏳ |
-| 905 | Pref: Notification preferences | ⏳ |
-| 906 | Pref: Sound effects (sale complete beep) | ⏳ |
-| 907 | Pref: Auto-focus behavior | ⏳ |
-| 908 | Pref: Keyboard shortcut customization | ⏳ |
-| 909 | Pref: Date range default (Today/Week/Month) | ⏳ |
-| 910 | Pref: Dashboard widget arrangement | ⏳ |
-| 911 | Pref: Receipt auto-print toggle | ⏳ |
-| 912 | Pref: Cash drawer auto-open toggle | ⏳ |
-| 913 | Pref: Low stock threshold per user | ⏳ |
-| 914 | Pref: Number of recent items | ⏳ |
-| 915 | Pref: Compact/comfortable view density | ⏳ |
-| 916 | Pref: User avatar/profile picture | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 898–906 | Personal preferences | Default landing page, default view (list/grid), items per page preference, default printer, default payment method, sidebar collapsed/expanded, column visibility per DataGrid, sort preference persistence, filter preference persistence |
+| 907–916 | Notification preferences | Email notification toggle, SMS notification toggle, in-app notification toggle, alert sound preference, low stock alert threshold, daily report auto-email, weekly summary preference, notification quiet hours, notification priority filter, notification history |
 
-### G20: Payment Integration (17 features)
+### G20: Payment Processing (17 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 917 | Pay: UPI deep link (PhonePe/GPay/Paytm) | ⏳ |
-| 918 | Pay: UPI QR code generation | ⏳ |
-| 919 | Pay: UPI payment verification | ⏳ |
-| 920 | Pay: Razorpay POS integration | ⏳ |
-| 921 | Pay: PayTM POS integration | ⏳ |
-| 922 | Pay: Pine Labs EDC integration | ⏳ |
-| 923 | Pay: Card swipe machine integration | ⏳ |
-| 924 | Pay: Split payment (Cash + Card) | ⏳ |
-| 925 | Pay: Split payment (Cash + UPI) | ⏳ |
-| 926 | Pay: Partial payment / advance | ⏳ |
-| 927 | Pay: Credit sale (due balance) | ⏳ |
-| 928 | Pay: EMI option | ⏳ |
-| 929 | Pay: Wallet integration (Paytm Wallet) | ⏳ |
-| 930 | Pay: Payment reconciliation | ⏳ |
-| 931 | Pay: Settlement report | ⏳ |
-| 932 | Pay: Refund to original payment method | ⏳ |
-| 933 | Pay: Payment failure retry | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 917–924 | Payment gateway | Razorpay integration, PayTM integration, PhonePe integration, Google Pay integration, UPI deep link, payment status polling, refund via gateway, payment reconciliation |
+| 925–933 | Payment features | EMI support, partial payment tracking, payment plan, advance payment / deposit, payment reminder SMS, payment receipt, payment history per customer, credit/debit note adjustment, foreign currency acceptance |
 
-### G21: Budgeting & Forecasting (6 features)
+### G21: Budgeting & Planning (6 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 934 | Budget: Monthly revenue target | ⏳ |
-| 935 | Budget: Monthly expense budget | ⏳ |
-| 936 | Budget: Budget vs actual dashboard | ⏳ |
-| 937 | Budget: Variance analysis | ⏳ |
-| 938 | Forecast: Next month sales prediction | ⏳ |
-| 939 | Forecast: Cash flow projection | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 934–939 | Financial planning | Monthly sales budget, expense budget, budget vs actual report, variance analysis, forecast based on trends, financial goal setting |
 
 ### G22: Advanced Reporting (9 features)
 
-| # | Feature | Status |
-|---|---|---|
-| 940 | Report: Custom report builder | ⏳ |
-| 941 | Report: Saved report templates | ⏳ |
-| 942 | Report: Scheduled email delivery | ⏳ |
-| 943 | Report: Chart/graph visualization | ⏳ |
-| 944 | Report: Drill-down from summary to detail | ⏳ |
-| 945 | Report: Cross-tab/pivot table | ⏳ |
-| 946 | Report: Comparison period overlay | ⏳ |
-| 947 | Report: Dashboard widget from any report | ⏳ |
-| 948 | Report: Real-time auto-refresh | ⏳ |
+| # | Feature | Description |
+|---|---------|-------------|
+| 940–948 | Advanced reports | Custom report builder, scheduled report emails, report bookmarks/favorites, comparative reports (period vs period), drill-down reports, report sharing, KPI dashboard, real-time analytics, report access control (role-based) |
 
 ---
 
-## Summary
+## Progress Tracking
 
-| Category | Total | ✅ Done | ⏭ Skip | ⏳ Pending |
-|---|---|---|---|---|
-| **Phase 1** — Foundation & Product | 72 | 70 | 2 | 0 |
-| **Phase 2** — Sales & Billing | 87 | 87 | 0 | 0 |
-| **Phase 3** — Inventory & Stock | 85 | 28 | 0 | 57 |
-| **Phase 4** — Customer & Relationships | 83 | 0 | 0 | 83 |
-| **Phase 5** — Reports & Analytics | 82 | 22 | 0 | 60 |
-| **Phase 6** — Settings & Admin | 61 | 26 | 0 | 35 |
-| **Core Total** | **470** | **233** | **2** | **235** |
-| **G1–G22 Expansion** | **478** | **8** | **0** | **470** |
-| **Grand Total** | **948** | **241** | **2** | **705** |
-
-> **Progress: 241/948 (25.4%)**
->
-> Last updated after Feature #130 session.
+| Status | Count |
+|--------|-------|
+| ✅ Built | 11 |
+| ⏭ Skipped | 8 |
+| 🔨 Remaining | 929 |
+| **Total** | **948** |
