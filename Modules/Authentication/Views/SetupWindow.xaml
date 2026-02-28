@@ -27,7 +27,7 @@
         <!-- ── Row 1: Numbered step circles + labels ──────────── -->
         <StackPanel Grid.Row="1" HorizontalAlignment="Center"
                     Margin="0,4,0,4">
-            <Grid Width="280">
+            <Grid Width="{StaticResource StepperWidth}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -36,7 +36,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <!-- Step 1 circle -->
-                <Border Grid.Column="0" Width="24" Height="24" CornerRadius="12"
+                <Border Grid.Column="0" Width="{StaticResource StepCircleSize}" Height="{StaticResource StepCircleSize}" CornerRadius="12"
                         HorizontalAlignment="Center">
                     <Border.Style>
                         <Style TargetType="Border">
@@ -53,8 +53,8 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <!-- Connector 1-2 -->
-                <Border Grid.Column="1" Height="2" VerticalAlignment="Center"
-                        Margin="4,0" CornerRadius="1">
+                <Border Grid.Column="1" Height="{StaticResource StepConnectorHeight}" VerticalAlignment="Center"
+                        Margin="{StaticResource StepConnectorMargin}" CornerRadius="1">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
@@ -67,7 +67,7 @@
                     </Border.Style>
                 </Border>
                 <!-- Step 2 circle -->
-                <Border Grid.Column="2" Width="24" Height="24" CornerRadius="12"
+                <Border Grid.Column="2" Width="{StaticResource StepCircleSize}" Height="{StaticResource StepCircleSize}" CornerRadius="12"
                         HorizontalAlignment="Center">
                     <Border.Style>
                         <Style TargetType="Border">
@@ -100,8 +100,8 @@
                     </TextBlock>
                 </Border>
                 <!-- Connector 2-3 -->
-                <Border Grid.Column="3" Height="2" VerticalAlignment="Center"
-                        Margin="4,0" CornerRadius="1">
+                <Border Grid.Column="3" Height="{StaticResource StepConnectorHeight}" VerticalAlignment="Center"
+                        Margin="{StaticResource StepConnectorMargin}" CornerRadius="1">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
@@ -114,7 +114,7 @@
                     </Border.Style>
                 </Border>
                 <!-- Step 3 circle -->
-                <Border Grid.Column="4" Width="24" Height="24" CornerRadius="12"
+                <Border Grid.Column="4" Width="{StaticResource StepCircleSize}" Height="{StaticResource StepCircleSize}" CornerRadius="12"
                         HorizontalAlignment="Center">
                     <Border.Style>
                         <Style TargetType="Border">
@@ -142,7 +142,7 @@
                 </Border>
             </Grid>
             <!-- Step labels — active step is bold + accented -->
-            <Grid Width="280" Margin="{StaticResource FieldLabelSpacing}">
+            <Grid Width="{StaticResource StepperWidth}" Margin="{StaticResource FieldLabelSpacing}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -371,7 +371,7 @@
 
                     <!-- ── Admin (blue pastel section) ── -->
                     <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource RoleAdminBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
                         <TextBlock Text="🛡️ Admin" FontWeight="SemiBold"
                                    Foreground="{StaticResource RoleAdminAccent}"
                                    FontSize="{StaticResource FontSizeBody}"/>
@@ -383,13 +383,13 @@
                                  PasswordChanged="OnPinChanged"
                                  AutomationProperties.Name="Admin PIN"/>
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
-                        <TextBlock Text="{Binding AdminPinWarning}" Margin="6,0,0,0"
+                        <TextBlock Text="{Binding AdminPinWarning}" Margin="{StaticResource StrengthLabelGap}"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentWarning}"/>
                     </StackPanel>
@@ -416,7 +416,7 @@
 
                     <!-- ── Manager (purple pastel section) ── -->
                     <Border Grid.Row="6" Grid.ColumnSpan="2" Background="{StaticResource RoleManagerBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
                         <TextBlock Text="📋 Manager" FontWeight="SemiBold"
                                    Foreground="{StaticResource RoleManagerAccent}"
                                    FontSize="{StaticResource FontSizeBody}"/>
@@ -428,13 +428,13 @@
                                  PasswordChanged="OnPinChanged"
                                  AutomationProperties.Name="Manager PIN"/>
                     <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal">
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
-                        <TextBlock Text="{Binding ManagerPinWarning}" Margin="6,0,0,0"
+                        <TextBlock Text="{Binding ManagerPinWarning}" Margin="{StaticResource StrengthLabelGap}"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentWarning}"/>
                     </StackPanel>
@@ -461,7 +461,7 @@
 
                     <!-- ── User (green pastel section) ── -->
                     <Border Grid.Row="12" Grid.ColumnSpan="2" Background="{StaticResource RoleUserBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
                         <TextBlock Text="👤 User" FontWeight="SemiBold"
                                    Foreground="{StaticResource RoleUserAccent}"
                                    FontSize="{StaticResource FontSizeBody}"/>
@@ -473,13 +473,13 @@
                                  PasswordChanged="OnPinChanged"
                                  AutomationProperties.Name="User PIN"/>
                     <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal">
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                        <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}"
                                 Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
-                        <TextBlock Text="{Binding UserPinWarning}" Margin="6,0,0,0"
+                        <TextBlock Text="{Binding UserPinWarning}" Margin="{StaticResource StrengthLabelGap}"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentWarning}"/>
                     </StackPanel>
@@ -506,7 +506,7 @@
 
                     <!-- ── Master Password ── -->
                     <Border Grid.Row="18" Grid.ColumnSpan="2" Background="{StaticResource FluentSurfaceElevated}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
                         <TextBlock Text="🔐 Master Password" FontWeight="SemiBold"
                                    Foreground="{StaticResource FluentTextPrimary}"
                                    FontSize="{StaticResource FontSizeBody}"
@@ -543,7 +543,7 @@
                                Text="{Binding PinConflictWarning}"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentError}"
-                               Margin="0,4,0,0">
+                               Margin="{StaticResource FieldLabelSpacing}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
@@ -576,7 +576,7 @@
             <!-- Success overlay -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                         Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}">
-                <TextBlock Text="✅" FontSize="40" HorizontalAlignment="Center"
+                <TextBlock Text="✅" FontSize="{StaticResource FontSizeIconLarge}" HorizontalAlignment="Center"
                            Margin="{StaticResource ItemSpacing}"/>
                 <TextBlock Text="Setup Complete!"
                            FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="Bold"
@@ -773,7 +773,7 @@
         <TextBlock Grid.Row="5" HorizontalAlignment="Center"
                    FontSize="{StaticResource FontSizeCaption}"
                    Foreground="{StaticResource FluentTextTertiary}"
-                   Margin="0,8,0,0">
+                   Margin="{StaticResource MessageBarSpacing}">
             <Run Text="© 2025 "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
         </TextBlock>
     </Grid>
