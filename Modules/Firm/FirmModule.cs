@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Firm.Services;
 using StoreAssistantPro.Modules.Firm.ViewModels;
@@ -16,13 +16,13 @@ public static class FirmModule
         services.AddTransient<IFirmService, FirmService>();
 
         // ViewModels
-        services.AddTransient<FirmManagementViewModel>();
+        services.AddTransient<FirmViewModel>();
 
         // Views
-        services.AddTransient<FirmManagementWindow>();
+        services.AddTransient<FirmWindow>();
 
         // Dialog registration
-        services.AddDialogRegistration<FirmManagementWindow>(FirmManagementDialog);
+        services.AddDialogRegistration<FirmWindow>(FirmManagementDialog);
 
         return services;
     }

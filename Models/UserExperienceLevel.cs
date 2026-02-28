@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Classifies an operator's expertise with the application, used to

@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands;
+﻿namespace StoreAssistantPro.Core.Commands;
 
 /// <summary>
 /// Marker interface for enterprise command requests. Extends the basic

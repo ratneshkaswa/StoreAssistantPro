@@ -1,10 +1,10 @@
-using StoreAssistantPro.Models;
+﻿using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.MainShell.Models;
 
 /// <summary>
 /// Module-local DTO carrying aggregated dashboard metrics.
-/// Keeps MainWorkspaceViewModel decoupled from Products and Sales modules.
+/// Keeps WorkspaceViewModel decoupled from Products and Sales modules.
 /// </summary>
 public sealed record DashboardSummary(
     int TotalProducts,

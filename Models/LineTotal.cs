@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Pricing result for a single line item in a retail transaction.

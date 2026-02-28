@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Events;
+﻿namespace StoreAssistantPro.Core.Events;
 
 /// <summary>
 /// Dispatches domain events to subscribers. Registered as a singleton —

@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Billing.ViewModels;

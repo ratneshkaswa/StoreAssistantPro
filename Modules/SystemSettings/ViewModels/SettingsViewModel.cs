@@ -1,10 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core;
 
 namespace StoreAssistantPro.Modules.SystemSettings.ViewModels;
 
-public partial class SystemSettingsViewModel : BaseViewModel
+public partial class SettingsViewModel : BaseViewModel
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -17,7 +17,7 @@ public partial class SystemSettingsViewModel : BaseViewModel
     [ObservableProperty]
     public partial ObservableObject? CurrentCategoryView { get; set; }
 
-    public SystemSettingsViewModel(IServiceProvider serviceProvider)
+    public SettingsViewModel(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         NavigateToCategory("General");

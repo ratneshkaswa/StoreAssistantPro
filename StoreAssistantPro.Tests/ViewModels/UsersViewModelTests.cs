@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Users.Commands;
@@ -7,12 +7,12 @@ using StoreAssistantPro.Modules.Users.ViewModels;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class UserManagementViewModelTests
+public class UsersViewModelTests
 {
     private readonly IUserService _userService = Substitute.For<IUserService>();
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
 
-    private UserManagementViewModel CreateSut() => new(_userService, _commandBus);
+    private UsersViewModel CreateSut() => new(_userService, _commandBus);
 
     [Fact]
     public async Task LoadUsers_PopulatesList()

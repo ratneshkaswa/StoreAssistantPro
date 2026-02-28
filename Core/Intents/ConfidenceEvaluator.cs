@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Intents;
+﻿namespace StoreAssistantPro.Core.Intents;
 
 /// <summary>
 /// Pure, static confidence evaluation logic that decides whether an

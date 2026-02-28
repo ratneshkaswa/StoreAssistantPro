@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;

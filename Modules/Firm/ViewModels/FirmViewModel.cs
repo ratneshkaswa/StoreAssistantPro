@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -8,7 +8,7 @@ using StoreAssistantPro.Modules.Firm.Services;
 
 namespace StoreAssistantPro.Modules.Firm.ViewModels;
 
-public partial class FirmManagementViewModel(
+public partial class FirmViewModel(
     IFirmService firmService,
     IEventBus eventBus) : BaseViewModel
 {

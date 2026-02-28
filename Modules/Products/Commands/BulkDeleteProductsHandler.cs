@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Commands;
+﻿using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Modules.Products.Services;
 
 namespace StoreAssistantPro.Modules.Products.Commands;

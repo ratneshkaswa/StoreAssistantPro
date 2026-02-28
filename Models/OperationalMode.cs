@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Controls which feature set is active across the application.

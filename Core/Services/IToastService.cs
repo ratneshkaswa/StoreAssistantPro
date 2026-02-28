@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;

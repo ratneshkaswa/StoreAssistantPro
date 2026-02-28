@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Workflows;
+﻿using StoreAssistantPro.Core.Workflows;
 
 namespace StoreAssistantPro.Core.Intents;
 

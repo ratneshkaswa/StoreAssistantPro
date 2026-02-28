@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Intents;
+﻿namespace StoreAssistantPro.Core.Intents;
 
 /// <summary>
 /// Classifies the type of user input detected by the

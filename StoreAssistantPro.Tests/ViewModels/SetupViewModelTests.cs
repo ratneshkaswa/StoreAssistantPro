@@ -1,20 +1,20 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class FirstTimeSetupViewModelTests
+public class SetupViewModelTests
 {
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
 
-    private FirstTimeSetupViewModel CreateSut() => new(_commandBus);
+    private SetupViewModel CreateSut() => new(_commandBus);
 
     /// <summary>
     /// Helper: configures a valid SUT through steps 1→2→3 and executes SaveCommand.
     /// </summary>
-    private async Task<FirstTimeSetupViewModel> CreateAndCompleteSetupAsync(
+    private async Task<SetupViewModel> CreateAndCompleteSetupAsync(
         string firmName = "Test Store",
         string adminPin = "1234", string adminConfirm = "1234",
         string managerPin = "5678", string managerConfirm = "5678",

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Services;
@@ -14,7 +14,7 @@ public class AuthenticationFlow(
 {
     public bool RunFirstTimeSetup()
     {
-        var window = serviceProvider.GetRequiredService<FirstTimeSetupWindow>();
+        var window = serviceProvider.GetRequiredService<SetupWindow>();
         sizingService.ConfigureStartupWindow(window, 480, 840);
         TrySetAppIcon(window);
         return window.ShowDialog() == true;
@@ -24,14 +24,14 @@ public class AuthenticationFlow(
     {
         userType = default;
 
-        var loginWindow = serviceProvider.GetRequiredService<UnifiedLoginWindow>();
+        var loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
         sizingService.ConfigureStartupWindow(loginWindow, 420, 640);
         TrySetAppIcon(loginWindow);
 
         if (loginWindow.ShowDialog() != true)
             return false;
 
-        var vm = (UnifiedLoginViewModel)loginWindow.DataContext;
+        var vm = (LoginViewModel)loginWindow.DataContext;
         userType = vm.SelectedUserType!.Value;
         return true;
     }

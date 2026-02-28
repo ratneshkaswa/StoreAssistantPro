@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Services;
+﻿namespace StoreAssistantPro.Core.Services;
 
 /// <summary>
 /// Tracks which inline guidance tips have been dismissed by the user.

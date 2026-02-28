@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -70,7 +70,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     /// Owns current-user display, mode indicator, notification count,
     /// dashboard stats, and clock — all live-updating.
     /// </summary>
-    public DashboardSummaryViewModel DashboardSummary { get; }
+    public DashboardViewModel DashboardSummary { get; }
 
     // ── Side panels ──
 
@@ -159,7 +159,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _notificationService = notificationService;
         AppState = appState;
         StatusBar = statusBar;
-        DashboardSummary = new DashboardSummaryViewModel(appState, eventBus, dashboardService);
+        DashboardSummary = new DashboardViewModel(appState, eventBus, dashboardService);
 
         ((ObservableObject)_navigationService).PropertyChanged += OnNavigationPropertyChanged;
 

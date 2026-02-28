@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;

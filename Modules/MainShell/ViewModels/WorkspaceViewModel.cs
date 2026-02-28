@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -8,7 +8,7 @@ using StoreAssistantPro.Modules.MainShell.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
-public partial class MainWorkspaceViewModel(IDashboardService dashboardService) : BaseViewModel
+public partial class WorkspaceViewModel(IDashboardService dashboardService) : BaseViewModel
 {
     [ObservableProperty]
     public partial int TotalProducts { get; set; }

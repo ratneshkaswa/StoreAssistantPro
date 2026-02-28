@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Workflows;
+﻿namespace StoreAssistantPro.Core.Workflows;
 
 /// <summary>
 /// Represents one discrete step within a workflow.

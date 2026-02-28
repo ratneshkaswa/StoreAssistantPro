@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 public enum UserType
 {

@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Intents;
+﻿namespace StoreAssistantPro.Core.Intents;
 
 /// <summary>
 /// Immutable result of <see cref="ISmartEnterKeyService.Evaluate"/>.

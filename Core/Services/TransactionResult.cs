@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Services;
+﻿namespace StoreAssistantPro.Core.Services;
 
 /// <summary>
 /// Structured outcome of a <see cref="ITransactionSafetyService"/>

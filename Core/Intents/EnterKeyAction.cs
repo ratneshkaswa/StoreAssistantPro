@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Intents;
+﻿namespace StoreAssistantPro.Core.Intents;
 
 /// <summary>
 /// The action <see cref="ISmartEnterKeyService"/> recommends for an

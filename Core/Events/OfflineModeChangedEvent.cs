@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Events;
+﻿namespace StoreAssistantPro.Core.Events;
 
 /// <summary>
 /// Published by <see cref="Services.IOfflineModeService"/> when the

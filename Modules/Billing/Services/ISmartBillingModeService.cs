@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Billing.Services;
+﻿namespace StoreAssistantPro.Modules.Billing.Services;
 
 /// <summary>
 /// Bridges <see cref="IBillingSessionService"/> lifecycle events to

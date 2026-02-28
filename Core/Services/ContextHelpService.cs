@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Events;

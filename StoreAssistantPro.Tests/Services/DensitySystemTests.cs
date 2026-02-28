@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;

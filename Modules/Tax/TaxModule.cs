@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Modules.Tax.Commands;
 using StoreAssistantPro.Modules.Tax.Services;
@@ -22,13 +22,13 @@ public static class TaxModule
         services.AddTransient<ICommandRequestHandler<SetDefaultTaxProfileCommand, Unit>, SetDefaultTaxProfileHandler>();
 
         // ViewModels
-        services.AddTransient<TaxManagementViewModel>();
+        services.AddTransient<TaxViewModel>();
 
         // Views
-        services.AddTransient<TaxManagementWindow>();
+        services.AddTransient<TaxWindow>();
 
         // Dialog registration
-        services.AddDialogRegistration<TaxManagementWindow>(TaxManagementDialog);
+        services.AddDialogRegistration<TaxWindow>(TaxManagementDialog);
 
         return services;
     }

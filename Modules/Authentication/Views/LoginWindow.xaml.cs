@@ -1,13 +1,13 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Modules.Authentication.Views;
 
-public partial class UnifiedLoginWindow : Window
+public partial class LoginWindow : Window
 {
-    public UnifiedLoginWindow(UnifiedLoginViewModel vm)
+    public LoginWindow(LoginViewModel vm)
     {
         InitializeComponent();
         DataContext = vm;
@@ -15,8 +15,6 @@ public partial class UnifiedLoginWindow : Window
         vm.Initialize();
 
         PreviewKeyDown += OnPreviewKeyDown;
-        PreviewKeyUp += (_, _) => vm.RefreshCapsLock();
-        Loaded += (_, _) => vm.RefreshCapsLock();
     }
 
     /// <summary>
@@ -26,7 +24,7 @@ public partial class UnifiedLoginWindow : Window
     /// </summary>
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (DataContext is not UnifiedLoginViewModel vm)
+        if (DataContext is not LoginViewModel vm)
             return;
 
         // Role selection shortcuts

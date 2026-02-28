@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands;
+﻿namespace StoreAssistantPro.Core.Commands;
 
 /// <summary>
 /// Marker interface for all commands. A command is a simple DTO

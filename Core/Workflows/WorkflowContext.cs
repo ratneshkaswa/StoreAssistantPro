@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Workflows;
+﻿namespace StoreAssistantPro.Core.Workflows;
 
 /// <summary>
 /// Mutable bag of state carried through a single workflow execution.

@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Billing.Services;
+﻿namespace StoreAssistantPro.Modules.Billing.Services;
 
 /// <summary>
 /// Runs at startup (and optionally on a periodic timer) to archive

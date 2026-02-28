@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Base;
+﻿namespace StoreAssistantPro.Core.Base;
 
 /// <summary>
 /// Example page demonstrating the <see cref="BasePage"/> layout pattern.

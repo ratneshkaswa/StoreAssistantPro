@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Data;

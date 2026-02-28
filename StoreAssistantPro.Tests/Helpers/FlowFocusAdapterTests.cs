@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Helpers;
+﻿using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Tests.Helpers;

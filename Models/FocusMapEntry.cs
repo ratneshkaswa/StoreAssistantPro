@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// A single element in a <see cref="FocusMap"/>'s logical focus order.

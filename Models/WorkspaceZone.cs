@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Identifies visual zones in the main shell whose emphasis

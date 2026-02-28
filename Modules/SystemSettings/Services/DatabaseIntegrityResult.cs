@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.SystemSettings.Services;
+﻿namespace StoreAssistantPro.Modules.SystemSettings.Services;
 
 /// <summary>
 /// Result of a database integrity check.

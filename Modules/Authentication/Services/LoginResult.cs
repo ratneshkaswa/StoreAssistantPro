@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Authentication.Services;
+﻿namespace StoreAssistantPro.Modules.Authentication.Services;
 
 /// <summary>
 /// Result of a PIN validation attempt. Carries success/failure,

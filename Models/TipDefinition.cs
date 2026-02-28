@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Services;
+﻿using StoreAssistantPro.Core.Services;
 
 namespace StoreAssistantPro.Models;
 
@@ -89,7 +89,7 @@ public sealed record TipDefinition
     /// <summary>
     /// Name of the window or view where the tip should appear.
     /// Matches the view's unqualified type name, e.g.
-    /// <c>"SalesView"</c>, <c>"FirmManagementWindow"</c>.
+    /// <c>"SalesView"</c>, <c>"FirmWindow"</c>.
     /// <para>
     /// Used by the tip service to scope eligible tips to the
     /// currently active window. Multiple tips can target the

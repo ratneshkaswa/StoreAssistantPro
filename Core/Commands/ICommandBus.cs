@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands;
+﻿namespace StoreAssistantPro.Core.Commands;
 
 /// <summary>
 /// Dispatches commands to their registered handlers via DI.

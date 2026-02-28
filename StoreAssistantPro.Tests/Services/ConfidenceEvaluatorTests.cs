@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Intents;
+﻿using StoreAssistantPro.Core.Intents;
 using StoreAssistantPro.Core.Workflows;
 
 namespace StoreAssistantPro.Tests.Services;

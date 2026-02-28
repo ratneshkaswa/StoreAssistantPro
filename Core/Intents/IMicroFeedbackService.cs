@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Intents;
+﻿namespace StoreAssistantPro.Core.Intents;
 
 /// <summary>
 /// Singleton service that listens to zero-click action events and

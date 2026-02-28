@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Startup.Services;

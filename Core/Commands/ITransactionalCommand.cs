@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands;
+﻿namespace StoreAssistantPro.Core.Commands;
 
 /// <summary>
 /// Marker interface that opts a command into automatic transaction

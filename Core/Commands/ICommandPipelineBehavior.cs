@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands;
+﻿namespace StoreAssistantPro.Core.Commands;
 
 /// <summary>
 /// Middleware that wraps command execution in the pipeline. Behaviors

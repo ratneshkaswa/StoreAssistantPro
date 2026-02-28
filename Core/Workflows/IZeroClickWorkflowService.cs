@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Workflows;
+﻿namespace StoreAssistantPro.Core.Workflows;
 
 /// <summary>
 /// Singleton service that detects high-confidence user actions and

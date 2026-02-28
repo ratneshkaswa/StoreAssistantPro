@@ -1,17 +1,17 @@
-using StoreAssistantPro.Core;
+﻿using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.SystemSettings.ViewModels;
 
 namespace StoreAssistantPro.Modules.SystemSettings.Views;
 
-public partial class SystemSettingsWindow : BaseDialogWindow
+public partial class SettingsWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 780;
     protected override double DialogHeight => 520;
 
-    public SystemSettingsWindow(
+    public SettingsWindow(
         IWindowSizingService sizingService,
-        SystemSettingsViewModel vm) : base(sizingService)
+        SettingsViewModel vm) : base(sizingService)
     {
         InitializeComponent();
         DataContext = vm;

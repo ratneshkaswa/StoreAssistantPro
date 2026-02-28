@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;

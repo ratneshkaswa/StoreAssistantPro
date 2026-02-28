@@ -1,11 +1,10 @@
-<Window x:Class="StoreAssistantPro.Modules.Authentication.Views.FirstTimeSetupWindow"
+﻿<Window x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="One Time Setup"
         Icon="pack://application:,,,/Assets/app.ico"
-        h:Motion.WindowFadeIn="True"
         Closing="OnWindowClosing">
     <Window.InputBindings>
         <KeyBinding Key="Back" Command="{Binding PreviousStepCommand}"/>
@@ -776,7 +775,7 @@
                    FontSize="{StaticResource FontSizeCaption}"
                    Foreground="{StaticResource FluentTextTertiary}"
                    Margin="0,8,0,0">
-            <Run Text="Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
+            <Run Text="© 2025 "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
         </TextBlock>
     </Grid>
 </Window>

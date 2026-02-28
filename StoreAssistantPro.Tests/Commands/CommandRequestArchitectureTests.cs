@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Commands;
+﻿using StoreAssistantPro.Core.Commands;
 
 namespace StoreAssistantPro.Tests.Commands;
 

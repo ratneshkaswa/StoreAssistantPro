@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;

@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -8,7 +8,7 @@ using StoreAssistantPro.Modules.Authentication.Commands;
 
 namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 
-public partial class FirstTimeSetupViewModel : BaseViewModel
+public partial class SetupViewModel : BaseViewModel
 {
     // ── Step navigation ──
 
@@ -186,7 +186,7 @@ public partial class FirstTimeSetupViewModel : BaseViewModel
     /// <summary>Raised when step changes so the view can set focus.</summary>
     public event Action<int>? StepChanged;
 
-    public FirstTimeSetupViewModel(ICommandBus commandBus) : base()
+    public SetupViewModel(ICommandBus commandBus) : base()
     {
         _commandBus = commandBus;
         CurrentStep = 1;

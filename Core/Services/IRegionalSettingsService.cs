@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Services;
+﻿namespace StoreAssistantPro.Core.Services;
 
 /// <summary>
 /// Centralizes regional formatting rules for the application.

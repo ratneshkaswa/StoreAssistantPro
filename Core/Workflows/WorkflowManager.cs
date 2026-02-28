@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 

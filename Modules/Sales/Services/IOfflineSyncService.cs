@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Sales.Services;
+﻿namespace StoreAssistantPro.Modules.Sales.Services;
 
 /// <summary>
 /// Replays offline-queued bills to the server database when

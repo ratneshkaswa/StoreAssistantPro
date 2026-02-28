@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
@@ -19,13 +19,13 @@ namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 /// directly on <see cref="MainViewModel"/>.
 /// </para>
 /// </summary>
-public partial class DashboardSummaryViewModel : ObservableObject, IDisposable
+public partial class DashboardViewModel : ObservableObject, IDisposable
 {
     private readonly IAppStateService _appState;
     private readonly IEventBus _eventBus;
     private readonly IDashboardService _dashboardService;
 
-    public DashboardSummaryViewModel(
+    public DashboardViewModel(
         IAppStateService appState,
         IEventBus eventBus,
         IDashboardService dashboardService)

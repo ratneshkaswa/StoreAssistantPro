@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Data;

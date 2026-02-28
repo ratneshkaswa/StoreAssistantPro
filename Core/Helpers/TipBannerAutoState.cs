@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using StoreAssistantPro.Core.Controls;
 using StoreAssistantPro.Core.Services;
 

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Windows;
 
 namespace StoreAssistantPro.Core.Helpers;

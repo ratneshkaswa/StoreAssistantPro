@@ -1,4 +1,4 @@
-using StoreAssistantPro.Modules.SystemSettings.Services;
+﻿using StoreAssistantPro.Modules.SystemSettings.Services;
 
 namespace StoreAssistantPro.Tests.Services;
 

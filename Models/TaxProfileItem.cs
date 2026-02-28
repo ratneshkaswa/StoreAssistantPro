@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Join entity linking a <see cref="TaxProfile"/> to a <see cref="TaxMaster"/> component.

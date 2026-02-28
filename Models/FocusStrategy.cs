@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Determines how a <see cref="FocusHint"/> resolves to a visual-tree element.

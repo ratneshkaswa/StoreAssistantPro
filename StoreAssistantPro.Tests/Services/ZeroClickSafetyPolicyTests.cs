@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using StoreAssistantPro.Core.Workflows;
 
 namespace StoreAssistantPro.Tests.Services;

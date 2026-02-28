@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Inward.ViewModels;

@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Data;
+﻿namespace StoreAssistantPro.Core.Data;
 
 /// <summary>
 /// Carries one page of <typeparamref name="T"/> items together with

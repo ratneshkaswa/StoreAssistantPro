@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -7,17 +7,17 @@ using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class UnifiedLoginViewModelTests
+public class LoginViewModelTests
 {
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
-    private UnifiedLoginViewModel CreateSut()
+    private LoginViewModel CreateSut()
     {
         _regional.Now.Returns(DateTime.Now);
         _regional.FormatTime(Arg.Any<DateTime>()).Returns("12:00 PM");
-        var vm = new UnifiedLoginViewModel(_commandBus, _appState, _regional);
+        var vm = new LoginViewModel(_commandBus, _appState, _regional);
         vm.Initialize();
         return vm;
     }

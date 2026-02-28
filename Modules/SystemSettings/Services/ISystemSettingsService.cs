@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.SystemSettings.Services;
+﻿namespace StoreAssistantPro.Modules.SystemSettings.Services;
 
 public interface ISystemSettingsService
 {

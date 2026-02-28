@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.MainShell.Services;
+﻿namespace StoreAssistantPro.Modules.MainShell.Services;
 
 /// <summary>
 /// Encapsulates the MainShell module's window lifecycle.

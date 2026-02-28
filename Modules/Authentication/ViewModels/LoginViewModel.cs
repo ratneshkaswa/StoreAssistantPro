@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,7 +19,7 @@ namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 /// automatically (POS auto-login). Error is cleared on next digit input.
 /// </para>
 /// </summary>
-public partial class UnifiedLoginViewModel : BaseViewModel
+public partial class LoginViewModel : BaseViewModel
 {
     private readonly ICommandBus _commandBus;
     private readonly IAppStateService _appState;
@@ -53,23 +53,12 @@ public partial class UnifiedLoginViewModel : BaseViewModel
     public bool IsLastUsedManager => LastLoggedInUser == UserType.Manager;
     public bool IsLastUsedUser => LastLoggedInUser == UserType.User;
 
-    /// <summary>Application version displayed in the login footer.</summary>
-    public string AppVersion { get; } =
-        System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
-
     // ── L1: Firm name ──
     public string FirmName => _appState.FirmName;
 
     // ── L9: Clock ──
     [ObservableProperty]
     public partial string CurrentTime { get; set; }
-
-    // ── L10: Offline indicator ──
-    public bool IsOffline => _appState.IsOfflineMode;
-
-    // ── L8: Caps Lock ──
-    [ObservableProperty]
-    public partial bool IsCapsLockOn { get; set; }
 
     // ── L3: Failed attempts ──
     [ObservableProperty]
@@ -87,7 +76,7 @@ public partial class UnifiedLoginViewModel : BaseViewModel
 
     public Action<bool?>? RequestClose { get; set; }
 
-    public UnifiedLoginViewModel(
+    public LoginViewModel(
         ICommandBus commandBus,
         IAppStateService appState,
         IRegionalSettingsService regional)
@@ -226,10 +215,6 @@ public partial class UnifiedLoginViewModel : BaseViewModel
             ? $"{MaxAttempts - count} attempt(s) remaining"
             : string.Empty;
     }
-
-    /// <summary>Called by code-behind when Caps Lock state changes.</summary>
-    public void RefreshCapsLock() =>
-        IsCapsLockOn = System.Windows.Input.Keyboard.IsKeyToggled(System.Windows.Input.Key.CapsLock);
 
     [RelayCommand]
     private void ForgotPin()

@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Workflows;
+﻿namespace StoreAssistantPro.Core.Workflows;
 
 /// <summary>
 /// Classifies the type of action a <see cref="IZeroClickRule"/> performs.

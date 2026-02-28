@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;

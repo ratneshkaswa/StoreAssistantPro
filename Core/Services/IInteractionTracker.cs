@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;

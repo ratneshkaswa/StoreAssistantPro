@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Products.Services;
+﻿namespace StoreAssistantPro.Modules.Products.Services;
 
 /// <summary>
 /// Coordinates stock take sessions — loading products, recording counts,

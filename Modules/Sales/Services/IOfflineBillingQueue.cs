@@ -1,4 +1,4 @@
-using StoreAssistantPro.Modules.Sales.Models;
+﻿using StoreAssistantPro.Modules.Sales.Models;
 
 namespace StoreAssistantPro.Modules.Sales.Services;
 

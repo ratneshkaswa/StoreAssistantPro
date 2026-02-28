@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Products.Services;
+﻿namespace StoreAssistantPro.Modules.Products.Services;
 
 /// <summary>
 /// Lightweight aggregate snapshot of inventory metrics.

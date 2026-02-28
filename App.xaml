@@ -38,9 +38,9 @@
             <helpers:RoleColorConverter x:Key="RoleColorConverter"/>
             <helpers:PinStrengthConverter x:Key="PinStrengthConverter"/>
 
-        <!-- ViewModel → View DataTemplates (MainShell module) -->
-        <DataTemplate DataType="{x:Type shellVm:MainWorkspaceViewModel}">
-            <shellViews:MainWorkspaceView/>
+        <!-- ViewModel ? View DataTemplates (MainShell module) -->
+        <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">
+            <shellViews:WorkspaceView/>
         </DataTemplate>
 
         <!-- Products module -->
@@ -147,7 +147,7 @@
                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
 
                                 <TextBlock x:Name="PART_Loading"
-                                           Text="⏳ Loading..." FontSize="14" Foreground="#888"
+                                           Text="? Loading..." FontSize="14" Foreground="#888"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Visibility="Collapsed"/>
                             </Grid>
@@ -175,7 +175,7 @@
             </Setter>
         </Style>
 
-        <!-- Enterprise page layout: TipBanner · Toolbar · MainContent · Messages · BottomForm · StatusBar -->
+        <!-- Enterprise page layout: TipBanner � Toolbar � MainContent � Messages � BottomForm � StatusBar -->
         <Style TargetType="{x:Type controls:EnterprisePageLayout}">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
@@ -207,7 +207,7 @@
                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
 
                                 <TextBlock x:Name="PART_Loading"
-                                           Text="⏳ Loading..."
+                                           Text="? Loading..."
                                            FontSize="{StaticResource FontSizeSectionHeader}"
                                            Foreground="{StaticResource FluentTextTertiary}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -236,7 +236,7 @@
                         </Grid>
 
                         <ControlTemplate.Triggers>
-                            <!-- Collapse empty slots — no wasted vertical space -->
+                            <!-- Collapse empty slots � no wasted vertical space -->
                             <Trigger Property="TipBannerContent" Value="{x:Null}">
                                 <Setter TargetName="PART_TipBanner" Property="Visibility" Value="Collapsed"/>
                             </Trigger>

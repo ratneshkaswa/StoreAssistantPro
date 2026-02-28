@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Workflows;
+﻿namespace StoreAssistantPro.Core.Workflows;
 
 /// <summary>
 /// Defines a multi-step user flow. Each concrete workflow declares its

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Commands.Logging;
 

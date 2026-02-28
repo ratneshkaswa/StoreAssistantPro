@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Authentication.Services;
+﻿namespace StoreAssistantPro.Modules.Authentication.Services;
 
 public interface ISetupService
 {

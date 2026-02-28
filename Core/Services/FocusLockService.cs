@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;
 

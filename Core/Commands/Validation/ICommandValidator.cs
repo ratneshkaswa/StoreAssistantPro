@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands.Validation;
+﻿namespace StoreAssistantPro.Core.Commands.Validation;
 
 /// <summary>
 /// Validates a command before it reaches the handler. Each command

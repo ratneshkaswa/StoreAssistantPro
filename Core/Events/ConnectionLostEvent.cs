@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Events;
+﻿namespace StoreAssistantPro.Core.Events;
 
 /// <summary>
 /// Published when the <see cref="Services.IConnectivityMonitorService"/>

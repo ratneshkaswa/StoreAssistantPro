@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Data;
+﻿namespace StoreAssistantPro.Core.Data;
 
 /// <summary>
 /// Filter entities by their active/inactive status.

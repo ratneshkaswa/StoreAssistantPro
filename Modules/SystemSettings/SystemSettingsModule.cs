@@ -26,17 +26,17 @@ public static class SystemSettingsModule
         services.AddTransient<ICommandRequestHandler<ChangeMasterPinCommand, Unit>, ChangeMasterPinHandler>();
 
         // ViewModels
-        services.AddTransient<SystemSettingsViewModel>();
+        services.AddTransient<SettingsViewModel>();
         services.AddTransient<GeneralSettingsViewModel>();
         services.AddTransient<SecuritySettingsViewModel>();
         services.AddTransient<BackupSettingsViewModel>();
         services.AddTransient<AppInfoViewModel>();
 
         // Views
-        services.AddTransient<SystemSettingsWindow>();
+        services.AddTransient<SettingsWindow>();
 
         // Dialog registration
-        services.AddDialogRegistration<SystemSettingsWindow>(SystemSettingsDialog);
+        services.AddDialogRegistration<SettingsWindow>(SystemSettingsDialog);
 
         return services;
     }

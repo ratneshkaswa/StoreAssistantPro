@@ -1,4 +1,4 @@
-<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Billing.Views.ResumeBillingDialog"
+﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Billing.Views.ResumeBillingDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"

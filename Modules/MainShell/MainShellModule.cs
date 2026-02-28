@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.Services;
@@ -17,7 +17,7 @@ public static class MainShellModule
         NavigationPageRegistry pageRegistry)
     {
         // Page registration (string-key → ViewModel mapping)
-        pageRegistry.Map<MainWorkspaceViewModel>(MainWorkspacePage);
+        pageRegistry.Map<WorkspaceViewModel>(MainWorkspacePage);
 
         // Services
         services.AddSingleton<IDialogService, DialogService>();
@@ -28,7 +28,7 @@ public static class MainShellModule
 
         // ViewModels
         services.AddTransient<MainViewModel>();
-        services.AddTransient<MainWorkspaceViewModel>();
+        services.AddTransient<WorkspaceViewModel>();
         services.AddTransient<TasksViewModel>();
 
         // Views

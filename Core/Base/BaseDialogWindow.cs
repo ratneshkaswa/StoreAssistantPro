@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
@@ -37,12 +37,12 @@ namespace StoreAssistantPro.Core;
 ///
 /// <para><b>Code-behind:</b></para>
 /// <code>
-/// public partial class FirmManagementWindow : BaseDialogWindow
+/// public partial class FirmWindow : BaseDialogWindow
 /// {
 ///     protected override double DialogWidth  =&gt; 450;
 ///     protected override double DialogHeight =&gt; 350;
 ///
-///     public FirmManagementWindow(IWindowSizingService sizing, FirmManagementViewModel vm)
+///     public FirmWindow(IWindowSizingService sizing, FirmViewModel vm)
 ///         : base(sizing)
 ///     {
 ///         InitializeComponent();

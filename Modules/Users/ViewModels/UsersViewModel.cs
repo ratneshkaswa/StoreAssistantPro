@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -10,7 +10,7 @@ using StoreAssistantPro.Modules.Users.Services;
 
 namespace StoreAssistantPro.Modules.Users.ViewModels;
 
-public partial class UserManagementViewModel(
+public partial class UsersViewModel(
     IUserService userService,
     ICommandBus commandBus) : BaseViewModel
 {

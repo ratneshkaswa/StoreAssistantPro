@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Startup.Services;
+﻿namespace StoreAssistantPro.Modules.Startup.Services;
 
 public interface IStartupService
 {

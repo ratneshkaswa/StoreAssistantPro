@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Helpers;
+﻿namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
 /// Centralized input validation rules for the application.

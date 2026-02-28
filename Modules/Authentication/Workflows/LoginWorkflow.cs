@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Session;
+﻿using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Services;
 

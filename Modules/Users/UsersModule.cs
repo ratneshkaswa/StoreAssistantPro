@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Users.Commands;
@@ -21,13 +21,13 @@ public static class UsersModule
         services.AddTransient<ICommandRequestHandler<ChangePinCommand, Unit>, ChangePinHandler>();
 
         // ViewModels
-        services.AddTransient<UserManagementViewModel>();
+        services.AddTransient<UsersViewModel>();
 
         // Views
-        services.AddTransient<UserManagementWindow>();
+        services.AddTransient<UsersWindow>();
 
         // Dialog registration
-        services.AddDialogRegistration<UserManagementWindow>(UserManagementDialog);
+        services.AddDialogRegistration<UsersWindow>(UserManagementDialog);
 
         return services;
     }

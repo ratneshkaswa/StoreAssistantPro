@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Commands;
@@ -27,12 +27,12 @@ public static class AuthenticationModule
         services.AddTransient<ICommandRequestHandler<LogoutCommand, Unit>, LogoutHandler>();
 
         // ViewModels
-        services.AddTransient<FirstTimeSetupViewModel>();
-        services.AddTransient<UnifiedLoginViewModel>();
+        services.AddTransient<SetupViewModel>();
+        services.AddTransient<LoginViewModel>();
 
         // Views
-        services.AddTransient<FirstTimeSetupWindow>();
-        services.AddTransient<UnifiedLoginWindow>();
+        services.AddTransient<SetupWindow>();
+        services.AddTransient<LoginWindow>();
 
         return services;
     }

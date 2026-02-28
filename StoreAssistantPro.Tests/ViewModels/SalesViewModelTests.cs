@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Data;
 using StoreAssistantPro.Core.Services;

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
@@ -10,13 +10,13 @@ using StoreAssistantPro.Modules.MainShell.ViewModels;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class DashboardSummaryViewModelTests
+public class DashboardViewModelTests
 {
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
     private readonly IDashboardService _dashboardService = Substitute.For<IDashboardService>();
 
-    public DashboardSummaryViewModelTests()
+    public DashboardViewModelTests()
     {
         // Default stubs so the constructor's RefreshStatsAsync doesn't throw
         _dashboardService.GetSummaryAsync().Returns(
@@ -24,7 +24,7 @@ public class DashboardSummaryViewModelTests
         _appState.Notifications.Returns(new ObservableCollection<AppNotification>());
     }
 
-    private DashboardSummaryViewModel CreateSut() => new(_appState, _eventBus, _dashboardService);
+    private DashboardViewModel CreateSut() => new(_appState, _eventBus, _dashboardService);
 
     // ── CurrentUser ────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,11 +7,11 @@ using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Modules.Authentication.Views;
 
-public partial class FirstTimeSetupWindow : Window
+public partial class SetupWindow : Window
 {
-    private FirstTimeSetupViewModel? _vm;
+    private SetupViewModel? _vm;
 
-    public FirstTimeSetupWindow(FirstTimeSetupViewModel vm)
+    public SetupWindow(SetupViewModel vm)
     {
         InitializeComponent();
         DataContext = _vm = vm;
@@ -61,7 +61,7 @@ public partial class FirstTimeSetupWindow : Window
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter) return;
-        if (DataContext is not FirstTimeSetupViewModel vm) return;
+        if (DataContext is not SetupViewModel vm) return;
 
         if (vm.IsStep3)
         {
@@ -78,7 +78,7 @@ public partial class FirstTimeSetupWindow : Window
 
     private void OnPinChanged(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not FirstTimeSetupViewModel vm) return;
+        if (DataContext is not SetupViewModel vm) return;
 
         if (sender == AdminPinBox)
             vm.AdminPin = AdminPinBox.Password;

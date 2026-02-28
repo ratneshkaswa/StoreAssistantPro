@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Immutable result of <see cref="Core.Services.FlowStateAnalyzer.Analyze"/>.

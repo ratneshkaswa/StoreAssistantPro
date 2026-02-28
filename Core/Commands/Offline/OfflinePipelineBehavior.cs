@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Services;
 
 namespace StoreAssistantPro.Core.Commands.Offline;

@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Events;
+﻿using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Authentication.Events;

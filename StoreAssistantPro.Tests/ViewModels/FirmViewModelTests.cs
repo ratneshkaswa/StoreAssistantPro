@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Firm.Events;
@@ -7,12 +7,12 @@ using StoreAssistantPro.Modules.Firm.ViewModels;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class FirmManagementViewModelTests
+public class FirmViewModelTests
 {
     private readonly IFirmService _firmService = Substitute.For<IFirmService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
-    private FirmManagementViewModel CreateSut() => new(_firmService, _eventBus);
+    private FirmViewModel CreateSut() => new(_firmService, _eventBus);
 
     [Fact]
     public async Task LoadFirm_PopulatesFields()

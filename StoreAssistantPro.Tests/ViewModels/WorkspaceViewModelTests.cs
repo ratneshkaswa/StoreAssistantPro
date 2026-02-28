@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
@@ -6,11 +6,11 @@ using StoreAssistantPro.Modules.MainShell.ViewModels;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class MainWorkspaceViewModelTests
+public class WorkspaceViewModelTests
 {
     private readonly IDashboardService _dashboardService = Substitute.For<IDashboardService>();
 
-    private MainWorkspaceViewModel CreateSut() => new(_dashboardService);
+    private WorkspaceViewModel CreateSut() => new(_dashboardService);
 
     private static DashboardSummary MakeSummary(
         int totalProducts = 0,

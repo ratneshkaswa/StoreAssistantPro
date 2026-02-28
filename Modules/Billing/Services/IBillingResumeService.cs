@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Billing.Services;
+﻿namespace StoreAssistantPro.Modules.Billing.Services;
 
 /// <summary>
 /// Checks for a persisted billing session on startup and offers the

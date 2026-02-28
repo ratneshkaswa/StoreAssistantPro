@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;

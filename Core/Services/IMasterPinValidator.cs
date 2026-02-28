@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Services;
+﻿namespace StoreAssistantPro.Core.Services;
 
 /// <summary>
 /// Validates the 6-digit master PIN against the stored hash.

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -11,7 +11,7 @@ using StoreAssistantPro.Modules.Tax.Services;
 
 namespace StoreAssistantPro.Modules.Tax.ViewModels;
 
-public partial class TaxManagementViewModel(
+public partial class TaxViewModel(
     ITaxService taxService,
     ICommandBus commandBus,
     IDialogService dialogService) : BaseViewModel

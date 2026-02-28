@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Events;
+﻿using StoreAssistantPro.Core.Events;
 
 namespace StoreAssistantPro.Core.Intents;
 

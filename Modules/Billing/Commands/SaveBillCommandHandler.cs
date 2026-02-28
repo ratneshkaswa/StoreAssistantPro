@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core.Commands;
+﻿using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;

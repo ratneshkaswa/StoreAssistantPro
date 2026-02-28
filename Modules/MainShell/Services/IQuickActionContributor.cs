@@ -1,4 +1,4 @@
-using StoreAssistantPro.Modules.MainShell.Models;
+﻿using StoreAssistantPro.Modules.MainShell.Models;
 
 namespace StoreAssistantPro.Modules.MainShell.Services;
 

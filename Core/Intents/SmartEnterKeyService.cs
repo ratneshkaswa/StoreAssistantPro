@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Events;
 
 namespace StoreAssistantPro.Core.Intents;

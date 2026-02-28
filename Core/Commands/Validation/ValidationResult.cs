@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Commands.Validation;
+﻿namespace StoreAssistantPro.Core.Commands.Validation;
 
 /// <summary>
 /// Represents a single validation failure with a property path and

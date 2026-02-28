@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Intents;

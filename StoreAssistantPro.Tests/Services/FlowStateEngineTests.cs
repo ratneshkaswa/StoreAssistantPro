@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;

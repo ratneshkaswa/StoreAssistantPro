@@ -1,4 +1,4 @@
-using System.Globalization;
+ï»¿using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Threading;
@@ -117,7 +117,7 @@ public partial class App : Application
         }
 
         // If setup was cancelled (user closed the One Time Setup window),
-        // shut down the application — do not proceed to login.
+        // shut down the application ï¿½ do not proceed to login.
         if (!workflowManager.Context.Get<bool>("IsInitialized")
             && !await _host.Services.GetRequiredService<StoreAssistantPro.Modules.Startup.Services.IStartupService>().IsAppInitializedAsync())
         {
@@ -129,7 +129,7 @@ public partial class App : Application
         // before the login loop so no stale session is offered for resume.
         await sessionCleanup.RunCleanupAsync();
 
-        // ?? Phase 5: Main app loop — login ? main window ? logout ??
+        // ?? Phase 5: Main app loop ï¿½ login ? main window ? logout ??
         while (true)
         {
             await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
@@ -192,7 +192,7 @@ public partial class App : Application
     {
         MessageBox.Show(
             $"An unexpected error occurred:\n\n{ex.Message}\n\nThe error has been logged. Please contact support if this persists.",
-            "Store Assistant Pro — Error",
+            "Store Assistant Pro ï¿½ Error",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
     }

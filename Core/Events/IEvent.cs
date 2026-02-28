@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Events;
+﻿namespace StoreAssistantPro.Core.Events;
 
 /// <summary>
 /// Marker interface for all events. An event represents something

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Suppliers.Services;
 using StoreAssistantPro.Modules.Suppliers.ViewModels;

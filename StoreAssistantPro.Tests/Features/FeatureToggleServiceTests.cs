@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using NSubstitute;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Services;

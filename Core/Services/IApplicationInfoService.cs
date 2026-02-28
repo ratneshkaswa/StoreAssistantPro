@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Services;
+﻿namespace StoreAssistantPro.Core.Services;
 
 /// <summary>
 /// Read-only provider of application-level metadata.

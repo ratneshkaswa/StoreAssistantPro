@@ -1,4 +1,4 @@
-using StoreAssistantPro.Data;
+﻿using StoreAssistantPro.Data;
 
 namespace StoreAssistantPro.Core.Services;
 

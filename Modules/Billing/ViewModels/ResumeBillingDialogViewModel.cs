@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;

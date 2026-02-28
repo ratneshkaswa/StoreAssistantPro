@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Data;
+﻿namespace StoreAssistantPro.Core.Data;
 
 /// <summary>
 /// Filter products by stock status relative to their MinStockLevel.

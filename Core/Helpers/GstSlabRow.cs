@@ -1,7 +1,7 @@
-namespace StoreAssistantPro.Core.Helpers;
+﻿namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
-/// Data row for the GST rate slab reference table in TaxManagementWindow.
+/// Data row for the GST rate slab reference table in TaxWindow.
 /// Used as a static DataGrid item in XAML.
 /// </summary>
 public class GstSlabRow

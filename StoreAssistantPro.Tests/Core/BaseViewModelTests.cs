@@ -1,4 +1,4 @@
-using StoreAssistantPro.Core;
+﻿using StoreAssistantPro.Core;
 
 namespace StoreAssistantPro.Tests.Core;
 

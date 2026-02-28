@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;

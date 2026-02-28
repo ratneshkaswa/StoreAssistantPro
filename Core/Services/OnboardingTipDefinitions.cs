@@ -1,4 +1,4 @@
-using StoreAssistantPro.Models;
+﻿using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;
 
@@ -67,7 +67,7 @@ public static class OnboardingTipDefinitions
         new TipDefinition
         {
             TipId            = MainWorkspaceWelcome,
-            WindowName       = "MainWorkspaceView",
+            WindowName       = "WorkspaceView",
             Title            = "Welcome to StoreAssistantPro",
             Message          = "This is your dashboard — use the sidebar to navigate between Products, Sales, and Settings.",
             ContextCondition = _ => true,
@@ -80,7 +80,7 @@ public static class OnboardingTipDefinitions
         new TipDefinition
         {
             TipId            = FirstTimeSetupDone,
-            WindowName       = "MainWorkspaceView",
+            WindowName       = "WorkspaceView",
             Title            = "Setup complete",
             Message          = "Your store is configured. Start by adding products to your catalog, then create your first sale.",
             ContextCondition = _ => true,
@@ -132,7 +132,7 @@ public static class OnboardingTipDefinitions
         new TipDefinition
         {
             TipId            = SettingsExplore,
-            WindowName       = "SystemSettingsWindow",
+            WindowName       = "SettingsWindow",
             Title            = "System settings",
             Message          = "Configure your store name, tax rates, backup schedule, and user accounts from the sidebar.",
             ContextCondition = _ => true,

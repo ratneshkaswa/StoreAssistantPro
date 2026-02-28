@@ -1,4 +1,4 @@
-using NSubstitute;
+﻿using NSubstitute;
 using StoreAssistantPro.Modules.SystemSettings.Commands;
 using StoreAssistantPro.Modules.SystemSettings.Services;
 

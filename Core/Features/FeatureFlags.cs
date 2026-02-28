@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Core.Features;
+﻿namespace StoreAssistantPro.Core.Features;
 
 /// <summary>
 /// Well-known feature names used across the application.

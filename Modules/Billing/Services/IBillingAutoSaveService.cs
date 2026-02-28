@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Billing.Services;
+﻿namespace StoreAssistantPro.Modules.Billing.Services;
 
 /// <summary>
 /// Coordinates automatic persistence of the billing cart during an

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;
 

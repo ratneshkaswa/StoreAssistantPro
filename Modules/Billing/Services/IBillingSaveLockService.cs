@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Modules.Billing.Services;
+﻿namespace StoreAssistantPro.Modules.Billing.Services;
 
 /// <summary>
 /// Serialises billing save operations so that at most one

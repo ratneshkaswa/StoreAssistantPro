@@ -1,4 +1,4 @@
-using StoreAssistantPro.Modules.Authentication.Services;
+﻿using StoreAssistantPro.Modules.Authentication.Services;
 
 namespace StoreAssistantPro.Core.Services;
 

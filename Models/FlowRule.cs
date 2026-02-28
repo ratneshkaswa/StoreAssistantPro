@@ -1,4 +1,4 @@
-namespace StoreAssistantPro.Models;
+﻿namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// A single rule verdict from the <see cref="Core.Services.FlowStateAnalyzer"/>.
