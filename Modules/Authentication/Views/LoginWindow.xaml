@@ -168,7 +168,16 @@
                     </Style>
                 </Border.Style>
                 <Grid>
-                    <StackPanel>
+                    <!-- â”€â”€ Normal PIN entry mode â”€â”€ -->
+                    <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToVisibility}}">
+                        <!-- Success message after PIN reset -->
+                    <TextBlock Text="{Binding ResetSuccessMessage}"
+                               HorizontalAlignment="Center"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentSuccess}"
+                               Visibility="{Binding ResetSuccessMessage, Converter={StaticResource BoolToVisibility}}"
+                               Margin="{StaticResource CompactItemSpacing}"/>
+
                         <!-- Role hint / instruction (always visible, layout-stable) -->
                     <TextBlock Text="{Binding RoleHintText}"
                                HorizontalAlignment="Center"
@@ -226,7 +235,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Row="0" Grid.Column="0" Content="1" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="1" Style="{StaticResource PosKeypadButtonStyle}"/>
+                        <Button Grid.Row="0" Grid.Column="0" Content="1" x:Name="Digit1Button" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="1" Style="{StaticResource PosKeypadButtonStyle}"/>
                         <Button Grid.Row="0" Grid.Column="1" Content="2" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="2" Style="{StaticResource PosKeypadButtonStyle}"/>
                         <Button Grid.Row="0" Grid.Column="2" Content="3" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="3" Style="{StaticResource PosKeypadButtonStyle}"/>
                         <Button Grid.Row="1" Grid.Column="0" Content="4" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="4" Style="{StaticResource PosKeypadButtonStyle}"/>
@@ -258,6 +267,77 @@
                             Forgot PIN?
                         </Hyperlink>
                     </TextBlock>
+                    </StackPanel>
+
+                    <!-- â”€â”€ Forgot PIN recovery form â”€â”€ -->
+                    <StackPanel Visibility="{Binding IsForgotPinMode, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="Reset PIN" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeSectionHeader}"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource FluentAccentDefault}"
+                                   Margin="{StaticResource CompactItemSpacing}"/>
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentTextSecondary}"
+                                   Margin="{StaticResource CompactItemSpacing}">
+                            <Run Text="Enter Master Password to reset"/>
+                            <Run Text="{Binding SelectedUserType, Mode=OneWay}"/>
+                            <Run Text="PIN"/>
+                        </TextBlock>
+
+                        <Grid Margin="{StaticResource ItemSpacing}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Master"
+                                       Style="{StaticResource FormRowLabelStyle}"/>
+                            <PasswordBox Grid.Row="0" Grid.Column="1"
+                                         x:Name="ResetMasterBox" MaxLength="6"
+                                         PasswordChanged="OnResetPinChanged"
+                                         AutomationProperties.Name="Master Password"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="New PIN"
+                                       Style="{StaticResource FormRowLabelStyle}"/>
+                            <PasswordBox Grid.Row="2" Grid.Column="1"
+                                         x:Name="ResetNewPinBox" MaxLength="4"
+                                         PasswordChanged="OnResetPinChanged"
+                                         AutomationProperties.Name="New PIN"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Confirm"
+                                       Style="{StaticResource FormRowLabelStyle}"/>
+                            <PasswordBox Grid.Row="4" Grid.Column="1"
+                                         x:Name="ResetConfirmPinBox" MaxLength="4"
+                                         PasswordChanged="OnResetPinChanged"
+                                         AutomationProperties.Name="Confirm New PIN"/>
+                        </Grid>
+
+                        <!-- Error -->
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Style="{StaticResource ErrorMessageStyle}"
+                                   HorizontalAlignment="Center" Margin="0"/>
+
+                        <!-- Action buttons -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                    Margin="{StaticResource FormActionBarSpacing}">
+                            <Button Content="Cancel"
+                                    Command="{Binding CancelForgotPinCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Margin="{StaticResource InlineControlSpacing}"
+                                    AutomationProperties.Name="Cancel PIN reset"/>
+                            <Button Content="Reset PIN"
+                                    Command="{Binding ResetPinCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    AutomationProperties.Name="Confirm PIN reset"/>
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Verifying overlay -->

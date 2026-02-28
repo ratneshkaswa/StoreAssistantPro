@@ -12,12 +12,14 @@ public class LoginViewModelTests
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
+    private readonly IConnectivityMonitorService _connectivity = Substitute.For<IConnectivityMonitorService>();
 
     private LoginViewModel CreateSut()
     {
         _regional.Now.Returns(DateTime.Now);
         _regional.FormatTime(Arg.Any<DateTime>()).Returns("12:00 PM");
-        var vm = new LoginViewModel(_commandBus, _appState, _regional);
+        _connectivity.IsConnected.Returns(true);
+        var vm = new LoginViewModel(_commandBus, _appState, _regional, _connectivity);
         vm.Initialize();
         return vm;
     }

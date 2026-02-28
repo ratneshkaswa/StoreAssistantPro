@@ -92,6 +92,11 @@
                             <Setter TargetName="Bd" Property="BorderBrush"
                                     Value="{StaticResource FluentAccentPressed}"/>
                         </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentStrokeFocus}"/>
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="2"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -142,6 +147,10 @@
                                     Value="{StaticResource FluentSubtlePressed}"/>
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextSecondary}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource FluentStrokeFocus}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

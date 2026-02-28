@@ -15,14 +15,16 @@ public class ChangePinHandler(
 {
     protected override async Task<CommandResult> ExecuteAsync(ChangePinCommand command)
     {
-        if (command.UserType == UserType.Admin)
+        // Master PIN validation — required for Admin, accepted for any role
+        if (!string.IsNullOrWhiteSpace(command.MasterPin))
         {
-            if (string.IsNullOrWhiteSpace(command.MasterPin))
-                return CommandResult.Failure("Master Password is required to change Admin PIN.");
-
             var isMasterValid = await loginService.ValidateMasterPinAsync(command.MasterPin);
             if (!isMasterValid)
                 return CommandResult.Failure("Invalid Master Password.");
+        }
+        else if (command.UserType == UserType.Admin)
+        {
+            return CommandResult.Failure("Master Password is required to change Admin PIN.");
         }
 
         await userService.ChangePinAsync(command.UserType, command.NewPin);

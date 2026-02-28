@@ -8,6 +8,7 @@ using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
+using StoreAssistantPro.Modules.Users.Commands;
 
 namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 
@@ -24,6 +25,7 @@ public partial class LoginViewModel : BaseViewModel
     private readonly ICommandBus _commandBus;
     private readonly IAppStateService _appState;
     private readonly IRegionalSettingsService _regional;
+    private readonly IConnectivityMonitorService _connectivity;
     private readonly DispatcherTimer _clockTimer;
 
     // Failed attempt tracking per role
@@ -56,6 +58,12 @@ public partial class LoginViewModel : BaseViewModel
     // ── L1: Firm name ──
     public string FirmName => _appState.FirmName;
 
+    // ── L15: Connection status ──
+    public bool IsOffline => !_connectivity.IsConnected;
+    public string ConnectionStatus => _connectivity.IsConnected ? "● Connected" : "● Offline";
+    public string AppVersion { get; } =
+        System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
+
     // ── L9: Clock ──
     [ObservableProperty]
     public partial string CurrentTime { get; set; }
@@ -79,12 +87,14 @@ public partial class LoginViewModel : BaseViewModel
     public LoginViewModel(
         ICommandBus commandBus,
         IAppStateService appState,
-        IRegionalSettingsService regional)
+        IRegionalSettingsService regional,
+        IConnectivityMonitorService connectivity)
         : base()
     {
         _commandBus = commandBus;
         _appState = appState;
         _regional = regional;
+        _connectivity = connectivity;
 
         CurrentTime = _regional.FormatTime(_regional.Now);
         AttemptsMessage = string.Empty;
@@ -139,6 +149,15 @@ public partial class LoginViewModel : BaseViewModel
         ErrorMessage = string.Empty;
         IsRoleLocked = false;
         UpdateAttemptsMessage();
+    }
+
+    /// <summary>Clears selected role (layered ESC).</summary>
+    public void DeselectRole()
+    {
+        SelectedUserType = null;
+        PinPad.Reset();
+        ErrorMessage = string.Empty;
+        AttemptsMessage = string.Empty;
     }
 
     [RelayCommand]
@@ -216,9 +235,79 @@ public partial class LoginViewModel : BaseViewModel
             : string.Empty;
     }
 
+    // ── Forgot PIN recovery ──
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNormalMode))]
+    public partial bool IsForgotPinMode { get; set; }
+
+    public bool IsNormalMode => !IsForgotPinMode;
+
+    public string MasterPassword { get; set; } = string.Empty;
+    public string NewPin { get; set; } = string.Empty;
+    public string NewPinConfirm { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ResetSuccessMessage { get; set; } = string.Empty;
+
     [RelayCommand]
     private void ForgotPin()
     {
-        ErrorMessage = "Contact your Admin or use Master Password to reset PIN.";
+        if (SelectedUserType is null)
+        {
+            ErrorMessage = "Select a role first.";
+            return;
+        }
+
+        IsForgotPinMode = true;
+        ErrorMessage = string.Empty;
+        ResetSuccessMessage = string.Empty;
+        MasterPassword = string.Empty;
+        NewPin = string.Empty;
+        NewPinConfirm = string.Empty;
+        PinPad.Reset();
+    }
+
+    [RelayCommand]
+    private void CancelForgotPin()
+    {
+        IsForgotPinMode = false;
+        ErrorMessage = string.Empty;
+        ResetSuccessMessage = string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task ResetPinAsync()
+    {
+        if (SelectedUserType is null) return;
+
+        if (!Validate(v => v
+            .Rule(InputValidator.IsRequired(MasterPassword), "Enter your Master Password.")
+            .Rule(InputValidator.IsRequired(NewPin), "Enter a new PIN.")
+            .Rule(InputValidator.IsValidUserPin(NewPin), "PIN must be exactly 4 digits.")
+            .Rule(InputValidator.AreEqual(NewPin, NewPinConfirm), "PINs do not match.")))
+            return;
+
+        IsVerifying = true;
+        try
+        {
+            var result = await _commandBus.SendAsync(
+                new ChangePinCommand(SelectedUserType.Value, NewPin, MasterPassword));
+
+            if (result.Succeeded)
+            {
+                ResetSuccessMessage = $"{SelectedUserType} PIN has been reset. Please login.";
+                ErrorMessage = string.Empty;
+                IsForgotPinMode = false;
+                PinPad.Reset();
+            }
+            else
+            {
+                ErrorMessage = result.ErrorMessage ?? "PIN reset failed.";
+            }
+        }
+        finally
+        {
+            IsVerifying = false;
+        }
     }
 }
