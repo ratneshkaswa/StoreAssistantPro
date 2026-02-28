@@ -2,83 +2,205 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
-        Title="Store Assistant Pro — First Time Setup"
-        h:Motion.WindowFadeIn="True">
-    <Grid Margin="{StaticResource DialogPadding}">
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+        Title="One Time Setup"
+        h:Motion.WindowFadeIn="True"
+        Closing="OnWindowClosing">
+        Icon="pack://application:,,,/Assets/app.ico">
+    <Window.InputBindings>
+        <KeyBinding Key="Back" Command="{Binding PreviousStepCommand}"/>
+    </Window.InputBindings>
+
+    <Grid Margin="{StaticResource DialogPadding}"
+          Background="{StaticResource FluentBackgroundSecondary}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>  <!-- 0: Title -->
+            <RowDefinition Height="Auto"/>  <!-- 1: Progress bar -->
+            <RowDefinition Height="*"/>     <!-- 2: Step content -->
+            <RowDefinition Height="Auto"/>  <!-- 3: Error -->
+            <RowDefinition Height="Auto"/>  <!-- 4: Nav buttons -->
+            <RowDefinition Height="Auto"/>  <!-- 5: Developer credit -->
         </Grid.RowDefinitions>
 
-        <!-- Title -->
-        <TextBlock Text="First Time Setup" Style="{StaticResource DialogTitleStyle}"/>
+        <!-- ── Row 0: Logo + title (matches Login window) ───── -->
+        <controls:AppBranding Grid.Row="0" LogoSize="48"/>
 
-        <!-- Step indicator — current=accent, completed(past)=success, future=tertiary -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                    Margin="{StaticResource SectionSpacing}">
-            <!-- Step 1: active on step 1, completed on steps 2-3 -->
-            <Ellipse Width="10" Height="10">
-                <Ellipse.Style>
-                    <Style TargetType="Ellipse">
-                        <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsStep1}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Ellipse.Style>
-            </Ellipse>
-            <TextBlock Text="  Firm Details  " FontSize="{StaticResource FontSizeCaption}"
-                       VerticalAlignment="Center" Foreground="{StaticResource FluentTextSecondary}"/>
-            <TextBlock Text="—" Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"
-                       Margin="{StaticResource InlineControlSpacing}"/>
-            <!-- Step 2: active on step 2, completed on step 3, future on step 1 -->
-            <Ellipse Width="10" Height="10">
-                <Ellipse.Style>
-                    <Style TargetType="Ellipse">
-                        <Setter Property="Fill" Value="{StaticResource FluentTextTertiary}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsStep2}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsStep3}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Ellipse.Style>
-            </Ellipse>
-            <TextBlock Text="  Set PINs  " FontSize="{StaticResource FontSizeCaption}"
-                       VerticalAlignment="Center" Foreground="{StaticResource FluentTextSecondary}"/>
-            <TextBlock Text="—" Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"
-                       Margin="{StaticResource InlineControlSpacing}"/>
-            <!-- Step 3: active on step 3, future otherwise -->
-            <Ellipse Width="10" Height="10">
-                <Ellipse.Style>
-                    <Style TargetType="Ellipse">
-                        <Setter Property="Fill" Value="{StaticResource FluentTextTertiary}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsStep3}" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Ellipse.Style>
-            </Ellipse>
-            <TextBlock Text="  Confirm  " FontSize="{StaticResource FontSizeCaption}"
-                       VerticalAlignment="Center" Foreground="{StaticResource FluentTextSecondary}"/>
+        <!-- ── Row 1: Numbered step circles + labels ──────────── -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center"
+                    Margin="0,4,0,4">
+            <Grid Width="280">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!-- Step 1 circle -->
+                <Border Grid.Column="0" Width="24" Height="24" CornerRadius="12"
+                        HorizontalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="1" Foreground="{StaticResource FluentTextOnAccent}"
+                               FontSize="{StaticResource FontSizeCaption}" FontWeight="Bold"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <!-- Connector 1-2 -->
+                <Border Grid.Column="1" Height="2" VerticalAlignment="Center"
+                        Margin="4,0" CornerRadius="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="False">
+                                    <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+                <!-- Step 2 circle -->
+                <Border Grid.Column="2" Width="24" Height="24" CornerRadius="12"
+                        HorizontalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep2}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="2" FontSize="{StaticResource FontSizeCaption}" FontWeight="Bold"
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep2}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+                <!-- Connector 2-3 -->
+                <Border Grid.Column="3" Height="2" VerticalAlignment="Center"
+                        Margin="4,0" CornerRadius="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+                <!-- Step 3 circle -->
+                <Border Grid.Column="4" Width="24" Height="24" CornerRadius="12"
+                        HorizontalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="3" FontSize="{StaticResource FontSizeCaption}" FontWeight="Bold"
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+            </Grid>
+            <!-- Step labels — active step is bold + accented -->
+            <Grid Width="280" Margin="{StaticResource FieldLabelSpacing}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Firm Details" HorizontalAlignment="Left"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Grid.Column="1" Text="Set PINs" HorizontalAlignment="Center"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep2}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Grid.Column="2" Text="Confirm" HorizontalAlignment="Right"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
         </StackPanel>
 
-        <!-- ═══════════════════════════════════════════════════════
+        <!-- ═════════════════════════════════════════════════════
              STEP 1: Firm Details
-             ═══════════════════════════════════════════════════════ -->
-        <Grid Grid.Row="2" VerticalAlignment="Top">
-            <Grid.Style>
-                <Style TargetType="Grid">
+             ═════════════════════════════════════════════════════ -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden"
+                    HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
                     <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsStep1}" Value="True">
@@ -86,42 +208,125 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </Grid.Style>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" MinWidth="120"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            </ScrollViewer.Style>
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!--  0: Firm Name -->
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>  <!--  2: Address -->
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>  <!--  4: Phone -->
+                    <RowDefinition Height="Auto"/>  <!--  5: Phone hint -->
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>  <!--  7: Email -->
+                    <RowDefinition Height="Auto"/>  <!--  8: Email hint -->
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>  <!-- 10: GSTIN -->
+                    <RowDefinition Height="Auto"/>  <!-- 11: GSTIN hint -->
+                </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Firm Name"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="0" Grid.Column="1"
-                     Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="200"/>
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                           Style="{StaticResource FormRowLabelStyle}"
+                           AutomationProperties.Name="Firm Name required">
+                    <Run Text="Firm Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                </TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="FirmNameBox"
+                         Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="200" h:Watermark.Text="e.g. Sharma Textiles"
+                         AutomationProperties.Name="Firm Name"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Address"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="2" Grid.Column="1"
-                     Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="500"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Address"
+                           Style="{StaticResource FormRowLabelStyle}"/>
+                <TextBox Grid.Row="2" Grid.Column="1"
+                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="500" h:Watermark.Text="e.g. 12 MG Road, Indore, MP"
+                         AutomationProperties.Name="Address"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Phone"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="4" Grid.Column="1"
-                     Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="20"/>
-        </Grid>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Phone"
+                           Style="{StaticResource FormRowLabelStyle}"/>
+                <TextBox Grid.Row="4" Grid.Column="1"
+                         Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="20" h:Watermark.Text="e.g. 9876543210"
+                         PreviewTextInput="OnPreviewPhoneOnly"
+                         AutomationProperties.Name="Phone number"/>
+                <TextBlock Grid.Row="5" Grid.Column="1"
+                           Text="{Binding PhoneValidationHint}"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PhoneValidationHint}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding PhoneValidationHint}" Value="Digits, +, - and spaces only">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
-        <!-- ═══════════════════════════════════════════════════════
-             STEP 2: Set PINs (with confirmation + weak PIN warnings)
-             ═══════════════════════════════════════════════════════ -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Email"
+                           Style="{StaticResource FormRowLabelStyle}"/>
+                <TextBox Grid.Row="7" Grid.Column="1"
+                         Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="200" h:Watermark.Text="e.g. store@example.com"
+                         AutomationProperties.Name="Email address"/>
+                <TextBlock Grid.Row="8" Grid.Column="1"
+                           Text="{Binding EmailValidationHint}"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EmailValidationHint}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding EmailValidationHint}" Value="Enter a valid email address">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="GSTIN"
+                           Style="{StaticResource FormRowLabelStyle}"/>
+                <TextBox Grid.Row="10" Grid.Column="1"
+                         Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="15" h:Watermark.Text="e.g. 22AAAAA0000A1Z5"
+                         CharacterCasing="Upper"
+                         AutomationProperties.Name="GST Identification Number"/>
+                <TextBlock Grid.Row="11" Grid.Column="1"
+                           Text="{Binding GstinValidationHint}"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GstinValidationHint}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding GstinValidationHint}" Value="Format: 22AAAAA0000A1Z5">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- ═════════════════════════════════════════════════════
+             STEP 2: Set PINs
+             ═════════════════════════════════════════════════════ -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden"
+                    HorizontalScrollBarVisibility="Disabled">
             <ScrollViewer.Style>
                 <Style TargetType="ScrollViewer">
                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -132,122 +337,234 @@
                     </Style.Triggers>
                 </Style>
             </ScrollViewer.Style>
-            <Grid VerticalAlignment="Top">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="120"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <!--  0: Admin PIN          -->
-                    <RowDefinition Height="Auto"/>
-                    <!--  1: Admin warning       -->
-                    <RowDefinition Height="Auto"/>
-                    <!--  2: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!--  3: Admin confirm       -->
-                    <RowDefinition Height="Auto"/>
-                    <!--  4: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!--  5: Manager PIN         -->
-                    <RowDefinition Height="Auto"/>
-                    <!--  6: Manager warning     -->
-                    <RowDefinition Height="Auto"/>
-                    <!--  7: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!--  8: Manager confirm     -->
-                    <RowDefinition Height="Auto"/>
-                    <!--  9: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!-- 10: User PIN            -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- 11: User warning        -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- 12: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!-- 13: User confirm        -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- 14: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!-- 15: Master Password     -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- 16: spacing             -->
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <!-- 17: Master confirm      -->
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>  <!--  0: Admin header -->
+                        <RowDefinition Height="Auto"/>  <!--  1: Admin PIN -->
+                        <RowDefinition Height="Auto"/>  <!--  2: Admin strength -->
+                        <RowDefinition Height="Auto"/>  <!--  3: Admin confirm -->
+                        <RowDefinition Height="Auto"/>  <!--  4: Admin confirm hint -->
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>  <!--  6: Manager header -->
+                        <RowDefinition Height="Auto"/>  <!--  7: Manager PIN -->
+                        <RowDefinition Height="Auto"/>  <!--  8: Manager strength -->
+                        <RowDefinition Height="Auto"/>  <!--  9: Manager confirm -->
+                        <RowDefinition Height="Auto"/>  <!-- 10: Manager confirm hint -->
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>  <!-- 12: User header -->
+                        <RowDefinition Height="Auto"/>  <!-- 13: User PIN -->
+                        <RowDefinition Height="Auto"/>  <!-- 14: User strength -->
+                        <RowDefinition Height="Auto"/>  <!-- 15: User confirm -->
+                        <RowDefinition Height="Auto"/>  <!-- 16: User confirm hint -->
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>  <!-- 18: Master header -->
+                        <RowDefinition Height="Auto"/>  <!-- 19: Master PIN -->
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>  <!-- 21: Master confirm -->
+                        <RowDefinition Height="Auto"/>  <!-- 22: Master confirm hint -->
+                        <RowDefinition Height="Auto"/>  <!-- 23: Conflict warning -->
+                    </Grid.RowDefinitions>
 
-                <!-- Row 0: Admin PIN -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Admin PIN (4 digits)"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="0" Grid.Column="1"
-                             x:Name="AdminPinBox" MaxLength="4"
-                             PasswordChanged="OnPinChanged"/>
-                <!-- Row 1: Admin warning -->
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AdminPinWarning}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentWarning}"/>
-                <!-- Row 3: Admin confirm -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Confirm Admin PIN"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="3" Grid.Column="1"
-                             x:Name="AdminPinConfirmBox" MaxLength="4"
-                             PasswordChanged="OnPinChanged"/>
+                    <!-- ── Admin (blue pastel section) ── -->
+                    <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource RoleAdminBackground}"
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                        <TextBlock Text="🛡️ Admin" FontWeight="SemiBold"
+                                   Foreground="{StaticResource RoleAdminAccent}"
+                                   FontSize="{StaticResource FontSizeBody}"/>
+                    </Border>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="PIN (4 digits)"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="1" Grid.Column="1"
+                                 x:Name="AdminPinBox" MaxLength="4"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Admin PIN"/>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                        <TextBlock Text="{Binding AdminPinWarning}" Margin="6,0,0,0"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentWarning}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Confirm"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="3" Grid.Column="1"
+                                 x:Name="AdminPinConfirmBox" MaxLength="4"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Confirm Admin PIN"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="✓ Match"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentSuccess}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding AdminConfirmHint}" Value="✓ Match">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
-                <!-- Row 5: Manager PIN -->
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Manager PIN (4 digits)"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="5" Grid.Column="1"
-                             x:Name="ManagerPinBox" MaxLength="4"
-                             PasswordChanged="OnPinChanged"/>
-                <!-- Row 6: Manager warning -->
-                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding ManagerPinWarning}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentWarning}"/>
-                <!-- Row 8: Manager confirm -->
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="Confirm Manager PIN"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="8" Grid.Column="1"
-                             x:Name="ManagerPinConfirmBox" MaxLength="4"
-                             PasswordChanged="OnPinChanged"/>
+                    <!-- ── Manager (purple pastel section) ── -->
+                    <Border Grid.Row="6" Grid.ColumnSpan="2" Background="{StaticResource RoleManagerBackground}"
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                        <TextBlock Text="📋 Manager" FontWeight="SemiBold"
+                                   Foreground="{StaticResource RoleManagerAccent}"
+                                   FontSize="{StaticResource FontSizeBody}"/>
+                    </Border>
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="PIN (4 digits)"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="7" Grid.Column="1"
+                                 x:Name="ManagerPinBox" MaxLength="4"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Manager PIN"/>
+                    <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal">
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                        <TextBlock Text="{Binding ManagerPinWarning}" Margin="6,0,0,0"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentWarning}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Confirm"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="9" Grid.Column="1"
+                                 x:Name="ManagerPinConfirmBox" MaxLength="4"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Confirm Manager PIN"/>
+                    <TextBlock Grid.Row="10" Grid.Column="1" Text="✓ Match"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentSuccess}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ManagerConfirmHint}" Value="✓ Match">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
-                <!-- Row 10: User PIN -->
-                <TextBlock Grid.Row="10" Grid.Column="0" Text="User PIN (4 digits)"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="10" Grid.Column="1"
-                             x:Name="UserPinBox" MaxLength="4"
-                             PasswordChanged="OnPinChanged"/>
-                <!-- Row 11: User warning -->
-                <TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding UserPinWarning}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentWarning}"/>
-                <!-- Row 13: User confirm -->
-                <TextBlock Grid.Row="13" Grid.Column="0" Text="Confirm User PIN"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="13" Grid.Column="1"
-                             x:Name="UserPinConfirmBox" MaxLength="4"
-                             PasswordChanged="OnPinChanged"/>
+                    <!-- ── User (green pastel section) ── -->
+                    <Border Grid.Row="12" Grid.ColumnSpan="2" Background="{StaticResource RoleUserBackground}"
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                        <TextBlock Text="👤 User" FontWeight="SemiBold"
+                                   Foreground="{StaticResource RoleUserAccent}"
+                                   FontSize="{StaticResource FontSizeBody}"/>
+                    </Border>
+                    <TextBlock Grid.Row="13" Grid.Column="0" Text="PIN (4 digits)"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="13" Grid.Column="1"
+                                 x:Name="UserPinBox" MaxLength="4"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="User PIN"/>
+                    <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal">
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
+                        <Border Width="24" Height="4" CornerRadius="2" Margin="0,2,3,0"
+                                Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                        <TextBlock Text="{Binding UserPinWarning}" Margin="6,0,0,0"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentWarning}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="15" Grid.Column="0" Text="Confirm"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="15" Grid.Column="1"
+                                 x:Name="UserPinConfirmBox" MaxLength="4"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Confirm User PIN"/>
+                    <TextBlock Grid.Row="16" Grid.Column="1" Text="✓ Match"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentSuccess}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding UserConfirmHint}" Value="✓ Match">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
-                <!-- Row 15: Master Password -->
-                <TextBlock Grid.Row="15" Grid.Column="0" Text="Master Password (6 digits)"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="15" Grid.Column="1"
-                             x:Name="MasterPinBox" MaxLength="6"
-                             PasswordChanged="OnPinChanged"/>
-                <!-- Row 17: Master confirm -->
-                <TextBlock Grid.Row="17" Grid.Column="0" Text="Confirm Master Password"
-                           Style="{StaticResource FormRowLabelStyle}"/>
-                <PasswordBox Grid.Row="17" Grid.Column="1"
-                             x:Name="MasterPinConfirmBox" MaxLength="6"
-                             PasswordChanged="OnPinChanged"/>
-            </Grid>
+                    <!-- ── Master Password ── -->
+                    <Border Grid.Row="18" Grid.ColumnSpan="2" Background="{StaticResource FluentSurfaceElevated}"
+                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="8,2" Margin="0,0,0,2">
+                        <TextBlock Text="🔐 Master Password" FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextPrimary}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   ToolTip="Used to recover or change PINs if forgotten."/>
+                    </Border>
+                    <TextBlock Grid.Row="19" Grid.Column="0" Text="Password (6 digits)"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="19" Grid.Column="1"
+                                 x:Name="MasterPinBox" MaxLength="6"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Master Password"/>
+                    <TextBlock Grid.Row="21" Grid.Column="0" Text="Confirm"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <PasswordBox Grid.Row="21" Grid.Column="1"
+                                 x:Name="MasterPinConfirmBox" MaxLength="6"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Confirm Master Password"/>
+                    <TextBlock Grid.Row="22" Grid.Column="1" Text="✓ Match"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentSuccess}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding MasterConfirmHint}" Value="✓ Match">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock Grid.Row="23" Grid.Column="1"
+                               Text="{Binding PinConflictWarning}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentError}"
+                               Margin="0,4,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PinConflictWarning}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
         </ScrollViewer>
 
-        <!-- ═══════════════════════════════════════════════════════
-             STEP 3: Confirmation Summary
-             ═══════════════════════════════════════════════════════ -->
-        <StackPanel Grid.Row="2" VerticalAlignment="Top">
-            <StackPanel.Style>
-                <Style TargetType="StackPanel">
+        <!-- ═════════════════════════════════════════════════════
+             STEP 3: Confirmation
+             ═════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2">
+            <Grid.Style>
+                <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsStep3}" Value="True">
@@ -255,77 +572,180 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </StackPanel.Style>
+            </Grid.Style>
 
-            <TextBlock Text="Please review your settings before completing setup."
-                       FontSize="{StaticResource FontSizeBody}"
-                       Foreground="{StaticResource FluentTextSecondary}"
-                       Margin="{StaticResource SectionSpacing}"/>
+            <!-- Success overlay -->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
+                        h:Motion.SlideFadeIn="True">
+                <TextBlock Text="✅" FontSize="40" HorizontalAlignment="Center"
+                           Margin="{StaticResource ItemSpacing}"/>
+                <TextBlock Text="Setup Complete!"
+                           FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource FluentSuccess}"
+                           Margin="{StaticResource FieldLabelSpacing}"/>
+                <TextBlock Text="{Binding RedirectCountdown}"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource FluentTextSecondary}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
 
-            <Border Background="{StaticResource FluentSurfaceElevated}"
-                    BorderBrush="{StaticResource FluentStrokeDefault}"
-                    BorderThickness="1" CornerRadius="{StaticResource FluentCornerMedium}"
-                    Padding="{StaticResource CardPadding}">
-                <StackPanel>
-                    <TextBlock Margin="{StaticResource ItemSpacing}">
-                        <Run Text="Firm Name: " FontWeight="SemiBold"/>
-                        <Run Text="{Binding FirmName, Mode=OneWay}"/>
-                    </TextBlock>
-                    <TextBlock Margin="{StaticResource ItemSpacing}">
-                        <Run Text="Address: " FontWeight="SemiBold"/>
-                        <Run Text="{Binding Address, Mode=OneWay}"/>
-                    </TextBlock>
-                    <TextBlock Margin="{StaticResource ItemSpacing}">
-                        <Run Text="Phone: " FontWeight="SemiBold"/>
-                        <Run Text="{Binding Phone, Mode=OneWay}"/>
-                    </TextBlock>
-                    <TextBlock Margin="{StaticResource ItemSpacing}">
-                        <Run Text="Admin PIN: " FontWeight="SemiBold"/>
-                        <Run Text="••••"/>
-                    </TextBlock>
-                    <TextBlock Margin="{StaticResource ItemSpacing}">
-                        <Run Text="Manager PIN: " FontWeight="SemiBold"/>
-                        <Run Text="••••"/>
-                    </TextBlock>
-                    <TextBlock Margin="{StaticResource ItemSpacing}">
-                        <Run Text="User PIN: " FontWeight="SemiBold"/>
-                        <Run Text="••••"/>
-                    </TextBlock>
-                    <TextBlock>
-                        <Run Text="Master Password: " FontWeight="SemiBold"/>
-                        <Run Text="••••••"/>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
-
-            <TextBlock Text="💡 Remember your PINs — you will need them to log in."
-                       FontSize="{StaticResource FontSizeCaption}"
-                       Foreground="{StaticResource FluentWarning}"
-                       Margin="{StaticResource MessageBarSpacing}"/>
-        </StackPanel>
-
-        <!-- Error message -->
-        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}"
-                   Style="{StaticResource ErrorMessageStyle}" Margin="{StaticResource FieldLabelSpacing}"/>
-
-        <!-- Navigation buttons -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="← Back" Command="{Binding PreviousStepCommand}"
-                    Margin="{StaticResource InlineControlSpacing}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+            <!-- Review panel -->
+            <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                         HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer.Style>
+                    <Style TargetType="ScrollViewer">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding CanGoBack}" Value="False">
+                            <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Button.Style>
-            </Button>
-            <!-- Next (steps 1 & 2) -->
-            <Button Content="Next →" Command="{Binding NextStepCommand}">
+                </ScrollViewer.Style>
+                <StackPanel>
+                    <TextBlock Text="Please review your settings before completing setup."
+                               FontSize="{StaticResource FontSizeBody}"
+                               Foreground="{StaticResource FluentTextSecondary}"
+                               Margin="{StaticResource ItemSpacing}"/>
+
+                    <!-- Firm details card -->
+                    <Border Background="{StaticResource FluentSurfaceElevated}"
+                            BorderBrush="{StaticResource FluentStrokeDefault}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{StaticResource CardPadding}"
+                            Margin="{StaticResource CompactItemSpacing}"
+                            Effect="{StaticResource FluentShadowSmall}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                                       Text="Firm Details" FontWeight="Bold"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       Margin="{StaticResource CompactItemSpacing}"/>
+
+                            <TextBlock Grid.Row="1" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="Firm Name: " FontWeight="SemiBold"/>
+                                <Run Text="{Binding FirmName, Mode=OneWay}"/>
+                            </TextBlock>
+                            <Button Grid.Row="1" Grid.Column="1" Content="Edit"
+                                    Command="{Binding GoToStepCommand}" CommandParameter="1"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    FontSize="{StaticResource FontSizeCaption}"
+                                    Padding="{StaticResource ChipPadding}"
+                                    VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Row="2" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="Address: " FontWeight="SemiBold"/>
+                                <Run Text="{Binding AddressDisplay, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="3" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="Phone: " FontWeight="SemiBold"/>
+                                <Run Text="{Binding PhoneDisplay, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="4" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="Email: " FontWeight="SemiBold"/>
+                                <Run Text="{Binding EmailDisplay, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="5" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="GSTIN: " FontWeight="SemiBold"/>
+                                <Run Text="{Binding GstinDisplay, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <!-- PINs card -->
+                    <Border Background="{StaticResource FluentSurfaceElevated}"
+                            BorderBrush="{StaticResource FluentStrokeDefault}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{StaticResource CardPadding}"
+                            Margin="{StaticResource CompactItemSpacing}"
+                            Effect="{StaticResource FluentShadowSmall}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                                       Text="Security" FontWeight="Bold"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       Margin="{StaticResource CompactItemSpacing}"/>
+
+                            <TextBlock Grid.Row="1" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="Admin PIN: " FontWeight="SemiBold"
+                                     Foreground="{StaticResource RoleAdminAccent}"/>
+                                <Run Text="••••"/>
+                            </TextBlock>
+                            <Button Grid.Row="1" Grid.Column="1" Content="Edit"
+                                    Command="{Binding GoToStepCommand}" CommandParameter="2"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    FontSize="{StaticResource FontSizeCaption}"
+                                    Padding="{StaticResource ChipPadding}"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="Manager PIN: " FontWeight="SemiBold"
+                                     Foreground="{StaticResource RoleManagerAccent}"/>
+                                <Run Text="••••"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="3" Margin="{StaticResource CompactItemSpacing}">
+                                <Run Text="User PIN: " FontWeight="SemiBold"
+                                     Foreground="{StaticResource RoleUserAccent}"/>
+                                <Run Text="••••"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="4">
+                                <Run Text="Master Password: " FontWeight="SemiBold"/>
+                                <Run Text="••••••"/>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="💡 Remember your PINs — you will need them to log in."
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentWarning}"
+                               Margin="{StaticResource FieldLabelSpacing}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ── Row 3: Error ───────────────────────────────────── -->
+        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}"
+                   Style="{StaticResource ErrorMessageStyle}"
+                   Margin="{StaticResource FieldLabelSpacing}"/>
+
+        <!-- ── Row 4: Navigation ──────────────────────────────── -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="← Back" Command="{Binding PreviousStepCommand}"
+                    Margin="{StaticResource InlineControlSpacing}"
+                    Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVisibility}}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    AutomationProperties.Name="Go to previous step"/>
+            <Button Content="Next →" Command="{Binding NextStepCommand}"
+                    AutomationProperties.Name="Go to next step">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
                         <Style.Triggers>
@@ -336,8 +756,8 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <!-- Complete (step 3 only) -->
-            <Button Content="Complete Setup" Command="{Binding SaveCommand}">
+            <Button Content="Complete Setup" Command="{Binding SaveCommand}"
+                    AutomationProperties.Name="Complete first time setup">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -350,5 +770,13 @@
                 </Button.Style>
             </Button>
         </StackPanel>
+
+        <!-- ── Row 5: Developer credit ────────────────────────────── -->
+        <TextBlock Grid.Row="5" HorizontalAlignment="Center"
+                   FontSize="{StaticResource FontSizeCaption}"
+                   Foreground="{StaticResource FluentTextTertiary}"
+                   Margin="0,8,0,0">
+            <Run Text="Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
+        </TextBlock>
     </Grid>
 </Window>

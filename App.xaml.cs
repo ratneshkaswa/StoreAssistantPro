@@ -23,6 +23,11 @@ public partial class App : Application
     private IHost _host = null!;
     private ILogger<App>? _logger;
 
+    /// <summary>
+    /// Exposes the DI container for attached behaviors that cannot use constructor injection.
+    /// </summary>
+    public IServiceProvider? Services => _host?.Services;
+
     public App()
     {
         SetIndianCulture();
@@ -30,15 +35,7 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
-        // ?? Phase 1: Show splash immediately (no DI, no DB) ?????????
-        var splash = CreateSplashWindow();
-        splash.Show();
-
-        // Yield so the splash window paints before the synchronous
-        // DI container build occupies the UI thread.
-        await Dispatcher.Yield(DispatcherPriority.Render);
-
-        // ?? Phase 2: Build DI container ?????????????????????????????
+        // Build DI container
         var builder = Host.CreateApplicationBuilder();
 
         builder.Services
@@ -107,8 +104,6 @@ public partial class App : Application
 
         await workflowManager.StartWorkflowAsync(StartupWorkflow.WorkflowName);
 
-        splash.Close();
-
         if (workflowManager.Context.Has("Error"))
         {
             MessageBox.Show(
@@ -117,6 +112,15 @@ public partial class App : Application
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
 
+            Shutdown();
+            return;
+        }
+
+        // If setup was cancelled (user closed the One Time Setup window),
+        // shut down the application — do not proceed to login.
+        if (!workflowManager.Context.Get<bool>("IsInitialized")
+            && !await _host.Services.GetRequiredService<StoreAssistantPro.Modules.Startup.Services.IStartupService>().IsAppInitializedAsync())
+        {
             Shutdown();
             return;
         }
@@ -160,31 +164,6 @@ public partial class App : Application
         _host.Dispose();
         base.OnExit(e);
     }
-
-    // ?? Splash ??
-
-    /// <summary>
-    /// Creates a minimal splash window with zero DI dependencies.
-    /// Shown before the DI container is built so the user sees
-    /// immediate visual feedback on launch.
-    /// </summary>
-    private static Window CreateSplashWindow() => new()
-    {
-        Title = "Store Assistant Pro",
-        Width = 360,
-        Height = 200,
-        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-        WindowStyle = WindowStyle.None,
-        ResizeMode = ResizeMode.NoResize,
-        Content = new System.Windows.Controls.TextBlock
-        {
-            Text = "Loading Store Assistant Pro…",
-            FontSize = 18,
-            FontWeight = FontWeights.SemiBold,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-        }
-    };
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {

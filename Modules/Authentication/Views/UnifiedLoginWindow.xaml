@@ -3,12 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:models="clr-namespace:StoreAssistantPro.Models"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Store Assistant Pro — Login"
         h:Motion.WindowFadeIn="True">
+        Icon="pack://application:,,,/Assets/app.ico">
     <Window.Resources>
-        <!-- Extends the base selectable style with selection highlight -->
-        <Style x:Key="UserButtonStyle" TargetType="Button"
+        <!-- Admin button — blue pastel, deepens on selection -->
+        <Style x:Key="AdminButtonStyle" TargetType="Button"
                BasedOn="{StaticResource SelectableUserButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource RoleAdminBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource RoleAdminBorder}"/>
             <Style.Triggers>
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
@@ -17,71 +21,117 @@
                             <Binding Path="SelectedUserType"/>
                         </MultiBinding>
                     </DataTrigger.Binding>
-                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                    <Setter Property="Background" Value="{StaticResource RoleAdminAccent}"/>
                     <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource FluentAccentDefault}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource RoleAdminAccent}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Manager button — purple pastel -->
+        <Style x:Key="ManagerButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource SelectableUserButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource RoleManagerBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource RoleManagerBorder}"/>
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding RelativeSource="{RelativeSource Self}" Path="Tag"/>
+                            <Binding Path="SelectedUserType"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="{StaticResource RoleManagerAccent}"/>
+                    <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource RoleManagerAccent}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- User button — green pastel -->
+        <Style x:Key="UserButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource SelectableUserButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource RoleUserBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource RoleUserBorder}"/>
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding RelativeSource="{RelativeSource Self}" Path="Tag"/>
+                            <Binding Path="SelectedUserType"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="{StaticResource RoleUserAccent}"/>
+                    <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource RoleUserAccent}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
     </Window.Resources>
 
-    <!-- Centered card layout — content never exceeds 380 px -->
-    <Grid Background="{StaticResource FluentBackgroundPrimary}">
-        <Grid MaxWidth="380" VerticalAlignment="Center" HorizontalAlignment="Center"
+    <Grid Background="{StaticResource FluentBackgroundSecondary}">
+        <Grid MaxWidth="340" VerticalAlignment="Center" HorizontalAlignment="Center"
               Margin="{StaticResource DialogPadding}"
               h:KeyboardNav.EscapeCommand="{Binding PinPad.ClearCommand}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
+                <RowDefinition Height="Auto"/>  <!-- 1: Role buttons -->
+                <RowDefinition Height="Auto"/>  <!-- 2: PIN dots -->
+                <RowDefinition Height="Auto"/>  <!-- 3: Feedback -->
+                <RowDefinition Height="Auto"/>  <!-- 4: Keypad -->
+                <RowDefinition Height="Auto"/>  <!-- 5: Footer -->
             </Grid.RowDefinitions>
 
-            <!-- App icon + Title -->
-            <StackPanel HorizontalAlignment="Center" Margin="{StaticResource SectionSpacing}">
-                <TextBlock Text="🏪" FontSize="36" HorizontalAlignment="Center"
-                           Margin="{StaticResource ItemSpacing}"/>
-                <TextBlock Text="Store Assistant Pro" Style="{StaticResource DialogTitleStyle}"
-                           HorizontalAlignment="Center"/>
+            <!-- ── Row 0: Logo + title ──────────────────────── -->
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center"
+                        Margin="{StaticResource ItemSpacing}">
+                <controls:AppBranding LogoSize="48" Subtitle="{Binding FirmName}"/>
+                <Border HorizontalAlignment="Center"
+                        Margin="{StaticResource FieldLabelSpacing}"
+                        Style="{StaticResource StatusBadgePillStyle}"
+                        Background="{StaticResource FluentError}"
+                        Visibility="{Binding IsOffline, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="● Offline" FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextOnAccent}" FontWeight="SemiBold"/>
+                </Border>
             </StackPanel>
 
-            <!-- User selection buttons with distinct role icons -->
-            <Grid Grid.Row="1" Margin="{StaticResource SectionSpacing}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0"
-                        Style="{StaticResource UserButtonStyle}"
+            <!-- ── Row 1: Role buttons (uniform height) ─────── -->
+            <UniformGrid Grid.Row="1" Columns="3"
+                         Margin="{StaticResource FieldGroupSpacing}">
+                <Button Margin="0,0,4,0"
+                        Style="{StaticResource AdminButtonStyle}"
                         Tag="{x:Static models:UserType.Admin}"
                         Command="{Binding SelectUserCommand}"
                         CommandParameter="{x:Static models:UserType.Admin}"
                         AutomationProperties.Name="Admin login"
                         ToolTip="F1 — Admin">
                     <StackPanel>
-                        <TextBlock Text="🛡️" FontSize="{StaticResource FontSizeIconMedium}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Admin" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="🛡️" FontSize="{StaticResource FontSizeIconMedium}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Admin" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeBody}" Margin="0,2,0,0"/>
+                        <TextBlock Text="F1" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentTextTertiary}"/>
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="2"
-                        Style="{StaticResource UserButtonStyle}"
+                <Button Margin="2,0"
+                        Style="{StaticResource ManagerButtonStyle}"
                         Tag="{x:Static models:UserType.Manager}"
                         Command="{Binding SelectUserCommand}"
                         CommandParameter="{x:Static models:UserType.Manager}"
                         AutomationProperties.Name="Manager login"
                         ToolTip="F2 — Manager">
                     <StackPanel>
-                        <TextBlock Text="📋" FontSize="{StaticResource FontSizeIconMedium}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Manager" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="📋" FontSize="{StaticResource FontSizeIconMedium}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Manager" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeBody}" Margin="0,2,0,0"/>
+                        <TextBlock Text="F2" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentTextTertiary}"/>
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="4"
+                <Button Margin="4,0,0,0"
                         Style="{StaticResource UserButtonStyle}"
                         Tag="{x:Static models:UserType.User}"
                         Command="{Binding SelectUserCommand}"
@@ -89,34 +139,20 @@
                         AutomationProperties.Name="User login"
                         ToolTip="F3 — User">
                     <StackPanel>
-                        <TextBlock Text="👤" FontSize="{StaticResource FontSizeIconMedium}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="User" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="👤" FontSize="{StaticResource FontSizeIconMedium}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="User" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeBody}" Margin="0,2,0,0"/>
+                        <TextBlock Text="F3" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentTextTertiary}"/>
                     </StackPanel>
                 </Button>
-            </Grid>
+            </UniformGrid>
 
-            <!-- Selected user indicator -->
-            <TextBlock Grid.Row="2" HorizontalAlignment="Center"
-                       FontSize="{StaticResource FontSizeLabel}"
-                       Foreground="{StaticResource FluentTextSecondary}"
-                       Margin="{StaticResource ItemSpacing}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsUserSelected}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-                <Run Text="Logging in as: "/>
-                <Run Text="{Binding SelectedUserType, Mode=OneWay}" FontWeight="SemiBold"/>
-            </TextBlock>
-
-            <!-- PIN display (masked dots) -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
-                        Margin="{StaticResource FieldGroupSpacing}">
+            <!-- ── Row 2: PIN dots ──────────────────────────── -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                        Margin="{StaticResource ItemSpacing}">
                 <Ellipse Style="{StaticResource PinDotStyle}"
                          Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=0, NotifyOnTargetUpdated=True}"/>
                 <Ellipse Style="{StaticResource PinDotStyle}"
@@ -127,14 +163,29 @@
                          Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=3, NotifyOnTargetUpdated=True}"/>
             </StackPanel>
 
-            <!-- Error message -->
-            <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}"
-                       Style="{StaticResource ErrorMessageStyle}"
-                       HorizontalAlignment="Center"
-                       h:Motion.ShakeOnTrigger="{Binding HasError}"/>
+            <!-- ── Row 3: Error / warnings ──────────────────── -->
+            <StackPanel Grid.Row="3" HorizontalAlignment="Center"
+                        Margin="{StaticResource FieldLabelSpacing}">
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Style="{StaticResource ErrorMessageStyle}"
+                           HorizontalAlignment="Center" Margin="0"
+                           h:Motion.ShakeOnTrigger="{Binding HasError}"/>
+                <TextBlock Text="{Binding AttemptsMessage}"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentWarning}"
+                           HorizontalAlignment="Center"
+                           Margin="{StaticResource FieldLabelSpacing}"
+                           Visibility="{Binding AttemptsMessage, Converter={StaticResource BoolToVisibility}}"/>
+                <TextBlock Text="⬆ Caps Lock is ON"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentWarning}"
+                           HorizontalAlignment="Center"
+                           Margin="{StaticResource FieldLabelSpacing}"
+                           Visibility="{Binding IsCapsLockOn, Converter={StaticResource BoolToVisibility}}"/>
+            </StackPanel>
 
-            <!-- PIN keypad -->
-            <Grid Grid.Row="5" Margin="{StaticResource KeypadInset}" Height="260">
+            <!-- ── Row 4: Compact keypad ────────────────────── -->
+            <Grid Grid.Row="4" Margin="32,4,32,0" Height="200">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
@@ -155,21 +206,29 @@
                 <Button Grid.Row="2" Grid.Column="0" Content="7" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="7" Style="{StaticResource PosKeypadButtonStyle}"/>
                 <Button Grid.Row="2" Grid.Column="1" Content="8" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="8" Style="{StaticResource PosKeypadButtonStyle}"/>
                 <Button Grid.Row="2" Grid.Column="2" Content="9" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="9" Style="{StaticResource PosKeypadButtonStyle}"/>
-                <Button Grid.Row="3" Grid.Column="0" Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource PosKeypadButtonStyle}" FontSize="14"/>
+                <Button Grid.Row="3" Grid.Column="0" Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource PosKeypadButtonStyle}" FontSize="{StaticResource FontSizeBody}"/>
                 <Button Grid.Row="3" Grid.Column="1" Content="0" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="0" Style="{StaticResource PosKeypadButtonStyle}"/>
                 <Button Grid.Row="3" Grid.Column="2" Content="⌫" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource PosKeypadButtonStyle}"
                         AutomationProperties.Name="Backspace"/>
             </Grid>
 
-            <!-- Version footer -->
-            <TextBlock Grid.Row="6" HorizontalAlignment="Center"
-                       FontSize="{StaticResource FontSizeCaption}"
-                       Foreground="{StaticResource FluentTextTertiary}"
-                       Margin="{StaticResource MessageBarSpacing}">
-                <Run Text="v"/>
-                <Run Text="{Binding AppVersion, Mode=OneWay}"/>
-                <Run Text=" · .NET 10 · WPF"/>
-            </TextBlock>
+            <!-- ── Row 5: Footer ────────────────────────────── -->
+            <StackPanel Grid.Row="5" HorizontalAlignment="Center"
+                        Margin="{StaticResource MessageBarSpacing}">
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="{StaticResource FontSizeLabel}"
+                           Foreground="{StaticResource FluentTextSecondary}"
+                           FontWeight="SemiBold"
+                           Text="{Binding CurrentTime}"/>
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           Margin="{StaticResource FieldLabelSpacing}">
+                    <Run Text="v"/>
+                    <Run Text="{Binding AppVersion, Mode=OneWay}"/>
+                    <Run Text=" · .NET 10 · WPF"/>
+                </TextBlock>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

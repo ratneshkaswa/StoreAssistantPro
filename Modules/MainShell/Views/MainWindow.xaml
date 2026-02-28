@@ -368,7 +368,6 @@
             h:BillingFocusBehavior.IsActive="{Binding FocusLock.IsFocusLocked}"
             h:BillingDimBehavior.HighlightOnLock="True"
             h:BillingDimBehavior.IsLocked="{Binding FocusLock.IsFocusLocked}"
-            EnableSlideTransition="True"
             Content="{Binding CurrentView}"/>
 
         <!-- BOTTOM STATUS BAR -->
@@ -407,10 +406,22 @@
                 <Border Style="{StaticResource FluentStatusBarSeparatorStyle}"/>
             </StatusBarItem>
 
-            <!-- Current user -->
+            <!-- Current user (role-coloured pill) -->
             <StatusBarItem Grid.Column="2" Style="{StaticResource FluentStatusBarItemStyle}">
-                <TextBlock Text="{Binding DashboardSummary.CurrentUser}"
-                           Foreground="{StaticResource FluentSuccess}" FontWeight="SemiBold"/>
+                <Border Style="{StaticResource StatusBadgePillStyle}"
+                        Background="{Binding DashboardSummary.CurrentUserType,
+                                     Converter={StaticResource RoleColorConverter},
+                                     ConverterParameter=Background}"
+                        BorderBrush="{Binding DashboardSummary.CurrentUserType,
+                                      Converter={StaticResource RoleColorConverter},
+                                      ConverterParameter=Border}">
+                    <TextBlock Text="{Binding DashboardSummary.CurrentUser}"
+                               Foreground="{Binding DashboardSummary.CurrentUserType,
+                                            Converter={StaticResource RoleColorConverter},
+                                            ConverterParameter=Accent}"
+                               FontWeight="SemiBold"
+                               FontSize="{StaticResource FontSizeStatusBar}"/>
+                </Border>
             </StatusBarItem>
 
             <!-- Operational mode indicator -->

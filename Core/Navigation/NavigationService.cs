@@ -14,6 +14,9 @@ public partial class NavigationService(
     [ObservableProperty]
     public partial ObservableObject CurrentView { get; set; }
 
+    [ObservableProperty]
+    public partial string? CurrentPageKey { get; set; }
+
     public void NavigateTo<TViewModel>() where TViewModel : ObservableObject
     {
         CurrentView = serviceProvider.GetRequiredService<TViewModel>();
@@ -29,6 +32,7 @@ public partial class NavigationService(
             return;
 
         CurrentView = (ObservableObject)serviceProvider.GetRequiredService(vmType);
+        CurrentPageKey = pageKey;
     }
 
     public void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject

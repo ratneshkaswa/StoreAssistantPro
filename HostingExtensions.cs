@@ -11,6 +11,7 @@ using StoreAssistantPro.Core.Commands.Transaction;
 using StoreAssistantPro.Core.Commands.Validation;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Intents;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
@@ -20,11 +21,12 @@ using StoreAssistantPro.Modules.Authentication;
 using StoreAssistantPro.Modules.Billing;
 using StoreAssistantPro.Modules.Brands;
 using StoreAssistantPro.Modules.Firm;
+using StoreAssistantPro.Modules.Inward;
 using StoreAssistantPro.Modules.MainShell;
 using StoreAssistantPro.Modules.Products;
 using StoreAssistantPro.Modules.Sales;
 using StoreAssistantPro.Modules.Startup;
-using StoreAssistantPro.Modules.Suppliers;
+using StoreAssistantPro.Modules.Vendors;
 using StoreAssistantPro.Modules.SystemSettings;
 using StoreAssistantPro.Modules.Tax;
 using StoreAssistantPro.Modules.Users;
@@ -69,6 +71,7 @@ internal static class HostingExtensions
         services.AddSingleton<ISessionService, SessionService>();
         services.AddSingleton<IWindowRegistry, WindowRegistry>();
         services.AddSingleton<IWorkflowManager, WorkflowManager>();
+        services.AddSingleton<IZeroClickWorkflowService, ZeroClickWorkflowService>();
         services.AddSingleton<ICommandBus, CommandBus>();
         services.AddSingleton<ICommandExecutionPipeline, CommandExecutionPipeline>();
         services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
@@ -92,6 +95,12 @@ internal static class HostingExtensions
         services.AddSingleton<IConnectivityMonitorService, ConnectivityMonitorService>();
         services.AddSingleton<IOfflineModeService, OfflineModeService>();
         services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<IToastService, ToastService>();
+        services.AddSingleton<IDensityService, DensityService>();
+        services.AddSingleton<ICalmUIService, CalmUIService>();
+        services.AddSingleton<IFocusRuleEngine, FocusRuleEngine>();
+        services.AddSingleton<IPredictiveFocusService, PredictiveFocusService>();
+        services.AddSingleton<IFocusSafetyGuard, FocusSafetyGuard>();
         services.AddSingleton<ITipStateService, TipStateService>();
         services.AddSingleton<ITipRegistryService, TipRegistryService>();
         services.AddSingleton<IOnboardingJourneyService, OnboardingJourneyService>();
@@ -99,6 +108,14 @@ internal static class HostingExtensions
         services.AddSingleton<IContextHelpService, ContextHelpService>();
         services.AddSingleton<ITipRotationService, TipRotationService>();
         services.AddSingleton<OnboardingTipRegistrar>();
+        services.AddSingleton<IIntentDetectionService, IntentDetectionService>();
+        services.AddSingleton<IZeroClickPinService, ZeroClickPinService>();
+        services.AddSingleton<ISmartEnterKeyService, SmartEnterKeyService>();
+        services.AddSingleton<IMicroFeedbackService, MicroFeedbackService>();
+        services.AddSingleton<IZeroClickSafetyPolicy, ZeroClickSafetyPolicy>();
+        services.AddSingleton<IFlowStateEngine, FlowStateEngine>();
+        services.AddSingleton(sp => new Lazy<IFlowStateEngine>(sp.GetRequiredService<IFlowStateEngine>));
+        services.AddSingleton<IInteractionTracker, InteractionTracker>();
 
         return services;
     }
@@ -108,6 +125,9 @@ internal static class HostingExtensions
         var pageRegistry = new NavigationPageRegistry();
         services.AddSingleton(pageRegistry);
 
+        var focusMapRegistry = new FocusMapRegistry();
+        services.AddSingleton<IFocusMapRegistry>(focusMapRegistry);
+
         services
             .AddStartupModule()
             .AddAuthenticationModule()
@@ -115,7 +135,8 @@ internal static class HostingExtensions
             .AddProductsModule(pageRegistry)
             .AddBrandsModule(pageRegistry)
             .AddSalesModule(pageRegistry)
-            .AddSuppliersModule(pageRegistry)
+            .AddVendorsModule(pageRegistry, focusMapRegistry)
+            .AddInwardModule(pageRegistry)
             .AddFirmModule()
             .AddUsersModule()
             .AddSystemSettingsModule()

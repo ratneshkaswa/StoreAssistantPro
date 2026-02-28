@@ -11,6 +11,7 @@ public class CompleteFirstSetupHandler(ISetupService setupService)
     {
         await setupService.InitializeAppAsync(
             command.FirmName, command.Address, command.Phone,
+            command.Email, command.GSTIN, command.CurrencyCode,
             command.AdminPin, command.ManagerPin,
             command.UserPin, command.MasterPin);
 

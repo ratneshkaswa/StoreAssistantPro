@@ -17,4 +17,7 @@ public interface IProductService
         IReadOnlyList<BulkDeleteItem> items, CancellationToken ct = default);
     Task<int> GetLowStockCountAsync(CancellationToken ct = default);
     Task<bool> IsBarcodeUniqueAsync(string barcode, int? excludeProductId = null, CancellationToken ct = default);
+    Task<IReadOnlyList<Product>> FindByBarcodeAsync(string barcode, CancellationToken ct = default);
+    Task<IReadOnlyList<Product>> FindByExactTextAsync(string text, CancellationToken ct = default);
+    Task<int> BulkUpdatePricesAsync(int? categoryId, decimal percentage, CancellationToken ct = default);
 }

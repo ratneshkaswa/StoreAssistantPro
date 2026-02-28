@@ -8,8 +8,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon Condition="Exists('Assets\app.ico')">Assets\app.ico</ApplicationIcon>
     <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**;Templates\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\app.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
@@ -22,6 +27,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\logo-64.png" Condition="Exists('Assets\logo-64.png')" />
+    <Resource Include="Assets\logo-128.png" Condition="Exists('Assets\logo-128.png')" />
+    <Resource Include="Assets\logo-256.png" Condition="Exists('Assets\logo-256.png')" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -29,6 +41,10 @@
 
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Modules\UserManagement\Views\" />
   </ItemGroup>
 
 </Project>

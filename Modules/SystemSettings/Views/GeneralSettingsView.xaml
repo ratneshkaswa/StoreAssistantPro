@@ -30,6 +30,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Row 0: Firm Name -->
@@ -62,8 +64,17 @@
                       IsChecked="{Binding SmartTooltipsEnabled}"
                       Style="{StaticResource FluentCheckBoxStyle}"/>
 
-            <!-- Row 6: Messages -->
-            <StackPanel Grid.Row="6" Grid.Column="1">
+            <!-- Row 6: Density -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="UI Density"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <ComboBox Grid.Row="6" Grid.Column="1"
+                      ItemsSource="{Binding AvailableDensityModes}"
+                      SelectedItem="{Binding SelectedDensityMode}"
+                      Width="{StaticResource FieldWidthCompact}"
+                      HorizontalAlignment="Left"/>
+
+            <!-- Row 8: Messages -->
+            <StackPanel Grid.Row="8" Grid.Column="1">
                 <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
                 <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
                            h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>

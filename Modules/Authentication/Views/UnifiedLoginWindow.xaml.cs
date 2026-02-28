@@ -15,6 +15,8 @@ public partial class UnifiedLoginWindow : Window
         vm.Initialize();
 
         PreviewKeyDown += OnPreviewKeyDown;
+        PreviewKeyUp += (_, _) => vm.RefreshCapsLock();
+        Loaded += (_, _) => vm.RefreshCapsLock();
     }
 
     /// <summary>

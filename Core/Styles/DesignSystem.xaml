@@ -33,12 +33,12 @@
          ═══════════════════════════════════════════════════════════════ -->
 
     <!-- ── Background (outermost window / page) ────────────────────── -->
-    <SolidColorBrush x:Key="FluentBackgroundPrimary"   Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="FluentBackgroundPrimary"   Color="#F3F3F3"/>
     <SolidColorBrush x:Key="FluentBackgroundSecondary" Color="#FFFFFF"/>
 
     <!-- ── Surface (cards, panels, popups) ─────────────────────────── -->
     <SolidColorBrush x:Key="FluentSurface"             Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="FluentSurfaceElevated"     Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="FluentSurfaceElevated"     Color="#FBFBFB"/>
     <SolidColorBrush x:Key="FluentSurfaceStroke"       Color="#E5E5E5"/>
 
     <!-- ── Stroke (borders, dividers) ──────────────────────────────── -->
@@ -58,6 +58,18 @@
     <SolidColorBrush x:Key="FluentAccentHover"         Color="#0067C0"/>
     <SolidColorBrush x:Key="FluentAccentPressed"       Color="#003D7A"/>
     <SolidColorBrush x:Key="FluentAccentDisabled"      Color="#C4C4C4"/>
+    <SolidColorBrush x:Key="FluentAccentLight1"        Color="#60CDFF"/>
+    <SolidColorBrush x:Key="FluentAccentLight2"        Color="#98D8FF"/>
+    <SolidColorBrush x:Key="FluentAccentLight3"        Color="#B8E6FF"/>
+    <SolidColorBrush x:Key="FluentAccentDark1"         Color="#0050A0"/>
+    <SolidColorBrush x:Key="FluentAccentDark2"         Color="#003E7E"/>
+    <SolidColorBrush x:Key="FluentAccentDark3"         Color="#002D5E"/>
+
+    <!-- Control fills (WinUI 3 token parity) -->
+    <SolidColorBrush x:Key="FluentControlFillDefault"  Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="FluentControlFillSecondary" Color="#F9F9F9"/>
+    <SolidColorBrush x:Key="FluentControlFillTertiary" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="FluentControlFillDisabled" Color="#F9F9F9"/>
 
     <!-- ── Subtle (transparent interactive fills) ──────────────────── -->
     <SolidColorBrush x:Key="FluentSubtleTransparent"   Color="Transparent"/>
@@ -77,6 +89,12 @@
     <SolidColorBrush x:Key="FluentInfo"                Color="#005FB8"/>
     <SolidColorBrush x:Key="FluentInfoBackground"      Color="#D6EBFF"/>
 
+    <!-- Row highlight tints (subtle DataGrid row backgrounds) -->
+    <SolidColorBrush x:Key="RowHighlightSuccess"  Color="#0F7B0F" Opacity="0.08"/>
+    <SolidColorBrush x:Key="RowHighlightWarning"  Color="#9D5D00" Opacity="0.10"/>
+    <SolidColorBrush x:Key="RowHighlightDanger"   Color="#C42B1C" Opacity="0.10"/>
+    <SolidColorBrush x:Key="RowHighlightInactive" Color="#8A8886" Opacity="0.12"/>
+
     <!-- ── Tip Banner (soft, non-distracting guidance) ──────────────── -->
     <SolidColorBrush x:Key="TipBannerBackground"       Color="#F8F9FB"/>
     <SolidColorBrush x:Key="TipBannerBackgroundHover"  Color="#F2F4F8"/>
@@ -87,11 +105,11 @@
     <SolidColorBrush x:Key="TipBannerBodyForeground"   Color="#707070"/>
 
     <!-- ── Chrome (menu bar, status bar, toolbar) ──────────────────── -->
-    <SolidColorBrush x:Key="FluentMenuBarBackground"   Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="FluentMenuBarBackground"   Color="#F3F3F3"/>
     <SolidColorBrush x:Key="FluentMenuBarForeground"   Color="#1A1A1A"/>
-    <SolidColorBrush x:Key="FluentStatusBarBackground" Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="FluentStatusBarBackground" Color="#FBFBFB"/>
     <SolidColorBrush x:Key="FluentStatusBarForeground" Color="#616161"/>
-    <SolidColorBrush x:Key="FluentToolbarBackground"   Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="FluentToolbarBackground"   Color="#FBFBFB"/>
     <SolidColorBrush x:Key="FluentToolbarBorder"       Color="#E5E5E5"/>
 
     <!-- ── KPI Stat Card Palette ───────────────────────────────────── -->
@@ -108,13 +126,29 @@
     <SolidColorBrush x:Key="FluentKpiTeal"             Color="#0E7A6B"/>
     <SolidColorBrush x:Key="FluentKpiTealMuted"        Color="#D1F0EB"/>
 
+    <!-- Role Identity Palette (soft pastels) -->
+    <SolidColorBrush x:Key="RoleAdminBackground"       Color="#E8EEFA"/>
+    <SolidColorBrush x:Key="RoleAdminBorder"           Color="#B4C8ED"/>
+    <SolidColorBrush x:Key="RoleAdminAccent"           Color="#3B6FC0"/>
+    <SolidColorBrush x:Key="RoleManagerBackground"     Color="#F0E6FA"/>
+    <SolidColorBrush x:Key="RoleManagerBorder"         Color="#D4BEF0"/>
+    <SolidColorBrush x:Key="RoleManagerAccent"         Color="#7B3FAF"/>
+    <SolidColorBrush x:Key="RoleUserBackground"        Color="#E3F4EC"/>
+    <SolidColorBrush x:Key="RoleUserBorder"            Color="#B0DCC5"/>
+    <SolidColorBrush x:Key="RoleUserAccent"            Color="#1D7B4E"/>
+
 
     <!-- ═══════════════════════════════════════════════════════════════
          2. TYPOGRAPHY
          ═══════════════════════════════════════════════════════════════ -->
 
     <!-- Font family stack (Fluent 2 preferred → fallback) -->
-    <FontFamily x:Key="FluentFontFamily">Segoe UI Variable, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="FluentFontFamily">Segoe UI Variable, Segoe UI, Segoe UI Emoji, sans-serif</FontFamily>
+
+    <!-- Win11 optical-size font variants -->
+    <FontFamily x:Key="FluentFontDisplay">Segoe UI Variable Display, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="FluentFontText">Segoe UI Variable Text, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="FluentFontSmall">Segoe UI Variable Small, Segoe UI, sans-serif</FontFamily>
 
     <!-- Type scale — semantic sizes for each content role -->
     <sys:Double x:Key="FontSizePageTitle">24</sys:Double>
@@ -127,10 +161,17 @@
     <sys:Double x:Key="FontSizeStatusBar">10</sys:Double>
     <sys:Double x:Key="FontSizeIconMedium">18</sys:Double>
 
+    <!-- Line height tokens (Win11 spec) -->
+    <sys:Double x:Key="LineHeightTitle">36</sys:Double>
+    <sys:Double x:Key="LineHeightSubtitle">28</sys:Double>
+    <sys:Double x:Key="LineHeightBody">20</sys:Double>
+    <sys:Double x:Key="LineHeightCaption">16</sys:Double>
+
 
     <!-- ═══════════════════════════════════════════════════════════════
          3. CORNER RADIUS
          ═══════════════════════════════════════════════════════════════ -->
+    <CornerRadius x:Key="FluentCornerXSmall">2</CornerRadius>
     <CornerRadius x:Key="FluentCornerSmall">4</CornerRadius>
     <CornerRadius x:Key="FluentCornerMedium">8</CornerRadius>
     <CornerRadius x:Key="FluentCornerLarge">12</CornerRadius>
@@ -188,6 +229,14 @@
     <Thickness x:Key="PanelGap">12</Thickness>
     <Thickness x:Key="EmptyStatePadding">0,24</Thickness>
     <Thickness x:Key="StatCardGap">0,0,8,8</Thickness>
+    <Thickness x:Key="HintTextSpacing">0,2,0,0</Thickness>
+    <Thickness x:Key="SmallCardPadding">8,6</Thickness>
+    <Thickness x:Key="SectionCardGap">0,12,0,0</Thickness>
+    <Thickness x:Key="DashboardListItemSpacing">0,2,0,2</Thickness>
+    <Thickness x:Key="InlineLeftGap">8,0,0,0</Thickness>
+    <Thickness x:Key="NotificationDotOffset">0,4,8,0</Thickness>
+    <Thickness x:Key="CardContentPadding">12,8</Thickness>
+    <Thickness x:Key="ChipPadding">4,2</Thickness>
 
     <!-- Grid row height for two-column form layouts -->
     <GridLength x:Key="FormRowSpacing">8</GridLength>
@@ -268,8 +317,8 @@
          All durations set to 0 — animations disabled.
          Original values preserved in comments for re-enabling.
          ═══════════════════════════════════════════════════════════════ -->
-    <Duration x:Key="FluentDurationFast">0:0:0</Duration>         <!-- was 0:0:0.083 -->
-    <Duration x:Key="FluentDurationNormal">0:0:0</Duration>       <!-- was 0:0:0.167 -->
+    <Duration x:Key="FluentDurationFast">0:0:0.083</Duration>
+    <Duration x:Key="FluentDurationNormal">0:0:0.167</Duration>
     <Duration x:Key="FluentDurationPageFade">0:0:0</Duration>     <!-- was 0:0:0.15  -->
     <Duration x:Key="FluentDurationSlow">0:0:0</Duration>         <!-- was 0:0:0.25  -->
 
@@ -305,7 +354,7 @@
 
     <!-- Button micro-interaction scale factors — neutralized -->
     <sys:Double x:Key="MotionButtonScaleHover">1.0</sys:Double>     <!-- was 1.02 -->
-    <sys:Double x:Key="MotionButtonScalePressed">1.0</sys:Double>   <!-- was 0.98 -->
+    <sys:Double x:Key="MotionButtonScalePressed">0.98</sys:Double>
     <sys:Double x:Key="MotionButtonScaleRest">1.0</sys:Double>
 
     <!-- Slide offsets — neutralized (0 = no movement) -->
@@ -341,8 +390,8 @@
     <SolidColorBrush x:Key="TooltipBackground"     Color="#F7F7F7"/>
     <SolidColorBrush x:Key="TooltipBorder"         Color="#E0E0E0"/>
     <SolidColorBrush x:Key="TooltipInnerHighlight" Color="#26FFFFFF"/>
-    <CornerRadius    x:Key="TooltipCornerRadius">6</CornerRadius>
-    <Thickness       x:Key="TooltipPadding">10,7,10,8</Thickness>
+    <CornerRadius    x:Key="TooltipCornerRadius">8</CornerRadius>
+    <Thickness       x:Key="TooltipPadding">12,8,12,9</Thickness>
     <sys:Double      x:Key="TooltipMaxWidth">320</sys:Double>
 
     <DropShadowEffect x:Key="TooltipShadow"

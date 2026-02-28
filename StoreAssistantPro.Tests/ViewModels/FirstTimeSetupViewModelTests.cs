@@ -77,6 +77,7 @@ public class FirstTimeSetupViewModelTests
 
         await _commandBus.Received(1).SendAsync(Arg.Is<CompleteFirstSetupCommand>(c =>
             c.FirmName == "Test Store" && c.Address == "" && c.Phone == ""
+            && c.Email == "" && c.GSTIN == "" && c.CurrencyCode == "INR"
             && c.AdminPin == "1234" && c.ManagerPin == "5678"
             && c.UserPin == "9012" && c.MasterPin == "123456"));
         Assert.True(closeResult);
@@ -242,5 +243,95 @@ public class FirstTimeSetupViewModelTests
         var sut = CreateSut();
         sut.AdminPin = "2847";
         Assert.Empty(sut.AdminPinWarning);
+    }
+
+    // ── GSTIN state decode ──
+
+    [Theory]
+    [InlineData("22AAAAA0000A1Z5", "Chhattisgarh")]
+    [InlineData("27AAAAA0000A1Z5", "Maharashtra")]
+    [InlineData("07AAAAA0000A1Z5", "Delhi")]
+    public void GstinValidationHint_ValidGstin_ShowsStateName(string gstin, string expectedState)
+    {
+        var sut = CreateSut();
+        sut.GSTIN = gstin;
+        Assert.Contains(expectedState, sut.GstinValidationHint);
+        Assert.StartsWith("✓", sut.GstinValidationHint);
+    }
+
+    [Fact]
+    public void GstinValidationHint_InvalidGstin_ShowsFormatHelp()
+    {
+        var sut = CreateSut();
+        sut.GSTIN = "INVALID";
+        Assert.Equal("Format: 22AAAAA0000A1Z5", sut.GstinValidationHint);
+    }
+
+    [Fact]
+    public void GstinValidationHint_Empty_ReturnsEmpty()
+    {
+        var sut = CreateSut();
+        sut.GSTIN = "";
+        Assert.Empty(sut.GstinValidationHint);
+    }
+
+    // ── Phone format preview ──
+
+    [Fact]
+    public void PhoneValidationHint_10Digits_ShowsFormattedPreview()
+    {
+        var sut = CreateSut();
+        sut.Phone = "9876543210";
+        Assert.StartsWith("✓", sut.PhoneValidationHint);
+        Assert.Contains("98765 43210", sut.PhoneValidationHint);
+    }
+
+    [Fact]
+    public void PhoneValidationHint_InvalidChars_ShowsWarning()
+    {
+        var sut = CreateSut();
+        sut.Phone = "abc";
+        Assert.Equal("Digits, +, - and spaces only", sut.PhoneValidationHint);
+    }
+
+    // ── Display properties (Not provided fallback) ──
+
+    [Theory]
+    [InlineData("", "Not provided")]
+    [InlineData("  ", "Not provided")]
+    [InlineData("123 Main St", "123 Main St")]
+    public void AddressDisplay_FallbackWhenBlank(string address, string expected)
+    {
+        var sut = CreateSut();
+        sut.Address = address;
+        Assert.Equal(expected, sut.AddressDisplay);
+    }
+
+    [Theory]
+    [InlineData("", "Not provided")]
+    [InlineData("test@test.com", "test@test.com")]
+    public void EmailDisplay_FallbackWhenBlank(string email, string expected)
+    {
+        var sut = CreateSut();
+        sut.Email = email;
+        Assert.Equal(expected, sut.EmailDisplay);
+    }
+
+    // ── Currency code (hardcoded INR for India) ──
+
+    [Fact]
+    public void CurrencyCode_AlwaysINR()
+    {
+        var sut = CreateSut();
+        Assert.Equal("INR", sut.CurrencyCode);
+    }
+
+    // ── Redirect countdown ──
+
+    [Fact]
+    public void RedirectCountdown_InitiallyEmpty()
+    {
+        var sut = CreateSut();
+        Assert.Empty(sut.RedirectCountdown);
     }
 }

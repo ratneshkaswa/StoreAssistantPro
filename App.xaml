@@ -13,6 +13,10 @@
              xmlns:salesViews="clr-namespace:StoreAssistantPro.Modules.Sales.Views"
              xmlns:settingsVm="clr-namespace:StoreAssistantPro.Modules.SystemSettings.ViewModels"
              xmlns:settingsViews="clr-namespace:StoreAssistantPro.Modules.SystemSettings.Views"
+             xmlns:vendorsVm="clr-namespace:StoreAssistantPro.Modules.Vendors.ViewModels"
+             xmlns:vendorsViews="clr-namespace:StoreAssistantPro.Modules.Vendors.Views"
+             xmlns:inwardVm="clr-namespace:StoreAssistantPro.Modules.Inward.ViewModels"
+             xmlns:inwardViews="clr-namespace:StoreAssistantPro.Modules.Inward.Views"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              xmlns:core="clr-namespace:StoreAssistantPro.Core"
              ShutdownMode="OnExplicitShutdown">
@@ -21,7 +25,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Core/Styles/DesignSystem.xaml"/>
                 <ResourceDictionary Source="Core/Styles/FluentTheme.xaml"/>
-                <ResourceDictionary Source="Core/Styles/MotionSystem.xaml"/>
                 <ResourceDictionary Source="Core/Styles/GlobalStyles.xaml"/>
                 <ResourceDictionary Source="Core/Styles/PosStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -31,6 +34,9 @@
             <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <helpers:PinDotConverter x:Key="PinDotConverter"/>
             <helpers:BoolToActiveTextConverter x:Key="BoolToActiveText"/>
+            <helpers:NonEmptyStringToVisibilityConverter x:Key="NonEmptyStringToVisibility"/>
+            <helpers:RoleColorConverter x:Key="RoleColorConverter"/>
+            <helpers:PinStrengthConverter x:Key="PinStrengthConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:MainWorkspaceViewModel}">
@@ -66,6 +72,16 @@
             <settingsViews:AppInfoView/>
         </DataTemplate>
 
+        <!-- Vendors module -->
+        <DataTemplate DataType="{x:Type vendorsVm:VendorsViewModel}">
+            <vendorsViews:VendorsView/>
+        </DataTemplate>
+
+        <!-- Inward module -->
+        <DataTemplate DataType="{x:Type inwardVm:InwardViewModel}">
+            <inwardViews:InwardView/>
+        </DataTemplate>
+
         <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + slide-fade transition -->
         <Style TargetType="{x:Type controls:ResponsiveContentControl}">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -77,28 +93,10 @@
                                       Focusable="False"
                                       HorizontalScrollBarVisibility="Disabled"
                                       VerticalScrollBarVisibility="Auto"
-                                      Padding="0" Opacity="0">
-                            <ScrollViewer.Triggers>
-                                <!-- Initial load fade-in (first content only) -->
-                                <EventTrigger RoutedEvent="Loaded">
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="PART_ScrollViewer"
-                                                Storyboard.TargetProperty="Opacity"
-                                                From="0" To="1"
-                                                Duration="{StaticResource FluentDurationSlow}"
-                                                EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </ScrollViewer.Triggers>
+                                      Padding="0">
                             <controls:ViewportConstrainedPanel
                                 ViewportWidth="{Binding ViewportWidth, ElementName=PART_ScrollViewer}"
                                 ViewportHeight="{Binding ViewportHeight, ElementName=PART_ScrollViewer}">
-                                <controls:ViewportConstrainedPanel.RenderTransform>
-                                    <TranslateTransform x:Name="PART_SlideTransform"/>
-                                </controls:ViewportConstrainedPanel.RenderTransform>
                                 <ContentPresenter
                                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
@@ -170,6 +168,103 @@
                             <!-- Show loading overlay -->
                             <DataTrigger Binding="{Binding IsLoading}" Value="True">
                                 <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Enterprise page layout: TipBanner · Toolbar · MainContent · Messages · BottomForm · StatusBar -->
+        <Style TargetType="{x:Type controls:EnterprisePageLayout}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type controls:EnterprisePageLayout}">
+                        <Grid Margin="{StaticResource PagePadding}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>  <!-- Row 0: TipBanner   -->
+                                <RowDefinition Height="Auto"/>  <!-- Row 1: Toolbar     -->
+                                <RowDefinition Height="*"/>     <!-- Row 2: MainContent -->
+                                <RowDefinition Height="Auto"/>  <!-- Row 3: Messages    -->
+                                <RowDefinition Height="Auto"/>  <!-- Row 4: BottomForm  -->
+                                <RowDefinition Height="Auto"/>  <!-- Row 5: StatusBar   -->
+                            </Grid.RowDefinitions>
+
+                            <!-- Row 0: Tip Banner -->
+                            <ContentPresenter x:Name="PART_TipBanner" Grid.Row="0"
+                                              Content="{TemplateBinding TipBannerContent}"/>
+
+                            <!-- Row 1: Toolbar -->
+                            <ContentPresenter x:Name="PART_Toolbar" Grid.Row="1"
+                                              Content="{TemplateBinding ToolbarContent}"/>
+
+                            <!-- Row 2: Main Content + Loading Overlay -->
+                            <Grid Grid.Row="2" MinHeight="100">
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+
+                                <TextBlock x:Name="PART_Loading"
+                                           Text="⏳ Loading..."
+                                           FontSize="{StaticResource FontSizeSectionHeader}"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+
+                            <!-- Row 3: Messages (auto-bound to BaseViewModel) -->
+                            <StackPanel Grid.Row="3" Margin="{StaticResource MessageBarSpacing}">
+                                <TextBlock x:Name="PART_ErrorMessage"
+                                           Text="{Binding ErrorMessage}"
+                                           Style="{StaticResource ErrorMessageStyle}"/>
+                                <TextBlock x:Name="PART_SuccessMessage"
+                                           Text="{Binding SuccessMessage}"
+                                           Style="{StaticResource SuccessMessageStyle}"
+                                           helpers:AutoDismiss.IsEnabled="True"
+                                           helpers:AutoDismiss.Seconds="4"/>
+                            </StackPanel>
+
+                            <!-- Row 4: Bottom Form -->
+                            <ContentPresenter x:Name="PART_BottomForm" Grid.Row="4"
+                                              Content="{TemplateBinding BottomFormContent}"/>
+
+                            <!-- Row 5: Status Bar -->
+                            <ContentPresenter x:Name="PART_StatusBar" Grid.Row="5"
+                                              Content="{TemplateBinding StatusBarContent}"/>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Collapse empty slots — no wasted vertical space -->
+                            <Trigger Property="TipBannerContent" Value="{x:Null}">
+                                <Setter TargetName="PART_TipBanner" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="ToolbarContent" Value="{x:Null}">
+                                <Setter TargetName="PART_Toolbar" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="BottomFormContent" Value="{x:Null}">
+                                <Setter TargetName="PART_BottomForm" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="StatusBarContent" Value="{x:Null}">
+                                <Setter TargetName="PART_StatusBar" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <!-- Loading overlay (bound to BaseViewModel.IsLoading) -->
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <!-- Collapse messages when empty -->
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SuccessMessage}" Value="">
+                                <Setter TargetName="PART_SuccessMessage" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SuccessMessage}" Value="{x:Null}">
+                                <Setter TargetName="PART_SuccessMessage" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

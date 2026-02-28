@@ -203,6 +203,41 @@ public class ProductService(
         return !await query.AnyAsync(ct).ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<Product>> FindByBarcodeAsync(string barcode, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(barcode)) return [];
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.Products
+            .Where(p => p.Barcode == barcode.Trim() && p.IsActive)
+            .AsNoTracking()
+            .ToListAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<Product>> FindByExactTextAsync(string text, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return [];
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var trimmed = text.Trim();
+        return await context.Products
+            .Where(p => p.IsActive && p.Name == trimmed)
+            .AsNoTracking()
+            .ToListAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<int> BulkUpdatePricesAsync(int? categoryId, decimal percentage, CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var query = context.Products.Where(p => p.IsActive);
+        if (categoryId.HasValue)
+            query = query.Where(p => p.CategoryId == categoryId.Value);
+        var products = await query.ToListAsync(ct).ConfigureAwait(false);
+        if (products.Count == 0) return 0;
+        var factor = 1 + percentage / 100m;
+        foreach (var p in products)
+            p.SalePrice = Math.Round(p.SalePrice * factor, 2);
+        return await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
     private static IOrderedQueryable<Product> ApplySort(
         IQueryable<Product> query, string? sortColumn, bool descending)
     {

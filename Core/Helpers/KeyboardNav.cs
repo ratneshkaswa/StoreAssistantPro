@@ -1,8 +1,9 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using StoreAssistantPro.Core.Services;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -173,6 +174,61 @@ public static class KeyboardNav
 
     public static void SetEscapeCommandParameter(DependencyObject obj, object? value) =>
         obj.SetValue(EscapeCommandParameterProperty, value);
+
+    // ── FocusMapKey (smart Enter navigation) ─────────────────────────
+
+    /// <summary>
+    /// Associates a container with a named <see cref="IFocusMapRegistry"/>
+    /// focus map so Enter/Shift+Enter can navigate fields in declaration order.
+    /// When set, the behavior queries the registry for <see cref="GetNextElement"/>
+    /// and <see cref="GetPreviousElement"/> before falling back to
+    /// <see cref="TryExecuteDefaultCommand"/>.
+    /// </summary>
+    public static readonly DependencyProperty FocusMapKeyProperty =
+        DependencyProperty.RegisterAttached(
+            "FocusMapKey",
+            typeof(string),
+            typeof(KeyboardNav),
+            new PropertyMetadata(null));
+
+    public static string? GetFocusMapKey(DependencyObject obj) =>
+        (string?)obj.GetValue(FocusMapKeyProperty);
+
+    public static void SetFocusMapKey(DependencyObject obj, string? value) =>
+        obj.SetValue(FocusMapKeyProperty, value);
+
+    // ── Focus map helpers ────────────────────────────────────────────
+
+    /// <summary>
+    /// Queries the <see cref="IFocusMapRegistry"/> for the next focusable
+    /// element name after <paramref name="currentName"/>.
+    /// </summary>
+    internal static string? GetNextElement(IFocusMapRegistry registry, string mapKey, string currentName) =>
+        registry.Get(mapKey)?.GetNextElement(currentName);
+
+    /// <summary>
+    /// Queries the <see cref="IFocusMapRegistry"/> for the previous focusable
+    /// element name before <paramref name="currentName"/>.
+    /// </summary>
+    internal static string? GetPreviousElement(IFocusMapRegistry registry, string mapKey, string currentName) =>
+        registry.Get(mapKey)?.GetPreviousElement(currentName);
+
+    /// <summary>
+    /// Attempts to execute the nearest <see cref="DefaultCommandProperty"/>
+    /// from the given source element. Returns <c>true</c> if executed.
+    /// </summary>
+    internal static bool TryExecuteDefaultCommand(DependencyObject source)
+    {
+        var owner = FindNearestWithProperty(source, DefaultCommandProperty);
+        if (owner is null) return false;
+
+        var command = GetDefaultCommand(owner);
+        var parameter = GetDefaultCommandParameter(owner);
+        if (command is null || !command.CanExecute(parameter)) return false;
+
+        command.Execute(parameter);
+        return true;
+    }
 
     // ── Wiring ───────────────────────────────────────────────────────
 

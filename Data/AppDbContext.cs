@@ -18,6 +18,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
+    public DbSet<Vendor> Vendors => Set<Vendor>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<InwardEntry> InwardEntries => Set<InwardEntry>();
+    public DbSet<InwardParcel> InwardParcels => Set<InwardParcel>();
+    public DbSet<StockAdjustmentLog> StockAdjustmentLogs => Set<StockAdjustmentLog>();
+    public DbSet<PriceHistory> PriceHistories => Set<PriceHistory>();
+    public DbSet<State> States => Set<State>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -37,7 +37,7 @@
         <!-- Toolbar -->
         <Grid Grid.Row="2" Margin="{StaticResource ToolbarSpacing}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{StaticResource FieldWidthWide}"/>
+                <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -148,6 +148,11 @@
                       ItemsSource="{Binding Brands}"
                       SelectedItem="{Binding SelectedBrand}"
                       MouseDoubleClick="OnDataGridDoubleClick">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                        <Setter Property="h:RowHighlight.Level" Value="{Binding HighlightLevel}"/>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="{StaticResource ColumnWidthId}"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
@@ -158,23 +163,13 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- Empty state -->
-            <TextBlock Text="🏷  No brands found"
-                       Foreground="{StaticResource FluentTextTertiary}" FontStyle="Italic"
-                       FontSize="{StaticResource FontSizeBody}"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Margin="{StaticResource EmptyStatePadding}" IsHitTestVisible="False">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Brands.Count}" Value="0">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </Grid>
+                <controls:EmptyStateOverlay
+                    Icon="🏷"
+                    Title="No brands found"
+                    Description="Organise your products by brand for easy filtering and reporting."
+                    ActionText="➕ Add Brand"
+                    ActionCommand="{Binding ShowAddFormCommand}"
+                    ItemCount="{Binding Brands.Count}"/>
+            </Grid>
     </Grid>
 </UserControl>

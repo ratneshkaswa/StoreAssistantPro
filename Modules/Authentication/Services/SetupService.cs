@@ -12,6 +12,7 @@ public class SetupService(
 {
     public async Task InitializeAppAsync(
         string firmName, string address, string phone,
+        string email, string gstin, string currencyCode,
         string adminPin, string managerPin, string userPin, string masterPin)
     {
         using var _ = perf.BeginScope("SetupService.InitializeAppAsync");
@@ -25,6 +26,9 @@ public class SetupService(
             FirmName = firmName,
             Address = address,
             Phone = phone,
+            Email = string.IsNullOrWhiteSpace(email) ? string.Empty : email,
+            GSTNumber = string.IsNullOrWhiteSpace(gstin) ? null : gstin,
+            CurrencyCode = string.IsNullOrWhiteSpace(currencyCode) ? "INR" : currencyCode,
             IsInitialized = true,
             MasterPinHash = PinHasher.Hash(masterPin)
         });

@@ -168,6 +168,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _eventBus.Subscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
         _eventBus.Subscribe<OperationalModeChangedEvent>(OnModeChangedAsync);
         _eventBus.Subscribe<SaleCompletedEvent>(OnSaleCompletedAsync);
+        _eventBus.Subscribe<DensityChangedEvent>(OnDensityChangedAsync);
 
         RegisterQuickActions();
         foreach (var contributor in contributors)
@@ -267,6 +268,13 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
         var label = e.NewMode == OperationalMode.Billing ? "Billing" : "Management";
         _statusBar.Post($"Switched to {label} mode");
+        return Task.CompletedTask;
+    }
+
+    private Task OnDensityChangedAsync(DensityChangedEvent e)
+    {
+        // Re-navigate to refresh layout with new density tokens
+        _navigationService.NavigateTo(_currentPage);
         return Task.CompletedTask;
     }
 

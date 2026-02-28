@@ -13,12 +13,12 @@ public class CompleteFirstSetupHandlerTests
     [Fact]
     public async Task HandleAsync_Success_ReturnsSuccess()
     {
-        var command = new CompleteFirstSetupCommand("Store", "", "", "1234", "5678", "9012", "123456");
+        var command = new CompleteFirstSetupCommand("Store", "", "", "", "", "INR", "1234", "5678", "9012", "123456");
 
         var result = await CreateSut().HandleAsync(command);
 
         Assert.True(result.Succeeded);
-        await _setupService.Received(1).InitializeAppAsync("Store", "", "", "1234", "5678", "9012", "123456");
+        await _setupService.Received(1).InitializeAppAsync("Store", "", "", "", "", "INR", "1234", "5678", "9012", "123456");
     }
 
     [Fact]
@@ -27,11 +27,12 @@ public class CompleteFirstSetupHandlerTests
         _setupService.InitializeAppAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>())
             .Returns(Task.FromException(new InvalidOperationException("Already set up")));
 
         var result = await CreateSut().HandleAsync(
-            new CompleteFirstSetupCommand("S", "", "", "1234", "5678", "9012", "123456"));
+            new CompleteFirstSetupCommand("S", "", "", "", "", "INR", "1234", "5678", "9012", "123456"));
 
         Assert.False(result.Succeeded);
         Assert.Equal("Already set up", result.ErrorMessage);

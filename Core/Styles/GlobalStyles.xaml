@@ -87,7 +87,7 @@
 
     <!-- ── Page title (24 px bold — main content pages) ───────────── -->
     <Style x:Key="PageTitleStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontDisplay}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizePageTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
@@ -96,7 +96,7 @@
 
     <!-- ── Dialog / sub-window title (20 px bold) ─────────────────── -->
     <Style x:Key="DialogTitleStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontDisplay}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeDialogTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
@@ -359,11 +359,11 @@
          Applied automatically to every Window (MainWindow, login,
          setup, and all BaseDialogWindow subclasses).
          To opt-out: h:KeyboardNav.IsEnabled="False"
-                     h:AutoFocus.IsEnabled="False"
+                     h:PredictiveFocusBehavior.IsEnabled="False"
          ═══════════════════════════════════════════════════════════════ -->
     <Style TargetType="Window" BasedOn="{StaticResource FluentWindowStyle}">
         <Setter Property="h:KeyboardNav.IsEnabled" Value="True"/>
-        <Setter Property="h:AutoFocus.IsEnabled" Value="True"/>
+        <Setter Property="h:PredictiveFocusBehavior.IsEnabled" Value="True"/>
         <Setter Property="h:LayoutDiagnostics.IsEnabled" Value="True"/>
         <Setter Property="h:StyleComplianceDiagnostics.IsEnabled" Value="True"/>
     </Style>
@@ -651,6 +651,75 @@
                 <Setter Property="Visibility" Value="Collapsed"/>
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+
+    <!-- EmptyStateOverlay default style -->
+    <Style TargetType="controls:EmptyStateOverlay">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="IsHitTestVisible" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:EmptyStateOverlay">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Margin="{StaticResource EmptyStatePadding}">
+                        <TextBlock Text="{TemplateBinding Icon}"
+                                   FontSize="36" HorizontalAlignment="Center"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{TemplateBinding Title}"
+                                   FontSize="{StaticResource FontSizeSectionHeader}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextSecondary}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="{TemplateBinding Description}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   HorizontalAlignment="Center" TextWrapping="Wrap"
+                                   MaxWidth="400" Margin="0,4,0,12"/>
+                        <Button Content="{TemplateBinding ActionText}"
+                                Command="{TemplateBinding ActionCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- AppBranding -->
+    <Style TargetType="controls:AppBranding">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:AppBranding">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Image x:Name="PART_Logo" Source="/Assets/logo-64.png"
+                               Width="{TemplateBinding LogoSize}" Height="{TemplateBinding LogoSize}"
+                               HorizontalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Margin="{StaticResource FieldLabelSpacing}"/>
+                        <TextBlock x:Name="PART_Title" HorizontalAlignment="Center" Margin="0"
+                                   Style="{StaticResource DialogTitleStyle}">
+                            <Run Text="Store Assistant "/><Run Text="Pro" Foreground="{StaticResource FluentAccentDefault}"/>
+                        </TextBlock>
+                        <TextBlock x:Name="PART_Subtitle" Text="{TemplateBinding Subtitle}"
+                                   HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeLabel}"
+                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   Margin="{StaticResource FieldLabelSpacing}"/>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ShowTitle" Value="False">
+                            <Setter TargetName="PART_Title" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger SourceName="PART_Subtitle" Property="Text" Value="">
+                            <Setter TargetName="PART_Subtitle" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

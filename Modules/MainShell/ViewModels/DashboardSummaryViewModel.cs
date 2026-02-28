@@ -44,6 +44,7 @@ public partial class DashboardSummaryViewModel : ObservableObject, IDisposable
     // ── Current user ──
 
     public string CurrentUser => $"👤 {_appState.CurrentUserType}";
+    public UserType CurrentUserType => _appState.CurrentUserType;
 
     // ── Operational mode ──
 
@@ -96,6 +97,7 @@ public partial class DashboardSummaryViewModel : ObservableObject, IDisposable
         {
             case nameof(IAppStateService.CurrentUserType):
                 OnPropertyChanged(nameof(CurrentUser));
+                OnPropertyChanged(nameof(CurrentUserType));
                 break;
             case nameof(IAppStateService.CurrentMode):
                 OnPropertyChanged(nameof(IsBillingMode));

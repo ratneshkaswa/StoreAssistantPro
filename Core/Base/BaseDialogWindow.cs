@@ -131,8 +131,21 @@ public abstract class BaseDialogWindow : Window
     {
         sizingService.ConfigureDialogWindow(this, DialogWidth, DialogHeight);
 
+        // Set app icon (gracefully skips if asset not found)
+        TrySetAppIcon();
+
         if (CloseOnEscape)
             KeyboardNav.SetEscapeCommand(this, new CloseDialogCommand(this));
+    }
+
+    private void TrySetAppIcon()
+    {
+        var uri = new Uri("pack://application:,,,/Assets/app.ico", UriKind.Absolute);
+        var info = System.Windows.Application.GetResourceStream(uri);
+        if (info != null)
+        {
+            Icon = System.Windows.Media.Imaging.BitmapFrame.Create(info.Stream);
+        }
     }
 
     // ── Close command ────────────────────────────────────────────────

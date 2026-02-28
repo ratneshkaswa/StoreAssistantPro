@@ -364,7 +364,6 @@
 
         <!-- Inline Stock Adjustment Form -->
         <Border Grid.Row="5" Style="{StaticResource FormCardStyle}"
-                Background="{StaticResource FluentWarningBackground}"
                 Visibility="{Binding IsStockAdjustFormVisible, Converter={StaticResource BoolToVisibility}}"
                 h:KeyboardNav.DefaultCommand="{Binding SaveStockAdjustCommand}"
                 h:KeyboardNav.EscapeCommand="{Binding CancelStockAdjustCommand}"
@@ -433,26 +432,7 @@
                           Sorting="OnSorting">
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                    <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
-                                    <Setter Property="Opacity" Value="0.6"/>
-                                </DataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsActive}" Value="True"/>
-                                        <Condition Binding="{Binding Quantity}" Value="0"/>
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsActive}" Value="True"/>
-                                        <Condition Binding="{Binding IsLowStock}" Value="True"/>
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Background" Value="{StaticResource FluentWarningBackground}"/>
-                                </MultiDataTrigger>
-                            </Style.Triggers>
+                            <Setter Property="h:RowHighlight.Level" Value="{Binding HighlightLevel}"/>
                         </Style>
                     </DataGrid.RowStyle>
                     <DataGrid.Columns>
@@ -566,23 +546,13 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <!-- Empty state -->
-                <TextBlock Grid.Row="0" Text="📦  No products found"
-                           Foreground="{StaticResource FluentTextTertiary}" FontStyle="Italic"
-                           FontSize="{StaticResource FontSizeBody}"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Margin="{StaticResource EmptyStatePadding}" IsHitTestVisible="False">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Products.Count}" Value="0">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                <controls:EmptyStateOverlay
+                    Icon="📦"
+                    Title="No products found"
+                    Description="Add your first product to start managing inventory."
+                    ActionText="➕ Add Product"
+                    ActionCommand="{Binding ShowAddFormCommand}"
+                    ItemCount="{Binding Products.Count}"/>
 
                 <!-- Paging Controls -->
                 <StackPanel Grid.Row="1" Orientation="Horizontal"

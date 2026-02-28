@@ -48,6 +48,17 @@ public class Product
     public string? Barcode { get; set; }
 
     /// <summary>
+    /// Stock Keeping Unit — internal product code.
+    /// </summary>
+    [MaxLength(50)]
+    public string? SKU { get; set; }
+
+    /// <summary>
+    /// Optional product category for grouping.
+    /// </summary>
+    public int? CategoryId { get; set; }
+
+    /// <summary>
     /// Unit of measurement (e.g., pcs, meters, sets). Defaults to "pcs".
     /// </summary>
     [MaxLength(20)]
@@ -111,4 +122,13 @@ public class Product
 
     [Timestamp]
     public byte[]? RowVersion { get; set; }
+
+    /// <summary>
+    /// Computed row highlight based on stock and active status.
+    /// </summary>
+    public RowHighlightLevel HighlightLevel =>
+        !IsActive ? RowHighlightLevel.Inactive :
+        MinStockLevel > 0 && Quantity == 0 ? RowHighlightLevel.Danger :
+        MinStockLevel > 0 && Quantity <= MinStockLevel ? RowHighlightLevel.Warning :
+        RowHighlightLevel.None;
 }

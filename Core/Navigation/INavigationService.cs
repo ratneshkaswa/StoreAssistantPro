@@ -1,10 +1,12 @@
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoreAssistantPro.Core.Navigation;
 
-public interface INavigationService
+public interface INavigationService : INotifyPropertyChanged
 {
     ObservableObject CurrentView { get; }
+    string? CurrentPageKey { get; }
     void NavigateTo<TViewModel>() where TViewModel : ObservableObject;
     void NavigateTo(string pageKey);
     void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject;

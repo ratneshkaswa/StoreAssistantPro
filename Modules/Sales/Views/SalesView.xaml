@@ -306,23 +306,11 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- Empty state -->
-            <TextBlock Grid.Row="0" Text="💰  No sales found"
-                       Foreground="{StaticResource FluentTextTertiary}" FontStyle="Italic"
-                       FontSize="{StaticResource FontSizeBody}"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Margin="{StaticResource EmptyStatePadding}" IsHitTestVisible="False">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Sales.Count}" Value="0">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+            <controls:EmptyStateOverlay
+                Icon="💰"
+                Title="No sales found"
+                Description="Complete your first sale to see transaction history here."
+                ItemCount="{Binding Sales.Count}"/>
 
             <!-- Paging Controls -->
             <StackPanel Grid.Row="1" Orientation="Horizontal"
