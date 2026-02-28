@@ -275,7 +275,7 @@
     <Thickness x:Key="ControlPadding">6</Thickness>
     <Thickness x:Key="ButtonPadding">12,6</Thickness>
     <Thickness x:Key="ButtonPaddingLarge">16,8</Thickness>
-    <Thickness x:Key="KeypadInset">40,8,40,0</Thickness>
+    <Thickness x:Key="KeypadInset">24,8,24,0</Thickness>
     <Thickness x:Key="PagingButtonPadding">8,4</Thickness>
     <Thickness x:Key="SidebarNavItemPadding">20,12</Thickness>
 

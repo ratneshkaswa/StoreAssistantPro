@@ -216,10 +216,10 @@
                     <!-- Keypad -->
                     <Grid Margin="{StaticResource KeypadInset}">
                         <Grid.RowDefinitions>
-                            <RowDefinition MinHeight="44"/>
-                            <RowDefinition MinHeight="44"/>
-                            <RowDefinition MinHeight="44"/>
-                            <RowDefinition MinHeight="44"/>
+                            <RowDefinition MinHeight="52"/>
+                            <RowDefinition MinHeight="52"/>
+                            <RowDefinition MinHeight="52"/>
+                            <RowDefinition MinHeight="52"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

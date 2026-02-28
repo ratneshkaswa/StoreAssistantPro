@@ -106,10 +106,10 @@
          ═══════════════════════════════════════════════════════════════ -->
     <Style x:Key="PosKeypadButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="22"/>
-        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="Margin" Value="4"/>
+        <Setter Property="Margin" Value="3"/>
         <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
         <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness" Value="1"/>
