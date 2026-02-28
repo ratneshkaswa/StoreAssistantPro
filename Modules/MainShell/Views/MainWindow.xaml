@@ -6,7 +6,8 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}">
+        Title="{Binding WindowTitle}"
+        Icon="pack://application:,,,/Assets/app.ico">
 
     <!-- InputBindings are generated at runtime by ShortcutService -->
 

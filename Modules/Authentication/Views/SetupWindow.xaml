@@ -575,8 +575,7 @@
 
             <!-- Success overlay -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
-                        h:Motion.SlideFadeIn="True">
+                        Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock Text="✅" FontSize="40" HorizontalAlignment="Center"
                            Margin="{StaticResource ItemSpacing}"/>
                 <TextBlock Text="Setup Complete!"
