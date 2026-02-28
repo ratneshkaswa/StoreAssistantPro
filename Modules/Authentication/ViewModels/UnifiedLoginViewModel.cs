@@ -37,9 +37,21 @@ public partial class UnifiedLoginViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUserSelected))]
+    [NotifyPropertyChangedFor(nameof(RoleHintText))]
     public partial UserType? SelectedUserType { get; set; }
 
     public bool IsUserSelected => SelectedUserType is not null;
+
+    public string RoleHintText => SelectedUserType is { } role
+        ? $"Enter {role} PIN"
+        : "Select a role above";
+
+    [ObservableProperty]
+    public partial bool IsVerifying { get; set; }
+
+    public bool IsLastUsedAdmin => LastLoggedInUser == UserType.Admin;
+    public bool IsLastUsedManager => LastLoggedInUser == UserType.Manager;
+    public bool IsLastUsedUser => LastLoggedInUser == UserType.User;
 
     /// <summary>Application version displayed in the login footer.</summary>
     public string AppVersion { get; } =
@@ -68,6 +80,9 @@ public partial class UnifiedLoginViewModel : BaseViewModel
 
     // ── L2: Last user pre-selection ──
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLastUsedAdmin))]
+    [NotifyPropertyChangedFor(nameof(IsLastUsedManager))]
+    [NotifyPropertyChangedFor(nameof(IsLastUsedUser))]
     public partial UserType? LastLoggedInUser { get; set; }
 
     public Action<bool?>? RequestClose { get; set; }
@@ -160,6 +175,7 @@ public partial class UnifiedLoginViewModel : BaseViewModel
             return;
 
         PinPad.Lock();
+        IsVerifying = true;
         try
         {
             var result = await _commandBus.SendAsync(
@@ -196,6 +212,7 @@ public partial class UnifiedLoginViewModel : BaseViewModel
         }
         finally
         {
+            IsVerifying = false;
             PinPad.Unlock();
         }
     }
@@ -213,4 +230,10 @@ public partial class UnifiedLoginViewModel : BaseViewModel
     /// <summary>Called by code-behind when Caps Lock state changes.</summary>
     public void RefreshCapsLock() =>
         IsCapsLockOn = System.Windows.Input.Keyboard.IsKeyToggled(System.Windows.Input.Key.CapsLock);
+
+    [RelayCommand]
+    private void ForgotPin()
+    {
+        ErrorMessage = "Contact your Admin or use Master Password to reset PIN.";
+    }
 }

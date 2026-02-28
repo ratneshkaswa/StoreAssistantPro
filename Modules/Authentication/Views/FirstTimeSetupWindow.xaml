@@ -4,9 +4,9 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="One Time Setup"
+        Icon="pack://application:,,,/Assets/app.ico"
         h:Motion.WindowFadeIn="True"
         Closing="OnWindowClosing">
-        Icon="pack://application:,,,/Assets/app.ico">
     <Window.InputBindings>
         <KeyBinding Key="Back" Command="{Binding PreviousStepCommand}"/>
     </Window.InputBindings>

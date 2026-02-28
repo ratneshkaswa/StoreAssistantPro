@@ -25,7 +25,7 @@ public class AuthenticationFlow(
         userType = default;
 
         var loginWindow = serviceProvider.GetRequiredService<UnifiedLoginWindow>();
-        sizingService.ConfigureStartupWindow(loginWindow, 380, 520);
+        sizingService.ConfigureStartupWindow(loginWindow, 420, 640);
         TrySetAppIcon(loginWindow);
 
         if (loginWindow.ShowDialog() != true)

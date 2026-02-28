@@ -694,7 +694,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="controls:AppBranding">
                     <StackPanel HorizontalAlignment="Center">
-                        <Image x:Name="PART_Logo" Source="/Assets/logo-64.png"
+                        <Image x:Name="PART_Logo" Source="/Assets/logo-256.png"
                                Width="{TemplateBinding LogoSize}" Height="{TemplateBinding LogoSize}"
                                HorizontalAlignment="Center"
                                RenderOptions.BitmapScalingMode="HighQuality"

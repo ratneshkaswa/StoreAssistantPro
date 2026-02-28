@@ -46,7 +46,7 @@ public class AppBranding : Control
         {
             try
             {
-                var uri = new Uri("pack://application:,,,/Assets/logo-64.png", UriKind.Absolute);
+                var uri = new Uri("pack://application:,,,/Assets/logo-256.png", UriKind.Absolute);
                 var info = Application.GetResourceStream(uri);
                 return info != null;
             }
