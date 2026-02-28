@@ -16,6 +16,14 @@ public class Sale
     public DateTime SaleDate { get; set; }
     public decimal TotalAmount { get; set; }
 
+    /// <summary>Optional customer for non-walk-in sales.</summary>
+    public int? CustomerId { get; set; }
+    public Customer? Customer { get; set; }
+
+    /// <summary>Staff member who made the sale (for incentive tracking).</summary>
+    public int? StaffId { get; set; }
+    public Staff? Staff { get; set; }
+
     /// <summary>
     /// Client-generated idempotency key. Prevents the same bill from
     /// being saved twice (e.g. accidental double-click, network retry).
@@ -58,6 +66,12 @@ public class Sale
     public byte[]? RowVersion { get; set; }
 
     public ICollection<SaleItem> Items { get; set; } = [];
+
+    /// <summary>Extra charges applied to this sale (packing, delivery, etc.).</summary>
+    public ICollection<ExtraCharge> ExtraCharges { get; set; } = [];
+
+    /// <summary>Returns processed against this sale.</summary>
+    public ICollection<SaleReturn> Returns { get; set; } = [];
 
     /// <summary>
     /// Summary of item names for tooltip display.

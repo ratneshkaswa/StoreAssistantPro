@@ -20,11 +20,16 @@ using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication;
 using StoreAssistantPro.Modules.Billing;
 using StoreAssistantPro.Modules.Brands;
+using StoreAssistantPro.Modules.Customers;
+using StoreAssistantPro.Modules.FinancialYears;
 using StoreAssistantPro.Modules.Firm;
+using StoreAssistantPro.Modules.Inventory;
 using StoreAssistantPro.Modules.Inward;
 using StoreAssistantPro.Modules.MainShell;
 using StoreAssistantPro.Modules.Products;
+using StoreAssistantPro.Modules.Promotions;
 using StoreAssistantPro.Modules.Sales;
+using StoreAssistantPro.Modules.Staff;
 using StoreAssistantPro.Modules.Startup;
 using StoreAssistantPro.Modules.Vendors;
 using StoreAssistantPro.Modules.SystemSettings;
@@ -141,7 +146,12 @@ internal static class HostingExtensions
             .AddUsersModule()
             .AddSystemSettingsModule()
             .AddBillingModule()
-            .AddTaxModule();
+            .AddTaxModule()
+            .AddCustomersModule()
+            .AddStaffModule()
+            .AddPromotionsModule()
+            .AddInventoryModule()
+            .AddFinancialYearsModule();
 
         return services;
     }

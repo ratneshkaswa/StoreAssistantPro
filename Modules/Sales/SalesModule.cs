@@ -22,11 +22,13 @@ public static class SalesModule
 
         // Services
         services.AddTransient<ISalesService, SalesService>();
+        services.AddTransient<ISaleReturnService, SaleReturnService>();
         services.AddSingleton<IOfflineBillingQueue, OfflineBillingQueue>();
         services.AddSingleton<IOfflineSyncService, OfflineSyncService>();
 
         // Command handlers
         services.AddTransient<ICommandRequestHandler<CompleteSaleCommand, Unit>, CompleteSaleHandler>();
+        services.AddTransient<ICommandRequestHandler<ProcessReturnCommand, Unit>, ProcessReturnHandler>();
 
         // ViewModels
         services.AddTransient<SalesViewModel>();
