@@ -59,8 +59,11 @@ public partial class LoginViewModel : BaseViewModel
     public string FirmName => _appState.FirmName;
 
     // ── L15: Connection status ──
-    public bool IsOffline => !_connectivity.IsConnected;
-    public string ConnectionStatus => _connectivity.IsConnected ? "● Connected" : "● Offline";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConnectionStatus))]
+    public partial bool IsOffline { get; set; }
+
+    public string ConnectionStatus => IsOffline ? "● Offline" : "● Connected";
     public string AppVersion { get; } =
         System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
 
@@ -84,6 +87,9 @@ public partial class LoginViewModel : BaseViewModel
 
     public Action<bool?>? RequestClose { get; set; }
 
+    /// <summary>Raised after a successful PIN reset so the view can clear PasswordBoxes.</summary>
+    public event Action? ResetCompleted;
+
     public LoginViewModel(
         ICommandBus commandBus,
         IAppStateService appState,
@@ -99,10 +105,13 @@ public partial class LoginViewModel : BaseViewModel
         CurrentTime = _regional.FormatTime(_regional.Now);
         AttemptsMessage = string.Empty;
 
-        // L9: Clock timer
+        // L9: Clock timer + connectivity refresh
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _clockTimer.Tick += (_, _) => CurrentTime = _regional.FormatTime(_regional.Now);
-        CurrentTime = _regional.FormatTime(_regional.Now);
+        _clockTimer.Tick += (_, _) =>
+        {
+            CurrentTime = _regional.FormatTime(_regional.Now);
+            IsOffline = !_connectivity.IsConnected;
+        };
     }
 
     public void Initialize()
@@ -123,8 +132,11 @@ public partial class LoginViewModel : BaseViewModel
     /// <summary>Clear error as soon as user starts typing a new PIN.</summary>
     private void OnPinPadPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(PinPadViewModel.PinLength) && PinPad.PinLength > 0 && HasError)
-            ErrorMessage = string.Empty;
+        if (e.PropertyName == nameof(PinPadViewModel.PinLength) && PinPad.PinLength > 0)
+        {
+            if (HasError) ErrorMessage = string.Empty;
+            if (!string.IsNullOrEmpty(ResetSuccessMessage)) ResetSuccessMessage = string.Empty;
+        }
     }
 
     private void OnPinCompleted()
@@ -299,6 +311,10 @@ public partial class LoginViewModel : BaseViewModel
                 ErrorMessage = string.Empty;
                 IsForgotPinMode = false;
                 PinPad.Reset();
+                MasterPassword = string.Empty;
+                NewPin = string.Empty;
+                NewPinConfirm = string.Empty;
+                ResetCompleted?.Invoke();
             }
             else
             {

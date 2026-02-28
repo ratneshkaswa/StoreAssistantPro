@@ -26,7 +26,7 @@
 
         <!-- ── Row 1: Numbered step circles + labels ──────────── -->
         <StackPanel Grid.Row="1" HorizontalAlignment="Center"
-                    Margin="0,4,0,4">
+                    Margin="{StaticResource StepperMargin}">
             <Grid Width="{StaticResource StepperWidth}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

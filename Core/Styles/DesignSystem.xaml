@@ -253,6 +253,7 @@
     <Thickness x:Key="RoleSectionMargin">0,0,0,2</Thickness>
     <Thickness x:Key="BadgeOffset">0,-2,2,0</Thickness>
     <Thickness x:Key="RoleButtonGap">2,0</Thickness>
+    <Thickness x:Key="StepperMargin">0,4,0,4</Thickness>
 
     <!-- Grid row height for two-column form layouts -->
     <GridLength x:Key="FormRowSpacing">8</GridLength>

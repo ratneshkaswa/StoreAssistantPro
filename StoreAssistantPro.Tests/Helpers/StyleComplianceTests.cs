@@ -26,7 +26,7 @@ public partial class StyleComplianceTests
     // ── Baselines (lower these as you fix violations) ─────────────
 
     /// <summary>Current number of hardcoded Margin/Padding in views.</summary>
-    private const int MarginBaseline = 26;
+    private const int MarginBaseline = 25;
 
     /// <summary>Current number of hardcoded FontSize/FontFamily in views.</summary>
     private const int FontBaseline = 0;

@@ -69,7 +69,7 @@
     <Grid Background="{StaticResource FluentBackgroundSecondary}">
         <Grid MaxWidth="360" VerticalAlignment="Center" HorizontalAlignment="Center"
               Margin="{StaticResource DialogPadding}"
-              h:KeyboardNav.EscapeCommand="{Binding PinPad.ClearCommand}">
+              >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
                 <RowDefinition Height="Auto"/>  <!-- 1: Role buttons -->
@@ -168,7 +168,7 @@
                     </Style>
                 </Border.Style>
                 <Grid>
-                    <!-- â”€â”€ Normal PIN entry mode â”€â”€ -->
+                    <!-- Normal PIN entry mode -->
                     <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToVisibility}}">
                         <!-- Success message after PIN reset -->
                     <TextBlock Text="{Binding ResetSuccessMessage}"
@@ -269,7 +269,7 @@
                     </TextBlock>
                     </StackPanel>
 
-                    <!-- â”€â”€ Forgot PIN recovery form â”€â”€ -->
+                    <!-- Forgot PIN recovery form -->
                     <StackPanel Visibility="{Binding IsForgotPinMode, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="Reset PIN" HorizontalAlignment="Center"
                                    FontSize="{StaticResource FontSizeSectionHeader}"
@@ -365,10 +365,26 @@
                            FontWeight="SemiBold"
                            Text="{Binding CurrentTime}"
                            Margin="{StaticResource CompactItemSpacing}"/>
+                <!-- Connection status -->
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="{StaticResource FontSizeStatusBar}"
+                           Margin="{StaticResource CompactItemSpacing}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsOffline}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                    <Run Text="{Binding ConnectionStatus, Mode=OneWay}"/>
+                </TextBlock>
                 <TextBlock HorizontalAlignment="Center"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextDisabled}">
-                    <Run Text="© 2025 "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
+                    <Run Text="v"/><Run Text="{Binding AppVersion, Mode=OneWay}"/><Run Text=" · © 2025 "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
                 </TextBlock>
             </StackPanel>
         </Grid>
