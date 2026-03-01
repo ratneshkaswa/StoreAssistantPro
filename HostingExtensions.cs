@@ -150,8 +150,8 @@ internal static class HostingExtensions
             .AddTaxModule()
             .AddCustomersModule(pageRegistry)
             .AddStaffModule(pageRegistry)
-            .AddPromotionsModule()
-            .AddInventoryModule()
+            .AddPromotionsModule(pageRegistry)
+            .AddInventoryModule(pageRegistry)
             .AddFinancialYearsModule()
             .AddReportsModule(pageRegistry);
 

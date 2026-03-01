@@ -1,0 +1,92 @@
+<UserControl x:Class="StoreAssistantPro.Modules.Inventory.Views.StockAlertsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             Loaded="OnLoaded">
+    <controls:EnterprisePageLayout>
+
+        <controls:EnterprisePageLayout.TipBannerContent>
+            <controls:InlineTipBanner
+                h:TipBannerAutoState.TipKey="StockAlertsView.QuickTip"
+                h:TipBannerAutoState.ContextKey="StockAlerts"
+                Title="Quick tip"
+                TipText="Monitor stock levels. Low-stock alerts trigger automatically after each sale."/>
+        </controls:EnterprisePageLayout.TipBannerContent>
+
+        <controls:EnterprisePageLayout.ToolbarContent>
+            <Border Style="{StaticResource SectionCardStyle}"
+                    Margin="{StaticResource FieldGroupSpacing}">
+                <Border Style="{StaticResource SectionCardHeaderStyle}">
+                    <WrapPanel>
+                        <Button Content="🗑 Delete Alert" Command="{Binding DeleteAlertCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"/>
+                        <Button Content="🔄 Refresh" Command="{Binding LoadAlertsCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"/>
+                        <Separator Style="{StaticResource FluentSeparatorStyle}"/>
+                        <TextBlock Text="{Binding CountDisplay}" VerticalAlignment="Center"
+                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   Margin="{StaticResource InlineControlSpacing}"/>
+                    </WrapPanel>
+                </Border>
+            </Border>
+        </controls:EnterprisePageLayout.ToolbarContent>
+
+        <Border Style="{StaticResource SectionCardStyle}" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid Grid.Row="0" Style="{StaticResource EnterpriseDataGridStyle}"
+                          ItemsSource="{Binding Alerts}"
+                          SelectedItem="{Binding SelectedAlert}"
+                          MinHeight="100">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
+                        <DataGridTextColumn Header="Current Qty" Binding="{Binding Product.Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Low Threshold" Binding="{Binding LowThreshold}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="High Threshold" Binding="{Binding HighThreshold}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Enabled"
+                                            Binding="{Binding IsEnabled, Converter={StaticResource BoolToActiveText}}"
+                                            Width="{StaticResource ColumnWidthQty}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Low Stock Summary -->
+                <Expander Grid.Row="1" Header="⚠ Low Stock Products" IsExpanded="False"
+                          Margin="{StaticResource CompactItemSpacing}">
+                    <DataGrid Style="{StaticResource EnterpriseDataGridStyle}"
+                              ItemsSource="{Binding LowStockProducts}" MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Sale Price" Binding="{Binding SalePrice, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+
+                <!-- Over Stock Summary -->
+                <Expander Grid.Row="2" Header="📦 Over Stock Products" IsExpanded="False"
+                          Margin="{StaticResource CompactItemSpacing}">
+                    <DataGrid Style="{StaticResource EnterpriseDataGridStyle}"
+                              ItemsSource="{Binding OverStockProducts}" MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+
+                <controls:EmptyStateOverlay
+                    Icon="🔔"
+                    Title="No stock alerts configured"
+                    Description="Stock alerts are created automatically or through inventory settings."
+                    ItemCount="{Binding Alerts.Count}"/>
+            </Grid>
+        </Border>
+
+    </controls:EnterprisePageLayout>
+</UserControl>

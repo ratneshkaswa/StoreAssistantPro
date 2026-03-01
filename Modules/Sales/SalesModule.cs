@@ -11,6 +11,7 @@ namespace StoreAssistantPro.Modules.Sales;
 public static class SalesModule
 {
     public const string SalesPage = "Sales";
+    public const string SaleReturnsPage = "SaleReturns";
 
     public static IServiceCollection AddSalesModule(
         this IServiceCollection services,
@@ -19,6 +20,7 @@ public static class SalesModule
         // Page registration
         pageRegistry.Map<SalesViewModel>(SalesPage);
         pageRegistry.RequireFeature(SalesPage, FeatureFlags.Sales);
+        pageRegistry.Map<SaleReturnsViewModel>(SaleReturnsPage);
 
         // Services
         services.AddTransient<ISalesService, SalesService>();
@@ -32,6 +34,7 @@ public static class SalesModule
 
         // ViewModels
         services.AddTransient<SalesViewModel>();
+        services.AddTransient<SaleReturnsViewModel>();
 
         return services;
     }

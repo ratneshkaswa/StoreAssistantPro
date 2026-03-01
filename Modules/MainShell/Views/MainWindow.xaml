@@ -44,6 +44,9 @@
                 <MenuItem Header="_Customers" Command="{Binding NavigateToCustomersCommand}"/>
                 <MenuItem Header="S_taff" Command="{Binding NavigateToStaffCommand}"/>
                 <MenuItem Header="_Reports" Command="{Binding NavigateToReportsCommand}"/>
+                <MenuItem Header="_Promotions" Command="{Binding NavigateToPromotionsCommand}"/>
+                <MenuItem Header="Stoc_k Alerts" Command="{Binding NavigateToStockAlertsCommand}"/>
+                <MenuItem Header="Sale Re_turns" Command="{Binding NavigateToSaleReturnsCommand}"/>
                 <Separator/>
                 <MenuItem Header="_Logout" Command="{Binding LogoutCommand}"
                           InputGestureText="Ctrl+L"
@@ -70,6 +73,9 @@
                 <MenuItem Header="Staff" Command="{Binding NavigateToStaffCommand}"/>
                 <Separator/>
                 <MenuItem Header="Reports" Command="{Binding NavigateToReportsCommand}"/>
+                <MenuItem Header="Promotions" Command="{Binding NavigateToPromotionsCommand}"/>
+                <MenuItem Header="Stock Alerts" Command="{Binding NavigateToStockAlertsCommand}"/>
+                <MenuItem Header="Sale Returns" Command="{Binding NavigateToSaleReturnsCommand}"/>
             </MenuItem>
 
             <MenuItem Header="_Tools">

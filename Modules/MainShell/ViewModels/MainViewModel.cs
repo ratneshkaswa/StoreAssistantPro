@@ -46,6 +46,9 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private const string CustomersPage = "Customers";
     private const string StaffPage = "Staff";
     private const string ReportsPage = "Reports";
+    private const string PromotionsPage = "Promotions";
+    private const string StockAlertsPage = "StockAlerts";
+    private const string SaleReturnsPage = "SaleReturns";
 
     private const string FirmManagementDialog = "FirmManagement";
     private const string UserManagementDialog = "UserManagement";
@@ -360,6 +363,30 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _navigationService.NavigateTo(ReportsPage);
         _currentPage = ReportsPage;
         _statusBar.SetPersistent("Reports");
+    }
+
+    [RelayCommand]
+    private void NavigateToPromotions()
+    {
+        _navigationService.NavigateTo(PromotionsPage);
+        _currentPage = PromotionsPage;
+        _statusBar.SetPersistent("Promotions");
+    }
+
+    [RelayCommand]
+    private void NavigateToStockAlerts()
+    {
+        _navigationService.NavigateTo(StockAlertsPage);
+        _currentPage = StockAlertsPage;
+        _statusBar.SetPersistent("Stock Alerts");
+    }
+
+    [RelayCommand]
+    private void NavigateToSaleReturns()
+    {
+        _navigationService.NavigateTo(SaleReturnsPage);
+        _currentPage = SaleReturnsPage;
+        _statusBar.SetPersistent("Sale Returns");
     }
 
     // ── Menu commands ──
