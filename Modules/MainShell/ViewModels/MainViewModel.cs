@@ -342,6 +342,14 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     }
 
     [RelayCommand]
+    private void NavigateToSuppliers()
+    {
+        _navigationService.NavigateTo(SuppliersPage);
+        _currentPage = SuppliersPage;
+        _statusBar.SetPersistent("Suppliers");
+    }
+
+    [RelayCommand]
     private void NavigateToCustomers()
     {
         _navigationService.NavigateTo(CustomersPage);
