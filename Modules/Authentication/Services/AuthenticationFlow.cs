@@ -23,7 +23,7 @@ public class AuthenticationFlow(
         userType = default;
 
         var loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
-        sizingService.ConfigureStartupWindow(loginWindow, 420, 640);
+        sizingService.ConfigureStartupWindow(loginWindow, 420, 740);
 
         if (loginWindow.ShowDialog() != true)
             return false;
