@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime">
 
@@ -32,17 +32,17 @@
          1. COLOR PALETTE
          ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- ── Background (outermost window / page) ────────────────────── -->
-    <SolidColorBrush x:Key="FluentBackgroundPrimary"   Color="#F3F3F3"/>
-    <SolidColorBrush x:Key="FluentBackgroundSecondary" Color="#FFFFFF"/>
+    <!-- ── Background (outermost window / page — Win11 Mica tones) ────────────────────── -->
+    <SolidColorBrush x:Key="FluentBackgroundPrimary"   Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="FluentBackgroundSecondary" Color="#FAFAFA"/>
 
-    <!-- ── Surface (cards, panels, popups) ─────────────────────────── -->
+    <!-- ── Surface (cards, panels, popups — layered elevation) ─────────────────────────── -->
     <SolidColorBrush x:Key="FluentSurface"             Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="FluentSurfaceElevated"     Color="#FBFBFB"/>
-    <SolidColorBrush x:Key="FluentSurfaceStroke"       Color="#E5E5E5"/>
+    <SolidColorBrush x:Key="FluentSurfaceElevated"     Color="#FCFCFC"/>
+    <SolidColorBrush x:Key="FluentSurfaceStroke"       Color="#E8E8E8"/>
 
     <!-- ── Stroke (borders, dividers) ──────────────────────────────── -->
-    <SolidColorBrush x:Key="FluentStrokeDefault"       Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="FluentStrokeDefault"       Color="#E5E5E5"/>
     <SolidColorBrush x:Key="FluentStrokeFocus"         Color="#005FB8"/>
     <SolidColorBrush x:Key="FluentStrokeError"         Color="#C42B1C"/>
 
@@ -73,8 +73,8 @@
 
     <!-- ── Subtle (transparent interactive fills) ──────────────────── -->
     <SolidColorBrush x:Key="FluentSubtleTransparent"   Color="Transparent"/>
-    <SolidColorBrush x:Key="FluentSubtleHover"         Color="#0A000000"/>
-    <SolidColorBrush x:Key="FluentSubtlePressed"       Color="#12000000"/>
+    <SolidColorBrush x:Key="FluentSubtleHover"         Color="#09000000"/>
+    <SolidColorBrush x:Key="FluentSubtlePressed"       Color="#06000000"/>
 
     <!-- ── Semantic ────────────────────────────────────────────────── -->
     <SolidColorBrush x:Key="FluentSuccess"             Color="#0F7B0F"/>
@@ -104,13 +104,13 @@
     <SolidColorBrush x:Key="TipBannerTitleForeground"  Color="#242424"/>
     <SolidColorBrush x:Key="TipBannerBodyForeground"   Color="#707070"/>
 
-    <!-- ── Chrome (menu bar, status bar, toolbar) ──────────────────── -->
-    <SolidColorBrush x:Key="FluentMenuBarBackground"   Color="#F3F3F3"/>
+    <!-- ── Chrome (menu bar, status bar, toolbar — Win11 seamless) ──────────────────── -->
+    <SolidColorBrush x:Key="FluentMenuBarBackground"   Color="#F5F5F5"/>
     <SolidColorBrush x:Key="FluentMenuBarForeground"   Color="#1A1A1A"/>
-    <SolidColorBrush x:Key="FluentStatusBarBackground" Color="#FBFBFB"/>
-    <SolidColorBrush x:Key="FluentStatusBarForeground" Color="#616161"/>
-    <SolidColorBrush x:Key="FluentToolbarBackground"   Color="#FBFBFB"/>
-    <SolidColorBrush x:Key="FluentToolbarBorder"       Color="#E5E5E5"/>
+    <SolidColorBrush x:Key="FluentStatusBarBackground" Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="FluentStatusBarForeground" Color="#5C5C5C"/>
+    <SolidColorBrush x:Key="FluentToolbarBackground"   Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="FluentToolbarBorder"       Color="#EBEBEB"/>
 
     <!-- ── KPI Stat Card Palette ───────────────────────────────────── -->
     <SolidColorBrush x:Key="FluentKpiGreen"            Color="#0F7B0F"/>
@@ -313,18 +313,18 @@
          Large   = dialogs, overlays (24 px blur, 0.14)
          ═══════════════════════════════════════════════════════════════ -->
     <DropShadowEffect x:Key="FluentShadowSmall"
-                      BlurRadius="8" ShadowDepth="2"
-                      Direction="270" Opacity="0.08"
+                      BlurRadius="8" ShadowDepth="1"
+                      Direction="270" Opacity="0.06"
                       Color="#000000"/>
 
     <DropShadowEffect x:Key="FluentShadowMedium"
-                      BlurRadius="16" ShadowDepth="4"
-                      Direction="270" Opacity="0.12"
+                      BlurRadius="16" ShadowDepth="2"
+                      Direction="270" Opacity="0.10"
                       Color="#000000"/>
 
     <DropShadowEffect x:Key="FluentShadowLarge"
-                      BlurRadius="24" ShadowDepth="8"
-                      Direction="270" Opacity="0.14"
+                      BlurRadius="32" ShadowDepth="4"
+                      Direction="270" Opacity="0.12"
                       Color="#000000"/>
 
 
@@ -336,8 +336,8 @@
          ═══════════════════════════════════════════════════════════════ -->
     <Duration x:Key="FluentDurationFast">0:0:0.083</Duration>
     <Duration x:Key="FluentDurationNormal">0:0:0.167</Duration>
-    <Duration x:Key="FluentDurationPageFade">0:0:0</Duration>     <!-- was 0:0:0.15  -->
-    <Duration x:Key="FluentDurationSlow">0:0:0</Duration>         <!-- was 0:0:0.25  -->
+    <Duration x:Key="FluentDurationPageFade">0:0:0.15</Duration>
+    <Duration x:Key="FluentDurationSlow">0:0:0.25</Duration>
 
     <!-- Easing curve for panel dimming / focus-lock transitions -->
     <CubicEase x:Key="PanelDimEase" EasingMode="EaseOut"/>
@@ -365,18 +365,18 @@
     <CubicEase    x:Key="FluentEaseAccelerate" EasingMode="EaseIn"/>
     <QuadraticEase x:Key="FluentEasePoint"     EasingMode="EaseInOut"/>
 
-    <!-- Scale factors — neutralized (1.0 = no scale) -->
-    <sys:Double x:Key="MotionScaleHoverFrom">1.0</sys:Double>       <!-- was 0.985 -->
+    <!-- Scale factors — Win11 subtle hover breathing -->
+    <sys:Double x:Key="MotionScaleHoverFrom">0.985</sys:Double>
     <sys:Double x:Key="MotionScaleHoverTo">1.0</sys:Double>
 
-    <!-- Button micro-interaction scale factors — neutralized -->
-    <sys:Double x:Key="MotionButtonScaleHover">1.0</sys:Double>     <!-- was 1.02 -->
+    <!-- Button micro-interaction scale factors -->
+    <sys:Double x:Key="MotionButtonScaleHover">1.02</sys:Double>
     <sys:Double x:Key="MotionButtonScalePressed">0.98</sys:Double>
     <sys:Double x:Key="MotionButtonScaleRest">1.0</sys:Double>
 
-    <!-- Slide offsets — neutralized (0 = no movement) -->
-    <sys:Double x:Key="MotionSlideOffsetSmall">0</sys:Double>       <!-- was 12 -->
-    <sys:Double x:Key="MotionSlideOffsetNormal">0</sys:Double>      <!-- was 20 -->
+    <!-- Slide offsets — Win11 directional motion -->
+    <sys:Double x:Key="MotionSlideOffsetSmall">12</sys:Double>
+    <sys:Double x:Key="MotionSlideOffsetNormal">20</sys:Double>
 
     <!-- ═══════════════════════════════════════════════════════════════
          9. TOOLTIP TIMING

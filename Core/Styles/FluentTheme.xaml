@@ -949,7 +949,7 @@
         <Setter Property="Foreground"          Value="{StaticResource FluentMenuBarForeground}"/>
         <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"            Value="12"/>
-        <Setter Property="Padding"             Value="6,2"/>
+        <Setter Property="Padding"             Value="8,4"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -966,44 +966,40 @@
         </Setter>
     </Style>
 
-    <!-- Top-level menu item (Fluent subtle hover) -->
+    <!-- Top-level menu item (Win11 subtle hover with rounded corners) -->
     <Style x:Key="FluentMenuBarItemStyle" TargetType="MenuItem">
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"   Value="12"/>
-        <Setter Property="Padding"    Value="8,4"/>
+        <Setter Property="Padding"    Value="10,5"/>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TOOLBAR — Fluent elevated quick-action strip
+         TOOLBAR — Win11 seamless command bar
 
-         White surface with a subtle bottom stroke and small shadow
-         for slight elevation above the workspace content below.
-         Modern 12,6 padding keeps compact enterprise density.
+         Blends with the page surface using a subtle bottom stroke
+         only — no shadow, no elevation. Clean, modern, flat.
          ═══════════════════════════════════════════════════════════════ -->
     <Style x:Key="FluentToolbarStyle" TargetType="Border">
-        <Setter Property="Background"         Value="{StaticResource FluentSurface}"/>
+        <Setter Property="Background"         Value="{StaticResource FluentToolbarBackground}"/>
         <Setter Property="BorderBrush"        Value="{StaticResource FluentToolbarBorder}"/>
         <Setter Property="BorderThickness"    Value="0,0,0,1"/>
-        <Setter Property="Padding"            Value="12,6"/>
-        <Setter Property="Effect"             Value="{StaticResource FluentShadowSmall}"/>
+        <Setter Property="Padding"            Value="12,8"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         STATUS BAR — Fluent chrome strip
+         STATUS BAR — Win11 seamless chrome strip
 
-         Clean chromeless StatusBar with subtle top-stroke separation,
-         Segoe UI Variable 11 px, calm #FAFAFA surface.  The custom
-         ControlTemplate strips the default WPF resize grip, system
-         chrome, and separator rendering to produce a flat, modern bar.
+         Flush with window background, subtle top stroke only,
+         no elevation. Segoe UI Variable 11 px, relaxed padding.
          ═══════════════════════════════════════════════════════════════ -->
     <Style x:Key="FluentStatusBarStyle" TargetType="StatusBar">
         <Setter Property="Background"          Value="{StaticResource FluentStatusBarBackground}"/>
         <Setter Property="Foreground"          Value="{StaticResource FluentStatusBarForeground}"/>
         <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"            Value="11"/>
-        <Setter Property="Padding"             Value="10,5"/>
+        <Setter Property="Padding"             Value="12,6"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -1071,8 +1067,8 @@
         <Setter Property="BorderThickness"      Value="0"/>
         <Setter Property="SnapsToDevicePixels"  Value="True"/>
         <Setter Property="UseLayoutRounding"    Value="True"/>
-        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
-        <Setter Property="TextOptions.TextRenderingMode"  Value="ClearType"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
+        <Setter Property="TextOptions.TextRenderingMode"  Value="Auto"/>
     </Style>
 
 </ResourceDictionary>
