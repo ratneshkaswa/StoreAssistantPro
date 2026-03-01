@@ -17,6 +17,16 @@
              xmlns:vendorsViews="clr-namespace:StoreAssistantPro.Modules.Vendors.Views"
              xmlns:inwardVm="clr-namespace:StoreAssistantPro.Modules.Inward.ViewModels"
              xmlns:inwardViews="clr-namespace:StoreAssistantPro.Modules.Inward.Views"
+             xmlns:customersVm="clr-namespace:StoreAssistantPro.Modules.Customers.ViewModels"
+             xmlns:customersViews="clr-namespace:StoreAssistantPro.Modules.Customers.Views"
+             xmlns:staffVm="clr-namespace:StoreAssistantPro.Modules.Staff.ViewModels"
+             xmlns:staffViews="clr-namespace:StoreAssistantPro.Modules.Staff.Views"
+             xmlns:reportsVm="clr-namespace:StoreAssistantPro.Modules.Reports.ViewModels"
+             xmlns:reportsViews="clr-namespace:StoreAssistantPro.Modules.Reports.Views"
+             xmlns:promotionsVm="clr-namespace:StoreAssistantPro.Modules.Promotions.ViewModels"
+             xmlns:promotionsViews="clr-namespace:StoreAssistantPro.Modules.Promotions.Views"
+             xmlns:inventoryVm="clr-namespace:StoreAssistantPro.Modules.Inventory.ViewModels"
+             xmlns:inventoryViews="clr-namespace:StoreAssistantPro.Modules.Inventory.Views"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              xmlns:core="clr-namespace:StoreAssistantPro.Core"
              ShutdownMode="OnExplicitShutdown">
@@ -80,6 +90,36 @@
         <!-- Inward module -->
         <DataTemplate DataType="{x:Type inwardVm:InwardViewModel}">
             <inwardViews:InwardView/>
+        </DataTemplate>
+
+        <!-- Customers module -->
+        <DataTemplate DataType="{x:Type customersVm:CustomersViewModel}">
+            <customersViews:CustomersView/>
+        </DataTemplate>
+
+        <!-- Staff module -->
+        <DataTemplate DataType="{x:Type staffVm:StaffViewModel}">
+            <staffViews:StaffView/>
+        </DataTemplate>
+
+        <!-- Reports module -->
+        <DataTemplate DataType="{x:Type reportsVm:ReportsViewModel}">
+            <reportsViews:ReportsView/>
+        </DataTemplate>
+
+        <!-- Promotions module -->
+        <DataTemplate DataType="{x:Type promotionsVm:PromotionsViewModel}">
+            <promotionsViews:PromotionsView/>
+        </DataTemplate>
+
+        <!-- Inventory module (Stock Alerts) -->
+        <DataTemplate DataType="{x:Type inventoryVm:StockAlertsViewModel}">
+            <inventoryViews:StockAlertsView/>
+        </DataTemplate>
+
+        <!-- Sale Returns -->
+        <DataTemplate DataType="{x:Type salesVm:SaleReturnsViewModel}">
+            <salesViews:SaleReturnsView/>
         </DataTemplate>
 
         <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + slide-fade transition -->
