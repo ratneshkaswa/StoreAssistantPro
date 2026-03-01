@@ -1,0 +1,116 @@
+<UserControl x:Class="StoreAssistantPro.Modules.Staff.Views.StaffView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             Loaded="OnLoaded">
+    <controls:EnterprisePageLayout>
+
+        <controls:EnterprisePageLayout.TipBannerContent>
+            <controls:InlineTipBanner
+                h:TipBannerAutoState.TipKey="StaffView.QuickTip"
+                h:TipBannerAutoState.ContextKey="Staff"
+                Title="Quick tip"
+                TipText="Manage staff members. Track sales performance, incentives, and daily targets."/>
+        </controls:EnterprisePageLayout.TipBannerContent>
+
+        <controls:EnterprisePageLayout.ToolbarContent>
+            <Border Style="{StaticResource SectionCardStyle}"
+                    Margin="{StaticResource FieldGroupSpacing}">
+                <Border Style="{StaticResource SectionCardHeaderStyle}">
+                    <WrapPanel>
+                        <Button Content="➕ Add Staff" Command="{Binding ShowAddFormCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}" FontWeight="SemiBold"/>
+                        <Button Content="🗑 Delete" Command="{Binding DeleteStaffCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"/>
+                        <Separator Style="{StaticResource FluentSeparatorStyle}"/>
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="{StaticResource FieldWidthWide}"
+                                 h:Watermark.Text="🔍 Search staff..."
+                                 VerticalContentAlignment="Center"/>
+                        <TextBlock Text="{Binding CountDisplay}" VerticalAlignment="Center"
+                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   Margin="{StaticResource InlineControlSpacing}"/>
+                    </WrapPanel>
+                </Border>
+            </Border>
+        </controls:EnterprisePageLayout.ToolbarContent>
+
+        <Border Style="{StaticResource SectionCardStyle}" ClipToBounds="True">
+            <Grid>
+                <DataGrid Style="{StaticResource EnterpriseDataGridStyle}"
+                          ItemsSource="{Binding StaffMembers}"
+                          SelectedItem="{Binding SelectedStaff}"
+                          MinHeight="100">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="{StaticResource ColumnWidthId}"/>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Code" Binding="{Binding StaffCode}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthStatus}"/>
+                        <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="{StaticResource ColumnWidthStatus}"/>
+                        <DataGridTextColumn Header="Daily Target" Binding="{Binding DailyTarget, StringFormat=C}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Status"
+                                            Binding="{Binding IsActive, Converter={StaticResource BoolToActiveText}}"
+                                            Width="{StaticResource ColumnWidthQty}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <controls:EmptyStateOverlay
+                    Icon="👨‍💼"
+                    Title="No staff found"
+                    Description="Add staff members to track sales performance and incentives."
+                    ActionText="➕ Add Staff"
+                    ActionCommand="{Binding ShowAddFormCommand}"
+                    ItemCount="{Binding StaffMembers.Count}"/>
+            </Grid>
+        </Border>
+
+        <controls:EnterprisePageLayout.BottomFormContent>
+            <Border Style="{StaticResource FormCardStyle}"
+                    Visibility="{Binding IsAddFormVisible, Converter={StaticResource BoolToVisibility}}"
+                    h:KeyboardNav.DefaultCommand="{Binding SaveStaffCommand}"
+                    h:KeyboardNav.EscapeCommand="{Binding CancelAddCommand}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="4"
+                               Text="New Staff" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Name *" Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="Code" Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding NewStaffCode, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Phone" Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding NewPhone, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="2" Text="Daily Target" Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding NewDailyTarget, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <StackPanel Grid.Row="5" Grid.ColumnSpan="4" Orientation="Horizontal"
+                                HorizontalAlignment="Right" Margin="{StaticResource FormActionBarSpacing}">
+                        <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
+                                   VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="Cancel" Command="{Binding CancelAddCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="💾 Save" Command="{Binding SaveStaffCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </controls:EnterprisePageLayout.BottomFormContent>
+
+    </controls:EnterprisePageLayout>
+</UserControl>

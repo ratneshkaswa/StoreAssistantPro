@@ -148,12 +148,12 @@ internal static class HostingExtensions
             .AddSystemSettingsModule()
             .AddBillingModule()
             .AddTaxModule()
-            .AddCustomersModule()
-            .AddStaffModule()
+            .AddCustomersModule(pageRegistry)
+            .AddStaffModule(pageRegistry)
             .AddPromotionsModule()
             .AddInventoryModule()
             .AddFinancialYearsModule()
-            .AddReportsModule();
+            .AddReportsModule(pageRegistry);
 
         return services;
     }

@@ -41,6 +41,9 @@
                           h:SmartTooltip.ContextKey="NewBill"
                           Visibility="{Binding IsSalesEnabled, Converter={StaticResource BoolToVisibility}}"/>
                 <MenuItem Header="S_uppliers" Command="{Binding NavigateToSuppliersCommand}"/>
+                <MenuItem Header="_Customers" Command="{Binding NavigateToCustomersCommand}"/>
+                <MenuItem Header="S_taff" Command="{Binding NavigateToStaffCommand}"/>
+                <MenuItem Header="_Reports" Command="{Binding NavigateToReportsCommand}"/>
                 <Separator/>
                 <MenuItem Header="_Logout" Command="{Binding LogoutCommand}"
                           InputGestureText="Ctrl+L"
@@ -63,6 +66,10 @@
                           h:SmartTooltip.ContextKey="NewBill"
                           Visibility="{Binding IsSalesEnabled, Converter={StaticResource BoolToVisibility}}"/>
                 <MenuItem Header="Suppliers" Command="{Binding NavigateToSuppliersCommand}"/>
+                <MenuItem Header="Customers" Command="{Binding NavigateToCustomersCommand}"/>
+                <MenuItem Header="Staff" Command="{Binding NavigateToStaffCommand}"/>
+                <Separator/>
+                <MenuItem Header="Reports" Command="{Binding NavigateToReportsCommand}"/>
             </MenuItem>
 
             <MenuItem Header="_Tools">

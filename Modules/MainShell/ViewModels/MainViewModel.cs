@@ -43,6 +43,9 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private const string BrandsPage = "Brands";
     private const string SalesPage = "Sales";
     private const string SuppliersPage = "Suppliers";
+    private const string CustomersPage = "Customers";
+    private const string StaffPage = "Staff";
+    private const string ReportsPage = "Reports";
 
     private const string FirmManagementDialog = "FirmManagement";
     private const string UserManagementDialog = "UserManagement";
@@ -335,6 +338,30 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _statusBar.SetPersistent("Sales");
     }
 
+    [RelayCommand]
+    private void NavigateToCustomers()
+    {
+        _navigationService.NavigateTo(CustomersPage);
+        _currentPage = CustomersPage;
+        _statusBar.SetPersistent("Customers");
+    }
+
+    [RelayCommand]
+    private void NavigateToStaff()
+    {
+        _navigationService.NavigateTo(StaffPage);
+        _currentPage = StaffPage;
+        _statusBar.SetPersistent("Staff");
+    }
+
+    [RelayCommand]
+    private void NavigateToReports()
+    {
+        _navigationService.NavigateTo(ReportsPage);
+        _currentPage = ReportsPage;
+        _statusBar.SetPersistent("Reports");
+    }
+
     // ── Menu commands ──
 
     [RelayCommand]
@@ -447,6 +474,32 @@ public partial class MainViewModel : BaseViewModel, IDisposable
             Command = NavigateToProductsCommand,
             ShortcutText = "Ctrl+P", Gesture = "Ctrl+P", SortOrder = 20,
             RequiredFeature = FeatureFlags.Products
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Customers", Icon = "👤",
+            Description = "Manage customer database and loyalty",
+            HelpKey = "Customers",
+            Command = NavigateToCustomersCommand,
+            SortOrder = 25
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Staff", Icon = "👨‍💼",
+            Description = "Manage staff and track incentives",
+            HelpKey = "Staff",
+            Command = NavigateToStaffCommand,
+            SortOrder = 27,
+            RequiredRoles = [UserType.Admin, UserType.Manager]
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Reports", Icon = "📊",
+            Description = "View sales reports and analytics",
+            HelpKey = "Reports",
+            Command = NavigateToReportsCommand,
+            SortOrder = 35,
+            RequiredRoles = [UserType.Admin, UserType.Manager]
         });
         _quickActionService.Register(new QuickAction
         {
