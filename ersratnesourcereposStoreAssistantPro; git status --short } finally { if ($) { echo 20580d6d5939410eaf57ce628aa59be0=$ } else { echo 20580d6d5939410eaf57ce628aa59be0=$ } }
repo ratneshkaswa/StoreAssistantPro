@@ -1,0 +1,7 @@
+warning: in the working copy of 'Core/Styles/GlobalStyles.xaml', LF will be replaced by CRLF the next time Git touches it
+ App.xaml                                |  38 [32m+++++++[m[31m---[m
+ Core/Styles/DesignSystem.xaml           |   6 [32m++[m
+ Core/Styles/FluentTheme.xaml            |  10 [32m+[m[31m--[m
+ Core/Styles/GlobalStyles.xaml           | 118 [32m++++++++++++++++++++++++++[m[31m------[m
+ Modules/MainShell/Views/MainWindow.xaml |   6 [32m+[m[31m-[m
+ 5 files changed, 137 insertions(+), 41 deletions(-)
