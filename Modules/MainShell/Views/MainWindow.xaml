@@ -27,7 +27,7 @@
                 <MenuItem Header="_Home" Command="{Binding NavigateToMainWorkspaceCommand}"
                           InputGestureText="Ctrl+D"
                           h:SmartTooltip.ContextKey="Home"/>
-                <Separator/>
+                <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="_Logout" Command="{Binding LogoutCommand}"
                           InputGestureText="Ctrl+L"
                           h:SmartTooltip.ContextKey="Logout"/>
@@ -46,7 +46,7 @@
                 <MenuItem Header="User Management" Command="{Binding OpenUserManagementCommand}"
                           h:SmartTooltip.ContextKey="Users"
                           Visibility="{Binding IsUserManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <Separator/>
+                <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="Refresh Data" Command="{Binding RefreshCurrentViewCommand}"
                           InputGestureText="F5"
                           h:SmartTooltip.ContextKey="Refresh"/>

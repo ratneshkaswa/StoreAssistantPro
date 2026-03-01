@@ -937,19 +937,18 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         MENU BAR — Fluent top-level navigation strip
+         MENU BAR — Win11 seamless navigation strip
 
-         Chromeless Menu with Fluent font, subtle bottom stroke, and
-         clean flat appearance. The custom template strips the default
-         WPF menu chrome. Top-level items use FluentTextSecondary
-         with a subtle hover fill.
+         Flush with window background, subtle bottom stroke.
+         Top-level items show a rounded pill hover.
+         Submenu popups use rounded corners + shadow.
          ═══════════════════════════════════════════════════════════════ -->
     <Style x:Key="FluentMenuBarStyle" TargetType="Menu">
         <Setter Property="Background"          Value="{StaticResource FluentMenuBarBackground}"/>
         <Setter Property="Foreground"          Value="{StaticResource FluentMenuBarForeground}"/>
         <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"            Value="12"/>
-        <Setter Property="Padding"             Value="8,4"/>
+        <Setter Property="Padding"             Value="4,3"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -959,19 +958,170 @@
                             BorderThickness="0,0,0,1"
                             Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
-                        <ItemsPresenter/>
+                        <StackPanel IsItemsHost="True" Orientation="Horizontal"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Top-level menu item (Win11 subtle hover with rounded corners) -->
+    <!-- ── Dropdown menu item (Win11 rounded hover with shortcut) ──── -->
+    <Style x:Key="FluentMenuItemStyle" TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize"   Value="12"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Grid>
+                        <Border x:Name="ItemBd"
+                                Background="Transparent"
+                                CornerRadius="{StaticResource FluentCornerSmall}"
+                                Padding="12,8"
+                                Margin="4,1"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0"
+                                                  ContentSource="Header"
+                                                  RecognizesAccessKey="True"
+                                                  VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{TemplateBinding InputGestureText}"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           FontSize="11"
+                                           Margin="24,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Nested submenu popup -->
+                        <Popup x:Name="PART_Popup"
+                               IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Right"
+                               Focusable="False"
+                               AllowsTransparency="True"
+                               PopupAnimation="Fade"
+                               HorizontalOffset="-2">
+                            <Border Background="{StaticResource FluentSurface}"
+                                    BorderBrush="{StaticResource FluentSurfaceStroke}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource FluentCornerMedium}"
+                                    Padding="0,4"
+                                    Margin="4,0,4,4"
+                                    Effect="{StaticResource FluentShadowMedium}"
+                                    SnapsToDevicePixels="True">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ItemBd" Property="Background"
+                                    Value="{StaticResource FluentSubtleHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="ItemBd" Property="Background"
+                                    Value="{StaticResource FluentSubtlePressed}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Menu separator (Win11 thin divider) ─────────────────────── -->
+    <Style x:Key="FluentMenuSeparatorStyle" TargetType="Separator">
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="Background" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="Margin" Value="12,4"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <!-- ── Top-level menu bar item (Win11 rounded pill hover) ──────── -->
     <Style x:Key="FluentMenuBarItemStyle" TargetType="MenuItem">
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"   Value="12"/>
-        <Setter Property="Padding"    Value="10,5"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource FluentMenuItemStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Grid>
+                        <!-- Top-level header with rounded hover pill -->
+                        <Border x:Name="TopBd"
+                                Background="Transparent"
+                                CornerRadius="{StaticResource FluentCornerSmall}"
+                                Padding="10,5"
+                                Margin="1,0"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+
+                        <!-- Submenu popup (Win11 rounded flyout with shadow) -->
+                        <Popup x:Name="PART_Popup"
+                               IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Bottom"
+                               Focusable="False"
+                               AllowsTransparency="True"
+                               PopupAnimation="Fade"
+                               HorizontalOffset="-2">
+                            <Border x:Name="SubMenuBorder"
+                                    Background="{StaticResource FluentSurface}"
+                                    BorderBrush="{StaticResource FluentSurfaceStroke}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource FluentCornerMedium}"
+                                    Padding="0,4"
+                                    Margin="4,2,4,4"
+                                    Effect="{StaticResource FluentShadowMedium}"
+                                    SnapsToDevicePixels="True">
+                                <ScrollViewer Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type FrameworkElement}, ResourceId=MenuScrollViewer}}"
+                                              VerticalScrollBarVisibility="Auto">
+                                    <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Hover: rounded subtle fill -->
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="TopBd" Property="Background"
+                                    Value="{StaticResource FluentSubtleHover}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextPrimary}"/>
+                        </Trigger>
+
+                        <!-- Submenu open: keep highlight + slightly stronger fill -->
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter TargetName="TopBd" Property="Background"
+                                    Value="{StaticResource FluentSubtlePressed}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextPrimary}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
