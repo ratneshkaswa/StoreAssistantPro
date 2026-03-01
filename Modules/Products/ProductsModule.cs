@@ -23,6 +23,7 @@ public static class ProductsModule
 
         // Services
         services.AddTransient<IProductService, ProductService>();
+        services.AddTransient<ICategoryTypeService, CategoryTypeService>();
 
         // Command handlers
         services.AddTransient<ICommandRequestHandler<SaveProductCommand, Unit>, SaveProductHandler>();

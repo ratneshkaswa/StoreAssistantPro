@@ -10,6 +10,7 @@ public static class StaffModule
     public static IServiceCollection AddStaffModule(this IServiceCollection services)
     {
         services.AddSingleton<IStaffService, StaffService>();
+        services.AddSingleton<IIncentiveService, IncentiveService>();
         services.AddTransient<ICommandRequestHandler<SaveStaffCommand, Unit>, SaveStaffHandler>();
         services.AddTransient<ICommandRequestHandler<DeleteStaffCommand, Unit>, DeleteStaffHandler>();
 

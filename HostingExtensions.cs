@@ -28,6 +28,7 @@ using StoreAssistantPro.Modules.Inward;
 using StoreAssistantPro.Modules.MainShell;
 using StoreAssistantPro.Modules.Products;
 using StoreAssistantPro.Modules.Promotions;
+using StoreAssistantPro.Modules.Reports;
 using StoreAssistantPro.Modules.Sales;
 using StoreAssistantPro.Modules.Staff;
 using StoreAssistantPro.Modules.Startup;
@@ -151,7 +152,8 @@ internal static class HostingExtensions
             .AddStaffModule()
             .AddPromotionsModule()
             .AddInventoryModule()
-            .AddFinancialYearsModule();
+            .AddFinancialYearsModule()
+            .AddReportsModule();
 
         return services;
     }

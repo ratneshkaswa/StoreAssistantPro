@@ -9,6 +9,10 @@ public class Category
     [Required, MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Parent category type for two-level hierarchy.</summary>
+    public int? CategoryTypeId { get; set; }
+    public CategoryType? CategoryType { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     public RowHighlightLevel HighlightLevel =>

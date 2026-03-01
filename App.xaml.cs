@@ -13,6 +13,7 @@ using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Workflows;
 using StoreAssistantPro.Modules.Billing.Services;
+using StoreAssistantPro.Modules.Inventory.Services;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
 
@@ -66,6 +67,10 @@ public partial class App : Application
         // Eagerly resolve the onboarding tip registrar so all first-time
         // tips are registered before any view loads.
         _host.Services.GetRequiredService<OnboardingTipRegistrar>();
+
+        // Eagerly resolve the stock alert listener so it subscribes
+        // to sale-completed events before any sale can complete.
+        _host.Services.GetRequiredService<StockAlertListener>();
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
 

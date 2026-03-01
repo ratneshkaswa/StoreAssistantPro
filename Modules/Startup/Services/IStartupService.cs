@@ -6,4 +6,5 @@ public interface IStartupService
     Task<bool> IsAppInitializedAsync();
     Task LoadFirmInfoAsync();
     void LoadFeatureFlags();
+    Task EnsureFinancialYearAsync();
 }

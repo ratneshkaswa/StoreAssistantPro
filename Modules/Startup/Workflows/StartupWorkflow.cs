@@ -24,11 +24,12 @@ public class StartupWorkflow(
     private static readonly WorkflowStep FirstTimeSetup = new("FirstTimeSetup");
     private static readonly WorkflowStep LoadFirm = new("LoadFirmInfo");
     private static readonly WorkflowStep LoadFeatures = new("LoadFeatureFlags");
+    private static readonly WorkflowStep EnsureFY = new("EnsureFinancialYear");
 
     public string Name => WorkflowName;
 
     public IReadOnlyList<WorkflowStep> Steps { get; } =
-        [MigrateDb, CheckSetup, FirstTimeSetup, LoadFirm, LoadFeatures];
+        [MigrateDb, CheckSetup, FirstTimeSetup, LoadFirm, LoadFeatures, EnsureFY];
 
     public async Task<StepResult> ExecuteStepAsync(WorkflowStep step, WorkflowContext context)
     {
@@ -41,6 +42,7 @@ public class StartupWorkflow(
             "FirstTimeSetup" => RunFirstTimeSetup(context),
             "LoadFirmInfo" => await LoadFirmInfoAsync(),
             "LoadFeatureFlags" => LoadFeatureFlags(),
+            "EnsureFinancialYear" => await EnsureFinancialYearAsync(),
             _ => StepResult.Continue
         };
     }
@@ -90,6 +92,12 @@ public class StartupWorkflow(
     {
         startupService.LoadFeatureFlags();
         logger.LogInformation("Feature flags loaded");
+        return StepResult.Continue;
+    }
+
+    private async Task<StepResult> EnsureFinancialYearAsync()
+    {
+        await startupService.EnsureFinancialYearAsync();
         return StepResult.Complete;
     }
 

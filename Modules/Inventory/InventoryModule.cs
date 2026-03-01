@@ -8,6 +8,7 @@ public static class InventoryModule
     public static IServiceCollection AddInventoryModule(this IServiceCollection services)
     {
         services.AddSingleton<IStockAlertService, StockAlertService>();
+        services.AddSingleton<StockAlertListener>();
 
         return services;
     }

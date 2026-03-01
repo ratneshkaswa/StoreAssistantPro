@@ -33,6 +33,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ExtraCharge> ExtraCharges => Set<ExtraCharge>();
     public DbSet<FinancialYear> FinancialYears => Set<FinancialYear>();
     public DbSet<StockAlert> StockAlerts => Set<StockAlert>();
+    public DbSet<CategoryType> CategoryTypes => Set<CategoryType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -105,6 +106,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Brand>(entity =>
         {
             entity.HasIndex(b => b.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<CategoryType>(entity =>
+        {
+            entity.HasIndex(ct => ct.Name).IsUnique();
+            entity.HasMany(ct => ct.Categories)
+                  .WithOne(c => c.CategoryType)
+                  .HasForeignKey(c => c.CategoryTypeId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<BillingSession>(entity =>
