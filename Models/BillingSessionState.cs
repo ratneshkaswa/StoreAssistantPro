@@ -3,8 +3,7 @@
 /// <summary>
 /// Tracks the lifecycle of a single billing (POS) session.
 /// <para>
-/// Used by <see cref="Core.Services.IAppStateService"/> and
-/// <see cref="Modules.Billing.Services.IBillingModeService"/> to
+/// Used by <see cref="Core.Services.IAppStateService"/> and the billing mode service to
 /// coordinate auto mode switching:
 /// </para>
 /// <list type="bullet">

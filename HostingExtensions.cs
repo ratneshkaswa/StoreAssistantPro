@@ -18,23 +18,9 @@ using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication;
-using StoreAssistantPro.Modules.Billing;
-using StoreAssistantPro.Modules.Brands;
-using StoreAssistantPro.Modules.Customers;
-using StoreAssistantPro.Modules.FinancialYears;
 using StoreAssistantPro.Modules.Firm;
-using StoreAssistantPro.Modules.Inventory;
-using StoreAssistantPro.Modules.Inward;
 using StoreAssistantPro.Modules.MainShell;
-using StoreAssistantPro.Modules.Products;
-using StoreAssistantPro.Modules.Promotions;
-using StoreAssistantPro.Modules.Reports;
-using StoreAssistantPro.Modules.Sales;
-using StoreAssistantPro.Modules.Staff;
 using StoreAssistantPro.Modules.Startup;
-using StoreAssistantPro.Modules.Vendors;
-using StoreAssistantPro.Modules.SystemSettings;
-using StoreAssistantPro.Modules.Tax;
 using StoreAssistantPro.Modules.Users;
 
 namespace StoreAssistantPro;
@@ -138,22 +124,8 @@ internal static class HostingExtensions
             .AddStartupModule()
             .AddAuthenticationModule()
             .AddMainShellModule(pageRegistry)
-            .AddProductsModule(pageRegistry)
-            .AddBrandsModule(pageRegistry)
-            .AddSalesModule(pageRegistry)
-            .AddVendorsModule(pageRegistry, focusMapRegistry)
-            .AddInwardModule(pageRegistry)
             .AddFirmModule()
-            .AddUsersModule()
-            .AddSystemSettingsModule()
-            .AddBillingModule()
-            .AddTaxModule()
-            .AddCustomersModule(pageRegistry)
-            .AddStaffModule(pageRegistry)
-            .AddPromotionsModule(pageRegistry)
-            .AddInventoryModule(pageRegistry)
-            .AddFinancialYearsModule()
-            .AddReportsModule(pageRegistry);
+            .AddUsersModule();
 
         return services;
     }

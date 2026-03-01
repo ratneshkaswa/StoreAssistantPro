@@ -3,7 +3,6 @@ using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Intents;
 using StoreAssistantPro.Core.Workflows;
-using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Tests.Services;
 
@@ -11,7 +10,6 @@ public class MicroFeedbackServiceTests : IDisposable
 {
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
-    private Func<ProductAddedToCartEvent, Task>? _onProductAdded;
     private Func<PinAutoSubmittedEvent, Task>? _onPinSubmitted;
     private Func<ZeroClickActionExecutedEvent, Task>? _onZeroClickAction;
 
@@ -19,9 +17,6 @@ public class MicroFeedbackServiceTests : IDisposable
 
     public MicroFeedbackServiceTests()
     {
-        _eventBus.When(x => x.Subscribe(Arg.Any<Func<ProductAddedToCartEvent, Task>>()))
-            .Do(ci => _onProductAdded = ci.Arg<Func<ProductAddedToCartEvent, Task>>());
-
         _eventBus.When(x => x.Subscribe(Arg.Any<Func<PinAutoSubmittedEvent, Task>>()))
             .Do(ci => _onPinSubmitted = ci.Arg<Func<PinAutoSubmittedEvent, Task>>());
 
@@ -40,12 +35,6 @@ public class MicroFeedbackServiceTests : IDisposable
     // ═══════════════════════════════════════════════════════════════
 
     [Fact]
-    public void Constructor_SubscribesToProductAddedEvent()
-    {
-        _eventBus.Received(1).Subscribe(Arg.Any<Func<ProductAddedToCartEvent, Task>>());
-    }
-
-    [Fact]
     public void Constructor_SubscribesToPinAutoSubmittedEvent()
     {
         _eventBus.Received(1).Subscribe(Arg.Any<Func<PinAutoSubmittedEvent, Task>>());
@@ -58,44 +47,6 @@ public class MicroFeedbackServiceTests : IDisposable
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ProductAddedToCart → MicroFeedbackEvent
-    // ═══════════════════════════════════════════════════════════════
-
-    [Fact]
-    public async Task ProductAdded_PublishesMicroFeedback_CartLastRow()
-    {
-        var evt = new ProductAddedToCartEvent(1, "Blue Shirt", 1, 499m, "Barcode");
-
-        await _onProductAdded!(evt);
-
-        await _eventBus.Received(1).PublishAsync(
-            Arg.Is<MicroFeedbackEvent>(e =>
-                e.TargetId == "Cart:LastRow" &&
-                e.Type == MicroFeedbackType.Success));
-    }
-
-    [Fact]
-    public async Task ProductAdded_LabelContainsProductName()
-    {
-        var evt = new ProductAddedToCartEvent(42, "Red Kurta", 1, 899m, "ExactMatch");
-
-        await _onProductAdded!(evt);
-
-        await _eventBus.Received(1).PublishAsync(
-            Arg.Is<MicroFeedbackEvent>(e => e.Label.Contains("Red Kurta")));
-    }
-
-    [Fact]
-    public async Task ProductAdded_SuccessType()
-    {
-        var evt = new ProductAddedToCartEvent(1, "T-Shirt", 1, 299m, "Barcode");
-
-        await _onProductAdded!(evt);
-
-        await _eventBus.Received(1).PublishAsync(
-            Arg.Is<MicroFeedbackEvent>(e => e.Type == MicroFeedbackType.Success));
-    }
-
     // ═══════════════════════════════════════════════════════════════
     // PinAutoSubmitted → MicroFeedbackEvent
     // ═══════════════════════════════════════════════════════════════
@@ -159,15 +110,6 @@ public class MicroFeedbackServiceTests : IDisposable
     // ═══════════════════════════════════════════════════════════════
 
     [Fact]
-    public void Dispose_UnsubscribesProductAdded()
-    {
-        _sut.Dispose();
-
-        _eventBus.Received(1).Unsubscribe(
-            Arg.Any<Func<ProductAddedToCartEvent, Task>>());
-    }
-
-    [Fact]
     public void Dispose_UnsubscribesPinSubmitted()
     {
         _sut.Dispose();
@@ -193,7 +135,7 @@ public class MicroFeedbackServiceTests : IDisposable
 
         // Each event type should only be unsubscribed once
         _eventBus.Received(1).Unsubscribe(
-            Arg.Any<Func<ProductAddedToCartEvent, Task>>());
+            Arg.Any<Func<PinAutoSubmittedEvent, Task>>());
     }
 
     // ═══════════════════════════════════════════════════════════════

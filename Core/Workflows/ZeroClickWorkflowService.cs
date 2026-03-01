@@ -4,8 +4,6 @@ using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Events;
-using StoreAssistantPro.Modules.Billing.Events;
-using StoreAssistantPro.Modules.Sales.Events;
 
 namespace StoreAssistantPro.Core.Workflows;
 
@@ -76,8 +74,6 @@ public sealed class ZeroClickWorkflowService : IZeroClickWorkflowService
         // Subscribe to domain events that may trigger zero-click rules
         _eventBus.Subscribe<UserLoggedInEvent>(OnTriggerEvent);
         _eventBus.Subscribe<OperationalModeChangedEvent>(OnTriggerEvent);
-        _eventBus.Subscribe<BillingSessionCompletedEvent>(OnTriggerEvent);
-        _eventBus.Subscribe<SaleCompletedEvent>(OnTriggerEvent);
         _eventBus.Subscribe<ConnectionRestoredEvent>(OnTriggerEvent);
 
         // Re-evaluate when flow state changes — a transition to Flow may
@@ -165,8 +161,6 @@ public sealed class ZeroClickWorkflowService : IZeroClickWorkflowService
 
         _eventBus.Unsubscribe<UserLoggedInEvent>(OnTriggerEvent);
         _eventBus.Unsubscribe<OperationalModeChangedEvent>(OnTriggerEvent);
-        _eventBus.Unsubscribe<BillingSessionCompletedEvent>(OnTriggerEvent);
-        _eventBus.Unsubscribe<SaleCompletedEvent>(OnTriggerEvent);
         _eventBus.Unsubscribe<ConnectionRestoredEvent>(OnTriggerEvent);
         _eventBus.Unsubscribe<FlowStateChangedEvent>(OnFlowStateChangedAsync);
     }

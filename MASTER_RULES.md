@@ -2,25 +2,16 @@
 
 > **.NET 10 · WPF · MVVM · CommunityToolkit.Mvvm · Entity Framework Core**
 >
-> Central reference for all development standards in this enterprise
+> Central reference for **all** development standards in this enterprise
 > Indian-retail WPF application. Every contributor and every AI agent
 > must follow these rules when adding or modifying code.
 >
-> **Canonical sources** (this document summarises — the originals are
-> authoritative):
->
-> | Document | Scope |
-> |---|---|
-> | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Solution structure, MVVM wiring, base classes, keyboard nav, pricing rules |
-> | [`UI_RULES.md`](UI_RULES.md) | Design system, styles, layout, scroll policy, form density, motion, tip system, prohibited patterns |
-> | [`DEVELOPMENT_FLOW.md`](DEVELOPMENT_FLOW.md) | Enterprise architecture baseline, module creation checklist, data flow, DI patterns, regional/financial rules |
+> This is the **single authoritative rules document**.
+> Feature catalogue: [`FEATURE_CATALOGUE.md`](FEATURE_CATALOGUE.md).
 
 ---
 
 ## 1  Architecture Rules
-
-> Full specification: [`ARCHITECTURE.md` §1–4, §9–11](ARCHITECTURE.md)
-> and [`DEVELOPMENT_FLOW.md`](DEVELOPMENT_FLOW.md)
 
 ### 1.1  Solution structure
 
@@ -34,12 +25,12 @@ Templates/   → XAML page/dialog scaffolding templates
 
 ### 1.2  Module isolation
 
-| Rule | Ref |
-|---|---|
-| A module may only depend on `Core/`, `Models/`, and `Data/`. | `ARCHITECTURE.md §2` |
-| Modules **never** reference another module directly. | `ARCHITECTURE.md §2` |
-| Cross-module communication uses `IEventBus` only. | `ARCHITECTURE.md §10` |
-| Each module exposes a single `Add<Name>Module()` extension method. | `DEVELOPMENT_FLOW.md §Registration` |
+| Rule |
+|---|
+| A module may only depend on `Core/`, `Models/`, and `Data/`. |
+| Modules **never** reference another module directly. |
+| Cross-module communication uses `IEventBus` only. |
+| Each module exposes a single `Add<Name>Module()` extension method. |
 
 ### 1.3  MVVM boundaries
 
@@ -50,7 +41,6 @@ Templates/   → XAML page/dialog scaffolding templates
 | **Service** | DbContext (via factory), other services | ViewModels, Views |
 | **Command Handler** | Services (via DI), EventBus | ViewModels, Views, DbContext |
 
-> `DEVELOPMENT_FLOW.md §MVVM Boundaries`
 
 ### 1.4  Base classes (mandatory)
 
@@ -63,7 +53,6 @@ Templates/   → XAML page/dialog scaffolding templates
 | `BaseDialogWindow` | All modal dialogs | Fixed sizing, Enter/Esc wiring, owner centering |
 | `BasePage` | All content pages | Title bar, error bar, loading overlay, 20 px padding |
 
-> `ARCHITECTURE.md §4`, `DEVELOPMENT_FLOW.md §Base Class Rules`
 
 ### 1.5  Frozen infrastructure
 
@@ -89,7 +78,6 @@ never redesign:
 **Base classes:** `BaseViewModel` · `PinPadViewModel` ·
 `BaseCommandHandler` · `BaseDialogWindow` · `BasePage`
 
-> `DEVELOPMENT_FLOW.md §Core Infrastructure`
 
 ### 1.6  DI lifetime rules
 
@@ -105,7 +93,6 @@ never redesign:
 | Views / Windows | `Transient` |
 | `DbContextFactory` | `Singleton` (individual `DbContext` short-lived) |
 
-> `ARCHITECTURE.md §9`
 
 ### 1.7  Data access
 
@@ -119,15 +106,12 @@ never redesign:
     `CreateExecutionStrategy().ExecuteAsync()`.
 - Read-only queries do not need transactions.
 
-> `DEVELOPMENT_FLOW.md §Financial Transaction Rules`
 
 ---
 
 ## 2  UI Rules
 
-> Full specification: [`UI_RULES.md`](UI_RULES.md)
-
-### 2.1  Design system is the single source of truth
+### 2.1
 
 All visual values come from `Core/Styles/DesignSystem.xaml`. Zero inline
 values are permitted:
@@ -143,7 +127,6 @@ values are permitted:
 If a needed token does not exist, add it to `DesignSystem.xaml` — never
 hard-code at the call site.
 
-> `UI_RULES.md §1, §11`
 
 ### 2.2  Style architecture (load order)
 
@@ -165,7 +148,6 @@ PosStyles.xaml      → POS-specific templates (keypad, role buttons)
 - Views must **never** define inline styles — use `StaticResource` references.
 - Use `StaticResource`, not `DynamicResource` (tokens don't change at runtime).
 
-> `UI_RULES.md §2`
 
 ### 2.3  Named styles (never raw controls)
 
@@ -182,7 +164,6 @@ PosStyles.xaml      → POS-specific templates (keypad, role buttons)
 **Data grids:** implicit style for basic, `EnterpriseDataGridStyle` for primary
 data tables with full virtualisation.
 
-> `UI_RULES.md §3–4`
 
 ### 2.4  Color semantics
 
@@ -197,7 +178,6 @@ Never pick arbitrary colors. Use the semantic palette:
 | Brand accent | `FluentAccentDefault` / `Hover` / `Pressed` |
 | Success / Warning / Error | `FluentSuccess` · `FluentWarning` · `FluentError` |
 
-> `UI_RULES.md §7`
 
 ### 2.5  Layout rules
 
@@ -209,7 +189,6 @@ Never pick arbitrary colors. Use the semantic palette:
 - Window sizing is **always programmatic** — never in XAML.
 - Use spacing tokens from `DesignSystem.xaml` — no magic numbers.
 
-> `ARCHITECTURE.md §5.1–5.4`, `UI_RULES.md §5 Layout Standards`
 
 ### 2.6  Page structure template
 
@@ -222,7 +201,6 @@ Row 4  Auto   Error/success       (ErrorMessageStyle / SuccessMessageStyle)
 Row 5  *      Primary data area   (DataGrid or ScrollViewer)
 ```
 
-> `UI_RULES.md §5.4 Standard Page Layout`
 
 ### 2.7  Dialog structure template
 
@@ -237,17 +215,12 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 - Enter: `ConfirmCommand` on the dialog element.
 - Esc: auto-wired `CloseDialogCommand` (override `CloseOnEscape` to disable).
 
-> `ARCHITECTURE.md §7.2`, `UI_RULES.md §5.5 Standard Dialog Layout`
 
 ---
 
 ## 3  UX Standards
 
-> Full specification: [`ARCHITECTURE.md` §5.6–5.9](ARCHITECTURE.md),
-> [`UI_RULES.md` §9](UI_RULES.md),
-> [`DEVELOPMENT_FLOW.md` §Regional](DEVELOPMENT_FLOW.md)
-
-### 3.1  Keyboard navigation
+### 3.1
 
 | Key | Behavior |
 |---|---|
@@ -260,7 +233,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 - `DefaultCommand` and `EscapeCommand` are attached properties; nearest
   ancestor wins (inner form overrides dialog-level command).
 
-> `ARCHITECTURE.md §5.6`
 
 ### 3.2  Keyboard shortcut map
 
@@ -270,7 +242,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 **Module-consistent:** `Ctrl+N` New · `Ctrl+E` Edit · `Delete` Delete ·
 `Escape` Cancel · `Enter` Walk fields → submit on last
 
-> `ARCHITECTURE.md §5.6 Keyboard shortcut map`
 
 ### 3.3  Auto-focus on load
 
@@ -279,7 +250,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 - Opt out per window: `h:AutoFocus.IsEnabled="False"`.
 - Never write `Loaded` code-behind handlers for initial focus.
 
-> `ARCHITECTURE.md §5.7`
 
 ### 3.4  Input UX behaviors
 
@@ -289,7 +259,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 | Integer-only | `h:NumericInput.IsIntegerOnly="True"` | Block non-digit typing + paste |
 | Decimal-only | `h:NumericInput.IsDecimalOnly="True"` | Allow digits + one decimal |
 
-> `ARCHITECTURE.md §5.6 Input UX behaviors`
 
 ### 3.5  Inline validation
 
@@ -299,7 +268,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 - Form-level: `Validate()` / `ErrorMessage` pattern.
 - **Never** use `MessageBox` for validation feedback.
 
-> `ARCHITECTURE.md §5.9`, `UI_RULES.md §6 Validation`
 
 ### 3.6  Status bar
 
@@ -312,7 +280,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 | `SetPersistent(msg)` | Page context (stays until replaced) |
 | `Clear()` | Revert to "Ready" |
 
-> `ARCHITECTURE.md §5.8`
 
 ### 3.7  Regional & culture
 
@@ -322,15 +289,12 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 - **Never** use `DateTime.Now` — use `regional.Now` (IST).
 - `DateTime.UtcNow` only for DB-level comparisons (lockout expiry).
 
-> `DEVELOPMENT_FLOW.md §Regional & Culture Rules`
 
 ---
 
 ## 4  Motion System
 
-> Full specification: [`UI_RULES.md` §8](UI_RULES.md)
-
-### 4.1  Motion tokens (`DesignSystem.xaml`)
+### 4.1
 
 | Token | Value | Usage |
 |---|---|---|
@@ -355,7 +319,6 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 On content change: combined fade + slide-up (250 ms, Decelerate).
 Scroll position resets to top. Non-blocking — input accepted immediately.
 
-> `ARCHITECTURE.md §8`
 
 ### 4.4  Motion rules
 
@@ -500,7 +463,6 @@ SessionCompleted / Cancelled  → cancel timer, mark row inactive
 - **Never** call `SaveChangesAsync()` outside a transaction for
   financial writes.
 
-> `DEVELOPMENT_FLOW.md §Financial Transaction Rules`
 
 ### 6.4  Pricing rules
 
@@ -518,7 +480,6 @@ Product.SalePrice × Quantity
 - Discount applied **before tax** (Indian GST trade-discount, Section 15 CGST Act).
 - Amount discounts capped at subtotal (never negative).
 
-> `ARCHITECTURE.md §12`
 
 ---
 
@@ -638,3 +599,145 @@ Before submitting any change, verify:
 - [ ] No `DateTime.Now` — use `IRegionalSettingsService.Now`
 - [ ] No hardcoded format strings — use the regional service
 - [ ] Currency/number formatting via `IRegionalSettingsService`
+
+---
+
+## 8  Layout Enforcement
+
+### 8.1  Mandatory layout container
+
+Every navigable content page must use `EnterprisePageLayout` as root:
+
+```xml
+<controls:EnterprisePageLayout>
+    <controls:EnterprisePageLayout.TipBannerContent>...</controls:EnterprisePageLayout.TipBannerContent>
+    <controls:EnterprisePageLayout.ToolbarContent>...</controls:EnterprisePageLayout.ToolbarContent>
+    <!-- Primary content fills star row -->
+    <Border Style="{StaticResource SectionCardStyle}" ClipToBounds="True">...</Border>
+    <controls:EnterprisePageLayout.BottomFormContent>...</controls:EnterprisePageLayout.BottomFormContent>
+</controls:EnterprisePageLayout>
+```
+
+| # | Rule |
+|---|---|
+| 1 | Do not build manual `Grid` with `RowDefinitions` at page root — use `EnterprisePageLayout`. |
+| 2 | Do not set `Margin="{StaticResource PagePadding}"` on page root — template provides it. |
+| 3 | Do not manually add loading overlays or error/success bars — template provides them. |
+
+Dialogs inherit `BaseDialogWindow` with 3-row grid (`Auto`/`*`/`Auto`).
+
+### 8.2  Star-sized main content
+
+| # | Rule |
+|---|---|
+| 1 | Every page has **exactly one `*`-sized row** for primary data. |
+| 2 | Never place a `DataGrid` in an `Auto`-sized row. |
+| 3 | Never use `Height` on a `DataGrid`. |
+| 4 | Never use multiple `*` rows in any grid. |
+| 5 | Never use weighted stars (`2*`, `3*`) in page/dialog grids. |
+
+### 8.3  Grid row decision tree
+
+```
+Is this row the primary data/workspace area?
+ ├─ YES → Height="*"    (exactly ONE per grid)
+ └─ NO  → Height="Auto" (everything else)
+```
+
+### 8.4  Correct page layout (via EnterprisePageLayout)
+
+```
+Row 0  Auto    TipBanner
+Row 1  Auto    Toolbar
+Row 2  *       DataGrid / primary content     ← single star
+Row 3  Auto    Messages
+Row 4  Auto    BottomForm
+Row 5  Auto    StatusBar
+```
+
+### 8.5  Form sections always bottom-aligned
+
+| # | Rule |
+|---|---|
+| 1 | Collapsible add/edit forms go in `BottomFormContent` — Auto row **below** star row. |
+| 2 | Forms must never be placed above the DataGrid. |
+| 3 | Error/success in template's message bar (Row 3). |
+| 4 | Form grids use only `Auto` + `FormRowSpacing` rows — no star row in forms. |
+
+### 8.6  Card layout for sections
+
+| Section | Style |
+|---|---|
+| Toolbar / filter bar | `SectionCardStyle` + `SectionCardHeaderStyle` |
+| Primary data area | `SectionCardStyle` + `ClipToBounds="True"` |
+| Collapsible form | `FormCardStyle` |
+| Detail / summary panel | `DetailPanelStyle` |
+| Dashboard KPI tiles | `StatCardStyle` |
+
+Never set `Background`, `CornerRadius`, `Effect`, `BorderBrush` directly — use card styles.
+
+### 8.7  No full-window ScrollViewer
+
+| Allowed | Disallowed |
+|---|---|
+| Around `DataGrid`/`ListView`/`ItemsControl` in `*` row | Wrapping entire page/dialog/UserControl |
+| `ItemsControl` bound to collection | Wrapping form-only content |
+| `TextBox` with `AcceptsReturn="True"` | Wrapping dialog body |
+
+### 8.8  Layout compliance checklist
+
+**Page (EnterprisePageLayout):**
+- [ ] Root is `controls:EnterprisePageLayout`
+- [ ] Tip banner in `TipBannerContent` with `TipKey` and `ContextKey`
+- [ ] Toolbar in `ToolbarContent` using `SectionCardStyle`
+- [ ] Primary data in `Content` using `SectionCardStyle` + `ClipToBounds`
+- [ ] DataGrid uses `EnterpriseDataGridStyle` with `MinHeight="100"` and one `Width="*"` column
+- [ ] Forms in `BottomFormContent` using `FormCardStyle`
+- [ ] No multiple `*` rows, no fixed pixel heights, no floating elements
+
+**Dialog (BaseDialogWindow):**
+- [ ] 3-row grid: `Auto`/`*`/`Auto`
+- [ ] Sizing in code-behind only
+- [ ] No full-body `ScrollViewer`
+
+---
+
+## 9  Deep Clean Log
+
+### 9.1  Solution structure (post-clean)
+
+**5 kept modules:** Authentication, Firm, MainShell, Startup, Users.
+
+**Deleted modules:** Brands, Products, Suppliers, Inward, Staff, Tax, SystemSettings,
+Sales, Customers, Inventory, Vendors, FinancialYears, Promotions, Reports
+— all empty or Phase 1–3 content to be rebuilt fresh.
+
+**Deleted dead infrastructure files:**
+`PagedQuery`, `PagedResult`, `StockFilter`, `ActiveFilter` (query infra for deleted modules),
+`GstSlabRow` (no consumers), `ExampleDerivedPage` (template example),
+`SkeletonGrid`, `SkeletonRow` (no consumers), `FlowTipAdapter` (self-only),
+`CalmStyles.xaml` (not loaded in App.xaml).
+
+**Consolidated docs:** `ARCHITECTURE.md`, `UI_RULES.md`, `DEVELOPMENT_FLOW.md`,
+`LAYOUT_ENFORCEMENT.md`, `CLEANUP_LOG.md`, `FEATURE_CATALOGUE_DETAILED.md`
+all merged into `MASTER_RULES.md` + `FEATURE_CATALOGUE.md`.
+
+### 9.2  Bugs found & fixed
+
+| Bug | Root cause | Fix |
+|---|---|---|
+| QuickAction duplication | `QuickActionService` (Singleton) no dedup guard; Transient `MainViewModel` re-registered each login | Title-based dedup in `Register()` |
+| DensityChangedEvent leak | `MainViewModel` subscribed but never unsubscribed in `Dispose()` | Added matching `Unsubscribe` |
+| Stale App.xaml xmlns | 20+ xmlns + DataTemplates for deleted modules | Stripped all |
+| Dead MANAGEMENT pill | Hardcoded badge from old billing toggle | Removed |
+| Dead BillingDimBehavior bindings | FocusLock bindings on Menu/Toolbar with no billing mode | Removed bindings, kept behaviors (frozen baseline) |
+| Dead FocusLock on MainViewModel | No consumers after binding removal | Removed field, param, property |
+| Dead OperationalModeChangedEvent handler | No mode changes fire | Removed subscription, handler, unsubscribe |
+| Stale doc comments (3 files) | `<see cref>` to deleted module types | Replaced with plain text |
+
+### 9.3  Architecture patterns confirmed
+
+- Singleton services with `Register()` must guard against duplicates.
+- Transient VMs that subscribe to Singleton EventBus must unsubscribe in `Dispose()`.
+- `WindowRegistry` (dict overwrite), `NavigationPageRegistry` (once at startup), `ShortcutService` (clear+rebuild) are inherently safe.
+- `BillingDimBehavior`, `BillingFocusBehavior`, `IFocusLockService`, `BillingSession`, `BillingSessionState`, `OperationalMode` — frozen baseline, kept for future billing rebuild.

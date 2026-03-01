@@ -12,11 +12,9 @@ using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Commands;
-using StoreAssistantPro.Modules.Billing.Services;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
-using StoreAssistantPro.Modules.Sales.Events;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
@@ -32,32 +30,14 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private readonly IStatusBarService _statusBar;
     private readonly IQuickActionService _quickActionService;
     private readonly IShortcutService _shortcutService;
-    private readonly IBillingModeService _billingModeService;
-    private readonly IFocusLockService _focusLock;
     private readonly INotificationService _notificationService;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
     private const string MainWorkspacePage = "MainWorkspace";
-    private const string ProductsPage = "Products";
-    private const string BrandsPage = "Brands";
-    private const string SalesPage = "Sales";
-    private const string SuppliersPage = "Suppliers";
-    private const string CustomersPage = "Customers";
-    private const string StaffPage = "Staff";
-    private const string ReportsPage = "Reports";
-    private const string PromotionsPage = "Promotions";
-    private const string StockAlertsPage = "StockAlerts";
-    private const string SaleReturnsPage = "SaleReturns";
 
     private const string FirmManagementDialog = "FirmManagement";
     private const string UserManagementDialog = "UserManagement";
-    private const string TaxManagementDialog = "TaxManagement";
-    private const string TasksDialog = "Tasks";
-
-    // ── Well-known workflow names ──
-
-    private const string SettingsWorkflow = "Settings";
 
     // ── Application state (single source of truth) ──
 
@@ -93,28 +73,13 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     // ── Feature-gated visibility ──
 
-    public bool IsProductsEnabled => _features.IsEnabled(FeatureFlags.Products);
-    public bool IsSalesEnabled => _features.IsEnabled(FeatureFlags.Sales);
-    public bool IsBillingEnabled => _features.IsEnabled(FeatureFlags.Billing);
-    public bool IsSystemSettingsEnabled => _features.IsEnabled(FeatureFlags.SystemSettings);
-    public bool IsReportsEnabled => _features.IsEnabled(FeatureFlags.Reports);
     public bool IsUserManagementEnabled => _features.IsEnabled(FeatureFlags.UserManagement);
     public bool IsFirmManagementEnabled => _features.IsEnabled(FeatureFlags.FirmManagement);
-    public bool IsTaxManagementEnabled => _features.IsEnabled(FeatureFlags.TaxManagement);
 
     // ── Combined role + feature visibility (used by menu items) ──
 
     public bool IsFirmManagementVisible => IsAdmin && IsFirmManagementEnabled;
     public bool IsUserManagementVisible => IsAdmin && IsUserManagementEnabled;
-    public bool IsTaxManagementVisible => IsAdmin && IsTaxManagementEnabled;
-
-    // ── Billing mode ──
-
-    public bool IsBillingMode => AppState.CurrentMode == OperationalMode.Billing;
-
-    // ── Focus lock (exposed for XAML binding) ──
-
-    public IFocusLockService FocusLock => _focusLock;
 
     // ── Navigation ──
 
@@ -145,8 +110,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         IQuickActionService quickActionService,
         IShortcutService shortcutService,
         IDashboardService dashboardService,
-        IBillingModeService billingModeService,
-        IFocusLockService focusLock,
         INotificationService notificationService,
         IEnumerable<IQuickActionContributor> contributors)
     {
@@ -160,8 +123,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _statusBar = statusBar;
         _quickActionService = quickActionService;
         _shortcutService = shortcutService;
-        _billingModeService = billingModeService;
-        _focusLock = focusLock;
         _notificationService = notificationService;
         AppState = appState;
         StatusBar = statusBar;
@@ -172,8 +133,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         AppState.PropertyChanged += OnAppStatePropertyChanged;
         _features.PropertyChanged += OnFeaturesPropertyChanged;
         _eventBus.Subscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
-        _eventBus.Subscribe<OperationalModeChangedEvent>(OnModeChangedAsync);
-        _eventBus.Subscribe<SaleCompletedEvent>(OnSaleCompletedAsync);
         _eventBus.Subscribe<DensityChangedEvent>(OnDensityChangedAsync);
 
         RegisterQuickActions();
@@ -202,22 +161,13 @@ public partial class MainViewModel : BaseViewModel, IDisposable
                 NotifyCombinedVisibility();
                 RefreshQuickActions();
                 break;
-            case nameof(IAppStateService.CurrentMode):
-                NotifyBillingModeProperties();
-                break;
         }
     }
 
     private void OnFeaturesPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        OnPropertyChanged(nameof(IsProductsEnabled));
-        OnPropertyChanged(nameof(IsSalesEnabled));
-        OnPropertyChanged(nameof(IsBillingEnabled));
-        OnPropertyChanged(nameof(IsSystemSettingsEnabled));
-        OnPropertyChanged(nameof(IsReportsEnabled));
         OnPropertyChanged(nameof(IsUserManagementEnabled));
         OnPropertyChanged(nameof(IsFirmManagementEnabled));
-        OnPropertyChanged(nameof(IsTaxManagementEnabled));
         NotifyCombinedVisibility();
         RefreshQuickActions();
     }
@@ -249,62 +199,16 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         IsNotificationsPanelVisible = false;
     }
 
-    // ── Billing mode toggle ──
-
-    [RelayCommand]
-    private async Task ToggleBillingModeAsync()
-    {
-        if (IsBillingMode)
-            await _billingModeService.StopBillingAsync();
-        else
-            await _billingModeService.StartBillingAsync();
-    }
-
-    private Task OnModeChangedAsync(OperationalModeChangedEvent e)
-    {
-        NotifyBillingModeProperties();
-        RefreshQuickActions();
-
-        // If the current page is no longer available, fall back to Home
-        if (!IsPageEnabledForCurrentMode(_currentPage))
-        {
-            _navigationService.NavigateTo(MainWorkspacePage);
-            _currentPage = MainWorkspacePage;
-        }
-
-        var label = e.NewMode == OperationalMode.Billing ? "Billing" : "Management";
-        _statusBar.Post($"Switched to {label} mode");
-        return Task.CompletedTask;
-    }
-
     private Task OnDensityChangedAsync(DensityChangedEvent e)
     {
-        // Re-navigate to refresh layout with new density tokens
         _navigationService.NavigateTo(_currentPage);
         return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Checks whether the given page key is permitted in the current mode
-    /// by querying the centralized feature toggle service.
-    /// </summary>
-    private bool IsPageEnabledForCurrentMode(string pageKey) => pageKey switch
-    {
-        ProductsPage => _features.IsEnabled(FeatureFlags.Products),
-        SalesPage    => _features.IsEnabled(FeatureFlags.Sales),
-        _            => true // MainWorkspace and unknown pages are always allowed
-    };
-
-    private void NotifyBillingModeProperties()
-    {
-        OnPropertyChanged(nameof(IsBillingMode));
     }
 
     private void NotifyCombinedVisibility()
     {
         OnPropertyChanged(nameof(IsFirmManagementVisible));
         OnPropertyChanged(nameof(IsUserManagementVisible));
-        OnPropertyChanged(nameof(IsTaxManagementVisible));
     }
 
     // ── Navigation commands ──
@@ -315,86 +219,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _navigationService.NavigateTo(MainWorkspacePage);
         _currentPage = MainWorkspacePage;
         _statusBar.SetPersistent("Home");
-    }
-
-    [RelayCommand]
-    private void NavigateToProducts()
-    {
-        _navigationService.NavigateTo(ProductsPage);
-        _currentPage = ProductsPage;
-        _statusBar.SetPersistent("Products");
-    }
-
-    [RelayCommand]
-    private void NavigateToBrands()
-    {
-        _navigationService.NavigateTo(BrandsPage);
-        _currentPage = BrandsPage;
-        _statusBar.SetPersistent("Brands");
-    }
-
-    [RelayCommand]
-    private void NavigateToSales()
-    {
-        _navigationService.NavigateTo(SalesPage);
-        _currentPage = SalesPage;
-        _statusBar.SetPersistent("Sales");
-    }
-
-    [RelayCommand]
-    private void NavigateToSuppliers()
-    {
-        _navigationService.NavigateTo(SuppliersPage);
-        _currentPage = SuppliersPage;
-        _statusBar.SetPersistent("Suppliers");
-    }
-
-    [RelayCommand]
-    private void NavigateToCustomers()
-    {
-        _navigationService.NavigateTo(CustomersPage);
-        _currentPage = CustomersPage;
-        _statusBar.SetPersistent("Customers");
-    }
-
-    [RelayCommand]
-    private void NavigateToStaff()
-    {
-        _navigationService.NavigateTo(StaffPage);
-        _currentPage = StaffPage;
-        _statusBar.SetPersistent("Staff");
-    }
-
-    [RelayCommand]
-    private void NavigateToReports()
-    {
-        _navigationService.NavigateTo(ReportsPage);
-        _currentPage = ReportsPage;
-        _statusBar.SetPersistent("Reports");
-    }
-
-    [RelayCommand]
-    private void NavigateToPromotions()
-    {
-        _navigationService.NavigateTo(PromotionsPage);
-        _currentPage = PromotionsPage;
-        _statusBar.SetPersistent("Promotions");
-    }
-
-    [RelayCommand]
-    private void NavigateToStockAlerts()
-    {
-        _navigationService.NavigateTo(StockAlertsPage);
-        _currentPage = StockAlertsPage;
-        _statusBar.SetPersistent("Stock Alerts");
-    }
-
-    [RelayCommand]
-    private void NavigateToSaleReturns()
-    {
-        _navigationService.NavigateTo(SaleReturnsPage);
-        _currentPage = SaleReturnsPage;
-        _statusBar.SetPersistent("Sale Returns");
     }
 
     // ── Menu commands ──
@@ -432,27 +256,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _statusBar.Post("User management closed");
     }
 
-    [RelayCommand]
-    private void OpenTaxManagement()
-    {
-        _dialogService.ShowDialog(TaxManagementDialog);
-        _statusBar.Post("Tax management closed");
-    }
-
-    [RelayCommand]
-    private void OpenTasks()
-    {
-        _dialogService.ShowDialog(TasksDialog);
-        _statusBar.Post("Tasks closed");
-    }
-
-    [RelayCommand]
-    private async Task OpenSystemSettingsAsync()
-    {
-        await _workflowManager.StartWorkflowAsync(SettingsWorkflow);
-        _statusBar.Post("Settings closed");
-    }
-
     // ── Logout ──
 
     [RelayCommand]
@@ -465,14 +268,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     }
 
     // ── Event handlers ──
-
-    private async Task OnSaleCompletedAsync(SaleCompletedEvent e)
-    {
-        await _notificationService.PostAsync(
-            "Sale Completed",
-            $"Sale #{e.SaleId} — {e.TotalAmount:C} recorded successfully.",
-            AppNotificationLevel.Success);
-    }
 
     private async Task OnFirmUpdatedAsync(FirmUpdatedEvent e)
     {
@@ -491,50 +286,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
             HelpKey = "Home",
             Command = NavigateToMainWorkspaceCommand,
             ShortcutText = "Ctrl+D", Gesture = "Ctrl+D", SortOrder = 0
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "New Bill", Icon = "🧾",
-            Description = "Start a new billing session",
-            HelpKey = "NewBill",
-            Command = NavigateToSalesCommand,
-            ShortcutText = "Ctrl+S", Gesture = "Ctrl+S", SortOrder = 10,
-            RequiredFeature = FeatureFlags.Sales
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Products", Icon = "📦",
-            Description = "Manage product catalog and inventory",
-            HelpKey = "Products",
-            Command = NavigateToProductsCommand,
-            ShortcutText = "Ctrl+P", Gesture = "Ctrl+P", SortOrder = 20,
-            RequiredFeature = FeatureFlags.Products
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Customers", Icon = "👤",
-            Description = "Manage customer database and loyalty",
-            HelpKey = "Customers",
-            Command = NavigateToCustomersCommand,
-            SortOrder = 25
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Staff", Icon = "👨‍💼",
-            Description = "Manage staff and track incentives",
-            HelpKey = "Staff",
-            Command = NavigateToStaffCommand,
-            SortOrder = 27,
-            RequiredRoles = [UserType.Admin, UserType.Manager]
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Reports", Icon = "📊",
-            Description = "View sales reports and analytics",
-            HelpKey = "Reports",
-            Command = NavigateToReportsCommand,
-            SortOrder = 35,
-            RequiredRoles = [UserType.Admin, UserType.Manager]
         });
         _quickActionService.Register(new QuickAction
         {
@@ -558,46 +309,11 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Tax", Icon = "💲",
-            Description = "Configure tax rates and rules",
-            HelpKey = "Tax",
-            Command = OpenTaxManagementCommand,
-            SortOrder = 60,
-            RequiredRoles = [UserType.Admin],
-            RequiredFeature = FeatureFlags.TaxManagement
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Tasks", Icon = "📋",
-            Description = "View pending tasks and reminders",
-            HelpKey = "Tasks",
-            Command = OpenTasksCommand,
-            ShortcutText = "F6", Gesture = "F6", SortOrder = 70
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Settings", Icon = "⚙️",
-            Description = "Open system settings and preferences",
-            HelpKey = "Settings",
-            Command = OpenSystemSettingsCommand,
-            SortOrder = 80,
-            RequiredFeature = FeatureFlags.SystemSettings
-        });
-        _quickActionService.Register(new QuickAction
-        {
             Title = "Refresh", Icon = "🔄",
             Description = "Reload the current view data",
             HelpKey = "Refresh",
             Command = RefreshCurrentViewCommand,
             ShortcutText = "F5", Gesture = "F5", SortOrder = 90
-        });
-        _quickActionService.Register(new QuickAction
-        {
-            Title = "Toggle Mode", Icon = "🔀",
-            Description = "Switch between management and billing mode",
-            HelpKey = "ToggleMode",
-            Command = ToggleBillingModeCommand,
-            ShortcutText = "F8", Gesture = "F8", SortOrder = 5
         });
         _quickActionService.Register(new QuickAction
         {
@@ -634,7 +350,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         AppState.PropertyChanged -= OnAppStatePropertyChanged;
         _features.PropertyChanged -= OnFeaturesPropertyChanged;
         _eventBus.Unsubscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
-        _eventBus.Unsubscribe<OperationalModeChangedEvent>(OnModeChangedAsync);
+        _eventBus.Unsubscribe<DensityChangedEvent>(OnDensityChangedAsync);
         DashboardSummary.Dispose();
     }
 }

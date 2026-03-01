@@ -271,8 +271,6 @@ public class ZeroClickWorkflowServiceTests : IDisposable
     {
         _eventBus.Received().Subscribe(Arg.Any<Func<Modules.Authentication.Events.UserLoggedInEvent, Task>>());
         _eventBus.Received().Subscribe(Arg.Any<Func<OperationalModeChangedEvent, Task>>());
-        _eventBus.Received().Subscribe(Arg.Any<Func<Modules.Billing.Events.BillingSessionCompletedEvent, Task>>());
-        _eventBus.Received().Subscribe(Arg.Any<Func<Modules.Sales.Events.SaleCompletedEvent, Task>>());
         _eventBus.Received().Subscribe(Arg.Any<Func<ConnectionRestoredEvent, Task>>());
     }
 
@@ -283,8 +281,6 @@ public class ZeroClickWorkflowServiceTests : IDisposable
 
         _eventBus.Received().Unsubscribe(Arg.Any<Func<Modules.Authentication.Events.UserLoggedInEvent, Task>>());
         _eventBus.Received().Unsubscribe(Arg.Any<Func<OperationalModeChangedEvent, Task>>());
-        _eventBus.Received().Unsubscribe(Arg.Any<Func<Modules.Billing.Events.BillingSessionCompletedEvent, Task>>());
-        _eventBus.Received().Unsubscribe(Arg.Any<Func<Modules.Sales.Events.SaleCompletedEvent, Task>>());
         _eventBus.Received().Unsubscribe(Arg.Any<Func<ConnectionRestoredEvent, Task>>());
     }
 

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Workflows;
-using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Core.Intents;
 
@@ -23,24 +22,11 @@ public sealed class MicroFeedbackService : IMicroFeedbackService
         _eventBus = eventBus;
         _logger = logger;
 
-        _eventBus.Subscribe<ProductAddedToCartEvent>(OnProductAddedAsync);
         _eventBus.Subscribe<PinAutoSubmittedEvent>(OnPinAutoSubmittedAsync);
         _eventBus.Subscribe<ZeroClickActionExecutedEvent>(OnZeroClickActionAsync);
     }
 
     // ── Event handlers ───────────────────────────────────────────────
-
-    private async Task OnProductAddedAsync(ProductAddedToCartEvent evt)
-    {
-        _logger.LogDebug(
-            "MicroFeedback: product '{Name}' added via {Source} — pulsing cart row.",
-            evt.ProductName, evt.Source);
-
-        await _eventBus.PublishAsync(new MicroFeedbackEvent(
-            TargetId: "Cart:LastRow",
-            Type: MicroFeedbackType.Success,
-            Label: $"Added {evt.ProductName}"));
-    }
 
     private async Task OnPinAutoSubmittedAsync(PinAutoSubmittedEvent evt)
     {
@@ -73,7 +59,6 @@ public sealed class MicroFeedbackService : IMicroFeedbackService
         if (_disposed) return;
         _disposed = true;
 
-        _eventBus.Unsubscribe<ProductAddedToCartEvent>(OnProductAddedAsync);
         _eventBus.Unsubscribe<PinAutoSubmittedEvent>(OnPinAutoSubmittedAsync);
         _eventBus.Unsubscribe<ZeroClickActionExecutedEvent>(OnZeroClickActionAsync);
     }

@@ -29,8 +29,7 @@ public class BillingSession
     public int Id { get; set; }
 
     /// <summary>
-    /// Correlation identifier shared with the in-memory
-    /// <see cref="Modules.Billing.Services.IBillingSessionService"/>
+    /// Correlation identifier shared with the in-memory billing session service
     /// so a persisted row can be matched to the live session.
     /// </summary>
     public Guid SessionId { get; set; }

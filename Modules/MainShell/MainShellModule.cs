@@ -10,7 +10,6 @@ namespace StoreAssistantPro.Modules.MainShell;
 public static class MainShellModule
 {
     public const string MainWorkspacePage = "MainWorkspace";
-    public const string TasksDialog = "Tasks";
 
     public static IServiceCollection AddMainShellModule(
         this IServiceCollection services,
@@ -29,14 +28,9 @@ public static class MainShellModule
         // ViewModels
         services.AddTransient<MainViewModel>();
         services.AddTransient<WorkspaceViewModel>();
-        services.AddTransient<TasksViewModel>();
 
         // Views
         services.AddTransient<MainWindow>();
-        services.AddTransient<TasksWindow>();
-
-        // Dialog registration
-        services.AddDialogRegistration<TasksWindow>(TasksDialog);
 
         return services;
     }

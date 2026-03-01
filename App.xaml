@@ -5,28 +5,6 @@
              xmlns:helpers="clr-namespace:StoreAssistantPro.Core.Helpers"
              xmlns:shellVm="clr-namespace:StoreAssistantPro.Modules.MainShell.ViewModels"
              xmlns:shellViews="clr-namespace:StoreAssistantPro.Modules.MainShell.Views"
-             xmlns:productsVm="clr-namespace:StoreAssistantPro.Modules.Products.ViewModels"
-             xmlns:productsViews="clr-namespace:StoreAssistantPro.Modules.Products.Views"
-             xmlns:brandsVm="clr-namespace:StoreAssistantPro.Modules.Brands.ViewModels"
-             xmlns:brandsViews="clr-namespace:StoreAssistantPro.Modules.Brands.Views"
-             xmlns:salesVm="clr-namespace:StoreAssistantPro.Modules.Sales.ViewModels"
-             xmlns:salesViews="clr-namespace:StoreAssistantPro.Modules.Sales.Views"
-             xmlns:settingsVm="clr-namespace:StoreAssistantPro.Modules.SystemSettings.ViewModels"
-             xmlns:settingsViews="clr-namespace:StoreAssistantPro.Modules.SystemSettings.Views"
-             xmlns:vendorsVm="clr-namespace:StoreAssistantPro.Modules.Vendors.ViewModels"
-             xmlns:vendorsViews="clr-namespace:StoreAssistantPro.Modules.Vendors.Views"
-             xmlns:inwardVm="clr-namespace:StoreAssistantPro.Modules.Inward.ViewModels"
-             xmlns:inwardViews="clr-namespace:StoreAssistantPro.Modules.Inward.Views"
-             xmlns:customersVm="clr-namespace:StoreAssistantPro.Modules.Customers.ViewModels"
-             xmlns:customersViews="clr-namespace:StoreAssistantPro.Modules.Customers.Views"
-             xmlns:staffVm="clr-namespace:StoreAssistantPro.Modules.Staff.ViewModels"
-             xmlns:staffViews="clr-namespace:StoreAssistantPro.Modules.Staff.Views"
-             xmlns:reportsVm="clr-namespace:StoreAssistantPro.Modules.Reports.ViewModels"
-             xmlns:reportsViews="clr-namespace:StoreAssistantPro.Modules.Reports.Views"
-             xmlns:promotionsVm="clr-namespace:StoreAssistantPro.Modules.Promotions.ViewModels"
-             xmlns:promotionsViews="clr-namespace:StoreAssistantPro.Modules.Promotions.Views"
-             xmlns:inventoryVm="clr-namespace:StoreAssistantPro.Modules.Inventory.ViewModels"
-             xmlns:inventoryViews="clr-namespace:StoreAssistantPro.Modules.Inventory.Views"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              xmlns:core="clr-namespace:StoreAssistantPro.Core"
              ShutdownMode="OnExplicitShutdown">
@@ -48,78 +26,9 @@
             <helpers:RoleColorConverter x:Key="RoleColorConverter"/>
             <helpers:PinStrengthConverter x:Key="PinStrengthConverter"/>
 
-        <!-- ViewModel ? View DataTemplates (MainShell module) -->
+        <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">
             <shellViews:WorkspaceView/>
-        </DataTemplate>
-
-        <!-- Products module -->
-        <DataTemplate DataType="{x:Type productsVm:ProductsViewModel}">
-            <productsViews:ProductsView/>
-        </DataTemplate>
-
-        <!-- Brands module -->
-        <DataTemplate DataType="{x:Type brandsVm:BrandsViewModel}">
-            <brandsViews:BrandsView/>
-        </DataTemplate>
-
-        <!-- Sales module -->
-        <DataTemplate DataType="{x:Type salesVm:SalesViewModel}">
-            <salesViews:SalesView/>
-        </DataTemplate>
-
-        <!-- SystemSettings module -->
-        <DataTemplate DataType="{x:Type settingsVm:GeneralSettingsViewModel}">
-            <settingsViews:GeneralSettingsView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type settingsVm:SecuritySettingsViewModel}">
-            <settingsViews:SecuritySettingsView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type settingsVm:BackupSettingsViewModel}">
-            <settingsViews:BackupSettingsView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type settingsVm:AppInfoViewModel}">
-            <settingsViews:AppInfoView/>
-        </DataTemplate>
-
-        <!-- Vendors module -->
-        <DataTemplate DataType="{x:Type vendorsVm:VendorsViewModel}">
-            <vendorsViews:VendorsView/>
-        </DataTemplate>
-
-        <!-- Inward module -->
-        <DataTemplate DataType="{x:Type inwardVm:InwardViewModel}">
-            <inwardViews:InwardView/>
-        </DataTemplate>
-
-        <!-- Customers module -->
-        <DataTemplate DataType="{x:Type customersVm:CustomersViewModel}">
-            <customersViews:CustomersView/>
-        </DataTemplate>
-
-        <!-- Staff module -->
-        <DataTemplate DataType="{x:Type staffVm:StaffViewModel}">
-            <staffViews:StaffView/>
-        </DataTemplate>
-
-        <!-- Reports module -->
-        <DataTemplate DataType="{x:Type reportsVm:ReportsViewModel}">
-            <reportsViews:ReportsView/>
-        </DataTemplate>
-
-        <!-- Promotions module -->
-        <DataTemplate DataType="{x:Type promotionsVm:PromotionsViewModel}">
-            <promotionsViews:PromotionsView/>
-        </DataTemplate>
-
-        <!-- Inventory module (Stock Alerts) -->
-        <DataTemplate DataType="{x:Type inventoryVm:StockAlertsViewModel}">
-            <inventoryViews:StockAlertsView/>
-        </DataTemplate>
-
-        <!-- Sale Returns -->
-        <DataTemplate DataType="{x:Type salesVm:SaleReturnsViewModel}">
-            <salesViews:SaleReturnsView/>
         </DataTemplate>
 
         <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + slide-fade transition -->

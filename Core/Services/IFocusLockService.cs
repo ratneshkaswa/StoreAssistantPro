@@ -23,7 +23,7 @@ namespace StoreAssistantPro.Core.Services;
 /// <para>
 /// <b>Architecture rule:</b> ViewModels read <see cref="IsFocusLocked"/>
 /// and <see cref="ActiveModule"/> to gate navigation commands.
-/// Only <see cref="Modules.Billing.Services.SmartBillingModeService"/>
+/// Only the billing mode service
 /// and this service react to mode changes — no UI logic lives here.
 /// </para>
 /// </summary>

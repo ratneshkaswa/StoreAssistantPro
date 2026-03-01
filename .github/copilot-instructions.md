@@ -8,10 +8,8 @@
 
 | Priority | Document | Scope |
 |---|---|---|
-| 1 | [`MASTER_RULES.md`](../MASTER_RULES.md) | Summarised ruleset — start here for quick reference |
-| 2 | [`ARCHITECTURE.md`](../ARCHITECTURE.md) | Solution structure, MVVM wiring, base classes, keyboard nav, pricing rules |
-| 3 | [`UI_RULES.md`](../UI_RULES.md) | Design system, styles, layout, scroll policy, form density, motion, tip system, prohibited patterns |
-| 4 | [`DEVELOPMENT_FLOW.md`](../DEVELOPMENT_FLOW.md) | Enterprise architecture baseline, module creation checklist, data flow, DI patterns, regional/financial rules |
+| 1 | [`MASTER_RULES.md`](../MASTER_RULES.md) | All rules — architecture, UI, layout, data, motion, help system, deep clean log |
+| 2 | [`FEATURE_CATALOGUE.md`](../FEATURE_CATALOGUE.md) | All 948 features with status, phases, sprints, expansion gates |
 
 ## Rules
 
@@ -88,11 +86,13 @@ These eight systems are frozen. Extend through existing interfaces only:
 
 ### Current Progress
 
-- **Features Built**: 241 out of 948 total (25.4%).
+- **Deep clean completed**: All Phase 1–3 module code was stripped. Only core infrastructure + 5 shell modules remain.
+- **Active Modules**: Authentication, Firm, MainShell, Startup, Users.
+- **Features Built**: Infrastructure + shell features only. Module features will be rebuilt from Phase 1.
 - **Skipped Features**: 2 (MRP, SKU).
-- **Current Phase**: Phase 3 — Inventory & Stock Management.
-- **Next Features**: #182–#184 (Row highlights), #185+ (Stock management), #194+ (Purchase Orders).
-- **Progress Display**: Count shown as X/948, with memory updated every 10-15 features.
+- **Current Phase**: Restarting from Phase 1 — Product Foundation.
+- **Next Features**: Phase 1 Sprint 1 (Products module rebuild).
+- **Cleanup Log**: `MASTER_RULES.md §9` — full audit of what was stripped and why.
 
 ### Phases and Sprints
 

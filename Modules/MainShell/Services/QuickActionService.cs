@@ -20,6 +20,9 @@ public class QuickActionService : IQuickActionService
     {
         lock (_lock)
         {
+            if (_actions.Any(a => string.Equals(a.Title, action.Title, StringComparison.OrdinalIgnoreCase)))
+                return;
+
             _actions.Add(action);
         }
     }

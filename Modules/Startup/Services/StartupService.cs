@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
-using StoreAssistantPro.Modules.FinancialYears.Services;
 
 namespace StoreAssistantPro.Modules.Startup.Services;
 
@@ -13,7 +12,6 @@ public class StartupService(
     IAppStateService appState,
     IConfiguration configuration,
     IFeatureToggleService featureToggle,
-    IFinancialYearService financialYearService,
     IPerformanceMonitor perf,
     ILogger<StartupService> logger) : IStartupService
 {
@@ -67,16 +65,10 @@ public class StartupService(
         featureToggle.Load(flags);
     }
 
-    public async Task EnsureFinancialYearAsync()
+    public Task EnsureFinancialYearAsync()
     {
-        try
-        {
-            var fy = await financialYearService.EnsureCurrentFYAsync();
-            logger.LogInformation("Financial year ensured: {FY}", fy.Name);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Failed to ensure financial year — non-fatal, continuing");
-        }
+        // Financial year management not yet available — placeholder.
+        logger.LogInformation("Financial year check skipped — module not loaded");
+        return Task.CompletedTask;
     }
 }

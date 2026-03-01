@@ -21,32 +21,12 @@
 
         <!-- TOP MENU BAR -->
         <Menu Grid.Row="0" Style="{StaticResource FluentMenuBarStyle}"
-              ItemContainerStyle="{StaticResource FluentMenuBarItemStyle}"
-              h:BillingDimBehavior.DimOnLock="True"
-              h:BillingDimBehavior.IsLocked="{Binding FocusLock.IsFocusLocked}">
+              ItemContainerStyle="{StaticResource FluentMenuBarItemStyle}">
 
             <MenuItem Header="_File">
                 <MenuItem Header="_Home" Command="{Binding NavigateToMainWorkspaceCommand}"
                           InputGestureText="Ctrl+D"
                           h:SmartTooltip.ContextKey="Home"/>
-                <MenuItem Header="_Products" Command="{Binding NavigateToProductsCommand}"
-                          InputGestureText="Ctrl+P"
-                          h:SmartTooltip.ContextKey="Products"
-                          Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="_Brands" Command="{Binding NavigateToBrandsCommand}"
-                          h:SmartTooltip.ContextKey="Brands"
-                          Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="_Sales" Command="{Binding NavigateToSalesCommand}"
-                          InputGestureText="Ctrl+S"
-                          h:SmartTooltip.ContextKey="NewBill"
-                          Visibility="{Binding IsSalesEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="S_uppliers" Command="{Binding NavigateToSuppliersCommand}"/>
-                <MenuItem Header="_Customers" Command="{Binding NavigateToCustomersCommand}"/>
-                <MenuItem Header="S_taff" Command="{Binding NavigateToStaffCommand}"/>
-                <MenuItem Header="_Reports" Command="{Binding NavigateToReportsCommand}"/>
-                <MenuItem Header="_Promotions" Command="{Binding NavigateToPromotionsCommand}"/>
-                <MenuItem Header="Stoc_k Alerts" Command="{Binding NavigateToStockAlertsCommand}"/>
-                <MenuItem Header="Sale Re_turns" Command="{Binding NavigateToSaleReturnsCommand}"/>
                 <Separator/>
                 <MenuItem Header="_Logout" Command="{Binding LogoutCommand}"
                           InputGestureText="Ctrl+L"
@@ -57,25 +37,6 @@
                 <MenuItem Header="Home" Command="{Binding NavigateToMainWorkspaceCommand}"
                           InputGestureText="Ctrl+D"
                           h:SmartTooltip.ContextKey="Home"/>
-                <MenuItem Header="Products" Command="{Binding NavigateToProductsCommand}"
-                          InputGestureText="Ctrl+P"
-                          h:SmartTooltip.ContextKey="Products"
-                          Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Brands" Command="{Binding NavigateToBrandsCommand}"
-                          h:SmartTooltip.ContextKey="Brands"
-                          Visibility="{Binding IsProductsEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Sales History" Command="{Binding NavigateToSalesCommand}"
-                          InputGestureText="Ctrl+S"
-                          h:SmartTooltip.ContextKey="NewBill"
-                          Visibility="{Binding IsSalesEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Suppliers" Command="{Binding NavigateToSuppliersCommand}"/>
-                <MenuItem Header="Customers" Command="{Binding NavigateToCustomersCommand}"/>
-                <MenuItem Header="Staff" Command="{Binding NavigateToStaffCommand}"/>
-                <Separator/>
-                <MenuItem Header="Reports" Command="{Binding NavigateToReportsCommand}"/>
-                <MenuItem Header="Promotions" Command="{Binding NavigateToPromotionsCommand}"/>
-                <MenuItem Header="Stock Alerts" Command="{Binding NavigateToStockAlertsCommand}"/>
-                <MenuItem Header="Sale Returns" Command="{Binding NavigateToSaleReturnsCommand}"/>
             </MenuItem>
 
             <MenuItem Header="_Tools">
@@ -85,22 +46,10 @@
                 <MenuItem Header="User Management" Command="{Binding OpenUserManagementCommand}"
                           h:SmartTooltip.ContextKey="Users"
                           Visibility="{Binding IsUserManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Tax Management" Command="{Binding OpenTaxManagementCommand}"
-                          h:SmartTooltip.ContextKey="Tax"
-                          Visibility="{Binding IsTaxManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <Separator/>
-                <MenuItem Header="System Settings" Command="{Binding OpenSystemSettingsCommand}"
-                          h:SmartTooltip.ContextKey="Settings"
-                          Visibility="{Binding IsSystemSettingsEnabled, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator/>
                 <MenuItem Header="Refresh Data" Command="{Binding RefreshCurrentViewCommand}"
                           InputGestureText="F5"
                           h:SmartTooltip.ContextKey="Refresh"/>
-            </MenuItem>
-
-            <MenuItem Header="_Billing"
-                      Visibility="{Binding IsBillingEnabled, Converter={StaticResource BoolToVisibility}}">
-                <MenuItem Header="New Sale" Command="{Binding NavigateToSalesCommand}"/>
             </MenuItem>
 
             <MenuItem Header="_Help">
@@ -109,12 +58,9 @@
         </Menu>
 
         <!-- QUICK ACTION BAR -->
-        <Border Grid.Row="1" Style="{StaticResource FluentToolbarStyle}"
-                h:BillingDimBehavior.DimOnLock="True"
-                h:BillingDimBehavior.DimOpacity="0.55"
-                h:BillingDimBehavior.IsLocked="{Binding FocusLock.IsFocusLocked}">
+        <Border Grid.Row="1" Style="{StaticResource FluentToolbarStyle}">
             <DockPanel>
-                <!-- Mode toggle + indicator (right-docked) -->
+                <!-- Notification bell + indicators (right-docked) -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                             VerticalAlignment="Center" Margin="{StaticResource SidebarNavItemPadding}">
 
@@ -312,54 +258,9 @@
                         </Popup>
                     </Grid>
 
-                    <Border Margin="{StaticResource InlineControlSpacing}"
-                            h:StatusPillTransition.AnimateChanges="True">
-                        <Border.Style>
-                            <Style TargetType="Border" BasedOn="{StaticResource StatusBadgePillStyle}">
-                                <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsBillingMode}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock FontWeight="SemiBold" FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextOnAccent}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="🏢 MANAGEMENT"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsBillingMode}" Value="True">
-                                            <Setter Property="Text" Value="🧾 BILLING"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Border>
-                    <Button Command="{Binding ToggleBillingModeCommand}"
-                            h:BillingFocusBehavior.AllowFocus="True"
-                            h:SmartTooltip.ContextKey="StartBilling"
-                            h:SmartTooltip.Header="Billing Mode"
-                            h:SmartTooltip.Shortcut="F8"
-                            VerticalAlignment="Center">
-                        <Button.Style>
-                            <Style TargetType="Button"
-                                   BasedOn="{StaticResource EnterpriseActionButtonStyle}">
-                                <Setter Property="Content" Value="▶ Start Billing"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsBillingMode}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource FluentError}"/>
-                                        <Setter Property="Content" Value="⏹ Stop Billing"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-                </StackPanel>
+                    </StackPanel>
 
-                <!-- Quick actions (left, fills remaining space) -->
+                    <!-- Quick actions (left, fills remaining space) -->
                 <ItemsControl ItemsSource="{Binding QuickActions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -379,16 +280,10 @@
 
         <!-- BODY: WORKSPACE -->
         <controls:ResponsiveContentControl Grid.Row="2"
-            h:BillingFocusBehavior.IsActive="{Binding FocusLock.IsFocusLocked}"
-            h:BillingDimBehavior.HighlightOnLock="True"
-            h:BillingDimBehavior.IsLocked="{Binding FocusLock.IsFocusLocked}"
             Content="{Binding CurrentView}"/>
 
         <!-- BOTTOM STATUS BAR -->
-        <StatusBar Grid.Row="3" Style="{StaticResource FluentStatusBarStyle}"
-                   h:BillingDimBehavior.DimOnLock="True"
-                   h:BillingDimBehavior.DimOpacity="0.55"
-                   h:BillingDimBehavior.IsLocked="{Binding FocusLock.IsFocusLocked}">
+        <StatusBar Grid.Row="3" Style="{StaticResource FluentStatusBarStyle}">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -396,11 +291,8 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
@@ -438,90 +330,16 @@
                 </Border>
             </StatusBarItem>
 
-            <!-- Operational mode indicator -->
+            <!-- Center: status message -->
             <StatusBarItem Grid.Column="3" Style="{StaticResource FluentStatusBarItemStyle}"
-                           Margin="{StaticResource StatusBarPillGap}">
-                <Border VerticalAlignment="Center"
-                        h:StatusPillTransition.AnimateChanges="True">
-                    <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource StatusBadgePillStyle}">
-                            <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DashboardSummary.IsBillingMode}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource InlineLabelGap}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="🏢"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding DashboardSummary.IsBillingMode}" Value="True">
-                                            <Setter Property="Text" Value="🧾"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock Text="{Binding DashboardSummary.ModeDisplay}"
-                                   Foreground="{StaticResource FluentTextOnAccent}"
-                                   FontSize="{StaticResource FontSizeStatusBar}" FontWeight="Bold"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
-            </StatusBarItem>
-
-            <!-- Focus lock indicator -->
-            <StatusBarItem Grid.Column="4" Style="{StaticResource FluentStatusBarItemStyle}"
-                           Margin="{StaticResource StatusBarPillGap}">
-                <Border VerticalAlignment="Center"
-                        h:StatusPillTransition.AnimateChanges="True">
-                    <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource StatusBadgePillStyle}">
-                            <Setter Property="Background" Value="{StaticResource FluentTextTertiary}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding FocusLock.IsFocusLocked}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource FluentError}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource InlineLabelGap}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="&#x1F513;"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FocusLock.IsFocusLocked}" Value="True">
-                                            <Setter Property="Text" Value="&#x1F512;"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock Foreground="{StaticResource FluentTextOnAccent}"
-                                   FontSize="{StaticResource FontSizeStatusBar}" FontWeight="Bold"
-                                   VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="Normal Mode"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FocusLock.IsFocusLocked}" Value="True">
-                                            <Setter Property="Text" Value="Billing Focus Active"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
+                           HorizontalContentAlignment="Center">
+                <TextBlock Text="{Binding StatusBar.Message}"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           FontStyle="Italic"/>
             </StatusBarItem>
 
             <!-- Connectivity indicator -->
-            <StatusBarItem Grid.Column="5" Style="{StaticResource FluentStatusBarItemStyle}"
+            <StatusBarItem Grid.Column="4" Style="{StaticResource FluentStatusBarItemStyle}"
                            Margin="{StaticResource StatusBarPillGap}">
                 <Border VerticalAlignment="Center"
                         h:StatusPillTransition.AnimateChanges="True">
@@ -535,88 +353,36 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource InlineLabelGap}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="🟢"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
-                                            <Setter Property="Text" Value="🔴"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock Foreground="{StaticResource FluentTextOnAccent}"
-                                   FontSize="{StaticResource FontSizeStatusBar}" FontWeight="Bold"
-                                   VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="Online"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
-                                            <Setter Property="Text" Value="Offline"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
+                    <TextBlock Foreground="{StaticResource FluentTextOnAccent}"
+                               FontSize="{StaticResource FontSizeStatusBar}" FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="🟢 Online"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
+                                        <Setter Property="Text" Value="🔴 Offline"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </Border>
             </StatusBarItem>
 
-            <!-- Summary stats -->
-            <StatusBarItem Grid.Column="6" Style="{StaticResource FluentStatusBarItemStyle}"
-                           Margin="{StaticResource StatusBarPillGap}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="📦" Margin="{StaticResource InlineLabelGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.ProductCount}"
-                               Foreground="{StaticResource FluentKpiGreen}" FontWeight="SemiBold"/>
-                    <TextBlock Text="⚠" Margin="{StaticResource StatusBarStatGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.LowStockCount}"
-                               Foreground="{StaticResource FluentKpiOrange}" FontWeight="SemiBold"/>
-                    <TextBlock Text="🚫" Margin="{StaticResource StatusBarStatGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.OutOfStockCount}"
-                               Foreground="{StaticResource FluentKpiRed}" FontWeight="SemiBold"/>
-                    <TextBlock Text="🏷" Margin="{StaticResource StatusBarStatGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.InventoryValue, StringFormat=C}"
-                               Foreground="{StaticResource FluentKpiTeal}" FontWeight="SemiBold"/>
-                    <TextBlock Text="💰" Margin="{StaticResource StatusBarStatGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.TodaysSales, StringFormat=C}"
-                               Foreground="{StaticResource FluentKpiBlue}" FontWeight="SemiBold"/>
-                    <TextBlock Text="🧾" Margin="{StaticResource StatusBarStatGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.TodaysTransactions}"
-                               Foreground="{StaticResource FluentKpiPurple}" FontWeight="SemiBold"/>
-                    <TextBlock Text="🔔" Margin="{StaticResource StatusBarStatGap}"/>
-                    <TextBlock Text="{Binding DashboardSummary.NotificationCount}"
-                               Foreground="{StaticResource FluentAccentDefault}" FontWeight="SemiBold"/>
-                </StackPanel>
-            </StatusBarItem>
-
-            <!-- Center: status message -->
-            <StatusBarItem Grid.Column="7" Style="{StaticResource FluentStatusBarItemStyle}"
-                           HorizontalContentAlignment="Center">
-                <TextBlock Text="{Binding StatusBar.Message}"
-                           Foreground="{StaticResource FluentTextTertiary}"
-                           FontStyle="Italic"/>
-            </StatusBarItem>
-
             <!-- Clock -->
-            <StatusBarItem Grid.Column="8" Style="{StaticResource FluentStatusBarItemStyle}">
+            <StatusBarItem Grid.Column="5" Style="{StaticResource FluentStatusBarItemStyle}">
                 <TextBlock Text="{Binding DashboardSummary.CurrentTime}"
                            Foreground="{StaticResource FluentTextPrimary}" FontWeight="SemiBold"/>
             </StatusBarItem>
 
             <!-- Vertical divider -->
-            <StatusBarItem Grid.Column="9" Style="{StaticResource FluentStatusBarItemStyle}">
+            <StatusBarItem Grid.Column="6" Style="{StaticResource FluentStatusBarItemStyle}">
                 <Border Style="{StaticResource FluentStatusBarSeparatorStyle}"/>
             </StatusBarItem>
 
             <!-- Logout -->
-            <StatusBarItem Grid.Column="10" Style="{StaticResource FluentStatusBarItemStyle}">
+            <StatusBarItem Grid.Column="7" Style="{StaticResource FluentStatusBarItemStyle}">
                 <Button Content="Logout" Command="{Binding LogoutCommand}"
-                        h:BillingFocusBehavior.AllowFocus="True"
                         Style="{StaticResource ToolbarLinkButtonStyle}"/>
             </StatusBarItem>
         </StatusBar>

@@ -12,9 +12,6 @@ using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Workflows;
-using StoreAssistantPro.Modules.Billing.Services;
-using StoreAssistantPro.Modules.Customers.Services;
-using StoreAssistantPro.Modules.Inventory.Services;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
 
@@ -53,29 +50,13 @@ public partial class App : Application
 
         _host.Services.ApplyDialogRegistrations();
 
-        // Eagerly resolve the smart billing service so it subscribes
-        // to session events before any billing session can start.
-        _host.Services.GetRequiredService<ISmartBillingModeService>();
-
         // Eagerly resolve the focus lock service so it subscribes
         // to mode-changed events before any mode transition occurs.
         _host.Services.GetRequiredService<IFocusLockService>();
 
-        // Eagerly resolve the auto-save service so it subscribes to
-        // cart-change and session events before any billing starts.
-        _host.Services.GetRequiredService<IBillingAutoSaveService>();
-
         // Eagerly resolve the onboarding tip registrar so all first-time
         // tips are registered before any view loads.
         _host.Services.GetRequiredService<OnboardingTipRegistrar>();
-
-        // Eagerly resolve the stock alert listener so it subscribes
-        // to sale-completed events before any sale can complete.
-        _host.Services.GetRequiredService<StockAlertListener>();
-
-        // Eagerly resolve the customer stats listener so it updates
-        // purchase stats after every customer-linked sale.
-        _host.Services.GetRequiredService<CustomerStatsListener>();
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
 
@@ -109,8 +90,6 @@ public partial class App : Application
         var workflowManager = _host.Services.GetRequiredService<IWorkflowManager>();
         var session = _host.Services.GetRequiredService<ISessionService>();
         var shellFlow = _host.Services.GetRequiredService<IMainShellFlow>();
-        var billingResume = _host.Services.GetRequiredService<IBillingResumeService>();
-        var sessionCleanup = _host.Services.GetRequiredService<IStaleBillingSessionCleanupService>();
 
         await workflowManager.StartWorkflowAsync(StartupWorkflow.WorkflowName);
 
@@ -135,11 +114,7 @@ public partial class App : Application
             return;
         }
 
-        // Archive stale active sessions and purge old inactive rows
-        // before the login loop so no stale session is offered for resume.
-        await sessionCleanup.RunCleanupAsync();
-
-        // ?? Phase 5: Main app loop � login ? main window ? logout ??
+        // Main app loop — login → main window → logout
         while (true)
         {
             await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
@@ -149,12 +124,6 @@ public partial class App : Application
                 Shutdown();
                 return;
             }
-
-            // Check for a resumable billing session from a previous run.
-            // If found, the user chooses Resume (starts billing mode) or
-            // Discard (marks the session cancelled) before the main
-            // window opens.
-            await billingResume.TryResumeAsync();
 
             // Show main window (blocks until closed)
             if (!shellFlow.ShowMainWindow())
