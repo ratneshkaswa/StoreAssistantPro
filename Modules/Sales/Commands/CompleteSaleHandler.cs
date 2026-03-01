@@ -4,6 +4,7 @@ using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Promotions.Services;
 using StoreAssistantPro.Modules.Sales.Events;
 using StoreAssistantPro.Modules.Sales.Models;
 using StoreAssistantPro.Modules.Sales.Services;
@@ -21,10 +22,30 @@ public class CompleteSaleHandler(
     IRegionalSettingsService regional,
     IOfflineModeService offlineMode,
     IOfflineBillingQueue offlineQueue,
-    ISessionService sessionService) : BaseCommandHandler<CompleteSaleCommand>
+    ISessionService sessionService,
+    ICouponService couponService,
+    IVoucherService voucherService) : BaseCommandHandler<CompleteSaleCommand>
 {
     protected override async Task<CommandResult> ExecuteAsync(CompleteSaleCommand command)
     {
+        // Validate coupon if provided
+        if (!string.IsNullOrEmpty(command.CouponCode))
+        {
+            var coupon = await couponService.ValidateAndGetAsync(command.CouponCode, command.TotalAmount);
+            if (coupon is null)
+                return CommandResult.Failure("Invalid or expired coupon code.");
+        }
+
+        // Validate voucher if provided
+        if (!string.IsNullOrEmpty(command.VoucherCode) && command.VoucherRedeemAmount > 0)
+        {
+            var voucher = await voucherService.ValidateAndGetAsync(command.VoucherCode);
+            if (voucher is null)
+                return CommandResult.Failure("Invalid or expired voucher code.");
+            if (voucher.Balance < command.VoucherRedeemAmount)
+                return CommandResult.Failure($"Insufficient voucher balance. Available: {voucher.Balance:C}");
+        }
+
         var lineSubtotal = command.Items.Sum(i => i.UnitPrice * i.Quantity);
         var summary = billCalculation.Calculate(lineSubtotal, 0m, command.Discount);
 
@@ -47,6 +68,8 @@ public class CompleteSaleHandler(
             TotalAmount = summary.FinalAmount,
             PaymentMethod = command.PaymentMethod,
             CashierRole = sessionService.CurrentUserType.ToString(),
+            CustomerId = command.CustomerId,
+            StaffId = command.StaffId,
             DiscountType = command.Discount.Type,
             DiscountValue = command.Discount.Value,
             DiscountAmount = summary.DiscountAmount,
@@ -55,8 +78,16 @@ public class CompleteSaleHandler(
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice
-            }).ToList()
+                UnitPrice = i.UnitPrice,
+                ItemDiscountRate = i.ItemDiscountRate,
+                StaffId = i.StaffId
+            }).ToList(),
+            ExtraCharges = command.ExtraCharges?.Select(ec => new ExtraCharge
+            {
+                Name = ec.Name,
+                Amount = ec.Amount,
+                IsTaxable = ec.IsTaxable
+            }).ToList() ?? []
         };
 
         var result = await salesService.CreateSaleAsync(sale);
@@ -68,7 +99,23 @@ public class CompleteSaleHandler(
                 : CommandResult.Failure(result.ErrorMessage ?? "Sale failed.");
         }
 
-        await eventBus.PublishAsync(new SaleCompletedEvent(result.Value, sale.TotalAmount));
+        // Post-sale: increment coupon usage
+        if (!string.IsNullOrEmpty(command.CouponCode))
+        {
+            var coupon = await couponService.GetByCodeAsync(command.CouponCode);
+            if (coupon is not null)
+                await couponService.IncrementUsageAsync(coupon.Id);
+        }
+
+        // Post-sale: redeem voucher balance
+        if (!string.IsNullOrEmpty(command.VoucherCode) && command.VoucherRedeemAmount > 0)
+        {
+            var voucher = await voucherService.GetByCodeAsync(command.VoucherCode);
+            if (voucher is not null)
+                await voucherService.RedeemAsync(voucher.Id, command.VoucherRedeemAmount);
+        }
+
+        await eventBus.PublishAsync(new SaleCompletedEvent(result.Value, sale.TotalAmount, command.CustomerId));
         return CommandResult.Success();
     }
 
@@ -88,16 +135,29 @@ public class CompleteSaleHandler(
                 PaymentMethod = command.PaymentMethod,
                 CashierRole = sessionService.CurrentUserType.ToString(),
                 SaleDate = regional.Now,
+                CustomerId = command.CustomerId,
+                StaffId = command.StaffId,
                 DiscountType = command.Discount.Type,
                 DiscountValue = command.Discount.Value,
                 DiscountAmount = summary.DiscountAmount,
                 DiscountReason = command.Discount.Reason,
+                CouponCode = command.CouponCode,
+                VoucherCode = command.VoucherCode,
+                VoucherRedeemAmount = command.VoucherRedeemAmount,
                 Items = command.Items.Select(i => new SaleItemSnapshot
                 {
                     ProductId = i.ProductId,
                     Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList()
+                    UnitPrice = i.UnitPrice,
+                    ItemDiscountRate = i.ItemDiscountRate,
+                    StaffId = i.StaffId
+                }).ToList(),
+                ExtraCharges = command.ExtraCharges?.Select(ec => new ExtraChargeSnapshot
+                {
+                    Name = ec.Name,
+                    Amount = ec.Amount,
+                    IsTaxable = ec.IsTaxable
+                }).ToList() ?? []
             }
         };
 

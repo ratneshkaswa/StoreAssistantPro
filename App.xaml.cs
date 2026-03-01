@@ -13,6 +13,7 @@ using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Workflows;
 using StoreAssistantPro.Modules.Billing.Services;
+using StoreAssistantPro.Modules.Customers.Services;
 using StoreAssistantPro.Modules.Inventory.Services;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
@@ -71,6 +72,10 @@ public partial class App : Application
         // Eagerly resolve the stock alert listener so it subscribes
         // to sale-completed events before any sale can complete.
         _host.Services.GetRequiredService<StockAlertListener>();
+
+        // Eagerly resolve the customer stats listener so it updates
+        // purchase stats after every customer-linked sale.
+        _host.Services.GetRequiredService<CustomerStatsListener>();
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
 

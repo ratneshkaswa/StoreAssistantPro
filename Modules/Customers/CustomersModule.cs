@@ -10,6 +10,7 @@ public static class CustomersModule
     public static IServiceCollection AddCustomersModule(this IServiceCollection services)
     {
         services.AddSingleton<ICustomerService, CustomerService>();
+        services.AddSingleton<CustomerStatsListener>();
         services.AddTransient<ICommandRequestHandler<SaveCustomerCommand, Unit>, SaveCustomerHandler>();
         services.AddTransient<ICommandRequestHandler<DeleteCustomerCommand, Unit>, DeleteCustomerHandler>();
 

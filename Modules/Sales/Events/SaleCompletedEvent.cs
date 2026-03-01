@@ -2,4 +2,7 @@
 
 namespace StoreAssistantPro.Modules.Sales.Events;
 
-public sealed record SaleCompletedEvent(int SaleId, decimal TotalAmount) : IEvent;
+public sealed record SaleCompletedEvent(
+    int SaleId,
+    decimal TotalAmount,
+    int? CustomerId = null) : IEvent;

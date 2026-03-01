@@ -3,6 +3,7 @@ using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Promotions.Services;
 using StoreAssistantPro.Modules.Sales.Commands;
 using StoreAssistantPro.Modules.Sales.Events;
 using StoreAssistantPro.Modules.Sales.Models;
@@ -19,6 +20,8 @@ public class CompleteSaleHandlerTests
     private readonly IOfflineModeService _offlineMode = Substitute.For<IOfflineModeService>();
     private readonly IOfflineBillingQueue _offlineQueue = Substitute.For<IOfflineBillingQueue>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
+    private readonly ICouponService _couponService = Substitute.For<ICouponService>();
+    private readonly IVoucherService _voucherService = Substitute.For<IVoucherService>();
 
     public CompleteSaleHandlerTests()
     {
@@ -30,7 +33,7 @@ public class CompleteSaleHandlerTests
     }
 
     private CompleteSaleHandler CreateSut() =>
-        new(_salesService, _eventBus, _billCalculation, _regional, _offlineMode, _offlineQueue, _sessionService);
+        new(_salesService, _eventBus, _billCalculation, _regional, _offlineMode, _offlineQueue, _sessionService, _couponService, _voucherService);
 
     private static Guid NewKey() => Guid.NewGuid();
 

@@ -68,11 +68,17 @@ public sealed class CompleteSaleSnapshot
     public string PaymentMethod { get; init; } = string.Empty;
     public string? CashierRole { get; init; }
     public DateTime SaleDate { get; init; }
+    public int? CustomerId { get; init; }
+    public int? StaffId { get; init; }
     public DiscountType DiscountType { get; init; }
     public decimal DiscountValue { get; init; }
     public decimal DiscountAmount { get; init; }
     public string? DiscountReason { get; init; }
+    public string? CouponCode { get; init; }
+    public string? VoucherCode { get; init; }
+    public decimal VoucherRedeemAmount { get; init; }
     public List<SaleItemSnapshot> Items { get; init; } = [];
+    public List<ExtraChargeSnapshot> ExtraCharges { get; init; } = [];
 }
 
 /// <summary>
@@ -83,4 +89,16 @@ public sealed class SaleItemSnapshot
     public int ProductId { get; init; }
     public int Quantity { get; init; }
     public decimal UnitPrice { get; init; }
+    public decimal ItemDiscountRate { get; init; }
+    public int? StaffId { get; init; }
+}
+
+/// <summary>
+/// Snapshot of an extra charge within an offline bill.
+/// </summary>
+public sealed class ExtraChargeSnapshot
+{
+    public string Name { get; init; } = string.Empty;
+    public decimal Amount { get; init; }
+    public bool IsTaxable { get; init; }
 }

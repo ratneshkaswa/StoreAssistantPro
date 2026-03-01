@@ -13,9 +13,22 @@ public sealed record CompleteSaleCommand(
     decimal TotalAmount,
     string PaymentMethod,
     IReadOnlyList<SaleItemDto> Items,
-    BillDiscount Discount) : ICommandRequest<Unit>;
+    BillDiscount Discount,
+    int? CustomerId = null,
+    int? StaffId = null,
+    string? CouponCode = null,
+    string? VoucherCode = null,
+    decimal VoucherRedeemAmount = 0m,
+    IReadOnlyList<ExtraChargeDto>? ExtraCharges = null) : ICommandRequest<Unit>;
 
 public sealed record SaleItemDto(
     int ProductId,
     int Quantity,
-    decimal UnitPrice);
+    decimal UnitPrice,
+    decimal ItemDiscountRate = 0m,
+    int? StaffId = null);
+
+public sealed record ExtraChargeDto(
+    string Name,
+    decimal Amount,
+    bool IsTaxable = false);
