@@ -14,7 +14,7 @@ public class AuthenticationFlow(
     public bool RunFirstTimeSetup()
     {
         var window = serviceProvider.GetRequiredService<SetupWindow>();
-        sizingService.ConfigureStartupWindow(window, 520, 960);
+        sizingService.ConfigureStartupWindow(window, 520, 1020);
         return window.ShowDialog() == true;
     }
 

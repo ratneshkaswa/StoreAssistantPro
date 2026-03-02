@@ -18,9 +18,7 @@
 
         <controls:AppBranding Grid.Row="0" LogoSize="48"/>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-        <Grid>
+        <Grid Grid.Row="1">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                             Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="&#x2705;" FontSize="{StaticResource FontSizeIconLarge}" HorizontalAlignment="Center"
@@ -195,7 +193,6 @@
                     </StackPanel>
                 </StackPanel>
         </Grid>
-        </ScrollViewer>
 
         <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}" Margin="{StaticResource FieldLabelSpacing}"/>
 
