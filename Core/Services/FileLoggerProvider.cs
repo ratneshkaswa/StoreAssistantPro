@@ -67,8 +67,8 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
 
     internal void EnqueueEntry(string categoryName, LogLevel level, string message, Exception? exception)
     {
-        var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        var entry = $"[{timestamp}] [{level,-11}] [{categoryName}] {message}";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        var entry = $"[{timestamp}Z] [{level,-11}] [{categoryName}] {message}";
 
         if (exception is not null)
             entry += $"{Environment.NewLine}  Exception: {exception}";
@@ -81,7 +81,7 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
         var reader = _channel.Reader;
         while (await reader.WaitToReadAsync().ConfigureAwait(false))
         {
-            var logFile = Path.Combine(_logDirectory, $"app_{DateTime.Now:yyyyMMdd}.log");
+            var logFile = Path.Combine(_logDirectory, $"app_{DateTime.UtcNow:yyyyMMdd}.log");
 
             using var writer = new StreamWriter(logFile, append: true);
             while (reader.TryRead(out var entry))

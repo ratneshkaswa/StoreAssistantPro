@@ -15,5 +15,5 @@ public interface IMasterPinValidator
     /// Returns <c>true</c> if the PIN is correct, <c>false</c> if
     /// the user cancelled or entered a wrong PIN.
     /// </summary>
-    Task<bool> ValidateAsync(string promptMessage = "Enter Master PIN to continue.");
+    Task<bool> ValidateAsync(string promptMessage = "Enter Master PIN to continue.", CancellationToken ct = default);
 }

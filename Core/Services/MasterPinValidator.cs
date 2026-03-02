@@ -11,13 +11,13 @@ public class MasterPinValidator(
     IDialogService dialogService,
     ILoginService loginService) : IMasterPinValidator
 {
-    public async Task<bool> ValidateAsync(string promptMessage = "Enter Master PIN to continue.")
+    public async Task<bool> ValidateAsync(string promptMessage = "Enter Master PIN to continue.", CancellationToken ct = default)
     {
         var pin = dialogService.PromptPassword(promptMessage);
 
         if (string.IsNullOrWhiteSpace(pin))
             return false;
 
-        return await loginService.ValidateMasterPinAsync(pin);
+        return await loginService.ValidateMasterPinAsync(pin, ct);
     }
 }
