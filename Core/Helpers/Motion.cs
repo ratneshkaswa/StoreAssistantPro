@@ -425,6 +425,11 @@ public static class Motion
     public static void SetStaggerIndex(DependencyObject obj, int value) =>
         obj.SetValue(StaggerIndexProperty, value);
 
+    private static readonly DependencyProperty StaggerSubscribedProperty =
+        DependencyProperty.RegisterAttached(
+            "StaggerSubscribed", typeof(bool), typeof(Motion),
+            new PropertyMetadata(false));
+
     private static void OnStaggerIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not FrameworkElement fe || e.NewValue is not int index || index < 0)
@@ -436,6 +441,11 @@ public static class Motion
         EnsureTranslateTransform(fe);
         fe.Opacity = 0;
 
+        // Guard: subscribe Loaded only once to prevent handler accumulation
+        if ((bool)fe.GetValue(StaggerSubscribedProperty))
+            return;
+
+        fe.SetValue(StaggerSubscribedProperty, true);
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
@@ -510,6 +520,7 @@ public static class Motion
             anim.KeyFrames.Add(new LinearDoubleKeyFrame(3, KeyTime.FromPercent(0.6)));
             anim.KeyFrames.Add(new LinearDoubleKeyFrame(-1, KeyTime.FromPercent(0.8)));
             anim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(1.0)));
+            anim.Freeze();
 
             tt.BeginAnimation(TranslateTransform.XProperty, anim);
         }

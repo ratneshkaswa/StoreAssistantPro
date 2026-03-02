@@ -167,9 +167,16 @@ public sealed class ConnectivityMonitorService : IConnectivityMonitorService
         }
     }
 
-    private void OnTimerElapsed(object? state)
+    private async void OnTimerElapsed(object? state)
     {
-        _ = CheckNowAsync(CancellationToken.None);
+        try
+        {
+            await CheckNowAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Connectivity check failed unexpectedly");
+        }
     }
 
     private async Task PublishSafeAsync<TEvent>(TEvent @event)
@@ -191,6 +198,9 @@ public sealed class ConnectivityMonitorService : IConnectivityMonitorService
 
     public void Dispose()
     {
+        // Change timer to never fire again, then dispose.
+        // This prevents a race where the callback fires after Dispose.
+        _timer?.Change(Timeout.Infinite, Timeout.Infinite);
         _timer?.Dispose();
         _timer = null;
     }
