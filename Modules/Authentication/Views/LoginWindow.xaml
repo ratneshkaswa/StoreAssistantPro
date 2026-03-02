@@ -4,7 +4,7 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:models="clr-namespace:StoreAssistantPro.Models"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
-        Title="Store Assistant Pro — Login"
+        Title="Login"
         Icon="pack://application:,,,/Assets/app.ico">
     <Window.Resources>
         <!-- Admin button — blue pastel, deepens on selection -->
@@ -67,7 +67,7 @@
     </Window.Resources>
 
     <Grid Background="{StaticResource FluentBackgroundSecondary}">
-        <Grid MaxWidth="360" VerticalAlignment="Center" HorizontalAlignment="Center"
+        <Grid MaxWidth="420" VerticalAlignment="Center" HorizontalAlignment="Center"
               Margin="{StaticResource DialogPadding}"
               >
             <Grid.RowDefinitions>
@@ -78,12 +78,12 @@
             </Grid.RowDefinitions>
 
             <!-- ── Row 0: Logo + title ──────────────────────── -->
-            <controls:AppBranding Grid.Row="0" LogoSize="48" Subtitle="{Binding FirmName}"
-                                  Margin="{StaticResource CompactItemSpacing}"/>
+            <controls:AppBranding Grid.Row="0" LogoSize="56" Subtitle="{Binding FirmName}"
+                                  Margin="{StaticResource ItemSpacing}"/>
 
             <!-- ── Row 1: Role buttons ────────────────────────── -->
             <UniformGrid Grid.Row="1" Columns="3"
-                         Margin="{StaticResource CompactItemSpacing}">
+                         Margin="{StaticResource ItemSpacing}">
                 <Button Margin="{StaticResource RoleButtonGap}"
                         Style="{StaticResource AdminButtonStyle}"
                         Tag="{x:Static models:UserType.Admin}"
@@ -98,11 +98,6 @@
                             <TextBlock Text="Admin" HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
                         </StackPanel>
-                        <!-- Last-used badge -->
-                        <TextBlock Text="● last" FontSize="{StaticResource FontSizeStatusBar}" FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentAccentDefault}"
-                                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="{StaticResource BadgeOffset}"
-                                   Visibility="{Binding IsLastUsedAdmin, Converter={StaticResource BoolToVisibility}}"/>
                     </Grid>
                 </Button>
                 <Button Margin="{StaticResource RoleButtonGap}"
@@ -119,10 +114,6 @@
                             <TextBlock Text="Manager" HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
                         </StackPanel>
-                        <TextBlock Text="● last" FontSize="{StaticResource FontSizeStatusBar}" FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentAccentDefault}"
-                                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="{StaticResource BadgeOffset}"
-                                   Visibility="{Binding IsLastUsedManager, Converter={StaticResource BoolToVisibility}}"/>
                     </Grid>
                 </Button>
                 <Button Margin="{StaticResource RoleButtonGap}"
@@ -139,10 +130,6 @@
                             <TextBlock Text="User" HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
                         </StackPanel>
-                        <TextBlock Text="● last" FontSize="{StaticResource FontSizeStatusBar}" FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentAccentDefault}"
-                                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="{StaticResource BadgeOffset}"
-                                   Visibility="{Binding IsLastUsedUser, Converter={StaticResource BoolToVisibility}}"/>
                     </Grid>
                 </Button>
             </UniformGrid>
@@ -154,7 +141,7 @@
                     BorderThickness="1"
                     CornerRadius="{StaticResource FluentCornerMedium}"
                     Padding="{StaticResource CardPadding}"
-                    Margin="{StaticResource CompactItemSpacing}"
+                    Margin="{StaticResource ItemSpacing}"
                     Effect="{StaticResource FluentShadowSmall}"
                     IsEnabled="{Binding IsUserSelected}">
                 <Border.Style>
@@ -176,14 +163,14 @@
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentSuccess}"
                                Visibility="{Binding ResetSuccessMessage, Converter={StaticResource BoolToVisibility}}"
-                               Margin="{StaticResource CompactItemSpacing}"/>
+                               Margin="{StaticResource ItemSpacing}"/>
 
                         <!-- Role hint / instruction (always visible, layout-stable) -->
                     <TextBlock Text="{Binding RoleHintText}"
                                HorizontalAlignment="Center"
                                FontSize="{StaticResource FontSizeCaption}"
                                FontWeight="SemiBold"
-                               Margin="{StaticResource CompactItemSpacing}">
+                               Margin="{StaticResource ItemSpacing}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
@@ -198,7 +185,7 @@
 
                     <!-- PIN dots -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                Margin="{StaticResource CompactItemSpacing}">
+                                Margin="{StaticResource ItemSpacing}">
                         <Ellipse Style="{StaticResource PinDotStyle}"
                                  Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=0}"/>
                         <Ellipse Style="{StaticResource PinDotStyle}"
@@ -211,7 +198,7 @@
 
                     <!-- Error / warnings (MinHeight for layout stability) -->
                     <StackPanel HorizontalAlignment="Center" MinHeight="18"
-                                Margin="{StaticResource CompactItemSpacing}">
+                                Margin="{StaticResource ItemSpacing}">
                         <TextBlock Text="{Binding ErrorMessage}"
                                    Style="{StaticResource ErrorMessageStyle}"
                                    HorizontalAlignment="Center" Margin="0"/>
@@ -225,10 +212,10 @@
                     <!-- Keypad -->
                     <Grid Margin="{StaticResource KeypadInset}">
                         <Grid.RowDefinitions>
-                            <RowDefinition MinHeight="52"/>
-                            <RowDefinition MinHeight="52"/>
-                            <RowDefinition MinHeight="52"/>
-                            <RowDefinition MinHeight="52"/>
+                            <RowDefinition MinHeight="56"/>
+                            <RowDefinition MinHeight="56"/>
+                            <RowDefinition MinHeight="56"/>
+                            <RowDefinition MinHeight="56"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -255,12 +242,12 @@
                                HorizontalAlignment="Center"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextTertiary}"
-                               Margin="{StaticResource CompactItemSpacing}"/>
+                               Margin="{StaticResource ItemSpacing}"/>
 
                     <!-- Forgot PIN link -->
                     <TextBlock HorizontalAlignment="Center"
                                FontSize="{StaticResource FontSizeCaption}"
-                               Margin="{StaticResource CompactItemSpacing}">
+                               Margin="{StaticResource ItemSpacing}">
                         <Hyperlink Command="{Binding ForgotPinCommand}"
                                    Foreground="{StaticResource FluentAccentDefault}"
                                    TextDecorations="None">
@@ -275,11 +262,11 @@
                                    FontSize="{StaticResource FontSizeSectionHeader}"
                                    FontWeight="Bold"
                                    Foreground="{StaticResource FluentAccentDefault}"
-                                   Margin="{StaticResource CompactItemSpacing}"/>
+                                   Margin="{StaticResource ItemSpacing}"/>
                         <TextBlock HorizontalAlignment="Center"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentTextSecondary}"
-                                   Margin="{StaticResource CompactItemSpacing}">
+                                   Margin="{StaticResource ItemSpacing}">
                             <Run Text="Enter Master PIN to reset"/>
                             <Run Text="{Binding SelectedUserType, Mode=OneWay}"/>
                             <Run Text="PIN"/>
@@ -355,20 +342,20 @@
             </Border>
 
             <!-- ── Row 3: Footer ──────────────────────────────── -->
-            <StackPanel Grid.Row="3" Margin="{StaticResource CompactItemSpacing}">
+            <StackPanel Grid.Row="3" Margin="{StaticResource ItemSpacing}">
                 <!-- Separator -->
                 <Border Height="1" Background="{StaticResource FluentStrokeDefault}"
-                        Margin="{StaticResource CompactItemSpacing}"/>
+                        Margin="{StaticResource ItemSpacing}"/>
                 <TextBlock HorizontalAlignment="Center"
                            FontSize="{StaticResource FontSizeLabel}"
                            Foreground="{StaticResource FluentTextSecondary}"
                            FontWeight="SemiBold"
                            Text="{Binding CurrentTime}"
-                           Margin="{StaticResource CompactItemSpacing}"/>
+                           Margin="{StaticResource ItemSpacing}"/>
                 <!-- Connection status -->
                 <TextBlock HorizontalAlignment="Center"
                            FontSize="{StaticResource FontSizeStatusBar}"
-                           Margin="{StaticResource CompactItemSpacing}">
+                           Margin="{StaticResource ItemSpacing}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>

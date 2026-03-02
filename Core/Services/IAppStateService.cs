@@ -15,6 +15,7 @@ public interface IAppStateService : INotifyPropertyChanged
 
     string FirmName { get; }
     UserType CurrentUserType { get; }
+    UserType? LastLoggedInUserType { get; }
     bool IsLoggedIn { get; }
     string CurrentTime { get; }
     OperationalMode CurrentMode { get; }

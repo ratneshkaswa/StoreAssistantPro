@@ -50,6 +50,9 @@ public partial class AppStateService : ObservableObject, IAppStateService
     public partial UserType CurrentUserType { get; set; }
 
     [ObservableProperty]
+    public partial UserType? LastLoggedInUserType { get; set; }
+
+    [ObservableProperty]
     public partial bool IsLoggedIn { get; set; }
 
     [ObservableProperty]
@@ -79,8 +82,11 @@ public partial class AppStateService : ObservableObject, IAppStateService
     public void SetFirmInfo(string firmName) =>
         FirmName = firmName;
 
-    public void SetCurrentUser(UserType userType) =>
+    public void SetCurrentUser(UserType userType)
+    {
         CurrentUserType = userType;
+        LastLoggedInUserType = userType;
+    }
 
     public void SetLoggedIn(bool isLoggedIn)
     {

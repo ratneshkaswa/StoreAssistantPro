@@ -51,10 +51,6 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsVerifying { get; set; }
 
-    public bool IsLastUsedAdmin => LastLoggedInUser == UserType.Admin;
-    public bool IsLastUsedManager => LastLoggedInUser == UserType.Manager;
-    public bool IsLastUsedUser => LastLoggedInUser == UserType.User;
-
     // ── L1: Firm name ──
     public string FirmName => _appState.FirmName;
 
@@ -77,13 +73,6 @@ public partial class LoginViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial bool IsRoleLocked { get; set; }
-
-    // ── L2: Last user pre-selection ──
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsLastUsedAdmin))]
-    [NotifyPropertyChangedFor(nameof(IsLastUsedManager))]
-    [NotifyPropertyChangedFor(nameof(IsLastUsedUser))]
-    public partial UserType? LastLoggedInUser { get; set; }
 
     public Action<bool?>? RequestClose { get; set; }
 
@@ -120,11 +109,9 @@ public partial class LoginViewModel : BaseViewModel
         PinPad.PropertyChanged += OnPinPadPropertyChanged;
         _clockTimer.Start();
 
-        // L2: Pre-select last user only if firm is set up (meaning prior logins happened)
-        if (!string.IsNullOrEmpty(_appState.FirmName) && _appState.CurrentUserType is var lastUser
-            && lastUser != default(UserType))
+        // L2: Pre-select last user if a previous login has occurred
+        if (_appState.LastLoggedInUserType is { } lastUser)
         {
-            LastLoggedInUser = lastUser;
             SelectedUserType = lastUser;
         }
     }
