@@ -15,15 +15,15 @@ public class StartupService(
     IPerformanceMonitor perf,
     ILogger<StartupService> logger) : IStartupService
 {
-    public async Task MigrateDatabaseAsync()
+    public async Task MigrateDatabaseAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("StartupService.MigrateDatabaseAsync", TimeSpan.FromSeconds(5));
-        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         // 1. Apply migrations (creates the database if it doesn't exist)
         context.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
 
-        var pending = (await context.Database.GetPendingMigrationsAsync().ConfigureAwait(false)).ToList();
+        var pending = (await context.Database.GetPendingMigrationsAsync(ct).ConfigureAwait(false)).ToList();
 
         if (pending.Count == 0)
         {
@@ -34,22 +34,22 @@ public class StartupService(
         logger.LogInformation("Applying {Count} pending migration(s): {Migrations}",
             pending.Count, string.Join(", ", pending));
 
-        await context.Database.MigrateAsync().ConfigureAwait(false);
+        await context.Database.MigrateAsync(ct).ConfigureAwait(false);
 
         logger.LogInformation("All migrations applied successfully");
     }
 
-    public async Task<bool> IsAppInitializedAsync()
+    public async Task<bool> IsAppInitializedAsync(CancellationToken ct = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
-        var config = await context.AppConfigs.FirstOrDefaultAsync().ConfigureAwait(false);
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
         return config?.IsInitialized == true;
     }
 
-    public async Task LoadFirmInfoAsync()
+    public async Task LoadFirmInfoAsync(CancellationToken ct = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
-        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync().ConfigureAwait(false);
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct).ConfigureAwait(false);
         appState.SetFirmInfo(config?.FirmName ?? string.Empty);
     }
 
@@ -65,7 +65,7 @@ public class StartupService(
         featureToggle.Load(flags);
     }
 
-    public Task EnsureFinancialYearAsync()
+    public Task EnsureFinancialYearAsync(CancellationToken ct = default)
     {
         // Financial year management not yet available — placeholder.
         logger.LogInformation("Financial year check skipped — module not loaded");

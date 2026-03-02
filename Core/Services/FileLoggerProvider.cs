@@ -33,8 +33,11 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
 
     private readonly Task _writerTask;
 
-    public FileLoggerProvider()
+    private readonly LogLevel _minimumLevel;
+
+    public FileLoggerProvider(LogLevel minimumLevel = LogLevel.Information)
     {
+        _minimumLevel = minimumLevel;
         _logDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "StoreAssistantPro", "Logs");
@@ -49,7 +52,7 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
         {
             if (!_loggers.TryGetValue(categoryName, out var logger))
             {
-                logger = new FileLogger(categoryName, this);
+                logger = new FileLogger(categoryName, this, _minimumLevel);
                 _loggers[categoryName] = logger;
             }
             return logger;
@@ -89,11 +92,11 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
     }
 }
 
-internal sealed class FileLogger(string categoryName, FileLoggerProvider provider) : ILogger
+internal sealed class FileLogger(string categoryName, FileLoggerProvider provider, LogLevel minimumLevel) : ILogger
 {
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
-    public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
+    public bool IsEnabled(LogLevel logLevel) => logLevel >= minimumLevel;
 
     public void Log<TState>(
         LogLevel logLevel, EventId eventId, TState state,

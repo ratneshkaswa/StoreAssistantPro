@@ -18,7 +18,7 @@ public class CompleteFirstSetupHandlerTests
         var result = await CreateSut().HandleAsync(command);
 
         Assert.True(result.Succeeded);
-        await _setupService.Received(1).InitializeAppAsync("Store", "", "", "", "", "INR", "1234", "5678", "9012", "123456");
+        await _setupService.Received(1).InitializeAppAsync("Store", "", "", "", "", "INR", "1234", "5678", "9012", "123456", Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class CompleteFirstSetupHandlerTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>())
+            Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new InvalidOperationException("Already set up")));
 
         var result = await CreateSut().HandleAsync(

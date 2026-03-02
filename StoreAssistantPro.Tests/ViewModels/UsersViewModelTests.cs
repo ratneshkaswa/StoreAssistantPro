@@ -23,7 +23,7 @@ public class UsersViewModelTests
             new() { Id = 2, UserType = UserType.Manager, PinHash = "hash2" },
             new() { Id = 3, UserType = UserType.User, PinHash = "hash3" }
         };
-        _userService.GetAllUsersAsync().Returns(users);
+        _userService.GetAllUsersAsync(Arg.Any<CancellationToken>()).Returns(users);
 
         var sut = CreateSut();
         await sut.LoadUsersCommand.ExecuteAsync(null);

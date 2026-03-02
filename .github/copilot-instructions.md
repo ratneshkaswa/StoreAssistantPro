@@ -49,16 +49,88 @@ These eight systems are frozen. Extend through existing interfaces only:
 - `ScrollViewer` never wraps an entire window — only around data-driven content.
 - Field widths: `FieldWidthCompact`, `FieldWidthStandard`, `FieldWidthWide` — never raw numbers.
 - DataGrid columns: `ColumnWidthId`, `ColumnWidthPrice`, `ColumnWidthQty`, etc. One column must be `Width="*"`.
+
+#### Dialog Field Sizing
+
+- Input field sizes must match their content:
+  - Address = single-line, full width (no `AcceptsReturn`).
+  - PAN (10 chars) = `FieldWidthStandard`.
+  - GSTIN (15 chars) = `FieldWidthWide`.
+  - Pincode (6 digits) = `FieldWidthCompact`.
+  - Phone (10–15 digits) = `FieldWidthStandard`.
+  - Email/FirmName = full width.
+  - ComboBoxes with month names = `FieldWidthStandard`.
+- MaxLength in XAML **MUST** match MaxLength in Model and ViewModel — all three layers in sync.
+- Dialog fields must be properly sized for their content — always check field widths and heights match expected data length.
+- Dialog height must accommodate the tallest step without cropping.
+- Step `Grid`s inside a `Height="*"` row must have `VerticalAlignment="Top"`.
 - Animations: use `h:Motion.*` behaviors or `MotionSystem.xaml` storyboards — never inline.
 - Tip banners: `InlineTipBanner` in page Row 1 with `TipBannerAutoState.TipKey` and `ContextKey`.
+
+### Validation Error Display Pattern
+
+- **GLOBAL RULE**: Never render validation error TEXT in the `Validation.ErrorTemplate` — it's in the adorner layer and ALWAYS overlaps elements below.
+- The correct pattern is:
+  1. `ErrorTemplate` = transparent pass-through (`<AdornedElementPlaceholder/>` only — no `Border`, no text) to avoid double-border with the control's own border.
+  2. Style trigger on `Validation.HasError` sets `BorderBrush=FluentStrokeError` + `Background=FluentErrorBackground` (light red tint) + `ToolTip` with error text + `ToolTipService.InitialShowDelay=0`.
+- This applies to ALL input controls: `TextBox`, `PasswordBox`, `ComboBox`, `DatePicker`.
+- Already implemented in `GlobalStyles.xaml`.
+
+### Validation Attribute Rules
+
+- Every property with a validation attribute (`[MaxLength]`, `[Required]`, `[RegularExpression]`) **MUST** also have `[NotifyDataErrorInfo]` — otherwise the attribute is silently ignored by CommunityToolkit.Mvvm.
+- Wizard/step dialogs **MUST NOT** call `ValidateAllProperties()` on Next — it causes **cross-step validation bleed** (errors on Step 2 block Step 1). Instead, use per-step validation: `ClearErrors()` for all properties, then `ValidateProperty()` for only the current step's fields.
+- `ValidateAllProperties()` is only correct in `Save` — which validates everything before the final write.
+- **Next validates only `[Required]` fields** — optional field format errors (regex, email, GSTIN, PAN) must never block step navigation. They are caught on Save.
+- `SuccessMessage` and `ErrorMessage` must be cleared on step changes (Next/Back).
+- When validation blocks Next, always set `ErrorMessage` so the user sees feedback.
+
+### Wizard Dialog Rules
+
+- For multi-step wizard dialogs, **never** bind `ConfirmCommand` directly to `SaveCommand`.
+- Create a `ConfirmStepCommand` that delegates to `Next` on non-last steps and `Save` on the last step.
+- Otherwise, Enter on the last field of any non-final step triggers Save prematurely (because `KeyboardNav` fires `DefaultCommand` when no next editable field exists in the visible step).
+- When a hint `TextBlock` follows a validated field, there **MUST** be a `FormRowSpacing` row between them — otherwise the validation border overlaps the hint text.
+- All hint text margins should be consistent across steps (`Margin="0,4,0,0"`).
 
 ### Data & regional
 
 - EF Core via `IDbContextFactory<AppDbContext>` — short-lived contexts.
+- Every async service method **MUST** accept `CancellationToken ct = default` as its last parameter and pass it to all EF Core calls.
+- ViewModels forward `ct` from `RunAsync`/`RunLoadAsync` to service calls — never discard with `_`.
+- DB-accessing services with no mutable state → `Transient`. Only state-holding services → `Singleton`.
 - Financial writes require transactions (pipeline `[Transactional]`, `ITransactionSafetyService`, or `ITransactionHelper`).
 - Timestamps: `IRegionalSettingsService.Now` (IST) — never `DateTime.Now`.
+- `DateTime.UtcNow` only for DB-level comparisons (lockout expiry) and infrastructure logging.
 - Formatting: `IRegionalSettingsService.FormatCurrency/Date/Time` — never hardcode format strings.
 - Culture: `en-IN` set globally in `App.xaml.cs`.
+
+### BaseViewModel IDisposable
+
+- `BaseViewModel` implements `IDisposable` — disposes its internal `CancellationTokenSource`.
+- Derived VMs that subscribe to events or hold resources **MUST** override `Dispose()` and call `base.Dispose()`.
+- Never declare `IDisposable` redundantly on a VM — it already comes from `BaseViewModel`.
+
+### Firm Management Dialog Preferences
+
+- Number format is always Indian (1,00,000) — no field needed, not configurable.
+- Currency is always ₹ INR — display only, no field needed.
+- Date format needs more options.
+- Watermark adorners must check `IsVisible` to prevent bleed-through when using Visibility toggling (already fixed in Watermark.cs). Watermark adorners (and any adorner-based helpers) MUST check `tb.IsVisible` before adding adorners, and MUST subscribe to `IsVisibleChanged` to remove adorners when elements become Collapsed. WPF adorners live in a separate rendering layer and do NOT automatically follow the Visibility of their adorned element.
+
+### Regional Settings Integration
+
+- `IRegionalSettingsService` is mutable — `CurrencySymbol` and `DateFormat` update at runtime via `UpdateSettings()`.
+- On login: `SessionService.LoginAsync` reads `AppConfig` from DB and calls `regionalSettings.UpdateSettings()`.
+- On firm save: `FirmUpdatedEvent` carries `CurrencySymbol` + `DateFormat`; `MainViewModel.OnFirmUpdatedAsync` calls `UpdateSettings()`.
+- Any new regional setting added to Firm must follow this chain:
+  1. Add to `AppConfig` model.
+  2. Add to `FirmUpdateDto`.
+  3. Save in `FirmService` with null/whitespace guard.
+  4. Include in `FirmUpdatedEvent`.
+  5. Refresh in `RegionalSettingsService.UpdateSettings()`.
+  6. Refresh in `SessionService.LoginAsync` and `MainViewModel.OnFirmUpdatedAsync`.
+- `SetupService.InitializeAppAsync` must explicitly set ALL `AppConfig` fields — never rely on EF defaults alone for business-critical fields.
 
 ### Window sizing
 

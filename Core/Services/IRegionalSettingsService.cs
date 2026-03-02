@@ -20,6 +20,12 @@ public interface IRegionalSettingsService
     string DateTimeFormat { get; }
     TimeZoneInfo TimeZone { get; }
 
+    /// <summary>
+    /// Updates the display settings from the Firm configuration.
+    /// Called after login and after firm settings are saved.
+    /// </summary>
+    void UpdateSettings(string currencySymbol, string dateFormat);
+
     string FormatCurrency(decimal amount);
     string FormatNumber(decimal number);
     string FormatNumber(int number);

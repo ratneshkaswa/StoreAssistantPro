@@ -7,8 +7,8 @@ namespace StoreAssistantPro.Modules.Firm.Views;
 
 public partial class FirmWindow : BaseDialogWindow
 {
-    protected override double DialogWidth => 450;
-    protected override double DialogHeight => 350;
+    protected override double DialogWidth => 480;
+    protected override double DialogHeight => 590;
 
     public FirmWindow(
         IWindowSizingService sizingService,

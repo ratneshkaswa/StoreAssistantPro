@@ -18,7 +18,7 @@ using StoreAssistantPro.Modules.MainShell.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
-public partial class MainViewModel : BaseViewModel, IDisposable
+public partial class MainViewModel : BaseViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly ISessionService _sessionService;
@@ -31,6 +31,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private readonly IQuickActionService _quickActionService;
     private readonly IShortcutService _shortcutService;
     private readonly INotificationService _notificationService;
+    private readonly IRegionalSettingsService _regionalSettings;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -111,6 +112,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         IShortcutService shortcutService,
         IDashboardService dashboardService,
         INotificationService notificationService,
+        IRegionalSettingsService regionalSettings,
         IEnumerable<IQuickActionContributor> contributors)
     {
         _navigationService = navigationService;
@@ -124,6 +126,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _quickActionService = quickActionService;
         _shortcutService = shortcutService;
         _notificationService = notificationService;
+        _regionalSettings = regionalSettings;
         AppState = appState;
         StatusBar = statusBar;
         DashboardSummary = new DashboardViewModel(appState, eventBus, dashboardService);
@@ -233,11 +236,9 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     [RelayCommand]
     private void ShowAbout()
     {
-        System.Windows.MessageBox.Show(
+        _dialogService.ShowInfo(
             $"{AppState.FirmName}\n\nStore Assistant Pro v1.0.0\n.NET 10 • WPF • EF Core",
-            "About",
-            System.Windows.MessageBoxButton.OK,
-            System.Windows.MessageBoxImage.Information);
+            "About");
     }
 
     // ── Management commands (Admin only) ──
@@ -272,6 +273,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
     private async Task OnFirmUpdatedAsync(FirmUpdatedEvent e)
     {
         await _sessionService.RefreshFirmNameAsync();
+        _regionalSettings.UpdateSettings(e.CurrencySymbol, e.DateFormat);
         _statusBar.Post($"Firm updated to '{e.FirmName}'");
     }
 
@@ -344,7 +346,7 @@ public partial class MainViewModel : BaseViewModel, IDisposable
 
     // ── Cleanup ──
 
-    public void Dispose()
+    public override void Dispose()
     {
         ((ObservableObject)_navigationService).PropertyChanged -= OnNavigationPropertyChanged;
         AppState.PropertyChanged -= OnAppStatePropertyChanged;
@@ -352,5 +354,6 @@ public partial class MainViewModel : BaseViewModel, IDisposable
         _eventBus.Unsubscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
         _eventBus.Unsubscribe<DensityChangedEvent>(OnDensityChangedAsync);
         DashboardSummary.Dispose();
+        base.Dispose();
     }
 }

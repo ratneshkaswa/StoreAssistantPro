@@ -36,6 +36,7 @@ public static class Watermark
         tb.TextChanged -= OnTextBoxTextChanged;
         tb.GotFocus -= OnGotFocus;
         tb.LostFocus -= OnLostFocus;
+        tb.IsVisibleChanged -= OnIsVisibleChanged;
 
         if (e.NewValue is string { Length: > 0 })
         {
@@ -43,6 +44,7 @@ public static class Watermark
             tb.TextChanged += OnTextBoxTextChanged;
             tb.GotFocus += OnGotFocus;
             tb.LostFocus += OnLostFocus;
+            tb.IsVisibleChanged += OnIsVisibleChanged;
 
             if (tb.IsLoaded)
                 UpdateAdorner(tb);
@@ -65,6 +67,9 @@ public static class Watermark
     private static void OnLostFocus(object sender, RoutedEventArgs e) =>
         UpdateAdorner((TextBox)sender);
 
+    private static void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+        UpdateAdorner((TextBox)sender);
+
     private static void UpdateAdorner(TextBox tb)
     {
         var layer = AdornerLayer.GetAdornerLayer(tb);
@@ -72,7 +77,7 @@ public static class Watermark
 
         RemoveAdorner(tb, layer);
 
-        if (string.IsNullOrEmpty(tb.Text))
+        if (string.IsNullOrEmpty(tb.Text) && tb.IsVisible)
         {
             var text = GetText(tb);
             if (!string.IsNullOrEmpty(text))

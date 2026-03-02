@@ -13,12 +13,13 @@ public class SetupService(
     public async Task InitializeAppAsync(
         string firmName, string address, string phone,
         string email, string gstin, string currencyCode,
-        string adminPin, string managerPin, string userPin, string masterPin)
+        string adminPin, string managerPin, string userPin, string masterPin,
+        CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("SetupService.InitializeAppAsync");
-        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        if (await context.AppConfigs.AnyAsync().ConfigureAwait(false))
+        if (await context.AppConfigs.AnyAsync(ct).ConfigureAwait(false))
             throw new InvalidOperationException("Application has already been initialized.");
 
         context.AppConfigs.Add(new AppConfig
@@ -29,6 +30,11 @@ public class SetupService(
             Email = string.IsNullOrWhiteSpace(email) ? string.Empty : email,
             GSTNumber = string.IsNullOrWhiteSpace(gstin) ? null : gstin,
             CurrencyCode = string.IsNullOrWhiteSpace(currencyCode) ? "INR" : currencyCode,
+            CurrencySymbol = "₹",
+            FinancialYearStartMonth = 4,
+            FinancialYearEndMonth = 3,
+            DateFormat = "dd/MM/yyyy",
+            NumberFormat = "Indian",
             IsInitialized = true,
             MasterPinHash = PinHasher.Hash(masterPin)
         });
@@ -55,7 +61,7 @@ public class SetupService(
 
         try
         {
-            await context.SaveChangesAsync().ConfigureAwait(false);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
         }
         catch (DbUpdateException)
         {

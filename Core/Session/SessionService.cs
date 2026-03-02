@@ -9,6 +9,7 @@ namespace StoreAssistantPro.Core.Session;
 public class SessionService(
     IDbContextFactory<AppDbContext> contextFactory,
     IAppStateService appState,
+    IRegionalSettingsService regionalSettings,
     ILogger<SessionService> logger) : ISessionService
 {
     private readonly Lock _sessionLock = new();
@@ -17,7 +18,7 @@ public class SessionService(
     public string FirmName { get; private set; } = string.Empty;
     public bool IsLoggedIn { get; private set; }
 
-    public async Task LoginAsync(UserType userType)
+    public async Task LoginAsync(UserType userType, CancellationToken ct = default)
     {
         lock (_sessionLock)
         {
@@ -31,8 +32,8 @@ public class SessionService(
             }
         }
 
-        await using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
 
         lock (_sessionLock)
         {
@@ -45,13 +46,17 @@ public class SessionService(
         appState.SetCurrentUser(userType);
         appState.SetLoggedIn(true);
 
+        regionalSettings.UpdateSettings(
+            config?.CurrencySymbol ?? "₹",
+            config?.DateFormat ?? "dd/MM/yyyy");
+
         logger.LogInformation("Session created for {UserType}", userType);
     }
 
-    public async Task RefreshFirmNameAsync()
+    public async Task RefreshFirmNameAsync(CancellationToken ct = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
 
         lock (_sessionLock)
         {

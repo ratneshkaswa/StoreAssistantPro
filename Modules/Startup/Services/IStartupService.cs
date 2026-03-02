@@ -2,9 +2,9 @@
 
 public interface IStartupService
 {
-    Task MigrateDatabaseAsync();
-    Task<bool> IsAppInitializedAsync();
-    Task LoadFirmInfoAsync();
+    Task MigrateDatabaseAsync(CancellationToken ct = default);
+    Task<bool> IsAppInitializedAsync(CancellationToken ct = default);
+    Task LoadFirmInfoAsync(CancellationToken ct = default);
     void LoadFeatureFlags();
-    Task EnsureFinancialYearAsync();
+    Task EnsureFinancialYearAsync(CancellationToken ct = default);
 }

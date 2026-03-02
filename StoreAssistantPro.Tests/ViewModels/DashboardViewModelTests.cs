@@ -17,7 +17,7 @@ public class DashboardViewModelTests
 
     public DashboardViewModelTests()
     {
-        _dashboardService.GetSummaryAsync().Returns(DashboardSummary.Empty);
+        _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
     }
 
     private DashboardViewModel CreateSut() => new(_appState, _eventBus, _dashboardService);

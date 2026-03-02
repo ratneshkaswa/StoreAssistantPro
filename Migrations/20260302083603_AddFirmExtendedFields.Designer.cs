@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StoreAssistantPro.Data;
 
@@ -11,9 +12,11 @@ using StoreAssistantPro.Data;
 namespace StoreAssistantPro.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260302083603_AddFirmExtendedFields")]
+    partial class AddFirmExtendedFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,11 +39,6 @@ namespace StoreAssistantPro.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CurrencyCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("CurrencySymbol")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");

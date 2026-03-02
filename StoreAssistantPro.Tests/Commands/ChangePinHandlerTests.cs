@@ -23,7 +23,7 @@ public class ChangePinHandlerTests
             new ChangePinCommand(UserType.Manager, "1234", null));
 
         Assert.True(result.Succeeded);
-        await _userService.Received(1).ChangePinAsync(UserType.Manager, "1234");
+        await _userService.Received(1).ChangePinAsync(UserType.Manager, "1234", Arg.Any<CancellationToken>());
         await _eventBus.Received(1).PublishAsync(Arg.Is<PinChangedEvent>(e =>
             e.UserType == UserType.Manager));
     }
@@ -36,13 +36,13 @@ public class ChangePinHandlerTests
 
         Assert.False(result.Succeeded);
         Assert.Contains("Master PIN is required", result.ErrorMessage);
-        await _userService.DidNotReceive().ChangePinAsync(Arg.Any<UserType>(), Arg.Any<string>());
+        await _userService.DidNotReceive().ChangePinAsync(Arg.Any<UserType>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HandleAsync_AdminPin_InvalidMaster_Fails()
     {
-        _loginService.ValidateMasterPinAsync("000000").Returns(false);
+        _loginService.ValidateMasterPinAsync("000000", Arg.Any<CancellationToken>()).Returns(false);
 
         var result = await CreateSut().HandleAsync(
             new ChangePinCommand(UserType.Admin, "1234", "000000"));
@@ -54,13 +54,13 @@ public class ChangePinHandlerTests
     [Fact]
     public async Task HandleAsync_AdminPin_ValidMaster_Succeeds()
     {
-        _loginService.ValidateMasterPinAsync("123456").Returns(true);
+        _loginService.ValidateMasterPinAsync("123456", Arg.Any<CancellationToken>()).Returns(true);
 
         var result = await CreateSut().HandleAsync(
             new ChangePinCommand(UserType.Admin, "9999", "123456"));
 
         Assert.True(result.Succeeded);
-        await _userService.Received(1).ChangePinAsync(UserType.Admin, "9999");
+        await _userService.Received(1).ChangePinAsync(UserType.Admin, "9999", Arg.Any<CancellationToken>());
         await _eventBus.Received(1).PublishAsync(Arg.Is<PinChangedEvent>(e =>
             e.UserType == UserType.Admin));
     }

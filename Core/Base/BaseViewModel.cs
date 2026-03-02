@@ -19,7 +19,7 @@ namespace StoreAssistantPro.Core;
 /// and make cross-cutting concerns (logging, error handling) easy to add.
 /// </para>
 /// </summary>
-public abstract partial class BaseViewModel : ObservableValidator
+public abstract partial class BaseViewModel : ObservableValidator, IDisposable
 {
     /// <summary>
     /// Indicates whether the ViewModel is performing a long-running operation.
@@ -236,5 +236,18 @@ public abstract partial class BaseViewModel : ObservableValidator
         ErrorMessage = string.Empty;
         IsBusy = false;
         IsLoading = false;
+    }
+
+    /// <summary>
+    /// Disposes the internal <see cref="CancellationTokenSource"/>.
+    /// Override in derived ViewModels to unsubscribe from events;
+    /// always call <c>base.Dispose()</c>.
+    /// </summary>
+    public virtual void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+        GC.SuppressFinalize(this);
     }
 }

@@ -8,22 +8,11 @@
     <!-- =================================================================
          VALIDATION ERROR TEMPLATE
          ================================================================= -->
+    <!-- ErrorTemplate = adorner layer. Use AdornedElementPlaceholder
+         only (no border here) to avoid double-border with the
+         controls own BorderBrush set via Validation.HasError trigger. -->
     <ControlTemplate x:Key="InlineValidationErrorTemplate">
-        <StackPanel>
-            <Border BorderBrush="{StaticResource FluentStrokeError}" BorderThickness="1.5"
-                    CornerRadius="{StaticResource FluentCornerSmall}">
-                <AdornedElementPlaceholder/>
-            </Border>
-            <ItemsControl ItemsSource="{Binding}" Margin="2,3,0,0">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding ErrorContent}"
-                                   Foreground="{StaticResource FluentError}" FontSize="11"
-                                   TextWrapping="Wrap"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+        <AdornedElementPlaceholder/>
     </ControlTemplate>
 
     <!-- ═══════════════════════════════════════════════════════════════
@@ -45,16 +34,49 @@
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="h:SelectOnFocus.IsEnabled" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="Validation.HasError" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self},
+                                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+                <Setter Property="ToolTipService.ShowDuration" Value="30000"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- PasswordBox inherits FluentPasswordBoxStyle (rounded, accent-focus) -->
     <Style TargetType="PasswordBox" BasedOn="{StaticResource FluentPasswordBoxStyle}">
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="Validation.HasError" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self},
+                                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+                <Setter Property="ToolTipService.ShowDuration" Value="30000"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- ComboBox inherits FluentComboBoxStyle (rounded, accent-focus, Fluent dropdown) -->
     <Style TargetType="ComboBox" BasedOn="{StaticResource FluentComboBoxStyle}">
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="Validation.HasError" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self},
+                                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+                <Setter Property="ToolTipService.ShowDuration" Value="30000"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- ComboBoxItem inherits FluentComboBoxItemStyle (subtle hover/selection) -->
@@ -80,6 +102,17 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="Validation.HasError" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self},
+                                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+                <Setter Property="ToolTipService.ShowDuration" Value="30000"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════

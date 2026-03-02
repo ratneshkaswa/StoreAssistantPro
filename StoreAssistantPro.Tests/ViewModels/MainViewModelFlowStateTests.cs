@@ -25,7 +25,7 @@ public class MainViewModelFlowStateTests
     {
         _appState.Notifications.Returns(new ObservableCollection<AppNotification>());
         _appState.CurrentMode.Returns(OperationalMode.Management);
-        _dashboardService.GetSummaryAsync().Returns(DashboardSummary.Empty);
+        _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
     }
 
     private MainViewModel CreateSut()
@@ -45,6 +45,7 @@ public class MainViewModelFlowStateTests
             Substitute.For<IShortcutService>(),
             _dashboardService,
             Substitute.For<INotificationService>(),
+            Substitute.For<IRegionalSettingsService>(),
             []);
     }
 

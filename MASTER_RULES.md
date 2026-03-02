@@ -107,6 +107,27 @@ never redesign:
 - Read-only queries do not need transactions.
 
 
+### 1.8  CancellationToken propagation
+
+- Every async service method **MUST** accept `CancellationToken ct = default`
+  as its last parameter.
+- Pass `ct` to all EF Core calls: `CreateDbContextAsync(ct)`,
+  `FirstOrDefaultAsync(ct)`, `ToListAsync(ct)`, `AnyAsync(ct)`,
+  `SaveChangesAsync(ct)`.
+- ViewModels receive `ct` from `BaseViewModel.RunAsync` / `RunLoadAsync`
+  and forward it to service calls — never discard with `_`.
+- This ensures navigating away or cancelling cancels pending DB queries
+  instead of blocking the pooled `DbContext` until `CommandTimeout`.
+
+
+### 1.9  Service DI lifetime — DB-accessing services
+
+- Services that only hold `IDbContextFactory` + stateless dependencies
+  should be registered as `Transient` — defence-in-depth against
+  accidentally capturing a `DbContext` as a field.
+- Only services that hold **mutable in-memory state** need `Singleton`.
+
+
 ---
 
 ## 2  UI Rules
@@ -260,13 +281,69 @@ Row 2  Auto   Action buttons      (right-aligned, Primary + Secondary)
 | Decimal-only | `h:NumericInput.IsDecimalOnly="True"` | Allow digits + one decimal |
 
 
-### 3.5  Inline validation
+### 3.5  Validation — Error Display
 
-- Implicit styles set `Validation.ErrorTemplate` → red border + message.
-- ViewModels extend `ObservableValidator` via `BaseViewModel`.
-- Per-field: `[Required]` + `[NotifyDataErrorInfo]` attributes.
-- Form-level: `Validate()` / `ErrorMessage` pattern.
-- **Never** use `MessageBox` for validation feedback.
+- `Validation.ErrorTemplate` = **transparent pass-through** (`<AdornedElementPlaceholder/>` only).
+  Never add a `Border` or `TextBlock` in the ErrorTemplate — adorner-layer content
+  does NOT participate in WPF layout and overlaps elements below.
+- Style trigger on `Validation.HasError`:
+  - `BorderBrush` = `FluentStrokeError`
+  - `Background` = `FluentErrorBackground`
+  - `ToolTip` = error text (from `Validation.Errors[0].ErrorContent`)
+  - `ToolTipService.InitialShowDelay` = 0, `ShowDuration` = 30000
+- Applies to **all** input controls: `TextBox`, `PasswordBox`, `ComboBox`, `DatePicker`.
+- Already implemented globally in `GlobalStyles.xaml`.
+
+
+### 3.5.1  Validation — Attribute Rules
+
+- Every property with `[MaxLength]`, `[Required]`, or `[RegularExpression]` **MUST**
+  also have `[NotifyDataErrorInfo]` — CommunityToolkit.Mvvm silently ignores
+  attributes without it.
+- `MaxLength` in XAML **MUST** match `MaxLength` in Model — always check both.
+
+
+### 3.5.2  Validation — Wizard / Multi-Step Dialogs
+
+- **Never** call `ValidateAllProperties()` on Next — causes **cross-step validation
+  bleed** (errors on Step 2 block Step 1).
+- Per-step pattern: `ClearErrors()` for all properties → `ValidateProperty()` for
+  only the current step's `[Required]` fields.
+- Optional field format errors (regex, email, GSTIN, PAN) must **never** block
+  step navigation — they are caught on Save.
+- `ValidateAllProperties()` is only correct in `Save`.
+- `SuccessMessage` / `ErrorMessage` must be cleared on step change (Next / Back).
+- When validation blocks Next, always set `ErrorMessage` so user sees feedback.
+
+
+### 3.5.3  Wizard Dialog — Enter Key & ConfirmCommand
+
+- **Never** bind `ConfirmCommand` directly to `SaveCommand` in wizard dialogs.
+- Create a `ConfirmStepCommand`: delegates to `Next` on non-last steps, `Save` on last.
+- Otherwise, Enter on the last field of any non-final step triggers Save prematurely
+  (KeyboardNav fires `DefaultCommand` when no next editable field exists in the
+  visible step).
+
+
+### 3.5.4  Wizard Dialog — Layout
+
+- Step `Grid`s inside a `Height="*"` row **MUST** have `VerticalAlignment="Top"` —
+  otherwise content floats/stretches in the available space.
+- Hint `TextBlock` after a validated field **MUST** have a `FormRowSpacing` row
+  between them — validation border overlaps hint text without it.
+- All hint text margins: `Margin="0,4,0,0"` — consistent across steps.
+- Address fields: single-line for short addresses; no `AcceptsReturn` unless
+  the field genuinely needs multi-line.
+
+
+### 3.5.5  WPF Adorner Safety
+
+- Adorners live in a separate rendering layer — they do NOT follow `Visibility`,
+  `Opacity`, or layout of their adorned element.
+- Any adorner-based helper (Watermark, ErrorTemplate, etc.) **MUST**:
+  1. Check `element.IsVisible` before adding an adorner.
+  2. Subscribe to `IsVisibleChanged` to remove adorners when elements become Collapsed.
+- Already fixed in `Watermark.cs` and `GlobalStyles.xaml`.
 
 
 ### 3.6  Status bar

@@ -14,11 +14,11 @@ public class WorkspaceViewModelTests
     [Fact]
     public async Task LoadMainWorkspace_CallsDashboardService()
     {
-        _dashboardService.GetSummaryAsync().Returns(DashboardSummary.Empty);
+        _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
 
         var sut = CreateSut();
         await sut.LoadMainWorkspaceCommand.ExecuteAsync(null);
 
-        await _dashboardService.Received(1).GetSummaryAsync();
+        await _dashboardService.Received(1).GetSummaryAsync(Arg.Any<CancellationToken>());
     }
 }

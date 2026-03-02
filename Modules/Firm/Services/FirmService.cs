@@ -9,27 +9,34 @@ public class FirmService(
     IDbContextFactory<AppDbContext> contextFactory,
     IPerformanceMonitor perf) : IFirmService
 {
-    public async Task<AppConfig?> GetFirmAsync()
+    public async Task<AppConfig?> GetFirmAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("FirmService.GetFirmAsync");
-        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
-        return await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync().ConfigureAwait(false);
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateFirmAsync(string firmName, string address, string phone, string? gstNumber = null, string? currencyCode = null)
+    public async Task UpdateFirmAsync(FirmUpdateDto dto, CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("FirmService.UpdateFirmAsync");
-        await using var context = await contextFactory.CreateDbContextAsync().ConfigureAwait(false);
-        var config = await context.AppConfigs.FirstOrDefaultAsync().ConfigureAwait(false)
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException("Firm configuration not found.");
 
-        config.FirmName = firmName;
-        config.Address = address;
-        config.Phone = phone;
-        config.GSTNumber = string.IsNullOrWhiteSpace(gstNumber) ? null : gstNumber.Trim();
-        if (!string.IsNullOrWhiteSpace(currencyCode))
-            config.CurrencyCode = currencyCode.Trim();
+        config.FirmName = dto.FirmName;
+        config.Address = dto.Address;
+        config.State = dto.State;
+        config.Pincode = dto.Pincode;
+        config.Phone = dto.Phone;
+        config.Email = dto.Email;
+        config.GSTNumber = string.IsNullOrWhiteSpace(dto.GSTNumber) ? null : dto.GSTNumber.Trim();
+        config.PANNumber = string.IsNullOrWhiteSpace(dto.PANNumber) ? null : dto.PANNumber.Trim();
+        config.CurrencySymbol = string.IsNullOrWhiteSpace(dto.CurrencySymbol) ? "₹" : dto.CurrencySymbol;
+        config.FinancialYearStartMonth = dto.FinancialYearStartMonth;
+        config.FinancialYearEndMonth = dto.FinancialYearEndMonth;
+        config.DateFormat = dto.DateFormat;
+        config.NumberFormat = dto.NumberFormat;
 
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 }

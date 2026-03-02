@@ -15,11 +15,26 @@ public class RegionalSettingsService : IRegionalSettingsService
     private static readonly CultureInfo Culture = new("en-IN");
     private static readonly TimeZoneInfo Timezone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
 
-    public string CurrencySymbol => "₹";
-    public string DateFormat => "dd-MM-yyyy";
+    private readonly Lock _lock = new();
+    private string _currencySymbol = "₹";
+    private string _dateFormat = "dd-MM-yyyy";
+
+    public string CurrencySymbol { get { lock (_lock) return _currencySymbol; } }
+    public string DateFormat { get { lock (_lock) return _dateFormat; } }
     public string TimeFormat => "hh:mm tt";
-    public string DateTimeFormat => "dd-MM-yyyy hh:mm tt";
+    public string DateTimeFormat => $"{DateFormat} {TimeFormat}";
     public TimeZoneInfo TimeZone => Timezone;
+
+    public void UpdateSettings(string currencySymbol, string dateFormat)
+    {
+        lock (_lock)
+        {
+            if (!string.IsNullOrWhiteSpace(currencySymbol))
+                _currencySymbol = currencySymbol;
+            if (!string.IsNullOrWhiteSpace(dateFormat))
+                _dateFormat = dateFormat;
+        }
+    }
 
     public string FormatCurrency(decimal amount) =>
         amount.ToString("C", Culture);

@@ -18,7 +18,7 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task HandleAsync_ValidPin_ReturnsSuccessAndPublishesEvent()
     {
-        _loginService.ValidatePinAsync(UserType.Admin, "1234")
+        _loginService.ValidatePinAsync(UserType.Admin, "1234", Arg.Any<CancellationToken>())
             .Returns(LoginResult.Success());
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.Admin, "1234"));
@@ -31,7 +31,7 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task HandleAsync_InvalidPin_ReturnsFailureWithRemainingAttempts()
     {
-        _loginService.ValidatePinAsync(UserType.User, "0000")
+        _loginService.ValidatePinAsync(UserType.User, "0000", Arg.Any<CancellationToken>())
             .Returns(LoginResult.Failed("Invalid PIN. 2 attempt(s) remaining.", 2));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.User, "0000"));
@@ -44,7 +44,7 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task HandleAsync_LockedOut_ReturnsFailureWithLockoutMessage()
     {
-        _loginService.ValidatePinAsync(UserType.Manager, "9999")
+        _loginService.ValidatePinAsync(UserType.Manager, "9999", Arg.Any<CancellationToken>())
             .Returns(LoginResult.LockedOut("02:30 PM"));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.Manager, "9999"));
@@ -57,7 +57,7 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task HandleAsync_UserNotFound_ReturnsFailure()
     {
-        _loginService.ValidatePinAsync(UserType.User, "1111")
+        _loginService.ValidatePinAsync(UserType.User, "1111", Arg.Any<CancellationToken>())
             .Returns(LoginResult.Failed("User not found.", 0));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.User, "1111"));
