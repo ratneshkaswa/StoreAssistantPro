@@ -29,27 +29,8 @@ public partial class SetupWindow : Window
 
         PreviewKeyDown += OnPreviewKeyDown;
 
-        // Auto-focus first field when step changes
-        vm.StepChanged += OnStepChanged;
-
         // Focus firm name on load
-        Loaded += (_, _) => FocusByName("FirmNameBox");
-    }
-
-    private void OnStepChanged(int step)
-    {
-        Dispatcher.BeginInvoke(() =>
-        {
-            switch (step)
-            {
-                case 1:
-                    FocusByName("FirmNameBox");
-                    break;
-                case 2:
-                    AdminPinBox.Focus();
-                    break;
-            }
-        }, System.Windows.Threading.DispatcherPriority.Loaded);
+        Loaded += (_, _) => FirmNameBox.Focus();
     }
 
     private void FocusByName(string name)
@@ -63,15 +44,8 @@ public partial class SetupWindow : Window
         if (e.Key != Key.Enter) return;
         if (DataContext is not SetupViewModel vm) return;
 
-        if (vm.IsStep3)
-        {
-            if (vm.SaveCommand.CanExecute(null))
-                vm.SaveCommand.Execute(null);
-        }
-        else
-        {
-            vm.NextStepCommand.Execute(null);
-        }
+        if (vm.SaveCommand.CanExecute(null))
+            vm.SaveCommand.Execute(null);
 
         e.Handled = true;
     }
@@ -104,12 +78,6 @@ public partial class SetupWindow : Window
         e.Handled = !DigitsOnlyRegex().IsMatch(e.Text);
     }
 
-    /// <summary>Only allow digits, +, -, and spaces in phone field.</summary>
-    private void OnPreviewPhoneOnly(object sender, TextCompositionEventArgs e)
-    {
-        e.Handled = !PhoneCharsRegex().IsMatch(e.Text);
-    }
-
     /// <summary>Confirm close if setup is in progress.</summary>
     private void OnWindowClosing(object? sender, CancelEventArgs e)
     {
@@ -127,7 +95,4 @@ public partial class SetupWindow : Window
 
     [GeneratedRegex(@"^\d+$")]
     private static partial Regex DigitsOnlyRegex();
-
-    [GeneratedRegex(@"^[\d\s\+\-]+$")]
-    private static partial Regex PhoneCharsRegex();
 }

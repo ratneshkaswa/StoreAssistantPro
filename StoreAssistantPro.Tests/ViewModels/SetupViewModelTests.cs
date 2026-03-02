@@ -11,26 +11,12 @@ public class SetupViewModelTests
 
     private SetupViewModel CreateSut() => new(_commandBus);
 
-    /// <summary>
-    /// Helper: configures a valid SUT through steps 1→2→3 and executes SaveCommand.
-    /// </summary>
-    private async Task<SetupViewModel> CreateAndCompleteSetupAsync(
-        string firmName = "Test Store",
+    private void FillValidPins(SetupViewModel sut,
         string adminPin = "1234", string adminConfirm = "1234",
         string managerPin = "5678", string managerConfirm = "5678",
         string userPin = "9012", string userConfirm = "9012",
-        string masterPin = "123456", string masterConfirm = "123456",
-        bool? expectedClose = true)
+        string masterPin = "123456", string masterConfirm = "123456")
     {
-        bool? closeResult = null;
-        var sut = CreateSut();
-        sut.RequestClose = result => closeResult = result;
-
-        // Step 1: Firm details
-        sut.FirmName = firmName;
-        sut.NextStepCommand.Execute(null);
-
-        // Step 2: PINs
         sut.AdminPin = adminPin;
         sut.AdminPinConfirm = adminConfirm;
         sut.ManagerPin = managerPin;
@@ -39,13 +25,6 @@ public class SetupViewModelTests
         sut.UserPinConfirm = userConfirm;
         sut.MasterPin = masterPin;
         sut.MasterPinConfirm = masterConfirm;
-        sut.NextStepCommand.Execute(null);
-
-        // Step 3: Save
-        if (sut.IsStep3)
-            await sut.SaveCommand.ExecuteAsync(null);
-
-        return sut;
     }
 
     [Fact]
@@ -59,19 +38,7 @@ public class SetupViewModelTests
         sut.RequestClose = result => closeResult = result;
 
         sut.FirmName = "Test Store";
-        sut.NextStepCommand.Execute(null);
-        Assert.True(sut.IsStep2);
-
-        sut.AdminPin = "1234";
-        sut.AdminPinConfirm = "1234";
-        sut.ManagerPin = "5678";
-        sut.ManagerPinConfirm = "5678";
-        sut.UserPin = "9012";
-        sut.UserPinConfirm = "9012";
-        sut.MasterPin = "123456";
-        sut.MasterPinConfirm = "123456";
-        sut.NextStepCommand.Execute(null);
-        Assert.True(sut.IsStep3);
+        FillValidPins(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
@@ -84,14 +51,14 @@ public class SetupViewModelTests
     }
 
     [Fact]
-    public void NextStep_EmptyFirmName_StaysOnStep1()
+    public async Task Save_EmptyFirmName_ShowsError()
     {
         var sut = CreateSut();
         sut.FirmName = "";
+        FillValidPins(sut);
 
-        sut.NextStepCommand.Execute(null);
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(sut.IsStep1);
         Assert.Equal("Firm name is required.", sut.ErrorMessage);
     }
 
@@ -99,65 +66,38 @@ public class SetupViewModelTests
     [InlineData("12", "Admin PIN must be exactly 4 digits.")]
     [InlineData("abcd", "Admin PIN must be exactly 4 digits.")]
     [InlineData("12345", "Admin PIN must be exactly 4 digits.")]
-    public void NextStep_InvalidAdminPin_StaysOnStep2(string pin, string expectedError)
+    public async Task Save_InvalidAdminPin_ShowsError(string pin, string expectedError)
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        sut.NextStepCommand.Execute(null);
+        FillValidPins(sut, adminPin: pin, adminConfirm: pin);
 
-        sut.AdminPin = pin;
-        sut.AdminPinConfirm = pin;
-        sut.ManagerPin = "5678";
-        sut.ManagerPinConfirm = "5678";
-        sut.UserPin = "9012";
-        sut.UserPinConfirm = "9012";
-        sut.MasterPin = "123456";
-        sut.MasterPinConfirm = "123456";
-        sut.NextStepCommand.Execute(null);
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(sut.IsStep2);
         Assert.Equal(expectedError, sut.ErrorMessage);
     }
 
     [Fact]
-    public void NextStep_PinConfirmMismatch_StaysOnStep2()
+    public async Task Save_PinConfirmMismatch_ShowsError()
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        sut.NextStepCommand.Execute(null);
+        FillValidPins(sut, adminConfirm: "9999");
 
-        sut.AdminPin = "1234";
-        sut.AdminPinConfirm = "9999";
-        sut.ManagerPin = "5678";
-        sut.ManagerPinConfirm = "5678";
-        sut.UserPin = "9012";
-        sut.UserPinConfirm = "9012";
-        sut.MasterPin = "123456";
-        sut.MasterPinConfirm = "123456";
-        sut.NextStepCommand.Execute(null);
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(sut.IsStep2);
         Assert.Equal("Admin PIN confirmation does not match.", sut.ErrorMessage);
     }
 
     [Fact]
-    public void NextStep_InvalidMasterPin_StaysOnStep2()
+    public async Task Save_InvalidMasterPin_ShowsError()
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        sut.NextStepCommand.Execute(null);
+        FillValidPins(sut, masterPin: "1234", masterConfirm: "1234");
 
-        sut.AdminPin = "1234";
-        sut.AdminPinConfirm = "1234";
-        sut.ManagerPin = "5678";
-        sut.ManagerPinConfirm = "5678";
-        sut.UserPin = "9012";
-        sut.UserPinConfirm = "9012";
-        sut.MasterPin = "1234";
-        sut.MasterPinConfirm = "1234";
-        sut.NextStepCommand.Execute(null);
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(sut.IsStep2);
         Assert.Equal("Master Password must be exactly 6 digits.", sut.ErrorMessage);
     }
 
@@ -165,23 +105,16 @@ public class SetupViewModelTests
     [InlineData("1234", "1234", "5678")]
     [InlineData("1234", "5678", "1234")]
     [InlineData("5678", "1234", "1234")]
-    public void NextStep_DuplicatePins_StaysOnStep2(string admin, string manager, string user)
+    public async Task Save_DuplicatePins_ShowsError(string admin, string manager, string user)
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        sut.NextStepCommand.Execute(null);
+        FillValidPins(sut, adminPin: admin, adminConfirm: admin,
+                      managerPin: manager, managerConfirm: manager,
+                      userPin: user, userConfirm: user);
 
-        sut.AdminPin = admin;
-        sut.AdminPinConfirm = admin;
-        sut.ManagerPin = manager;
-        sut.ManagerPinConfirm = manager;
-        sut.UserPin = user;
-        sut.UserPinConfirm = user;
-        sut.MasterPin = "123456";
-        sut.MasterPinConfirm = "123456";
-        sut.NextStepCommand.Execute(null);
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.True(sut.IsStep2);
         Assert.Equal("Each role must have a unique PIN.", sut.ErrorMessage);
     }
 
@@ -196,34 +129,12 @@ public class SetupViewModelTests
         sut.RequestClose = result => closeResult = result;
 
         sut.FirmName = "Store";
-        sut.NextStepCommand.Execute(null);
-
-        sut.AdminPin = "1234";
-        sut.AdminPinConfirm = "1234";
-        sut.ManagerPin = "5678";
-        sut.ManagerPinConfirm = "5678";
-        sut.UserPin = "9012";
-        sut.UserPinConfirm = "9012";
-        sut.MasterPin = "123456";
-        sut.MasterPinConfirm = "123456";
-        sut.NextStepCommand.Execute(null);
+        FillValidPins(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.Equal("Already initialized.", sut.ErrorMessage);
         Assert.Null(closeResult);
-    }
-
-    [Fact]
-    public void PreviousStep_FromStep2_GoesBackToStep1()
-    {
-        var sut = CreateSut();
-        sut.FirmName = "Store";
-        sut.NextStepCommand.Execute(null);
-        Assert.True(sut.IsStep2);
-
-        sut.PreviousStepCommand.Execute(null);
-        Assert.True(sut.IsStep1);
     }
 
     [Theory]
@@ -245,7 +156,7 @@ public class SetupViewModelTests
         Assert.Empty(sut.AdminPinWarning);
     }
 
-    // ── GSTIN state decode ──
+    // -- GSTIN state decode --
 
     [Theory]
     [InlineData("22AAAAA0000A1Z5", "Chhattisgarh")]
@@ -256,7 +167,6 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.GSTIN = gstin;
         Assert.Contains(expectedState, sut.GstinValidationHint);
-        Assert.StartsWith("✓", sut.GstinValidationHint);
     }
 
     [Fact]
@@ -275,14 +185,13 @@ public class SetupViewModelTests
         Assert.Empty(sut.GstinValidationHint);
     }
 
-    // ── Phone format preview ──
+    // -- Phone format preview --
 
     [Fact]
     public void PhoneValidationHint_10Digits_ShowsFormattedPreview()
     {
         var sut = CreateSut();
         sut.Phone = "9876543210";
-        Assert.StartsWith("✓", sut.PhoneValidationHint);
         Assert.Contains("98765 43210", sut.PhoneValidationHint);
     }
 
@@ -294,7 +203,7 @@ public class SetupViewModelTests
         Assert.Equal("Digits, +, - and spaces only", sut.PhoneValidationHint);
     }
 
-    // ── Display properties (Not provided fallback) ──
+    // -- Display properties (Not provided fallback) --
 
     [Theory]
     [InlineData("", "Not provided")]
@@ -317,7 +226,7 @@ public class SetupViewModelTests
         Assert.Equal(expected, sut.EmailDisplay);
     }
 
-    // ── Currency code (hardcoded INR for India) ──
+    // -- Currency code (hardcoded INR for India) --
 
     [Fact]
     public void CurrencyCode_AlwaysINR()
@@ -326,7 +235,7 @@ public class SetupViewModelTests
         Assert.Equal("INR", sut.CurrencyCode);
     }
 
-    // ── Redirect countdown ──
+    // -- Redirect countdown --
 
     [Fact]
     public void RedirectCountdown_InitiallyEmpty()

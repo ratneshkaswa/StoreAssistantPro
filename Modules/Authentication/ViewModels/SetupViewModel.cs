@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -183,62 +183,31 @@ public partial class SetupViewModel : BaseViewModel
 
     public Action<bool?>? RequestClose { get; set; }
 
-    /// <summary>Raised when step changes so the view can set focus.</summary>
-    public event Action<int>? StepChanged;
-
     public SetupViewModel(ICommandBus commandBus) : base()
     {
         _commandBus = commandBus;
-        CurrentStep = 1;
     }
 
     private readonly ICommandBus _commandBus;
 
     [RelayCommand]
-    private void NextStep()
+    private async Task SaveAsync()
     {
         ErrorMessage = string.Empty;
 
-        if (CurrentStep == 1)
-        {
-            if (!Validate(v => v
-                .Rule(InputValidator.IsRequired(FirmName), "Firm name is required.")))
-                return;
-            CurrentStep = 2;
-            StepChanged?.Invoke(2);
-        }
-        else if (CurrentStep == 2)
-        {
-            if (!Validate(v => v
-                .Rule(InputValidator.IsValidUserPin(AdminPin), "Admin PIN must be exactly 4 digits.")
-                .Rule(InputValidator.AreEqual(AdminPin, AdminPinConfirm), "Admin PIN confirmation does not match.")
-                .Rule(InputValidator.IsValidUserPin(ManagerPin), "Manager PIN must be exactly 4 digits.")
-                .Rule(InputValidator.AreEqual(ManagerPin, ManagerPinConfirm), "Manager PIN confirmation does not match.")
-                .Rule(InputValidator.IsValidUserPin(UserPin), "User PIN must be exactly 4 digits.")
-                .Rule(InputValidator.AreEqual(UserPin, UserPinConfirm), "User PIN confirmation does not match.")
-                .Rule(InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin), "Each role must have a unique PIN.")
-                .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master Password must be exactly 6 digits.")
-                .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master Password confirmation does not match.")))
-                return;
-            CurrentStep = 3;
-            StepChanged?.Invoke(3);
-        }
-    }
+        if (!Validate(v => v
+            .Rule(InputValidator.IsRequired(FirmName), "Firm name is required.")
+            .Rule(InputValidator.IsValidUserPin(AdminPin), "Admin PIN must be exactly 4 digits.")
+            .Rule(InputValidator.AreEqual(AdminPin, AdminPinConfirm), "Admin PIN confirmation does not match.")
+            .Rule(InputValidator.IsValidUserPin(ManagerPin), "Manager PIN must be exactly 4 digits.")
+            .Rule(InputValidator.AreEqual(ManagerPin, ManagerPinConfirm), "Manager PIN confirmation does not match.")
+            .Rule(InputValidator.IsValidUserPin(UserPin), "User PIN must be exactly 4 digits.")
+            .Rule(InputValidator.AreEqual(UserPin, UserPinConfirm), "User PIN confirmation does not match.")
+            .Rule(InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin), "Each role must have a unique PIN.")
+            .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master Password must be exactly 6 digits.")
+            .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master Password confirmation does not match.")))
+            return;
 
-    [RelayCommand]
-    private void PreviousStep()
-    {
-        if (CurrentStep > 1)
-        {
-            ErrorMessage = string.Empty;
-            CurrentStep--;
-            StepChanged?.Invoke(CurrentStep);
-        }
-    }
-
-    [RelayCommand]
-    private async Task SaveAsync()
-    {
         var result = await _commandBus.SendAsync(new CompleteFirstSetupCommand(
             FirmName.Trim(), Address.Trim(), Phone.Trim(),
             Email.Trim(), GSTIN.Trim().ToUpperInvariant(), CurrencyCode,
@@ -256,18 +225,6 @@ public partial class SetupViewModel : BaseViewModel
         }
         else
             ErrorMessage = result.ErrorMessage ?? "Setup failed.";
-    }
-
-    // S9: Jump to step from summary
-    [RelayCommand]
-    private void GoToStep(string step)
-    {
-        if (int.TryParse(step, out var stepNum) && stepNum is >= 1 and <= 3)
-        {
-            ErrorMessage = string.Empty;
-            CurrentStep = stepNum;
-            StepChanged?.Invoke(CurrentStep);
-        }
     }
 
     private static string GetPinWarning(string pin)
