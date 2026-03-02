@@ -201,7 +201,7 @@ public class DensitySystemTests
     //  GeneralSettingsViewModel — density toggle
     // ══════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [Fact(Skip = "SystemSettings module deleted — re-enable when rebuilt")]
     public void GeneralSettingsViewModel_ExposesAvailableDensityModes()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "SystemSettings",
@@ -213,7 +213,7 @@ public class DensitySystemTests
         Assert.Contains("DensityMode.Compact", content, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [Fact(Skip = "SystemSettings module deleted — re-enable when rebuilt")]
     public void GeneralSettingsViewModel_CallsApplyDensityOnChange()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "SystemSettings",
@@ -224,7 +224,7 @@ public class DensitySystemTests
         Assert.Contains("OnSelectedDensityModeChanged", content, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [Fact(Skip = "SystemSettings module deleted — re-enable when rebuilt")]
     public void GeneralSettingsView_HasDensityComboBox()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "SystemSettings",

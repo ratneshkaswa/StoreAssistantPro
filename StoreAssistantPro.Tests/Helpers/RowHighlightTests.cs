@@ -299,7 +299,7 @@ public class RowHighlightTests
     //  ProductsView uses RowHighlight binding
     // ══════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [Fact(Skip = "Products module deleted — re-enable when rebuilt")]
     public void ProductsView_UsesRowHighlightBinding()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "Products",
@@ -310,7 +310,7 @@ public class RowHighlightTests
         Assert.Contains("HighlightLevel", content, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [Fact(Skip = "Products module deleted — re-enable when rebuilt")]
     public void ProductsView_NoInlineRowBackgroundTriggers()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "Products",
@@ -381,7 +381,7 @@ public class RowHighlightTests
     //  View wiring — Vendors and Brands use RowHighlight
     // ══════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [Fact(Skip = "Vendors module deleted — re-enable when rebuilt")]
     public void VendorsView_UsesRowHighlightBinding()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "Vendors",
@@ -392,7 +392,7 @@ public class RowHighlightTests
         Assert.Contains("HighlightLevel", content, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [Fact(Skip = "Brands module deleted — re-enable when rebuilt")]
     public void BrandsView_UsesRowHighlightBinding()
     {
         var path = Path.Combine(SolutionRoot, "Modules", "Brands",
