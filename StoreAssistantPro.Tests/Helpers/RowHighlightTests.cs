@@ -296,34 +296,6 @@ public class RowHighlightTests
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  ProductsView uses RowHighlight binding
-    // ══════════════════════════════════════════════════════════════════
-
-    [Fact(Skip = "Products module deleted — re-enable when rebuilt")]
-    public void ProductsView_UsesRowHighlightBinding()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "Products",
-            "Views", "ProductsView.xaml");
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("RowHighlight.Level", content, StringComparison.Ordinal);
-        Assert.Contains("HighlightLevel", content, StringComparison.Ordinal);
-    }
-
-    [Fact(Skip = "Products module deleted — re-enable when rebuilt")]
-    public void ProductsView_NoInlineRowBackgroundTriggers()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "Products",
-            "Views", "ProductsView.xaml");
-        var content = File.ReadAllText(path);
-
-        // The old inline triggers should be gone
-        Assert.DoesNotContain("FluentErrorBackground", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("FluentWarningBackground", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("FluentSurfaceElevated", content, StringComparison.Ordinal);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
     //  Vendor.HighlightLevel
     // ══════════════════════════════════════════════════════════════════
 
@@ -375,32 +347,6 @@ public class RowHighlightTests
     {
         var cat = new Category { IsActive = false };
         Assert.Equal(RowHighlightLevel.Inactive, cat.HighlightLevel);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  View wiring — Vendors and Brands use RowHighlight
-    // ══════════════════════════════════════════════════════════════════
-
-    [Fact(Skip = "Vendors module deleted — re-enable when rebuilt")]
-    public void VendorsView_UsesRowHighlightBinding()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "Vendors",
-            "Views", "VendorsView.xaml");
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("RowHighlight.Level", content, StringComparison.Ordinal);
-        Assert.Contains("HighlightLevel", content, StringComparison.Ordinal);
-    }
-
-    [Fact(Skip = "Brands module deleted — re-enable when rebuilt")]
-    public void BrandsView_UsesRowHighlightBinding()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "Brands",
-            "Views", "BrandsView.xaml");
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("RowHighlight.Level", content, StringComparison.Ordinal);
-        Assert.Contains("HighlightLevel", content, StringComparison.Ordinal);
     }
 
     // ══════════════════════════════════════════════════════════════════

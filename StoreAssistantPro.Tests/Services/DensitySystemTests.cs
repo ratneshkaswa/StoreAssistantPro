@@ -198,44 +198,6 @@ public class DensitySystemTests
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  GeneralSettingsViewModel — density toggle
-    // ══════════════════════════════════════════════════════════════════
-
-    [Fact(Skip = "SystemSettings module deleted — re-enable when rebuilt")]
-    public void GeneralSettingsViewModel_ExposesAvailableDensityModes()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "SystemSettings",
-            "ViewModels", "GeneralSettingsViewModel.cs");
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("AvailableDensityModes", content, StringComparison.Ordinal);
-        Assert.Contains("DensityMode.Normal", content, StringComparison.Ordinal);
-        Assert.Contains("DensityMode.Compact", content, StringComparison.Ordinal);
-    }
-
-    [Fact(Skip = "SystemSettings module deleted — re-enable when rebuilt")]
-    public void GeneralSettingsViewModel_CallsApplyDensityOnChange()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "SystemSettings",
-            "ViewModels", "GeneralSettingsViewModel.cs");
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("ApplyDensity", content, StringComparison.Ordinal);
-        Assert.Contains("OnSelectedDensityModeChanged", content, StringComparison.Ordinal);
-    }
-
-    [Fact(Skip = "SystemSettings module deleted — re-enable when rebuilt")]
-    public void GeneralSettingsView_HasDensityComboBox()
-    {
-        var path = Path.Combine(SolutionRoot, "Modules", "SystemSettings",
-            "Views", "GeneralSettingsView.xaml");
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("AvailableDensityModes", content, StringComparison.Ordinal);
-        Assert.Contains("SelectedDensityMode", content, StringComparison.Ordinal);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
     //  Token type consistency
     //
     //  Compact tokens must use the same XAML type as DesignSystem.

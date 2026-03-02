@@ -25,42 +25,6 @@ public partial class EmptyStateOverlayComplianceTests
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  Each DataGrid view uses EmptyStateOverlay
-    // ══════════════════════════════════════════════════════════════════
-
-    [Theory(Skip = "No DataGrid views exist yet — re-enable when Phase 1 modules are rebuilt")]
-    [InlineData("Modules/Products/Views/ProductsView.xaml")]
-    public void View_UsesEmptyStateOverlay(string relativePath)
-    {
-        var path = Path.Combine(SolutionRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
-        Assert.True(File.Exists(path), $"{relativePath} not found");
-
-        var content = File.ReadAllText(path);
-        Assert.Contains("EmptyStateOverlay", content, StringComparison.Ordinal);
-        Assert.Contains("ItemCount=", content, StringComparison.Ordinal);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  No inline empty-state TextBlock + DataTrigger pattern
-    // ══════════════════════════════════════════════════════════════════
-
-    [Theory(Skip = "No DataGrid views exist yet — re-enable when Phase 1 modules are rebuilt")]
-    [InlineData("Modules/Products/Views/ProductsView.xaml")]
-    public void View_NoInlineEmptyStateTextBlock(string relativePath)
-    {
-        var path = Path.Combine(SolutionRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
-        var content = File.ReadAllText(path);
-
-        // The old pattern: TextBlock with "No {items} found" + DataTrigger on Count
-        var oldPattern = InlineEmptyStateRegex();
-        var matches = oldPattern.Matches(content);
-
-        Assert.True(matches.Count == 0,
-            $"{relativePath} still has {matches.Count} inline empty-state TextBlock(s). " +
-            "Use <controls:EmptyStateOverlay .../> instead.");
-    }
-
-    // ══════════════════════════════════════════════════════════════════
     //  EmptyStateOverlay control and template exist
     // ══════════════════════════════════════════════════════════════════
 
@@ -79,21 +43,6 @@ public partial class EmptyStateOverlayComplianceTests
 
         Assert.Contains("TargetType=\"controls:EmptyStateOverlay\"", content, StringComparison.Ordinal);
         Assert.Contains("ControlTemplate", content, StringComparison.Ordinal);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  Action wiring — views with add commands wire the button
-    // ══════════════════════════════════════════════════════════════════
-
-    [Theory(Skip = "No DataGrid views exist yet — re-enable when Phase 1 modules are rebuilt")]
-    [InlineData("Modules/Products/Views/ProductsView.xaml")]
-    public void View_WithAddCommand_WiresActionButton(string relativePath)
-    {
-        var path = Path.Combine(SolutionRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
-        var content = File.ReadAllText(path);
-
-        Assert.Contains("ActionCommand=", content, StringComparison.Ordinal);
-        Assert.Contains("ActionText=", content, StringComparison.Ordinal);
     }
 
     // ── Regex ────────────────────────────────────────────────────────
