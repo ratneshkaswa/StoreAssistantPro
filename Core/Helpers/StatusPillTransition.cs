@@ -69,15 +69,47 @@ public static class StatusPillTransition
 
         if (e.NewValue is true)
         {
-            var tracker = new BackgroundTracker(fe);
-            fe.SetValue(TrackerProperty, tracker);
+            fe.Loaded += OnElementLoaded;
+            fe.Unloaded += OnElementUnloaded;
+
+            // If already loaded, attach immediately
+            if (fe.IsLoaded)
+                AttachTracker(fe);
         }
         else
         {
-            var tracker = fe.GetValue(TrackerProperty) as BackgroundTracker;
-            tracker?.Detach();
-            fe.ClearValue(TrackerProperty);
+            fe.Loaded -= OnElementLoaded;
+            fe.Unloaded -= OnElementUnloaded;
+            DetachTracker(fe);
         }
+    }
+
+    private static void OnElementLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe)
+            AttachTracker(fe);
+    }
+
+    private static void OnElementUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe)
+            DetachTracker(fe);
+    }
+
+    private static void AttachTracker(FrameworkElement fe)
+    {
+        if (fe.GetValue(TrackerProperty) is not null)
+            return; // Already attached
+
+        var tracker = new BackgroundTracker(fe);
+        fe.SetValue(TrackerProperty, tracker);
+    }
+
+    private static void DetachTracker(FrameworkElement fe)
+    {
+        var tracker = fe.GetValue(TrackerProperty) as BackgroundTracker;
+        tracker?.Detach();
+        fe.ClearValue(TrackerProperty);
     }
 
     // ── Tracker (listens for Background changes) ─────────────────────
