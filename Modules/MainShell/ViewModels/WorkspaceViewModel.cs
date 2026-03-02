@@ -7,8 +7,8 @@ namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 public partial class WorkspaceViewModel(IDashboardService dashboardService) : BaseViewModel
 {
     [RelayCommand]
-    private Task LoadMainWorkspaceAsync() => RunLoadAsync(async _ =>
+    private Task LoadMainWorkspaceAsync() => RunLoadAsync(async ct =>
     {
-        await dashboardService.GetSummaryAsync();
+        await dashboardService.GetSummaryAsync(ct);
     });
 }

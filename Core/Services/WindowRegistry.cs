@@ -24,6 +24,15 @@ public class WindowRegistry(
         _dialogMap[dialogKey] = typeof(TWindow);
     }
 
+    /// <summary>
+    /// Non-generic registration used by <see cref="HostingExtensions.ApplyDialogRegistrations"/>
+    /// to avoid reflection. The <paramref name="windowType"/> must derive from <see cref="Window"/>.
+    /// </summary>
+    internal void RegisterDialog(string dialogKey, Type windowType)
+    {
+        _dialogMap[dialogKey] = windowType;
+    }
+
     public bool? ShowDialog(string dialogKey)
     {
         if (!_dialogMap.TryGetValue(dialogKey, out var windowType))

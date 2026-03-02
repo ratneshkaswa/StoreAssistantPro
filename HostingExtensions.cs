@@ -144,17 +144,16 @@ internal static class HostingExtensions
 
     /// <summary>
     /// Pushes all <see cref="DialogRegistration"/> entries collected during DI
-    /// setup into the <see cref="IWindowRegistry"/>.
+    /// setup into the <see cref="WindowRegistry"/>.
+    /// Uses the non-generic internal <c>RegisterDialog(string, Type)</c>
+    /// overload to avoid reflection.
     /// </summary>
     public static void ApplyDialogRegistrations(this IServiceProvider services)
     {
-        var registry = services.GetRequiredService<IWindowRegistry>();
+        var registry = (WindowRegistry)services.GetRequiredService<IWindowRegistry>();
         foreach (var entry in services.GetServices<DialogRegistration>())
         {
-            var method = typeof(IWindowRegistry)
-                .GetMethod(nameof(IWindowRegistry.RegisterDialog))!
-                .MakeGenericMethod(entry.WindowType);
-            method.Invoke(registry, [entry.DialogKey]);
+            registry.RegisterDialog(entry.DialogKey, entry.WindowType);
         }
     }
 }

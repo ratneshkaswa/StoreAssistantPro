@@ -26,6 +26,12 @@ public partial class UsersWindow : BaseDialogWindow
         NewPinBox.PreviewTextInput += OnPreviewNumericOnly;
         ConfirmPinBox.PreviewTextInput += OnPreviewNumericOnly;
         MasterPinBox.PreviewTextInput += OnPreviewNumericOnly;
+
+        Closed += (_, _) =>
+        {
+            vm.PropertyChanged -= OnViewModelPropertyChanged;
+            vm.Dispose();
+        };
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)

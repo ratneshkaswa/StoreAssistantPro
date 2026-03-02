@@ -313,4 +313,14 @@ public partial class LoginViewModel : BaseViewModel
             IsVerifying = false;
         }
     }
+
+    // ── Cleanup ──
+
+    public override void Dispose()
+    {
+        _clockTimer.Stop();
+        PinPad.PinCompleted -= OnPinCompleted;
+        PinPad.PropertyChanged -= OnPinPadPropertyChanged;
+        base.Dispose();
+    }
 }

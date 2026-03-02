@@ -70,37 +70,21 @@ public partial class UsersViewModel(
     }
 
     [RelayCommand]
-    private async Task UnlockUserAsync()
+    private Task UnlockUserAsync() => RunAsync(async ct =>
     {
         if (SelectedUser is null) return;
 
-        try
-        {
-            await userService.ClearLockoutAsync(SelectedUser.UserType);
-            SuccessMessage = $"{SelectedUser.UserType} account unlocked.";
-            await LoadUsersAsync();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-    }
+        await userService.ClearLockoutAsync(SelectedUser.UserType, ct);
+        SuccessMessage = $"{SelectedUser.UserType} account unlocked.";
+        await LoadUsersAsync();
+    });
 
     [RelayCommand]
-    private async Task LoadUsersAsync()
+    private Task LoadUsersAsync() => RunLoadAsync(async ct =>
     {
-        ErrorMessage = string.Empty;
-
-        try
-        {
-            var users = await userService.GetAllUsersAsync();
-            Users = new ObservableCollection<UserCredential>(users);
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-    }
+        var users = await userService.GetAllUsersAsync(ct);
+        Users = new ObservableCollection<UserCredential>(users);
+    });
 
     [RelayCommand]
     private async Task ChangePinAsync()

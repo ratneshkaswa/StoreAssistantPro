@@ -38,6 +38,8 @@ public partial class LoginWindow : Window
 
             // Clear PasswordBoxes after successful PIN reset
             vm.ResetCompleted += ClearResetFields;
+
+        Closed += (_, _) => vm.Dispose();
     }
 
     /// <summary>

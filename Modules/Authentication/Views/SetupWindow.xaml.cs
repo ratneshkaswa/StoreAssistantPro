@@ -31,6 +31,7 @@ public partial class SetupWindow : Window
 
         // Focus firm name on load
         Loaded += (_, _) => FirmNameBox.Focus();
+        Closed += (_, _) => vm.Dispose();
     }
 
     private void FocusByName(string name)

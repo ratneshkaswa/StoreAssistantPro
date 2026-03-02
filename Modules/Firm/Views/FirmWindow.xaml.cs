@@ -16,6 +16,7 @@ public partial class FirmWindow : BaseDialogWindow
     {
         InitializeComponent();
         DataContext = vm;
+        Closed += (_, _) => vm.Dispose();
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)

@@ -138,10 +138,20 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
-        _logger?.LogInformation("Application exiting");
-        await _host.StopAsync();
-        _host.Dispose();
-        base.OnExit(e);
+        try
+        {
+            _logger?.LogInformation("Application exiting");
+            await _host.StopAsync(TimeSpan.FromSeconds(5));
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error during host shutdown");
+        }
+        finally
+        {
+            _host.Dispose();
+            base.OnExit(e);
+        }
     }
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

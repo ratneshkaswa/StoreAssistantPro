@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <Folder Include="Core\Data\" />
+    <Folder Include="Core\Hosting\" />
     <Folder Include="Modules\Billing\Commands\" />
     <Folder Include="Modules\Billing\Events\" />
     <Folder Include="Modules\Billing\Models\" />
