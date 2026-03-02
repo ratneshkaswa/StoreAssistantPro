@@ -30,7 +30,7 @@ public partial class LoginWindow : Window
                 Dispatcher.BeginInvoke(() => Digit1Button.Focus(),
                     System.Windows.Threading.DispatcherPriority.Input);
 
-            // Auto-focus master password box when entering forgot PIN mode
+            // Auto-focus master PIN box when entering forgot PIN mode
                 if (e.PropertyName == nameof(LoginViewModel.IsForgotPinMode) && vm.IsForgotPinMode)
                     Dispatcher.BeginInvoke(() => ResetMasterBox.Focus(),
                         System.Windows.Threading.DispatcherPriority.Input);

@@ -136,6 +136,9 @@
     <SolidColorBrush x:Key="RoleUserBackground"        Color="#E3F4EC"/>
     <SolidColorBrush x:Key="RoleUserBorder"            Color="#B0DCC5"/>
     <SolidColorBrush x:Key="RoleUserAccent"            Color="#1D7B4E"/>
+    <SolidColorBrush x:Key="RoleMasterBackground"      Color="#FDF6E3"/>
+    <SolidColorBrush x:Key="RoleMasterBorder"          Color="#F0DFA0"/>
+    <SolidColorBrush x:Key="RoleMasterAccent"          Color="#9A7B1A"/>
 
 
     <!-- ═══════════════════════════════════════════════════════════════

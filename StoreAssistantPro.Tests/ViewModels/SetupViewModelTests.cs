@@ -98,7 +98,7 @@ public class SetupViewModelTests
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.Equal("Master Password must be exactly 6 digits.", sut.ErrorMessage);
+        Assert.Equal("Master PIN must be exactly 6 digits.", sut.ErrorMessage);
     }
 
     [Theory]

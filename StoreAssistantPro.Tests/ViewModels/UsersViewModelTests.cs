@@ -92,34 +92,34 @@ public class UsersViewModelTests
     public async Task ChangePin_Admin_SendsMasterPinInCommand()
     {
         _commandBus.SendAsync(Arg.Any<ChangePinCommand>())
-            .Returns(CommandResult.Failure("Master Password is required to change Admin PIN."));
+            .Returns(CommandResult.Failure("Master PIN is required to change Admin PIN."));
 
-        var sut = CreateSut();
-        sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
-        sut.NewPin = "1234";
-        sut.ConfirmPin = "1234";
-        sut.MasterPin = "";
+                    var sut = CreateSut();
+                    sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
+                    sut.NewPin = "1234";
+                    sut.ConfirmPin = "1234";
+                    sut.MasterPin = "";
 
-        await sut.ChangePinCommand.ExecuteAsync(null);
+                    await sut.ChangePinCommand.ExecuteAsync(null);
 
-        Assert.Equal("Master Password is required to change Admin PIN.", sut.ErrorMessage);
+                    Assert.Equal("Master PIN is required to change Admin PIN.", sut.ErrorMessage);
     }
 
     [Fact]
     public async Task ChangePin_Admin_InvalidMasterPin_SetsError()
     {
         _commandBus.SendAsync(Arg.Any<ChangePinCommand>())
-            .Returns(CommandResult.Failure("Invalid Master Password."));
+            .Returns(CommandResult.Failure("Invalid Master PIN."));
 
-        var sut = CreateSut();
-        sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
-        sut.NewPin = "1234";
-        sut.ConfirmPin = "1234";
-        sut.MasterPin = "000000";
+                    var sut = CreateSut();
+                    sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
+                    sut.NewPin = "1234";
+                    sut.ConfirmPin = "1234";
+                    sut.MasterPin = "000000";
 
-        await sut.ChangePinCommand.ExecuteAsync(null);
+                    await sut.ChangePinCommand.ExecuteAsync(null);
 
-        Assert.Equal("Invalid Master Password.", sut.ErrorMessage);
+                    Assert.Equal("Invalid Master PIN.", sut.ErrorMessage);
         Assert.Empty(sut.MasterPin);
     }
 

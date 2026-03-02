@@ -204,8 +204,8 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(InputValidator.IsValidUserPin(UserPin), "User PIN must be exactly 4 digits.")
             .Rule(InputValidator.AreEqual(UserPin, UserPinConfirm), "User PIN confirmation does not match.")
             .Rule(InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin), "Each role must have a unique PIN.")
-            .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master Password must be exactly 6 digits.")
-            .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master Password confirmation does not match.")))
+            .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master PIN must be exactly 6 digits.")
+            .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master PIN confirmation does not match.")))
             return;
 
         var result = await _commandBus.SendAsync(new CompleteFirstSetupCommand(

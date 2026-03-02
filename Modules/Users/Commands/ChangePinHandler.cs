@@ -20,11 +20,11 @@ public class ChangePinHandler(
         {
             var isMasterValid = await loginService.ValidateMasterPinAsync(command.MasterPin);
             if (!isMasterValid)
-                return CommandResult.Failure("Invalid Master Password.");
+                return CommandResult.Failure("Invalid Master PIN.");
         }
         else if (command.UserType == UserType.Admin)
         {
-            return CommandResult.Failure("Master Password is required to change Admin PIN.");
+            return CommandResult.Failure("Master PIN is required to change Admin PIN.");
         }
 
         await userService.ChangePinAsync(command.UserType, command.NewPin);

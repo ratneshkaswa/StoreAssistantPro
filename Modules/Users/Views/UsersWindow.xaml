@@ -89,8 +89,8 @@
                          x:Name="ConfirmPinBox" MaxLength="4"
                          PasswordChanged="OnConfirmPinChanged"/>
 
-            <!-- Row 6: Master password (conditional) -->
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Master Password *"
+            <!-- Row 6: Master PIN (conditional) -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Master PIN *"
                        Style="{StaticResource FormRowLabelStyle}"
                        Foreground="{StaticResource FluentError}"
                        Visibility="{Binding IsMasterPinRequired, Converter={StaticResource BoolToVisibility}}"/>

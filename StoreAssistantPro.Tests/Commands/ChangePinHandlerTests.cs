@@ -35,7 +35,7 @@ public class ChangePinHandlerTests
             new ChangePinCommand(UserType.Admin, "1234", ""));
 
         Assert.False(result.Succeeded);
-        Assert.Contains("Master Password is required", result.ErrorMessage);
+        Assert.Contains("Master PIN is required", result.ErrorMessage);
         await _userService.DidNotReceive().ChangePinAsync(Arg.Any<UserType>(), Arg.Any<string>());
     }
 
@@ -48,7 +48,7 @@ public class ChangePinHandlerTests
             new ChangePinCommand(UserType.Admin, "1234", "000000"));
 
         Assert.False(result.Succeeded);
-        Assert.Contains("Invalid Master Password", result.ErrorMessage);
+        Assert.Contains("Invalid Master PIN", result.ErrorMessage);
     }
 
     [Fact]
