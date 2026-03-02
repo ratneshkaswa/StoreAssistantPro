@@ -26,6 +26,7 @@ public partial class AppStateService : ObservableObject, IAppStateService
 {
     private readonly DispatcherTimer _clockTimer;
     private readonly IRegionalSettingsService _regional;
+    private int _unreadCount;
 
     public AppStateService(IRegionalSettingsService regional)
     {
@@ -34,11 +35,26 @@ public partial class AppStateService : ObservableObject, IAppStateService
         SmartTooltipsEnabled = true;
 
         Notifications = [];
-        Notifications.CollectionChanged += (_, _) =>
-            OnPropertyChanged(nameof(UnreadNotificationCount));
+        Notifications.CollectionChanged += OnNotificationsChanged;
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => CurrentTime = _regional.FormatTime(_regional.Now);
+    }
+
+    private void OnNotificationsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        // Adjust cached counter incrementally instead of scanning the full list.
+        switch (e.Action)
+        {
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                if (e.NewItems is not null)
+                    _unreadCount += e.NewItems.Cast<AppNotification>().Count(n => !n.IsRead);
+                break;
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                _unreadCount = 0;
+                break;
+        }
+        OnPropertyChanged(nameof(UnreadNotificationCount));
     }
 
     // ── Observable state ──
@@ -75,7 +91,7 @@ public partial class AppStateService : ObservableObject, IAppStateService
 
     public ObservableCollection<AppNotification> Notifications { get; }
 
-    public int UnreadNotificationCount => Notifications.Count(n => !n.IsRead);
+    public int UnreadNotificationCount => _unreadCount;
 
     // ── State mutations ──
 
@@ -127,8 +143,12 @@ public partial class AppStateService : ObservableObject, IAppStateService
 
     public void MarkNotificationRead(AppNotification notification)
     {
-        notification.IsRead = true;
-        OnPropertyChanged(nameof(UnreadNotificationCount));
+        if (!notification.IsRead)
+        {
+            notification.IsRead = true;
+            _unreadCount = Math.Max(0, _unreadCount - 1);
+            OnPropertyChanged(nameof(UnreadNotificationCount));
+        }
     }
 
     public void ClearNotifications() =>

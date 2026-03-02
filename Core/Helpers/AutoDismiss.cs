@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Threading;
 
 namespace StoreAssistantPro.Core.Helpers;
@@ -44,15 +45,42 @@ public static class AutoDismiss
         DependencyProperty.RegisterAttached(
             "Timer", typeof(DispatcherTimer), typeof(AutoDismiss));
 
+    /// <summary>
+    /// Shadow copy of <see cref="TextBlock.TextProperty"/> used to
+    /// detect text changes without <c>DependencyPropertyDescriptor.AddValueChanged</c>
+    /// (which creates a strong reference that leaks memory).
+    /// </summary>
+    private static readonly DependencyProperty TextShadowProperty =
+        DependencyProperty.RegisterAttached(
+            "TextShadow", typeof(string), typeof(AutoDismiss),
+            new PropertyMetadata(null, OnTextShadowChanged));
+
     private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not TextBlock tb || e.NewValue is not true)
+        if (d is not TextBlock tb)
             return;
 
-        var dpd = System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-            TextBlock.TextProperty, typeof(TextBlock));
+        if (e.NewValue is true)
+        {
+            // Bind our shadow property to TextBlock.Text so we get
+            // change notifications via the property system (no leak).
+            BindingOperations.SetBinding(tb, TextShadowProperty,
+                new Binding(nameof(TextBlock.Text))
+                {
+                    Source = tb,
+                    Mode = BindingMode.OneWay
+                });
+        }
+        else
+        {
+            BindingOperations.ClearBinding(tb, TextShadowProperty);
+        }
+    }
 
-        dpd?.AddValueChanged(tb, (_, _) => OnTextChanged(tb));
+    private static void OnTextShadowChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is TextBlock tb)
+            OnTextChanged(tb);
     }
 
     private static void OnTextChanged(TextBlock tb)

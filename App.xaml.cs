@@ -166,7 +166,7 @@ public partial class App : Application
         if (e.ExceptionObject is Exception ex)
         {
             _logger?.LogCritical(ex, "Unhandled background thread exception (IsTerminating={IsTerminating})", e.IsTerminating);
-            Dispatcher.Invoke(() => ShowErrorDialog(ex));
+            Dispatcher.BeginInvoke(() => ShowErrorDialog(ex));
         }
     }
 
@@ -174,7 +174,7 @@ public partial class App : Application
     {
         _logger?.LogError(e.Exception, "Unobserved Task exception");
         e.SetObserved();
-        Dispatcher.Invoke(() => ShowErrorDialog(e.Exception.InnerException ?? e.Exception));
+        Dispatcher.BeginInvoke(() => ShowErrorDialog(e.Exception.InnerException ?? e.Exception));
     }
 
     private static void ShowErrorDialog(Exception ex)

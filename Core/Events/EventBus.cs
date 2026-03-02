@@ -134,8 +134,12 @@ public class EventBus : IEventBus
 
                 if (_targetRef is not null && _targetRef.Target is { } target)
                 {
-                    var result = _method!.Invoke(target, [@event]);
-                    task = result as Task ?? Task.CompletedTask;
+                    // Create a bound delegate from the stored MethodInfo + live target.
+                    // This avoids the object[] allocation of MethodInfo.Invoke and
+                    // is faster than DynamicInvoke for repeated calls.
+                    var typedDelegate = (Func<TEvent, Task>)Delegate.CreateDelegate(
+                        typeof(Func<TEvent, Task>), target, _method!);
+                    task = typedDelegate(@event);
                     return true;
                 }
             }
