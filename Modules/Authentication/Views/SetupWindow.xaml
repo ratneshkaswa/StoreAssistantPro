@@ -183,9 +183,14 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Text="&#x1F4A1; Remember your PINs &#x2014; you will need them to log in."
-                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
-                               HorizontalAlignment="Center" Margin="{StaticResource FieldLabelSpacing}"/>
+                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource FieldLabelSpacing}">
+                        <TextBlock Text="&#x1F4A1; Remember your PINs &#x2014; you will need them to log in."
+                                   FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="&#x1F510; Master Password is used to authorize critical actions such as deleting major records."
+                                   FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextTertiary}"
+                                   HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
                 </StackPanel>
         </Grid>
 
