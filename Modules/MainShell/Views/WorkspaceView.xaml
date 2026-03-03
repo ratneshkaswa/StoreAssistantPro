@@ -40,15 +40,9 @@
             <StackPanel Grid.Row="1" HorizontalAlignment="Center"
                         Margin="{StaticResource CompactItemSpacing}">
                 <TextBlock Text="Welcome to Store Assistant Pro"
-                           FontSize="{StaticResource FontSizeSectionHeader}"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource FluentTextPrimary}"
-                           HorizontalAlignment="Center"/>
+                           Style="{StaticResource HeroTitleStyle}"/>
                 <TextBlock Text="Your enterprise retail management workspace"
-                           FontSize="{StaticResource FontSizeBody}"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           HorizontalAlignment="Center"
-                           Margin="{StaticResource SubtitleGap}"/>
+                           Style="{StaticResource HeroSubtitleStyle}"/>
             </StackPanel>
 
             <!-- Quick-start cards -->
@@ -65,16 +59,8 @@
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
                         <TextBlock Text="🏢" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="Firm" FontWeight="SemiBold"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource FluentTextPrimary}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{StaticResource CardTitleSpacing}"/>
-                        <TextBlock Text="Manage details"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextTertiary}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{StaticResource CardSubtitleSpacing}"/>
+                        <TextBlock Text="Firm" Style="{StaticResource CardItemTitleStyle}"/>
+                        <TextBlock Text="Manage details" Style="{StaticResource CardItemSubtitleStyle}"/>
                     </StackPanel>
                 </Border>
 
@@ -89,16 +75,8 @@
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
                         <TextBlock Text="👥" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="Users" FontWeight="SemiBold"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource FluentTextPrimary}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{StaticResource CardTitleSpacing}"/>
-                        <TextBlock Text="Manage team"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextTertiary}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{StaticResource CardSubtitleSpacing}"/>
+                        <TextBlock Text="Users" Style="{StaticResource CardItemTitleStyle}"/>
+                        <TextBlock Text="Manage team" Style="{StaticResource CardItemSubtitleStyle}"/>
                     </StackPanel>
                 </Border>
 
@@ -112,16 +90,8 @@
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
                         <TextBlock Text="🔄" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="Refresh" FontWeight="SemiBold"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource FluentTextPrimary}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{StaticResource CardTitleSpacing}"/>
-                        <TextBlock Text="Reload data"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextTertiary}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{StaticResource CardSubtitleSpacing}"/>
+                        <TextBlock Text="Refresh" Style="{StaticResource CardItemTitleStyle}"/>
+                        <TextBlock Text="Reload data" Style="{StaticResource CardItemSubtitleStyle}"/>
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -129,8 +99,7 @@
             <!-- Hint -->
             <TextBlock Grid.Row="3"
                        Text="Tip: Use Ctrl+D to return here anytime"
-                       FontSize="{StaticResource FontSizeCaption}"
-                       Foreground="{StaticResource FluentTextTertiary}"
+                       Style="{StaticResource HintTextStyle}"
                        HorizontalAlignment="Center"
                        Margin="{StaticResource HeroHintSpacing}"/>
         </Grid>

@@ -265,6 +265,66 @@
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
+    <!-- Hint / info text (below fields, footnotes) -->
+    <Style x:Key="HintTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+        <Setter Property="Margin" Value="{StaticResource HintTextTopSpacing}"/>
+    </Style>
+
+    <!-- Warning caption text -->
+    <Style x:Key="WarningTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+    </Style>
+
+    <!-- Card item title (workspace quick-start cards) -->
+    <Style x:Key="CardItemTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="{StaticResource CardTitleSpacing}"/>
+    </Style>
+
+    <!-- Card item subtitle (workspace quick-start cards) -->
+    <Style x:Key="CardItemSubtitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="{StaticResource CardSubtitleSpacing}"/>
+    </Style>
+
+    <!-- Footer / version text -->
+    <Style x:Key="FooterTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextDisabled}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Hero / welcome title -->
+    <Style x:Key="HeroTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontDisplay}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSectionHeader}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Hero subtitle -->
+    <Style x:Key="HeroSubtitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="{StaticResource SubtitleGap}"/>
+    </Style>
+
     <!-- ═══════════════════════════════════════════════════════════════
          DATAGRID VIRTUALISATION &amp; SCROLL PERFORMANCE
 

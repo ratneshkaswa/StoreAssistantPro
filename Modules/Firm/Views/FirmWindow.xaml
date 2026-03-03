@@ -217,9 +217,7 @@
 
                 <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"
                            Text="Phone number will also be used as WhatsApp number."
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextTertiary}"
-                           Margin="{StaticResource HintTextTopSpacing}"/>
+                           Style="{StaticResource HintTextStyle}"/>
             </Grid>
 
             <!-- ───── Step 2: Tax &amp; Legal ───── -->
@@ -257,9 +255,7 @@
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                            Text="Business vertical: Clothing Retail"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextTertiary}"
-                           Margin="{StaticResource HintTextTopSpacing}"/>
+                           Style="{StaticResource HintTextStyle}"/>
             </Grid>
 
             <!-- ───── Step 3: Regional Settings ───── -->
@@ -308,9 +304,7 @@
                           Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
                 <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextTertiary}"
-                           Margin="{StaticResource HintTextTopSpacing}"
+                           Style="{StaticResource HintTextStyle}"
                            Text="Number format: Indian (1,00,000)"/>
             </Grid>
         </Grid>

@@ -64,8 +64,7 @@
                                          AutomationProperties.Name="Firm Name"/>
                             </Grid>
                             <TextBlock Text="You can add address, phone, GSTIN later from Firm Management."
-                                       FontSize="{StaticResource FontSizeCaption}"
-                                       Foreground="{StaticResource FluentTextTertiary}"
+                                       Style="{StaticResource HintTextStyle}"
                                        Margin="{StaticResource StepContentTopSpacing}"/>
                         </StackPanel>
                     </Border>
@@ -185,10 +184,10 @@
 
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource FieldLabelSpacing}">
                         <TextBlock Text="&#x1F4A1; Remember your PINs &#x2014; you will need them to log in."
-                                   FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
+                                   Style="{StaticResource WarningTextStyle}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="&#x1F510; Master PIN is used to authorize critical actions such as deleting major records."
-                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   Style="{StaticResource HintTextStyle}"
                                    HorizontalAlignment="Center" Margin="{StaticResource HintTextTopSpacing}"/>
                     </StackPanel>
                 </StackPanel>
@@ -210,7 +209,7 @@
             </Button.Style>
         </Button>
 
-        <TextBlock Grid.Row="4" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextTertiary}" Margin="{StaticResource MessageBarSpacing}">
+        <TextBlock Grid.Row="4" Style="{StaticResource FooterTextStyle}" Margin="{StaticResource MessageBarSpacing}">
             <Run Text="Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
         </TextBlock>
     </Grid>

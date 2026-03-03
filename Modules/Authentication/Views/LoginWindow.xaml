@@ -203,8 +203,7 @@
                                    Style="{StaticResource ErrorMessageStyle}"
                                    HorizontalAlignment="Center" Margin="0"/>
                         <TextBlock Text="{Binding AttemptsMessage}"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentWarning}"
+                                   Style="{StaticResource WarningTextStyle}"
                                    HorizontalAlignment="Center"
                                    Visibility="{Binding AttemptsMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
                     </StackPanel>
@@ -239,9 +238,8 @@
 
                     <!-- Keyboard hint -->
                     <TextBlock Text="Or use keyboard 0–9"
+                               Style="{StaticResource HintTextStyle}"
                                HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"
                                Margin="{StaticResource ItemSpacing}"/>
 
                     <!-- Forgot PIN link -->
@@ -368,9 +366,7 @@
                     </TextBlock.Style>
                     <Run Text="{Binding ConnectionStatus, Mode=OneWay}"/>
                 </TextBlock>
-                <TextBlock HorizontalAlignment="Center"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextDisabled}">
+                <TextBlock Style="{StaticResource FooterTextStyle}">
                     <Run Text="v"/><Run Text="{Binding AppVersion, Mode=OneWay}"/><Run Text=" &#x00B7; Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
                 </TextBlock>
             </StackPanel>
