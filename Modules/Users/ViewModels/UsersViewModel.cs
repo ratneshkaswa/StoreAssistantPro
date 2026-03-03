@@ -116,5 +116,4 @@ public partial class UsersViewModel(
                 MasterPin = string.Empty;
         }
     });
-
-    }
+}
