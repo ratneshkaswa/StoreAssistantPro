@@ -390,7 +390,17 @@ public sealed class OnboardingJourneyService : IOnboardingJourneyService
             };
         }
 
-        _ = Task.Run(() => WriteFile(snapshot));
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                WriteFile(snapshot);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to flush onboarding journey state to disk");
+            }
+        });
     }
 
     private void WriteFile(JourneyStateDto dto)

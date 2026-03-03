@@ -362,6 +362,11 @@ public static class Motion
     public static void SetSlideFadeReveal(DependencyObject obj, bool value) =>
         obj.SetValue(SlideFadeRevealProperty, value);
 
+    private static readonly DependencyProperty SlideFadeRevealSubscribedProperty =
+        DependencyProperty.RegisterAttached(
+            "SlideFadeRevealSubscribed", typeof(bool), typeof(Motion),
+            new PropertyMetadata(false));
+
     private static void OnSlideFadeRevealChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not FrameworkElement fe || e.NewValue is not true)
@@ -372,6 +377,11 @@ public static class Motion
 
         EnsureTranslateTransform(fe);
 
+        // Guard: subscribe IsVisibleChanged only once per element
+        if ((bool)fe.GetValue(SlideFadeRevealSubscribedProperty))
+            return;
+
+        fe.SetValue(SlideFadeRevealSubscribedProperty, true);
         fe.IsVisibleChanged += static (sender, args) =>
         {
             if (args.NewValue is not true)

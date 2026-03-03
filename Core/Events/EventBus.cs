@@ -71,7 +71,19 @@ public class EventBus : IEventBus
         foreach (var sub in snapshot)
         {
             if (sub.TryInvoke<TEvent>(@event, out var task))
-                await task;
+            {
+                try
+                {
+                    await task;
+                }
+                catch
+                {
+                    // Fault isolation — a handler that returns a faulted
+                    // Task must not prevent remaining subscribers from
+                    // receiving the event, nor surface as an unobserved
+                    // Task exception when callers fire-and-forget.
+                }
+            }
         }
     }
 

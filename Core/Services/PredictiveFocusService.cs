@@ -76,10 +76,18 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
         // avoid triggering the circular resolution at construction.
         _ = Task.Run(() =>
         {
-            var engine = _flowStateEngine.Value;
-            engine.PropertyChanged += OnFlowStateChanged;
-            // Sync idle timer now that the engine is available
-            _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(engine.CurrentState);
+            try
+            {
+                var engine = _flowStateEngine.Value;
+                engine.PropertyChanged += OnFlowStateChanged;
+                // Sync idle timer now that the engine is available
+                _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(engine.CurrentState);
+            }
+            catch (Exception)
+            {
+                // FlowStateEngine resolution failed — focus hints will
+                // work without flow-state adaptation.
+            }
         });
     }
 
@@ -226,5 +234,19 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
     private void OnIdleTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
         IsUserInputActive = false;
+    }
+
+    // ── Cleanup ──────────────────────────────────────────────────────
+
+    public void Dispose()
+    {
+        _idleTimer.Elapsed -= OnIdleTimerElapsed;
+        _idleTimer.Dispose();
+        _focusLock.PropertyChanged -= OnFocusLockChanged;
+        _appState.PropertyChanged -= OnAppStateChanged;
+        _navigation.PropertyChanged -= OnNavigationChanged;
+
+        if (_flowStateEngine.IsValueCreated)
+            _flowStateEngine.Value.PropertyChanged -= OnFlowStateChanged;
     }
 }

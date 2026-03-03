@@ -176,7 +176,17 @@ public sealed class TipStateService : ITipStateService
             snapshot = [.. _dismissed!.Order()];
         }
 
-        _ = Task.Run(() => WriteFile(snapshot));
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                WriteFile(snapshot);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to flush dismissed tips to disk");
+            }
+        });
     }
 
     private void WriteFile(string[] keys)

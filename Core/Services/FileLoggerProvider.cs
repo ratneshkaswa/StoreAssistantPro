@@ -83,11 +83,13 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
         {
             var logFile = Path.Combine(_logDirectory, $"app_{DateTime.UtcNow:yyyyMMdd}.log");
 
-            using var writer = new StreamWriter(logFile, append: true);
+            await using var writer = new StreamWriter(logFile, append: true);
             while (reader.TryRead(out var entry))
             {
                 await writer.WriteLineAsync(entry).ConfigureAwait(false);
             }
+            // Flush is implicit via await using (Dispose flushes),
+            // and closing the handle after each batch ensures durability.
         }
     }
 }

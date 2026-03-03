@@ -41,7 +41,7 @@ namespace StoreAssistantPro.Core.Services;
 ///         the event for reactive updates.</item>
 /// </list>
 /// </summary>
-public interface IPredictiveFocusService : INotifyPropertyChanged
+public interface IPredictiveFocusService : INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// The most recently produced focus hint, or <c>null</c> if no

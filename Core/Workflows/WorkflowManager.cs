@@ -76,7 +76,22 @@ public partial class WorkflowManager : ObservableObject, IWorkflowManager
 
         Reset();
 
-        _ = workflow.OnCancelledAsync(context);
+        // Fire-and-forget with exception guard — cancellation cleanup
+        // must not crash the app if the workflow's handler throws.
+        _ = SafeCancelAsync(workflow, context);
+    }
+
+    private static async Task SafeCancelAsync(IWorkflow workflow, WorkflowContext context)
+    {
+        try
+        {
+            await workflow.OnCancelledAsync(context);
+        }
+        catch
+        {
+            // Cancellation cleanup is best-effort — swallow to prevent
+            // unobserved Task exceptions.
+        }
     }
 
     public async Task CompleteWorkflowAsync()
