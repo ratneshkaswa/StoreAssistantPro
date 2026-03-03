@@ -23,6 +23,8 @@ public class UserService(
 
     public async Task ChangePinAsync(UserType userType, string newPin, CancellationToken ct = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(newPin);
+
         using var _ = perf.BeginScope($"UserService.ChangePinAsync({userType})");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var credential = await context.UserCredentials

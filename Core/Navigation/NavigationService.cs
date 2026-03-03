@@ -26,6 +26,8 @@ public partial class NavigationService(
 
     public void NavigateTo(string pageKey)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(pageKey);
+
         if (!_pageMap.TryGetValue(pageKey, out var vmType))
             throw new InvalidOperationException($"No ViewModel registered for page key '{pageKey}'.");
 
@@ -68,6 +70,7 @@ public partial class NavigationService(
         }
 
         CurrentView = newView;
+        logger.LogInformation("Navigated to {Page} ({ViewType})", label, newView.GetType().Name);
 
         // Notify incoming VM
         if (newView is INavigationAware incoming)

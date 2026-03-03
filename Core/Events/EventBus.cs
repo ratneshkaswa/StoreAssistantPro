@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace StoreAssistantPro.Core.Events;
 
@@ -15,11 +16,11 @@ namespace StoreAssistantPro.Core.Events;
 /// (they have no target to prevent GC of).
 /// </para>
 /// <para>
-/// <b>Fault isolation:</b> A throwing handler is caught and silently
+/// <b>Fault isolation:</b> A throwing handler is caught, logged, and
 /// skipped so remaining subscribers still receive the event.
 /// </para>
 /// </summary>
-public class EventBus : IEventBus
+public class EventBus(ILogger<EventBus> logger) : IEventBus
 {
     private readonly ConcurrentDictionary<Type, List<Subscription>> _subscriptions = [];
     private readonly Lock _lock = new();
@@ -76,12 +77,11 @@ public class EventBus : IEventBus
                 {
                     await task;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Fault isolation — a handler that returns a faulted
-                    // Task must not prevent remaining subscribers from
-                    // receiving the event, nor surface as an unobserved
-                    // Task exception when callers fire-and-forget.
+                    // Fault isolation — log but don't let a faulted handler
+                    // prevent remaining subscribers from receiving the event.
+                    logger.LogError(ex, "EventBus handler failed for {Event}", typeof(TEvent).Name);
                 }
             }
         }

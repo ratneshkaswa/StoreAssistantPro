@@ -60,6 +60,11 @@ public partial class App : Application
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
 
+        // Wire static logger factory into BaseViewModel so all
+        // RunAsync / RunLoadAsync exception catches are logged.
+        Core.BaseViewModel.SetLoggerFactory(
+            _host.Services.GetRequiredService<ILoggerFactory>());
+
         // 1. UI thread exceptions (bindings, commands, event handlers)
         DispatcherUnhandledException += OnDispatcherUnhandledException;
 

@@ -38,6 +38,6 @@ public static class InputValidator
     public static bool AreAllDistinct(params string[] values) =>
         values.Distinct(StringComparer.Ordinal).Count() == values.Length;
 
-    private static bool IsDigitsOfLength(string value, int length) =>
-        value.Length == length && value.AsSpan().IndexOfAnyExceptInRange('0', '9') < 0;
+    private static bool IsDigitsOfLength(string? value, int length) =>
+        value is not null && value.Length == length && value.AsSpan().IndexOfAnyExceptInRange('0', '9') < 0;
 }

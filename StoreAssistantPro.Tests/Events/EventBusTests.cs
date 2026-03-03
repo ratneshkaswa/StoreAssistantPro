@@ -1,16 +1,19 @@
-﻿using StoreAssistantPro.Core.Events;
+using Microsoft.Extensions.Logging.Abstractions;
+using StoreAssistantPro.Core.Events;
 
 namespace StoreAssistantPro.Tests.Events;
 
 public class EventBusTests
 {
+    private static EventBus CreateBus() => new(NullLogger<EventBus>.Instance);
+
     private sealed record TestEvent(string Value) : IEvent;
     private sealed record OtherEvent(int Number) : IEvent;
 
     [Fact]
     public async Task PublishAsync_NotifiesSubscriber()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         string? received = null;
 
         bus.Subscribe<TestEvent>(e =>
@@ -27,7 +30,7 @@ public class EventBusTests
     [Fact]
     public async Task PublishAsync_NotifiesMultipleSubscribers()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var calls = new List<string>();
 
         bus.Subscribe<TestEvent>(e => { calls.Add("A:" + e.Value); return Task.CompletedTask; });
@@ -41,7 +44,7 @@ public class EventBusTests
     [Fact]
     public async Task PublishAsync_DoesNotNotifyUnrelatedSubscribers()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var testCalled = false;
 
         bus.Subscribe<OtherEvent>(_ => { testCalled = true; return Task.CompletedTask; });
@@ -54,7 +57,7 @@ public class EventBusTests
     [Fact]
     public async Task Unsubscribe_RemovesHandler()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var callCount = 0;
 
         Task Handler(TestEvent _) { callCount++; return Task.CompletedTask; }
@@ -71,7 +74,7 @@ public class EventBusTests
     [Fact]
     public async Task PublishAsync_NoSubscribers_DoesNotThrow()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
 
         var ex = await Record.ExceptionAsync(() => bus.PublishAsync(new TestEvent("x")));
 
@@ -81,7 +84,7 @@ public class EventBusTests
     [Fact]
     public async Task PublishAsync_ExecutesHandlersSequentially()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var order = new List<int>();
 
         bus.Subscribe<TestEvent>(async _ =>
@@ -100,12 +103,12 @@ public class EventBusTests
         Assert.Equal([1, 2], order);
     }
 
-    // ── Fault isolation ──
+    // -- Fault isolation --
 
     [Fact]
     public async Task PublishAsync_ThrowingHandler_DoesNotBlockOtherSubscribers()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var secondCalled = false;
 
         bus.Subscribe<TestEvent>(_ => throw new InvalidOperationException("boom"));
@@ -116,12 +119,12 @@ public class EventBusTests
         Assert.True(secondCalled);
     }
 
-    // ── Weak reference behavior ──
+    // -- Weak reference behavior --
 
     [Fact]
     public async Task PublishAsync_InstanceMethodHandler_NotCalledAfterTargetCollected()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var callCount = 0;
 
         SubscribeFromShortLivedObject(bus, () => callCount++);
@@ -139,7 +142,7 @@ public class EventBusTests
     [Fact]
     public async Task PublishAsync_InstanceMethodHandler_CalledWhileTargetAlive()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         var callCount = 0;
 
         var subscriber = new TestSubscriber(() => callCount++);
@@ -154,7 +157,7 @@ public class EventBusTests
     [Fact]
     public async Task Unsubscribe_InstanceMethodHandler_AfterTargetCollected_NoException()
     {
-        var bus = new EventBus();
+        var bus = CreateBus();
         Func<TestEvent, Task>? handler = null;
 
         SubscribeAndCaptureHandler(bus, ref handler);
@@ -163,7 +166,7 @@ public class EventBusTests
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        // Unsubscribe after target is collected — should not throw.
+        // Unsubscribe after target is collected � should not throw.
         var ex = Record.Exception(() => bus.Unsubscribe(handler!));
         Assert.Null(ex);
 
@@ -171,7 +174,7 @@ public class EventBusTests
         await bus.PublishAsync(new TestEvent("x"));
     }
 
-    // ── Helpers ──
+    // -- Helpers --
 
     /// <summary>
     /// Subscribes an instance-method handler from a short-lived object

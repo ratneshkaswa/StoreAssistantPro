@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace StoreAssistantPro.Core;
 
@@ -21,6 +22,25 @@ namespace StoreAssistantPro.Core;
 /// </summary>
 public abstract partial class BaseViewModel : ObservableValidator, IDisposable
 {
+    private static ILoggerFactory? _loggerFactory;
+
+    /// <summary>
+    /// Called once at app startup to wire the DI logger factory into the
+    /// base class. All <see cref="RunAsync"/> / <see cref="RunLoadAsync"/>
+    /// exception catches will log through this factory.
+    /// </summary>
+    public static void SetLoggerFactory(ILoggerFactory loggerFactory) =>
+        _loggerFactory = loggerFactory;
+
+    /// <summary>
+    /// Lazy per-type logger resolved from the static factory.
+    /// Returns a no-op logger if the factory was never set.
+    /// </summary>
+    private ILogger? _vmLogger;
+    private ILogger VmLogger => _vmLogger ??=
+        _loggerFactory?.CreateLogger(GetType())
+        ?? Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance.CreateLogger(GetType());
+
     /// <summary>
     /// Indicates whether the ViewModel is performing a long-running operation.
     /// Bind to this in the View to show spinners, disable controls, etc.
@@ -165,6 +185,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         }
         catch (Exception ex)
         {
+            VmLogger.LogError(ex, "RunAsync failed in {ViewModel}", GetType().Name);
             ErrorMessage = ex.Message;
         }
         finally
@@ -195,6 +216,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         }
         catch (Exception ex)
         {
+            VmLogger.LogError(ex, "RunAsync<T> failed in {ViewModel}", GetType().Name);
             ErrorMessage = ex.Message;
             return default;
         }
@@ -233,6 +255,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         }
         catch (Exception ex)
         {
+            VmLogger.LogError(ex, "RunLoadAsync failed in {ViewModel}", GetType().Name);
             ErrorMessage = ex.Message;
         }
         finally

@@ -18,6 +18,8 @@ public class FirmService(
 
     public async Task UpdateFirmAsync(FirmUpdateDto dto, CancellationToken ct = default)
     {
+        ArgumentNullException.ThrowIfNull(dto);
+
         using var _ = perf.BeginScope("FirmService.UpdateFirmAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false)
