@@ -164,6 +164,9 @@
     <sys:Double x:Key="FontSizeStatusBar">10</sys:Double>
     <sys:Double x:Key="FontSizeIconMedium">18</sys:Double>
     <sys:Double x:Key="FontSizeIconLarge">40</sys:Double>
+    <sys:Double x:Key="FontSizeIconHero">48</sys:Double>
+
+    <sys:Double x:Key="FormLabelColumnMinWidth">100</sys:Double>
 
     <!-- Line height tokens (Win11 spec) -->
     <sys:Double x:Key="LineHeightTitle">36</sys:Double>
@@ -263,6 +266,10 @@
     <Thickness x:Key="BadgeOffset">0,-2,2,0</Thickness>
     <Thickness x:Key="RoleButtonGap">2,0</Thickness>
     <Thickness x:Key="StepperMargin">0,4,0,4</Thickness>
+    <Thickness x:Key="StepLabelSpacing">0,3,0,0</Thickness>
+    <Thickness x:Key="StepConnectorTopOffset">0,4,0,0</Thickness>
+    <Thickness x:Key="StepContentTopSpacing">0,8,0,0</Thickness>
+    <Thickness x:Key="HintTextTopSpacing">0,4,0,0</Thickness>
 
     <!-- Grid row height for two-column form layouts -->
     <GridLength x:Key="FormRowSpacing">8</GridLength>
@@ -288,6 +295,17 @@
     <Thickness x:Key="KeypadInset">24,8,24,0</Thickness>
     <Thickness x:Key="PagingButtonPadding">8,4</Thickness>
     <Thickness x:Key="SidebarNavItemPadding">20,12</Thickness>
+    <Thickness x:Key="QuickStartCardGap">6</Thickness>
+    <Thickness x:Key="QuickStartCardPadding">16,20</Thickness>
+    <Thickness x:Key="CardTitleSpacing">0,8,0,0</Thickness>
+    <Thickness x:Key="CardSubtitleSpacing">0,2,0,0</Thickness>
+    <Thickness x:Key="HeroSectionTopSpacing">0,24,0,0</Thickness>
+    <Thickness x:Key="HeroHintSpacing">0,20,0,0</Thickness>
+    <Thickness x:Key="SubtitleGap">0,6,0,0</Thickness>
+    <sys:Double x:Key="OverlayOpacity">0.85</sys:Double>
+    <sys:Double x:Key="KeypadRowMinHeight">56</sys:Double>
+    <sys:Double x:Key="ErrorAreaMinHeight">18</sys:Double>
+    <sys:Double x:Key="StepIndicatorWidth">260</sys:Double>
 
     <!-- ── Form field standard widths ─────────────────────────────
          Use instead of magic Width="80" etc. in views.

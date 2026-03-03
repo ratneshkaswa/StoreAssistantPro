@@ -50,7 +50,7 @@
                             <TextBlock Text="Firm Details" Style="{StaticResource SectionHeaderStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
@@ -66,7 +66,7 @@
                             <TextBlock Text="You can add address, phone, GSTIN later from Firm Management."
                                        FontSize="{StaticResource FontSizeCaption}"
                                        Foreground="{StaticResource FluentTextTertiary}"
-                                       Margin="0,8,0,0"/>
+                                       Margin="{StaticResource StepContentTopSpacing}"/>
                         </StackPanel>
                     </Border>
 
@@ -75,7 +75,7 @@
                             <TextBlock Text="Security PINs" Style="{StaticResource SectionHeaderStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -188,8 +188,8 @@
                                    FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="&#x1F510; Master PIN is used to authorize critical actions such as deleting major records."
-                                   FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextTertiary}"
-                                   HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   HorizontalAlignment="Center" Margin="{StaticResource HintTextTopSpacing}"/>
                     </StackPanel>
                 </StackPanel>
         </Grid>

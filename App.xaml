@@ -107,7 +107,7 @@
                                                    FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource FluentTextTertiary}"
                                                    HorizontalAlignment="Center"
-                                                   Margin="0,6,0,0"/>
+                                                   Margin="{StaticResource SubtitleGap}"/>
                                     </StackPanel>
                             </Grid>
                         </Grid>
@@ -195,7 +195,7 @@
                                                    FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource FluentTextTertiary}"
                                                    HorizontalAlignment="Center"
-                                                   Margin="0,6,0,0"/>
+                                                   Margin="{StaticResource SubtitleGap}"/>
                                     </StackPanel>
                             </Grid>
 

@@ -197,7 +197,7 @@
                     </StackPanel>
 
                     <!-- Error / warnings (MinHeight for layout stability) -->
-                    <StackPanel HorizontalAlignment="Center" MinHeight="18"
+                    <StackPanel HorizontalAlignment="Center" MinHeight="{StaticResource ErrorAreaMinHeight}"
                                 Margin="{StaticResource ItemSpacing}">
                         <TextBlock Text="{Binding ErrorMessage}"
                                    Style="{StaticResource ErrorMessageStyle}"
@@ -212,10 +212,10 @@
                     <!-- Keypad -->
                     <Grid Margin="{StaticResource KeypadInset}">
                         <Grid.RowDefinitions>
-                            <RowDefinition MinHeight="56"/>
-                            <RowDefinition MinHeight="56"/>
-                            <RowDefinition MinHeight="56"/>
-                            <RowDefinition MinHeight="56"/>
+                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
+                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
+                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
+                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -274,7 +274,7 @@
 
                         <Grid Margin="{StaticResource ItemSpacing}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" MinWidth="80"/>
+                                <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -330,7 +330,7 @@
                     <!-- Verifying overlay -->
                     <Border CornerRadius="{StaticResource FluentCornerMedium}"
                             Background="{StaticResource FluentControlFillDefault}"
-                            Opacity="0.85"
+                            Opacity="{StaticResource OverlayOpacity}"
                             Visibility="{Binding IsVerifying, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="Verifying…"
                                    FontSize="{StaticResource FontSizeBody}"

@@ -31,7 +31,7 @@
 
             <!-- Hero icon -->
             <TextBlock Grid.Row="0" Text="🏪"
-                       FontSize="48"
+                       FontSize="{StaticResource FontSizeIconHero}"
                        HorizontalAlignment="Center"
                        Margin="{StaticResource CompactItemSpacing}"
                        h:Motion.SlideFadeIn="True"/>
@@ -48,80 +48,80 @@
                            FontSize="{StaticResource FontSizeBody}"
                            Foreground="{StaticResource FluentTextSecondary}"
                            HorizontalAlignment="Center"
-                           Margin="0,6,0,0"/>
+                           Margin="{StaticResource SubtitleGap}"/>
             </StackPanel>
 
             <!-- Quick-start cards -->
             <UniformGrid Grid.Row="2" Columns="3"
-                         Margin="0,24,0,0">
+                         Margin="{StaticResource HeroSectionTopSpacing}">
                 <!-- Firm card -->
-                <Border Margin="6" Style="{StaticResource SectionCardStyle}"
+                <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
                         Cursor="Hand"
                         Visibility="{Binding DataContext.IsFirmManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
                     <Border.InputBindings>
                         <MouseBinding Gesture="LeftClick"
                                       Command="{Binding DataContext.OpenFirmManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Border.InputBindings>
-                    <StackPanel HorizontalAlignment="Center" Margin="16,20">
+                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
                         <TextBlock Text="🏢" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="Firm" FontWeight="SemiBold"
                                    FontSize="{StaticResource FontSizeBody}"
                                    Foreground="{StaticResource FluentTextPrimary}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,8,0,0"/>
+                                   Margin="{StaticResource CardTitleSpacing}"/>
                         <TextBlock Text="Manage details"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentTextTertiary}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,2,0,0"/>
+                                   Margin="{StaticResource CardSubtitleSpacing}"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Users card -->
-                <Border Margin="6" Style="{StaticResource SectionCardStyle}"
+                <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
                         Cursor="Hand"
                         Visibility="{Binding DataContext.IsUserManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
                     <Border.InputBindings>
                         <MouseBinding Gesture="LeftClick"
                                       Command="{Binding DataContext.OpenUserManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Border.InputBindings>
-                    <StackPanel HorizontalAlignment="Center" Margin="16,20">
+                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
                         <TextBlock Text="👥" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="Users" FontWeight="SemiBold"
                                    FontSize="{StaticResource FontSizeBody}"
                                    Foreground="{StaticResource FluentTextPrimary}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,8,0,0"/>
+                                   Margin="{StaticResource CardTitleSpacing}"/>
                         <TextBlock Text="Manage team"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentTextTertiary}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,2,0,0"/>
+                                   Margin="{StaticResource CardSubtitleSpacing}"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Refresh card -->
-                <Border Margin="6" Style="{StaticResource SectionCardStyle}"
+                <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
                         Cursor="Hand">
                     <Border.InputBindings>
                         <MouseBinding Gesture="LeftClick"
                                       Command="{Binding DataContext.RefreshCurrentViewCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Border.InputBindings>
-                    <StackPanel HorizontalAlignment="Center" Margin="16,20">
+                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
                         <TextBlock Text="🔄" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="Refresh" FontWeight="SemiBold"
                                    FontSize="{StaticResource FontSizeBody}"
                                    Foreground="{StaticResource FluentTextPrimary}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,8,0,0"/>
+                                   Margin="{StaticResource CardTitleSpacing}"/>
                         <TextBlock Text="Reload data"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentTextTertiary}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,2,0,0"/>
+                                   Margin="{StaticResource CardSubtitleSpacing}"/>
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -132,7 +132,7 @@
                        FontSize="{StaticResource FontSizeCaption}"
                        Foreground="{StaticResource FluentTextTertiary}"
                        HorizontalAlignment="Center"
-                       Margin="0,20,0,0"/>
+                       Margin="{StaticResource HeroHintSpacing}"/>
         </Grid>
     </Grid>
 </UserControl>

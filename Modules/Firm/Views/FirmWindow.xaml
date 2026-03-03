@@ -1,4 +1,4 @@
-﻿<core:BaseDialogWindow                                                                                                                                                                                                          x:Class="StoreAssistantPro.Modules.Firm.Views.FirmWindow"
+﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Firm.Views.FirmWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -19,7 +19,7 @@
             <TextBlock Text="&#x1F3E2; Firm Management" Style="{StaticResource DialogTitleStyle}"/>
 
             <!-- Visual step progress: ●──────○──────○ -->
-            <Grid HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="260">
+            <Grid HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="{StaticResource StepIndicatorWidth}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -38,7 +38,7 @@
                         </Ellipse.Style>
                     </Ellipse>
                     <TextBlock Text="Profile" HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="0,3,0,0">
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
@@ -54,7 +54,7 @@
                 </StackPanel>
 
                 <!-- Line 1→2 -->
-                <Border Grid.Column="1" Height="2" VerticalAlignment="Top" Margin="0,4,0,0">
+                <Border Grid.Column="1" Height="2" VerticalAlignment="Top" Margin="{StaticResource StepConnectorTopOffset}">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
@@ -82,7 +82,7 @@
                         </Ellipse.Style>
                     </Ellipse>
                     <TextBlock Text="Tax" HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="0,3,0,0">
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
@@ -98,7 +98,7 @@
                 </StackPanel>
 
                 <!-- Line 2→3 -->
-                <Border Grid.Column="3" Height="2" VerticalAlignment="Top" Margin="0,4,0,0">
+                <Border Grid.Column="3" Height="2" VerticalAlignment="Top" Margin="{StaticResource StepConnectorTopOffset}">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
@@ -126,7 +126,7 @@
                         </Ellipse.Style>
                     </Ellipse>
                     <TextBlock Text="Regional" HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="0,3,0,0">
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
@@ -144,13 +144,13 @@
         </StackPanel>
 
         <!-- Row 1: Step content -->
-        <Grid Grid.Row="1" Margin="0,8,0,0">
+        <Grid Grid.Row="1" Margin="{StaticResource StepContentTopSpacing}">
 
             <!-- ───── Step 1: Firm Profile ───── -->
             <Grid Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibility}}"
                   VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -219,14 +219,14 @@
                            Text="Phone number will also be used as WhatsApp number."
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextTertiary}"
-                           Margin="0,4,0,0"/>
+                           Margin="{StaticResource HintTextTopSpacing}"/>
             </Grid>
 
             <!-- ───── Step 2: Tax &amp; Legal ───── -->
             <Grid Visibility="{Binding IsStep2, Converter={StaticResource BoolToVisibility}}"
                   VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -259,14 +259,14 @@
                            Text="Business vertical: Clothing Retail"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextTertiary}"
-                           Margin="0,4,0,0"/>
+                           Margin="{StaticResource HintTextTopSpacing}"/>
             </Grid>
 
             <!-- ───── Step 3: Regional Settings ───── -->
             <Grid Visibility="{Binding IsStep3, Converter={StaticResource BoolToVisibility}}"
                   VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -294,7 +294,7 @@
                               SelectedItem="{Binding SelectedFYStartMonth}"
                               Width="{StaticResource FieldWidthStandard}"/>
                     <TextBlock Text="{Binding FinancialYearDisplay}" VerticalAlignment="Center"
-                               Margin="12,0,0,0"
+                               Margin="{StaticResource FormColumnGap}"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextSecondary}"/>
                 </StackPanel>
@@ -310,7 +310,7 @@
                 <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextTertiary}"
-                           Margin="0,4,0,0"
+                           Margin="{StaticResource HintTextTopSpacing}"
                            Text="Number format: Indian (1,00,000)"/>
             </Grid>
         </Grid>
