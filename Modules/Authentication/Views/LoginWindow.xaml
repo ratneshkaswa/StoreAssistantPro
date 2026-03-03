@@ -157,8 +157,9 @@
                     </Style>
                 </Border.Style>
                 <Grid>
-                    <!-- Normal PIN entry mode -->
-                    <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToVisibility}}">
+                    <!-- Normal PIN entry mode (Hidden, not Collapsed, to preserve card height) -->
+                    <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToHiddenVisibility}}"
+                                IsHitTestVisible="{Binding IsNormalMode}">
                         <!-- Success message after PIN reset (MinHeight reserves space) -->
                     <TextBlock Text="{Binding ResetSuccessMessage}"
                                HorizontalAlignment="Center"
@@ -252,8 +253,9 @@
                     </TextBlock>
                     </StackPanel>
 
-                    <!-- Forgot PIN recovery form -->
-                    <StackPanel Visibility="{Binding IsForgotPinMode, Converter={StaticResource BoolToVisibility}}">
+                    <!-- Forgot PIN recovery form (anchored top within reserved card space) -->
+                    <StackPanel Visibility="{Binding IsForgotPinMode, Converter={StaticResource BoolToVisibility}}"
+                                VerticalAlignment="Top">
                         <TextBlock Text="Reset PIN" HorizontalAlignment="Center"
                                    FontSize="{StaticResource FontSizeSectionHeader}"
                                    FontWeight="Bold"
