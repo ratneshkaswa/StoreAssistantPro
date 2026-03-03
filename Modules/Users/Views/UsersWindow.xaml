@@ -37,22 +37,9 @@
             </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Role" Binding="{Binding UserType}" Width="*"/>
-                <DataGridTextColumn Header="Failed Attempts" Binding="{Binding FailedAttempts}" Width="{StaticResource ColumnWidthQty}"/>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="{StaticResource ColumnWidthId}"/>
             </DataGrid.Columns>
         </DataGrid>
-
-        <!-- Lockout status banner -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="{StaticResource FieldLabelSpacing}">
-            <TextBlock Text="{Binding LockoutStatusText}"
-                       FontSize="{StaticResource FontSizeCaption}"
-                       Foreground="{StaticResource FluentWarning}"
-                       VerticalAlignment="Center"/>
-            <Button Content="🔓 Unlock" Command="{Binding UnlockUserCommand}"
-                    Style="{StaticResource ToolbarButtonStyle}"
-                    Margin="{StaticResource InlineControlSpacing}"
-                    Visibility="{Binding IsSelectedUserLockedOut, Converter={StaticResource BoolToVisibility}}"/>
-        </StackPanel>
 
         <!-- Change PIN — two-column form -->
         <Grid Grid.Row="3">

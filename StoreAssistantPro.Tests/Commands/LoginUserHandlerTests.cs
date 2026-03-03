@@ -29,28 +29,15 @@ public class LoginUserHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_InvalidPin_ReturnsFailureWithRemainingAttempts()
+    public async Task HandleAsync_InvalidPin_ReturnsFailure()
     {
         _loginService.ValidatePinAsync(UserType.User, "0000", Arg.Any<CancellationToken>())
-            .Returns(LoginResult.Failed("Invalid PIN. 2 attempt(s) remaining.", 2));
+            .Returns(LoginResult.Failed("Invalid PIN."));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.User, "0000"));
 
         Assert.False(result.Succeeded);
-        Assert.Contains("2 attempt(s) remaining", result.ErrorMessage);
-        await _eventBus.DidNotReceive().PublishAsync(Arg.Any<UserLoggedInEvent>());
-    }
-
-    [Fact]
-    public async Task HandleAsync_LockedOut_ReturnsFailureWithLockoutMessage()
-    {
-        _loginService.ValidatePinAsync(UserType.Manager, "9999", Arg.Any<CancellationToken>())
-            .Returns(LoginResult.LockedOut("02:30 PM"));
-
-        var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.Manager, "9999"));
-
-        Assert.False(result.Succeeded);
-        Assert.Contains("Account locked", result.ErrorMessage);
+        Assert.Equal("Invalid PIN.", result.ErrorMessage);
         await _eventBus.DidNotReceive().PublishAsync(Arg.Any<UserLoggedInEvent>());
     }
 
@@ -58,7 +45,7 @@ public class LoginUserHandlerTests
     public async Task HandleAsync_UserNotFound_ReturnsFailure()
     {
         _loginService.ValidatePinAsync(UserType.User, "1111", Arg.Any<CancellationToken>())
-            .Returns(LoginResult.Failed("User not found.", 0));
+            .Returns(LoginResult.Failed("User not found."));
 
         var result = await CreateSut().HandleAsync(new LoginUserCommand(UserType.User, "1111"));
 

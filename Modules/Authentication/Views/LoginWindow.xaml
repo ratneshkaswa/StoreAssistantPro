@@ -196,16 +196,12 @@
                                  Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=3}"/>
                     </StackPanel>
 
-                    <!-- Error / warnings (MinHeight for layout stability) -->
+                    <!-- Error (MinHeight for layout stability) -->
                     <StackPanel HorizontalAlignment="Center" MinHeight="{StaticResource ErrorAreaMinHeight}"
                                 Margin="{StaticResource ItemSpacing}">
                         <TextBlock Text="{Binding ErrorMessage}"
                                    Style="{StaticResource ErrorMessageStyle}"
                                    HorizontalAlignment="Center" Margin="0"/>
-                        <TextBlock Text="{Binding AttemptsMessage}"
-                                   Style="{StaticResource WarningTextStyle}"
-                                   HorizontalAlignment="Center"
-                                   Visibility="{Binding AttemptsMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
                     </StackPanel>
 
                     <!-- Keypad -->

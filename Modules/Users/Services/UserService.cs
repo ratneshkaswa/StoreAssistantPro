@@ -35,18 +35,4 @@ public class UserService(
         credential.PinHash = PinHasher.Hash(newPin);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
-
-    public async Task ClearLockoutAsync(UserType userType, CancellationToken ct = default)
-    {
-        using var _ = perf.BeginScope($"UserService.ClearLockoutAsync({userType})");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        var credential = await context.UserCredentials
-            .FirstOrDefaultAsync(c => c.UserType == userType, ct)
-            .ConfigureAwait(false)
-            ?? throw new InvalidOperationException($"Credential for {userType} not found.");
-
-        credential.FailedAttempts = 0;
-        credential.LockoutEndTime = null;
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
-    }
 }

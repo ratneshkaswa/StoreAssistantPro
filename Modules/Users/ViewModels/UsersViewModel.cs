@@ -29,30 +29,8 @@ public partial class UsersViewModel(
     [ObservableProperty]
     public partial bool IsMasterPinRequired { get; set; }
 
-    // ── Lockout status (read-only display) ──
-
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSelectedUserLockedOut))]
-    [NotifyPropertyChangedFor(nameof(LockoutStatusText))]
     public partial UserCredential? SelectedUser { get; set; }
-
-    public bool IsSelectedUserLockedOut =>
-        SelectedUser is not null
-        && SelectedUser.LockoutEndTime.HasValue
-        && SelectedUser.LockoutEndTime.Value > DateTime.UtcNow;
-
-    public string LockoutStatusText
-    {
-        get
-        {
-            if (SelectedUser is null) return string.Empty;
-            if (!IsSelectedUserLockedOut)
-                return SelectedUser.FailedAttempts > 0
-                    ? $"⚠ {SelectedUser.FailedAttempts} failed attempt(s)"
-                    : string.Empty;
-            return $"🔒 Locked until {SelectedUser.LockoutEndTime!.Value.ToLocalTime():HH:mm:ss}";
-        }
-    }
 
     partial void OnSelectedUserChanged(UserCredential? value)
     {
@@ -62,19 +40,7 @@ public partial class UsersViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
         IsMasterPinRequired = value?.UserType == UserType.Admin;
-        OnPropertyChanged(nameof(IsSelectedUserLockedOut));
-        OnPropertyChanged(nameof(LockoutStatusText));
     }
-
-    [RelayCommand]
-    private Task UnlockUserAsync() => RunAsync(async ct =>
-    {
-        if (SelectedUser is null) return;
-
-        await userService.ClearLockoutAsync(SelectedUser.UserType, ct);
-        SuccessMessage = $"{SelectedUser.UserType} account unlocked.";
-        await LoadUsersAsync();
-    });
 
     [RelayCommand]
     private Task LoadUsersAsync() => RunLoadAsync(async ct =>

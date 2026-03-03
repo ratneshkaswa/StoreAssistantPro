@@ -67,12 +67,6 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     public partial string CurrentTime { get; set; }
 
-    /// <summary>
-    /// Kept for XAML binding compatibility. Server <see cref="BaseViewModel.ErrorMessage"/>
-    /// now carries all attempt/lockout info — this property is always empty.
-    /// </summary>
-    public string AttemptsMessage => string.Empty;
-
     public Action<bool?>? RequestClose { get; set; }
 
     /// <summary>Raised after a successful PIN reset so the view can clear PasswordBoxes.</summary>
