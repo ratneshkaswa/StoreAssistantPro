@@ -129,6 +129,8 @@ public abstract class BaseDialogWindow : Window
 
     public BaseDialogWindow(IWindowSizingService sizingService)
     {
+        UseLayoutRounding = true;
+        SnapsToDevicePixels = true;
         sizingService.ConfigureDialogWindow(this, DialogWidth, DialogHeight);
 
         // Set app icon (gracefully skips if asset not found)

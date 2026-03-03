@@ -7,7 +7,9 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
-        Icon="pack://application:,,,/Assets/app.ico">
+        Icon="pack://application:,,,/Assets/app.ico"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
 
     <!-- InputBindings are generated at runtime by ShortcutService -->
 
@@ -349,8 +351,7 @@
             <!-- Connectivity indicator -->
             <StatusBarItem Grid.Column="4" Style="{StaticResource FluentStatusBarItemStyle}"
                            Margin="{StaticResource StatusBarPillGap}">
-                <Border VerticalAlignment="Center"
-                        h:StatusPillTransition.AnimateChanges="True">
+                <Border VerticalAlignment="Center">
                     <Border.Style>
                         <Style TargetType="Border" BasedOn="{StaticResource StatusBadgePillStyle}">
                             <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>

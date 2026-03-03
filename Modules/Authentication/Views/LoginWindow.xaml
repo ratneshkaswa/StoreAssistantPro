@@ -5,7 +5,9 @@
         xmlns:models="clr-namespace:StoreAssistantPro.Models"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Login"
-        Icon="pack://application:,,,/Assets/app.ico">
+        Icon="pack://application:,,,/Assets/app.ico"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
     <Window.Resources>
         <!-- Admin button — blue pastel, deepens on selection -->
         <Style x:Key="AdminButtonStyle" TargetType="Button"
@@ -301,9 +303,10 @@
                                          AutomationProperties.Name="Confirm New PIN"/>
                         </Grid>
 
-                        <!-- Error -->
+                        <!-- Error (MinHeight reserves space) -->
                         <TextBlock Text="{Binding ErrorMessage}"
                                    Style="{StaticResource ErrorMessageStyle}"
+                                   MinHeight="{StaticResource ErrorAreaMinHeight}"
                                    HorizontalAlignment="Center" Margin="0"/>
 
                         <!-- Action buttons -->

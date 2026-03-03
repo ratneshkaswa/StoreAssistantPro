@@ -33,8 +33,7 @@
             <TextBlock Grid.Row="0" Text="🏪"
                        FontSize="{StaticResource FontSizeIconHero}"
                        HorizontalAlignment="Center"
-                       Margin="{StaticResource CompactItemSpacing}"
-                       h:Motion.SlideFadeIn="True"/>
+                       Margin="{StaticResource CompactItemSpacing}"/>
 
             <!-- Welcome text -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center"

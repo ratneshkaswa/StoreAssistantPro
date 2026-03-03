@@ -5,7 +5,9 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="One Time Setup"
         Icon="pack://application:,,,/Assets/app.ico"
-        Closing="OnWindowClosing">
+        Closing="OnWindowClosing"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
 
     <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
