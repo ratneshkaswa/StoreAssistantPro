@@ -1,12 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Features;
 
 namespace StoreAssistantPro.Core.Navigation;
 
 public partial class NavigationService(
     IServiceProvider serviceProvider,
-    IFeatureToggleService featureToggle) : ObservableObject, INavigationService
+    IFeatureToggleService featureToggle,
+    ILogger<NavigationService> logger) : ObservableObject, INavigationService
 {
     private readonly Dictionary<string, Type> _pageMap = [];
     private readonly Dictionary<string, string> _featureMap = new(StringComparer.OrdinalIgnoreCase);
@@ -19,7 +21,7 @@ public partial class NavigationService(
 
     public void NavigateTo<TViewModel>() where TViewModel : ObservableObject
     {
-        CurrentView = serviceProvider.GetRequiredService<TViewModel>();
+        ActivateView(serviceProvider.GetRequiredService<TViewModel>(), typeof(TViewModel).Name);
     }
 
     public void NavigateTo(string pageKey)
@@ -31,8 +33,9 @@ public partial class NavigationService(
         if (_featureMap.TryGetValue(pageKey, out var flag) && !featureToggle.IsEnabled(flag))
             return;
 
-        CurrentView = (ObservableObject)serviceProvider.GetRequiredService(vmType);
+        var newView = (ObservableObject)serviceProvider.GetRequiredService(vmType);
         CurrentPageKey = pageKey;
+        ActivateView(newView, pageKey);
     }
 
     public void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject
@@ -43,5 +46,49 @@ public partial class NavigationService(
     public void MapFeature(string pageKey, string featureFlag)
     {
         _featureMap[pageKey] = featureFlag;
+    }
+
+    // ── Lifecycle orchestration ──────────────────────────────────────
+
+    private void ActivateView(ObservableObject newView, string label)
+    {
+        var previous = CurrentView;
+
+        // Notify outgoing VM and dispose it
+        if (previous is not null && !ReferenceEquals(previous, newView))
+        {
+            if (previous is INavigationAware outgoing)
+                outgoing.OnNavigatedFrom();
+
+            if (previous is IDisposable disposable)
+            {
+                disposable.Dispose();
+                logger.LogDebug("Disposed outgoing view: {ViewType}", previous.GetType().Name);
+            }
+        }
+
+        CurrentView = newView;
+
+        // Notify incoming VM
+        if (newView is INavigationAware incoming)
+        {
+            _ = NotifyNavigatedToAsync(incoming, label);
+        }
+    }
+
+    private async Task NotifyNavigatedToAsync(INavigationAware aware, string label)
+    {
+        try
+        {
+            await aware.OnNavigatedTo();
+        }
+        catch (OperationCanceledException)
+        {
+            // Navigated away before OnNavigatedTo completed — expected.
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "OnNavigatedTo failed for {Page}", label);
+        }
     }
 }

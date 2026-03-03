@@ -208,11 +208,6 @@ public partial class FirmViewModel : BaseViewModel
         "yyyy/MM/dd"
     ];
 
-    // ── Messages ──
-
-    [ObservableProperty]
-    public partial string SuccessMessage { get; set; } = string.Empty;
-
     [RelayCommand]
     private Task LoadFirmAsync() => RunLoadAsync(async ct =>
     {

@@ -29,9 +29,6 @@ public partial class UsersViewModel(
     [ObservableProperty]
     public partial bool IsMasterPinRequired { get; set; }
 
-    [ObservableProperty]
-    public partial string SuccessMessage { get; set; } = string.Empty;
-
     // ── Lockout status (read-only display) ──
 
     [ObservableProperty]

@@ -45,10 +45,24 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public partial string ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
+    /// Success/confirmation message to display in the View after a
+    /// successful action (save, delete, PIN change, etc.).
+    /// Typically auto-dismissed by <c>AutoDismiss</c> in the template.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSuccess))]
+    public partial string SuccessMessage { get; set; } = string.Empty;
+
+    /// <summary>
     /// <c>true</c> when <see cref="ErrorMessage"/> is non-empty.
     /// Useful for triggering shake animations or error indicators in the View.
     /// </summary>
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
+    /// <summary>
+    /// <c>true</c> when <see cref="SuccessMessage"/> is non-empty.
+    /// </summary>
+    public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
 
     /// <summary>
     /// Human-readable title derived from the class name by default.
@@ -234,6 +248,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public virtual void ClearState()
     {
         ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
         IsBusy = false;
         IsLoading = false;
     }

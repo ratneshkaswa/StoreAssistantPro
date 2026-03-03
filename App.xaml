@@ -98,7 +98,7 @@
 
                                 <StackPanel x:Name="PART_Loading"
                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                Visibility="Collapsed">
+                                                Opacity="0" Visibility="Collapsed">
                                         <TextBlock Text="&#x23F3;"
                                                    FontSize="{StaticResource FontSizePageTitle}"
                                                    HorizontalAlignment="Center"
@@ -124,9 +124,28 @@
                             <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
                                 <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
-                            <!-- Show loading overlay -->
+                            <!-- Show loading overlay with fade -->
                             <DataTrigger Binding="{Binding IsLoading}" Value="True">
                                 <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="LoadingFadeIn">
+                                        <Storyboard Storyboard.TargetName="PART_Loading">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="{StaticResource FluentDurationNormal}"
+                                                             EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="LoadingFadeIn"/>
+                                    <BeginStoryboard>
+                                        <Storyboard Storyboard.TargetName="PART_Loading">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="{StaticResource FluentDurationFast}"
+                                                             EasingFunction="{StaticResource FluentEaseAccelerate}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -167,7 +186,7 @@
 
                                 <StackPanel x:Name="PART_Loading"
                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                Visibility="Collapsed">
+                                                Opacity="0" Visibility="Collapsed">
                                         <TextBlock Text="&#x23F3;"
                                                    FontSize="{StaticResource FontSizePageTitle}"
                                                    HorizontalAlignment="Center"
@@ -215,9 +234,28 @@
                             <Trigger Property="StatusBarContent" Value="{x:Null}">
                                 <Setter TargetName="PART_StatusBar" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
-                            <!-- Loading overlay (bound to BaseViewModel.IsLoading) -->
+                            <!-- Loading overlay with fade (bound to BaseViewModel.IsLoading) -->
                             <DataTrigger Binding="{Binding IsLoading}" Value="True">
                                 <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="EntLoadingFadeIn">
+                                        <Storyboard Storyboard.TargetName="PART_Loading">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="{StaticResource FluentDurationNormal}"
+                                                             EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="EntLoadingFadeIn"/>
+                                    <BeginStoryboard>
+                                        <Storyboard Storyboard.TargetName="PART_Loading">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="{StaticResource FluentDurationFast}"
+                                                             EasingFunction="{StaticResource FluentEaseAccelerate}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
                             </DataTrigger>
                             <!-- Collapse messages when empty -->
                             <DataTrigger Binding="{Binding ErrorMessage}" Value="">
