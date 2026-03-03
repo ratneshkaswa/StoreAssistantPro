@@ -138,14 +138,38 @@ public abstract class BaseDialogWindow : Window
             KeyboardNav.SetEscapeCommand(this, new CloseDialogCommand(this));
     }
 
+    /// <summary>
+    /// Cached app icon — loaded once, shared by all dialog instances.
+    /// </summary>
+    private static System.Windows.Media.Imaging.BitmapFrame? _cachedIcon;
+    private static bool _iconLoaded;
+
     private void TrySetAppIcon()
     {
-        var uri = new Uri("pack://application:,,,/Assets/app.ico", UriKind.Absolute);
-        var info = System.Windows.Application.GetResourceStream(uri);
-        if (info != null)
+        if (!_iconLoaded)
         {
-            Icon = System.Windows.Media.Imaging.BitmapFrame.Create(info.Stream);
+            _iconLoaded = true;
+            try
+            {
+                var uri = new Uri("pack://application:,,,/Assets/app.ico", UriKind.Absolute);
+                var info = System.Windows.Application.GetResourceStream(uri);
+                if (info is not null)
+                {
+                    using var stream = info.Stream;
+                    _cachedIcon = System.Windows.Media.Imaging.BitmapFrame.Create(
+                        stream,
+                        System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                        System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+                }
+            }
+            catch
+            {
+                // Asset not found or unreadable — dialogs will have no icon.
+            }
         }
+
+        if (_cachedIcon is not null)
+            Icon = _cachedIcon;
     }
 
     // ── Close command ────────────────────────────────────────────────
