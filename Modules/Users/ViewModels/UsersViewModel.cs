@@ -87,7 +87,7 @@ public partial class UsersViewModel(
     });
 
     [RelayCommand]
-    private async Task ChangePinAsync()
+    private Task ChangePinAsync() => RunAsync(async ct =>
     {
         SuccessMessage = string.Empty;
 
@@ -115,6 +115,6 @@ public partial class UsersViewModel(
             if (user.UserType == UserType.Admin)
                 MasterPin = string.Empty;
         }
-    }
+    });
 
     }

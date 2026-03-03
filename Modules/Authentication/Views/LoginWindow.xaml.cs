@@ -31,13 +31,13 @@ public partial class LoginWindow : Window
                     System.Windows.Threading.DispatcherPriority.Input);
 
             // Auto-focus master PIN box when entering forgot PIN mode
-                if (e.PropertyName == nameof(LoginViewModel.IsForgotPinMode) && vm.IsForgotPinMode)
-                    Dispatcher.BeginInvoke(() => ResetMasterBox.Focus(),
-                        System.Windows.Threading.DispatcherPriority.Input);
-            };
+            if (e.PropertyName == nameof(LoginViewModel.IsForgotPinMode) && vm.IsForgotPinMode)
+                Dispatcher.BeginInvoke(() => ResetMasterBox.Focus(),
+                    System.Windows.Threading.DispatcherPriority.Input);
+        };
 
-            // Clear PasswordBoxes after successful PIN reset
-            vm.ResetCompleted += ClearResetFields;
+        // Clear PasswordBoxes after successful PIN reset
+        vm.ResetCompleted += ClearResetFields;
 
         Closed += (_, _) => vm.Dispose();
     }
