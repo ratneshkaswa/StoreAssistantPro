@@ -28,12 +28,6 @@ public partial class LoginViewModel : BaseViewModel
     private readonly IConnectivityMonitorService _connectivity;
     private readonly DispatcherTimer _clockTimer;
 
-    // Failed attempt tracking per role
-    private readonly Dictionary<UserType, int> _failedAttempts = new();
-    private readonly Dictionary<UserType, DateTime?> _lockoutUntil = new();
-    private const int MaxAttempts = 5;
-    private const int LockoutSeconds = 30;
-
     /// <summary>Reusable PIN pad — bind keypad buttons to <c>PinPad.AddDigitCommand</c> etc.</summary>
     public PinPadViewModel PinPad { get; } = new(maxLength: 4);
 
@@ -70,9 +64,6 @@ public partial class LoginViewModel : BaseViewModel
     // ── L3: Failed attempts ──
     [ObservableProperty]
     public partial string AttemptsMessage { get; set; }
-
-    [ObservableProperty]
-    public partial bool IsRoleLocked { get; set; }
 
     public Action<bool?>? RequestClose { get; set; }
 
@@ -135,19 +126,10 @@ public partial class LoginViewModel : BaseViewModel
     [RelayCommand]
     private void SelectUser(UserType userType)
     {
-        // L3: Check lockout
-        if (_lockoutUntil.TryGetValue(userType, out var until) && until > _regional.Now)
-        {
-            var remaining = (int)(until.Value - _regional.Now).TotalSeconds;
-            ErrorMessage = $"{userType} is locked. Try again in {remaining}s.";
-            return;
-        }
-
         SelectedUserType = userType;
         PinPad.Reset();
         ErrorMessage = string.Empty;
-        IsRoleLocked = false;
-        UpdateAttemptsMessage();
+        AttemptsMessage = string.Empty;
     }
 
     /// <summary>Clears selected role (layered ESC).</summary>
@@ -165,15 +147,6 @@ public partial class LoginViewModel : BaseViewModel
         if (SelectedUserType is null)
         {
             ErrorMessage = "Please select a user.";
-            return;
-        }
-
-        // L3: Check lockout
-        if (_lockoutUntil.TryGetValue(SelectedUserType.Value, out var until) && until > _regional.Now)
-        {
-            var remaining = (int)(until.Value - _regional.Now).TotalSeconds;
-            ErrorMessage = $"Too many attempts. Locked for {remaining}s.";
-            PinPad.Reset();
             return;
         }
 
@@ -195,25 +168,8 @@ public partial class LoginViewModel : BaseViewModel
             }
             else
             {
-                // L3: Track failed attempts
-                var role = SelectedUserType.Value;
-                _failedAttempts.TryGetValue(role, out var count);
-                count++;
-                _failedAttempts[role] = count;
-
-                if (count >= MaxAttempts)
-                {
-                    _lockoutUntil[role] = _regional.Now.AddSeconds(LockoutSeconds);
-                    _failedAttempts[role] = 0;
-                    IsRoleLocked = true;
-                    ErrorMessage = $"Too many failed attempts. {role} locked for {LockoutSeconds}s.";
-                }
-                else
-                {
-                    ErrorMessage = result.ErrorMessage ?? "Login failed.";
-                }
-
-                UpdateAttemptsMessage();
+                ErrorMessage = result.ErrorMessage ?? "Login failed.";
+                AttemptsMessage = string.Empty;
                 PinPad.Reset();
             }
         }
@@ -222,16 +178,6 @@ public partial class LoginViewModel : BaseViewModel
             IsVerifying = false;
             PinPad.Unlock();
         }
-    }
-
-    private void UpdateAttemptsMessage()
-    {
-        if (SelectedUserType is null) { AttemptsMessage = string.Empty; return; }
-
-        _failedAttempts.TryGetValue(SelectedUserType.Value, out var count);
-        AttemptsMessage = count > 0
-            ? $"{MaxAttempts - count} attempt(s) remaining"
-            : string.Empty;
     }
 
     // ── Forgot PIN recovery ──
