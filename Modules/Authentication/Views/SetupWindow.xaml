@@ -193,7 +193,9 @@
                 </StackPanel>
         </Grid>
 
-        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}" Margin="{StaticResource FieldLabelSpacing}"/>
+        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
+                   MinHeight="{StaticResource MessageAreaMinHeight}"
+                   Margin="{StaticResource FieldLabelSpacing}"/>
 
         <Button Grid.Row="3" Content="Complete Setup" Command="{Binding SaveCommand}"
                 HorizontalAlignment="Right"

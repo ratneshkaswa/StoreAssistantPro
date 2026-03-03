@@ -157,12 +157,12 @@
                 <Grid>
                     <!-- Normal PIN entry mode -->
                     <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToVisibility}}">
-                        <!-- Success message after PIN reset -->
+                        <!-- Success message after PIN reset (MinHeight reserves space) -->
                     <TextBlock Text="{Binding ResetSuccessMessage}"
                                HorizontalAlignment="Center"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentSuccess}"
-                               Visibility="{Binding ResetSuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                               MinHeight="{StaticResource ErrorAreaMinHeight}"
                                Margin="{StaticResource ItemSpacing}"/>
 
                         <!-- Role hint / instruction (always visible, layout-stable) -->

@@ -85,10 +85,11 @@
                                                   VerticalAlignment="Center"/>
                             </DockPanel>
 
-                            <!-- Error message bar -->
+                            <!-- Error message bar (MinHeight reserves space to prevent layout shift) -->
                             <TextBlock x:Name="PART_ErrorMessage" Grid.Row="1"
                                        Text="{Binding ErrorMessage}"
-                                       Style="{StaticResource ErrorMessageStyle}"/>
+                                       Style="{StaticResource ErrorMessageStyle}"
+                                       MinHeight="{StaticResource ErrorAreaMinHeight}"/>
 
                             <!-- Page content + loading overlay -->
                             <Grid Grid.Row="2">
@@ -117,13 +118,6 @@
                             <Trigger Property="PageTitle" Value="">
                                 <Setter TargetName="PART_TitleBar" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
-                            <!-- Collapse error bar when empty -->
-                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
-                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
-                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
                             <!-- Show loading overlay with fade -->
                             <DataTrigger Binding="{Binding IsLoading}" Value="True">
                                 <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
@@ -199,8 +193,9 @@
                                     </StackPanel>
                             </Grid>
 
-                            <!-- Row 3: Messages (auto-bound to BaseViewModel) -->
-                            <StackPanel Grid.Row="3" Margin="{StaticResource MessageBarSpacing}">
+                            <!-- Row 3: Messages (MinHeight reserves space to prevent layout shift) -->
+                            <StackPanel Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+                                        Margin="{StaticResource MessageBarSpacing}">
                                 <TextBlock x:Name="PART_ErrorMessage"
                                            Text="{Binding ErrorMessage}"
                                            Style="{StaticResource ErrorMessageStyle}"/>
@@ -257,22 +252,9 @@
                                     </BeginStoryboard>
                                 </DataTrigger.ExitActions>
                             </DataTrigger>
-                            <!-- Collapse messages when empty -->
-                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
-                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
-                                <Setter TargetName="PART_ErrorMessage" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding SuccessMessage}" Value="">
-                                <Setter TargetName="PART_SuccessMessage" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding SuccessMessage}" Value="{x:Null}">
-                                <Setter TargetName="PART_SuccessMessage" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
             </Setter>
         </Style>
         </ResourceDictionary>

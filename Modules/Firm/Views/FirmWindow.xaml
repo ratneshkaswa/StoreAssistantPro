@@ -309,8 +309,9 @@
             </Grid>
         </Grid>
 
-        <!-- Row 2: Messages -->
-        <StackPanel Grid.Row="2" Margin="{StaticResource FieldLabelSpacing}">
+        <!-- Row 2: Messages (reserved space prevents layout shift) -->
+        <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
+                    Margin="{StaticResource FieldLabelSpacing}">
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
             <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
                        h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
