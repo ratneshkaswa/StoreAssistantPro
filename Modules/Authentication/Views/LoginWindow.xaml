@@ -162,7 +162,7 @@
                                HorizontalAlignment="Center"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentSuccess}"
-                               Visibility="{Binding ResetSuccessMessage, Converter={StaticResource BoolToVisibility}}"
+                               Visibility="{Binding ResetSuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
                                Margin="{StaticResource ItemSpacing}"/>
 
                         <!-- Role hint / instruction (always visible, layout-stable) -->
@@ -206,7 +206,7 @@
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentWarning}"
                                    HorizontalAlignment="Center"
-                                   Visibility="{Binding AttemptsMessage, Converter={StaticResource BoolToVisibility}}"/>
+                                   Visibility="{Binding AttemptsMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
                     </StackPanel>
 
                     <!-- Keypad -->
