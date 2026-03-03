@@ -19,6 +19,12 @@ namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 /// When the PIN reaches 4 digits and a user is selected, login executes
 /// automatically (POS auto-login). Error is cleared on next digit input.
 /// </para>
+/// <para>
+/// <b>State integrity:</b> All UI messages (<see cref="BaseViewModel.ErrorMessage"/>,
+/// <see cref="ResetSuccessMessage"/>) are mutually exclusive. Every state
+/// transition calls <see cref="ClearMessages"/> before setting the new message,
+/// preventing contradictory text on screen.
+/// </para>
 /// </summary>
 public partial class LoginViewModel : BaseViewModel
 {
@@ -61,9 +67,11 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     public partial string CurrentTime { get; set; }
 
-    // ── L3: Failed attempts ──
-    [ObservableProperty]
-    public partial string AttemptsMessage { get; set; }
+    /// <summary>
+    /// Kept for XAML binding compatibility. Server <see cref="BaseViewModel.ErrorMessage"/>
+    /// now carries all attempt/lockout info — this property is always empty.
+    /// </summary>
+    public string AttemptsMessage => string.Empty;
 
     public Action<bool?>? RequestClose { get; set; }
 
@@ -83,7 +91,6 @@ public partial class LoginViewModel : BaseViewModel
         _connectivity = connectivity;
 
         CurrentTime = _regional.FormatTime(_regional.Now);
-        AttemptsMessage = string.Empty;
 
         // L9: Clock timer + connectivity refresh
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -107,14 +114,21 @@ public partial class LoginViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Single point of message cleanup. Enforces mutual exclusion:
+    /// only one message type can be visible at any time.
+    /// </summary>
+    private void ClearMessages()
+    {
+        ErrorMessage = string.Empty;
+        ResetSuccessMessage = string.Empty;
+    }
+
     /// <summary>Clear error as soon as user starts typing a new PIN.</summary>
     private void OnPinPadPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(PinPadViewModel.PinLength) && PinPad.PinLength > 0)
-        {
-            if (HasError) ErrorMessage = string.Empty;
-            if (!string.IsNullOrEmpty(ResetSuccessMessage)) ResetSuccessMessage = string.Empty;
-        }
+            ClearMessages();
     }
 
     private void OnPinCompleted()
@@ -128,8 +142,7 @@ public partial class LoginViewModel : BaseViewModel
     {
         SelectedUserType = userType;
         PinPad.Reset();
-        ErrorMessage = string.Empty;
-        AttemptsMessage = string.Empty;
+        ClearMessages();
     }
 
     /// <summary>Clears selected role (layered ESC).</summary>
@@ -137,8 +150,7 @@ public partial class LoginViewModel : BaseViewModel
     {
         SelectedUserType = null;
         PinPad.Reset();
-        ErrorMessage = string.Empty;
-        AttemptsMessage = string.Empty;
+        ClearMessages();
     }
 
     [RelayCommand]
@@ -154,6 +166,7 @@ public partial class LoginViewModel : BaseViewModel
             .Rule(InputValidator.IsRequired(PinPad.Pin), "Please enter your PIN.")))
             return;
 
+        ClearMessages();
         PinPad.Lock();
         IsVerifying = true;
         try
@@ -169,7 +182,6 @@ public partial class LoginViewModel : BaseViewModel
             else
             {
                 ErrorMessage = result.ErrorMessage ?? "Login failed.";
-                AttemptsMessage = string.Empty;
                 PinPad.Reset();
             }
         }
@@ -204,8 +216,7 @@ public partial class LoginViewModel : BaseViewModel
         }
 
         IsForgotPinMode = true;
-        ErrorMessage = string.Empty;
-        ResetSuccessMessage = string.Empty;
+        ClearMessages();
         MasterPassword = string.Empty;
         NewPin = string.Empty;
         NewPinConfirm = string.Empty;
@@ -216,8 +227,7 @@ public partial class LoginViewModel : BaseViewModel
     private void CancelForgotPin()
     {
         IsForgotPinMode = false;
-        ErrorMessage = string.Empty;
-        ResetSuccessMessage = string.Empty;
+        ClearMessages();
     }
 
     [RelayCommand]
@@ -232,6 +242,7 @@ public partial class LoginViewModel : BaseViewModel
             .Rule(InputValidator.AreEqual(NewPin, NewPinConfirm), "PINs do not match.")))
             return;
 
+        ClearMessages();
         IsVerifying = true;
         try
         {
@@ -240,9 +251,8 @@ public partial class LoginViewModel : BaseViewModel
 
             if (result.Succeeded)
             {
-                ResetSuccessMessage = $"{SelectedUserType} PIN has been reset. Please login.";
-                ErrorMessage = string.Empty;
                 IsForgotPinMode = false;
+                ResetSuccessMessage = $"{SelectedUserType} PIN has been reset. Please login.";
                 PinPad.Reset();
                 MasterPassword = string.Empty;
                 NewPin = string.Empty;
