@@ -7,8 +7,8 @@ namespace StoreAssistantPro.Modules.Tax.Views;
 
 public partial class TaxManagementWindow : BaseDialogWindow
 {
-    protected override double DialogWidth => 900;
-    protected override double DialogHeight => 720;
+    protected override double DialogWidth => 1050;
+    protected override double DialogHeight => 780;
 
     public TaxManagementWindow(
         IWindowSizingService sizingService,
