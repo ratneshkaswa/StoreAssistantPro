@@ -58,6 +58,9 @@ public class SetupService(
         });
 
         SeedDefaultTaxSlabs(context);
+        SeedColours(context);
+        SeedSystemSettings(context);
+        SeedFinancialYear(context);
 
         try
         {
@@ -113,5 +116,49 @@ public class SetupService(
             new TaxProfileItem { TaxProfile = gst18, TaxMaster = sgst9 },
             new TaxProfileItem { TaxProfile = gst28, TaxMaster = cgst14 },
             new TaxProfileItem { TaxProfile = gst28, TaxMaster = sgst14 });
+    }
+
+    /// <summary>
+    /// Seeds the predefined 100-colour palette. Users cannot add colours
+    /// outside this list — it is the single source of truth.
+    /// </summary>
+    private static void SeedColours(AppDbContext context)
+    {
+        context.Colours.AddRange(ColourSeedData.GetAll());
+    }
+
+    /// <summary>
+    /// Seeds the single SystemSettings row with safe defaults.
+    /// </summary>
+    private static void SeedSystemSettings(AppDbContext context)
+    {
+        context.SystemSettings.Add(new SystemSettings
+        {
+            DefaultTaxMode = "Exclusive",
+            AutoBackupEnabled = false
+        });
+    }
+
+    /// <summary>
+    /// Seeds the initial financial year based on the current date.
+    /// Indian FY runs April 1 – March 31.
+    /// </summary>
+    private static void SeedFinancialYear(AppDbContext context)
+    {
+        var now = DateTime.UtcNow;
+        var fyStart = now.Month >= 4
+            ? new DateTime(now.Year, 4, 1)
+            : new DateTime(now.Year - 1, 4, 1);
+        var fyEnd = fyStart.AddYears(1).AddDays(-1);
+
+        context.FinancialYears.Add(new FinancialYear
+        {
+            Name = $"{fyStart.Year}–{fyEnd.Year % 100:D2}",
+            StartDate = fyStart,
+            EndDate = fyEnd,
+            IsCurrent = true,
+            BillingCounterResetDate = fyStart,
+            CreatedDate = now
+        });
     }
 }

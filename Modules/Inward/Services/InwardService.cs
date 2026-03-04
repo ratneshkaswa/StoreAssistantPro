@@ -164,7 +164,7 @@ public class InwardService(
     // ── Parcel numbering ─────────────────────────────────────────────
 
     /// <summary>
-    /// Finds the highest sequence number for parcels in the given month
+    /// Finds the highest sequence number for parcels in the given month+year
     /// and returns the next one. Format: MM-NN.
     /// Resets to 1 automatically each month.
     /// </summary>
@@ -172,18 +172,22 @@ public class InwardService(
         AppDbContext context, DateTime date, CancellationToken ct)
     {
         var monthPrefix = $"{date.Month:D2}-";
+        var yearStart = new DateTime(date.Year, date.Month, 1);
+        var yearEnd = yearStart.AddMonths(1);
 
-        var maxNumber = await context.InwardParcels
+        var parcelNumbers = await context.InwardParcels
             .AsNoTracking()
-            .Where(p => p.ParcelNumber.StartsWith(monthPrefix))
+            .Where(p => p.ParcelNumber.StartsWith(monthPrefix)
+                     && p.InwardEntry!.InwardDate >= yearStart
+                     && p.InwardEntry!.InwardDate < yearEnd)
             .Select(p => p.ParcelNumber)
             .ToListAsync(ct)
             .ConfigureAwait(false);
 
-        if (maxNumber.Count == 0)
+        if (parcelNumbers.Count == 0)
             return 1;
 
-        var maxSeq = maxNumber
+        var maxSeq = parcelNumbers
             .Select(n => int.TryParse(n.AsSpan(3), out var seq) ? seq : 0)
             .Max();
 
