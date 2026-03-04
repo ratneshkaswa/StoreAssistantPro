@@ -1,0 +1,146 @@
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Settings.Views.SystemSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        Title="System Settings"
+        ConfirmCommand="{Binding SaveCommand}"
+        Loaded="OnLoaded">
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Text="&#x2699; System Settings" Style="{StaticResource DialogTitleStyle}"/>
+
+        <!-- Settings sections -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- Database section -->
+                <TextBlock Text="Database" Style="{StaticResource SectionHeaderStyle}"
+                           Margin="{StaticResource SectionSpacing}"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Backup Location"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"
+                             h:Watermark.Text="Default: app folder\Backups"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Backup"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="&#x1F4BE; Backup Now" Command="{Binding BackupCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"/>
+                        <TextBlock Text="{Binding LastBackupPath}" Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource FluentTextTertiary}"
+                                   FontSize="{StaticResource FontSizeCaption}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Restore"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <Grid Grid.Row="4" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding RestoreFilePath, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Path to .bak file"/>
+                        <Button Grid.Column="1" Content="Restore" Command="{Binding RestoreCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Margin="{StaticResource InlineControlSpacing}"/>
+                    </Grid>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                               Style="{StaticResource HintTextStyle}"
+                               Text="⚠ Restore will replace the current database. Restart required after restore."/>
+                </Grid>
+
+                <!-- General section -->
+                <TextBlock Text="General" Style="{StaticResource SectionHeaderStyle}"
+                           Margin="{StaticResource SectionSpacing}"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Default Printer"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Text="{Binding DefaultPrinter, UpdateSourceTrigger=PropertyChanged}"
+                             h:Watermark.Text="System default"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Auto Backup"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                        <CheckBox Content="Enable Auto Backup" IsChecked="{Binding AutoBackupEnabled}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Backup Time"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1"
+                             Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                             h:Watermark.Text="HH:mm"/>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Tax Mode"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Row="6" Grid.Column="1"
+                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                              SelectedItem="{Binding DefaultTaxMode}">
+                        <ComboBoxItem Content="Exclusive"/>
+                        <ComboBoxItem Content="Inclusive"/>
+                    </ComboBox>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Messages -->
+        <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
+                    Margin="{StaticResource FieldLabelSpacing}">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="&#x1F4BE; Save Settings" Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</core:BaseDialogWindow>

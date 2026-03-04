@@ -1,0 +1,314 @@
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inward.Views.InwardEntryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        Title="Inward Entry"
+        ConfirmCommand="{Binding ConfirmStepCommand}"
+        Loaded="OnLoaded">
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Title + step indicator -->
+        <StackPanel>
+            <TextBlock Text="&#x1F4E6; Inward Entry" Style="{StaticResource DialogTitleStyle}"/>
+
+            <Grid HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="{StaticResource StepIndicatorWidth}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Step 1 -->
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <Ellipse Width="10" Height="10" HorizontalAlignment="Center">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="Parcels" HorizontalAlignment="Center"
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep1}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <Border Grid.Column="1" Height="2" VerticalAlignment="Top" Margin="{StaticResource StepConnectorTopOffset}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="False">
+                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- Step 2 -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <Ellipse Width="10" Height="10" HorizontalAlignment="Center">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource FluentStrokeDefault}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep1}" Value="False">
+                                        <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="Transport" HorizontalAlignment="Center"
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep2}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <Border Grid.Column="3" Height="2" VerticalAlignment="Top" Margin="{StaticResource StepConnectorTopOffset}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- Step 3 -->
+                <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                    <Ellipse Width="10" Height="10" HorizontalAlignment="Center">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource FluentStrokeDefault}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="Products" HorizontalAlignment="Center"
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- Row 1: Step content -->
+        <Grid Grid.Row="1" Margin="{StaticResource StepContentTopSpacing}">
+
+            <!-- Step 1: Select parcel count -->
+            <Grid Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibility}}"
+                  VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                    <Run Text="Number of Parcels "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                </TextBlock>
+                <ComboBox Grid.Row="0" Grid.Column="1"
+                          ItemsSource="{Binding ParcelCounts}"
+                          SelectedItem="{Binding ParcelCount}"
+                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                           Style="{StaticResource HintTextStyle}"
+                           Text="Select 1–10 parcels for this inward entry."/>
+            </Grid>
+
+            <!-- Step 2: Transport charges -->
+            <Grid Visibility="{Binding IsStep2, Converter={StaticResource BoolToVisibility}}"
+                  VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Transport Charges (₹)"
+                           Style="{StaticResource FormRowLabelStyle}"/>
+                <TextBox Grid.Row="0" Grid.Column="1"
+                         Text="{Binding TransportCharges, UpdateSourceTrigger=PropertyChanged}"
+                         Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                         h:Watermark.Text="0"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                           Style="{StaticResource HintTextStyle}"
+                           Text="Total transport charges will be split equally across parcels."/>
+            </Grid>
+
+            <!-- Step 3: Parcels with products -->
+            <ScrollViewer Visibility="{Binding IsStep3, Converter={StaticResource BoolToVisibility}}"
+                          VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Parcels}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,8"
+                                    Background="{StaticResource FluentSubtleBackground}"
+                                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                                    Padding="{StaticResource CardPadding}">
+                                <StackPanel>
+                                    <!-- Parcel header -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentAccentDefault}">
+                                            <Run Text="Parcel "/>
+                                            <Run Text="{Binding ParcelNumber, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <!-- Vendor selection -->
+                                    <Grid Margin="0,6,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Vendor" Style="{StaticResource FormRowLabelStyle}"/>
+                                        <ComboBox Grid.Column="1"
+                                                  ItemsSource="{Binding DataContext.Vendors, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  SelectedItem="{Binding SelectedVendor}"
+                                                  DisplayMemberPath="Name"/>
+                                    </Grid>
+
+                                    <!-- Product rows -->
+                                    <ItemsControl ItemsSource="{Binding ProductRows}" Margin="0,6,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,4,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="60"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ComboBox ItemsSource="{Binding DataContext.Products, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              SelectedItem="{Binding SelectedProduct}"
+                                                              DisplayMemberPath="Name"/>
+                                                    <TextBox Grid.Column="1"
+                                                             Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="4,0" MaxLength="8"/>
+                                                    <ComboBox Grid.Column="2"
+                                                              ItemsSource="{Binding DataContext.Colours, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              SelectedItem="{Binding SelectedColour}"
+                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                    <ComboBox Grid.Column="3"
+                                                              ItemsSource="{Binding DataContext.Sizes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              SelectedItem="{Binding SelectedSize}"
+                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                    <ComboBox Grid.Column="4"
+                                                              ItemsSource="{Binding DataContext.Patterns, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              SelectedItem="{Binding SelectedPattern}"
+                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                    <ComboBox Grid.Column="5"
+                                                              ItemsSource="{Binding DataContext.VariantTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              SelectedItem="{Binding SelectedVariantType}"
+                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Row 2: Messages -->
+        <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
+                    Margin="{StaticResource FieldLabelSpacing}">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
+        </StackPanel>
+
+        <!-- Row 3: Navigation buttons -->
+        <Grid Grid.Row="3" Margin="{StaticResource FormActionBarSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="&#x2190; Back" Command="{Binding BackCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVisibility}}"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="Next &#x2192;" Command="{Binding NextCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="{StaticResource InlineControlSpacing}"
+                        Visibility="{Binding CanGoNext, Converter={StaticResource BoolToVisibility}}"/>
+                <Button Content="&#x1F4BE; Save Entry" Command="{Binding SaveCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="{StaticResource InlineControlSpacing}"
+                        Visibility="{Binding IsLastStep, Converter={StaticResource BoolToVisibility}}"/>
+                <Button Content="Close" IsCancel="True"
+                        Style="{StaticResource SecondaryButtonStyle}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</core:BaseDialogWindow>

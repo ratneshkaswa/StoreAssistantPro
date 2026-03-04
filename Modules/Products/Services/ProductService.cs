@@ -135,6 +135,20 @@ public class ProductService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
+    // ── Tax Profiles (for dropdowns) ────────────────────────────────
+
+    public async Task<IReadOnlyList<TaxProfile>> GetActiveTaxProfilesAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetActiveTaxProfilesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.TaxProfiles
+            .AsNoTracking()
+            .Where(t => t.IsActive)
+            .OrderBy(t => t.ProfileName)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
     // ── Colours (predefined — read-only) ─────────────────────────────
 
     public async Task<IReadOnlyList<Colour>> GetColoursAsync(CancellationToken ct = default)

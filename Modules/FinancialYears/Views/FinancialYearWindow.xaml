@@ -1,0 +1,102 @@
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.FinancialYears.Views.FinancialYearWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        Title="Change Financial Year"
+        ConfirmCommand="{Binding SetCurrentCommand}"
+        Loaded="OnLoaded">
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Text="&#x1F4C5; Financial Year" Style="{StaticResource DialogTitleStyle}"/>
+
+        <!-- Current year display -->
+        <Border Grid.Row="1" Margin="{StaticResource ItemSpacing}"
+                Background="{StaticResource FluentSubtleBackground}"
+                CornerRadius="{StaticResource CornerRadiusMedium}"
+                Padding="{StaticResource CardPadding}">
+            <StackPanel>
+                <TextBlock Text="Current Financial Year" Style="{StaticResource FormRowLabelStyle}"/>
+                <TextBlock Text="{Binding CurrentYear.Name, FallbackValue='Not set'}"
+                           FontSize="{StaticResource FontSizeSubtitle}" FontWeight="SemiBold"
+                           Foreground="{StaticResource FluentAccentDefault}"
+                           Margin="0,4,0,0"/>
+                <TextBlock Foreground="{StaticResource FluentTextSecondary}"
+                           FontSize="{StaticResource FontSizeCaption}" Margin="0,2,0,0">
+                    <Run Text="Period: "/>
+                    <Run Text="{Binding CurrentYear.StartDate, StringFormat=d, FallbackValue='-'}"/>
+                    <Run Text=" to "/>
+                    <Run Text="{Binding CurrentYear.EndDate, StringFormat=d, FallbackValue='-'}"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- FY history grid -->
+        <DataGrid Grid.Row="2"
+                  ItemsSource="{Binding FinancialYears}"
+                  SelectedItem="{Binding SelectedYear}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column" CanUserAddRows="False"
+                  Margin="{StaticResource ItemSpacing}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Year" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Start" Binding="{Binding StartDate, StringFormat=d}" Width="{StaticResource ColumnWidthPrice}"/>
+                <DataGridTextColumn Header="End" Binding="{Binding EndDate, StringFormat=d}" Width="{StaticResource ColumnWidthPrice}"/>
+                <DataGridCheckBoxColumn Header="Current" Binding="{Binding IsCurrent, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Reset confirmation -->
+        <Border Grid.Row="3"
+                Visibility="{Binding IsConfirmingReset, Converter={StaticResource BoolToVisibility}}"
+                Background="{StaticResource FluentErrorBackground}"
+                CornerRadius="{StaticResource CornerRadiusMedium}"
+                Padding="{StaticResource CardPadding}"
+                Margin="{StaticResource ItemSpacing}">
+            <StackPanel>
+                <TextBlock Text="⚠ Reset Billing Numbers?" FontWeight="SemiBold"
+                           Foreground="{StaticResource FluentError}"/>
+                <TextBlock Text="This will reset all billing counters for the current year. This cannot be undone."
+                           TextWrapping="Wrap" Foreground="{StaticResource FluentTextSecondary}"
+                           Margin="0,4,0,8"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Confirm Reset" Command="{Binding ConfirmResetCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Cancel" Command="{Binding CancelResetCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Messages -->
+        <StackPanel Grid.Row="4" MinHeight="{StaticResource MessageAreaMinHeight}"
+                    Margin="{StaticResource FieldLabelSpacing}">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="&#x2795; Create Next Year" Command="{Binding CreateNewYearCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Set as Current" Command="{Binding SetCurrentCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Reset Billing" Command="{Binding ShowResetConfirmationCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</core:BaseDialogWindow>

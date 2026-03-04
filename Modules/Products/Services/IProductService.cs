@@ -13,6 +13,9 @@ public interface IProductService
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
     Task AttachTaxProfileAsync(int productId, int? taxProfileId, CancellationToken ct = default);
 
+    // ── Tax Profiles (for dropdowns) ──
+    Task<IReadOnlyList<TaxProfile>> GetActiveTaxProfilesAsync(CancellationToken ct = default);
+
     // ── Colours (read-only predefined palette) ──
     Task<IReadOnlyList<Colour>> GetColoursAsync(CancellationToken ct = default);
 
