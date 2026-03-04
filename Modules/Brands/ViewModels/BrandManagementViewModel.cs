@@ -16,6 +16,9 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
     public partial Brand? SelectedBrand { get; set; }
 
     [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial string BrandName { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -75,6 +78,18 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
         await brandService.ToggleActiveAsync(SelectedBrand.Id, ct);
         SuccessMessage = $"Brand '{SelectedBrand.Name}' {(SelectedBrand.IsActive ? "deactivated" : "activated")}.";
         await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task SearchAsync() => RunAsync(async ct =>
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            await ReloadAsync(ct);
+            return;
+        }
+        var results = await brandService.SearchAsync(SearchText, ct);
+        Brands = new ObservableCollection<Brand>(results);
     });
 
     private async Task ReloadAsync(CancellationToken ct)

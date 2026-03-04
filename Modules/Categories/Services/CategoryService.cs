@@ -119,6 +119,23 @@ public class CategoryService(
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<Category>> SearchAsync(string query, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+
+        using var _ = perf.BeginScope("CategoryService.SearchAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var term = query.Trim();
+        return await context.Categories
+            .AsNoTracking()
+            .Include(c => c.CategoryType)
+            .Where(c => c.Name.Contains(term))
+            .OrderBy(c => c.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
     public async Task CreateAsync(CategoryDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);

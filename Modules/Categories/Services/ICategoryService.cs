@@ -15,6 +15,7 @@ public interface ICategoryService
     Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Category>> GetActiveAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Category>> GetByTypeAsync(int categoryTypeId, CancellationToken ct = default);
+    Task<IReadOnlyList<Category>> SearchAsync(string query, CancellationToken ct = default);
     Task CreateAsync(CategoryDto dto, CancellationToken ct = default);
     Task UpdateAsync(int id, CategoryDto dto, CancellationToken ct = default);
     Task ToggleActiveAsync(int id, CancellationToken ct = default);

@@ -43,20 +43,20 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 28 | Category model | P0 | 🔨 | Entity: Id, Name (max 100), Description (max 500), IsActive, ParentCategoryId (nullable self-ref). |
-| 29 | Category CRUD | P0 | 🔨 | Full add/edit/delete with inline forms. Name required, unique within same parent. |
-| 30 | Product → Category FK | P0 | 🔨 | Add CategoryId (nullable FK) to Product. Products belong to exactly one category or "Uncategorized". |
+| 28 | Category model | P0 | ✅ | Entity: Id, Name (max 100), Description (max 500), IsActive, ParentCategoryId (nullable self-ref). |
+| 29 | Category CRUD | P0 | ✅ | Full add/edit/delete with inline forms. Name required, unique within same parent. |
+| 30 | Product → Category FK | P0 | ✅ | Add CategoryId (nullable FK) to Product. Products belong to exactly one category or "Uncategorized". |
 | 31 | Category hierarchy | P2 | 🔨 | Self-referencing ParentCategoryId enables tree: Clothing → Men → Shirts. TreeView UI. |
-| 32 | Brand model | P1 | 🔨 | Entity: Id, Name (max 100), LogoPath (nullable), IsActive. |
-| 33 | Brand CRUD | P1 | 🔨 | Full add/edit/delete with inline forms. Name required, unique. |
-| 34 | Product → Brand FK | P1 | 🔨 | Add BrandId (nullable FK) to Product. Products optionally belong to one brand. |
-| 35 | Category search | P1 | 🔨 | Text search by category name in the category list view. |
+| 32 | Brand model | P1 | ✅ | Entity: Id, Name (max 100), LogoPath (nullable), IsActive. |
+| 33 | Brand CRUD | P1 | ✅ | Full add/edit/delete with inline forms. Name required, unique. |
+| 34 | Product → Brand FK | P1 | ✅ | Add BrandId (nullable FK) to Product. Products optionally belong to one brand. |
+| 35 | Category search | P1 | ✅ | Text search by category name in the category list view. |
 | 36 | Category paging | P1 | 🔨 | Server-side paging using PagedQuery/PagedResult pattern. |
-| 37 | Brand search | P1 | 🔨 | Text search by brand name in the brand list view. |
+| 37 | Brand search | P1 | ✅ | Text search by brand name in the brand list view. |
 | 38 | Brand paging | P1 | 🔨 | Server-side paging using PagedQuery/PagedResult pattern. |
 | 39 | Default category | P2 | 🔨 | Auto-assign new products to "General" or "Uncategorized" category if none selected. |
-| 40 | Category product count | P2 | 🔨 | Display count of products per category in the category list (e.g., "Shirts (42)"). |
-| 41 | Brand product count | P2 | 🔨 | Display count of products per brand in the brand list. |
+| 40 | Category product count | P2 | ✅ | Display count of products per category in the category list (e.g., "Shirts (42)"). |
+| 41 | Brand product count | P2 | ✅ | Display count of products per brand in the brand list. |
 | 42 | Bulk assign category | P2 | 🔨 | Multi-select products in DataGrid → assign to chosen category in one operation. |
 | 43 | Bulk assign brand | P2 | 🔨 | Multi-select products in DataGrid → assign to chosen brand in one operation. |
 | 44 | Category import (CSV) | P2 | 🔨 | Bulk import categories from CSV file. |

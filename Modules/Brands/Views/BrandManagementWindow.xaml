@@ -8,6 +8,7 @@
     <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
+            <RowDefinition Height="Auto"/>  <!-- Search -->
             <RowDefinition Height="*"/>     <!-- DataGrid -->
             <RowDefinition Height="Auto"/>  <!-- Form -->
             <RowDefinition Height="Auto"/>  <!-- Buttons -->
@@ -18,8 +19,20 @@
         <!-- Title -->
         <TextBlock Text="&#x1F3F7; Brand Management" Style="{StaticResource DialogTitleStyle}"/>
 
+        <!-- Search -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="Search brands…"/>
+            <Button Grid.Column="1" Content="&#x1F50D; Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
         <!-- DataGrid -->
-        <DataGrid Grid.Row="1"
+        <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Brands}"
                   SelectedItem="{Binding SelectedBrand}"
                   AutoGenerateColumns="False" IsReadOnly="True"
@@ -34,7 +47,7 @@
         </DataGrid>
 
         <!-- Form -->
-        <Grid Grid.Row="2" Margin="{StaticResource StepContentTopSpacing}">
+        <Grid Grid.Row="3" Margin="{StaticResource StepContentTopSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                 <ColumnDefinition Width="*"/>
@@ -50,7 +63,7 @@
         </Grid>
 
         <!-- Buttons -->
-        <Grid Grid.Row="3" Margin="{StaticResource FormActionBarSpacing}">
+        <Grid Grid.Row="4" Margin="{StaticResource FormActionBarSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -67,7 +80,7 @@
         </Grid>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="4" MinHeight="{StaticResource MessageAreaMinHeight}"
+        <StackPanel Grid.Row="5" MinHeight="{StaticResource MessageAreaMinHeight}"
                     Margin="{StaticResource FieldLabelSpacing}">
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
             <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
@@ -75,7 +88,7 @@
         </StackPanel>
 
         <!-- Close -->
-        <Grid Grid.Row="5" Margin="{StaticResource FormActionBarSpacing}">
+        <Grid Grid.Row="6" Margin="{StaticResource FormActionBarSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>

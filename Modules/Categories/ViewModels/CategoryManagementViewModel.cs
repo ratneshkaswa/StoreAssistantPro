@@ -104,6 +104,9 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
     public partial Category? SelectedCategory { get; set; }
 
     [ObservableProperty]
+    public partial string CategorySearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial string CategoryName { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -163,6 +166,18 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         await categoryService.ToggleActiveAsync(SelectedCategory.Id, ct);
         SuccessMessage = $"Category '{SelectedCategory.Name}' {(SelectedCategory.IsActive ? "deactivated" : "activated")}.";
         await ReloadCategoriesAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task SearchCategoriesAsync() => RunAsync(async ct =>
+    {
+        if (string.IsNullOrWhiteSpace(CategorySearchText))
+        {
+            await ReloadCategoriesAsync(ct);
+            return;
+        }
+        var results = await categoryService.SearchAsync(CategorySearchText, ct);
+        Categories = new ObservableCollection<Category>(results);
     });
 
     // ═══════════════════════════════════════════════════════════════

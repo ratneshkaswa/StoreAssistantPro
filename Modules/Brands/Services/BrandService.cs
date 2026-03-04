@@ -42,6 +42,31 @@ public class BrandService(
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<Brand>> SearchAsync(string query, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+
+        using var _ = perf.BeginScope("BrandService.SearchAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var term = query.Trim();
+        var brands = await context.Brands
+            .AsNoTracking()
+            .Where(b => b.Name.Contains(term))
+            .OrderBy(b => b.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        foreach (var brand in brands)
+        {
+            brand.ProductCount = await context.Products
+                .CountAsync(p => p.BrandId == brand.Id, ct)
+                .ConfigureAwait(false);
+        }
+
+        return brands;
+    }
+
     public async Task CreateAsync(string name, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
