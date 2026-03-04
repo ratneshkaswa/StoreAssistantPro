@@ -116,4 +116,24 @@ public class SystemSettingsService(
 
         logger.LogInformation("Database restored from {Path}", backupPath);
     }
+
+    public async Task<bool> IsSetupCompletedAsync(CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var settings = await context.SystemSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+        return settings?.SetupCompleted == true;
+    }
+
+    public async Task MarkSetupCompletedAsync(CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var settings = await context.SystemSettings.FirstOrDefaultAsync(ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("System settings not found.");
+        settings.SetupCompleted = true;
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        logger.LogInformation("First-run setup wizard completed");
+    }
 }

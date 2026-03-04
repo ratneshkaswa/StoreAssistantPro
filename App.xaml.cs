@@ -13,6 +13,8 @@ using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Workflows;
 using StoreAssistantPro.Modules.MainShell.Services;
+using StoreAssistantPro.Modules.Settings.Services;
+using StoreAssistantPro.Modules.Startup.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
 
 namespace StoreAssistantPro;
@@ -119,7 +121,7 @@ public partial class App : Application
             return;
         }
 
-        // Main app loop — login → main window → logout
+        // Main app loop — login → setup wizard (first run) → main window → logout
         while (true)
         {
             await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
@@ -128,6 +130,18 @@ public partial class App : Application
             {
                 Shutdown();
                 return;
+            }
+
+            // First-run setup wizard — runs once after initial login
+            var settingsService = _host.Services.GetRequiredService<ISystemSettingsService>();
+            if (!await settingsService.IsSetupCompletedAsync())
+            {
+                var wizardFlow = _host.Services.GetRequiredService<ISetupWizardFlow>();
+                if (!wizardFlow.RunSetupWizard())
+                {
+                    // User closed the wizard without finishing — stay in login loop
+                    continue;
+                }
             }
 
             // Show main window (blocks until closed)

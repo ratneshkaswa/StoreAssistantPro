@@ -43,6 +43,12 @@ public class SystemSettings
     [MaxLength(20)]
     public string DefaultTaxMode { get; set; } = "Exclusive";
 
+    /// <summary>
+    /// Set to <c>true</c> after the first-run setup wizard completes all steps
+    /// (Firm → Tax → Vendor → Product). Prevents the wizard from re-appearing.
+    /// </summary>
+    public bool SetupCompleted { get; set; }
+
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 }
