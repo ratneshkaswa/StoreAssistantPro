@@ -18,6 +18,8 @@ using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication;
+using StoreAssistantPro.Modules.Brands;
+using StoreAssistantPro.Modules.Categories;
 using StoreAssistantPro.Modules.FinancialYears;
 using StoreAssistantPro.Modules.Firm;
 using StoreAssistantPro.Modules.Inward;
@@ -138,6 +140,8 @@ internal static class HostingExtensions
             .AddFirmModule()
             .AddUsersModule()
             .AddTaxModule()
+            .AddCategoriesModule()
+            .AddBrandsModule()
             .AddVendorsModule()
             .AddProductsModule()
             .AddFinancialYearsModule()

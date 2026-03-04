@@ -58,6 +58,12 @@
                 <MenuItem Header="Product Management" Command="{Binding OpenProductManagementCommand}"
                           h:SmartTooltip.ContextKey="Products"
                           Visibility="{Binding IsProductManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Category Management" Command="{Binding OpenCategoryManagementCommand}"
+                          h:SmartTooltip.ContextKey="Categories"
+                          Visibility="{Binding IsCategoryManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Brand Management" Command="{Binding OpenBrandManagementCommand}"
+                          h:SmartTooltip.ContextKey="Brands"
+                          Visibility="{Binding IsBrandManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="Inward Entry" Command="{Binding OpenInwardEntryCommand}"
                           h:SmartTooltip.ContextKey="Inward"

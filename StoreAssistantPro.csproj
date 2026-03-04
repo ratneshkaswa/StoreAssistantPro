@@ -54,9 +54,6 @@
     <Folder Include="Modules\Billing\Views\" />
     <Folder Include="Modules\Billing\Workflows\" />
     <Folder Include="Modules\Brands\Commands\" />
-    <Folder Include="Modules\Brands\Services\" />
-    <Folder Include="Modules\Brands\ViewModels\" />
-    <Folder Include="Modules\Brands\Views\" />
     <Folder Include="Modules\Customers\Commands\" />
     <Folder Include="Modules\Customers\Services\" />
     <Folder Include="Modules\Customers\ViewModels\" />

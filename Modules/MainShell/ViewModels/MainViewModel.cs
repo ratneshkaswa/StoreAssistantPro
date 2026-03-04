@@ -42,6 +42,8 @@ public partial class MainViewModel : BaseViewModel
     private const string TaxManagementDialog = "TaxManagement";
     private const string VendorManagementDialog = "VendorManagement";
     private const string ProductManagementDialog = "ProductManagement";
+    private const string CategoryManagementDialog = "CategoryManagement";
+    private const string BrandManagementDialog = "BrandManagement";
     private const string FinancialYearDialog = "FinancialYear";
     private const string SystemSettingsDialog = "SystemSettings";
     private const string InwardEntryDialog = "InwardEntry";
@@ -90,6 +92,8 @@ public partial class MainViewModel : BaseViewModel
     public bool IsTaxManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.TaxManagement);
     public bool IsVendorManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.VendorManagement);
     public bool IsProductManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Products);
+    public bool IsCategoryManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Products);
+    public bool IsBrandManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Products);
     public bool IsFinancialYearVisible => IsAdmin && _features.IsEnabled(FeatureFlags.FinancialYear);
     public bool IsSystemSettingsVisible => IsAdmin && _features.IsEnabled(FeatureFlags.SystemSettings);
     public bool IsInwardEntryVisible => _features.IsEnabled(FeatureFlags.InwardEntry);
@@ -227,6 +231,8 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsTaxManagementVisible));
         OnPropertyChanged(nameof(IsVendorManagementVisible));
         OnPropertyChanged(nameof(IsProductManagementVisible));
+        OnPropertyChanged(nameof(IsCategoryManagementVisible));
+        OnPropertyChanged(nameof(IsBrandManagementVisible));
         OnPropertyChanged(nameof(IsFinancialYearVisible));
         OnPropertyChanged(nameof(IsSystemSettingsVisible));
         OnPropertyChanged(nameof(IsInwardEntryVisible));
@@ -294,6 +300,20 @@ public partial class MainViewModel : BaseViewModel
     {
         _dialogService.ShowDialog(ProductManagementDialog);
         _statusBar.Post("Product management closed");
+    }
+
+    [RelayCommand]
+    private void OpenCategoryManagement()
+    {
+        _dialogService.ShowDialog(CategoryManagementDialog);
+        _statusBar.Post("Category management closed");
+    }
+
+    [RelayCommand]
+    private void OpenBrandManagement()
+    {
+        _dialogService.ShowDialog(BrandManagementDialog);
+        _statusBar.Post("Brand management closed");
     }
 
     [RelayCommand]
