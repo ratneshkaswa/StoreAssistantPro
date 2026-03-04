@@ -15,7 +15,7 @@ public class TaxService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.TaxMasters
             .AsNoTracking()
-            .OrderBy(t => t.TaxName)
+            .OrderBy(t => t.SlabPercent)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -27,22 +27,12 @@ public class TaxService(
         return await context.TaxMasters
             .AsNoTracking()
             .Where(t => t.IsActive)
-            .OrderBy(t => t.TaxName)
+            .OrderBy(t => t.SlabPercent)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
 
-    public async Task<TaxMaster?> GetByIdAsync(int id, CancellationToken ct = default)
-    {
-        using var _ = perf.BeginScope("TaxService.GetByIdAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.TaxMasters
-            .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id == id, ct)
-            .ConfigureAwait(false);
-    }
-
-    public async Task CreateAsync(TaxMasterDto dto, CancellationToken ct = default)
+    public async Task CreateAsync(TaxDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
         ValidateDto(dto);
@@ -50,24 +40,21 @@ public class TaxService(
         using var _ = perf.BeginScope("TaxService.CreateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        if (await context.TaxMasters.AnyAsync(t => t.TaxName == dto.TaxName, ct).ConfigureAwait(false))
-            throw new InvalidOperationException($"Tax slab '{dto.TaxName}' already exists.");
+        if (await context.TaxMasters.AnyAsync(t => t.TaxName == dto.TaxName.Trim(), ct).ConfigureAwait(false))
+            throw new InvalidOperationException($"Tax '{dto.TaxName}' already exists.");
 
-        var entity = new TaxMaster
+        context.TaxMasters.Add(new TaxMaster
         {
             TaxName = dto.TaxName.Trim(),
-            TaxRate = dto.TaxRate,
-            HSNCode = string.IsNullOrWhiteSpace(dto.HSNCode) ? null : dto.HSNCode.Trim(),
-            ApplicableCategory = dto.ApplicableCategory,
+            SlabPercent = dto.SlabPercent,
             IsActive = true,
             CreatedDate = DateTime.UtcNow
-        };
+        });
 
-        context.TaxMasters.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateAsync(int id, TaxMasterDto dto, CancellationToken ct = default)
+    public async Task UpdateAsync(int id, TaxDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
         ValidateDto(dto);
@@ -76,39 +63,37 @@ public class TaxService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var entity = await context.TaxMasters.FirstOrDefaultAsync(t => t.Id == id, ct).ConfigureAwait(false)
-            ?? throw new InvalidOperationException($"Tax slab with Id {id} not found.");
+            ?? throw new InvalidOperationException($"Tax with Id {id} not found.");
 
-        if (await context.TaxMasters.AnyAsync(t => t.TaxName == dto.TaxName && t.Id != id, ct).ConfigureAwait(false))
-            throw new InvalidOperationException($"Tax slab '{dto.TaxName}' already exists.");
+        if (await context.TaxMasters.AnyAsync(t => t.TaxName == dto.TaxName.Trim() && t.Id != id, ct).ConfigureAwait(false))
+            throw new InvalidOperationException($"Tax '{dto.TaxName}' already exists.");
 
         entity.TaxName = dto.TaxName.Trim();
-        entity.TaxRate = dto.TaxRate;
-        entity.HSNCode = string.IsNullOrWhiteSpace(dto.HSNCode) ? null : dto.HSNCode.Trim();
-        entity.ApplicableCategory = dto.ApplicableCategory;
-
+        entity.SlabPercent = dto.SlabPercent;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task ToggleActiveAsync(int id, CancellationToken ct = default)
+    public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope("TaxService.ToggleActiveAsync");
+        using var _ = perf.BeginScope("TaxService.DeleteAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var entity = await context.TaxMasters.FirstOrDefaultAsync(t => t.Id == id, ct).ConfigureAwait(false)
-            ?? throw new InvalidOperationException($"Tax slab with Id {id} not found.");
+            ?? throw new InvalidOperationException($"Tax with Id {id} not found.");
 
-        entity.IsActive = !entity.IsActive;
+        var inUse = await context.Products.AnyAsync(p => p.TaxId == id, ct).ConfigureAwait(false);
+        if (inUse)
+            throw new InvalidOperationException("Cannot delete — this tax is assigned to one or more products. Remove the assignment first.");
+
+        context.TaxMasters.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    private static void ValidateDto(TaxMasterDto dto)
+    private static void ValidateDto(TaxDto dto)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.TaxName, nameof(dto.TaxName));
 
-        if (dto.TaxRate < 0 || dto.TaxRate > 100)
-            throw new ArgumentOutOfRangeException(nameof(dto.TaxRate), "GST percent must be between 0 and 100.");
-
-        if (!string.IsNullOrWhiteSpace(dto.HSNCode) && (dto.HSNCode.Trim().Length < 4 || dto.HSNCode.Trim().Length > 8))
-            throw new ArgumentException("HSN code must be 4–8 digits.", nameof(dto.HSNCode));
+        if (dto.SlabPercent < 0 || dto.SlabPercent > 100)
+            throw new ArgumentOutOfRangeException(nameof(dto.SlabPercent), "Slab % must be between 0 and 100.");
     }
 }

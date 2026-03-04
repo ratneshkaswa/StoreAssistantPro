@@ -61,9 +61,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(p => p.UOM).HasMaxLength(20).HasDefaultValue("pcs");
             entity.HasIndex(p => p.HSNCode);
             entity.HasIndex(p => p.Barcode).IsUnique().HasFilter("[Barcode] IS NOT NULL");
-            entity.HasOne(p => p.TaxProfile)
+            entity.HasOne(p => p.Tax)
                   .WithMany()
-                  .HasForeignKey(p => p.TaxProfileId)
+                  .HasForeignKey(p => p.TaxId)
                   .OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(p => p.Brand)
                   .WithMany()
@@ -87,10 +87,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<TaxMaster>(entity =>
         {
-            entity.Property(t => t.TaxRate).HasColumnType("decimal(5,2)");
+            entity.Property(t => t.SlabPercent).HasColumnType("decimal(5,2)");
             entity.HasIndex(t => t.TaxName).IsUnique();
             entity.HasIndex(t => t.IsActive);
-            entity.HasIndex(t => t.HSNCode);
         });
 
         modelBuilder.Entity<TaxProfile>(entity =>
@@ -107,7 +106,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(i => i.TaxMaster)
-                  .WithMany(m => m.ProfileItems)
+                  .WithMany()
                   .HasForeignKey(i => i.TaxMasterId)
                   .OnDelete(DeleteBehavior.Restrict);
 

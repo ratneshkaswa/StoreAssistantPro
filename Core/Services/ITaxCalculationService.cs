@@ -12,8 +12,7 @@ namespace StoreAssistantPro.Core.Services;
 /// </para>
 /// <para>
 /// The service is stateless and does not access the database.
-/// Tax rates come from <see cref="TaxMaster"/> / <see cref="TaxProfile"/>
-/// entities resolved by the caller.
+/// Tax rates come from <see cref="TaxMaster"/> entities resolved by the caller.
 /// </para>
 /// </summary>
 public interface ITaxCalculationService

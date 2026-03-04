@@ -16,7 +16,7 @@ public partial class ProductManagementViewModel(IProductService productService) 
     public partial Product? SelectedProduct { get; set; }
 
     [ObservableProperty]
-    public partial ObservableCollection<TaxProfile> TaxProfiles { get; set; } = [];
+    public partial ObservableCollection<TaxMaster> Taxes { get; set; } = [];
 
     // ── Form fields ──
 
@@ -30,7 +30,7 @@ public partial class ProductManagementViewModel(IProductService productService) 
     public partial ProductUnit SelectedUnit { get; set; } = ProductUnit.Piece;
 
     [ObservableProperty]
-    public partial TaxProfile? SelectedTaxProfile { get; set; }
+    public partial TaxMaster? SelectedTax { get; set; }
 
     [ObservableProperty]
     public partial bool SupportsColour { get; set; } = true;
@@ -59,7 +59,7 @@ public partial class ProductManagementViewModel(IProductService productService) 
         ProductName = value.Name;
         SelectedProductType = value.ProductType;
         SelectedUnit = value.Unit;
-        SelectedTaxProfile = TaxProfiles.FirstOrDefault(t => t.Id == value.TaxProfileId);
+        SelectedTax = Taxes.FirstOrDefault(t => t.Id == value.TaxId);
         SupportsColour = value.SupportsColour;
         SupportsSize = value.SupportsSize;
         SupportsPattern = value.SupportsPattern;
@@ -75,8 +75,8 @@ public partial class ProductManagementViewModel(IProductService productService) 
         var products = await productService.GetAllAsync(ct);
         Products = new ObservableCollection<Product>(products);
 
-        var profiles = await productService.GetActiveTaxProfilesAsync(ct);
-        TaxProfiles = new ObservableCollection<TaxProfile>(profiles);
+        var taxes = await productService.GetActiveTaxesAsync(ct);
+        Taxes = new ObservableCollection<TaxMaster>(taxes);
     });
 
     [RelayCommand]
@@ -86,7 +86,7 @@ public partial class ProductManagementViewModel(IProductService productService) 
         ProductName = string.Empty;
         SelectedProductType = ProductType.Readymade;
         SelectedUnit = ProductUnit.Piece;
-        SelectedTaxProfile = null;
+        SelectedTax = null;
         SupportsColour = true;
         SupportsSize = true;
         SupportsPattern = false;
@@ -106,7 +106,7 @@ public partial class ProductManagementViewModel(IProductService productService) 
 
         var dto = new ProductDto(
             ProductName, SelectedProductType, SelectedUnit,
-            SelectedTaxProfile?.Id, SupportsColour, SupportsPattern,
+            SelectedTax?.Id, SupportsColour, SupportsPattern,
             SupportsSize, SupportsType);
 
         if (IsEditing && SelectedProduct is not null)

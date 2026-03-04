@@ -53,8 +53,8 @@ public class Product
     [MaxLength(8)]
     public string? HSNCode { get; set; }
 
-    public int? TaxProfileId { get; set; }
-    public TaxProfile? TaxProfile { get; set; }
+    public int? TaxId { get; set; }
+    public TaxMaster? Tax { get; set; }
 
     public int? BrandId { get; set; }
     public Brand? Brand { get; set; }

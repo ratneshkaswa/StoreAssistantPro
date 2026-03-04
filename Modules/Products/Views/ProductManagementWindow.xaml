@@ -30,7 +30,7 @@
                 <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Type" Binding="{Binding ProductType}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="{StaticResource ColumnWidthQty}"/>
-                <DataGridTextColumn Header="Tax Profile" Binding="{Binding TaxProfile.ProfileName}" Width="{StaticResource ColumnWidthPrice}"/>
+                <DataGridTextColumn Header="Tax" Binding="{Binding Tax.TaxName}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
             </DataGrid.Columns>
         </DataGrid>
@@ -71,12 +71,12 @@
                           Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tax Profile"
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tax"
                        Style="{StaticResource FormRowLabelStyle}"/>
             <ComboBox Grid.Row="4" Grid.Column="1"
-                      ItemsSource="{Binding TaxProfiles}"
-                      SelectedItem="{Binding SelectedTaxProfile}"
-                      DisplayMemberPath="ProfileName"
+                      ItemsSource="{Binding Taxes}"
+                      SelectedItem="{Binding SelectedTax}"
+                      DisplayMemberPath="TaxName"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Text="Attributes"

@@ -11,10 +11,10 @@ public interface IProductService
     Task CreateAsync(ProductDto dto, CancellationToken ct = default);
     Task UpdateAsync(int id, ProductDto dto, CancellationToken ct = default);
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
-    Task AttachTaxProfileAsync(int productId, int? taxProfileId, CancellationToken ct = default);
+    Task AttachTaxAsync(int productId, int? taxId, CancellationToken ct = default);
 
-    // ── Tax Profiles (for dropdowns) ──
-    Task<IReadOnlyList<TaxProfile>> GetActiveTaxProfilesAsync(CancellationToken ct = default);
+    // ── Taxes (for dropdowns) ──
+    Task<IReadOnlyList<TaxMaster>> GetActiveTaxesAsync(CancellationToken ct = default);
 
     // ── Colours (read-only predefined palette) ──
     Task<IReadOnlyList<Colour>> GetColoursAsync(CancellationToken ct = default);
@@ -36,7 +36,7 @@ public record ProductDto(
     string Name,
     ProductType ProductType,
     ProductUnit Unit,
-    int? TaxProfileId,
+    int? TaxId,
     bool SupportsColour,
     bool SupportsPattern,
     bool SupportsSize,

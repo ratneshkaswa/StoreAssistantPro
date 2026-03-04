@@ -17,7 +17,7 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Products
             .AsNoTracking()
-            .Include(p => p.TaxProfile)
+            .Include(p => p.Tax)
             .OrderBy(p => p.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
@@ -29,7 +29,7 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Products
             .AsNoTracking()
-            .Include(p => p.TaxProfile)
+            .Include(p => p.Tax)
             .Where(p => p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(ct)
@@ -42,7 +42,7 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Products
             .AsNoTracking()
-            .Include(p => p.TaxProfile)
+            .Include(p => p.Tax)
             .FirstOrDefaultAsync(p => p.Id == id, ct)
             .ConfigureAwait(false);
     }
@@ -63,7 +63,7 @@ public class ProductService(
             Name = dto.Name.Trim(),
             ProductType = dto.ProductType,
             Unit = dto.Unit,
-            TaxProfileId = dto.TaxProfileId,
+            TaxId = dto.TaxId,
             SupportsColour = dto.SupportsColour,
             SupportsPattern = dto.SupportsPattern,
             SupportsSize = dto.SupportsSize,
@@ -92,7 +92,7 @@ public class ProductService(
         entity.Name = dto.Name.Trim();
         entity.ProductType = dto.ProductType;
         entity.Unit = dto.Unit;
-        entity.TaxProfileId = dto.TaxProfileId;
+        entity.TaxId = dto.TaxId;
         entity.SupportsColour = dto.SupportsColour;
         entity.SupportsPattern = dto.SupportsPattern;
         entity.SupportsSize = dto.SupportsSize;
@@ -113,38 +113,38 @@ public class ProductService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task AttachTaxProfileAsync(int productId, int? taxProfileId, CancellationToken ct = default)
+    public async Task AttachTaxAsync(int productId, int? taxId, CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope("ProductService.AttachTaxProfileAsync");
+        using var _ = perf.BeginScope("ProductService.AttachTaxAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var product = await context.Products.FirstOrDefaultAsync(p => p.Id == productId, ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Product with Id {productId} not found.");
 
-        if (taxProfileId.HasValue)
+        if (taxId.HasValue)
         {
-            var profileExists = await context.TaxProfiles
-                .AnyAsync(t => t.Id == taxProfileId.Value && t.IsActive, ct)
+            var exists = await context.TaxMasters
+                .AnyAsync(t => t.Id == taxId.Value && t.IsActive, ct)
                 .ConfigureAwait(false);
 
-            if (!profileExists)
-                throw new InvalidOperationException("Selected tax profile does not exist or is inactive.");
+            if (!exists)
+                throw new InvalidOperationException("Selected tax does not exist or is inactive.");
         }
 
-        product.TaxProfileId = taxProfileId;
+        product.TaxId = taxId;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    // ── Tax Profiles (for dropdowns) ────────────────────────────────
+    // ── Taxes (for dropdowns) ────────────────────────────────────────
 
-    public async Task<IReadOnlyList<TaxProfile>> GetActiveTaxProfilesAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<TaxMaster>> GetActiveTaxesAsync(CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope("ProductService.GetActiveTaxProfilesAsync");
+        using var _ = perf.BeginScope("ProductService.GetActiveTaxesAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.TaxProfiles
+        return await context.TaxMasters
             .AsNoTracking()
             .Where(t => t.IsActive)
-            .OrderBy(t => t.ProfileName)
+            .OrderBy(t => t.SlabPercent)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
