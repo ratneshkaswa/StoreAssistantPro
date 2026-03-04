@@ -67,16 +67,16 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
-                <Button Content="&#x2795; Clear" Command="{Binding ClearFormCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Content="&#x1F5D1; Delete" Command="{Binding DeleteCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            </StackPanel>
+            <Button Grid.Column="1" Content="&#x2795; Clear" Command="{Binding ClearFormCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="2" Content="&#x1F5D1; Delete" Command="{Binding DeleteCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="3" Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Messages -->

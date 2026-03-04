@@ -51,7 +51,8 @@
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                         <Button Content="&#x1F4BE; Backup Now" Command="{Binding BackupCommand}"
                                 Style="{StaticResource PrimaryButtonStyle}"/>
-                        <TextBlock Text="{Binding LastBackupPath}" Margin="8,0,0,0"
+                        <TextBlock Text="{Binding LastBackupPath}"
+                                   Margin="{StaticResource InlineControlSpacing}"
                                    VerticalAlignment="Center"
                                    Foreground="{StaticResource FluentTextTertiary}"
                                    FontSize="{StaticResource FontSizeCaption}"/>

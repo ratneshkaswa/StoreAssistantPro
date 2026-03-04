@@ -15,10 +15,14 @@
         </Grid.RowDefinitions>
 
         <!-- Row 0: Title + step indicator -->
-        <StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <TextBlock Text="&#x1F4E6; Inward Entry" Style="{StaticResource DialogTitleStyle}"/>
 
-            <Grid HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="{StaticResource StepIndicatorWidth}">
+            <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="{StaticResource StepIndicatorWidth}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -138,7 +142,7 @@
                     </TextBlock>
                 </StackPanel>
             </Grid>
-        </StackPanel>
+        </Grid>
 
         <!-- Row 1: Step content -->
         <Grid Grid.Row="1" Margin="{StaticResource StepContentTopSpacing}">
@@ -200,27 +204,26 @@
                 <ItemsControl ItemsSource="{Binding Parcels}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="0,0,0,8"
+                            <Border Margin="{StaticResource ItemSpacing}"
                                     Background="{StaticResource FluentSubtleBackground}"
                                     CornerRadius="{StaticResource CornerRadiusMedium}"
                                     Padding="{StaticResource CardPadding}">
-                                <StackPanel>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
                                     <!-- Parcel header -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentAccentDefault}">
-                                            <Run Text="Parcel "/>
-                                            <Run Text="{Binding ParcelNumber, Mode=OneWay}"/>
-                                        </TextBlock>
-                                    </Grid>
+                                    <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentAccentDefault}">
+                                        <Run Text="Parcel "/>
+                                        <Run Text="{Binding ParcelNumber, Mode=OneWay}"/>
+                                    </TextBlock>
 
                                     <!-- Vendor selection -->
-                                    <Grid Margin="0,6,0,0">
+                                    <Grid Grid.Row="1" Margin="{StaticResource FieldLabelSpacing}">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Vendor" Style="{StaticResource FormRowLabelStyle}"/>
@@ -231,13 +234,13 @@
                                     </Grid>
 
                                     <!-- Product rows -->
-                                    <ItemsControl ItemsSource="{Binding ProductRows}" Margin="0,6,0,0">
+                                    <ItemsControl Grid.Row="2" ItemsSource="{Binding ProductRows}" Margin="{StaticResource FieldLabelSpacing}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Grid Margin="0,4,0,0">
+                                                <Grid Margin="{StaticResource FieldLabelSpacing}">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="60"/>
+                                                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FieldWidthCompact}"/>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="*"/>
@@ -248,28 +251,28 @@
                                                               DisplayMemberPath="Name"/>
                                                     <TextBox Grid.Column="1"
                                                              Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
-                                                             Margin="4,0" MaxLength="8"/>
+                                                             Margin="{StaticResource InlineControlSpacing}" MaxLength="8"/>
                                                     <ComboBox Grid.Column="2"
                                                               ItemsSource="{Binding DataContext.Colours, RelativeSource={RelativeSource AncestorType=Window}}"
                                                               SelectedItem="{Binding SelectedColour}"
-                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
                                                     <ComboBox Grid.Column="3"
                                                               ItemsSource="{Binding DataContext.Sizes, RelativeSource={RelativeSource AncestorType=Window}}"
                                                               SelectedItem="{Binding SelectedSize}"
-                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
                                                     <ComboBox Grid.Column="4"
                                                               ItemsSource="{Binding DataContext.Patterns, RelativeSource={RelativeSource AncestorType=Window}}"
                                                               SelectedItem="{Binding SelectedPattern}"
-                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
                                                     <ComboBox Grid.Column="5"
                                                               ItemsSource="{Binding DataContext.VariantTypes, RelativeSource={RelativeSource AncestorType=Window}}"
                                                               SelectedItem="{Binding SelectedVariantType}"
-                                                              DisplayMemberPath="Name" Margin="2,0"/>
+                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                </StackPanel>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -297,18 +300,23 @@
                     Style="{StaticResource SecondaryButtonStyle}"
                     Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVisibility}}"/>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 <Button Content="Next &#x2192;" Command="{Binding NextCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding CanGoNext, Converter={StaticResource BoolToVisibility}}"/>
-                <Button Content="&#x1F4BE; Save Entry" Command="{Binding SaveCommand}"
+                <Button Grid.Column="1" Content="&#x1F4BE; Save Entry" Command="{Binding SaveCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding IsLastStep, Converter={StaticResource BoolToVisibility}}"/>
-                <Button Content="Close" IsCancel="True"
+                <Button Grid.Column="2" Content="Close" IsCancel="True"
                         Style="{StaticResource SecondaryButtonStyle}"/>
-            </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </core:BaseDialogWindow>
