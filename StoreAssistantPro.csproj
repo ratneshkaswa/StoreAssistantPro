@@ -61,15 +61,12 @@
     <Folder Include="Modules\Customers\Services\" />
     <Folder Include="Modules\Customers\ViewModels\" />
     <Folder Include="Modules\Customers\Views\" />
-    <Folder Include="Modules\FinancialYears\Services\" />
     <Folder Include="Modules\Inventory\Services\" />
     <Folder Include="Modules\Inventory\ViewModels\" />
     <Folder Include="Modules\Inventory\Views\" />
-    <Folder Include="Modules\Inward\Services\" />
     <Folder Include="Modules\Inward\ViewModels\" />
     <Folder Include="Modules\Inward\Views\" />
     <Folder Include="Modules\Products\Commands\" />
-    <Folder Include="Modules\Products\Services\" />
     <Folder Include="Modules\Products\ViewModels\" />
     <Folder Include="Modules\Products\Views\" />
     <Folder Include="Modules\Promotions\Commands\" />
@@ -99,11 +96,9 @@
     <Folder Include="Modules\SystemSettings\Views\" />
     <Folder Include="Modules\SystemSettings\Workflows\" />
     <Folder Include="Modules\Tax\Commands\" />
-    <Folder Include="Modules\Tax\Services\" />
     <Folder Include="Modules\Tax\ViewModels\" />
     <Folder Include="Modules\Tax\Views\" />
     <Folder Include="Modules\UserManagement\Views\" />
-    <Folder Include="Modules\Vendors\Services\" />
     <Folder Include="Modules\Vendors\ViewModels\" />
     <Folder Include="Modules\Vendors\Views\" />
   </ItemGroup>

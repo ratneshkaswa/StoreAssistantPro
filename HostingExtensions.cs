@@ -18,10 +18,16 @@ using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication;
+using StoreAssistantPro.Modules.FinancialYears;
 using StoreAssistantPro.Modules.Firm;
+using StoreAssistantPro.Modules.Inward;
 using StoreAssistantPro.Modules.MainShell;
+using StoreAssistantPro.Modules.Products;
+using StoreAssistantPro.Modules.Settings;
 using StoreAssistantPro.Modules.Startup;
+using StoreAssistantPro.Modules.Tax;
 using StoreAssistantPro.Modules.Users;
+using StoreAssistantPro.Modules.Vendors;
 
 namespace StoreAssistantPro;
 
@@ -125,7 +131,13 @@ internal static class HostingExtensions
             .AddAuthenticationModule()
             .AddMainShellModule(pageRegistry)
             .AddFirmModule()
-            .AddUsersModule();
+            .AddUsersModule()
+            .AddTaxModule()
+            .AddVendorsModule()
+            .AddProductsModule()
+            .AddFinancialYearsModule()
+            .AddSettingsModule()
+            .AddInwardModule();
 
         return services;
     }
