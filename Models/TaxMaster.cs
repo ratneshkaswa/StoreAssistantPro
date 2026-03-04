@@ -17,6 +17,19 @@ public class TaxMaster
     [Range(0, 100)]
     public decimal TaxRate { get; set; }
 
+    /// <summary>
+    /// Harmonized System Nomenclature code for this tax slab.
+    /// Indian GST uses 4–8 digit HSN codes for goods classification.
+    /// </summary>
+    [MaxLength(8)]
+    public string? HSNCode { get; set; }
+
+    /// <summary>
+    /// Which product category this tax slab applies to.
+    /// Defaults to <see cref="TaxApplicableCategory.Both"/>.
+    /// </summary>
+    public TaxApplicableCategory ApplicableCategory { get; set; } = TaxApplicableCategory.Both;
+
     public bool IsActive { get; set; } = true;
 
     public bool IsDefault { get; set; }

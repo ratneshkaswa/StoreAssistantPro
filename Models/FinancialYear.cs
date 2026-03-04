@@ -19,6 +19,12 @@ public class FinancialYear
     /// <summary>Whether this is the currently active financial year.</summary>
     public bool IsCurrent { get; set; }
 
+    /// <summary>
+    /// Date when the billing counter (invoice number sequence) was last reset.
+    /// Typically reset at FY start or manually by admin.
+    /// </summary>
+    public DateTime? BillingCounterResetDate { get; set; }
+
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     [Timestamp]

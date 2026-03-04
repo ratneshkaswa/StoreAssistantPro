@@ -4,8 +4,8 @@ namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Represents a single parcel within an <see cref="InwardEntry"/>.
-/// Each parcel has its own inward number (e.g., 02-01, 02-02),
-/// a category (from Products), and a vendor.
+/// Each parcel has its own parcel number (e.g., 02-01, 02-02),
+/// a vendor, and up to 3 product line items.
 /// </summary>
 public class InwardParcel
 {
@@ -22,17 +22,21 @@ public class InwardParcel
     public string ParcelNumber { get; set; } = string.Empty;
 
     /// <summary>
-    /// Product category for this parcel.
-    /// </summary>
-    public int? CategoryId { get; set; }
-    public Category? Category { get; set; }
-
-    /// <summary>
     /// Vendor who sent this parcel.
     /// </summary>
     public int? VendorId { get; set; }
     public Vendor? Vendor { get; set; }
 
+    /// <summary>
+    /// Transport charge allocated to this individual parcel.
+    /// </summary>
+    public decimal TransportCharge { get; set; }
+
     [MaxLength(300)]
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Product line items in this parcel (maximum 3 per parcel).
+    /// </summary>
+    public ICollection<InwardProduct> Products { get; set; } = [];
 }

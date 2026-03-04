@@ -34,6 +34,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<FinancialYear> FinancialYears => Set<FinancialYear>();
     public DbSet<StockAlert> StockAlerts => Set<StockAlert>();
     public DbSet<CategoryType> CategoryTypes => Set<CategoryType>();
+    public DbSet<Colour> Colours => Set<Colour>();
+    public DbSet<ProductPattern> ProductPatterns => Set<ProductPattern>();
+    public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
+    public DbSet<ProductVariantType> ProductVariantTypes => Set<ProductVariantType>();
+    public DbSet<InwardProduct> InwardProducts => Set<InwardProduct>();
+    public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,6 +86,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(t => t.TaxRate).HasColumnType("decimal(5,2)");
             entity.HasIndex(t => t.TaxName).IsUnique();
             entity.HasIndex(t => t.IsActive);
+            entity.HasIndex(t => t.HSNCode);
         });
 
         modelBuilder.Entity<TaxProfile>(entity =>
@@ -250,6 +257,103 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(si => si.StaffId)
                   .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── Colour (predefined palette — unique name) ──────────────
+        modelBuilder.Entity<Colour>(entity =>
+        {
+            entity.HasIndex(c => c.Name).IsUnique();
+            entity.HasIndex(c => c.SortOrder);
+        });
+
+        // ── Product attributes (manual entry — unique names) ───────
+        modelBuilder.Entity<ProductPattern>(entity =>
+        {
+            entity.HasIndex(p => p.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<ProductSize>(entity =>
+        {
+            entity.HasIndex(s => s.Name).IsUnique();
+            entity.HasIndex(s => s.SortOrder);
+        });
+
+        modelBuilder.Entity<ProductVariantType>(entity =>
+        {
+            entity.HasIndex(t => t.Name).IsUnique();
+        });
+
+        // ── Vendor (GSTIN + PAN indexes) ───────────────────────────
+        modelBuilder.Entity<Vendor>(entity =>
+        {
+            entity.HasIndex(v => v.Name);
+            entity.HasIndex(v => v.GSTIN).HasFilter("[GSTIN] IS NOT NULL");
+            entity.HasIndex(v => v.PAN).HasFilter("[PAN] IS NOT NULL");
+            entity.Property(v => v.CreditLimit).HasColumnType("decimal(18,2)");
+            entity.Property(v => v.OpeningBalance).HasColumnType("decimal(18,2)");
+        });
+
+        // ── Inward Entry ───────────────────────────────────────────
+        modelBuilder.Entity<InwardEntry>(entity =>
+        {
+            entity.HasIndex(e => e.InwardNumber).IsUnique();
+            entity.HasIndex(e => e.InwardDate);
+            entity.Property(e => e.TransportCharges).HasColumnType("decimal(18,2)");
+            entity.HasOne(e => e.Vendor)
+                  .WithMany()
+                  .HasForeignKey(e => e.VendorId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── Inward Parcel ──────────────────────────────────────────
+        modelBuilder.Entity<InwardParcel>(entity =>
+        {
+            entity.HasIndex(p => p.ParcelNumber);
+            entity.Property(p => p.TransportCharge).HasColumnType("decimal(18,2)");
+            entity.HasOne(p => p.InwardEntry)
+                  .WithMany(e => e.Parcels)
+                  .HasForeignKey(p => p.InwardEntryId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.Vendor)
+                  .WithMany()
+                  .HasForeignKey(p => p.VendorId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── Inward Product (parcel line items with attributes) ─────
+        modelBuilder.Entity<InwardProduct>(entity =>
+        {
+            entity.Property(ip => ip.Quantity).HasColumnType("decimal(18,3)");
+            entity.HasOne(ip => ip.InwardParcel)
+                  .WithMany(p => p.Products)
+                  .HasForeignKey(ip => ip.InwardParcelId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(ip => ip.Product)
+                  .WithMany()
+                  .HasForeignKey(ip => ip.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(ip => ip.Colour)
+                  .WithMany()
+                  .HasForeignKey(ip => ip.ColourId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(ip => ip.Size)
+                  .WithMany()
+                  .HasForeignKey(ip => ip.SizeId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(ip => ip.Pattern)
+                  .WithMany()
+                  .HasForeignKey(ip => ip.PatternId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(ip => ip.VariantType)
+                  .WithMany()
+                  .HasForeignKey(ip => ip.VariantTypeId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ── Product (add ProductType index) ────────────────────────
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasIndex(p => p.ProductType);
         });
     }
 }

@@ -21,6 +21,10 @@ public class Vendor
     [MaxLength(300)]
     public string? Address { get; set; }
 
+    /// <summary>Secondary address line (landmark, area).</summary>
+    [MaxLength(300)]
+    public string? AddressLine2 { get; set; }
+
     /// <summary>City for vendor location lookup and reporting.</summary>
     [MaxLength(100)]
     public string? City { get; set; }
@@ -38,6 +42,18 @@ public class Vendor
     /// </summary>
     [MaxLength(15)]
     public string? GSTIN { get; set; }
+
+    /// <summary>
+    /// Permanent Account Number (10-char alphanumeric for India).
+    /// </summary>
+    [MaxLength(10)]
+    public string? PAN { get; set; }
+
+    /// <summary>
+    /// Preferred transport method (e.g., "Road", "Courier", "Self").
+    /// </summary>
+    [MaxLength(100)]
+    public string? TransportPreference { get; set; }
 
     /// <summary>
     /// Payment terms (e.g., "Net 30", "Net 60", "COD", "Advance").

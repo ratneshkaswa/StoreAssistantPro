@@ -9,6 +9,31 @@ public class Product
     [Required, MaxLength(200)]
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Classification: readymade garment or garment cloth (fabric).
+    /// Drives unit, tax applicability, and available attributes.
+    /// </summary>
+    public ProductType ProductType { get; set; } = ProductType.Readymade;
+
+    /// <summary>
+    /// Unit of sale: Piece for readymade, Meter for garment cloth.
+    /// </summary>
+    public ProductUnit Unit { get; set; } = ProductUnit.Piece;
+
+    // ── Attribute flags (controls which attributes appear during inward/billing) ──
+
+    /// <summary>Whether this product supports colour selection.</summary>
+    public bool SupportsColour { get; set; } = true;
+
+    /// <summary>Whether this product supports pattern selection.</summary>
+    public bool SupportsPattern { get; set; }
+
+    /// <summary>Whether this product supports size selection.</summary>
+    public bool SupportsSize { get; set; } = true;
+
+    /// <summary>Whether this product supports type selection (e.g., Half Sleeve, Full Sleeve).</summary>
+    public bool SupportsType { get; set; }
+
     [Range(0, double.MaxValue)]
     public decimal SalePrice { get; set; }
 
