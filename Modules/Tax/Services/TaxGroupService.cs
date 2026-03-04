@@ -329,16 +329,7 @@ public class TaxGroupService(
         if (mapping is null)
             return null;
 
-        return await context.TaxSlabs
-            .AsNoTracking()
-            .Where(s => s.TaxGroupId == mapping.TaxGroupId
-                     && s.IsActive
-                     && s.PriceFrom <= unitPrice
-                     && s.PriceTo >= unitPrice
-                     && s.EffectiveFrom <= date
-                     && (s.EffectiveTo == null || s.EffectiveTo >= date))
-            .OrderByDescending(s => s.EffectiveFrom)
-            .FirstOrDefaultAsync(ct)
+        return await FindEffectiveSlabAsync(context, mapping.TaxGroupId, unitPrice, date, ct)
             .ConfigureAwait(false);
     }
 
@@ -363,16 +354,7 @@ public class TaxGroupService(
             return new TaxResult(total, 0, 0, 0, 0, 0, total, null, null);
         }
 
-        var slab = await context.TaxSlabs
-            .AsNoTracking()
-            .Where(s => s.TaxGroupId == mapping.TaxGroupId
-                     && s.IsActive
-                     && s.PriceFrom <= unitPrice
-                     && s.PriceTo >= unitPrice
-                     && s.EffectiveFrom <= date
-                     && (s.EffectiveTo == null || s.EffectiveTo >= date))
-            .OrderByDescending(s => s.EffectiveFrom)
-            .FirstOrDefaultAsync(ct)
+        var slab = await FindEffectiveSlabAsync(context, mapping.TaxGroupId, unitPrice, date, ct)
             .ConfigureAwait(false);
 
         if (slab is null)
@@ -416,6 +398,23 @@ public class TaxGroupService(
             baseAmount, slab.GSTPercent,
             cgst, sgst, igst, totalTax, totalAmount,
             mapping.HSNCode?.Code, mapping.TaxGroup?.Name);
+    }
+
+    /// <summary>Finds the most recently effective active slab matching price and date.</summary>
+    private static async Task<TaxSlab?> FindEffectiveSlabAsync(
+        AppDbContext context, int taxGroupId, decimal unitPrice, DateTime date, CancellationToken ct)
+    {
+        return await context.TaxSlabs
+            .AsNoTracking()
+            .Where(s => s.TaxGroupId == taxGroupId
+                     && s.IsActive
+                     && s.PriceFrom <= unitPrice
+                     && s.PriceTo >= unitPrice
+                     && s.EffectiveFrom <= date
+                     && (s.EffectiveTo == null || s.EffectiveTo >= date))
+            .OrderByDescending(s => s.EffectiveFrom)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
     }
 
     // ── Validation ───────────────────────────────────────────────────

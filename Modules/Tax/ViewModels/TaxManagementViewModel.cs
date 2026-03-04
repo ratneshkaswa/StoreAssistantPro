@@ -14,6 +14,7 @@ public partial class TaxManagementViewModel(
 {
     /// <summary>Suppresses slab reload while populating form from a selected slab.</summary>
     private bool _suppressSlabReload;
+
     // ═══════════════════════════════════════════════════════════════
     //  Tab 1 — GST Groups
     // ═══════════════════════════════════════════════════════════════
@@ -163,7 +164,13 @@ public partial class TaxManagementViewModel(
     partial void OnSlabGroupChanged(TaxGroup? value)
     {
         if (!_suppressSlabReload)
-            _ = LoadSlabsForGroupAsync();
+            _ = SafeLoadSlabsAsync();
+    }
+
+    private async Task SafeLoadSlabsAsync()
+    {
+        try { await LoadSlabsForGroupAsync(); }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
     }
 
     [RelayCommand]
@@ -337,7 +344,13 @@ public partial class TaxManagementViewModel(
     [ObservableProperty]
     public partial string RuleCurrentMapping { get; set; } = "No product selected";
 
-    partial void OnRuleProductChanged(Product? value) => _ = LoadCurrentMappingAsync();
+    partial void OnRuleProductChanged(Product? value) => _ = SafeLoadMappingAsync();
+
+    private async Task SafeLoadMappingAsync()
+    {
+        try { await LoadCurrentMappingAsync(); }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+    }
 
     private async Task LoadCurrentMappingAsync()
     {

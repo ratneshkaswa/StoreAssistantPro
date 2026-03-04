@@ -33,18 +33,22 @@ public class TaxSlab
     public decimal IGSTPercent { get; set; }
 
     /// <summary>
+    /// Sentinel value for "no upper limit" — fits SQL <c>decimal(18,2)</c>.
+    /// ₹99,99,99,999 effectively means unlimited for Indian retail.
+    /// </summary>
+    public const decimal MaxPrice = 99_99_99_999m;
+
+    /// <summary>
     /// Lower price boundary (inclusive) for this slab.
     /// Use 0 for the lowest slab.
     /// </summary>
-    [Range(0, double.MaxValue)]
+    [Range(0, (double)MaxPrice)]
     public decimal PriceFrom { get; set; }
 
     /// <summary>
     /// Upper price boundary (inclusive) for this slab.
-    /// Use <see cref="MaxPrice"/> (99,99,99,999) for "and above".
+    /// Use <see cref="MaxPrice"/> for "and above".
     /// </summary>
-    public const decimal MaxPrice = 99_99_99_999m;
-
     [Range(0, (double)MaxPrice)]
     public decimal PriceTo { get; set; } = MaxPrice;
 
