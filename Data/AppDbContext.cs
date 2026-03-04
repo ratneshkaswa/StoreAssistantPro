@@ -38,6 +38,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductPattern> ProductPatterns => Set<ProductPattern>();
     public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
     public DbSet<ProductVariantType> ProductVariantTypes => Set<ProductVariantType>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<InwardProduct> InwardProducts => Set<InwardProduct>();
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
     public DbSet<TaxGroup> TaxGroups => Set<TaxGroup>();
@@ -288,6 +289,29 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<ProductVariantType>(entity =>
         {
             entity.HasIndex(t => t.Name).IsUnique();
+        });
+
+        // ── ProductVariant (size+colour per product) ────────────────
+        modelBuilder.Entity<ProductVariant>(entity =>
+        {
+            entity.HasOne(v => v.Product)
+                  .WithMany()
+                  .HasForeignKey(v => v.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(v => v.Size)
+                  .WithMany()
+                  .HasForeignKey(v => v.SizeId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(v => v.Colour)
+                  .WithMany()
+                  .HasForeignKey(v => v.ColourId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(v => v.Barcode).IsUnique().HasFilter("[Barcode] IS NOT NULL");
+            entity.HasIndex(v => new { v.ProductId, v.SizeId, v.ColourId }).IsUnique();
+            entity.Property(v => v.AdditionalPrice).HasColumnType("decimal(18,2)");
         });
 
         // ── Vendor (GSTIN + PAN indexes) ───────────────────────────

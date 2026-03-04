@@ -154,6 +154,8 @@
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="&#x2795; New" Command="{Binding NewProductCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="&#x1F9E9; Variants" Command="{Binding ManageVariantsCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Toggle Active" Command="{Binding ToggleActiveCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"

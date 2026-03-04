@@ -236,4 +236,17 @@ public partial class ProductManagementViewModel(
         await LoadAsync();
         SuccessMessage = "Status toggled.";
     });
+
+    /// <summary>
+    /// Callback set by code-behind to open the Variant Management dialog
+    /// for the selected product. Avoids direct view references in the ViewModel.
+    /// </summary>
+    public Action<Product>? OpenVariantsDialog { get; set; }
+
+    [RelayCommand]
+    private void ManageVariants()
+    {
+        if (SelectedProduct is null) return;
+        OpenVariantsDialog?.Invoke(SelectedProduct);
+    }
 }

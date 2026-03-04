@@ -68,24 +68,24 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 48 | Size model | P0 | 🔨 | Entity: Id, Name (S/M/L/XL/XXL/Free Size), SortOrder. Master table for clothing sizes. |
-| 49 | Color model | P0 | 🔨 | Entity: Id, Name (Black/White/Red…), HexCode (#000000). Master table for colors. |
-| 50 | Product Variant model | P0 | 🔨 | Entity: Id, ProductId (FK), SizeId (FK), ColorId (FK), Barcode (unique), Quantity, AdditionalPrice. |
-| 51 | Variant CRUD | P0 | 🔨 | Add/edit/delete variants per product. Each variant is a unique size+color combination. |
-| 52 | Variant stock tracking | P0 | 🔨 | Each variant maintains its own quantity independent of parent product. |
-| 53 | Variant barcode (unique) | P0 | 🔨 | Every variant gets a unique barcode. Scanning adds that specific variant to cart. |
-| 54 | Variant price adjustment | P1 | 🔨 | ± price offset from base product price. E.g., XXL costs ₹50 extra: AdditionalPrice = 50. |
-| 55 | Size master CRUD | P1 | 🔨 | Manage the master list of available sizes. Add custom sizes (28, 30, 32 for trousers). |
-| 56 | Color master CRUD | P1 | 🔨 | Manage the master list of available colors with hex codes for UI display. |
+| 48 | Size model | P0 | ✅ | Entity: Id, Name (S/M/L/XL/XXL/Free Size), SortOrder. Master table for clothing sizes. |
+| 49 | Color model | P0 | ✅ | Entity: Id, Name (Black/White/Red…), HexCode (#000000). Master table for colors. |
+| 50 | Product Variant model | P0 | ✅ | Entity: Id, ProductId (FK), SizeId (FK), ColorId (FK), Barcode (unique), Quantity, AdditionalPrice. |
+| 51 | Variant CRUD | P0 | ✅ | Add/edit/delete variants per product. Each variant is a unique size+color combination. |
+| 52 | Variant stock tracking | P0 | ✅ | Each variant maintains its own quantity independent of parent product. |
+| 53 | Variant barcode (unique) | P0 | ✅ | Every variant gets a unique barcode. Scanning adds that specific variant to cart. |
+| 54 | Variant price adjustment | P1 | ✅ | ± price offset from base product price. E.g., XXL costs ₹50 extra: AdditionalPrice = 50. |
+| 55 | Size master CRUD | P1 | ✅ | Manage the master list of available sizes. Add custom sizes (28, 30, 32 for trousers). |
+| 56 | Color master CRUD | P1 | ✅ | Manage the master list of available colors with hex codes for UI display. |
 | 57 | Size group templates | P2 | 🔨 | Predefined groups: "Shirt sizes" (S-XXL), "Trouser sizes" (28-40), "Free size". Quick-fill variants. |
 | 58 | Variant grid view | P1 | 🔨 | Matrix view: rows=sizes, columns=colors, cells=quantity. Visual stock overview per product. |
-| 59 | Variant search in billing | P0 | 🔨 | Scan variant barcode → auto-add to cart with correct size/color/price. |
+| 59 | Variant search in billing | P0 | ✅ | Scan variant barcode → auto-add to cart with correct size/color/price. |
 | 60 | Variant low stock alert | P1 | 🔨 | Per-variant minimum stock check. Alert when any variant falls below threshold. |
-| 61 | Bulk variant creation | P1 | 🔨 | Select multiple sizes + multiple colors → auto-create all combinations (e.g., 5 sizes × 4 colors = 20 variants). |
+| 61 | Bulk variant creation | P1 | ✅ | Select multiple sizes + multiple colors → auto-create all combinations (e.g., 5 sizes × 4 colors = 20 variants). |
 | 62 | Variant import (CSV) | P2 | 🔨 | Bulk import variants with columns: ProductName, Size, Color, Barcode, Qty, PriceOffset. |
 | 63 | Variant export (CSV) | P2 | 🔨 | Export all variants to CSV for backup/analysis. |
 | 64 | Variant image per color | P2 | 🔨 | Different product photo per color variant for visual identification. |
-| 65 | Variant inactive toggle | P2 | 🔨 | Deactivate specific size/color combos without deleting (e.g., discontinued size). |
+| 65 | Variant inactive toggle | P2 | ✅ | Deactivate specific size/color combos without deleting (e.g., discontinued size). |
 
 ### Sprint 4: Inventory Basics — InventoryView (15 features)
 
