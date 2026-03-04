@@ -49,6 +49,27 @@
                           h:SmartTooltip.ContextKey="Users"
                           Visibility="{Binding IsUserManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                <MenuItem Header="Tax Management" Command="{Binding OpenTaxManagementCommand}"
+                          h:SmartTooltip.ContextKey="Tax"
+                          Visibility="{Binding IsTaxManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Vendor Management" Command="{Binding OpenVendorManagementCommand}"
+                          h:SmartTooltip.ContextKey="Vendors"
+                          Visibility="{Binding IsVendorManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Product Management" Command="{Binding OpenProductManagementCommand}"
+                          h:SmartTooltip.ContextKey="Products"
+                          Visibility="{Binding IsProductManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                <MenuItem Header="Inward Entry" Command="{Binding OpenInwardEntryCommand}"
+                          h:SmartTooltip.ContextKey="Inward"
+                          Visibility="{Binding IsInwardEntryVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                <MenuItem Header="Financial Year" Command="{Binding OpenFinancialYearCommand}"
+                          h:SmartTooltip.ContextKey="FinancialYear"
+                          Visibility="{Binding IsFinancialYearVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="System Settings" Command="{Binding OpenSystemSettingsCommand}"
+                          h:SmartTooltip.ContextKey="Settings"
+                          Visibility="{Binding IsSystemSettingsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="Refresh Data" Command="{Binding RefreshCurrentViewCommand}"
                           InputGestureText="F5"
                           h:SmartTooltip.ContextKey="Refresh"/>

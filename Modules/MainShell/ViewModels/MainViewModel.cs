@@ -39,6 +39,12 @@ public partial class MainViewModel : BaseViewModel
 
     private const string FirmManagementDialog = "FirmManagement";
     private const string UserManagementDialog = "UserManagement";
+    private const string TaxManagementDialog = "TaxManagement";
+    private const string VendorManagementDialog = "VendorManagement";
+    private const string ProductManagementDialog = "ProductManagement";
+    private const string FinancialYearDialog = "FinancialYear";
+    private const string SystemSettingsDialog = "SystemSettings";
+    private const string InwardEntryDialog = "InwardEntry";
 
     // ── Application state (single source of truth) ──
 
@@ -81,6 +87,12 @@ public partial class MainViewModel : BaseViewModel
 
     public bool IsFirmManagementVisible => IsAdmin && IsFirmManagementEnabled;
     public bool IsUserManagementVisible => IsAdmin && IsUserManagementEnabled;
+    public bool IsTaxManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.TaxManagement);
+    public bool IsVendorManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.VendorManagement);
+    public bool IsProductManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Products);
+    public bool IsFinancialYearVisible => IsAdmin && _features.IsEnabled(FeatureFlags.FinancialYear);
+    public bool IsSystemSettingsVisible => IsAdmin && _features.IsEnabled(FeatureFlags.SystemSettings);
+    public bool IsInwardEntryVisible => _features.IsEnabled(FeatureFlags.InwardEntry);
 
     // ── Navigation ──
 
@@ -212,6 +224,12 @@ public partial class MainViewModel : BaseViewModel
     {
         OnPropertyChanged(nameof(IsFirmManagementVisible));
         OnPropertyChanged(nameof(IsUserManagementVisible));
+        OnPropertyChanged(nameof(IsTaxManagementVisible));
+        OnPropertyChanged(nameof(IsVendorManagementVisible));
+        OnPropertyChanged(nameof(IsProductManagementVisible));
+        OnPropertyChanged(nameof(IsFinancialYearVisible));
+        OnPropertyChanged(nameof(IsSystemSettingsVisible));
+        OnPropertyChanged(nameof(IsInwardEntryVisible));
     }
 
     // ── Navigation commands ──
@@ -255,6 +273,48 @@ public partial class MainViewModel : BaseViewModel
     {
         _dialogService.ShowDialog(UserManagementDialog);
         _statusBar.Post("User management closed");
+    }
+
+    [RelayCommand]
+    private void OpenTaxManagement()
+    {
+        _dialogService.ShowDialog(TaxManagementDialog);
+        _statusBar.Post("Tax management closed");
+    }
+
+    [RelayCommand]
+    private void OpenVendorManagement()
+    {
+        _dialogService.ShowDialog(VendorManagementDialog);
+        _statusBar.Post("Vendor management closed");
+    }
+
+    [RelayCommand]
+    private void OpenProductManagement()
+    {
+        _dialogService.ShowDialog(ProductManagementDialog);
+        _statusBar.Post("Product management closed");
+    }
+
+    [RelayCommand]
+    private void OpenFinancialYear()
+    {
+        _dialogService.ShowDialog(FinancialYearDialog);
+        _statusBar.Post("Financial year dialog closed");
+    }
+
+    [RelayCommand]
+    private void OpenSystemSettings()
+    {
+        _dialogService.ShowDialog(SystemSettingsDialog);
+        _statusBar.Post("System settings closed");
+    }
+
+    [RelayCommand]
+    private void OpenInwardEntry()
+    {
+        _dialogService.ShowDialog(InwardEntryDialog);
+        _statusBar.Post("Inward entry closed");
     }
 
     // ── Logout ──
@@ -308,6 +368,65 @@ public partial class MainViewModel : BaseViewModel
             SortOrder = 50,
             RequiredRoles = [UserType.Admin, UserType.Manager],
             RequiredFeature = FeatureFlags.UserManagement
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Tax", Icon = "💰",
+            Description = "Manage GST tax slabs and HSN codes",
+            HelpKey = "Tax",
+            Command = OpenTaxManagementCommand,
+            SortOrder = 55,
+            RequiredRoles = [UserType.Admin],
+            RequiredFeature = FeatureFlags.TaxManagement
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Vendors", Icon = "📦",
+            Description = "Manage vendor details and GST info",
+            HelpKey = "Vendors",
+            Command = OpenVendorManagementCommand,
+            SortOrder = 60,
+            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredFeature = FeatureFlags.VendorManagement
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Products", Icon = "👕",
+            Description = "Manage product categories and attributes",
+            HelpKey = "Products",
+            Command = OpenProductManagementCommand,
+            SortOrder = 65,
+            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredFeature = FeatureFlags.Products
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Inward", Icon = "📥",
+            Description = "Record new stock inward entries",
+            HelpKey = "Inward",
+            Command = OpenInwardEntryCommand,
+            SortOrder = 70,
+            RequiredFeature = FeatureFlags.InwardEntry
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "FY", Icon = "📅",
+            Description = "Change financial year and reset billing",
+            HelpKey = "FinancialYear",
+            Command = OpenFinancialYearCommand,
+            SortOrder = 75,
+            RequiredRoles = [UserType.Admin],
+            RequiredFeature = FeatureFlags.FinancialYear
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Settings", Icon = "⚙",
+            Description = "Backup, restore, and system defaults",
+            HelpKey = "Settings",
+            Command = OpenSystemSettingsCommand,
+            SortOrder = 80,
+            RequiredRoles = [UserType.Admin],
+            RequiredFeature = FeatureFlags.SystemSettings
         });
         _quickActionService.Register(new QuickAction
         {

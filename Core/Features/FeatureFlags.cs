@@ -16,4 +16,7 @@ public static class FeatureFlags
     public const string UserManagement = "UserManagement";
     public const string FirmManagement = "FirmManagement";
     public const string TaxManagement = "TaxManagement";
+    public const string VendorManagement = "VendorManagement";
+    public const string FinancialYear = "FinancialYear";
+    public const string InwardEntry = "InwardEntry";
 }
