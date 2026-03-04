@@ -51,6 +51,10 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
@@ -71,7 +75,7 @@
                           Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tax"
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tax Rate"
                        Style="{StaticResource FormRowLabelStyle}"/>
             <ComboBox Grid.Row="4" Grid.Column="1"
                       ItemsSource="{Binding Taxes}"
@@ -79,9 +83,24 @@
                       DisplayMemberPath="TaxName"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Attributes"
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="GST Group"
                        Style="{StaticResource FormRowLabelStyle}"/>
-            <WrapPanel Grid.Row="6" Grid.Column="1">
+            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal">
+                <ComboBox ItemsSource="{Binding TaxGroups}"
+                          SelectedItem="{Binding SelectedTaxGroup}"
+                          DisplayMemberPath="Name"
+                          Width="{StaticResource FieldWidthStandard}"/>
+                <ComboBox ItemsSource="{Binding HSNCodes}"
+                          SelectedItem="{Binding SelectedHSNCode}"
+                          DisplayMemberPath="Code"
+                          Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
+                <CheckBox Content="Override allowed" IsChecked="{Binding OverrideAllowed}"
+                          Margin="{StaticResource InlineControlSpacing}" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Attributes"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <WrapPanel Grid.Row="8" Grid.Column="1">
                 <CheckBox Content="Colour" IsChecked="{Binding SupportsColour}"
                           Margin="{StaticResource InlineControlSpacing}"/>
                 <CheckBox Content="Size" IsChecked="{Binding SupportsSize}"
@@ -92,7 +111,11 @@
                           Margin="{StaticResource InlineControlSpacing}"/>
             </WrapPanel>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
+                       Style="{StaticResource HintTextStyle}"
+                       Text="Tax Rate is for quick billing. GST Group + HSN enables enterprise price-based slab resolution."/>
+
+            <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"
                        Style="{StaticResource HintTextStyle}"
                        Text="Only enabled attributes will appear during inward entry and billing."/>
         </Grid>

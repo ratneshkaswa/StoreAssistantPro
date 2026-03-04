@@ -4,10 +4,13 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
+using StoreAssistantPro.Modules.Tax.Services;
 
 namespace StoreAssistantPro.Modules.Products.ViewModels;
 
-public partial class ProductManagementViewModel(IProductService productService) : BaseViewModel
+public partial class ProductManagementViewModel(
+    IProductService productService,
+    ITaxGroupService taxGroupService) : BaseViewModel
 {
     [ObservableProperty]
     public partial ObservableCollection<Product> Products { get; set; } = [];
@@ -17,6 +20,23 @@ public partial class ProductManagementViewModel(IProductService productService) 
 
     [ObservableProperty]
     public partial ObservableCollection<TaxMaster> Taxes { get; set; } = [];
+
+    // ── Enterprise GST dropdowns ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<TaxGroup> TaxGroups { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<HSNCode> HSNCodes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial TaxGroup? SelectedTaxGroup { get; set; }
+
+    [ObservableProperty]
+    public partial HSNCode? SelectedHSNCode { get; set; }
+
+    [ObservableProperty]
+    public partial bool OverrideAllowed { get; set; }
 
     // ── Form fields ──
 
@@ -67,6 +87,36 @@ public partial class ProductManagementViewModel(IProductService productService) 
         IsEditing = true;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+
+        // Load enterprise mapping asynchronously
+        _ = LoadMappingForProductAsync(value.Id);
+    }
+
+    private async Task LoadMappingForProductAsync(int productId)
+    {
+        try
+        {
+            var mapping = await taxGroupService.GetMappingByProductAsync(productId);
+            if (mapping is not null)
+            {
+                SelectedTaxGroup = TaxGroups.FirstOrDefault(g => g.Id == mapping.TaxGroupId);
+                SelectedHSNCode = HSNCodes.FirstOrDefault(h => h.Id == mapping.HSNCodeId);
+                OverrideAllowed = mapping.OverrideAllowed;
+            }
+            else
+            {
+                SelectedTaxGroup = null;
+                SelectedHSNCode = null;
+                OverrideAllowed = false;
+            }
+        }
+        catch
+        {
+            // Non-critical — keep form usable
+            SelectedTaxGroup = null;
+            SelectedHSNCode = null;
+            OverrideAllowed = false;
+        }
     }
 
     [RelayCommand]
@@ -77,6 +127,12 @@ public partial class ProductManagementViewModel(IProductService productService) 
 
         var taxes = await productService.GetActiveTaxesAsync(ct);
         Taxes = new ObservableCollection<TaxMaster>(taxes);
+
+        var groups = await taxGroupService.GetActiveGroupsAsync(ct);
+        TaxGroups = new ObservableCollection<TaxGroup>(groups);
+
+        var codes = await taxGroupService.GetActiveHSNCodesAsync(ct);
+        HSNCodes = new ObservableCollection<HSNCode>(codes);
     });
 
     [RelayCommand]
@@ -87,6 +143,9 @@ public partial class ProductManagementViewModel(IProductService productService) 
         SelectedProductType = ProductType.Readymade;
         SelectedUnit = ProductUnit.Piece;
         SelectedTax = null;
+        SelectedTaxGroup = null;
+        SelectedHSNCode = null;
+        OverrideAllowed = false;
         SupportsColour = true;
         SupportsSize = true;
         SupportsPattern = false;
@@ -109,15 +168,33 @@ public partial class ProductManagementViewModel(IProductService productService) 
             SelectedTax?.Id, SupportsColour, SupportsPattern,
             SupportsSize, SupportsType);
 
+        int productId;
         if (IsEditing && SelectedProduct is not null)
         {
             await productService.UpdateAsync(SelectedProduct.Id, dto, ct);
+            productId = SelectedProduct.Id;
             SuccessMessage = "Product updated.";
         }
         else
         {
             await productService.CreateAsync(dto, ct);
+            // Reload to get the new product's Id
+            var all = await productService.GetAllAsync(ct);
+            var created = all.FirstOrDefault(p => p.Name == ProductName.Trim());
+            productId = created?.Id ?? 0;
             SuccessMessage = "Product created.";
+        }
+
+        // Save enterprise tax mapping if both group and HSN are selected
+        if (productId > 0 && SelectedTaxGroup is not null && SelectedHSNCode is not null)
+        {
+            await taxGroupService.SetProductMappingAsync(
+                new ProductTaxMappingDto(productId, SelectedTaxGroup.Id, SelectedHSNCode.Id, OverrideAllowed), ct);
+        }
+        else if (productId > 0 && SelectedTaxGroup is null)
+        {
+            // Clear mapping if group was deselected
+            await taxGroupService.RemoveProductMappingAsync(productId, ct);
         }
 
         await LoadAsync();
