@@ -20,6 +20,7 @@ public class LoginService(
         using var _ = perf.BeginScope($"LoginService.ValidatePinAsync({userType})");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var credential = await context.UserCredentials
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserType == userType, ct).ConfigureAwait(false);
 
         if (credential is null)

@@ -42,7 +42,7 @@ public class StartupService(
     public async Task<bool> IsAppInitializedAsync(CancellationToken ct = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct).ConfigureAwait(false);
         return config?.IsInitialized == true;
     }
 
