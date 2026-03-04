@@ -227,7 +227,7 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
     }
 
     private string CurrentPageKey() =>
-        _navigation.CurrentPageKey;
+        _navigation.CurrentPageKey ?? string.Empty;
 
     // ── Idle timer ───────────────────────────────────────────────────
 

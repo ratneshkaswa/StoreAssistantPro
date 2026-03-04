@@ -12,7 +12,7 @@ public class LogoutHandler(
     IEventBus eventBus,
     ILogger<LogoutHandler> logger) : BaseCommandHandler<LogoutCommand>
 {
-    protected override async Task<CommandResult> ExecuteAsync(LogoutCommand command)
+    protected override async Task<CommandResult> ExecuteAsync(LogoutCommand command, CancellationToken ct)
     {
         logger.LogInformation("Logout initiated for {UserType}", command.UserType);
 

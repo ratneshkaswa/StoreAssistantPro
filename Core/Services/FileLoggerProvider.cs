@@ -62,7 +62,13 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
     public void Dispose()
     {
         _channel.Writer.TryComplete();
-        _writerTask.GetAwaiter().GetResult();
+
+        // Use a timeout to prevent deadlock if Dispose is called from
+        // the UI thread while the writer task is blocked.
+        if (!_writerTask.Wait(TimeSpan.FromSeconds(5)))
+        {
+            // Best-effort — some log entries may be lost on abrupt shutdown.
+        }
     }
 
     internal void EnqueueEntry(string categoryName, LogLevel level, string message, Exception? exception)

@@ -40,7 +40,7 @@ public abstract class BaseCommandHandler<TCommand>
     {
         try
         {
-            return await ExecuteAsync(command);
+            return await ExecuteAsync(command, CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -50,14 +50,29 @@ public abstract class BaseCommandHandler<TCommand>
 
     /// <summary>
     /// Pipeline-compatible entry point. Delegates to
-    /// <see cref="HandleAsync(TCommand)"/> and wraps the untyped
-    /// <see cref="CommandResult"/> into a
+    /// <see cref="ExecuteAsync(TCommand, CancellationToken)"/> and
+    /// wraps the untyped <see cref="CommandResult"/> into a
     /// <see cref="CommandResult{Unit}"/>.
+    /// <para>
+    /// <b>CancellationToken forwarding:</b> The pipeline receives
+    /// <paramref name="ct"/> from the bus and passes it through to the
+    /// handler so that EF Core calls, HTTP requests, and other async
+    /// work are properly cancellable.
+    /// </para>
     /// </summary>
     async Task<CommandResult<Unit>> ICommandRequestHandler<TCommand, Unit>.HandleAsync(
         TCommand command, CancellationToken ct)
     {
-        var result = await HandleAsync(command);
+        CommandResult result;
+        try
+        {
+            result = await ExecuteAsync(command, ct);
+        }
+        catch (Exception ex)
+        {
+            result = CommandResult.Failure(ex.Message);
+        }
+
         return result.Succeeded
             ? CommandResult<Unit>.Success(Unit.Value)
             : CommandResult<Unit>.Failure(result.ErrorMessage ?? "Unknown error");
@@ -68,6 +83,22 @@ public abstract class BaseCommandHandler<TCommand>
     /// <see cref="CommandResult.Success"/> or
     /// <see cref="CommandResult.Failure"/> for expected outcomes.
     /// Unexpected exceptions are caught by the base class.
+    /// <para>
+    /// Override this method (with <paramref name="ct"/>) to receive
+    /// the <see cref="CancellationToken"/> from the command pipeline.
+    /// The default implementation delegates to the parameterless
+    /// overload for backward compatibility.
+    /// </para>
     /// </summary>
-    protected abstract Task<CommandResult> ExecuteAsync(TCommand command);
+    protected virtual Task<CommandResult> ExecuteAsync(TCommand command, CancellationToken ct)
+        => ExecuteAsync(command);
+
+    /// <summary>
+    /// Parameterless overload kept for backward compatibility.
+    /// New handlers should override the <c>(TCommand, CancellationToken)</c>
+    /// overload instead to receive pipeline cancellation.
+    /// </summary>
+    protected virtual Task<CommandResult> ExecuteAsync(TCommand command)
+        => throw new NotImplementedException(
+            $"Handler {GetType().Name} must override ExecuteAsync(TCommand) or ExecuteAsync(TCommand, CancellationToken).");
 }

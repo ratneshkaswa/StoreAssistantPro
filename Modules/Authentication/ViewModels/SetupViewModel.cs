@@ -186,15 +186,14 @@ public partial class SetupViewModel : BaseViewModel
     public SetupViewModel(ICommandBus commandBus) : base()
     {
         _commandBus = commandBus;
+        CurrentStep = 1;
     }
 
     private readonly ICommandBus _commandBus;
 
     [RelayCommand]
-    private async Task SaveAsync()
+    private Task SaveAsync() => RunAsync(async ct =>
     {
-        ErrorMessage = string.Empty;
-
         if (!Validate(v => v
             .Rule(InputValidator.IsRequired(FirmName), "Firm name is required.")
             .Rule(InputValidator.IsValidUserPin(AdminPin), "Admin PIN must be exactly 4 digits.")
@@ -219,13 +218,13 @@ public partial class SetupViewModel : BaseViewModel
             for (var i = 3; i >= 1; i--)
             {
                 RedirectCountdown = $"Redirecting to login in {i}…";
-                await Task.Delay(500);
+                await Task.Delay(500, ct);
             }
             RequestClose?.Invoke(true);
         }
         else
             ErrorMessage = result.ErrorMessage ?? "Setup failed.";
-    }
+    });
 
     private static string GetPinWarning(string pin)
     {

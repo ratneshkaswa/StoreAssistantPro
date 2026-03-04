@@ -34,16 +34,13 @@ public partial class SetupWindow : Window
         Closed += (_, _) => vm.Dispose();
     }
 
-    private void FocusByName(string name)
-    {
-        if (FindName(name) is UIElement element)
-            element.Focus();
-    }
-
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter) return;
         if (DataContext is not SetupViewModel vm) return;
+
+        // IsBusy guard — don't fire commands while a save is in progress
+        if (vm.IsBusy) { e.Handled = true; return; }
 
         if (vm.SaveCommand.CanExecute(null))
             vm.SaveCommand.Execute(null);

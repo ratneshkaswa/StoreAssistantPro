@@ -22,6 +22,17 @@ public partial class FirmWindow : BaseDialogWindow
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (DataContext is FirmViewModel vm)
-            await vm.LoadFirmCommand.ExecuteAsync(null);
+        {
+            try
+            {
+                await vm.LoadFirmCommand.ExecuteAsync(null);
+            }
+            catch (Exception)
+            {
+                // RunLoadAsync inside the VM already captures and logs
+                // exceptions. This guard is defensive against edge cases
+                // where the command infrastructure itself throws.
+            }
+        }
     }
 }

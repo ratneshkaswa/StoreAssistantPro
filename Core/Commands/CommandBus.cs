@@ -14,11 +14,11 @@
 public class CommandBus(ICommandExecutionPipeline pipeline) : ICommandBus
 {
     /// <inheritdoc/>
-    public async Task<CommandResult> SendAsync<TCommand>(TCommand command)
+    public async Task<CommandResult> SendAsync<TCommand>(TCommand command, CancellationToken ct = default)
         where TCommand : ICommandRequest<Unit>
     {
         var result = await pipeline
-            .ExecuteAsync<TCommand, Unit>(command);
+            .ExecuteAsync<TCommand, Unit>(command, ct);
 
         return result.ToBase();
     }

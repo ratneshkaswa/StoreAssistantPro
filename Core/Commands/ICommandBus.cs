@@ -29,7 +29,7 @@ public interface ICommandBus
     /// Dispatches a <see cref="ICommandRequest{Unit}"/> through the
     /// full pipeline and returns an untyped <see cref="CommandResult"/>.
     /// </summary>
-    Task<CommandResult> SendAsync<TCommand>(TCommand command)
+    Task<CommandResult> SendAsync<TCommand>(TCommand command, CancellationToken ct = default)
         where TCommand : ICommandRequest<Unit>;
 
     /// <summary>

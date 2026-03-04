@@ -30,8 +30,6 @@ public class LoginService(
 
         if (PinHasher.Verify(pin, credential.PinHash))
         {
-            await context.SaveChangesAsync(ct).ConfigureAwait(false);
-
             logger.LogInformation("Login succeeded for {UserType}", userType);
             await eventBus.PublishAsync(new UserLoginSuccessEvent(userType, DateTime.UtcNow));
             return LoginResult.Success();

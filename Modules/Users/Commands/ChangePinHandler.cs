@@ -13,12 +13,12 @@ public class ChangePinHandler(
     ILoginService loginService,
     IEventBus eventBus) : BaseCommandHandler<ChangePinCommand>
 {
-    protected override async Task<CommandResult> ExecuteAsync(ChangePinCommand command)
+    protected override async Task<CommandResult> ExecuteAsync(ChangePinCommand command, CancellationToken ct)
     {
         // Master PIN validation — required for Admin, accepted for any role
         if (!string.IsNullOrWhiteSpace(command.MasterPin))
         {
-            var isMasterValid = await loginService.ValidateMasterPinAsync(command.MasterPin);
+            var isMasterValid = await loginService.ValidateMasterPinAsync(command.MasterPin, ct);
             if (!isMasterValid)
                 return CommandResult.Failure("Invalid Master PIN.");
         }
@@ -27,7 +27,7 @@ public class ChangePinHandler(
             return CommandResult.Failure("Master PIN is required to change Admin PIN.");
         }
 
-        await userService.ChangePinAsync(command.UserType, command.NewPin);
+        await userService.ChangePinAsync(command.UserType, command.NewPin, ct);
         await eventBus.PublishAsync(new PinChangedEvent(command.UserType));
         return CommandResult.Success();
     }

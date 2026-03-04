@@ -10,9 +10,9 @@ public class LoginUserHandler(
     ILoginService loginService,
     IEventBus eventBus) : BaseCommandHandler<LoginUserCommand>
 {
-    protected override async Task<CommandResult> ExecuteAsync(LoginUserCommand command)
+    protected override async Task<CommandResult> ExecuteAsync(LoginUserCommand command, CancellationToken ct)
     {
-        var result = await loginService.ValidatePinAsync(command.UserType, command.Pin);
+        var result = await loginService.ValidatePinAsync(command.UserType, command.Pin, ct);
         if (!result.Succeeded)
             return CommandResult.Failure(result.ErrorMessage ?? "Login failed.");
 

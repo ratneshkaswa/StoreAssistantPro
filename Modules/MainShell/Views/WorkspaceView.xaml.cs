@@ -15,7 +15,16 @@ public partial class WorkspaceView : UserControl
     {
         if (DataContext is WorkspaceViewModel vm)
         {
-            await vm.LoadMainWorkspaceCommand.ExecuteAsync(null);
+            try
+            {
+                await vm.LoadMainWorkspaceCommand.ExecuteAsync(null);
+            }
+            catch (Exception)
+            {
+                // RunLoadAsync inside the VM already captures and logs
+                // exceptions. This guard is defensive against edge cases
+                // where the command infrastructure itself throws.
+            }
         }
     }
 }
