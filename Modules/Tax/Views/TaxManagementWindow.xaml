@@ -4,7 +4,6 @@
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         Title="Tax Management"
-        ConfirmCommand="{Binding SaveCommand}"
         Loaded="OnLoaded">
     <Grid Margin="{StaticResource DialogPadding}">
         <Grid.RowDefinitions>
@@ -12,92 +11,365 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Title -->
         <TextBlock Text="&#x1F4B0; Tax Management" Style="{StaticResource DialogTitleStyle}"/>
 
-        <!-- Tax slab grid -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding TaxSlabs}"
-                  SelectedItem="{Binding SelectedTaxSlab}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  SelectionMode="Single"
-                  HeadersVisibility="Column" CanUserAddRows="False"
-                  Margin="{StaticResource ItemSpacing}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
-                <DataGridTextColumn Header="GST %" Binding="{Binding TaxRate, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridTextColumn Header="HSN" Binding="{Binding HSNCode}" Width="{StaticResource ColumnWidthId}"/>
-                <DataGridTextColumn Header="Category" Binding="{Binding ApplicableCategory}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Tabbed content -->
+        <TabControl Grid.Row="1" Margin="{StaticResource ItemSpacing}">
 
-        <!-- Form fields -->
-        <Grid Grid.Row="2" Margin="{StaticResource ItemSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <!-- ═══════════════════════════════════════════════
+                 Tab 1: GST Groups
+                 ═══════════════════════════════════════════════ -->
+            <TabItem Header="GST Groups">
+                <Grid Margin="{StaticResource ItemSpacing}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                <Run Text="Tax Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-            </TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1"
-                     Text="{Binding TaxName, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="100" h:Watermark.Text="e.g. CGST 9%"/>
+                    <DataGrid ItemsSource="{Binding Groups}"
+                              SelectedItem="{Binding SelectedGroup}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column" CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Group Name" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                            <DataGridTextColumn Header="Slabs" Binding="{Binding Slabs.Count}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                <Run Text="GST % "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-            </TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1"
-                     Text="{Binding TaxRate, UpdateSourceTrigger=PropertyChanged}"
-                     Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                     MaxLength="6" h:Watermark.Text="e.g. 9"/>
+                    <Grid Grid.Row="1" Margin="{StaticResource StepContentTopSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="HSN Code"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="4" Grid.Column="1"
-                     Text="{Binding HSNCode, UpdateSourceTrigger=PropertyChanged}"
-                     Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                     MaxLength="8" h:Watermark.Text="4–8 digits"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                            <Run Text="Group Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        </TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding GroupName, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="100" h:Watermark.Text="e.g. GST Garments"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Applicable To"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <ComboBox Grid.Row="6" Grid.Column="1"
-                      ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding SelectedCategory}"
-                      Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
-        </Grid>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Description"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding GroupDescription, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="300" h:Watermark.Text="e.g. Price-based GST for garments"/>
+                    </Grid>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                                Margin="{StaticResource FormActionBarSpacing}">
+                        <Button Content="&#x2795; New" Command="{Binding NewGroupCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="Toggle Active" Command="{Binding ToggleGroupActiveCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="&#x1F4BE; Save Group" Command="{Binding SaveGroupCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════════════════════════════
+                 Tab 2: GST Slabs
+                 ═══════════════════════════════════════════════ -->
+            <TabItem Header="GST Slabs">
+                <Grid Margin="{StaticResource ItemSpacing}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Group filter -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Tax Group" Style="{StaticResource FormRowLabelStyle}"/>
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding Groups}"
+                                  SelectedItem="{Binding SlabGroup}"
+                                  DisplayMemberPath="Name"
+                                  Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+                    </Grid>
+
+                    <!-- Slab grid -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Slabs}"
+                              SelectedItem="{Binding SelectedSlab}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column" CanUserAddRows="False"
+                              Margin="{StaticResource ItemSpacing}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="GST %" Binding="{Binding GSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="CGST %" Binding="{Binding CGSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="SGST %" Binding="{Binding SGSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="IGST %" Binding="{Binding IGSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Price From" Binding="{Binding PriceFrom, StringFormat=₹{0:N0}}" Width="*"/>
+                            <DataGridTextColumn Header="Price To" Binding="{Binding PriceTo, StringFormat=₹{0:N0}}" Width="*"/>
+                            <DataGridTextColumn Header="Effective" Binding="{Binding EffectiveFrom, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Slab form -->
+                    <Grid Grid.Row="2" Margin="{StaticResource StepContentTopSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                            <Run Text="GST % "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        </TextBlock>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <TextBox Text="{Binding SlabGSTPercent, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="{StaticResource FieldWidthCompact}" MaxLength="6" h:Watermark.Text="e.g. 5"/>
+                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center"
+                                       Foreground="{StaticResource FluentTextTertiary}"
+                                       FontSize="{StaticResource FontSizeCaption}">
+                                <Run Text="CGST: "/><Run Text="{Binding SlabCGST, Mode=OneWay}"/>
+                                <Run Text="  SGST: "/><Run Text="{Binding SlabSGST, Mode=OneWay}"/>
+                                <Run Text="  IGST: "/><Run Text="{Binding SlabIGST, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                            <Run Text="Price Range (₹) "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        </TextBlock>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                            <TextBox Text="{Binding SlabPriceFrom, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="{StaticResource FieldWidthCompact}" MaxLength="10" h:Watermark.Text="From"/>
+                            <TextBlock Text=" – " VerticalAlignment="Center" Margin="4,0"
+                                       Foreground="{StaticResource FluentTextTertiary}"/>
+                            <TextBox Text="{Binding SlabPriceTo, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="{StaticResource FieldWidthCompact}" MaxLength="10" h:Watermark.Text="To (blank = no limit)"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Effective From"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <DatePicker Grid.Row="4" Grid.Column="1"
+                                    SelectedDate="{Binding SlabEffectiveFrom}"
+                                    Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Effective To"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <DatePicker Grid.Row="6" Grid.Column="1"
+                                    SelectedDate="{Binding SlabEffectiveTo}"
+                                    Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Style="{StaticResource HintTextStyle}"
+                                   Text="Leave 'Effective To' empty for slabs currently in effect. CGST/SGST/IGST auto-calculated."/>
+                    </Grid>
+
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+                                Margin="{StaticResource FormActionBarSpacing}">
+                        <Button Content="&#x2795; New" Command="{Binding NewSlabCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="&#x1F5D1; Delete" Command="{Binding DeleteSlabCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="&#x1F4BE; Save Slab" Command="{Binding SaveSlabCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════════════════════════════
+                 Tab 3: HSN Codes
+                 ═══════════════════════════════════════════════ -->
+            <TabItem Header="HSN Codes">
+                <Grid Margin="{StaticResource ItemSpacing}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <DataGrid ItemsSource="{Binding HSNCodes}"
+                              SelectedItem="{Binding SelectedHSN}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column" CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="HSN Code" Binding="{Binding Code}" Width="{StaticResource ColumnWidthId}"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                            <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="{StaticResource ColumnWidthPrice}"/>
+                            <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Grid Grid.Row="1" Margin="{StaticResource StepContentTopSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                            <Run Text="HSN Code "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        </TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding HSNCodeValue, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                                 MaxLength="8" h:Watermark.Text="e.g. 6109"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                            <Run Text="Description "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        </TextBlock>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding HSNDescription, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="300" h:Watermark.Text="e.g. T-shirts, singlets and other vests"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Category"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <ComboBox Grid.Row="4" Grid.Column="1"
+                                  ItemsSource="{Binding HSNCategories}"
+                                  SelectedItem="{Binding HSNSelectedCategory}"
+                                  Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Style="{StaticResource HintTextStyle}"
+                                   Text="HSN codes (4–8 digits) are mandatory on GST invoices for goods classification."/>
+                    </Grid>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                                Margin="{StaticResource FormActionBarSpacing}">
+                        <Button Content="&#x2795; New" Command="{Binding NewHSNCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="Toggle Active" Command="{Binding ToggleHSNActiveCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="&#x1F4BE; Save HSN" Command="{Binding SaveHSNCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════════════════════════════
+                 Tab 4: Tax Rules (Product → Group + HSN)
+                 ═══════════════════════════════════════════════ -->
+            <TabItem Header="Tax Rules">
+                <Grid Margin="{StaticResource ItemSpacing}" VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                        <Run Text="Product "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    </TextBlock>
+                    <ComboBox Grid.Row="0" Grid.Column="1"
+                              ItemsSource="{Binding Products}"
+                              SelectedItem="{Binding RuleProduct}"
+                              DisplayMemberPath="Name"
+                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Current Rule"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1"
+                               Text="{Binding RuleCurrentMapping}"
+                               Foreground="{StaticResource FluentTextSecondary}"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                        <Run Text="Tax Group "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    </TextBlock>
+                    <ComboBox Grid.Row="4" Grid.Column="1"
+                              ItemsSource="{Binding Groups}"
+                              SelectedItem="{Binding RuleGroup}"
+                              DisplayMemberPath="Name"
+                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                        <Run Text="HSN Code "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    </TextBlock>
+                    <ComboBox Grid.Row="6" Grid.Column="1"
+                              ItemsSource="{Binding HSNCodes}"
+                              SelectedItem="{Binding RuleHSN}"
+                              DisplayMemberPath="Code"
+                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Override Allowed"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <CheckBox Grid.Row="8" Grid.Column="1"
+                              IsChecked="{Binding RuleOverrideAllowed}"
+                              Content="Allow operator to override tax group during billing"
+                              VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
+                               Style="{StaticResource HintTextStyle}"
+                               Text="Assign a tax group and HSN code per product. The matching slab is resolved at billing based on unit price and date."/>
+
+                    <StackPanel Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"
+                                Orientation="Horizontal" HorizontalAlignment="Right"
+                                Margin="{StaticResource FormActionBarSpacing}">
+                        <Button Content="&#x1F5D1; Remove Rule" Command="{Binding RemoveRuleCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="&#x1F4BE; Save Rule" Command="{Binding SaveRuleCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+        <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
                     Margin="{StaticResource FieldLabelSpacing}">
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
             <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
                        h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
         </StackPanel>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
+        <!-- Close button -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="&#x2795; New" Command="{Binding NewTaxSlabCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Toggle Active" Command="{Binding ToggleActiveCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Close" IsCancel="True"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </StackPanel>
