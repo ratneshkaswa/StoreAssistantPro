@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Threading;
@@ -36,6 +37,24 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        var startupTimestamp = Stopwatch.GetTimestamp();
+
+        try
+        {
+            await InitializeAndRunAsync(startupTimestamp);
+        }
+        catch (Exception ex)
+        {
+            // Last-resort catch — covers DI build failures, host start failures,
+            // and anything before the dispatcher handler is wired.
+            _logger?.LogCritical(ex, "Fatal error during application startup");
+            ShowFatalErrorDialog(ex);
+            Shutdown(1);
+        }
+    }
+
+    private async Task InitializeAndRunAsync(long startupTimestamp)
+    {
         // Build DI container
         var builder = Host.CreateApplicationBuilder();
 
@@ -67,6 +86,8 @@ public partial class App : Application
         Core.BaseViewModel.SetLoggerFactory(
             _host.Services.GetRequiredService<ILoggerFactory>());
 
+        // ── Global exception handlers ────────────────────────────────
+
         // 1. UI thread exceptions (bindings, commands, event handlers)
         DispatcherUnhandledException += OnDispatcherUnhandledException;
 
@@ -78,22 +99,29 @@ public partial class App : Application
 
         _logger.LogInformation("Application starting");
 
-        // ?? Phase 3: Pre-warm EF Core model on a background thread ??
-        // The first CreateDbContextAsync compiles the EF model (~500 ms
-        // cold start).  Kick it off in parallel with host startup so
-        // the migration step sees an already-warm factory.
+        // ── Phase 3: Pre-warm EF Core model ──────────────────────────
         var warmupTask = Task.Run(async () =>
         {
-            var factory = _host.Services
-                .GetRequiredService<IDbContextFactory<AppDbContext>>();
-            await using var _ = await factory.CreateDbContextAsync()
-                .ConfigureAwait(false);
+            try
+            {
+                var factory = _host.Services
+                    .GetRequiredService<IDbContextFactory<AppDbContext>>();
+                await using var _ = await factory.CreateDbContextAsync()
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "EF Core warmup failed — migration step will retry");
+            }
         });
 
         await _host.StartAsync();
         await warmupTask;
 
-        // ?? Phase 4: Startup workflow (migrate, setup, load) ????????
+        var startupElapsed = Stopwatch.GetElapsedTime(startupTimestamp);
+        _logger.LogInformation("Application ready in {ElapsedMs:F0} ms", startupElapsed.TotalMilliseconds);
+
+        // ── Phase 4: Startup workflow (migrate, setup, load) ─────────
         var workflowManager = _host.Services.GetRequiredService<IWorkflowManager>();
         var session = _host.Services.GetRequiredService<ISessionService>();
         var shellFlow = _host.Services.GetRequiredService<IMainShellFlow>();
@@ -175,8 +203,9 @@ public partial class App : Application
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        _logger?.LogError(e.Exception, "Unhandled UI thread exception");
-        ShowErrorDialog(e.Exception);
+        var errorId = GenerateErrorId();
+        _logger?.LogError(e.Exception, "Unhandled UI thread exception [{ErrorId}]", errorId);
+        ShowErrorDialog(e.Exception, errorId);
         e.Handled = true;
     }
 
@@ -184,26 +213,60 @@ public partial class App : Application
     {
         if (e.ExceptionObject is Exception ex)
         {
-            _logger?.LogCritical(ex, "Unhandled background thread exception (IsTerminating={IsTerminating})", e.IsTerminating);
-            Dispatcher.BeginInvoke(() => ShowErrorDialog(ex));
+            var errorId = GenerateErrorId();
+            _logger?.LogCritical(ex, "Unhandled background thread exception [{ErrorId}] (IsTerminating={IsTerminating})", errorId, e.IsTerminating);
+            Dispatcher.BeginInvoke(() => ShowErrorDialog(ex, errorId));
         }
     }
 
     private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        _logger?.LogError(e.Exception, "Unobserved Task exception");
+        var errorId = GenerateErrorId();
+        _logger?.LogError(e.Exception, "Unobserved Task exception [{ErrorId}]", errorId);
         e.SetObserved();
-        Dispatcher.BeginInvoke(() => ShowErrorDialog(e.Exception.InnerException ?? e.Exception));
+        Dispatcher.BeginInvoke(() => ShowErrorDialog(e.Exception.InnerException ?? e.Exception, errorId));
     }
 
-    private static void ShowErrorDialog(Exception ex)
+    private static void ShowErrorDialog(Exception ex, string errorId)
     {
+        var (title, userMessage) = CategorizeException(ex);
+
         MessageBox.Show(
-            $"An unexpected error occurred:\n\n{ex.Message}\n\nThe error has been logged. Please contact support if this persists.",
-            "Store Assistant Pro � Error",
+            $"{userMessage}\n\nError Reference: {errorId}\n\nThe error has been logged. Please contact support if this persists.",
+            $"Store Assistant Pro — {title}",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
     }
+
+    private static void ShowFatalErrorDialog(Exception ex)
+    {
+        var (title, userMessage) = CategorizeException(ex);
+
+        MessageBox.Show(
+            $"The application failed to start.\n\n{title}: {userMessage}\n\nPlease check your configuration and try again.",
+            "Store Assistant Pro — Fatal Error",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+    }
+
+    private static (string Title, string Message) CategorizeException(Exception ex) => ex switch
+    {
+        Microsoft.Data.SqlClient.SqlException sqlEx =>
+            ("Database Error", $"A database error occurred: {sqlEx.Message}"),
+        DbUpdateException dbEx =>
+            ("Data Error", $"Failed to save data: {(dbEx.InnerException ?? dbEx).Message}"),
+        InvalidOperationException invOp when invOp.Message.Contains("connection string", StringComparison.OrdinalIgnoreCase) =>
+            ("Configuration Error", "Database connection string is missing or invalid. Check appsettings.json."),
+        TimeoutException =>
+            ("Timeout", "The operation timed out. Please check your database connection and try again."),
+        OperationCanceledException =>
+            ("Cancelled", "The operation was cancelled."),
+        _ =>
+            ("Unexpected Error", $"An unexpected error occurred: {ex.Message}")
+    };
+
+    private static string GenerateErrorId() =>
+        $"ERR-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
 
     private static void SetIndianCulture()
     {

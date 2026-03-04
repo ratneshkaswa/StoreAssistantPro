@@ -60,7 +60,12 @@ internal static class HostingExtensions
         services.AddLogging(logging =>
         {
             logging.ClearProviders();
-            logging.AddProvider(new FileLoggerProvider());
+#if DEBUG
+            logging.AddProvider(new FileLoggerProvider(LogLevel.Debug));
+            logging.AddDebug();
+#else
+            logging.AddProvider(new FileLoggerProvider(LogLevel.Information));
+#endif
         });
 
         services.AddSingleton<IAppStateService, AppStateService>();
