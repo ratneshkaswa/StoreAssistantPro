@@ -13,6 +13,7 @@ public static class TaxModule
     public static IServiceCollection AddTaxModule(this IServiceCollection services)
     {
         services.AddTransient<ITaxService, TaxService>();
+        services.AddTransient<ITaxGroupService, TaxGroupService>();
         services.AddTransient<TaxManagementViewModel>();
         services.AddTransient<TaxManagementWindow>();
         services.AddDialogRegistration<TaxManagementWindow>(TaxManagementDialog);

@@ -40,6 +40,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductVariantType> ProductVariantTypes => Set<ProductVariantType>();
     public DbSet<InwardProduct> InwardProducts => Set<InwardProduct>();
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
+    public DbSet<TaxGroup> TaxGroups => Set<TaxGroup>();
+    public DbSet<TaxSlab> TaxSlabs => Set<TaxSlab>();
+    public DbSet<HSNCode> HSNCodes => Set<HSNCode>();
+    public DbSet<ProductTaxMapping> ProductTaxMappings => Set<ProductTaxMapping>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -354,6 +358,58 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasIndex(p => p.ProductType);
+        });
+
+        // ── Tax Group ──────────────────────────────────────────────
+        modelBuilder.Entity<TaxGroup>(entity =>
+        {
+            entity.HasIndex(g => g.Name).IsUnique();
+            entity.HasIndex(g => g.IsActive);
+        });
+
+        // ── Tax Slab (price-based GST within a group) ──────────────
+        modelBuilder.Entity<TaxSlab>(entity =>
+        {
+            entity.Property(s => s.GSTPercent).HasColumnType("decimal(5,2)");
+            entity.Property(s => s.CGSTPercent).HasColumnType("decimal(5,2)");
+            entity.Property(s => s.SGSTPercent).HasColumnType("decimal(5,2)");
+            entity.Property(s => s.IGSTPercent).HasColumnType("decimal(5,2)");
+            entity.Property(s => s.PriceFrom).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.PriceTo).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(s => s.TaxGroup)
+                  .WithMany(g => g.Slabs)
+                  .HasForeignKey(s => s.TaxGroupId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(s => new { s.TaxGroupId, s.PriceFrom, s.PriceTo });
+            entity.HasIndex(s => s.EffectiveFrom);
+        });
+
+        // ── HSN Code master ────────────────────────────────────────
+        modelBuilder.Entity<HSNCode>(entity =>
+        {
+            entity.HasIndex(h => h.Code).IsUnique();
+            entity.HasIndex(h => h.Category);
+        });
+
+        // ── Product → Tax Group + HSN mapping ──────────────────────
+        modelBuilder.Entity<ProductTaxMapping>(entity =>
+        {
+            entity.HasOne(m => m.Product)
+                  .WithMany()
+                  .HasForeignKey(m => m.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.TaxGroup)
+                  .WithMany(g => g.ProductMappings)
+                  .HasForeignKey(m => m.TaxGroupId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(m => m.HSNCode)
+                  .WithMany(h => h.ProductMappings)
+                  .HasForeignKey(m => m.HSNCodeId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(m => m.ProductId).IsUnique();
         });
     }
 }
