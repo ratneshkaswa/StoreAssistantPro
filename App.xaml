@@ -27,6 +27,7 @@
             <helpers:RoleColorConverter x:Key="RoleColorConverter"/>
             <helpers:PinStrengthConverter x:Key="PinStrengthConverter"/>
             <helpers:BoolToHiddenVisibilityConverter x:Key="BoolToHiddenVisibility"/>
+            <helpers:PriceToDisplayConverter x:Key="PriceToDisplayConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">

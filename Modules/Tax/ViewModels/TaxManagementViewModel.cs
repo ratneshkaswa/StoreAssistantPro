@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
-using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Tax.Services;
@@ -11,9 +10,10 @@ namespace StoreAssistantPro.Modules.Tax.ViewModels;
 
 public partial class TaxManagementViewModel(
     ITaxGroupService groupService,
-    IProductService productService,
-    IRegionalSettingsService regional) : BaseViewModel
+    IProductService productService) : BaseViewModel
 {
+    /// <summary>Suppresses slab reload while populating form from a selected slab.</summary>
+    private bool _suppressSlabReload;
     // ═══════════════════════════════════════════════════════════════
     //  Tab 1 — GST Groups
     // ═══════════════════════════════════════════════════════════════
@@ -145,17 +145,26 @@ public partial class TaxManagementViewModel(
     partial void OnSelectedSlabChanged(TaxSlab? value)
     {
         if (value is null) return;
-        SlabGroup = Groups.FirstOrDefault(g => g.Id == value.TaxGroupId);
-        SlabGSTPercent = value.GSTPercent.ToString("G");
-        SlabPriceFrom = value.PriceFrom.ToString("G");
-        SlabPriceTo = value.PriceTo == decimal.MaxValue ? string.Empty : value.PriceTo.ToString("G");
-        SlabEffectiveFrom = value.EffectiveFrom;
-        SlabEffectiveTo = value.EffectiveTo;
-        IsEditingSlab = true;
-        ClearMessages();
+        _suppressSlabReload = true;
+        try
+        {
+            SlabGroup = Groups.FirstOrDefault(g => g.Id == value.TaxGroupId);
+            SlabGSTPercent = value.GSTPercent.ToString("G");
+            SlabPriceFrom = value.PriceFrom.ToString("G");
+            SlabPriceTo = value.PriceTo >= TaxSlab.MaxPrice ? string.Empty : value.PriceTo.ToString("G");
+            SlabEffectiveFrom = value.EffectiveFrom;
+            SlabEffectiveTo = value.EffectiveTo;
+            IsEditingSlab = true;
+            ClearMessages();
+        }
+        finally { _suppressSlabReload = false; }
     }
 
-    partial void OnSlabGroupChanged(TaxGroup? value) => _ = LoadSlabsForGroupAsync();
+    partial void OnSlabGroupChanged(TaxGroup? value)
+    {
+        if (!_suppressSlabReload)
+            _ = LoadSlabsForGroupAsync();
+    }
 
     [RelayCommand]
     private void NewSlab()
@@ -177,13 +186,17 @@ public partial class TaxManagementViewModel(
 
         if (!Validate(v => v
             .Rule(SlabGroup is not null, "Select a tax group.")
-            .Rule(decimal.TryParse(SlabGSTPercent, out _), "GST% must be a number 0–100.")
-            .Rule(decimal.TryParse(SlabPriceFrom, out _), "Price From must be a number.")))
+            .Rule(decimal.TryParse(SlabGSTPercent, out var gstVal) && gstVal >= 0 && gstVal <= 100,
+                  "GST% must be a number 0–100.")
+            .Rule(decimal.TryParse(SlabPriceFrom, out var fromVal) && fromVal >= 0,
+                  "Price From must be a non-negative number.")
+            .Rule(string.IsNullOrWhiteSpace(SlabPriceTo) || decimal.TryParse(SlabPriceTo, out _),
+                  "Price To must be a number or blank for no limit.")))
             return;
 
         var gst = decimal.Parse(SlabGSTPercent);
         var from = decimal.Parse(SlabPriceFrom);
-        var to = string.IsNullOrWhiteSpace(SlabPriceTo) ? decimal.MaxValue : decimal.Parse(SlabPriceTo);
+        var to = string.IsNullOrWhiteSpace(SlabPriceTo) ? TaxSlab.MaxPrice : decimal.Parse(SlabPriceTo);
 
         var dto = new TaxSlabDto(SlabGroup!.Id, gst, from, to, SlabEffectiveFrom, SlabEffectiveTo);
 

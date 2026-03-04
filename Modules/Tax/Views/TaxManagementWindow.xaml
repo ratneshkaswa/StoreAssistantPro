@@ -120,7 +120,7 @@
                             <DataGridTextColumn Header="SGST %" Binding="{Binding SGSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthQty}"/>
                             <DataGridTextColumn Header="IGST %" Binding="{Binding IGSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthQty}"/>
                             <DataGridTextColumn Header="Price From" Binding="{Binding PriceFrom, StringFormat=₹{0:N0}}" Width="*"/>
-                            <DataGridTextColumn Header="Price To" Binding="{Binding PriceTo, StringFormat=₹{0:N0}}" Width="*"/>
+                            <DataGridTextColumn Header="Price To" Binding="{Binding PriceTo, Converter={StaticResource PriceToDisplayConverter}}" Width="*"/>
                             <DataGridTextColumn Header="Effective" Binding="{Binding EffectiveFrom, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
                         </DataGrid.Columns>
                     </DataGrid>

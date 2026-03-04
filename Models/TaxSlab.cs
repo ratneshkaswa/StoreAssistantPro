@@ -41,10 +41,12 @@ public class TaxSlab
 
     /// <summary>
     /// Upper price boundary (inclusive) for this slab.
-    /// Use <see cref="decimal.MaxValue"/> for "and above".
+    /// Use <see cref="MaxPrice"/> (99,99,99,999) for "and above".
     /// </summary>
-    [Range(0, double.MaxValue)]
-    public decimal PriceTo { get; set; } = decimal.MaxValue;
+    public const decimal MaxPrice = 99_99_99_999m;
+
+    [Range(0, (double)MaxPrice)]
+    public decimal PriceTo { get; set; } = MaxPrice;
 
     /// <summary>Date from which this slab is effective.</summary>
     public DateTime EffectiveFrom { get; set; }
