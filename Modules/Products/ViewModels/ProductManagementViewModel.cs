@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Brands.Services;
+using StoreAssistantPro.Modules.Categories.Services;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Tax.Services;
 
@@ -37,6 +39,20 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial bool OverrideAllowed { get; set; }
+
+    // ── Category & Brand dropdowns ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<Category> Categories { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<Brand> Brands { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Category? SelectedCategory { get; set; }
+
+    [ObservableProperty]
+    public partial Brand? SelectedBrand { get; set; }
 
     // ── Form fields ──
 
@@ -80,6 +96,8 @@ public partial class ProductManagementViewModel(
         SelectedProductType = value.ProductType;
         SelectedUnit = value.Unit;
         SelectedTax = Taxes.FirstOrDefault(t => t.Id == value.TaxId);
+        SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.CategoryId);
+        SelectedBrand = Brands.FirstOrDefault(b => b.Id == value.BrandId);
         SupportsColour = value.SupportsColour;
         SupportsSize = value.SupportsSize;
         SupportsPattern = value.SupportsPattern;
@@ -133,6 +151,12 @@ public partial class ProductManagementViewModel(
 
         var codes = await taxGroupService.GetActiveHSNCodesAsync(ct);
         HSNCodes = new ObservableCollection<HSNCode>(codes);
+
+        var categories = await productService.GetActiveCategoriesAsync(ct);
+        Categories = new ObservableCollection<Category>(categories);
+
+        var brands = await productService.GetActiveBrandsAsync(ct);
+        Brands = new ObservableCollection<Brand>(brands);
     });
 
     [RelayCommand]
@@ -146,6 +170,8 @@ public partial class ProductManagementViewModel(
         SelectedTaxGroup = null;
         SelectedHSNCode = null;
         OverrideAllowed = false;
+        SelectedCategory = null;
+        SelectedBrand = null;
         SupportsColour = true;
         SupportsSize = true;
         SupportsPattern = false;
@@ -165,7 +191,8 @@ public partial class ProductManagementViewModel(
 
         var dto = new ProductDto(
             ProductName, SelectedProductType, SelectedUnit,
-            SelectedTax?.Id, SupportsColour, SupportsPattern,
+            SelectedTax?.Id, SelectedCategory?.Id, SelectedBrand?.Id,
+            SupportsColour, SupportsPattern,
             SupportsSize, SupportsType);
 
         int productId;

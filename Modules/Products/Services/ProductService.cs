@@ -18,6 +18,8 @@ public class ProductService(
         return await context.Products
             .AsNoTracking()
             .Include(p => p.Tax)
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
             .OrderBy(p => p.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
@@ -30,6 +32,8 @@ public class ProductService(
         return await context.Products
             .AsNoTracking()
             .Include(p => p.Tax)
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
             .Where(p => p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(ct)
@@ -43,6 +47,8 @@ public class ProductService(
         return await context.Products
             .AsNoTracking()
             .Include(p => p.Tax)
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
             .FirstOrDefaultAsync(p => p.Id == id, ct)
             .ConfigureAwait(false);
     }
@@ -64,6 +70,8 @@ public class ProductService(
             ProductType = dto.ProductType,
             Unit = dto.Unit,
             TaxId = dto.TaxId,
+            CategoryId = dto.CategoryId,
+            BrandId = dto.BrandId,
             SupportsColour = dto.SupportsColour,
             SupportsPattern = dto.SupportsPattern,
             SupportsSize = dto.SupportsSize,
@@ -93,6 +101,8 @@ public class ProductService(
         entity.ProductType = dto.ProductType;
         entity.Unit = dto.Unit;
         entity.TaxId = dto.TaxId;
+        entity.CategoryId = dto.CategoryId;
+        entity.BrandId = dto.BrandId;
         entity.SupportsColour = dto.SupportsColour;
         entity.SupportsPattern = dto.SupportsPattern;
         entity.SupportsSize = dto.SupportsSize;
@@ -145,6 +155,34 @@ public class ProductService(
             .AsNoTracking()
             .Where(t => t.IsActive)
             .OrderBy(t => t.SlabPercent)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Categories (for dropdowns) ───────────────────────────────────
+
+    public async Task<IReadOnlyList<Category>> GetActiveCategoriesAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetActiveCategoriesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.Categories
+            .AsNoTracking()
+            .Where(c => c.IsActive)
+            .OrderBy(c => c.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Brands (for dropdowns) ───────────────────────────────────────
+
+    public async Task<IReadOnlyList<Brand>> GetActiveBrandsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetActiveBrandsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.Brands
+            .AsNoTracking()
+            .Where(b => b.IsActive)
+            .OrderBy(b => b.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }

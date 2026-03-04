@@ -7,8 +7,8 @@ namespace StoreAssistantPro.Modules.Products.Views;
 
 public partial class ProductManagementWindow : BaseDialogWindow
 {
-    protected override double DialogWidth => 650;
-    protected override double DialogHeight => 620;
+    protected override double DialogWidth => 900;
+    protected override double DialogHeight => 780;
 
     public ProductManagementWindow(
         IWindowSizingService sizingService,

@@ -29,7 +29,8 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Type" Binding="{Binding ProductType}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="{StaticResource ColumnWidthQty}"/>
+                <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                <DataGridTextColumn Header="Brand" Binding="{Binding Brand.Name}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridTextColumn Header="Tax" Binding="{Binding Tax.TaxName}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
             </DataGrid.Columns>
@@ -42,6 +43,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                 <RowDefinition Height="Auto"/>
@@ -75,17 +80,33 @@
                           Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tax Rate"
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Category"
                        Style="{StaticResource FormRowLabelStyle}"/>
             <ComboBox Grid.Row="4" Grid.Column="1"
+                      ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding SelectedCategory}"
+                      DisplayMemberPath="Name"
+                      Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Brand"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <ComboBox Grid.Row="6" Grid.Column="1"
+                      ItemsSource="{Binding Brands}"
+                      SelectedItem="{Binding SelectedBrand}"
+                      DisplayMemberPath="Name"
+                      Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Tax Rate"
+                       Style="{StaticResource FormRowLabelStyle}"/>
+            <ComboBox Grid.Row="8" Grid.Column="1"
                       ItemsSource="{Binding Taxes}"
                       SelectedItem="{Binding SelectedTax}"
                       DisplayMemberPath="TaxName"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="GST Group"
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="GST Group"
                        Style="{StaticResource FormRowLabelStyle}"/>
-            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
                 <ComboBox ItemsSource="{Binding TaxGroups}"
                           SelectedItem="{Binding SelectedTaxGroup}"
                           DisplayMemberPath="Name"
@@ -98,9 +119,9 @@
                           Margin="{StaticResource InlineControlSpacing}" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" Text="Attributes"
+            <TextBlock Grid.Row="12" Grid.Column="0" Text="Attributes"
                        Style="{StaticResource FormRowLabelStyle}"/>
-            <WrapPanel Grid.Row="8" Grid.Column="1">
+            <WrapPanel Grid.Row="12" Grid.Column="1">
                 <CheckBox Content="Colour" IsChecked="{Binding SupportsColour}"
                           Margin="{StaticResource InlineControlSpacing}"/>
                 <CheckBox Content="Size" IsChecked="{Binding SupportsSize}"
@@ -111,11 +132,11 @@
                           Margin="{StaticResource InlineControlSpacing}"/>
             </WrapPanel>
 
-            <TextBlock Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2"
                        Style="{StaticResource HintTextStyle}"
                        Text="Tax Rate is for quick billing. GST Group + HSN enables enterprise price-based slab resolution."/>
 
-            <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2"
                        Style="{StaticResource HintTextStyle}"
                        Text="Only enabled attributes will appear during inward entry and billing."/>
         </Grid>

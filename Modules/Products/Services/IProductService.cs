@@ -16,6 +16,12 @@ public interface IProductService
     // ── Taxes (for dropdowns) ──
     Task<IReadOnlyList<TaxMaster>> GetActiveTaxesAsync(CancellationToken ct = default);
 
+    // ── Categories (for dropdowns) ──
+    Task<IReadOnlyList<Category>> GetActiveCategoriesAsync(CancellationToken ct = default);
+
+    // ── Brands (for dropdowns) ──
+    Task<IReadOnlyList<Brand>> GetActiveBrandsAsync(CancellationToken ct = default);
+
     // ── Colours (read-only predefined palette) ──
     Task<IReadOnlyList<Colour>> GetColoursAsync(CancellationToken ct = default);
 
@@ -37,6 +43,8 @@ public record ProductDto(
     ProductType ProductType,
     ProductUnit Unit,
     int? TaxId,
+    int? CategoryId,
+    int? BrandId,
     bool SupportsColour,
     bool SupportsPattern,
     bool SupportsSize,

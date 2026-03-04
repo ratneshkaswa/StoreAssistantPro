@@ -82,6 +82,7 @@ public class Product
     /// Optional product category for grouping.
     /// </summary>
     public int? CategoryId { get; set; }
+    public Category? Category { get; set; }
 
     /// <summary>
     /// Unit of measurement (e.g., pcs, meters, sets). Defaults to "pcs".
