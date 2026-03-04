@@ -85,6 +85,12 @@ public class Product
     public Category? Category { get; set; }
 
     /// <summary>
+    /// Primary supplier / vendor for this product.
+    /// </summary>
+    public int? VendorId { get; set; }
+    public Vendor? Vendor { get; set; }
+
+    /// <summary>
     /// Unit of measurement (e.g., pcs, meters, sets). Defaults to "pcs".
     /// </summary>
     [MaxLength(20)]

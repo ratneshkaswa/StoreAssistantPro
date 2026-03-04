@@ -285,7 +285,7 @@ public partial class SetupWizardViewModel(
 
         var dto = new ProductDto(
             ProductName.Trim(), ProductType.Readymade, ProductUnit.Piece,
-            SelectedProductTax?.Id, null, null, true, false, true, false);
+            SelectedProductTax?.Id, null, null, null, true, false, true, false);
 
         await productService.CreateAsync(dto, ct);
         SuccessMessage = $"Product '{ProductName.Trim()}' added.";

@@ -54,6 +54,14 @@ public partial class ProductManagementViewModel(
     [ObservableProperty]
     public partial Brand? SelectedBrand { get; set; }
 
+    // ── Vendor dropdown ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<Vendor> Vendors { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Vendor? SelectedVendor { get; set; }
+
     // ── Form fields ──
 
     [ObservableProperty]
@@ -98,6 +106,7 @@ public partial class ProductManagementViewModel(
         SelectedTax = Taxes.FirstOrDefault(t => t.Id == value.TaxId);
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.CategoryId);
         SelectedBrand = Brands.FirstOrDefault(b => b.Id == value.BrandId);
+        SelectedVendor = Vendors.FirstOrDefault(v => v.Id == value.VendorId);
         SupportsColour = value.SupportsColour;
         SupportsSize = value.SupportsSize;
         SupportsPattern = value.SupportsPattern;
@@ -157,6 +166,9 @@ public partial class ProductManagementViewModel(
 
         var brands = await productService.GetActiveBrandsAsync(ct);
         Brands = new ObservableCollection<Brand>(brands);
+
+        var vendors = await productService.GetActiveVendorsAsync(ct);
+        Vendors = new ObservableCollection<Vendor>(vendors);
     });
 
     [RelayCommand]
@@ -172,6 +184,7 @@ public partial class ProductManagementViewModel(
         OverrideAllowed = false;
         SelectedCategory = null;
         SelectedBrand = null;
+        SelectedVendor = null;
         SupportsColour = true;
         SupportsSize = true;
         SupportsPattern = false;
@@ -191,7 +204,7 @@ public partial class ProductManagementViewModel(
 
         var dto = new ProductDto(
             ProductName, SelectedProductType, SelectedUnit,
-            SelectedTax?.Id, SelectedCategory?.Id, SelectedBrand?.Id,
+            SelectedTax?.Id, SelectedCategory?.Id, SelectedBrand?.Id, SelectedVendor?.Id,
             SupportsColour, SupportsPattern,
             SupportsSize, SupportsType);
 

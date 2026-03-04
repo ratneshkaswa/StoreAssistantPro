@@ -22,6 +22,9 @@ public interface IProductService
     // ── Brands (for dropdowns) ──
     Task<IReadOnlyList<Brand>> GetActiveBrandsAsync(CancellationToken ct = default);
 
+    // ── Vendors (for dropdowns) ──
+    Task<IReadOnlyList<Vendor>> GetActiveVendorsAsync(CancellationToken ct = default);
+
     // ── Colours (read-only predefined palette) ──
     Task<IReadOnlyList<Colour>> GetColoursAsync(CancellationToken ct = default);
 
@@ -45,6 +48,7 @@ public record ProductDto(
     int? TaxId,
     int? CategoryId,
     int? BrandId,
+    int? VendorId,
     bool SupportsColour,
     bool SupportsPattern,
     bool SupportsSize,

@@ -20,6 +20,7 @@ public class ProductService(
             .Include(p => p.Tax)
             .Include(p => p.Category)
             .Include(p => p.Brand)
+            .Include(p => p.Vendor)
             .OrderBy(p => p.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
@@ -34,6 +35,7 @@ public class ProductService(
             .Include(p => p.Tax)
             .Include(p => p.Category)
             .Include(p => p.Brand)
+            .Include(p => p.Vendor)
             .Where(p => p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(ct)
@@ -49,6 +51,7 @@ public class ProductService(
             .Include(p => p.Tax)
             .Include(p => p.Category)
             .Include(p => p.Brand)
+            .Include(p => p.Vendor)
             .FirstOrDefaultAsync(p => p.Id == id, ct)
             .ConfigureAwait(false);
     }
@@ -72,6 +75,7 @@ public class ProductService(
             TaxId = dto.TaxId,
             CategoryId = dto.CategoryId,
             BrandId = dto.BrandId,
+            VendorId = dto.VendorId,
             SupportsColour = dto.SupportsColour,
             SupportsPattern = dto.SupportsPattern,
             SupportsSize = dto.SupportsSize,
@@ -103,6 +107,7 @@ public class ProductService(
         entity.TaxId = dto.TaxId;
         entity.CategoryId = dto.CategoryId;
         entity.BrandId = dto.BrandId;
+        entity.VendorId = dto.VendorId;
         entity.SupportsColour = dto.SupportsColour;
         entity.SupportsPattern = dto.SupportsPattern;
         entity.SupportsSize = dto.SupportsSize;
@@ -183,6 +188,20 @@ public class ProductService(
             .AsNoTracking()
             .Where(b => b.IsActive)
             .OrderBy(b => b.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Vendors (for dropdowns) ──────────────────────────────────────
+
+    public async Task<IReadOnlyList<Vendor>> GetActiveVendorsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetActiveVendorsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.Vendors
+            .AsNoTracking()
+            .Where(v => v.IsActive)
+            .OrderBy(v => v.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }

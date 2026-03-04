@@ -75,6 +75,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(p => p.CategoryId)
                   .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(p => p.Vendor)
+                  .WithMany()
+                  .HasForeignKey(p => p.VendorId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<SaleItem>(entity =>

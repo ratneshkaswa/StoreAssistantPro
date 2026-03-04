@@ -111,11 +111,11 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 81 | Supplier model | P0 | 🔨 | Entity: Id, Name, ContactPerson, Phone, Email, GSTIN (15 chars), Address, IsActive, Notes. |
-| 82 | Supplier CRUD | P0 | 🔨 | Full add/edit/delete with inline forms, paging, search. |
-| 83 | Product → Supplier FK | P1 | 🔨 | Add SupplierId (nullable FK) to Product. Links product to primary supplier. |
-| 84 | Supplier active/inactive | P1 | 🔨 | Deactivate suppliers without deleting. Inactive suppliers hidden from dropdowns. |
-| 85 | Supplier search | P1 | 🔨 | Search by name, phone number, or GSTIN. |
+| 81 | Supplier model | P0 | ✅ | Entity: Id, Name, ContactPerson, Phone, Email, GSTIN (15 chars), Address, IsActive, Notes. |
+| 82 | Supplier CRUD | P0 | ✅ | Full add/edit/delete with inline forms, paging, search. |
+| 83 | Product → Supplier FK | P1 | ✅ | Add SupplierId (nullable FK) to Product. Links product to primary supplier. |
+| 84 | Supplier active/inactive | P1 | ✅ | Deactivate suppliers without deleting. Inactive suppliers hidden from dropdowns. |
+| 85 | Supplier search | P1 | ✅ | Search by name, phone number, or GSTIN. |
 | 86 | Supplier GSTIN validation | P1 | 🔨 | Validate 15-character Indian GSTIN format: 2-digit state + 10-char PAN + 1Z + checksum. |
 | 87 | Supplier ledger | P2 | 🔨 | Running balance per supplier: total purchases − total payments = outstanding. |
 | 88 | Supplier import (CSV) | P2 | 🔨 | Bulk import suppliers from CSV. |
@@ -124,7 +124,7 @@
 | 91 | Supplier due alerts | P2 | 🔨 | Dashboard alert when supplier payment is overdue beyond agreed credit period. |
 | 92 | Multiple suppliers per product | P2 | 🔨 | Many-to-many: ProductSupplier join table. Multiple vendors can supply same product. |
 | 93 | Supplier price list | P2 | 🔨 | Cost price varies per supplier per product. Pick best price when creating PO. |
-| 94 | Supplier notes | P2 | 🔨 | Free-text notes field per supplier for special terms, delivery schedules, etc. |
+| 94 | Supplier notes | P2 | ✅ | Free-text notes field per supplier for special terms, delivery schedules, etc. |
 | 95 | Supplier product count | P2 | 🔨 | Display number of products linked to each supplier in the supplier list. |
 
 ---
