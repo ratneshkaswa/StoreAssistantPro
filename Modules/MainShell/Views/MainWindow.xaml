@@ -65,6 +65,9 @@
                           h:SmartTooltip.ContextKey="Brands"
                           Visibility="{Binding IsBrandManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                <MenuItem Header="Inventory" Command="{Binding OpenInventoryCommand}"
+                          h:SmartTooltip.ContextKey="Inventory"
+                          Visibility="{Binding IsInventoryVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <MenuItem Header="Inward Entry" Command="{Binding OpenInwardEntryCommand}"
                           h:SmartTooltip.ContextKey="Inward"
                           Visibility="{Binding IsInwardEntryVisible, Converter={StaticResource BoolToVisibility}}"/>

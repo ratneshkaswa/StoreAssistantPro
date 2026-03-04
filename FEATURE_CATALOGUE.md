@@ -91,13 +91,13 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 66 | Stock adjustment (manual +/-) | P0 | 🔨 | Increase or decrease product quantity with a reason. Positive = stock in, negative = stock out. |
-| 67 | Adjustment reason codes | P0 | 🔨 | Predefined reasons: Damage, Theft, Correction, Return, Transfer, Opening Stock, Other. |
-| 68 | Stock adjustment log | P0 | 🔨 | Immutable audit trail: ProductId, OldQty, NewQty, Reason, UserId, Timestamp. |
+| 66 | Stock adjustment (manual +/-) | P0 | ✅ | Increase or decrease product quantity with a reason. Positive = stock in, negative = stock out. |
+| 67 | Adjustment reason codes | P0 | ✅ | Predefined reasons: Damage, Theft, Correction, Return, Transfer, Opening Stock, Other. |
+| 68 | Stock adjustment log | P0 | ✅ | Immutable audit trail: ProductId, OldQty, NewQty, Reason, UserId, Timestamp. |
 | 69 | Stock take / physical count | P1 | 🔨 | Enter physical count per product. System auto-calculates difference and creates adjustment. |
-| 70 | Low stock alert dashboard | P0 | 🔨 | Dedicated view listing all products where Quantity ≤ MinStockLevel. Sorted by urgency. |
-| 71 | Out of stock alert | P0 | 🔨 | Separate section/badge for products where Quantity = 0. Highlighted in red. |
-| 72 | Stock value report | P1 | 🔨 | Total inventory value calculated as Σ(Quantity × CostPrice) across all products. |
+| 70 | Low stock alert dashboard | P0 | ✅ | Dedicated view listing all products where Quantity ≤ MinStockLevel. Sorted by urgency. |
+| 71 | Out of stock alert | P0 | ✅ | Separate section/badge for products where Quantity = 0. Highlighted in red. |
+| 72 | Stock value report | P1 | ✅ | Total inventory value calculated as Σ(Quantity × CostPrice) across all products. |
 | 73 | Stock movement history | P1 | 🔨 | Timeline per product showing all quantity changes: sales, returns, adjustments, purchases. |
 | 74 | Opening stock entry | P1 | 🔨 | Bulk set initial stock quantities when first onboarding the system. |
 | 75 | Stock freeze (period lock) | P2 | 🔨 | Lock all stock edits during physical audit period. Only admin can freeze/unfreeze. |

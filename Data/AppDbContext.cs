@@ -39,6 +39,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
     public DbSet<ProductVariantType> ProductVariantTypes => Set<ProductVariantType>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<StockAdjustment> StockAdjustments => Set<StockAdjustment>();
     public DbSet<InwardProduct> InwardProducts => Set<InwardProduct>();
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
     public DbSet<TaxGroup> TaxGroups => Set<TaxGroup>();
@@ -312,6 +313,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(v => v.Barcode).IsUnique().HasFilter("[Barcode] IS NOT NULL");
             entity.HasIndex(v => new { v.ProductId, v.SizeId, v.ColourId }).IsUnique();
             entity.Property(v => v.AdditionalPrice).HasColumnType("decimal(18,2)");
+        });
+
+        // ── StockAdjustment (immutable audit log) ───────────────────
+        modelBuilder.Entity<StockAdjustment>(entity =>
+        {
+            entity.HasOne(a => a.Product)
+                  .WithMany()
+                  .HasForeignKey(a => a.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(a => a.ProductVariant)
+                  .WithMany()
+                  .HasForeignKey(a => a.ProductVariantId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(a => a.ProductId);
+            entity.HasIndex(a => a.ProductVariantId);
+            entity.HasIndex(a => a.Timestamp);
         });
 
         // ── Vendor (GSTIN + PAN indexes) ───────────────────────────
