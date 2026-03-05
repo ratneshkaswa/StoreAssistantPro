@@ -135,25 +135,25 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 96 | Add product by name search | P0 | 🔨 | Type-ahead search box in billing. Type product name → select from dropdown → add to cart. |
-| 97 | Add product by barcode scan | P0 | 🔨 | Barcode scanner input detected → product looked up → instantly added to cart with qty=1. |
-| 98 | Cart line: quantity edit | P0 | 🔨 | Click qty field in cart → type new quantity. Auto-recalculates line total and bill total. |
-| 99 | Cart line: remove item | P0 | 🔨 | Delete button per line item. Removes product from cart entirely. |
-| 100 | Cart line: price override | P1 | 🔨 | Change sale price for this transaction only. Requires manager PIN if discount > threshold. |
-| 101 | Cart subtotal display | P0 | 🔨 | Live sum of all line totals (before tax and discount). Updates on every cart change. |
+| 96 | Add product by name search | P0 | ✅ | Type-ahead search box in billing. Type product name → select from dropdown → add to cart. |
+| 97 | Add product by barcode scan | P0 | ✅ | Barcode scanner input detected → product looked up → instantly added to cart with qty=1. |
+| 98 | Cart line: quantity edit | P0 | ✅ | Click qty field in cart → type new quantity. Auto-recalculates line total and bill total. |
+| 99 | Cart line: remove item | P0 | ✅ | Delete button per line item. Removes product from cart entirely. |
+| 100 | Cart line: price override | P1 | ✅ | Change sale price for this transaction only. Requires manager PIN if discount > threshold. |
+| 101 | Cart subtotal display | P0 | ✅ | Live sum of all line totals (before tax and discount). Updates on every cart change. |
 | 102 | Cart tax display | P0 | 🔨 | Total tax amount. Shows CGST + SGST (or IGST) calculated per line based on tax profile. |
-| 103 | Cart grand total | P0 | 🔨 | Final amount: Subtotal + Tax − Discount. Large, prominent display. |
-| 104 | Bill-level discount (₹) | P0 | 🔨 | Flat rupee discount applied to entire bill. Distributed proportionally across line items for GST. |
-| 105 | Bill-level discount (%) | P0 | 🔨 | Percentage discount on bill total. Converted to ₹ amount then distributed. |
+| 103 | Cart grand total | P0 | ✅ | Final amount: Subtotal + Tax − Discount. Large, prominent display. |
+| 104 | Bill-level discount (₹) | P0 | ✅ | Flat rupee discount applied to entire bill. Distributed proportionally across line items for GST. |
+| 105 | Bill-level discount (%) | P0 | ✅ | Percentage discount on bill total. Converted to ₹ amount then distributed. |
 | 106 | Line-level discount (₹) | P1 | 🔨 | Flat rupee discount on a specific line item. Reduces that item's taxable value. |
-| 107 | Line-level discount (%) | P1 | 🔨 | Percentage discount on a specific line item. |
-| 108 | Payment: Cash | P0 | 🔨 | Select Cash payment method. Enter amount tendered. |
-| 109 | Cash change calculation | P0 | 🔨 | If cash tendered > grand total, display change due = tendered − total. |
-| 110 | Complete sale → deduct stock | P0 | 🔨 | Atomic transaction: create Sale record + SaleItems + decrement product quantities. |
-| 111 | Sale number auto-generation | P0 | 🔨 | Sequential invoice number with configurable prefix (e.g., INV-2025-00001). |
-| 112 | Sale timestamp (IST) | P0 | 🔨 | Record sale date/time using IRegionalSettingsService.Now (Indian Standard Time). |
-| 113 | Sale → User tracking | P0 | 🔨 | Record which user (cashier) completed the sale. FK to UserCredential. |
-| 114 | Cart clear / cancel bill | P0 | 🔨 | Discard entire cart. Confirmation dialog required. No stock changes on cancel. |
+| 107 | Line-level discount (%) | P1 | ✅ | Percentage discount on a specific line item. |
+| 108 | Payment: Cash | P0 | ✅ | Select Cash payment method. Enter amount tendered. |
+| 109 | Cash change calculation | P0 | ✅ | If cash tendered > grand total, display change due = tendered − total. |
+| 110 | Complete sale → deduct stock | P0 | ✅ | Atomic transaction: create Sale record + SaleItems + decrement product quantities. |
+| 111 | Sale number auto-generation | P0 | ✅ | Sequential invoice number with configurable prefix (e.g., INV-2025-00001). |
+| 112 | Sale timestamp (IST) | P0 | ✅ | Record sale date/time using IRegionalSettingsService.Now (Indian Standard Time). |
+| 113 | Sale → User tracking | P0 | ✅ | Record which user (cashier) completed the sale. FK to UserCredential. |
+| 114 | Cart clear / cancel bill | P0 | ✅ | Discard entire cart. Confirmation dialog required. No stock changes on cancel. |
 | 115 | Billing keyboard shortcuts | P0 | 🔨 | F2=New bill, F5=Pay, F8=Hold, Esc=Cancel, +/- for qty, Tab through fields. |
 
 ### Sprint 7: Payment Methods & Receipts — SalesView + ReceiptView (20 features)

@@ -71,6 +71,9 @@
                 <MenuItem Header="Inward Entry" Command="{Binding OpenInwardEntryCommand}"
                           h:SmartTooltip.ContextKey="Inward"
                           Visibility="{Binding IsInwardEntryVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Billing" Command="{Binding OpenBillingCommand}"
+                          h:SmartTooltip.ContextKey="Billing"
+                          Visibility="{Binding IsBillingVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="Financial Year" Command="{Binding OpenFinancialYearCommand}"
                           h:SmartTooltip.ContextKey="FinancialYear"
