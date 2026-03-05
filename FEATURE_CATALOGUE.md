@@ -160,19 +160,19 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 116 | Payment: UPI | P0 | 🔨 | Record UPI transaction reference number. No gateway integration (manual entry). |
-| 117 | Payment: Card | P0 | 🔨 | Record card type (credit/debit) and last 4 digits. Manual entry, no POS terminal integration. |
+| 116 | Payment: UPI | P0 | ✅ | Record UPI transaction reference number. No gateway integration (manual entry). |
+| 117 | Payment: Card | P0 | ✅ | Record card type (credit/debit) and last 4 digits. Manual entry, no POS terminal integration. |
 | 118 | Payment: Split payment | P1 | 🔨 | Part cash + part UPI/card. Multiple payment entries summing to grand total. |
 | 119 | Payment: Credit (on account) | P1 | 🔨 | Sale on customer credit. Creates receivable balance against customer. |
-| 120 | Receipt: thermal 80mm | P0 | 🔨 | Format receipt for standard 80mm thermal printer. Fixed-width text layout. |
-| 121 | Receipt: firm details | P0 | 🔨 | Print store name, address, phone on receipt header. |
-| 122 | Receipt: GSTIN | P0 | 🔨 | Print store's GST identification number on receipt. |
-| 123 | Receipt: line items | P0 | 🔨 | Print each item: name, qty, rate, discount, tax, line total. |
-| 124 | Receipt: totals summary | P0 | 🔨 | Print subtotal, discount, tax (CGST/SGST), grand total. |
-| 125 | Receipt: payment method | P0 | 🔨 | Print how customer paid: Cash/UPI/Card with reference. |
-| 126 | Receipt: thank you footer | P1 | 🔨 | Configurable footer text: "Thank you! Visit again!" |
-| 127 | Receipt preview | P1 | 🔨 | On-screen preview before sending to printer. |
-| 128 | Receipt reprint | P1 | 🔨 | Reprint receipt for any past sale from sale history. |
+| 120 | Receipt: thermal 80mm | P0 | ✅ | Format receipt for standard 80mm thermal printer. Fixed-width text layout. |
+| 121 | Receipt: firm details | P0 | ✅ | Print store name, address, phone on receipt header. |
+| 122 | Receipt: GSTIN | P0 | ✅ | Print store's GST identification number on receipt. |
+| 123 | Receipt: line items | P0 | ✅ | Print each item: name, qty, rate, discount, tax, line total. |
+| 124 | Receipt: totals summary | P0 | ✅ | Print subtotal, discount, tax (CGST/SGST), grand total. |
+| 125 | Receipt: payment method | P0 | ✅ | Print how customer paid: Cash/UPI/Card with reference. |
+| 126 | Receipt: thank you footer | P1 | ✅ | Configurable footer text: "Thank you! Visit again!" |
+| 127 | Receipt preview | P1 | ✅ | On-screen preview before sending to printer. |
+| 128 | Receipt reprint | P1 | ✅ | Reprint receipt for any past sale from sale history. |
 | 129 | Receipt: QR code | P2 | 🔨 | QR code containing sale ID or UPI payment link. |
 | 130 | Receipt: invoice barcode | P2 | 🔨 | Barcode of invoice number for easy scanning/lookup. |
 | 131 | A4 tax invoice format | P1 | 🔨 | Full-page GST tax invoice for B2B customers with all required fields. |
@@ -185,10 +185,10 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 136 | Sale history list | P0 | 🔨 | Paged DataGrid of all past sales: Invoice#, Date, Customer, Total, PaymentMethod. |
-| 137 | Sale history: date filter | P0 | 🔨 | DatePicker range filter to view sales within specific period. |
-| 138 | Sale history: invoice search | P0 | 🔨 | Search by invoice number for quick lookup. |
-| 139 | Sale detail view | P0 | 🔨 | Click sale → expand/dialog showing all line items, taxes, payment details. |
+| 136 | Sale history list | P0 | ✅ | Paged DataGrid of all past sales: Invoice#, Date, Customer, Total, PaymentMethod. |
+| 137 | Sale history: date filter | P0 | ✅ | DatePicker range filter to view sales within specific period. |
+| 138 | Sale history: invoice search | P0 | ✅ | Search by invoice number for quick lookup. |
+| 139 | Sale detail view | P0 | ✅ | Click sale → expand/dialog showing all line items, taxes, payment details. |
 | 140 | Sale history export (CSV) | P1 | 🔨 | Export filtered sales data to CSV file. |
 | 141 | Sale return (full) | P0 | 🔨 | Return entire sale: reverse all line items, restore stock, calculate refund. |
 | 142 | Sale return (partial) | P0 | 🔨 | Select specific items/quantities to return from a sale. |

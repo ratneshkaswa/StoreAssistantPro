@@ -74,6 +74,9 @@
                 <MenuItem Header="Billing" Command="{Binding OpenBillingCommand}"
                           h:SmartTooltip.ContextKey="Billing"
                           Visibility="{Binding IsBillingVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Sale History" Command="{Binding OpenSaleHistoryCommand}"
+                          h:SmartTooltip.ContextKey="SaleHistory"
+                          Visibility="{Binding IsSaleHistoryVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="Financial Year" Command="{Binding OpenFinancialYearCommand}"
                           h:SmartTooltip.ContextKey="FinancialYear"

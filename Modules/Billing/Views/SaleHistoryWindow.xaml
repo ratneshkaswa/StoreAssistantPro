@@ -1,0 +1,121 @@
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Billing.Views.SaleHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        Title="Sale History"
+        Loaded="OnLoaded">
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Title -->
+            <RowDefinition Height="Auto"/>  <!-- Filters -->
+            <RowDefinition Height="*"/>     <!-- List + Detail -->
+            <RowDefinition Height="Auto"/>  <!-- Messages -->
+            <RowDefinition Height="Auto"/>  <!-- Close -->
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Text="&#x1F4CB; Sale History" Style="{StaticResource DialogTitleStyle}"/>
+
+        <!-- Filters -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <DatePicker Grid.Column="1" SelectedDate="{Binding DateFrom}"
+                        Width="{StaticResource FieldWidthCompact}"/>
+
+            <TextBlock Grid.Column="2" Text="To:" VerticalAlignment="Center"
+                       Margin="{StaticResource InlineControlSpacing}"/>
+            <DatePicker Grid.Column="3" SelectedDate="{Binding DateTo}"
+                        Width="{StaticResource FieldWidthCompact}"/>
+
+            <TextBox Grid.Column="4" Text="{Binding InvoiceSearch, UpdateSourceTrigger=PropertyChanged}"
+                     Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}"
+                     h:Watermark.Text="Invoice #"/>
+
+            <Button Grid.Column="6" Content="&#x1F50D; Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </Grid>
+
+        <!-- Content: Sale list + Detail/Receipt -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sale list -->
+            <DataGrid ItemsSource="{Binding Sales}"
+                      SelectedItem="{Binding SelectedSale}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Invoice" Binding="{Binding InvoiceNumber}" Width="*"/>
+                    <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=dd-MMM HH:mm}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=₹{0:N2}}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Right panel: Detail + Receipt preview -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Sale detail summary -->
+                <TextBlock Text="{Binding SaleDetail}" TextWrapping="Wrap"
+                           Foreground="{StaticResource FluentTextSecondary}"
+                           Margin="{StaticResource ItemSpacing}"/>
+
+                <!-- Preview button -->
+                <Button Grid.Row="1" Content="&#x1F4C4; Preview Receipt"
+                        Command="{Binding PreviewReceiptCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Margin="{StaticResource ItemSpacing}"/>
+
+                <!-- Receipt preview -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <TextBlock Text="{Binding ReceiptPreview}"
+                               FontFamily="Consolas" FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextPrimary}"
+                               Background="{StaticResource FluentSurfaceElevated}"
+                               Padding="8" TextWrapping="NoWrap"
+                               Margin="{StaticResource ItemSpacing}"/>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!-- Messages -->
+        <StackPanel Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+                    Margin="{StaticResource FieldLabelSpacing}">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
+        </StackPanel>
+
+        <!-- Close -->
+        <Grid Grid.Row="4" Margin="{StaticResource FormActionBarSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </Grid>
+    </Grid>
+</core:BaseDialogWindow>
