@@ -154,11 +154,12 @@
     <FontFamily x:Key="FluentFontSmall">Segoe UI Variable Small, Segoe UI, sans-serif</FontFamily>
 
     <!-- Type scale — semantic sizes for each content role -->
-    <sys:Double x:Key="FontSizePageTitle">24</sys:Double>
+    <sys:Double x:Key="FontSizePageTitle">28</sys:Double>
     <sys:Double x:Key="FontSizeDialogTitle">20</sys:Double>
     <sys:Double x:Key="FontSizeKpi">28</sys:Double>
+    <sys:Double x:Key="FontSizeHeadline">18</sys:Double>
     <sys:Double x:Key="FontSizeSectionHeader">16</sys:Double>
-    <sys:Double x:Key="FontSizeBody">13</sys:Double>
+    <sys:Double x:Key="FontSizeBody">14</sys:Double>
     <sys:Double x:Key="FontSizeLabel">12</sys:Double>
     <sys:Double x:Key="FontSizeCaption">11</sys:Double>
     <sys:Double x:Key="FontSizeStatusBar">10</sys:Double>
@@ -283,10 +284,10 @@
          ═══════════════════════════════════════════════════════════════ -->
 
     <!-- ── Control heights ────────────────────────────────────────── -->
-    <sys:Double x:Key="ControlHeight">32</sys:Double>
-    <sys:Double x:Key="ButtonHeight">34</sys:Double>
+    <sys:Double x:Key="ControlHeight">36</sys:Double>
+    <sys:Double x:Key="ButtonHeight">36</sys:Double>
     <sys:Double x:Key="ButtonHeightLarge">36</sys:Double>
-    <sys:Double x:Key="DataGridRowHeight">32</sys:Double>
+    <sys:Double x:Key="DataGridRowHeight">40</sys:Double>
 
     <!-- ── Control-internal padding ───────────────────────────────── -->
     <Thickness x:Key="ControlPadding">6</Thickness>
@@ -443,5 +444,8 @@
                       BlurRadius="12" ShadowDepth="3"
                       Direction="270" Opacity="0.10"
                       Color="#000000"/>
+
+    <sys:Double x:Key="FocusVisualThickness">2</sys:Double>
+    <Thickness x:Key="FocusVisualMargin">-3</Thickness>
 
 </ResourceDictionary>

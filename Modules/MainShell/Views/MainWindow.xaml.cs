@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
 
@@ -10,6 +11,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         sizingService.ConfigureMainWindow(this);
+
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
         DataContextChanged += (_, _) =>
         {

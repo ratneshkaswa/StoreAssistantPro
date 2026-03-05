@@ -136,6 +136,9 @@ public abstract class BaseDialogWindow : Window
         // Set app icon (gracefully skips if asset not found)
         TrySetAppIcon();
 
+        // Win11 Mica backdrop for all dialogs
+        SourceInitialized += (_, _) => Helpers.Win11Backdrop.ApplyDialog(this);
+
         if (CloseOnEscape)
             KeyboardNav.SetEscapeCommand(this, new CloseDialogCommand(this));
     }

@@ -1,4 +1,5 @@
 using System.Windows;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Startup.ViewModels;
 
@@ -13,6 +14,8 @@ public partial class SetupWizardWindow : Window
         InitializeComponent();
         DataContext = vm;
         sizingService.ConfigureStartupWindow(this, 640, 780);
+
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
 
         vm.RequestClose = result =>
         {

@@ -361,7 +361,7 @@
         <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
         <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
         <Setter Property="EnableRowVirtualization" Value="True"/>
-        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="GridLinesVisibility" Value="None"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
         <Setter Property="AlternatingRowBackground" Value="{StaticResource FluentBackgroundSecondary}"/>
@@ -379,7 +379,7 @@
         <Setter Property="EnableRowVirtualization" Value="True"/>
         <Setter Property="EnableColumnVirtualization" Value="True"/>
         <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
-        <Setter Property="RowHeight" Value="32"/>
+        <Setter Property="RowHeight" Value="40"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="IsReadOnly" Value="True"/>
@@ -403,7 +403,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{StaticResource FluentSurfaceStroke}"
                                 BorderThickness="0,0,0,1"
-                                Padding="10,8"
+                                Padding="12,12"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="Center"/>

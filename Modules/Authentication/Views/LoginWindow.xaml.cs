@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
@@ -15,6 +16,8 @@ public partial class LoginWindow : Window
         DataContext = vm;
         vm.RequestClose = result => DialogResult = result;
         vm.Initialize();
+
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
 
         PreviewKeyDown += OnPreviewKeyDown;
 
