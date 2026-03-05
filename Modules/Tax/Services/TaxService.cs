@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Tax.Services;
 
 public class TaxService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : ITaxService
 {
     public async Task<IReadOnlyList<TaxMaster>> GetAllAsync(CancellationToken ct = default)
@@ -48,7 +49,7 @@ public class TaxService(
             TaxName = dto.TaxName.Trim(),
             SlabPercent = dto.SlabPercent,
             IsActive = true,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = regional.Now
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);

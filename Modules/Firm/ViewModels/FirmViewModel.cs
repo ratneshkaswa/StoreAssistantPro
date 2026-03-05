@@ -159,10 +159,22 @@ public partial class FirmViewModel : BaseViewModel
     [RegularExpression(@"^$|^\d{2}[A-Z]{5}\d{4}[A-Z]\d[Z][A-Z\d]$", ErrorMessage = "Invalid GSTIN format.")]
     public partial string GSTNumber { get; set; } = string.Empty;
 
+    partial void OnGSTNumberChanged(string value)
+    {
+        if (value.Length > 0 && value != value.ToUpperInvariant())
+            GSTNumber = value.ToUpperInvariant();
+    }
+
     [ObservableProperty]
     [NotifyDataErrorInfo]
     [RegularExpression(@"^$|^[A-Z]{5}\d{4}[A-Z]$", ErrorMessage = "Invalid PAN format (e.g., ABCDE1234F).")]
     public partial string PANNumber { get; set; } = string.Empty;
+
+    partial void OnPANNumberChanged(string value)
+    {
+        if (value.Length > 0 && value != value.ToUpperInvariant())
+            PANNumber = value.ToUpperInvariant();
+    }
 
     // ── Step 3: Regional Settings ──
 

@@ -56,7 +56,7 @@ public class ProductService(
             .ConfigureAwait(false);
     }
 
-    public async Task CreateAsync(ProductDto dto, CancellationToken ct = default)
+    public async Task<int> CreateAsync(ProductDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));
@@ -85,6 +85,7 @@ public class ProductService(
 
         context.Products.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return entity.Id;
     }
 
     public async Task UpdateAsync(int id, ProductDto dto, CancellationToken ct = default)

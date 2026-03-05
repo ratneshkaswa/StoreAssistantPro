@@ -115,36 +115,26 @@ public partial class ProductManagementViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
-        // Load enterprise mapping asynchronously
-        _ = LoadMappingForProductAsync(value.Id);
+        LoadMappingForProductCommand.ExecuteAsync(value.Id);
     }
 
-    private async Task LoadMappingForProductAsync(int productId)
+    [RelayCommand]
+    private Task LoadMappingForProductAsync(int productId) => RunLoadAsync(async ct =>
     {
-        try
+        var mapping = await taxGroupService.GetMappingByProductAsync(productId, ct);
+        if (mapping is not null)
         {
-            var mapping = await taxGroupService.GetMappingByProductAsync(productId);
-            if (mapping is not null)
-            {
-                SelectedTaxGroup = TaxGroups.FirstOrDefault(g => g.Id == mapping.TaxGroupId);
-                SelectedHSNCode = HSNCodes.FirstOrDefault(h => h.Id == mapping.HSNCodeId);
-                OverrideAllowed = mapping.OverrideAllowed;
-            }
-            else
-            {
-                SelectedTaxGroup = null;
-                SelectedHSNCode = null;
-                OverrideAllowed = false;
-            }
+            SelectedTaxGroup = TaxGroups.FirstOrDefault(g => g.Id == mapping.TaxGroupId);
+            SelectedHSNCode = HSNCodes.FirstOrDefault(h => h.Id == mapping.HSNCodeId);
+            OverrideAllowed = mapping.OverrideAllowed;
         }
-        catch
+        else
         {
-            // Non-critical — keep form usable
             SelectedTaxGroup = null;
             SelectedHSNCode = null;
             OverrideAllowed = false;
         }
-    }
+    });
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
@@ -217,11 +207,7 @@ public partial class ProductManagementViewModel(
         }
         else
         {
-            await productService.CreateAsync(dto, ct);
-            // Reload to get the new product's Id
-            var all = await productService.GetAllAsync(ct);
-            var created = all.FirstOrDefault(p => p.Name == ProductName.Trim());
-            productId = created?.Id ?? 0;
+            productId = await productService.CreateAsync(dto, ct);
             SuccessMessage = "Product created.";
         }
 

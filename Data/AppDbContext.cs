@@ -340,7 +340,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // ── Vendor (GSTIN + PAN indexes) ───────────────────────────
         modelBuilder.Entity<Vendor>(entity =>
         {
-            entity.HasIndex(v => v.Name);
+            entity.HasIndex(v => v.Name).IsUnique();
             entity.HasIndex(v => v.GSTIN).HasFilter("[GSTIN] IS NOT NULL");
             entity.HasIndex(v => v.PAN).HasFilter("[PAN] IS NOT NULL");
             entity.Property(v => v.CreditLimit).HasColumnType("decimal(18,2)");
@@ -408,6 +408,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasIndex(p => p.ProductType);
+            entity.HasIndex(p => p.Name).IsUnique();
         });
 
         // ── Tax Group ──────────────────────────────────────────────

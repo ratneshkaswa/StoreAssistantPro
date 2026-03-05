@@ -13,19 +13,21 @@ public class BrandService(
     {
         using var _ = perf.BeginScope("BrandService.GetAllAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var productCounts = await context.Products
+            .GroupBy(p => p.BrandId)
+            .Select(g => new { BrandId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.BrandId, g => g.Count, ct)
+            .ConfigureAwait(false);
+
         var brands = await context.Brands
             .AsNoTracking()
             .OrderBy(b => b.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
 
-        // Populate product counts
         foreach (var brand in brands)
-        {
-            brand.ProductCount = await context.Products
-                .CountAsync(p => p.BrandId == brand.Id, ct)
-                .ConfigureAwait(false);
-        }
+            brand.ProductCount = productCounts.GetValueOrDefault(brand.Id);
 
         return brands;
     }
@@ -57,11 +59,18 @@ public class BrandService(
             .ToListAsync(ct)
             .ConfigureAwait(false);
 
-        foreach (var brand in brands)
+        if (brands.Count > 0)
         {
-            brand.ProductCount = await context.Products
-                .CountAsync(p => p.BrandId == brand.Id, ct)
+            var brandIds = brands.Select(b => b.Id).ToList();
+            var productCounts = await context.Products
+                .Where(p => brandIds.Contains(p.BrandId ?? 0))
+                .GroupBy(p => p.BrandId)
+                .Select(g => new { BrandId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.BrandId, g => g.Count, ct)
                 .ConfigureAwait(false);
+
+            foreach (var brand in brands)
+                brand.ProductCount = productCounts.GetValueOrDefault(brand.Id);
         }
 
         return brands;

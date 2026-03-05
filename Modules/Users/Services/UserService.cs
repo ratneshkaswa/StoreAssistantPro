@@ -33,6 +33,8 @@ public class UserService(
             ?? throw new InvalidOperationException($"Credential for {userType} not found.");
 
         credential.PinHash = PinHasher.Hash(newPin);
+        credential.FailedAttempts = 0;
+        credential.LockoutEndTime = null;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 }

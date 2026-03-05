@@ -82,16 +82,21 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        await ReloadVendorsAsync(ct);
+    });
+
+    private async Task ReloadVendorsAsync(CancellationToken ct)
+    {
         var vendors = await vendorService.GetAllAsync(ct);
         Vendors = new ObservableCollection<Vendor>(vendors);
-    });
+    }
 
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            await LoadAsync();
+            await ReloadVendorsAsync(ct);
             return;
         }
         var results = await vendorService.SearchAsync(SearchText, ct);
@@ -115,14 +120,13 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
         PAN = string.Empty;
         TransportPreference = string.Empty;
         IsEditing = false;
-        ErrorMessage = string.Empty;
-        SuccessMessage = string.Empty;
+        ClearMessages();
     }
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>
     {
-        SuccessMessage = string.Empty;
+        ClearMessages();
 
         if (!Validate(v => v.Rule(!string.IsNullOrWhiteSpace(VendorName), "Vendor name is required.")))
             return;
@@ -143,7 +147,7 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
             SuccessMessage = "Vendor created.";
         }
 
-        await LoadAsync();
+        await ReloadVendorsAsync(ct);
         NewVendor();
     });
 
@@ -152,7 +156,13 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
     {
         if (SelectedVendor is null) return;
         await vendorService.ToggleActiveAsync(SelectedVendor.Id, ct);
-        await LoadAsync();
+        await ReloadVendorsAsync(ct);
         SuccessMessage = "Status toggled.";
     });
+
+    private void ClearMessages()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
 }

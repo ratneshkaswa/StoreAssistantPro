@@ -8,7 +8,7 @@ public interface IProductService
     Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Product>> GetActiveAsync(CancellationToken ct = default);
     Task<Product?> GetByIdAsync(int id, CancellationToken ct = default);
-    Task CreateAsync(ProductDto dto, CancellationToken ct = default);
+    Task<int> CreateAsync(ProductDto dto, CancellationToken ct = default);
     Task UpdateAsync(int id, ProductDto dto, CancellationToken ct = default);
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
     Task AttachTaxAsync(int productId, int? taxId, CancellationToken ct = default);

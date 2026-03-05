@@ -70,11 +70,16 @@ public class VendorService(
 
         using var _ = perf.BeginScope("VendorService.CreateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var trimmedName = dto.Name.Trim();
+        if (await context.Vendors.AnyAsync(v => v.Name == trimmedName, ct).ConfigureAwait(false))
+            throw new InvalidOperationException($"Vendor '{trimmedName}' already exists.");
+
         var now = regional.Now;
 
         var entity = new Vendor
         {
-            Name = dto.Name.Trim(),
+            Name = trimmedName,
             ContactPerson = dto.ContactPerson?.Trim(),
             Phone = dto.Phone?.Trim(),
             Email = dto.Email?.Trim(),
@@ -109,7 +114,11 @@ public class VendorService(
         var entity = await context.Vendors.FirstOrDefaultAsync(v => v.Id == id, ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Vendor with Id {id} not found.");
 
-        entity.Name = dto.Name.Trim();
+        var trimmedName = dto.Name.Trim();
+        if (await context.Vendors.AnyAsync(v => v.Name == trimmedName && v.Id != id, ct).ConfigureAwait(false))
+            throw new InvalidOperationException($"Vendor '{trimmedName}' already exists.");
+
+        entity.Name = trimmedName;
         entity.ContactPerson = dto.ContactPerson?.Trim();
         entity.Phone = dto.Phone?.Trim();
         entity.Email = dto.Email?.Trim();
