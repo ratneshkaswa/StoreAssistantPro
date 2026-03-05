@@ -15,6 +15,7 @@
                 <ResourceDictionary Source="Core/Styles/FluentTheme.xaml"/>
                 <ResourceDictionary Source="Core/Styles/MotionSystem.xaml"/>
                 <ResourceDictionary Source="Core/Styles/GlobalStyles.xaml"/>
+                <ResourceDictionary Source="Core/Styles/ToggleSwitch.xaml"/>
                 <ResourceDictionary Source="Core/Styles/PosStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 

@@ -47,7 +47,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="City" Binding="{Binding City}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -158,8 +158,6 @@
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="&#x2795; New" Command="{Binding NewVendorCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Toggle Active" Command="{Binding ToggleActiveCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
                     Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>

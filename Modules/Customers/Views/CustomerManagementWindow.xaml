@@ -44,7 +44,7 @@
                 <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridTextColumn Header="GSTIN" Binding="{Binding GSTIN}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+                <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -120,8 +120,6 @@
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="&#x2795; New" Command="{Binding NewCustomerCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Toggle Active" Command="{Binding ToggleActiveCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
                     Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>

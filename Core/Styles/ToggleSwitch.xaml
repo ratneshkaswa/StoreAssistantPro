@@ -1,0 +1,86 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Fluent Toggle Switch — 44x22 pill track with 16px sliding thumb -->
+    <Style x:Key="FluentToggleSwitchStyle" TargetType="CheckBox">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid Width="44" Height="22">
+                        <Border x:Name="Track" CornerRadius="11"
+                                Background="{StaticResource FluentSurfaceStroke}"
+                                BorderBrush="{StaticResource FluentTextTertiary}"
+                                BorderThickness="1.5"/>
+                        <Border x:Name="Thumb" Width="16" Height="16" CornerRadius="8"
+                                Background="{StaticResource FluentTextSecondary}"
+                                HorizontalAlignment="Left" Margin="3,0,0,0"
+                                VerticalAlignment="Center">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="ThumbTranslate" X="0"/>
+                            </Border.RenderTransform>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="Track" Property="BorderBrush"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="Thumb" Property="Background"
+                                    Value="{StaticResource FluentTextOnAccent}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ThumbTranslate"
+                                            Storyboard.TargetProperty="X"
+                                            To="22" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="ThumbTranslate"
+                                            Storyboard.TargetProperty="X"
+                                            To="0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="BorderBrush"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Track" Property="Opacity" Value="0.4"/>
+                            <Setter TargetName="Thumb" Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Reusable DataTemplate for Active toggle column -->
+    <DataTemplate x:Key="ActiveToggleCellTemplate">
+        <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                  IsChecked="{Binding IsActive, Mode=OneWay}"
+                  IsHitTestVisible="False"/>
+    </DataTemplate>
+
+</ResourceDictionary>

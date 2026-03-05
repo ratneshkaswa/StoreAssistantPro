@@ -33,7 +33,7 @@
                 <DataGridTextColumn Header="Brand" Binding="{Binding Brand.Name}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridTextColumn Header="Vendor" Binding="{Binding Vendor.Name}" Width="{StaticResource ColumnWidthPrice}"/>
                 <DataGridTextColumn Header="Tax" Binding="{Binding Tax.TaxName}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+                <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -166,8 +166,6 @@
             <Button Content="&#x2795; New" Command="{Binding NewProductCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="&#x1F9E9; Variants" Command="{Binding ManageVariantsCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Toggle Active" Command="{Binding ToggleActiveCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
                     Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>

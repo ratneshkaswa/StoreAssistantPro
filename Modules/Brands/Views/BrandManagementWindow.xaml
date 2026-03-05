@@ -42,7 +42,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Brand" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Products" Binding="{Binding ProductCount}" Width="{StaticResource ColumnWidthQty}"/>
-                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=OneWay}" Width="{StaticResource ColumnWidthQty}"/>
+                <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -73,9 +73,7 @@
 
             <Button Grid.Column="1" Content="Clear" Command="{Binding ClearFormCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="2" Content="Toggle Active" Command="{Binding ToggleActiveCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="3" Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
+            <Button Grid.Column="2" Content="&#x1F4BE; Save" Command="{Binding SaveCommand}"
                     Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
