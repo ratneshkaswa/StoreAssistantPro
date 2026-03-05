@@ -39,7 +39,7 @@ public static class Win11Backdrop
         // Apply WindowChrome for extended title bar
         var chrome = new WindowChrome
         {
-            CaptionHeight = 32,
+            CaptionHeight = 48,
             GlassFrameThickness = new Thickness(-1),
             CornerRadius = new CornerRadius(8),
             UseAeroCaptionButtons = true,
@@ -67,7 +67,7 @@ public static class Win11Backdrop
 
         var chrome = new WindowChrome
         {
-            CaptionHeight = 32,
+            CaptionHeight = 36,
             GlassFrameThickness = new Thickness(-1),
             CornerRadius = new CornerRadius(8),
             UseAeroCaptionButtons = true,

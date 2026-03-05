@@ -17,10 +17,10 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Text="👤 User Management" Style="{StaticResource DialogTitleStyle}"/>
+        <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE77B;"/><Run Text=" User Management"/></TextBlock>
 
         <!-- User list — fills available space -->
-        <DataGrid Grid.Row="1"
+        <DataGrid AutomationProperties.Name="Users list" Grid.Row="1"
                   ItemsSource="{Binding Users}"
                   SelectedItem="{Binding SelectedUser}"
                   AutoGenerateColumns="False" IsReadOnly="True"
@@ -99,7 +99,7 @@
         <StackPanel Grid.Row="5" Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="🔑 Change PIN" Command="{Binding ChangePinCommand}"
+            <Button Content="Change PIN" Command="{Binding ChangePinCommand}"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Close" IsCancel="True"

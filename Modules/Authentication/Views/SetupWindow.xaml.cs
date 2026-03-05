@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Modules.Authentication.Views;
@@ -16,6 +17,8 @@ public partial class SetupWindow : Window
         InitializeComponent();
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
+
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
 
         // Enforce numeric-only input on all PIN PasswordBoxes
         AdminPinBox.PreviewTextInput += OnPreviewNumericOnly;

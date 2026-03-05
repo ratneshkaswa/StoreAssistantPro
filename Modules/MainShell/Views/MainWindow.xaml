@@ -113,7 +113,7 @@
                         <Button x:Name="NotificationBellButton"
                                 Command="{Binding ToggleNotificationsPanelCommand}"
                                 Background="Transparent" BorderThickness="0"
-                                Cursor="Hand" Padding="6,4"
+                                Cursor="Hand" Padding="{StaticResource ControlPadding}"
                                 h:HelpHint.HelpText="View notifications"
                                 h:HelpHint.Category="Navigation">
                             <Button.Template>
@@ -122,7 +122,7 @@
                                             CornerRadius="{StaticResource FluentCornerMedium}"
                                             Padding="{TemplateBinding Padding}">
                                         <Grid h:NotificationBadgeBehavior.Count="{Binding AppState.UnreadNotificationCount}">
-                                            <TextBlock Text="🔔" FontSize="{StaticResource FontSizeIconMedium}"
+                                            <TextBlock Text="&#xEA8F;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"/>
                                         </Grid>
@@ -164,7 +164,7 @@
                                     <!-- Header -->
                                     <Border Grid.Row="0"
                                             Background="{StaticResource FluentSurfaceElevated}"
-                                            CornerRadius="{StaticResource FluentCornerLargeTop}" Padding="12,8">
+                                            CornerRadius="{StaticResource FluentCornerLargeTop}" Padding="{StaticResource CardContentPadding}">
                                         <DockPanel>
                                             <TextBlock Text="Notifications"
                                                        FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"
@@ -195,7 +195,7 @@
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Padding="12,8"
+                                                    <Border Padding="{StaticResource CardContentPadding}"
                                                             BorderBrush="{StaticResource FluentSurfaceStroke}"
                                                             BorderThickness="0,0,0,1"
                                                             Cursor="Hand"
@@ -297,7 +297,7 @@
 
                                     <!-- Footer -->
                                     <Border Grid.Row="2" BorderBrush="{StaticResource FluentSurfaceStroke}"
-                                            BorderThickness="0,1,0,0" Padding="12,6"
+                                            BorderThickness="0,1,0,0" Padding="{StaticResource ButtonPadding}"
                                             CornerRadius="{StaticResource FluentCornerMediumBottom}">
                                         <Button Content="Clear all"
                                                 Style="{StaticResource ToolbarLinkButtonStyle}"
@@ -408,10 +408,10 @@
                                FontSize="{StaticResource FontSizeStatusBar}" FontWeight="Bold">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="🟢 Online"/>
+                                <Setter Property="Text" Value="● Online"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
-                                        <Setter Property="Text" Value="🔴 Offline"/>
+                                        <Setter Property="Text" Value="● Offline"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

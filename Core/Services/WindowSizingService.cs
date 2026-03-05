@@ -16,7 +16,7 @@ public class WindowSizingService : IWindowSizingService
 
         window.WindowStartupLocation = WindowStartupLocation.Manual;
         window.WindowState = WindowState.Normal;
-        window.ResizeMode = ResizeMode.NoResize;
+        window.ResizeMode = ResizeMode.CanResize;
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;
         window.Closed += (_, _) => SystemParameters.StaticPropertyChanged -= OnDisplayChanged;

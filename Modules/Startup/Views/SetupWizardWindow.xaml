@@ -1,4 +1,4 @@
-<Window x:Class="StoreAssistantPro.Modules.Startup.Views.SetupWizardWindow"
+﻿<Window x:Class="StoreAssistantPro.Modules.Startup.Views.SetupWizardWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -97,7 +97,7 @@
                          MaxLength="15" h:Watermark.Text="e.g. 22AAAAA0000A1Z5"/>
 
                 <Button Grid.Row="10" Grid.Column="1"
-                        Content="💾 Save Firm Details"
+                        Content="Save Firm Details"
                         Command="{Binding SaveFirmCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         HorizontalAlignment="Left"/>
@@ -154,7 +154,7 @@
                 </Grid>
 
                 <!-- Tax list -->
-                <DataGrid Grid.Row="2"
+                <DataGrid AutomationProperties.Name="Tax rates" Grid.Row="2"
                           ItemsSource="{Binding Taxes}"
                           AutoGenerateColumns="False" IsReadOnly="True"
                           SelectionMode="Single"
@@ -227,7 +227,7 @@
                 </Grid>
 
                 <!-- Vendor list -->
-                <DataGrid Grid.Row="4"
+                <DataGrid AutomationProperties.Name="Vendors" Grid.Row="4"
                           ItemsSource="{Binding Vendors}"
                           AutoGenerateColumns="False" IsReadOnly="True"
                           SelectionMode="Single"
@@ -292,7 +292,7 @@
                 </Grid>
 
                 <!-- Product list -->
-                <DataGrid Grid.Row="4"
+                <DataGrid AutomationProperties.Name="Products" Grid.Row="4"
                           ItemsSource="{Binding Products}"
                           AutoGenerateColumns="False" IsReadOnly="True"
                           SelectionMode="Single"

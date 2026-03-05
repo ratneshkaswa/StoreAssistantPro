@@ -1,4 +1,4 @@
-<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Billing.Views.SaleHistoryWindow"
+﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Billing.Views.SaleHistoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Text="&#x1F4CB; Sale History" Style="{StaticResource DialogTitleStyle}"/>
+        <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/><Run Text=" Sale History"/></TextBlock>
 
         <!-- Filters -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -42,7 +42,7 @@
                      Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}"
                      h:Watermark.Text="Invoice #"/>
 
-            <Button Grid.Column="6" Content="&#x1F50D; Search" Command="{Binding SearchCommand}"
+            <Button Grid.Column="6" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </Grid>
 
@@ -55,7 +55,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Sale list -->
-            <DataGrid ItemsSource="{Binding Sales}"
+            <DataGrid AutomationProperties.Name="Sale history" ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
@@ -83,7 +83,7 @@
                            Margin="{StaticResource ItemSpacing}"/>
 
                 <!-- Preview button -->
-                <Button Grid.Row="1" Content="&#x1F4C4; Preview Receipt"
+                <Button Grid.Row="1" Content="Preview Receipt"
                         Command="{Binding PreviewReceiptCommand}"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Margin="{StaticResource ItemSpacing}"/>
@@ -91,10 +91,10 @@
                 <!-- Receipt preview -->
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                     <TextBlock Text="{Binding ReceiptPreview}"
-                               FontFamily="Consolas" FontSize="{StaticResource FontSizeCaption}"
+                               FontFamily="{StaticResource FluentFontMono}" FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextPrimary}"
                                Background="{StaticResource FluentSurfaceElevated}"
-                               Padding="8" TextWrapping="NoWrap"
+                               Padding="{StaticResource SmallCardPadding}" TextWrapping="NoWrap"
                                Margin="{StaticResource ItemSpacing}"/>
                 </ScrollViewer>
             </Grid>

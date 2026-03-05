@@ -95,9 +95,9 @@
                         ToolTip="F1 — Admin">
                     <Grid>
                         <StackPanel>
-                            <TextBlock Text="🛡️" FontSize="{StaticResource FontSizeIconMedium}"
+                            <TextBlock Text="&#xE83D;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock Text="Admin" HorizontalAlignment="Center"
+                             <TextBlock Text="Admin" HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
                         </StackPanel>
                     </Grid>
@@ -111,9 +111,9 @@
                         ToolTip="F2 — Manager">
                     <Grid>
                         <StackPanel>
-                            <TextBlock Text="📋" FontSize="{StaticResource FontSizeIconMedium}"
+                            <TextBlock Text="&#xE77B;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock Text="Manager" HorizontalAlignment="Center"
+                             <TextBlock Text="Manager" HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
                         </StackPanel>
                     </Grid>
@@ -127,9 +127,9 @@
                         ToolTip="F3 — User">
                     <Grid>
                         <StackPanel>
-                            <TextBlock Text="👤" FontSize="{StaticResource FontSizeIconMedium}"
+                            <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock Text="User" HorizontalAlignment="Center"
+                             <TextBlock Text="User" HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
                         </StackPanel>
                     </Grid>

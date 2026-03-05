@@ -16,7 +16,7 @@
 
         <!-- Row 0: Title + step indicator -->
         <StackPanel>
-            <TextBlock Text="&#x1F3E2; Firm Management" Style="{StaticResource DialogTitleStyle}"/>
+            <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE731;"/><Run Text=" Firm Management"/></TextBlock>
 
             <!-- Visual step progress: ●──────○──────○ -->
             <Grid HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="{StaticResource StepIndicatorWidth}">
@@ -334,7 +334,7 @@
                         Style="{StaticResource PrimaryButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding CanGoNext, Converter={StaticResource BoolToVisibility}}"/>
-                <Button Content="&#x1F4BE; Save" Command="{Binding SaveFirmCommand}"
+                <Button Content="Save" Command="{Binding SaveFirmCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding IsLastStep, Converter={StaticResource BoolToVisibility}}"/>

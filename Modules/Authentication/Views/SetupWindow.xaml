@@ -23,7 +23,7 @@
         <Grid Grid.Row="1">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                             Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="&#x2705;" FontSize="{StaticResource FontSizeIconLarge}" HorizontalAlignment="Center"
+                    <TextBlock Text="&#xE73E;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}" HorizontalAlignment="Center"
                                Margin="{StaticResource ItemSpacing}"/>
                     <TextBlock Text="Setup Complete!"
                                FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="Bold"
@@ -108,8 +108,8 @@
 
                                 <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource RoleAdminBackground}"
                                         CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                                    <TextBlock Text="&#x1F6E1;&#xFE0F; Admin" FontWeight="SemiBold"
-                                               Foreground="{StaticResource RoleAdminAccent}" FontSize="{StaticResource FontSizeBody}"/>
+                                    <TextBlock FontWeight="SemiBold"
+                                               Foreground="{StaticResource RoleAdminAccent}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE83D;"/><Run Text=" Admin"/></TextBlock>
                                 </Border>
                                 <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (4 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="1" Grid.Column="1" x:Name="AdminPinBox" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Admin PIN"/>
@@ -127,8 +127,8 @@
 
                                 <Border Grid.Row="6" Grid.ColumnSpan="2" Background="{StaticResource RoleManagerBackground}"
                                         CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                                    <TextBlock Text="&#x1F4CB; Manager" FontWeight="SemiBold"
-                                               Foreground="{StaticResource RoleManagerAccent}" FontSize="{StaticResource FontSizeBody}"/>
+                                    <TextBlock FontWeight="SemiBold"
+                                               Foreground="{StaticResource RoleManagerAccent}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE77B;"/><Run Text=" Manager"/></TextBlock>
                                 </Border>
                                 <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (4 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="7" Grid.Column="1" x:Name="ManagerPinBox" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Manager PIN"/>
@@ -146,8 +146,8 @@
 
                                 <Border Grid.Row="12" Grid.ColumnSpan="2" Background="{StaticResource RoleUserBackground}"
                                         CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                                    <TextBlock Text="&#x1F464; User" FontWeight="SemiBold"
-                                               Foreground="{StaticResource RoleUserAccent}" FontSize="{StaticResource FontSizeBody}"/>
+                                    <TextBlock FontWeight="SemiBold"
+                                               Foreground="{StaticResource RoleUserAccent}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7EE;"/><Run Text=" User"/></TextBlock>
                                 </Border>
                                 <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (4 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="13" Grid.Column="1" x:Name="UserPinBox" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="User PIN"/>
@@ -165,9 +165,9 @@
 
                                 <Border Grid.Row="18" Grid.ColumnSpan="2" Background="{StaticResource RoleMasterBackground}"
                                         CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                                    <TextBlock Text="&#x1F510; Master" FontWeight="SemiBold"
+                                    <TextBlock FontWeight="SemiBold"
                                                Foreground="{StaticResource RoleMasterAccent}" FontSize="{StaticResource FontSizeBody}"
-                                               ToolTip="Used to recover or change PINs if forgotten."/>
+                                               ToolTip="Used to recover or change PINs if forgotten."><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE72E;"/><Run Text=" Master"/></TextBlock>
                                 </Border>
                                 <TextBlock Grid.Row="19" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (6 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="19" Grid.Column="1" x:Name="MasterPinBox" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Master PIN"/>
@@ -185,10 +185,10 @@
                     </Border>
 
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource FieldLabelSpacing}">
-                        <TextBlock Text="&#x1F4A1; Remember your PINs &#x2014; you will need them to log in."
+                        <TextBlock Text="Remember your PINs — you will need them to log in."
                                    Style="{StaticResource WarningTextStyle}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="&#x1F510; Master PIN is used to authorize critical actions such as deleting major records."
+                        <TextBlock Text="Master PIN is used to authorize critical actions such as deleting major records."
                                    Style="{StaticResource HintTextStyle}"
                                    HorizontalAlignment="Center" Margin="{StaticResource HintTextTopSpacing}"/>
                     </StackPanel>

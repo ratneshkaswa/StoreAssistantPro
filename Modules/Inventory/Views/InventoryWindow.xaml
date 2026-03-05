@@ -1,4 +1,4 @@
-<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inventory.Views.InventoryWindow"
+﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inventory.Views.InventoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -15,24 +15,17 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Text="&#x1F4E6; Inventory Management" Style="{StaticResource DialogTitleStyle}"/>
+        <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inventory Management"/></TextBlock>
 
         <!-- Tab selector -->
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <Button Content="Stock Adjust" Command="{Binding SwitchTabCommand}" CommandParameter="0"
-                    Style="{StaticResource ToolbarButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="1" Content="Adjustment Log" Command="{Binding SwitchTabCommand}" CommandParameter="1"
-                    Style="{StaticResource ToolbarButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="2" Content="Alerts" Command="{Binding SwitchTabCommand}" CommandParameter="2"
-                    Style="{StaticResource ToolbarButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+            <Button Content="Stock Adjust" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
+                    Style="{StaticResource SegmentedButtonStyle}"/>
+            <Button Content="Adjustment Log" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
+                    Style="{StaticResource SegmentedButtonStyle}"/>
+            <Button Content="Alerts" Tag="2" Command="{Binding SwitchTabCommand}" CommandParameter="2"
+                    Style="{StaticResource SegmentedButtonStyle}"/>
+        </StackPanel>
 
         <!-- ═══════════════════════════════════════════════════════════
              Tab 0: Stock Adjustment
@@ -45,7 +38,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <DataGrid ItemsSource="{Binding Products}"
+            <DataGrid AutomationProperties.Name="Stock overview" ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
@@ -100,7 +93,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="1" Content="&#x1F4BE; Apply Adjustment" Command="{Binding AdjustCommand}"
+                <Button Grid.Column="1" Content="Apply Adjustment" Command="{Binding AdjustCommand}"
                         Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
         </Grid>
@@ -110,7 +103,7 @@
              ═══════════════════════════════════════════════════════════ -->
         <Grid Grid.Row="2"
               Visibility="{Binding IsTabLog, Converter={StaticResource BoolToVisibility}}">
-            <DataGrid ItemsSource="{Binding AdjustmentLog}"
+            <DataGrid AutomationProperties.Name="Adjustment log" ItemsSource="{Binding AdjustmentLog}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -145,9 +138,9 @@
             </TextBlock>
 
             <!-- Out of Stock -->
-            <TextBlock Grid.Row="1" Text="🔴 Out of Stock" Style="{StaticResource SectionHeaderStyle}"
-                       Margin="{StaticResource StepContentTopSpacing}"/>
-            <DataGrid Grid.Row="2"
+            <TextBlock Grid.Row="1" Style="{StaticResource SectionHeaderStyle}"
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentError}" Text="●"/><Run Text=" Out of Stock"/></TextBlock>
+            <DataGrid AutomationProperties.Name="Out of stock products" Grid.Row="2"
                       ItemsSource="{Binding OutOfStockProducts}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
@@ -161,9 +154,9 @@
             </DataGrid>
 
             <!-- Low Stock -->
-            <TextBlock Grid.Row="3" Text="🟡 Low Stock" Style="{StaticResource SectionHeaderStyle}"
-                       Margin="{StaticResource StepContentTopSpacing}"/>
-            <DataGrid Grid.Row="4"
+            <TextBlock Grid.Row="3" Style="{StaticResource SectionHeaderStyle}"
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentWarning}" Text="●"/><Run Text=" Low Stock"/></TextBlock>
+            <DataGrid AutomationProperties.Name="Low stock products" Grid.Row="4"
                       ItemsSource="{Binding LowStockProducts}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"

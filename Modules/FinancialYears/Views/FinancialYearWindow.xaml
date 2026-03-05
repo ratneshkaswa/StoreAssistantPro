@@ -1,4 +1,4 @@
-<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.FinancialYears.Views.FinancialYearWindow"
+﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.FinancialYears.Views.FinancialYearWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Text="&#x1F4C5; Financial Year" Style="{StaticResource DialogTitleStyle}"/>
+        <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE787;"/><Run Text=" Financial Year"/></TextBlock>
 
         <!-- Current year display -->
         <Border Grid.Row="1" Margin="{StaticResource ItemSpacing}"
@@ -46,7 +46,7 @@
         </Border>
 
         <!-- FY history grid -->
-        <DataGrid Grid.Row="2"
+        <DataGrid AutomationProperties.Name="Financial years" Grid.Row="2"
                   ItemsSource="{Binding FinancialYears}"
                   SelectedItem="{Binding SelectedYear}"
                   AutoGenerateColumns="False" IsReadOnly="True"
@@ -104,7 +104,7 @@
         <!-- Buttons -->
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="&#x2795; Create Next Year" Command="{Binding CreateNewYearCommand}"
+            <Button Content="Create Next Year" Command="{Binding CreateNewYearCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Set as Current" Command="{Binding SetCurrentCommand}"
                     Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>

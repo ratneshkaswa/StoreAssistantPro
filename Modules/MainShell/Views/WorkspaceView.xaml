@@ -30,7 +30,7 @@
             </Grid.RowDefinitions>
 
             <!-- Hero icon -->
-            <TextBlock Grid.Row="0" Text="🏪"
+            <TextBlock Grid.Row="0" Text="&#xE719;" FontFamily="{StaticResource FluentIconFont}"
                        FontSize="{StaticResource FontSizeIconHero}"
                        HorizontalAlignment="Center"
                        Margin="{StaticResource CompactItemSpacing}"/>
@@ -56,7 +56,7 @@
                                       Command="{Binding DataContext.OpenFirmManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Border.InputBindings>
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
-                        <TextBlock Text="🏢" FontSize="{StaticResource FontSizeIconLarge}"
+                        <TextBlock Text="&#xE731;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="Firm" Style="{StaticResource CardItemTitleStyle}"/>
                         <TextBlock Text="Manage details" Style="{StaticResource CardItemSubtitleStyle}"/>
@@ -72,7 +72,7 @@
                                       Command="{Binding DataContext.OpenUserManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Border.InputBindings>
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
-                        <TextBlock Text="👥" FontSize="{StaticResource FontSizeIconLarge}"
+                        <TextBlock Text="&#xE716;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="Users" Style="{StaticResource CardItemTitleStyle}"/>
                         <TextBlock Text="Manage team" Style="{StaticResource CardItemSubtitleStyle}"/>
@@ -87,7 +87,7 @@
                                       Command="{Binding DataContext.RefreshCurrentViewCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Border.InputBindings>
                     <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
-                        <TextBlock Text="🔄" FontSize="{StaticResource FontSizeIconLarge}"
+                        <TextBlock Text="&#xE72C;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="Refresh" Style="{StaticResource CardItemTitleStyle}"/>
                         <TextBlock Text="Reload data" Style="{StaticResource CardItemSubtitleStyle}"/>
