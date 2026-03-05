@@ -190,27 +190,27 @@
 | 138 | Sale history: invoice search | P0 | ✅ | Search by invoice number for quick lookup. |
 | 139 | Sale detail view | P0 | ✅ | Click sale → expand/dialog showing all line items, taxes, payment details. |
 | 140 | Sale history export (CSV) | P1 | 🔨 | Export filtered sales data to CSV file. |
-| 141 | Sale return (full) | P0 | 🔨 | Return entire sale: reverse all line items, restore stock, calculate refund. |
-| 142 | Sale return (partial) | P0 | 🔨 | Select specific items/quantities to return from a sale. |
-| 143 | Return reason code | P1 | 🔨 | Mandatory reason: Defective, Wrong Size, Customer Changed Mind, Duplicate, Other. |
-| 144 | Return → stock restoration | P0 | 🔨 | Automatically add returned quantities back to product stock. |
-| 145 | Return → refund calculation | P0 | 🔨 | Calculate refund amount based on original prices of returned items including tax. |
+| 141 | Sale return (full) | P0 | ✅ | Return entire sale: reverse all line items, restore stock, calculate refund. |
+| 142 | Sale return (partial) | P0 | ✅ | Select specific items/quantities to return from a sale. |
+| 143 | Return reason code | P1 | ✅ | Mandatory reason: Defective, Wrong Size, Customer Changed Mind, Duplicate, Other. |
+| 144 | Return → stock restoration | P0 | ✅ | Automatically add returned quantities back to product stock. |
+| 145 | Return → refund calculation | P0 | ✅ | Calculate refund amount based on original prices of returned items including tax. |
 | 146 | Credit note generation | P1 | 🔨 | Issue credit note document for returns. Links back to original invoice. |
 | 147 | Exchange (return + new sale) | P1 | 🔨 | Combined flow: return items from old sale + bill new items. Net amount = new − returned. |
 | 148 | Return approval (Manager PIN) | P1 | 🔨 | Returns require manager authorization via PIN entry. |
-| 149 | Return history list | P1 | 🔨 | Paged list of all processed returns with details. |
+| 149 | Return history list | P1 | ✅ | Paged list of all processed returns with details. |
 | 150 | Return receipt print | P1 | 🔨 | Print return/credit note receipt for customer. |
 | 151 | Daily return summary | P2 | 🔨 | Aggregate return count and value per day. |
-| 152 | Return against original invoice | P0 | 🔨 | Every return must reference original sale ID. Prevents duplicate returns. |
+| 152 | Return against original invoice | P0 | ✅ | Every return must reference original sale ID. Prevents duplicate returns. |
 | 153 | No-bill return (manager only) | P2 | 🔨 | Accept return without original invoice. Admin-only, logged in audit trail. |
 
 ### Sprint 9: Customer Management — CustomersView (20 features)
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 154 | Customer model | P0 | 🔨 | Entity: Id, Name, Phone, Email, Address, GSTIN, CreatedDate, IsActive, Notes. |
-| 155 | Customer CRUD | P0 | 🔨 | Full add/edit/delete with inline forms, search, paging. |
-| 156 | Customer search by phone | P0 | 🔨 | Quick lookup by 10-digit mobile number. Most common customer identifier in India. |
+| 154 | Customer model | P0 | ✅ | Entity: Id, Name, Phone, Email, Address, GSTIN, CreatedDate, IsActive, Notes. |
+| 155 | Customer CRUD | P0 | ✅ | Full add/edit/delete with inline forms, search, paging. |
+| 156 | Customer search by phone | P0 | ✅ | Quick lookup by 10-digit mobile number. Most common customer identifier in India. |
 | 157 | Customer → Sale linking | P0 | 🔨 | Attach customer to a sale at billing time. Enables purchase history and credit tracking. |
 | 158 | Walk-in customer (default) | P0 | 🔨 | Sales without a named customer use implicit "Walk-in" customer. No data collected. |
 | 159 | Customer purchase history | P1 | 🔨 | View all past purchases by a customer with dates and amounts. |
@@ -220,11 +220,11 @@
 | 163 | Customer tier | P2 | 🔨 | Auto-tier based on total spend: Regular → Silver (₹10K+) → Gold (₹50K+). Tier-specific discounts. |
 | 164 | Customer birthday | P2 | 🔨 | Date field. Enables birthday discount campaigns and SMS/WhatsApp greetings. |
 | 165 | Customer anniversary | P2 | 🔨 | Date field. Enables anniversary promotions. |
-| 166 | Customer notes | P2 | 🔨 | Free-text notes: preferences, special instructions, relationship notes. |
+| 166 | Customer notes | P2 | ✅ | Free-text notes: preferences, special instructions, relationship notes. |
 | 167 | Customer import (CSV) | P2 | 🔨 | Bulk import customer list from CSV file. |
 | 168 | Customer export (CSV) | P2 | 🔨 | Export all customers to CSV. |
-| 169 | Customer duplicate detection | P1 | 🔨 | Warn when adding customer with phone number that already exists. |
-| 170 | Customer active/inactive | P1 | 🔨 | Deactivate customers without deleting. Preserves history. |
+| 169 | Customer duplicate detection | P1 | ✅ | Warn when adding customer with phone number that already exists. |
+| 170 | Customer active/inactive | P1 | ✅ | Deactivate customers without deleting. Preserves history. |
 | 171 | Customer GSTIN validation | P1 | 🔨 | Validate 15-char GSTIN format for B2B customers. |
 | 172 | Customer group/tag | P2 | 🔨 | Tag customers: "Wholesale", "Regular", "VIP". Filter and target by group. |
 | 173 | Customer credit limit | P2 | 🔨 | Maximum outstanding balance allowed. Block credit sales beyond limit. |

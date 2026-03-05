@@ -49,15 +49,9 @@
     <Folder Include="Modules\Billing\Commands\" />
     <Folder Include="Modules\Billing\Events\" />
     <Folder Include="Modules\Billing\Models\" />
-    <Folder Include="Modules\Billing\Services\" />
-    <Folder Include="Modules\Billing\ViewModels\" />
-    <Folder Include="Modules\Billing\Views\" />
     <Folder Include="Modules\Billing\Workflows\" />
     <Folder Include="Modules\Brands\Commands\" />
     <Folder Include="Modules\Customers\Commands\" />
-    <Folder Include="Modules\Customers\Services\" />
-    <Folder Include="Modules\Customers\ViewModels\" />
-    <Folder Include="Modules\Customers\Views\" />
     <Folder Include="Modules\Products\Commands\" />
     <Folder Include="Modules\Promotions\Commands\" />
     <Folder Include="Modules\Promotions\Services\" />

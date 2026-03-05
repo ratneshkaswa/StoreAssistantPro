@@ -20,4 +20,5 @@ public static class FeatureFlags
     public const string FinancialYear = "FinancialYear";
     public const string InwardEntry = "InwardEntry";
     public const string Inventory = "Inventory";
+    public const string Customers = "Customers";
 }

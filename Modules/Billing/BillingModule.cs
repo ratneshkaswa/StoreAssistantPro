@@ -16,6 +16,7 @@ public static class BillingModule
         services.AddTransient<IBillingService, BillingService>();
         services.AddTransient<IReceiptService, ReceiptService>();
         services.AddTransient<ISaleHistoryService, SaleHistoryService>();
+        services.AddTransient<ISaleReturnService, SaleReturnService>();
         services.AddTransient<BillingViewModel>();
         services.AddTransient<SaleHistoryViewModel>();
         services.AddTransient<BillingWindow>();

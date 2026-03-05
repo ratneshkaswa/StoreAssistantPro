@@ -47,6 +47,7 @@ public partial class MainViewModel : BaseViewModel
     private const string InventoryDialog = "Inventory";
     private const string BillingDialog = "Billing";
     private const string SaleHistoryDialog = "SaleHistory";
+    private const string CustomerManagementDialog = "CustomerManagement";
     private const string FinancialYearDialog = "FinancialYear";
     private const string SystemSettingsDialog = "SystemSettings";
     private const string InwardEntryDialog = "InwardEntry";
@@ -103,6 +104,7 @@ public partial class MainViewModel : BaseViewModel
     public bool IsInventoryVisible => _features.IsEnabled(FeatureFlags.Inventory);
     public bool IsBillingVisible => _features.IsEnabled(FeatureFlags.Billing);
     public bool IsSaleHistoryVisible => _features.IsEnabled(FeatureFlags.Sales);
+    public bool IsCustomerManagementVisible => _features.IsEnabled(FeatureFlags.Customers);
 
     // ── Navigation ──
 
@@ -245,6 +247,7 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsInventoryVisible));
         OnPropertyChanged(nameof(IsBillingVisible));
         OnPropertyChanged(nameof(IsSaleHistoryVisible));
+        OnPropertyChanged(nameof(IsCustomerManagementVisible));
     }
 
     // ── Navigation commands ──
@@ -365,6 +368,13 @@ public partial class MainViewModel : BaseViewModel
     {
         _dialogService.ShowDialog(SaleHistoryDialog);
         _statusBar.Post("Sale history closed");
+    }
+
+    [RelayCommand]
+    private void OpenCustomerManagement()
+    {
+        _dialogService.ShowDialog(CustomerManagementDialog);
+        _statusBar.Post("Customer management closed");
     }
 
     // ── Logout ──
