@@ -1,0 +1,147 @@
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.PurchaseOrders.Views.PurchaseOrderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        Title="Purchase Orders"
+        Loaded="OnLoaded">
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Text="&#x1F4E6; Purchase Orders" Style="{StaticResource DialogTitleStyle}"/>
+
+        <!-- Filters -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="Search PO# or supplier…"/>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding StatusOptions}"
+                      SelectedItem="{Binding FilterStatus}"
+                      Width="{StaticResource FieldWidthStandard}"
+                      Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="2" Content="&#x1F50D; Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- PO list + detail -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- PO list -->
+            <DataGrid ItemsSource="{Binding Orders}"
+                      SelectedItem="{Binding SelectedOrder}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="PO#" Binding="{Binding OrderNumber}" Width="*"/>
+                    <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Date" Binding="{Binding OrderDate, StringFormat=dd-MMM-yy}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=₹{0:N2}}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Right: New PO form -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="{StaticResource ItemSpacing}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Supplier"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Row="0" Grid.Column="1"
+                              ItemsSource="{Binding Suppliers}"
+                              SelectedItem="{Binding SelectedSupplier}"
+                              DisplayMemberPath="Name"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Expected"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <DatePicker Grid.Row="2" Grid.Column="1"
+                                SelectedDate="{Binding ExpectedDate}"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1"
+                             Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="500" h:Watermark.Text="Optional"/>
+                </Grid>
+
+                <!-- PO line items -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding LineItems}"
+                          AutoGenerateColumns="False"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="True"
+                          MaxHeight="200"
+                          Margin="{StaticResource ItemSpacing}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                        <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Cost" Binding="{Binding UnitCost}" Width="{StaticResource ColumnWidthPrice}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Create PO button -->
+                <Button Grid.Row="2" Content="&#x2795; Create PO" Command="{Binding CreateOrderCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        HorizontalAlignment="Stretch"
+                        Margin="{StaticResource ItemSpacing}"/>
+            </Grid>
+        </Grid>
+
+        <!-- Messages -->
+        <StackPanel Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+                    Margin="{StaticResource FieldLabelSpacing}">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
+        </StackPanel>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="Mark Ordered" Command="{Binding MarkOrderedCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Receive All" Command="{Binding ReceiveAllCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Cancel PO" Command="{Binding CancelOrderCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close" IsCancel="True"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</core:BaseDialogWindow>

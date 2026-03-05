@@ -48,6 +48,7 @@ public partial class MainViewModel : BaseViewModel
     private const string BillingDialog = "Billing";
     private const string SaleHistoryDialog = "SaleHistory";
     private const string CustomerManagementDialog = "CustomerManagement";
+    private const string PurchaseOrdersDialog = "PurchaseOrders";
     private const string FinancialYearDialog = "FinancialYear";
     private const string SystemSettingsDialog = "SystemSettings";
     private const string InwardEntryDialog = "InwardEntry";
@@ -105,6 +106,7 @@ public partial class MainViewModel : BaseViewModel
     public bool IsBillingVisible => _features.IsEnabled(FeatureFlags.Billing);
     public bool IsSaleHistoryVisible => _features.IsEnabled(FeatureFlags.Sales);
     public bool IsCustomerManagementVisible => _features.IsEnabled(FeatureFlags.Customers);
+    public bool IsPurchaseOrdersVisible => _features.IsEnabled(FeatureFlags.PurchaseOrders);
 
     // ── Navigation ──
 
@@ -248,6 +250,7 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsBillingVisible));
         OnPropertyChanged(nameof(IsSaleHistoryVisible));
         OnPropertyChanged(nameof(IsCustomerManagementVisible));
+        OnPropertyChanged(nameof(IsPurchaseOrdersVisible));
     }
 
     // ── Navigation commands ──
@@ -377,6 +380,13 @@ public partial class MainViewModel : BaseViewModel
         _statusBar.Post("Customer management closed");
     }
 
+    [RelayCommand]
+    private void OpenPurchaseOrders()
+    {
+        _dialogService.ShowDialog(PurchaseOrdersDialog);
+        _statusBar.Post("Purchase orders closed");
+    }
+
     // ── Logout ──
 
     [RelayCommand]
@@ -461,12 +471,78 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
+            Title = "Categories", Icon = "🏷",
+            Description = "Manage product categories",
+            HelpKey = "Categories",
+            Command = OpenCategoryManagementCommand,
+            SortOrder = 66,
+            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredFeature = FeatureFlags.Products
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Brands", Icon = "🔖",
+            Description = "Manage product brands",
+            HelpKey = "Brands",
+            Command = OpenBrandManagementCommand,
+            SortOrder = 67,
+            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredFeature = FeatureFlags.Products
+        });
+        _quickActionService.Register(new QuickAction
+        {
             Title = "Inward", Icon = "📥",
             Description = "Record new stock inward entries",
             HelpKey = "Inward",
             Command = OpenInwardEntryCommand,
             SortOrder = 70,
             RequiredFeature = FeatureFlags.InwardEntry
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Inventory", Icon = "📊",
+            Description = "Stock adjustments, alerts, and valuation",
+            HelpKey = "Inventory",
+            Command = OpenInventoryCommand,
+            SortOrder = 72,
+            RequiredFeature = FeatureFlags.Inventory
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Billing", Icon = "🛒",
+            Description = "Create new sales and process payments",
+            HelpKey = "Billing",
+            Command = OpenBillingCommand,
+            SortOrder = 74,
+            RequiredFeature = FeatureFlags.Billing
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Sales", Icon = "📋",
+            Description = "View sale history and reprint receipts",
+            HelpKey = "SaleHistory",
+            Command = OpenSaleHistoryCommand,
+            SortOrder = 75,
+            RequiredFeature = FeatureFlags.Sales
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Customers", Icon = "👤",
+            Description = "Manage customer records and contacts",
+            HelpKey = "Customers",
+            Command = OpenCustomerManagementCommand,
+            SortOrder = 76,
+            RequiredFeature = FeatureFlags.Customers
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "PO", Icon = "📦",
+            Description = "Create and track purchase orders",
+            HelpKey = "PurchaseOrders",
+            Command = OpenPurchaseOrdersCommand,
+            SortOrder = 77,
+            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredFeature = FeatureFlags.PurchaseOrders
         });
         _quickActionService.Register(new QuickAction
         {

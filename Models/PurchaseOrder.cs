@@ -6,8 +6,9 @@ public enum PurchaseOrderStatus
 {
     Draft = 0,
     Ordered = 1,
-    Received = 2,
-    Cancelled = 3
+    PartialReceived = 2,
+    Received = 3,
+    Cancelled = 4
 }
 
 public class PurchaseOrder
@@ -18,6 +19,8 @@ public class PurchaseOrder
     public string OrderNumber { get; set; } = string.Empty;
 
     public DateTime OrderDate { get; set; }
+
+    public DateTime? ExpectedDate { get; set; }
 
     public int SupplierId { get; set; }
     public Supplier? Supplier { get; set; }
@@ -49,6 +52,8 @@ public class PurchaseOrderItem
     public Product? Product { get; set; }
 
     public int Quantity { get; set; }
+
+    public int QuantityReceived { get; set; }
 
     public decimal UnitCost { get; set; }
 

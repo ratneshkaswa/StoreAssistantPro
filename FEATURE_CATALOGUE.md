@@ -233,10 +233,10 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 174 | Flat discount on bill | P0 | 🔨 | Enter ₹ amount off total bill. Distributed across items for GST calculation. |
-| 175 | Percentage discount on bill | P0 | 🔨 | Enter % off total bill. Converted to ₹ then distributed. |
+| 174 | Flat discount on bill | P0 | ✅ | Enter ₹ amount off total bill. Distributed across items for GST calculation. |
+| 175 | Percentage discount on bill | P0 | ✅ | Enter % off total bill. Converted to ₹ then distributed. |
 | 176 | Line-item flat discount | P0 | 🔨 | ₹ off a specific line item in the cart. |
-| 177 | Line-item % discount | P0 | 🔨 | % off a specific line item. |
+| 177 | Line-item % discount | P0 | ✅ | % off a specific line item. |
 | 178 | Discount approval (PIN) | P1 | 🔨 | Manager PIN required for discounts exceeding configurable threshold (e.g., >20%). |
 | 179 | Maximum discount limit | P1 | 🔨 | System-wide cap on maximum discount percentage allowed. Prevents excessive discounts. |
 | 180 | Buy X Get Y free | P2 | 🔨 | Promotional rule: "Buy 2 shirts, get 1 free". Auto-applies when cart matches criteria. |
@@ -282,18 +282,18 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 209 | Purchase Order model | P1 | 🔨 | Entity: Id, PONumber, SupplierId, OrderDate, ExpectedDate, Status, Notes, TotalAmount. |
-| 210 | PO creation | P1 | 🔨 | Create PO with supplier selection and line items (product, qty, unit cost). |
-| 211 | PO → Supplier link | P1 | 🔨 | Each PO linked to exactly one supplier. |
-| 212 | PO line items | P1 | 🔨 | POItem: POId, ProductId, QtyOrdered, QtyReceived, UnitCost, LineTotal. |
-| 213 | PO status workflow | P1 | 🔨 | Status transitions: Draft → Sent → Partial Received → Fully Received → Closed/Cancelled. |
-| 214 | PO receive goods | P1 | 🔨 | Mark items as received → automatically updates product stock quantities. |
-| 215 | PO partial receipt | P1 | 🔨 | Receive some items now, rest later. QtyReceived updated incrementally. |
-| 216 | PO cost price update | P1 | 🔨 | Update product cost price from PO unit cost on receipt. |
-| 217 | PO search / filter | P1 | 🔨 | Search by PO number, supplier name, date range, status. |
+| 209 | Purchase Order model | P1 | ✅ | Entity: Id, PONumber, SupplierId, OrderDate, ExpectedDate, Status, Notes, TotalAmount. |
+| 210 | PO creation | P1 | ✅ | Create PO with supplier selection and line items (product, qty, unit cost). |
+| 211 | PO → Supplier link | P1 | ✅ | Each PO linked to exactly one supplier. |
+| 212 | PO line items | P1 | ✅ | POItem: POId, ProductId, QtyOrdered, QtyReceived, UnitCost, LineTotal. |
+| 213 | PO status workflow | P1 | ✅ | Status transitions: Draft → Sent → Partial Received → Fully Received → Closed/Cancelled. |
+| 214 | PO receive goods | P1 | ✅ | Mark items as received → automatically updates product stock quantities. |
+| 215 | PO partial receipt | P1 | ✅ | Receive some items now, rest later. QtyReceived updated incrementally. |
+| 216 | PO cost price update | P1 | ✅ | Update product cost price from PO unit cost on receipt. |
+| 217 | PO search / filter | P1 | ✅ | Search by PO number, supplier name, date range, status. |
 | 218 | PO paging | P1 | 🔨 | Server-side paging for PO list. |
 | 219 | PO print | P2 | 🔨 | Print formatted purchase order to send to supplier. |
-| 220 | PO history | P1 | 🔨 | View all past purchase orders with status and amounts. |
+| 220 | PO history | P1 | ✅ | View all past purchase orders with status and amounts. |
 | 221 | PO duplicate / reorder | P2 | 🔨 | Clone a previous PO to quickly reorder same products from same supplier. |
 | 222 | PO auto-generate from low stock | P2 | 🔨 | System suggests PO with products below min stock level, grouped by supplier. |
 | 223 | PO import (CSV) | P2 | 🔨 | Create PO from CSV file with product/qty/cost data. |
