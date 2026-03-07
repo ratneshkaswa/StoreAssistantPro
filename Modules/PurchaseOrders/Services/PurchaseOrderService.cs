@@ -139,12 +139,12 @@ public class PurchaseOrderService(
                 // Update stock
                 var product = await context.Products
                     .FirstOrDefaultAsync(p => p.Id == item.ProductId, ct)
-                    .ConfigureAwait(false);
-                if (product is not null)
-                {
-                    product.Quantity += line.QuantityReceived;
-                    product.CostPrice = item.UnitCost; // Update cost price from PO
-                }
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException(
+                        $"Product Id {item.ProductId} no longer exists. Cannot update stock from PO receipt.");
+
+                product.Quantity += line.QuantityReceived;
+                product.CostPrice = item.UnitCost; // Update cost price from PO
             }
 
             // Update PO status
@@ -176,9 +176,9 @@ public class PurchaseOrderService(
             .ConfigureAwait(false);
     }
 
-    private static async Task<string> GenerateOrderNumberAsync(AppDbContext context, CancellationToken ct)
+    private async Task<string> GenerateOrderNumberAsync(AppDbContext context, CancellationToken ct)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = regional.Now.Date;
         var prefix = $"PO-{today:yyyyMMdd}-";
         var last = await context.PurchaseOrders
             .Where(po => po.OrderNumber.StartsWith(prefix))

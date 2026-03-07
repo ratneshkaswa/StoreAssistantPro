@@ -12,6 +12,7 @@ namespace StoreAssistantPro.Modules.Inventory.ViewModels;
 public partial class InventoryViewModel(
     IInventoryService inventoryService,
     IProductService productService,
+    IRegionalSettingsService regional,
     IAppStateService appState) : BaseViewModel
 {
     // ═══════════════════════════════════════════════════════════════
@@ -115,7 +116,7 @@ public partial class InventoryViewModel(
     public partial ObservableCollection<Product> OutOfStockProducts { get; set; } = [];
 
     [ObservableProperty]
-    public partial string TotalStockValue { get; set; } = "₹0";
+    public partial string TotalStockValue { get; set; } = string.Empty;
 
     // ═══════════════════════════════════════════════════════════════
     //  Load
@@ -150,7 +151,7 @@ public partial class InventoryViewModel(
         OutOfStockProducts = new ObservableCollection<Product>(oos);
 
         var value = await inventoryService.GetTotalStockValueAsync(ct);
-        TotalStockValue = $"₹{value:N2}";
+        TotalStockValue = regional.FormatCurrency(value);
     }
 
     private void ClearMessages()

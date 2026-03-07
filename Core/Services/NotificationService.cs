@@ -14,11 +14,13 @@ public class NotificationService : INotificationService
 {
     private readonly IAppStateService _appState;
     private readonly IEventBus _eventBus;
+    private readonly IRegionalSettingsService _regional;
 
-    public NotificationService(IAppStateService appState, IEventBus eventBus)
+    public NotificationService(IAppStateService appState, IEventBus eventBus, IRegionalSettingsService regional)
     {
         _appState = appState;
         _eventBus = eventBus;
+        _regional = regional;
     }
 
     public ObservableCollection<AppNotification> Notifications => _appState.Notifications;
@@ -32,7 +34,8 @@ public class NotificationService : INotificationService
         {
             Title = title,
             Message = message,
-            Level = level
+            Level = level,
+            Timestamp = _regional.Now
         };
 
         _appState.AddNotification(notification);

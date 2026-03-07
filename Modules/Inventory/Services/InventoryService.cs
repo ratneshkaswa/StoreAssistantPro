@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Inventory.Services;
 
 public class InventoryService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : IInventoryService
 {
     // ── Stock adjustment ─────────────────────────────────────────────
@@ -50,7 +51,7 @@ public class InventoryService(
             Reason = dto.Reason,
             Notes = string.IsNullOrWhiteSpace(dto.Notes) ? null : dto.Notes.Trim(),
             UserId = dto.UserId,
-            Timestamp = DateTime.UtcNow
+            Timestamp = regional.Now
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);

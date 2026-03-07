@@ -79,11 +79,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(p => p.VendorId)
                   .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<SaleItem>(entity =>
-        {
-            entity.Property(si => si.UnitPrice).HasColumnType("decimal(18,2)");
+            entity.HasIndex(p => p.ProductType);
+            entity.HasIndex(p => p.Name).IsUnique();
         });
 
         modelBuilder.Entity<Sale>(entity =>
@@ -92,7 +89,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(s => s.DiscountValue).HasColumnType("decimal(18,2)");
             entity.Property(s => s.DiscountAmount).HasColumnType("decimal(18,2)");
             entity.HasIndex(s => s.SaleDate);
+            entity.HasIndex(s => s.InvoiceNumber).IsUnique();
             entity.HasIndex(s => s.IdempotencyKey).IsUnique();
+            entity.HasOne(s => s.Customer)
+                  .WithMany()
+                  .HasForeignKey(s => s.CustomerId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(s => s.Staff)
+                  .WithMany()
+                  .HasForeignKey(s => s.StaffId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<TaxMaster>(entity =>
@@ -135,6 +141,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithOne(c => c.CategoryType)
                   .HasForeignKey(c => c.CategoryTypeId)
                   .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasIndex(c => c.Name).IsUnique();
+            entity.HasIndex(c => c.IsActive);
         });
 
         modelBuilder.Entity<BillingSession>(entity =>
@@ -251,25 +263,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<Sale>(entity =>
-        {
-            entity.HasOne(s => s.Customer)
-                  .WithMany()
-                  .HasForeignKey(s => s.CustomerId)
-                  .OnDelete(DeleteBehavior.SetNull);
-            entity.HasOne(s => s.Staff)
-                  .WithMany()
-                  .HasForeignKey(s => s.StaffId)
-                  .OnDelete(DeleteBehavior.SetNull);
-        });
-
         modelBuilder.Entity<SaleItem>(entity =>
         {
+            entity.Property(si => si.UnitPrice).HasColumnType("decimal(18,2)");
             entity.Property(si => si.ItemDiscountRate).HasColumnType("decimal(5,2)");
             entity.HasOne(si => si.Staff)
                   .WithMany()
                   .HasForeignKey(si => si.StaffId)
                   .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(si => si.ProductVariant)
+                  .WithMany()
+                  .HasForeignKey(si => si.ProductVariantId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasIndex(si => si.ProductVariantId);
         });
 
         // ── Colour (predefined palette — unique name) ──────────────
@@ -404,13 +410,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // ── Product (add ProductType index) ────────────────────────
-        modelBuilder.Entity<Product>(entity =>
-        {
-            entity.HasIndex(p => p.ProductType);
-            entity.HasIndex(p => p.Name).IsUnique();
-        });
-
         // ── Tax Group ──────────────────────────────────────────────
         modelBuilder.Entity<TaxGroup>(entity =>
         {
@@ -461,6 +460,41 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(m => m.ProductId).IsUnique();
+        });
+
+        // ── State (Indian GST state master) ────────────────────────
+        modelBuilder.Entity<State>(entity =>
+        {
+            entity.HasIndex(s => s.StateCode).IsUnique();
+            entity.HasIndex(s => s.Name).IsUnique();
+        });
+
+        // ── PriceHistory (audit trail for price changes) ───────────
+        modelBuilder.Entity<PriceHistory>(entity =>
+        {
+            entity.Property(p => p.OldSalePrice).HasColumnType("decimal(18,2)");
+            entity.Property(p => p.NewSalePrice).HasColumnType("decimal(18,2)");
+            entity.Property(p => p.OldCostPrice).HasColumnType("decimal(18,2)");
+            entity.Property(p => p.NewCostPrice).HasColumnType("decimal(18,2)");
+            entity.Property(p => p.OldMRP).HasColumnType("decimal(18,2)");
+            entity.Property(p => p.NewMRP).HasColumnType("decimal(18,2)");
+            entity.HasOne(p => p.Product)
+                  .WithMany()
+                  .HasForeignKey(p => p.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(p => p.ProductId);
+            entity.HasIndex(p => p.ChangedDate);
+        });
+
+        // ── StockAdjustmentLog (immutable audit trail) ─────────────
+        modelBuilder.Entity<StockAdjustmentLog>(entity =>
+        {
+            entity.HasOne(l => l.Product)
+                  .WithMany()
+                  .HasForeignKey(l => l.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(l => l.ProductId);
+            entity.HasIndex(l => l.AdjustedAt);
         });
     }
 }

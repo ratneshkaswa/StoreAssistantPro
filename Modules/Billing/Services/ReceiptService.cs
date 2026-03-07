@@ -67,8 +67,8 @@ public class ReceiptService(
         {
             var name = Truncate(item.Product?.Name ?? $"#{item.ProductId}", 18);
             var qty = item.Quantity.ToString();
-            var rate = item.UnitPrice.ToString("N0");
-            var total = item.Subtotal.ToString("N2");
+            var rate = regional.FormatNumber(item.UnitPrice);
+            var total = regional.FormatCurrency(item.Subtotal);
 
             sb.AppendLine(FormatLine(name, qty, rate, total));
 
@@ -121,10 +121,10 @@ public class ReceiptService(
 
     private static string FormatLine(string col1, string col2, string col3, string col4)
     {
-        // 18 + 4 + 8 + 10 + 2 spaces = 42
-        return $"{col1,-18} {col2,4} {col3,8} {col4,10}";
+        // 18 + 4 + 8 + 9 + 3 spaces = 42
+        return $"{col1,-18} {col2,4} {col3,8} {col4,9}";
     }
 
-    private static string TotalLine(string label, decimal amount) =>
-        $"{label,-28} {(amount >= 0 ? "₹" : "-₹")}{Math.Abs(amount),10:N2}";
+    private string TotalLine(string label, decimal amount) =>
+        $"{label,-28} {regional.FormatCurrency(amount),13}";
 }

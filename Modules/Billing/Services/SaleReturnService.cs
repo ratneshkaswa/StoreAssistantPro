@@ -52,19 +52,33 @@ public class SaleReturnService(
                 Quantity = dto.QuantityReturned,
                 RefundAmount = refundAmount,
                 Reason = dto.Reason,
-                ReturnDate = regional.Now,
-                StockRestored = true
+                ReturnDate = regional.Now
             };
 
             context.SaleReturns.Add(saleReturn);
 
-            // Restore stock to product
-            var product = await context.Products
-                .FirstOrDefaultAsync(p => p.Id == saleItem.ProductId, ct)
-                .ConfigureAwait(false);
+            // Restore stock to the correct entity (variant or product)
+            if (saleItem.ProductVariantId.HasValue)
+            {
+                var variant = await context.ProductVariants
+                    .FirstOrDefaultAsync(v => v.Id == saleItem.ProductVariantId.Value, ct)
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException(
+                        $"ProductVariant Id {saleItem.ProductVariantId} no longer exists. Cannot restore stock for return.");
 
-            if (product is not null)
+                variant.Quantity += dto.QuantityReturned;
+            }
+            else
+            {
+                var product = await context.Products
+                    .FirstOrDefaultAsync(p => p.Id == saleItem.ProductId, ct)
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException(
+                        $"Product Id {saleItem.ProductId} no longer exists. Cannot restore stock for return.");
+
                 product.Quantity += dto.QuantityReturned;
+            }
+            saleReturn.StockRestored = true;
 
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             await tx.CommitAsync(ct).ConfigureAwait(false);
@@ -105,9 +119,9 @@ public class SaleReturnService(
             .ConfigureAwait(false);
     }
 
-    private static async Task<string> GenerateReturnNumberAsync(AppDbContext context, CancellationToken ct)
+    private async Task<string> GenerateReturnNumberAsync(AppDbContext context, CancellationToken ct)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = regional.Now.Date;
         var prefix = $"RET-{today:yyyyMMdd}-";
 
         var last = await context.SaleReturns

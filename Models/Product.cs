@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -106,33 +107,39 @@ public class Product
     /// <c>true</c> when <see cref="Quantity"/> is at or below <see cref="MinStockLevel"/>
     /// and MinStockLevel is configured (greater than zero).
     /// </summary>
+    [NotMapped]
     public bool IsLowStock => MinStockLevel > 0 && Quantity <= MinStockLevel;
 
     /// <summary>
     /// Computed stock value at cost: <see cref="CostPrice"/> × <see cref="Quantity"/>.
     /// </summary>
+    [NotMapped]
     public decimal StockValue => CostPrice * Quantity;
 
     /// <summary>
     /// Computed margin per unit: <see cref="SalePrice"/> − <see cref="CostPrice"/>.
     /// </summary>
+    [NotMapped]
     public decimal Margin => SalePrice - CostPrice;
 
     /// <summary>
     /// Computed margin percentage: (SalePrice − CostPrice) / SalePrice × 100.
     /// Returns 0 when SalePrice is zero.
     /// </summary>
+    [NotMapped]
     public decimal MarginPercent => SalePrice > 0 ? Math.Round((SalePrice - CostPrice) / SalePrice * 100, 1) : 0;
 
     /// <summary>
     /// Computed retail value: <see cref="SalePrice"/> × <see cref="Quantity"/>.
     /// </summary>
+    [NotMapped]
     public decimal RetailValue => SalePrice * Quantity;
 
     /// <summary>
     /// <c>true</c> when <see cref="Quantity"/> exceeds <see cref="MaxStockLevel"/>
     /// and MaxStockLevel is configured (greater than zero).
     /// </summary>
+    [NotMapped]
     public bool IsOverStock => MaxStockLevel > 0 && Quantity > MaxStockLevel;
 
     /// <summary>
@@ -158,6 +165,7 @@ public class Product
     /// <summary>
     /// Computed row highlight based on stock and active status.
     /// </summary>
+    [NotMapped]
     public RowHighlightLevel HighlightLevel =>
         !IsActive ? RowHighlightLevel.Inactive :
         MinStockLevel > 0 && Quantity == 0 ? RowHighlightLevel.Danger :

@@ -1,8 +1,10 @@
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
@@ -10,21 +12,28 @@ namespace StoreAssistantPro.Modules.Authentication.Views;
 
 public partial class LoginWindow : Window
 {
-    public LoginWindow(LoginViewModel vm)
+    private LoginViewModel? _vm;
+
+    public LoginWindow(IWindowSizingService sizing, LoginViewModel vm)
     {
         InitializeComponent();
-        DataContext = vm;
+        DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
         vm.Initialize();
 
+        sizing.ConfigureStartupWindow(this, 480, 740);
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
 
         PreviewKeyDown += OnPreviewKeyDown;
+        PreviewKeyUp += (_, _) => UpdateCapsLockWarning();
 
-        // Numeric-only on reset PIN fields
-        ResetNewPinBox.PreviewTextInput += OnPreviewNumericOnly;
-        ResetConfirmPinBox.PreviewTextInput += OnPreviewNumericOnly;
-        ResetMasterBox.PreviewTextInput += OnPreviewNumericOnly;
+        // Numeric-only + paste protection on reset PIN fields
+        PasswordBox[] resetPinBoxes = [ResetNewPinBox, ResetConfirmPinBox, ResetMasterBox];
+        foreach (var box in resetPinBoxes)
+        {
+            box.PreviewTextInput += OnPreviewNumericOnly;
+            DataObject.AddPastingHandler(box, OnPastingNumericOnly);
+        }
 
         // Auto-focus first keypad button after role selection
         vm.PropertyChanged += (_, e) =>
@@ -57,10 +66,12 @@ public partial class LoginWindow : Window
         if (DataContext is not LoginViewModel vm)
             return;
 
+        UpdateCapsLockWarning();
+
         // In forgot-PIN mode, Enter triggers reset; ESC cancels
         if (vm.IsForgotPinMode)
         {
-            if (e.Key == Key.Escape)
+            if (e.Key == Key.Escape && vm.CancelForgotPinCommand.CanExecute(null))
             {
                 vm.CancelForgotPinCommand.Execute(null);
                 ClearResetFields();
@@ -74,10 +85,13 @@ public partial class LoginWindow : Window
             return;
         }
 
+        // Keyboard safety — skip PIN pad routing when focus is inside editable fields
+        var focusInEditable = Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox;
+
         // Layered ESC: clear PIN first, then deselect role
         if (e.Key == Key.Escape)
         {
-            if (vm.PinPad.PinLength > 0)
+            if (vm.PinPad.PinLength > 0 && vm.PinPad.ClearCommand.CanExecute(null))
                 vm.PinPad.ClearCommand.Execute(null);
             else if (vm.IsUserSelected)
                 vm.DeselectRole();
@@ -85,22 +99,26 @@ public partial class LoginWindow : Window
             return;
         }
 
-        // Role selection shortcuts
+        // Role selection shortcuts (always active regardless of focus)
         switch (e.Key)
         {
-            case Key.F1:
+            case Key.F1 when vm.SelectUserCommand.CanExecute(UserType.Admin):
                 vm.SelectUserCommand.Execute(UserType.Admin);
                 e.Handled = true;
                 return;
-            case Key.F2:
+            case Key.F2 when vm.SelectUserCommand.CanExecute(UserType.Manager):
                 vm.SelectUserCommand.Execute(UserType.Manager);
                 e.Handled = true;
                 return;
-            case Key.F3:
+            case Key.F3 when vm.SelectUserCommand.CanExecute(UserType.User):
                 vm.SelectUserCommand.Execute(UserType.User);
                 e.Handled = true;
                 return;
         }
+
+        // Skip digit/key routing when focus is inside editable fields
+        if (focusInEditable)
+            return;
 
         var digit = e.Key switch
         {
@@ -117,7 +135,7 @@ public partial class LoginWindow : Window
             _ => null
         };
 
-        if (digit is not null)
+        if (digit is not null && vm.PinPad.AddDigitCommand.CanExecute(digit))
         {
             vm.PinPad.AddDigitCommand.Execute(digit);
             e.Handled = true;
@@ -126,17 +144,16 @@ public partial class LoginWindow : Window
 
         switch (e.Key)
         {
-            case Key.Back:
+            case Key.Back when vm.PinPad.BackspaceCommand.CanExecute(null):
                 vm.PinPad.BackspaceCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.Delete:
+            case Key.Delete when vm.PinPad.ClearCommand.CanExecute(null):
                 vm.PinPad.ClearCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.Enter:
-                if (vm.LoginCommand.CanExecute(null))
-                    vm.LoginCommand.Execute(null);
+            case Key.Enter when vm.LoginCommand.CanExecute(null):
+                vm.LoginCommand.Execute(null);
                 e.Handled = true;
                 break;
         }
@@ -164,6 +181,38 @@ public partial class LoginWindow : Window
     private static void OnPreviewNumericOnly(object sender, TextCompositionEventArgs e)
     {
         e.Handled = !DigitsOnlyRegex().IsMatch(e.Text);
+    }
+
+    /// <summary>Reject non-numeric clipboard paste in PIN fields.</summary>
+    private static void OnPastingNumericOnly(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(typeof(string)))
+        {
+            var text = (string)e.DataObject.GetData(typeof(string))!;
+            if (!DigitsOnlyRegex().IsMatch(text))
+                e.CancelCommand();
+        }
+        else
+        {
+            e.CancelCommand();
+        }
+    }
+
+    /// <summary>Prevent window closing during processing.</summary>
+    private void OnWindowClosing(object? sender, CancelEventArgs e)
+    {
+        // Allow programmatic close after successful login
+        if (DialogResult == true) return;
+
+        if (_vm is { IsBusy: true } or { IsVerifying: true })
+            e.Cancel = true;
+    }
+
+    private void UpdateCapsLockWarning()
+    {
+        CapsLockWarning.Visibility = Keyboard.IsKeyToggled(Key.CapsLock)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     [GeneratedRegex(@"^\d+$")]

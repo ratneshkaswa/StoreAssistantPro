@@ -26,9 +26,12 @@ public class SetupService(
         {
             FirmName = firmName,
             Address = address,
+            State = string.Empty,
+            Pincode = string.Empty,
             Phone = phone,
             Email = string.IsNullOrWhiteSpace(email) ? string.Empty : email,
             GSTNumber = string.IsNullOrWhiteSpace(gstin) ? null : gstin,
+            PANNumber = null,
             CurrencyCode = string.IsNullOrWhiteSpace(currencyCode) ? "INR" : currencyCode,
             CurrencySymbol = "₹",
             FinancialYearStartMonth = 4,

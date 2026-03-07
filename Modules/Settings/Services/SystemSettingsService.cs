@@ -82,9 +82,10 @@ public class SystemSettingsService(
         var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
         var backupPath = Path.Combine(backupDir, $"{dbName}_{timestamp}.bak");
 
-        var sql = $"BACKUP DATABASE [{dbName}] TO DISK = '{backupPath}' WITH FORMAT, INIT, SKIP, NOREWIND, NOUNLOAD";
+        // Use parameterized dynamic SQL to prevent SQL injection via file path
+        var sql = $"DECLARE @sql NVARCHAR(MAX) = N'BACKUP DATABASE ' + QUOTENAME(@p0) + N' TO DISK = ' + QUOTENAME(@p1, '''') + N' WITH FORMAT, INIT, SKIP, NOREWIND, NOUNLOAD'; EXEC sp_executesql @sql;";
 
-        await context.Database.ExecuteSqlRawAsync(sql, ct).ConfigureAwait(false);
+        await context.Database.ExecuteSqlRawAsync(sql, [dbName, backupPath], ct).ConfigureAwait(false);
 
         logger.LogInformation("Database backed up to {Path}", backupPath);
         return backupPath;
@@ -105,14 +106,10 @@ public class SystemSettingsService(
 
         var dbName = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString).InitialCatalog;
 
-        // Set single-user mode, restore, then return to multi-user
-        var sql = $"""
-            ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-            RESTORE DATABASE [{dbName}] FROM DISK = '{backupPath}' WITH REPLACE;
-            ALTER DATABASE [{dbName}] SET MULTI_USER;
-            """;
+        // Use parameterized dynamic SQL to prevent SQL injection via file path
+        var sql = $"DECLARE @sql NVARCHAR(MAX) = N'ALTER DATABASE ' + QUOTENAME(@p0) + N' SET SINGLE_USER WITH ROLLBACK IMMEDIATE; RESTORE DATABASE ' + QUOTENAME(@p0) + N' FROM DISK = ' + QUOTENAME(@p1, '''') + N' WITH REPLACE; ALTER DATABASE ' + QUOTENAME(@p0) + N' SET MULTI_USER;'; EXEC sp_executesql @sql;";
 
-        await context.Database.ExecuteSqlRawAsync(sql, ct).ConfigureAwait(false);
+        await context.Database.ExecuteSqlRawAsync(sql, [dbName, backupPath], ct).ConfigureAwait(false);
 
         logger.LogInformation("Database restored from {Path}", backupPath);
     }

@@ -11,7 +11,8 @@ namespace StoreAssistantPro.Modules.Billing.ViewModels;
 public partial class BillingViewModel(
     IBillingService billingService,
     IAppStateService appState,
-    IDialogService dialogService) : BaseViewModel
+    IDialogService dialogService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     // ═══════════════════════════════════════════════════════════════
     //  Cart
@@ -234,7 +235,7 @@ public partial class BillingViewModel(
             Guid.NewGuid());
 
         var sale = await billingService.CompleteSaleAsync(dto, ct);
-        SuccessMessage = $"Sale {sale.InvoiceNumber} completed — ₹{sale.TotalAmount:N2}";
+        SuccessMessage = $"Sale {sale.InvoiceNumber} completed — {regional.FormatCurrency(sale.TotalAmount)}";
 
         CartItems.Clear();
         SelectedCartItem = null;

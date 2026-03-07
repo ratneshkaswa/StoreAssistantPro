@@ -33,4 +33,11 @@ public class SaleItem
 
     public int ProductId { get; set; }
     public Product? Product { get; set; }
+
+    /// <summary>
+    /// Optional variant FK — tracks which variant was sold so returns
+    /// can restore stock to the correct entity.
+    /// </summary>
+    public int? ProductVariantId { get; set; }
+    public ProductVariant? ProductVariant { get; set; }
 }

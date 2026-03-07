@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Categories.Services;
 
 public class CategoryService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : ICategoryService
 {
     // ── Category Types ───────────────────────────────────────────────
@@ -46,7 +47,7 @@ public class CategoryService(
         if (await context.CategoryTypes.AnyAsync(t => t.Name == trimmed, ct).ConfigureAwait(false))
             throw new InvalidOperationException($"Category type '{trimmed}' already exists.");
 
-        context.CategoryTypes.Add(new CategoryType { Name = trimmed, IsActive = true, CreatedDate = DateTime.UtcNow });
+        context.CategoryTypes.Add(new CategoryType { Name = trimmed, IsActive = true, CreatedDate = regional.Now });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 

@@ -52,7 +52,8 @@
             </DataGrid>
 
             <!-- Vendor form -->
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
+                        h:SmoothScroll.IsEnabled="True">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>

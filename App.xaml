@@ -11,6 +11,13 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Enterprise UI design system (merged first — existing Core/Styles take precedence for any overlapping keys) -->
+                <ResourceDictionary Source="UI/Themes/Colors.xaml"/>
+                <ResourceDictionary Source="UI/Themes/Typography.xaml"/>
+                <ResourceDictionary Source="UI/Styles/Cards.xaml"/>
+                <ResourceDictionary Source="UI/Styles/Buttons.xaml"/>
+                <ResourceDictionary Source="UI/Styles/Windows.xaml"/>
+
                 <ResourceDictionary Source="Core/Styles/DesignSystem.xaml"/>
                 <ResourceDictionary Source="Core/Styles/FluentTheme.xaml"/>
                 <ResourceDictionary Source="Core/Styles/MotionSystem.xaml"/>
@@ -18,6 +25,11 @@
                 <ResourceDictionary Source="Core/Styles/ToggleSwitch.xaml"/>
                 <ResourceDictionary Source="Core/Styles/PosStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Global Window background (overridden to Transparent on Win11 by Win11Backdrop for Mica) -->
+            <Style TargetType="Window">
+                <Setter Property="Background" Value="{StaticResource AppBackgroundBrush}"/>
+            </Style>
 
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
             <helpers:EqualityConverter x:Key="EqualityConverter"/>

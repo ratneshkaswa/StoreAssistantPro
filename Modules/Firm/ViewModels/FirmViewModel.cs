@@ -101,6 +101,8 @@ public partial class FirmViewModel : BaseViewModel
     /// </summary>
     private bool ValidateCurrentStep()
     {
+        ClearErrors();
+
         switch (CurrentStep)
         {
             case 1:
@@ -128,6 +130,8 @@ public partial class FirmViewModel : BaseViewModel
     public partial string FirmName { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
     public partial string Address { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -167,6 +171,7 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
+    [MaxLength(10, ErrorMessage = "PAN cannot exceed 10 characters.")]
     [RegularExpression(@"^$|^[A-Z]{5}\d{4}[A-Z]$", ErrorMessage = "Invalid PAN format (e.g., ABCDE1234F).")]
     public partial string PANNumber { get; set; } = string.Empty;
 

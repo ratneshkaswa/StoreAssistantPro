@@ -6,6 +6,7 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Login"
         Icon="pack://application:,,,/Assets/app.ico"
+        Closing="OnWindowClosing"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
     <Window.Resources>
@@ -68,8 +69,8 @@
         </Style>
     </Window.Resources>
 
-    <Grid Background="{StaticResource FluentBackgroundSecondary}">
-        <Grid MaxWidth="420" VerticalAlignment="Center" HorizontalAlignment="Center"
+    <Grid>
+        <Grid MaxWidth="{StaticResource LoginCardMaxWidth}" VerticalAlignment="Center" HorizontalAlignment="Center"
               Margin="{StaticResource DialogPadding}"
               >
             <Grid.RowDefinitions>
@@ -93,14 +94,12 @@
                         CommandParameter="{x:Static models:UserType.Admin}"
                         AutomationProperties.Name="Admin login"
                         ToolTip="F1 — Admin">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock Text="&#xE83D;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                       HorizontalAlignment="Center"/>
-                             <TextBlock Text="Admin" HorizontalAlignment="Center"
-                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                        </StackPanel>
-                    </Grid>
+                    <StackPanel>
+                        <TextBlock Text="&#xE83D;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
+                                   HorizontalAlignment="Center"/>
+                         <TextBlock Text="Admin" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
+                    </StackPanel>
                 </Button>
                 <Button Margin="{StaticResource RoleButtonGap}"
                         Style="{StaticResource ManagerButtonStyle}"
@@ -109,14 +108,12 @@
                         CommandParameter="{x:Static models:UserType.Manager}"
                         AutomationProperties.Name="Manager login"
                         ToolTip="F2 — Manager">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock Text="&#xE77B;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                       HorizontalAlignment="Center"/>
-                             <TextBlock Text="Manager" HorizontalAlignment="Center"
-                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                        </StackPanel>
-                    </Grid>
+                    <StackPanel>
+                        <TextBlock Text="&#xE77B;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
+                                   HorizontalAlignment="Center"/>
+                         <TextBlock Text="Manager" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
+                    </StackPanel>
                 </Button>
                 <Button Margin="{StaticResource RoleButtonGap}"
                         Style="{StaticResource UserButtonStyle}"
@@ -125,14 +122,12 @@
                         CommandParameter="{x:Static models:UserType.User}"
                         AutomationProperties.Name="User login"
                         ToolTip="F3 — User">
-                    <Grid>
-                        <StackPanel>
-                            <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                       HorizontalAlignment="Center"/>
-                             <TextBlock Text="User" HorizontalAlignment="Center"
-                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                        </StackPanel>
-                    </Grid>
+                    <StackPanel>
+                        <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
+                                   HorizontalAlignment="Center"/>
+                         <TextBlock Text="User" HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
+                    </StackPanel>
                 </Button>
             </UniformGrid>
 
@@ -188,7 +183,8 @@
 
                     <!-- PIN dots -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                Margin="{StaticResource ItemSpacing}">
+                                Margin="{StaticResource ItemSpacing}"
+                                AutomationProperties.Name="PIN entry progress">
                         <Ellipse Style="{StaticResource PinDotStyle}"
                                  Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=0}"/>
                         <Ellipse Style="{StaticResource PinDotStyle}"
@@ -305,6 +301,15 @@
                                          AutomationProperties.Name="Confirm New PIN"/>
                         </Grid>
 
+                        <!-- CapsLock warning -->
+                        <TextBlock x:Name="CapsLockWarning"
+                                   Text="⚠ Caps Lock is on"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Foreground="{StaticResource FluentWarning}"
+                                   HorizontalAlignment="Center"
+                                   Visibility="Collapsed"
+                                   Margin="{StaticResource ItemSpacing}"/>
+
                         <!-- Error (MinHeight reserves space) -->
                         <TextBlock Text="{Binding ErrorMessage}"
                                    Style="{StaticResource ErrorMessageStyle}"
@@ -330,6 +335,7 @@
                     <Border CornerRadius="{StaticResource FluentCornerMedium}"
                             Background="{StaticResource FluentControlFillDefault}"
                             Opacity="{StaticResource OverlayOpacity}"
+                            IsHitTestVisible="True"
                             Visibility="{Binding IsVerifying, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="Verifying…"
                                    FontSize="{StaticResource FontSizeBody}"
@@ -343,7 +349,7 @@
             <!-- ── Row 3: Footer ──────────────────────────────── -->
             <StackPanel Grid.Row="3" Margin="{StaticResource ItemSpacing}">
                 <!-- Separator -->
-                <Border Height="1" Background="{StaticResource FluentStrokeDefault}"
+                <Border Height="{StaticResource SeparatorHeight}" Background="{StaticResource FluentStrokeDefault}"
                         Margin="{StaticResource ItemSpacing}"/>
                 <TextBlock HorizontalAlignment="Center"
                            FontSize="{StaticResource FontSizeLabel}"

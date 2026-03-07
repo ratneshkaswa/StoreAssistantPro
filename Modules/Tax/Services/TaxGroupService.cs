@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Tax.Services;
 
 public class TaxGroupService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : ITaxGroupService
 {
     // ── Tax Groups ───────────────────────────────────────────────────
@@ -62,14 +63,14 @@ public class TaxGroupService(
         {
             Name = dto.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim(),
-            IsActive = true,
-            CreatedDate = DateTime.UtcNow
-        });
+                IsActive = true,
+                    CreatedDate = regional.Now
+                });
 
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
-    }
+                await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
 
-    public async Task UpdateGroupAsync(int id, TaxGroupDto dto, CancellationToken ct = default)
+            public async Task UpdateGroupAsync(int id, TaxGroupDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));
@@ -207,7 +208,7 @@ public class TaxGroupService(
             Description = dto.Description.Trim(),
             Category = dto.Category,
             IsActive = true,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = regional.Now
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
@@ -291,7 +292,7 @@ public class TaxGroupService(
                 TaxGroupId = dto.TaxGroupId,
                 HSNCodeId = dto.HSNCodeId,
                 OverrideAllowed = dto.OverrideAllowed,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = regional.Now
             });
         }
 
@@ -441,7 +442,7 @@ public class TaxGroupService(
             throw new ArgumentException("HSN code must be 4–8 characters.", nameof(dto.Code));
     }
 
-    private static TaxSlab BuildSlab(TaxSlabDto dto) => new()
+    private TaxSlab BuildSlab(TaxSlabDto dto) => new()
     {
         TaxGroupId = dto.TaxGroupId,
         GSTPercent = dto.GSTPercent,
@@ -453,6 +454,6 @@ public class TaxGroupService(
         EffectiveFrom = dto.EffectiveFrom,
         EffectiveTo = dto.EffectiveTo,
         IsActive = true,
-        CreatedDate = DateTime.UtcNow
+        CreatedDate = regional.Now
     };
 }

@@ -26,6 +26,7 @@ public class Brand
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 
+    [NotMapped]
     public RowHighlightLevel HighlightLevel =>
         !IsActive ? RowHighlightLevel.Inactive : RowHighlightLevel.None;
 }

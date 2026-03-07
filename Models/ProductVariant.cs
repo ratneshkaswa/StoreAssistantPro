@@ -45,6 +45,7 @@ public class ProductVariant
     [NotMapped]
     public string DisplayName => $"{Product?.Name} — {Size?.Name} / {Colour?.Name}";
 
+    [NotMapped]
     public RowHighlightLevel HighlightLevel =>
         !IsActive ? RowHighlightLevel.Inactive
         : Quantity == 0 ? RowHighlightLevel.Warning

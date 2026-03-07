@@ -1,4 +1,4 @@
-<Window x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupWindow"
+﻿<Window x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -36,18 +36,20 @@
                                HorizontalAlignment="Center"/>
                 </StackPanel>
 
-                <StackPanel>
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Focusable="False">
+                    <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </StackPanel.Style>
-
-                    <Border Style="{StaticResource FormCardStyle}">
+                    </ScrollViewer.Style>
+                <StackPanel>
+                    <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <TextBlock Text="Firm Details" Style="{StaticResource SectionHeaderStyle}"/>
                             <Grid>
@@ -71,7 +73,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource FormCardStyle}">
+                    <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <TextBlock Text="Security PINs" Style="{StaticResource SectionHeaderStyle}"/>
                             <Grid>
@@ -114,9 +116,9 @@
                                 <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (4 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="1" Grid.Column="1" x:Name="AdminPinBox" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Admin PIN"/>
                                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     <TextBlock Text="{Binding AdminPinWarning}" Margin="{StaticResource StrengthLabelGap}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"/>
                                 </StackPanel>
                                 <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
@@ -133,9 +135,9 @@
                                 <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (4 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="7" Grid.Column="1" x:Name="ManagerPinBox" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Manager PIN"/>
                                 <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal">
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     <TextBlock Text="{Binding ManagerPinWarning}" Margin="{StaticResource StrengthLabelGap}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"/>
                                 </StackPanel>
                                 <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
@@ -152,9 +154,9 @@
                                 <TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN (4 digits) "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="13" Grid.Column="1" x:Name="UserPinBox" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="User PIN"/>
                                 <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal">
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="2" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
+                                    <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     <TextBlock Text="{Binding UserPinWarning}" Margin="{StaticResource StrengthLabelGap}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"/>
                                 </StackPanel>
                                 <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
@@ -184,15 +186,11 @@
                         </StackPanel>
                     </Border>
 
-                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource FieldLabelSpacing}">
-                        <TextBlock Text="Remember your PINs — you will need them to log in."
-                                   Style="{StaticResource WarningTextStyle}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="Master PIN is used to authorize critical actions such as deleting major records."
-                                   Style="{StaticResource HintTextStyle}"
-                                   HorizontalAlignment="Center" Margin="{StaticResource HintTextTopSpacing}"/>
-                    </StackPanel>
+                    <TextBlock Text="Master PIN is used to authorize critical actions such as deleting major records."
+                               Style="{StaticResource HintTextStyle}"
+                               HorizontalAlignment="Center" Margin="{StaticResource FieldLabelSpacing}"/>
                 </StackPanel>
+                </ScrollViewer>
         </Grid>
 
         <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
@@ -216,5 +214,18 @@
         <TextBlock Grid.Row="4" Style="{StaticResource FooterTextStyle}" Margin="{StaticResource MessageBarSpacing}">
             <Run Text="Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
         </TextBlock>
+
+        <!-- Loading overlay -->
+        <Border Grid.Row="0" Grid.RowSpan="5"
+                Background="{StaticResource FluentControlFillDefault}"
+                Opacity="{StaticResource OverlayOpacity}"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"
+                IsHitTestVisible="True">
+            <TextBlock Text="Processingâ€¦"
+                       FontSize="{StaticResource FontSizeBody}"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource FluentAccentDefault}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
     </Grid>
 </Window>

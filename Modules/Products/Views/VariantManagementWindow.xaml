@@ -44,7 +44,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Size" Binding="{Binding Size.Name}" Width="{StaticResource ColumnWidthQty}"/>
                         <DataGridTextColumn Header="Colour" Binding="{Binding Colour.Name}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="*"/>
                         <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
                         <DataGridTextColumn Header="± Price" Binding="{Binding AdditionalPrice, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
@@ -145,33 +145,35 @@
 
                 <TextBlock Grid.Row="1" Text="Sizes" Style="{StaticResource FormRowLabelStyle}"
                            Margin="{StaticResource StepContentTopSpacing}"/>
-                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                            h:SmoothScroll.IsEnabled="True">
                     <ItemsControl ItemsSource="{Binding BulkSizes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding DisplayName}"
                                           IsChecked="{Binding IsSelected}"
-                                          Margin="0,2"/>
+                                          Margin="{StaticResource CheckListItemSpacing}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
 
-                <TextBlock Grid.Row="3" Text="Colours" Style="{StaticResource FormRowLabelStyle}"
+                <TextBlock Grid.Row="3" Text="Colours"
                            Margin="{StaticResource StepContentTopSpacing}"/>
-                <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto"
+                            h:SmoothScroll.IsEnabled="True">
                     <ItemsControl ItemsSource="{Binding BulkColours}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding DisplayName}"
                                           IsChecked="{Binding IsSelected}"
-                                          Margin="0,2"/>
+                                          Margin="{StaticResource CheckListItemSpacing}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
 
-                <Button Grid.Row="5" Content="Bulk Create"
+                <Button Grid.Row="5"
                         Command="{Binding BulkCreateCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         HorizontalAlignment="Stretch"

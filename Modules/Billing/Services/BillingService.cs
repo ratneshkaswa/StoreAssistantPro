@@ -41,6 +41,7 @@ public class BillingService(
                 items.Add(new SaleItem
                 {
                     ProductId = ci.ProductId,
+                    ProductVariantId = ci.ProductVariantId,
                     Quantity = ci.Quantity,
                     UnitPrice = ci.UnitPrice,
                     ItemDiscountRate = ci.ItemDiscountRate
@@ -53,7 +54,10 @@ public class BillingService(
                         .FirstOrDefaultAsync(v => v.Id == ci.ProductVariantId.Value, ct)
                         .ConfigureAwait(false)
                         ?? throw new InvalidOperationException($"Variant Id {ci.ProductVariantId} not found.");
-                    variant.Quantity = Math.Max(0, variant.Quantity - ci.Quantity);
+                    if (variant.Quantity < ci.Quantity)
+                        throw new InvalidOperationException(
+                            $"Insufficient stock for variant {ci.ProductVariantId}. Available: {variant.Quantity}, requested: {ci.Quantity}.");
+                    variant.Quantity -= ci.Quantity;
                 }
                 else
                 {
@@ -61,7 +65,10 @@ public class BillingService(
                         .FirstOrDefaultAsync(p => p.Id == ci.ProductId, ct)
                         .ConfigureAwait(false)
                         ?? throw new InvalidOperationException($"Product Id {ci.ProductId} not found.");
-                    product.Quantity = Math.Max(0, product.Quantity - ci.Quantity);
+                    if (product.Quantity < ci.Quantity)
+                        throw new InvalidOperationException(
+                            $"Insufficient stock for product '{product.Name}'. Available: {product.Quantity}, requested: {ci.Quantity}.");
+                    product.Quantity -= ci.Quantity;
                 }
             }
 
@@ -159,9 +166,9 @@ public class BillingService(
             .ConfigureAwait(false);
     }
 
-    private static async Task<string> GenerateNextInvoiceAsync(AppDbContext context, CancellationToken ct)
+    private async Task<string> GenerateNextInvoiceAsync(AppDbContext context, CancellationToken ct)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = regional.Now.Date;
         var prefix = $"INV-{today:yyyyMMdd}-";
 
         var lastInvoice = await context.Sales

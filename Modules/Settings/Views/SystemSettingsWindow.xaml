@@ -18,7 +18,8 @@
         <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE713;"/><Run Text=" System Settings"/></TextBlock>
 
         <!-- Settings sections -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    h:SmoothScroll.IsEnabled="True">
             <StackPanel>
 
                 <!-- Database section -->

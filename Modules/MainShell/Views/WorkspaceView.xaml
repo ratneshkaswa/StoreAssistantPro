@@ -49,7 +49,7 @@
                          Margin="{StaticResource HeroSectionTopSpacing}">
                 <!-- Firm card -->
                 <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
-                        Cursor="Hand"
+                        Cursor="Hand" h:CardHover.IsEnabled="True"
                         Visibility="{Binding DataContext.IsFirmManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
                     <Border.InputBindings>
                         <MouseBinding Gesture="LeftClick"
@@ -65,7 +65,7 @@
 
                 <!-- Users card -->
                 <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
-                        Cursor="Hand"
+                        Cursor="Hand" h:CardHover.IsEnabled="True"
                         Visibility="{Binding DataContext.IsUserManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
                     <Border.InputBindings>
                         <MouseBinding Gesture="LeftClick"
@@ -81,7 +81,7 @@
 
                 <!-- Refresh card -->
                 <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
-                        Cursor="Hand">
+                        Cursor="Hand" h:CardHover.IsEnabled="True">
                     <Border.InputBindings>
                         <MouseBinding Gesture="LeftClick"
                                       Command="{Binding DataContext.RefreshCurrentViewCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>

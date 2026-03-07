@@ -112,6 +112,7 @@
                     <Grid Margin="{StaticResource FormColumnGap}" VerticalAlignment="Center">
                         <Button x:Name="NotificationBellButton"
                                 Command="{Binding ToggleNotificationsPanelCommand}"
+                                AutomationProperties.Name="Notifications"
                                 Background="Transparent" BorderThickness="0"
                                 Cursor="Hand" Padding="{StaticResource ControlPadding}"
                                 h:HelpHint.HelpText="View notifications"
@@ -143,10 +144,10 @@
 
                         <!-- Notification popup — anchored below bell, auto-closes on outside click -->
                         <Popup PlacementTarget="{Binding ElementName=NotificationBellButton}"
-                               Placement="Bottom" HorizontalOffset="-280"
+                               Placement="Bottom" HorizontalOffset="{StaticResource NotificationPopupOffset}"
                                StaysOpen="False" AllowsTransparency="True"
                                IsOpen="{Binding IsNotificationsPanelVisible, Mode=TwoWay}">
-                            <Border Width="{StaticResource NotificationPanelWidth}" MaxHeight="400"
+                            <Border Width="{StaticResource NotificationPanelWidth}" MaxHeight="{StaticResource NotificationPanelMaxHeight}"
                                     Background="{StaticResource FluentSurface}"
                                     BorderBrush="{StaticResource FluentSurfaceStroke}"
                                     BorderThickness="1"
@@ -180,19 +181,27 @@
                                     </Border>
 
                                     <!-- Notification list -->
-                                    <ScrollViewer Grid.Row="1"
-                                                  VerticalScrollBarVisibility="Auto"
-                                                  HorizontalScrollBarVisibility="Disabled"
-                                                  Padding="0"
-                                                  CanContentScroll="True">
-                                        <ItemsControl ItemsSource="{Binding AppState.Notifications}"
-                                                      VirtualizingStackPanel.IsVirtualizing="True"
-                                                      VirtualizingStackPanel.VirtualizationMode="Recycling">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <VirtualizingStackPanel/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
+                                    <ItemsControl Grid.Row="1"
+                                                  ItemsSource="{Binding AppState.Notifications}"
+                                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                  ScrollViewer.CanContentScroll="True">
+                                        <ItemsControl.Template>
+                                            <ControlTemplate TargetType="ItemsControl">
+                                                <ScrollViewer Focusable="False"
+                                                              CanContentScroll="True"
+                                                              Padding="0">
+                                                    <ItemsPresenter/>
+                                                </ScrollViewer>
+                                            </ControlTemplate>
+                                        </ItemsControl.Template>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Padding="{StaticResource CardContentPadding}"
@@ -231,9 +240,10 @@
 
                                                             <!-- Level indicator dot -->
                                                             <Ellipse Grid.Column="0" Grid.RowSpan="2"
-                                                                     Width="8" Height="8"
+                                                                     Width="{StaticResource NotificationDotSize}"
+                                                                     Height="{StaticResource NotificationDotSize}"
                                                                      VerticalAlignment="Top"
-                                                                     Margin="0,4,8,0">
+                                                                     Margin="{StaticResource NotificationDotOffset}">
                                                                 <Ellipse.Style>
                                                                     <Style TargetType="Ellipse">
                                                                         <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
@@ -254,7 +264,7 @@
 
                                                             <!-- Title + timestamp -->
                                                             <DockPanel Grid.Column="1" Grid.Row="0">
-                                                                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm}"
+                                                                <TextBlock Text="{Binding Timestamp, StringFormat=t}"
                                                                            Foreground="{StaticResource FluentTextTertiary}" FontSize="{StaticResource FontSizeStatusBar}"
                                                                            DockPanel.Dock="Right"
                                                                            VerticalAlignment="Center"/>
@@ -269,13 +279,12 @@
                                                                        Foreground="{StaticResource FluentTextSecondary}" FontSize="{StaticResource FontSizeCaption}"
                                                                        TextWrapping="Wrap"
                                                                        TextTrimming="CharacterEllipsis"
-                                                                       MaxHeight="34" Margin="0,2,0,0"/>
+                                                                       MaxHeight="{StaticResource NotificationMessageMaxHeight}" Margin="{StaticResource HintTextSpacing}"/>
                                                         </Grid>
                                                     </Border>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                    </ScrollViewer>
 
                                     <!-- Empty state (shown when no notifications) -->
                                     <TextBlock Grid.Row="1" Text="No notifications"

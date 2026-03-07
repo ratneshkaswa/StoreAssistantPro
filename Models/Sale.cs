@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -76,6 +77,7 @@ public class Sale
     /// <summary>
     /// Summary of item names for tooltip display.
     /// </summary>
+    [NotMapped]
     public string ItemsSummary => Items.Count == 0
         ? "No items"
         : string.Join("\n", Items.Select(i => $"{i.Product?.Name ?? "?"} ×{i.Quantity}"));
@@ -83,6 +85,7 @@ public class Sale
     /// <summary>
     /// Human-readable discount summary for detail panel display.
     /// </summary>
+    [NotMapped]
     public string DiscountSummary => DiscountType == DiscountType.None
         ? string.Empty
         : $"{DiscountType}: {DiscountValue}{(DiscountType == DiscountType.Percentage ? "%" : "")} = −{DiscountAmount:C}{(string.IsNullOrEmpty(DiscountReason) ? "" : $" ({DiscountReason})")}";

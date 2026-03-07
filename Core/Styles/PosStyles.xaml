@@ -80,18 +80,6 @@
                                           VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background"
-                                    Value="{StaticResource FluentSubtleHover}"/>
-                            <Setter TargetName="Bd" Property="BorderBrush"
-                                    Value="{StaticResource FluentAccentDefault}"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bd" Property="Background"
-                                    Value="{StaticResource FluentSubtlePressed}"/>
-                            <Setter TargetName="Bd" Property="BorderBrush"
-                                    Value="{StaticResource FluentAccentPressed}"/>
-                        </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush"
                                     Value="{StaticResource FluentStrokeFocus}"/>
@@ -100,6 +88,16 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource FluentSubtleHover}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource FluentAccentDefault}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource FluentSubtlePressed}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource FluentAccentPressed}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════

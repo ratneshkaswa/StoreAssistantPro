@@ -76,8 +76,24 @@ public class LoginService(
                 : "Invalid PIN.");
     }
 
+    private const int MaxMasterPinAttempts = 5;
+    private static readonly TimeSpan MasterPinLockoutDuration = TimeSpan.FromMinutes(30);
+    private static int _masterPinFailedAttempts;
+    private static DateTime _masterPinLockoutEnd = DateTime.MinValue;
+    private static readonly Lock _masterPinLock = new();
+
     public async Task<bool> ValidateMasterPinAsync(string pin, CancellationToken ct = default)
     {
+        lock (_masterPinLock)
+        {
+            if (_masterPinLockoutEnd > DateTime.UtcNow)
+            {
+                var remaining = _masterPinLockoutEnd - DateTime.UtcNow;
+                logger.LogWarning("Master PIN validation blocked — locked out for {Minutes}m", (int)remaining.TotalMinutes + 1);
+                return false;
+            }
+        }
+
         using var _ = perf.BeginScope("LoginService.ValidateMasterPinAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var config = await context.AppConfigs
@@ -88,9 +104,28 @@ public class LoginService(
         var isValid = config is not null && PinHasher.Verify(pin, config.MasterPinHash);
 
         if (!isValid)
+        {
+            lock (_masterPinLock)
+            {
+                _masterPinFailedAttempts++;
+                if (_masterPinFailedAttempts >= MaxMasterPinAttempts)
+                {
+                    _masterPinLockoutEnd = DateTime.UtcNow.Add(MasterPinLockoutDuration);
+                    _masterPinFailedAttempts = 0;
+                    logger.LogWarning("Master PIN locked out after {Max} failed attempts", MaxMasterPinAttempts);
+                }
+            }
             logger.LogWarning("Master PIN validation failed");
+        }
         else
+        {
+            lock (_masterPinLock)
+            {
+                _masterPinFailedAttempts = 0;
+                _masterPinLockoutEnd = DateTime.MinValue;
+            }
             logger.LogInformation("Master PIN validated successfully");
+        }
 
         return isValid;
     }

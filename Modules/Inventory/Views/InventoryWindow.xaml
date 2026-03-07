@@ -1,4 +1,4 @@
-﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inventory.Views.InventoryWindow"
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inventory.Views.InventoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -113,7 +113,7 @@
                     <DataGridTextColumn Header="New Qty" Binding="{Binding NewQuantity}" Width="{StaticResource ColumnWidthQty}"/>
                     <DataGridTextColumn Header="Change" Binding="{Binding QuantityChange}" Width="{StaticResource ColumnWidthQty}"/>
                     <DataGridTextColumn Header="Reason" Binding="{Binding Reason}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Time" Binding="{Binding Timestamp, StringFormat=dd-MMM HH:mm}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Timestamp, StringFormat=g}" Width="{StaticResource ColumnWidthPrice}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

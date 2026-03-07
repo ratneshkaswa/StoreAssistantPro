@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Products.Services;
 
 public class ProductVariantService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : IProductVariantService
 {
     public async Task<IReadOnlyList<ProductVariant>> GetByProductAsync(int productId, CancellationToken ct = default)
@@ -58,7 +59,7 @@ public class ProductVariantService(
             Quantity = dto.Quantity,
             AdditionalPrice = dto.AdditionalPrice,
             IsActive = true,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = regional.Now
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
@@ -145,7 +146,7 @@ public class ProductVariantService(
                     Quantity = 0,
                     AdditionalPrice = 0,
                     IsActive = true,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = regional.Now
                 });
                 created++;
             }

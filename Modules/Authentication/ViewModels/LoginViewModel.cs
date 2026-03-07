@@ -231,6 +231,7 @@ public partial class LoginViewModel : BaseViewModel
 
         if (!Validate(v => v
             .Rule(InputValidator.IsRequired(MasterPassword), "Enter your Master PIN.")
+            .Rule(InputValidator.IsValidMasterPin(MasterPassword), "Master PIN must be exactly 6 digits.")
             .Rule(InputValidator.IsRequired(NewPin), "Enter a new PIN.")
             .Rule(InputValidator.IsValidUserPin(NewPin), "PIN must be exactly 4 digits.")
             .Rule(InputValidator.AreEqual(NewPin, NewPinConfirm), "PINs do not match.")))

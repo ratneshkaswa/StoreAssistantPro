@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Tax.Services;
 
@@ -9,7 +10,8 @@ namespace StoreAssistantPro.Modules.Tax.ViewModels;
 
 public partial class TaxManagementViewModel(
     ITaxService taxService,
-    ITaxGroupService taxGroupService) : BaseViewModel
+    ITaxGroupService taxGroupService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     // ═══════════════════════════════════════════════════════════════
     //  Tab Navigation
@@ -237,7 +239,7 @@ public partial class TaxManagementViewModel(
             decimal.Parse(SlabGST),
             decimal.Parse(SlabPriceFrom),
             priceTo,
-            DateTime.UtcNow, null);
+            regional.Now, null);
 
         await taxGroupService.CreateSlabAsync(dto, ct);
         SuccessMessage = "Slab added.";

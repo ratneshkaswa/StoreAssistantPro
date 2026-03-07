@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -44,10 +45,14 @@ public class Coupon
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 
-    /// <summary>Whether the coupon is currently usable.</summary>
+    /// <summary>
+    /// Whether the coupon is currently usable.
+    /// Note: ValidFrom/ValidTo are stored in local time (IST) by the service layer.
+    /// </summary>
+    [NotMapped]
     public bool IsValid =>
         IsActive
-        && DateTime.UtcNow >= ValidFrom
-        && DateTime.UtcNow <= ValidTo
+        && DateTime.Now >= ValidFrom
+        && DateTime.Now <= ValidTo
         && (MaxUsageCount == 0 || UsedCount < MaxUsageCount);
 }

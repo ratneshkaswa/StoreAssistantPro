@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -72,6 +73,7 @@ public class Vendor
     public bool IsActive { get; set; } = true;
 
     /// <summary>Computed row highlight: <see cref="RowHighlightLevel.Inactive"/> when deactivated.</summary>
+    [NotMapped]
     public RowHighlightLevel HighlightLevel =>
         IsActive ? RowHighlightLevel.None : RowHighlightLevel.Inactive;
 

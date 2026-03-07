@@ -1,0 +1,33 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         ENTERPRISE TYPOGRAPHY
+
+         Reusable TextBlock styles. These are merged BEFORE DesignSystem.xaml
+         so they use only Colors.xaml tokens. Prefer the named styles from
+         GlobalStyles.xaml (PageTitleStyle, SectionHeaderStyle, etc.)
+         which have full access to DesignSystem tokens.
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+
+    <Style x:Key="HeaderText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize"   Value="22"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+    </Style>
+
+    <Style x:Key="SectionText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize"   Value="16"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+    </Style>
+
+    <Style x:Key="LabelText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize"   Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+    </Style>
+
+</ResourceDictionary>

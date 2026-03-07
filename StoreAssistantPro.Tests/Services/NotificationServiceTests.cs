@@ -10,13 +10,15 @@ public class NotificationServiceTests
 {
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
+    private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
     private readonly ObservableCollection<AppNotification> _notifications = [];
 
     private NotificationService CreateSut()
     {
         _appState.Notifications.Returns(_notifications);
         _appState.UnreadNotificationCount.Returns(_ => _notifications.Count(n => !n.IsRead));
-        return new NotificationService(_appState, _eventBus);
+        _regional.Now.Returns(new DateTime(2025, 6, 15, 14, 30, 0));
+        return new NotificationService(_appState, _eventBus, _regional);
     }
 
     // ── PostAsync ───────────────────────────────────────────────────
@@ -64,13 +66,26 @@ public class NotificationServiceTests
         await _eventBus.Received(1).PublishAsync(Arg.Any<NotificationsChangedEvent>());
     }
 
+    [Fact]
+    public async Task PostAsync_SetsTimestampFromRegionalService()
+    {
+        var expected = new DateTime(2025, 6, 15, 14, 30, 0);
+        _regional.Now.Returns(expected);
+        var sut = CreateSut();
+
+        await sut.PostAsync("Title", "Message");
+
+        _appState.Received(1).AddNotification(Arg.Is<AppNotification>(n =>
+            n.Timestamp == expected));
+    }
+
     // ── MarkReadAsync ──────────────────────────────────────────────
 
     [Fact]
     public async Task MarkReadAsync_DelegatesToAppState()
     {
         var sut = CreateSut();
-        var notification = new AppNotification { Title = "T", Message = "M" };
+        var notification = new AppNotification { Title = "T", Message = "M", Timestamp = _regional.Now };
 
         await sut.MarkReadAsync(notification);
 
@@ -81,7 +96,7 @@ public class NotificationServiceTests
     public async Task MarkReadAsync_PublishesChangedEvent()
     {
         var sut = CreateSut();
-        var notification = new AppNotification { Title = "T", Message = "M" };
+        var notification = new AppNotification { Title = "T", Message = "M", Timestamp = _regional.Now };
 
         await sut.MarkReadAsync(notification);
 
@@ -94,9 +109,9 @@ public class NotificationServiceTests
     public async Task MarkAllReadAsync_MarksEveryUnreadNotification()
     {
         var sut = CreateSut();
-        var n1 = new AppNotification { Title = "A", Message = "M1" };
-        var n2 = new AppNotification { Title = "B", Message = "M2", IsRead = true };
-        var n3 = new AppNotification { Title = "C", Message = "M3" };
+        var n1 = new AppNotification { Title = "A", Message = "M1", Timestamp = _regional.Now };
+        var n2 = new AppNotification { Title = "B", Message = "M2", Timestamp = _regional.Now, IsRead = true };
+        var n3 = new AppNotification { Title = "C", Message = "M3", Timestamp = _regional.Now };
         _notifications.Add(n1);
         _notifications.Add(n2);
         _notifications.Add(n3);
@@ -157,7 +172,7 @@ public class NotificationServiceTests
     public void UnreadCount_DelegatesToAppState()
     {
         var sut = CreateSut();
-        var n = new AppNotification { Title = "T", Message = "M" };
+        var n = new AppNotification { Title = "T", Message = "M", Timestamp = _regional.Now };
         _notifications.Add(n);
 
         Assert.Equal(1, sut.UnreadCount);

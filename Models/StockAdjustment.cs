@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -34,6 +35,7 @@ public class StockAdjustment
     public int NewQuantity { get; set; }
 
     /// <summary>Signed delta: NewQuantity − OldQuantity.</summary>
+    [NotMapped]
     public int QuantityChange => NewQuantity - OldQuantity;
 
     public AdjustmentReason Reason { get; set; }

@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Customers.Services;
 
 public class CustomerService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : ICustomerService
 {
     public async Task<IReadOnlyList<Customer>> GetAllAsync(CancellationToken ct = default)
@@ -94,7 +95,7 @@ public class CustomerService(
             GSTIN = dto.GSTIN?.Trim(),
             Notes = dto.Notes?.Trim(),
             IsActive = true,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = regional.Now
         });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
@@ -109,6 +110,16 @@ public class CustomerService(
             .FirstOrDefaultAsync(c => c.Id == id, ct)
             .ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Customer Id {id} not found.");
+
+        // Duplicate phone detection on update
+        if (!string.IsNullOrWhiteSpace(dto.Phone))
+        {
+            var phoneTaken = await context.Customers
+                .AnyAsync(c => c.Phone == dto.Phone.Trim() && c.Id != id, ct)
+                .ConfigureAwait(false);
+            if (phoneTaken)
+                throw new InvalidOperationException($"Another customer already has phone {dto.Phone}.");
+        }
 
         entity.Name = dto.Name.Trim();
         entity.Phone = dto.Phone?.Trim();

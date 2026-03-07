@@ -96,7 +96,7 @@ public partial class InwardEntryViewModel(
     });
 
     [RelayCommand]
-    private void Next()
+    private async Task NextAsync()
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
@@ -118,7 +118,7 @@ public partial class InwardEntryViewModel(
                 return;
             }
 
-            GenerateParcels();
+            await GenerateParcelsAsync();
             CurrentStep = 3;
         }
     }
@@ -133,10 +133,10 @@ public partial class InwardEntryViewModel(
 
     [RelayCommand]
     private Task ConfirmStepAsync() => CurrentStep < 3
-        ? Task.Run(() => Next())
+        ? NextAsync()
         : SaveAsync();
 
-    private async void GenerateParcels()
+    private async Task GenerateParcelsAsync()
     {
         var date = regional.Now;
         ParcelNumbers = await inwardService.GenerateParcelNumbersAsync(date, ParcelCount);

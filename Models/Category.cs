@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -15,6 +16,7 @@ public class Category
 
     public bool IsActive { get; set; } = true;
 
+    [NotMapped]
     public RowHighlightLevel HighlightLevel =>
         !IsActive ? RowHighlightLevel.Inactive : RowHighlightLevel.None;
 }

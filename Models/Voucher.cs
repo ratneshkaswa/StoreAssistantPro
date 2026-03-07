@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -33,8 +34,13 @@ public class Voucher
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 
+    /// <summary>
+    /// Whether the voucher is currently redeemable.
+    /// Note: ExpiryDate is stored in local time (IST) by the service layer.
+    /// </summary>
+    [NotMapped]
     public bool IsValid =>
         IsActive
         && Balance > 0
-        && DateTime.UtcNow <= ExpiryDate;
+        && DateTime.Now <= ExpiryDate;
 }

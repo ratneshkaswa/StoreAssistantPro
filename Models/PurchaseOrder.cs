@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAssistantPro.Models;
 
@@ -30,6 +31,7 @@ public class PurchaseOrder
     /// <summary>
     /// Computed total: Σ (Quantity × UnitCost) for all items.
     /// </summary>
+    [NotMapped]
     public decimal TotalAmount => Items.Sum(i => i.Quantity * i.UnitCost);
 
     [MaxLength(500)]
@@ -57,5 +59,6 @@ public class PurchaseOrderItem
 
     public decimal UnitCost { get; set; }
 
+    [NotMapped]
     public decimal Subtotal => Quantity * UnitCost;
 }

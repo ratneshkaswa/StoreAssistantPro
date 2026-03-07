@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Billing.Services;
 
@@ -9,7 +10,8 @@ namespace StoreAssistantPro.Modules.Billing.ViewModels;
 
 public partial class SaleHistoryViewModel(
     ISaleHistoryService historyService,
-    IReceiptService receiptService) : BaseViewModel
+    IReceiptService receiptService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     // ── Filters ──
 
@@ -46,12 +48,12 @@ public partial class SaleHistoryViewModel(
         }
 
         SaleDetail = $"Invoice: {value.InvoiceNumber}\n" +
-                     $"Date: {value.SaleDate:dd-MMM-yyyy HH:mm}\n" +
+                     $"Date: {regional.FormatDate(value.SaleDate)} {regional.FormatTime(value.SaleDate)}\n" +
                      $"Items: {value.Items.Count}\n" +
-                     $"Total: ₹{value.TotalAmount:N2}\n" +
+                     $"Total: {regional.FormatCurrency(value.TotalAmount)}\n" +
                      $"Payment: {value.PaymentMethod}" +
                      (string.IsNullOrEmpty(value.PaymentReference) ? "" : $" ({value.PaymentReference})") +
-                     (value.DiscountAmount > 0 ? $"\nDiscount: ₹{value.DiscountAmount:N2}" : "");
+                     (value.DiscountAmount > 0 ? $"\nDiscount: {regional.FormatCurrency(value.DiscountAmount)}" : "");
     }
 
     // ── Commands ──
