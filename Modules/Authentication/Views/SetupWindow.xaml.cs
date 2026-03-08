@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using StoreAssistantPro.Core.Helpers;
-using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Modules.Authentication.Views;
@@ -13,14 +12,12 @@ public partial class SetupWindow : Window
 {
     private SetupViewModel? _vm;
 
-    public SetupWindow(IWindowSizingService sizing, SetupViewModel vm)
+    public SetupWindow(SetupViewModel vm)
     {
         InitializeComponent();
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
 
-        var workArea = System.Windows.SystemParameters.WorkArea;
-        sizing.ConfigureStartupWindow(this, workArea.Width * 0.80, workArea.Height * 0.85);
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
 
         // Enforce numeric-only input + paste protection on all PIN PasswordBoxes
