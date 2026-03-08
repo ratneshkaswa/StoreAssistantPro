@@ -11,13 +11,6 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Enterprise UI design system (merged first — existing Core/Styles take precedence for any overlapping keys) -->
-                <ResourceDictionary Source="UI/Themes/Colors.xaml"/>
-                <ResourceDictionary Source="UI/Themes/Typography.xaml"/>
-                <ResourceDictionary Source="UI/Styles/Cards.xaml"/>
-                <ResourceDictionary Source="UI/Styles/Buttons.xaml"/>
-                <ResourceDictionary Source="UI/Styles/Windows.xaml"/>
-
                 <ResourceDictionary Source="Core/Styles/DesignSystem.xaml"/>
                 <ResourceDictionary Source="Core/Styles/FluentTheme.xaml"/>
                 <ResourceDictionary Source="Core/Styles/MotionSystem.xaml"/>

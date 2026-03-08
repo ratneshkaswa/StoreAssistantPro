@@ -741,19 +741,6 @@ public partial class ArchitectureComplianceTests
 
         var violations = new List<string>();
 
-        // UI/ dictionaries must appear before the first Core/ dictionary
-        var firstCoreIdx = content.IndexOf("Core/Styles/DesignSystem.xaml", StringComparison.Ordinal);
-        if (firstCoreIdx >= 0)
-        {
-            foreach (var uiDict in new[] { "UI/Themes/Colors.xaml", "UI/Themes/Typography.xaml",
-                "UI/Styles/Cards.xaml", "UI/Styles/Buttons.xaml", "UI/Styles/Windows.xaml" })
-            {
-                var uiIdx = content.IndexOf(uiDict, StringComparison.Ordinal);
-                if (uiIdx >= 0 && uiIdx > firstCoreIdx)
-                    violations.Add($"  Wrong order: {uiDict} must appear before Core/Styles (UI merged first for override)");
-            }
-        }
-
         // Required Core order — each must appear after the previous
         var requiredOrder = new[]
         {
@@ -784,7 +771,7 @@ public partial class ArchitectureComplianceTests
             _output.WriteLine(v);
 
         Assert.True(violations.Count == 0,
-            "Style chain must be: UI/* → DesignSystem → FluentTheme → MotionSystem → GlobalStyles → ToggleSwitch → PosStyles.\n"
+            "Style chain must be: DesignSystem → FluentTheme → MotionSystem → GlobalStyles → ToggleSwitch → PosStyles.\n"
             + string.Join("\n", violations));
     }
 

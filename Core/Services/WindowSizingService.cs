@@ -22,10 +22,15 @@ public class WindowSizingService : IWindowSizingService
         window.Closed += (_, _) => SystemParameters.StaticPropertyChanged -= OnDisplayChanged;
     }
 
+    private const double DialogMargin = 16;
+
     public void ConfigureDialogWindow(Window dialog, double width, double height)
     {
-        dialog.Width = width;
-        dialog.Height = height;
+        var workArea = SystemParameters.WorkArea;
+
+        // Clamp to work area with a small margin so the window never crops
+        dialog.Width = Math.Min(width, workArea.Width - DialogMargin);
+        dialog.Height = Math.Min(height, workArea.Height - DialogMargin);
         dialog.ResizeMode = ResizeMode.NoResize;
 
         if (_mainWindow is not null)
@@ -41,8 +46,10 @@ public class WindowSizingService : IWindowSizingService
 
     public void ConfigureStartupWindow(Window window, double width, double height)
     {
-        window.Width = width;
-        window.Height = height;
+        var workArea = SystemParameters.WorkArea;
+
+        window.Width = Math.Min(width, workArea.Width - DialogMargin);
+        window.Height = Math.Min(height, workArea.Height - DialogMargin);
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         window.ResizeMode = ResizeMode.NoResize;
     }

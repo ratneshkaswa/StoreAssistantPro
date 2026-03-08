@@ -81,6 +81,8 @@
     <Folder Include="Modules\SystemSettings\Workflows\" />
     <Folder Include="Modules\Tax\Commands\" />
     <Folder Include="Modules\UserManagement\Views\" />
+    <Folder Include="UI\Styles\" />
+    <Folder Include="UI\Themes\" />
   </ItemGroup>
 
 </Project>
