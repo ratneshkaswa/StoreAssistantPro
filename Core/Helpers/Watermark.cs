@@ -38,21 +38,8 @@ public static class Watermark
         tb.LostFocus -= OnLostFocus;
         tb.IsVisibleChanged -= OnIsVisibleChanged;
 
-        if (e.NewValue is string { Length: > 0 })
-        {
-            tb.Loaded += OnLoaded;
-            tb.TextChanged += OnTextBoxTextChanged;
-            tb.GotFocus += OnGotFocus;
-            tb.LostFocus += OnLostFocus;
-            tb.IsVisibleChanged += OnIsVisibleChanged;
-
-            if (tb.IsLoaded)
-                UpdateAdorner(tb);
-        }
-        else
-        {
-            RemoveAdorner(tb);
-        }
+        // Watermark rendering is temporarily disabled app-wide.
+        RemoveAdorner(tb);
     }
 
     private static void OnLoaded(object sender, RoutedEventArgs e) =>
@@ -77,7 +64,7 @@ public static class Watermark
 
         RemoveAdorner(tb, layer);
 
-        if (string.IsNullOrEmpty(tb.Text) && tb.IsVisible)
+        if (string.IsNullOrEmpty(tb.Text) && tb.IsVisible && !tb.IsKeyboardFocused)
         {
             var text = GetText(tb);
             if (!string.IsNullOrEmpty(text))
@@ -102,10 +89,12 @@ public static class Watermark
 
     private sealed class WatermarkAdorner : Adorner
     {
+        private readonly TextBox _adornedTextBox;
         private readonly TextBlock _textBlock;
 
         public WatermarkAdorner(TextBox adornedElement, string text) : base(adornedElement)
         {
+            _adornedTextBox = adornedElement;
             IsHitTestVisible = false;
 
             var tertiary = adornedElement.TryFindResource("FluentTextTertiary") as Brush
@@ -115,9 +104,11 @@ public static class Watermark
             {
                 Text = text,
                 Foreground = tertiary,
-                Padding = adornedElement.Padding,
+                FontFamily = adornedElement.FontFamily,
+                FontSize = adornedElement.FontSize,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(2, 0, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(adornedElement.BorderThickness.Left + adornedElement.Padding.Left + 2, 0, 0, 0),
                 IsHitTestVisible = false
             };
         }
@@ -134,7 +125,19 @@ public static class Watermark
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            _textBlock.Arrange(new Rect(finalSize));
+            _textBlock.Measure(finalSize);
+
+            var border = _adornedTextBox.BorderThickness;
+            var padding = _adornedTextBox.Padding;
+
+            var x = border.Left + padding.Left;
+            var y = (finalSize.Height - _textBlock.DesiredSize.Height) / 2;
+            if (y < 0) y = 0;
+
+            var width = finalSize.Width - x - border.Right - 2;
+            if (width < 0) width = 0;
+
+            _textBlock.Arrange(new Rect(x, y, width, _textBlock.DesiredSize.Height));
             return finalSize;
         }
     }

@@ -47,6 +47,7 @@ These eight systems are frozen. Extend through existing interfaces only:
 - Page root: `Grid` with `Margin="{StaticResource PagePadding}"` and exactly one `Height="*"` row.
 - Dialog root: `Grid` with `Margin="{StaticResource DialogPadding}"`, 3-row layout (Auto/*/Auto).
 - `ScrollViewer` never wraps an entire window — only around data-driven content.
+- For fixed-size windows (e.g., Firm Management, User Management), avoid `ScrollViewer`; use scrolling only for data-growing views such as vendor lists and bills.
 - Field widths: `FieldWidthCompact`, `FieldWidthStandard`, `FieldWidthWide` — never raw numbers.
 - DataGrid columns: `ColumnWidthId`, `ColumnWidthPrice`, `ColumnWidthQty`, etc. One column must be `Width="*"`.
 
@@ -196,3 +197,7 @@ These eight systems are frozen. Extend through existing interfaces only:
   - G20: Payments (17)
   - G21: Budgeting (6)
   - G22: Reporting (9)
+
+### UI Preferences
+
+- Remove visible Ctrl+Enter-style shortcut hints from UI everywhere.

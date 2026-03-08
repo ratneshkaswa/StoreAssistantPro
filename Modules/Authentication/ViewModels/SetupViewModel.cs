@@ -427,11 +427,25 @@ public partial class SetupViewModel : BaseViewModel
                 RedirectCountdown = $"Redirecting to login in {i}…";
                 await Task.Delay(500, ct);
             }
+
+            ClearSensitivePins();
             RequestClose?.Invoke(true);
         }
         else
             ErrorMessage = result.ErrorMessage ?? "Setup failed.";
     });
+
+    public void ClearSensitivePins()
+    {
+        AdminPin = string.Empty;
+        AdminPinConfirm = string.Empty;
+        ManagerPin = string.Empty;
+        ManagerPinConfirm = string.Empty;
+        UserPin = string.Empty;
+        UserPinConfirm = string.Empty;
+        MasterPin = string.Empty;
+        MasterPinConfirm = string.Empty;
+    }
 
     private const string WeakPinShortText = "⚠ Weak PIN";
     private const string WeakPinDetailText = "⚠ Weak PIN — consider a less predictable combination.";

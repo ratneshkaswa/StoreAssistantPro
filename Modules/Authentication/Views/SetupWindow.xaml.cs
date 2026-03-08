@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +19,7 @@ public partial class SetupWindow : Window
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
 
-        SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
         // Enforce numeric-only input + paste protection on all PIN PasswordBoxes
         PasswordBox[] pinBoxes = [AdminPinBox, AdminPinConfirmBox, ManagerPinBox, ManagerPinConfirmBox,
@@ -42,10 +43,40 @@ public partial class SetupWindow : Window
         DataObject.AddPastingHandler(PanBox, OnPastingUpperCase);
 
         PreviewKeyDown += OnPreviewKeyDown;
+        vm.PropertyChanged += OnViewModelPropertyChanged;
 
         // Focus firm name on load
         Loaded += (_, _) => FirmNameBox.Focus();
-        Closed += (_, _) => vm.Dispose();
+        Closed += (_, _) =>
+        {
+            vm.PropertyChanged -= OnViewModelPropertyChanged;
+            vm.Dispose();
+        };
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not SetupViewModel vm || e.PropertyName != nameof(SetupViewModel.ErrorMessage))
+            return;
+
+        if (string.IsNullOrWhiteSpace(vm.ErrorMessage))
+            return;
+
+        Dispatcher.BeginInvoke(() => FocusFirstInvalidField(vm.ErrorMessage));
+    }
+
+    private void FocusFirstInvalidField(string error)
+    {
+        if (error.Contains("Firm name", StringComparison.OrdinalIgnoreCase)) { FirmNameBox.Focus(); return; }
+        if (error.Contains("Admin PIN", StringComparison.OrdinalIgnoreCase)) { AdminPinBox.Focus(); return; }
+        if (error.Contains("Manager PIN", StringComparison.OrdinalIgnoreCase)) { ManagerPinBox.Focus(); return; }
+        if (error.Contains("User PIN", StringComparison.OrdinalIgnoreCase)) { UserPinBox.Focus(); return; }
+        if (error.Contains("Master PIN", StringComparison.OrdinalIgnoreCase)) { MasterPinBox.Focus(); return; }
+        if (error.Contains("GSTIN", StringComparison.OrdinalIgnoreCase)) { GstinBox.Focus(); return; }
+        if (error.Contains("PAN", StringComparison.OrdinalIgnoreCase)) { PanBox.Focus(); return; }
+        if (error.Contains("Pincode", StringComparison.OrdinalIgnoreCase)) { PincodeBox.Focus(); return; }
+        if (error.Contains("Email", StringComparison.OrdinalIgnoreCase)) { EmailBox.Focus(); return; }
+        if (error.Contains("Phone", StringComparison.OrdinalIgnoreCase)) { PhoneBox.Focus(); }
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -60,7 +91,7 @@ public partial class SetupWindow : Window
             return;
         }
 
-        // #5: Ctrl+Enter saves from anywhere
+        // #5: Keyboard save shortcut from anywhere
         if (e.Key == Key.Enter && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
         {
             if (!vm.IsBusy && vm.SaveCommand.CanExecute(null))
@@ -183,6 +214,8 @@ public partial class SetupWindow : Window
 
         if (result == MessageBoxResult.No)
             e.Cancel = true;
+        else
+            _vm.ClearSensitivePins();
     }
 
     /// <summary>Allow only digits, +, -, and spaces in Phone field.</summary>

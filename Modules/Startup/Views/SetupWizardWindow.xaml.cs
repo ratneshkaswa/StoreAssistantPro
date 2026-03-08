@@ -15,7 +15,7 @@ public partial class SetupWizardWindow : Window
         DataContext = vm;
         sizingService.ConfigureStartupWindow(this, 640, 780);
 
-        SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
         vm.RequestClose = result =>
         {

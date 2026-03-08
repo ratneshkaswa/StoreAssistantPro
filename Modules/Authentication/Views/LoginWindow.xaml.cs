@@ -22,7 +22,7 @@ public partial class LoginWindow : Window
         vm.Initialize();
 
         sizing.ConfigureStartupWindow(this, 480, 740);
-        SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
+        SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
         PreviewKeyDown += OnPreviewKeyDown;
         PreviewKeyUp += (_, _) => UpdateCapsLockWarning();

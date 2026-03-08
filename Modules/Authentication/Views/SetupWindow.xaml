@@ -12,6 +12,8 @@
         Background="{StaticResource AppBackgroundBrush}">
 
     <Window.Resources>
+        <h:WindowWidthToColumnsConverter x:Key="SetupColumnsConverter"/>
+
         <Style x:Key="PinStrengthSegmentStyle" TargetType="Border">
             <Setter Property="Width" Value="{StaticResource StrengthBarWidth}"/>
             <Setter Property="Height" Value="{StaticResource StrengthBarHeight}"/>
@@ -47,9 +49,27 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="CollapsibleHintTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+            <Setter Property="Margin" Value="{StaticResource ValidationHintMargin}"/>
+            <Setter Property="AutomationProperties.LiveSetting" Value="Polite"/>
+            <Setter Property="AutomationProperties.HelpText" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="{StaticResource PagePadding}" h:Motion.WindowFadeIn="True">
+    <Grid Margin="{StaticResource PagePadding}" h:Motion.WindowFadeIn="True"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -75,18 +95,26 @@
                                FontSize="{StaticResource FontSizeSectionHeader}" FontWeight="Bold"
                                HorizontalAlignment="Center"
                                Foreground="{StaticResource FluentSuccess}"
+                               AutomationProperties.LiveSetting="Polite"
+                               AutomationProperties.HelpText="Setup complete"
                                Margin="{StaticResource FieldLabelSpacing}"/>
                     <TextBlock Text="{Binding RedirectCountdown}"
                                FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource FluentTextSecondary}"
+                               AutomationProperties.LiveSetting="Polite"
+                               AutomationProperties.HelpText="{Binding RedirectCountdown}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- Three-column layout: Firm Profile | GSTIN + Master PIN | Security PINs -->
+                <!-- Responsive layout (3/2/1 columns): Firm Profile | Tax+Master | Security PINs -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               Focusable="False"
-                              h:SmoothScroll.IsEnabled="True">
+                              CanContentScroll="False"
+                              PanningMode="VerticalOnly"
+                              AutomationProperties.Name="Setup form content"
+                              AutomationProperties.HelpText="Scroll to review all setup sections"
+                              h:SmoothScroll.IsEnabled="False">
                     <ScrollViewer.Style>
                         <Style TargetType="ScrollViewer">
                             <Style.Triggers>
@@ -96,34 +124,15 @@
                             </Style.Triggers>
                         </Style>
                     </ScrollViewer.Style>
-                <Grid VerticalAlignment="Top">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource CardStyle}" Padding="{StaticResource SmallCardPadding}">
-                        <TextBlock Style="{StaticResource CaptionLabelStyle}" Text="Business" HorizontalAlignment="Center"/>
-                    </Border>
-                    <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource CardStyle}" Padding="{StaticResource SmallCardPadding}">
-                        <TextBlock Style="{StaticResource CaptionLabelStyle}" Text="Regional" HorizontalAlignment="Center"/>
-                    </Border>
-                    <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource CardStyle}" Padding="{StaticResource SmallCardPadding}">
-                        <TextBlock Style="{StaticResource CaptionLabelStyle}" Text="Security" HorizontalAlignment="Center"/>
-                    </Border>
+                <UniformGrid VerticalAlignment="Top"
+                             Margin="{StaticResource InlineControlSpacing}"
+                             Columns="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualWidth, Converter={StaticResource SetupColumnsConverter}}">
 
                     <!-- Column 1: Firm Profile + Tax & Legal -->
-                    <StackPanel Grid.Row="1" Grid.Column="0">
+                    <StackPanel Margin="{StaticResource InlineControlSpacing}">
                         <Border Style="{StaticResource CardStyle}" VerticalAlignment="Top" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="0">
                             <StackPanel>
-                                <TextBlock Style="{StaticResource SectionHeaderStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8D2;"/><Run Text=" Firm Profile"/></TextBlock>
+                                <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Firm Profile section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8D2;"/><Run Text=" Firm Profile"/></TextBlock>
                                 <Grid Margin="{StaticResource StepContentTopSpacing}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -146,69 +155,69 @@
                                     <RowDefinition Height="Auto"/>  <!-- 13: Email hint -->
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                                <TextBlock x:Name="FirmNameLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
                                     <Run Text="Firm Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                                 </TextBlock>
                                 <TextBox Grid.Row="0" Grid.Column="1" x:Name="FirmNameBox" TabIndex="0"
                                          Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
-                                         MaxLength="100" h:Watermark.Text="e.g. Sharma Textiles"
+                                         MaxLength="100"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=FirmNameLabel}"
                                          AutomationProperties.Name="Firm Name"/>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Address"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBlock x:Name="AddressLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Address"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
                                 <TextBox Grid.Row="2" Grid.Column="1" TabIndex="1"
                                          Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                                         MaxLength="200" h:Watermark.Text="Street, locality"
+                                         MaxLength="200"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
                                          AutomationProperties.Name="Address"/>
 
-                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="State"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBlock x:Name="StateLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="State"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
                                 <ComboBox Grid.Row="4" Grid.Column="1" TabIndex="2" AutomationProperties.Name="State"
                                           ItemsSource="{Binding IndianStates}" IsEditable="True" IsTextSearchEnabled="True"
                                           Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"
+                                          AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"
                                           MaxDropDownHeight="300"/>
 
-                                <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Pincode"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBlock x:Name="PincodeLabel" Grid.Row="6" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Pincode"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
                                 <TextBox Grid.Row="6" Grid.Column="1" x:Name="PincodeBox" TabIndex="3" AutomationProperties.Name="Pincode"
                                          Text="{Binding Pincode, UpdateSourceTrigger=PropertyChanged}"
                                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                                         MaxLength="6" h:Watermark.Text="6 digits"/>
+                                         AutomationProperties.LabeledBy="{Binding ElementName=PincodeLabel}"
+                                         MaxLength="6"/>
                                 <TextBlock Grid.Row="7" Grid.Column="1"
                                            Text="{Binding PincodeValidationHint}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{Binding PincodeValidationHint, Converter={StaticResource HintForegroundConverter}}" Margin="{StaticResource ValidationHintMargin}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding PincodeValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{Binding PincodeValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
 
-                                <TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Phone"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBlock x:Name="PhoneLabel" Grid.Row="9" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Phone"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
                                 <TextBox Grid.Row="9" Grid.Column="1" x:Name="PhoneBox" TabIndex="4"
                                          Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                                         MaxLength="15" h:Watermark.Text="e.g. 9876543210"
+                                         MaxLength="15"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=PhoneLabel}"
                                          AutomationProperties.Name="Phone"/>
                                 <TextBlock Grid.Row="10" Grid.Column="1"
                                            Text="{Binding PhoneValidationHint}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{Binding PhoneValidationHint, Converter={StaticResource HintForegroundConverter}}" Margin="{StaticResource ValidationHintMargin}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding PhoneValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{Binding PhoneValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
 
-                                <TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Email"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
-                                <TextBox Grid.Row="12" Grid.Column="1" TabIndex="5"
+                                <TextBlock x:Name="EmailLabel" Grid.Row="12" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Email"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBox Grid.Row="12" Grid.Column="1" x:Name="EmailBox" TabIndex="5"
                                          Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                                         MaxLength="100" h:Watermark.Text="firm@example.com"
+                                         MaxLength="100"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=EmailLabel}"
                                          AutomationProperties.Name="Email"/>
                                 <TextBlock Grid.Row="13" Grid.Column="1"
                                            Text="{Binding EmailValidationHint}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{Binding EmailValidationHint, Converter={StaticResource HintForegroundConverter}}" Margin="{StaticResource ValidationHintMargin}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding EmailValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{Binding EmailValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
 
                     <Border Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="1">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource SectionHeaderStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A5;"/><Run Text=" Tax &amp; Legal"/></TextBlock>
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Tax and Legal section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A5;"/><Run Text=" Tax &amp; Legal"/></TextBlock>
                             <Grid Margin="{StaticResource StepContentTopSpacing}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -223,45 +232,42 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GSTIN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBlock x:Name="GstinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GSTIN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
                                 <TextBox Grid.Row="0" Grid.Column="1" x:Name="GstinBox" TabIndex="10" AutomationProperties.Name="GSTIN"
                                          Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
                                          Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
-                                         MaxLength="15" h:Watermark.Text="e.g. 22AAAAA0000A1Z5" CharacterCasing="Upper"/>
+                                         AutomationProperties.LabeledBy="{Binding ElementName=GstinLabel}"
+                                         MaxLength="15" CharacterCasing="Upper"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1"
                                            Text="{Binding GstinValidationHint}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{Binding GstinValidationHint, Converter={StaticResource HintForegroundConverter}}" Margin="{StaticResource ValidationHintMargin}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding GstinValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{Binding GstinValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
 
-                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PAN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBlock x:Name="PanLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PAN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
                                 <TextBox Grid.Row="3" Grid.Column="1" x:Name="PanBox" TabIndex="11" AutomationProperties.Name="PAN"
                                          Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}"
                                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="10"
-                                         h:Watermark.Text="e.g. ABCDE1234F" CharacterCasing="Upper"/>
+                                         AutomationProperties.LabeledBy="{Binding ElementName=PanLabel}"
+                                         CharacterCasing="Upper"/>
                                 <TextBlock Grid.Row="4" Grid.Column="1"
                                            Text="{Binding PanValidationHint}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{Binding PanValidationHint, Converter={StaticResource HintForegroundConverter}}" Margin="{StaticResource ValidationHintMargin}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding PanValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{Binding PanValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
                                 <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
                                            Text="{Binding GstinPanCrossHint}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{Binding GstinPanCrossHint, Converter={StaticResource HintForegroundConverter}}" Margin="{StaticResource CrossHintMargin}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding GstinPanCrossHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{Binding GstinPanCrossHint, Converter={StaticResource HintForegroundConverter}}"
+                                           Margin="{StaticResource CrossHintMargin}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
                             </Grid>
                         </StackPanel>
                     </Border>
                     </StackPanel>
 
                     <!-- Column 2: Regional Settings + Master PIN -->
-                    <StackPanel Grid.Row="1" Grid.Column="2">
+                    <StackPanel Margin="{StaticResource InlineControlSpacing}">
                         <Border Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="2">
                             <StackPanel>
-                                <TextBlock Style="{StaticResource SectionHeaderStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE774;"/><Run Text=" Regional Settings"/></TextBlock>
+                                <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Regional Settings section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE774;"/><Run Text=" Regional Settings"/></TextBlock>
                                 <Grid Margin="{StaticResource StepContentTopSpacing}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -279,9 +285,11 @@
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Currency"
+                                               x:Name="CurrencyLabel"
                                                Style="{StaticResource FormRowLabelStyle}"/>
                                     <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="12" AutomationProperties.Name="Currency Symbol"
                                               ItemsSource="{Binding CurrencySymbols}" SelectedItem="{Binding SelectedCurrencySymbol}"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=CurrencyLabel}"
                                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1"
                                                Text="{Binding CurrencyPreview}"
@@ -289,9 +297,11 @@
                                                Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
 
                                     <TextBlock Grid.Row="3" Grid.Column="0" Text="FY Start"
+                                               x:Name="FyStartLabel"
                                                Style="{StaticResource FormRowLabelStyle}"/>
                                     <ComboBox Grid.Row="3" Grid.Column="1" TabIndex="13" AutomationProperties.Name="Financial Year Start Month"
                                               ItemsSource="{Binding Months}" SelectedItem="{Binding SelectedFYStartMonth}"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=FyStartLabel}"
                                               Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
                                     <TextBlock Grid.Row="4" Grid.Column="1"
                                                Text="{Binding FinancialYearDisplay}"
@@ -299,9 +309,11 @@
                                                Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
 
                                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Date Format"
+                                               x:Name="DateFormatLabel"
                                                Style="{StaticResource FormRowLabelStyle}"/>
                                     <ComboBox Grid.Row="6" Grid.Column="1" TabIndex="14" AutomationProperties.Name="Date Format"
                                               ItemsSource="{Binding DateFormats}" SelectedItem="{Binding SelectedDateFormat}"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=DateFormatLabel}"
                                               Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
                                     <TextBlock Grid.Row="7" Grid.Column="1"
                                                Text="{Binding DateFormatPreview}"
@@ -313,7 +325,7 @@
 
                         <Border Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="3">
                             <StackPanel>
-                                <TextBlock Style="{StaticResource SectionHeaderStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE72E;"/><Run Text=" Master PIN"/></TextBlock>
+                                <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Master PIN section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE72E;"/><Run Text=" Master PIN"/></TextBlock>
                                 <Grid Margin="{StaticResource StepContentTopSpacing}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -336,9 +348,10 @@
                                                    Foreground="{StaticResource RoleMasterAccent}" FontSize="{StaticResource FontSizeBody}"
                                                    ToolTip="Used to recover or change PINs if forgotten."><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE72E;"/><Run Text=" Master (6 digits)"/></TextBlock>
                                     </Border>
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                    <TextBlock x:Name="MasterPinLabel" Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                     <DockPanel Grid.Row="1" Grid.Column="1">
                                         <PasswordBox x:Name="MasterPinBox" TabIndex="15" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Master PIN"
+                                                     AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
                                                      Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                         <TextBlock Style="{StaticResource PinWarningTextStyle}"
                                                    Text="{Binding MasterPinWarning}"
@@ -350,9 +363,10 @@
                                         <Border Style="{StaticResource PinStrengthSegmentStyle}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                    <TextBlock x:Name="MasterConfirmLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                     <DockPanel Grid.Row="4" Grid.Column="1">
                                         <PasswordBox x:Name="MasterPinConfirmBox" TabIndex="16" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Master PIN"
+                                                     AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
                                                      Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                         <TextBlock Style="{StaticResource PinInlineHintStyle}"
                                                    Text="{Binding MasterConfirmHint}"
@@ -368,9 +382,9 @@
                     </StackPanel>
 
                     <!-- Column 3: Security PINs (Admin / Manager / User) -->
-                    <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource CardStyle}" VerticalAlignment="Top" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="4">
+                    <Border Style="{StaticResource CardStyle}" VerticalAlignment="Top" Margin="{StaticResource InlineControlSpacing}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="4">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource SectionHeaderStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/><Run Text=" Security PINs"/></TextBlock>
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Security PINs section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/><Run Text=" Security PINs"/></TextBlock>
                             <Grid Margin="{StaticResource StepContentTopSpacing}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -406,9 +420,10 @@
                                     <TextBlock FontWeight="SemiBold"
                                                Foreground="{StaticResource RoleAdminAccent}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE83D;"/><Run Text=" Admin (4 digits)"/></TextBlock>
                                 </Border>
-                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <TextBlock x:Name="AdminPinLabel" Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <DockPanel Grid.Row="1" Grid.Column="1">
                                     <PasswordBox x:Name="AdminPinBox" TabIndex="30" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Admin PIN"
+                                                 AutomationProperties.LabeledBy="{Binding ElementName=AdminPinLabel}"
                                                  Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                     <TextBlock Style="{StaticResource PinWarningTextStyle}"
                                                Text="{Binding AdminPinWarning}"
@@ -421,9 +436,10 @@
                                         <Border Style="{StaticResource PinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     </StackPanel>
                                 </DockPanel>
-                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <TextBlock x:Name="AdminConfirmLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <DockPanel Grid.Row="4" Grid.Column="1">
                                     <PasswordBox x:Name="AdminPinConfirmBox" TabIndex="31" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Admin PIN"
+                                                 AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
                                                  Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                     <TextBlock Style="{StaticResource PinInlineHintStyle}"
                                                Text="{Binding AdminConfirmHint}"
@@ -436,9 +452,10 @@
                                     <TextBlock FontWeight="SemiBold"
                                                Foreground="{StaticResource RoleManagerAccent}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE77B;"/><Run Text=" Manager (4 digits)"/></TextBlock>
                                 </Border>
-                                <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <TextBlock x:Name="ManagerPinLabel" Grid.Row="8" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <DockPanel Grid.Row="8" Grid.Column="1">
                                     <PasswordBox x:Name="ManagerPinBox" TabIndex="32" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Manager PIN"
+                                                 AutomationProperties.LabeledBy="{Binding ElementName=ManagerPinLabel}"
                                                  Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                     <TextBlock Style="{StaticResource PinWarningTextStyle}"
                                                Text="{Binding ManagerPinWarning}"
@@ -451,9 +468,10 @@
                                         <Border Style="{StaticResource PinStrengthSegmentStyle}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     </StackPanel>
                                 </DockPanel>
-                                <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <TextBlock x:Name="ManagerConfirmLabel" Grid.Row="11" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <DockPanel Grid.Row="11" Grid.Column="1">
                                     <PasswordBox x:Name="ManagerPinConfirmBox" TabIndex="33" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Manager PIN"
+                                                 AutomationProperties.LabeledBy="{Binding ElementName=ManagerConfirmLabel}"
                                                  Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                     <TextBlock Style="{StaticResource PinInlineHintStyle}"
                                                Text="{Binding ManagerConfirmHint}"
@@ -466,9 +484,10 @@
                                     <TextBlock FontWeight="SemiBold"
                                                Foreground="{StaticResource RoleUserAccent}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7EE;"/><Run Text=" User (4 digits)"/></TextBlock>
                                 </Border>
-                                <TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <TextBlock x:Name="UserPinLabel" Grid.Row="15" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <DockPanel Grid.Row="15" Grid.Column="1">
                                     <PasswordBox x:Name="UserPinBox" TabIndex="34" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="User PIN"
+                                                 AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
                                                  Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                     <TextBlock Style="{StaticResource PinWarningTextStyle}"
                                                Text="{Binding UserPinWarning}"
@@ -481,28 +500,55 @@
                                         <Border Style="{StaticResource PinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                                     </StackPanel>
                                 </DockPanel>
-                                <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <TextBlock x:Name="UserConfirmLabel" Grid.Row="18" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <DockPanel Grid.Row="18" Grid.Column="1">
                                     <PasswordBox x:Name="UserPinConfirmBox" TabIndex="35" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm User PIN"
+                                                 AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
                                                  Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                     <TextBlock Style="{StaticResource PinInlineHintStyle}"
                                                Text="{Binding UserConfirmHint}"
                                                Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                                 </DockPanel>
 
-                                <TextBlock Grid.Row="20" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding PinConflictWarning}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentError}" Margin="{StaticResource FieldLabelSpacing}">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding PinConflictWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
+                                <TextBlock Grid.Row="20" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding PinConflictWarning}"
+                                           Foreground="{StaticResource FluentError}"
+                                           Margin="{StaticResource FieldLabelSpacing}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
                             </Grid>
                         </StackPanel>
                     </Border>
-                </Grid>
+                </UniformGrid>
                 </ScrollViewer>
         </Grid>
 
-        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
-                   MinHeight="{StaticResource MessageAreaMinHeight}"
-                   Margin="{StaticResource FieldLabelSpacing}"/>
+        <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}" Margin="{StaticResource FieldLabelSpacing}">
+            <Border Background="{StaticResource FluentErrorBackground}"
+                    BorderBrush="{StaticResource FluentStrokeError}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource FluentCornerSmall}"
+                    Padding="{StaticResource SmallCardPadding}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="Please review highlighted fields and try again."
+                           Style="{StaticResource HintTextStyle}"
+                           Foreground="{StaticResource FluentError}"/>
+            </Border>
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
+                       AutomationProperties.LiveSetting="Assertive"
+                       AutomationProperties.HelpText="{Binding ErrorMessage}"/>
+        </StackPanel>
 
         <Grid Grid.Row="3" Margin="{StaticResource FormActionBarSpacing}">
             <Grid.ColumnDefinitions>
@@ -511,7 +557,9 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="{Binding RequiredFieldsProgress}"
                        VerticalAlignment="Center"
-                       Foreground="{Binding RequiredFieldsProgress, Converter={StaticResource HintForegroundConverter}}">
+                       Foreground="{Binding RequiredFieldsProgress, Converter={StaticResource HintForegroundConverter}}"
+                       AutomationProperties.LiveSetting="Polite"
+                       AutomationProperties.HelpText="{Binding RequiredFieldsProgress}">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource HintTextStyle}">
                         <Style.Triggers>
@@ -523,24 +571,6 @@
                 </TextBlock.Style>
             </TextBlock>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Border Background="{StaticResource FluentControlFillTertiary}"
-                        BorderBrush="{StaticResource FluentSurfaceStroke}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource FluentCornerSmall}"
-                        Padding="8,2"
-                        Margin="{StaticResource ItemSpacing}"
-                        VerticalAlignment="Center">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <TextBlock Text="Ctrl+Enter" Style="{StaticResource CaptionLabelStyle}" Margin="0"/>
-                </Border>
                 <Button Content="Complete Setup" Command="{Binding SaveCommand}"
                         AutomationProperties.Name="Complete first time setup">
                     <Button.Style>
@@ -566,7 +596,7 @@
                 Opacity="{StaticResource OverlayOpacity}"
                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"
                 IsHitTestVisible="True">
-            <Border Style="{StaticResource CardStyle}" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardPadding}" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel>
                     <TextBlock Text="&#xE895;" FontFamily="{StaticResource FluentIconFont}"
                                FontSize="{StaticResource FontSizeIconLarge}"

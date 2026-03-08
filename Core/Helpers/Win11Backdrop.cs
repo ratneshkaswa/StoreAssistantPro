@@ -23,7 +23,7 @@ public static class Win11Backdrop
     /// Applies DWM rounded corners to a top-level window.
     /// Call from SourceInitialized event.
     /// </summary>
-    public static void Apply(Window window, bool useMicaAlt = false)
+    public static void Apply(Window window)
     {
         if (!IsWindows11OrLater()) return;
 

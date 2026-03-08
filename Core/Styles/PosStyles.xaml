@@ -2,12 +2,12 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers">
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          PIN DOT STYLE
 
          Ellipse used in the login PIN display.  Adds a subtle scale
          pulse when the dot Fill changes from empty to filled.
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="PinDotStyle" TargetType="Ellipse">
         <Setter Property="Width" Value="{StaticResource PinDotSize}"/>
         <Setter Property="Height" Value="{StaticResource PinDotSize}"/>
@@ -36,7 +36,7 @@
         </Style.Triggers>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          SELECTABLE USER BUTTON
 
          POS-style role selection button with visual highlight when
@@ -50,7 +50,7 @@
                    Command="{Binding SelectUserCommand}"
                    CommandParameter="{x:Static models:UserType.Admin}"
                    Content="&#xE77B;  Admin"/>
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="SelectableUserButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
@@ -100,12 +100,12 @@
         </Style.Triggers>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          POS KEYPAD BUTTON
 
          Large touch-friendly button for POS-style PIN entry.
          Star-sized grid rows ensure buttons scale with the keypad area.
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="PosKeypadButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeDialogTitle}"/>
@@ -155,11 +155,11 @@
         </Setter>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          QUICK ACTION BAR BUTTON
 
          Enterprise POS toolbar button — large touch-friendly hit area
-         with vertically stacked icon, title, and shortcut hint.
+         with vertically stacked icon and title.
          Hover reveals a subtle background + accent bottom indicator
          matching the Fluent 2 tab selection pattern.
 
@@ -169,7 +169,7 @@
          Usage (inside ItemsControl.ItemTemplate):
            <Button Style="{StaticResource QuickActionButtonStyle}"
                    Command="{Binding Command}"/>
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="QuickActionButtonStyle" TargetType="Button">
         <Setter Property="MinWidth" Value="68"/>
         <Setter Property="MinHeight" Value="56"/>
@@ -184,7 +184,6 @@
         <!-- SmartTooltip — auto-wired from QuickAction DataContext -->
         <Setter Property="h:SmartTooltip.Header"     Value="{Binding Title}"/>
         <Setter Property="h:SmartTooltip.Text"       Value="{Binding Description}"/>
-        <Setter Property="h:SmartTooltip.Shortcut"   Value="{Binding ShortcutText}"/>
         <Setter Property="h:SmartTooltip.ContextKey" Value="{Binding HelpKey}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -211,15 +210,7 @@
                                            FontFamily="{StaticResource FluentFontFamily}"
                                            FontSize="{StaticResource FontSizeCaption}" FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
-                                           Margin="0,3,0,0"/>
-                                <TextBlock x:Name="ShortcutHint"
-                                           Text="{Binding ShortcutText}"
-                                           FontFamily="{StaticResource FluentFontFamily}"
-                                           FontSize="{StaticResource FontSizeStatusBar}"
-                                           Foreground="{StaticResource FluentTextTertiary}"
-                                           HorizontalAlignment="Center"
-                                           Margin="0,1,0,0"/>
-                            </StackPanel>
+                                           Margin="0,3,0,0"/></StackPanel>
                         </Border>
                         <!-- Accent bottom indicator (Fluent 2 hover highlight) -->
                         <Border x:Name="AccentIndicator"
@@ -228,12 +219,7 @@
                                 Background="{StaticResource FluentAccentDefault}"
                                 Opacity="0" Margin="8,0,8,2"/>
                     </Grid>
-                    <ControlTemplate.Triggers>
-                        <!-- Empty shortcut → collapse the hint row -->
-                        <DataTrigger Binding="{Binding ShortcutText}" Value="">
-                            <Setter TargetName="ShortcutHint" Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                        <Trigger Property="IsMouseOver" Value="True">
+                    <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Bd" Property="Background"
                                     Value="{StaticResource FluentSubtleHover}"/>
                             <Trigger.EnterActions>
@@ -323,7 +309,7 @@
         </Setter>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          ENTERPRISE ACTION BUTTON
 
          Modern flat action button with rounded corners, subtle hover
@@ -335,9 +321,9 @@
 
          Usage:
            <Button Style="{StaticResource EnterpriseActionButtonStyle}"
-                   Content="▶ Start Billing"
+                   Content="? Start Billing"
                    Command="{Binding ToggleBillingModeCommand}"/>
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="EnterpriseActionButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
@@ -450,19 +436,19 @@
         </Setter>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          DANGER ACTION BUTTON
 
          Same layout as EnterpriseActionButton but with error/danger
          color. Used for destructive or stop actions (Stop Billing,
          Delete, Cancel operations).
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="DangerActionButtonStyle" TargetType="Button"
            BasedOn="{StaticResource EnterpriseActionButtonStyle}">
         <Setter Property="Background" Value="{StaticResource FluentError}"/>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          STATUS BADGE PILL
 
          Compact rounded pill used in the quick-action bar and status
@@ -477,7 +463,7 @@
                    Background="{StaticResource FluentAccentDefault}">
                <TextBlock Text="MANAGEMENT" .../>
            </Border>
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="StatusBadgePillStyle" TargetType="Border">
         <Setter Property="CornerRadius" Value="{StaticResource FluentCornerSmall}"/>
         <Setter Property="Padding" Value="10,3"/>
@@ -485,12 +471,12 @@
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          TOOLBAR LINK BUTTON
 
          Minimal, borderless, text-only button for status bar and
          toolbar secondary actions (Logout, Clear all, etc.).
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="ToolbarLinkButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
@@ -596,12 +582,12 @@
         </Setter>
     </Style>
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          CART REMOVE BUTTON
 
-         Inline delete (✕) button for cart line items. Transparent at
+         Inline delete (?) button for cart line items. Transparent at
          rest, subtle hover highlight, error foreground on hover.
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="CartRemoveButtonStyle" TargetType="Button">
         <Setter Property="Padding" Value="4,1"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -633,7 +619,7 @@
     </Style>
 
 
-    <!-- ═══════════════════════════════════════════════════════════════
+    <!-- ===============================================================
          SEGMENTED TAB BUTTON
 
          Win11 Pivot/Tab-style button with an accent underline when
@@ -648,7 +634,7 @@
 
          The DataTrigger uses EqualityConverter to compare Tag (the
          tab index as string) with ActiveTab (int) via ToString().
-         ═══════════════════════════════════════════════════════════════ -->
+         =============================================================== -->
     <Style x:Key="SegmentedButtonStyle" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
@@ -702,7 +688,7 @@
             </Setter.Value>
         </Setter>
         <Style.Triggers>
-            <!-- When Tag matches ActiveTab → accent text color -->
+            <!-- When Tag matches ActiveTab ? accent text color -->
             <DataTrigger Value="True">
                 <DataTrigger.Binding>
                     <MultiBinding Converter="{StaticResource EqualityConverter}">
@@ -716,3 +702,6 @@
     </Style>
 
 </ResourceDictionary>
+
+
+

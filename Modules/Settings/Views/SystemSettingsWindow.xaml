@@ -6,7 +6,10 @@
         Title="System Settings"
         ConfirmCommand="{Binding SaveCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,6 +22,9 @@
 
         <!-- Settings sections -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    Focusable="False"
+                    CanContentScroll="True"
+                    PanningMode="VerticalOnly"
                     h:SmoothScroll.IsEnabled="True">
             <StackPanel>
 
@@ -129,8 +135,12 @@
         <!-- Messages -->
         <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
                     Margin="{StaticResource FieldLabelSpacing}">
-            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
+                       AutomationProperties.LiveSetting="Assertive"
+                       AutomationProperties.HelpText="{Binding ErrorMessage}"/>
             <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                       AutomationProperties.LiveSetting="Polite"
+                       AutomationProperties.HelpText="{Binding SuccessMessage}"
                        h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
         </StackPanel>
 

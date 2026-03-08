@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
@@ -51,6 +52,28 @@ public static class SmoothScroll
     {
         if (sender is not ScrollViewer sv) return;
 
+        // Let child selectors (e.g., ComboBox) consume wheel input so
+        // dropdown scrolling and selection cycling work as expected.
+        if (e.OriginalSource is DependencyObject source && IsInsideComboBox(source))
+            return;
+
+        // If wheel originates from a Popup tree (e.g., ComboBox dropdown),
+        // do not hijack it with parent smooth scrolling.
+        if (e.OriginalSource is DependencyObject popupSource &&
+            FindVisualAncestor<System.Windows.Controls.Primitives.Popup>(popupSource) is not null)
+            return;
+
+        // If focus is currently inside a ComboBox (editable or dropdown state),
+        // keep default wheel behavior to avoid broken selector scrolling.
+        if (Keyboard.FocusedElement is DependencyObject focused && IsInsideComboBox(focused))
+            return;
+
+        // If any ComboBox dropdown is open in this window, never hijack wheel.
+        // This prevents parent ScrollViewer animation from breaking dropdown list scrolling.
+        var root = Window.GetWindow(sv) as DependencyObject ?? sv;
+        if (HasOpenComboBox(root))
+            return;
+
         e.Handled = true;
 
         var currentTarget = (double)sv.GetValue(TargetOffsetProperty);
@@ -77,6 +100,43 @@ public static class SmoothScroll
         // Use a mediator to animate ScrollViewer.VerticalOffset (read-only DP)
         var mediator = GetOrCreateMediator(sv);
         mediator.BeginAnimation(ScrollViewerOffsetMediator.VerticalOffsetProperty, animation);
+    }
+
+    private static bool IsInsideComboBox(DependencyObject start)
+        => FindVisualAncestor<ComboBox>(start) is not null;
+
+    private static T? FindVisualAncestor<T>(DependencyObject? current)
+        where T : DependencyObject
+    {
+        while (current is not null)
+        {
+            if (current is T match)
+                return match;
+
+            current = current switch
+            {
+                Visual or System.Windows.Media.Media3D.Visual3D => VisualTreeHelper.GetParent(current),
+                _ => LogicalTreeHelper.GetParent(current)
+            };
+        }
+
+        return null;
+    }
+
+    private static bool HasOpenComboBox(DependencyObject root)
+    {
+        if (root is ComboBox cb && cb.IsDropDownOpen)
+            return true;
+
+        var count = VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (HasOpenComboBox(child))
+                return true;
+        }
+
+        return false;
     }
 
     private static ScrollViewerOffsetMediator GetOrCreateMediator(ScrollViewer sv)
