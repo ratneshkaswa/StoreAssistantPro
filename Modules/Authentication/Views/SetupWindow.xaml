@@ -8,7 +8,8 @@
         Closing="OnWindowClosing"
         SizeToContent="Manual"
         UseLayoutRounding="True"
-        SnapsToDevicePixels="True">
+        SnapsToDevicePixels="True"
+        Background="{StaticResource AppBackgroundBrush}">
 
     <Window.Resources>
         <Style x:Key="PinStrengthSegmentStyle" TargetType="Border">
@@ -48,7 +49,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="{StaticResource PagePadding}">
+    <Grid Margin="{StaticResource PagePadding}" h:Motion.WindowFadeIn="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -99,7 +100,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- ??? Column 1: Firm Profile + Tax & Legal ??? -->
+                    <!-- Column 1: Firm Profile + Tax & Legal -->
                     <StackPanel Grid.Column="0">
                         <Border Style="{StaticResource CardStyle}" VerticalAlignment="Top">
                             <StackPanel>
@@ -244,7 +245,7 @@
                     </Border>
                     </StackPanel>
 
-                    <!-- ??? Column 2: Regional Settings + Master PIN ??? -->
+                    <!-- Column 2: Regional Settings + Master PIN -->
                     <StackPanel Grid.Column="2">
                         <Border Style="{StaticResource CardStyle}">
                             <StackPanel>
@@ -354,7 +355,7 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- ??? Column 3: Security PINs (Admin / Manager / User) ??? -->
+                    <!-- Column 3: Security PINs (Admin / Manager / User) -->
                     <Border Grid.Column="4" Style="{StaticResource CardStyle}" VerticalAlignment="Top">
                         <StackPanel>
                             <TextBlock Text="Security PINs" Style="{StaticResource SectionHeaderStyle}"/>
