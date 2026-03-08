@@ -291,13 +291,13 @@
                                         <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
                                         <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
                                         <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                        <TextBlock Text="{Binding MasterPinWarning}"
+                                                   FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
+                                                   Margin="4,0,0,0" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding MasterPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                        </TextBlock>
                                     </StackPanel>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MasterPinWarning}"
-                                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
-                                               Margin="{StaticResource ValidationHintMargin}" HorizontalAlignment="Right"
-                                               TextTrimming="CharacterEllipsis">
-                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding MasterPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                    </TextBlock>
 
                                     <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                     <PasswordBox Grid.Row="4" Grid.Column="1" x:Name="MasterPinConfirmBox" TabIndex="16" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Master PIN"/>
@@ -361,13 +361,13 @@
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                    <TextBlock Text="{Binding AdminPinWarning}"
+                                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
+                                               Margin="4,0,0,0" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding AdminPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AdminPinWarning}"
-                                           FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
-                                           Margin="{StaticResource ValidationHintMargin}" HorizontalAlignment="Right"
-                                           TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding AdminPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
                                 <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="4" Grid.Column="1" x:Name="AdminPinConfirmBox" TabIndex="31" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Admin PIN"/>
                                 <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding AdminConfirmHint}"
@@ -389,13 +389,13 @@
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                    <TextBlock Text="{Binding ManagerPinWarning}"
+                                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
+                                               Margin="4,0,0,0" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding ManagerPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
-                                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding ManagerPinWarning}"
-                                           FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
-                                           Margin="{StaticResource ValidationHintMargin}" HorizontalAlignment="Right"
-                                           TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding ManagerPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
                                 <TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="11" Grid.Column="1" x:Name="ManagerPinConfirmBox" TabIndex="33" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Manager PIN"/>
                                 <TextBlock Grid.Row="12" Grid.Column="1" Text="{Binding ManagerConfirmHint}"
@@ -417,13 +417,13 @@
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
                                     <Border Width="{StaticResource StrengthBarWidth}" Height="{StaticResource StrengthBarHeight}" CornerRadius="{StaticResource FluentCornerXSmall}" Margin="{StaticResource StrengthBarGap}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                                    <TextBlock Text="{Binding UserPinWarning}"
+                                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
+                                               Margin="4,0,0,0" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis">
+                                        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding UserPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
-                                <TextBlock Grid.Row="16" Grid.Column="1" Text="{Binding UserPinWarning}"
-                                           FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentWarning}"
-                                           Margin="{StaticResource ValidationHintMargin}" HorizontalAlignment="Right"
-                                           TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding UserPinWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                </TextBlock>
                                 <TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                 <PasswordBox Grid.Row="18" Grid.Column="1" x:Name="UserPinConfirmBox" TabIndex="35" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm User PIN"/>
                                 <TextBlock Grid.Row="19" Grid.Column="1" Text="{Binding UserConfirmHint}"
