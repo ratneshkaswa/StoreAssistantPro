@@ -258,6 +258,7 @@ public partial class SetupViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AdminPinWarning))]
+    [NotifyPropertyChangedFor(nameof(AdminPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(AdminPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
@@ -274,6 +275,7 @@ public partial class SetupViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ManagerPinWarning))]
+    [NotifyPropertyChangedFor(nameof(ManagerPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(ManagerPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
@@ -290,6 +292,7 @@ public partial class SetupViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UserPinWarning))]
+    [NotifyPropertyChangedFor(nameof(UserPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(UserPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
@@ -307,6 +310,7 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MasterConfirmHint))]
     [NotifyPropertyChangedFor(nameof(MasterPinWarning))]
+    [NotifyPropertyChangedFor(nameof(MasterPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(MasterPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
@@ -324,9 +328,13 @@ public partial class SetupViewModel : BaseViewModel
     // ── Weak PIN warnings (non-blocking guidance) ──
 
     public string AdminPinWarning => GetPinWarning(AdminPin);
+    public string AdminPinWarningDetail => GetPinWarningDetail(AdminPin);
     public string ManagerPinWarning => GetPinWarning(ManagerPin);
+    public string ManagerPinWarningDetail => GetPinWarningDetail(ManagerPin);
     public string UserPinWarning => GetPinWarning(UserPin);
+    public string UserPinWarningDetail => GetPinWarningDetail(UserPin);
     public string MasterPinWarning => GetMasterPinWarning(MasterPin);
+    public string MasterPinWarningDetail => GetMasterPinWarningDetail(MasterPin);
 
     // S5: PIN strength (0-3: empty, weak, fair, strong)
     public int AdminPinStrength => GetPinStrength(AdminPin);
@@ -425,21 +433,32 @@ public partial class SetupViewModel : BaseViewModel
             ErrorMessage = result.ErrorMessage ?? "Setup failed.";
     });
 
-    private static string GetPinWarning(string pin)
-    {
-        if (pin.Length < 4) return string.Empty;
-        if (pin is "0000" or "1234" or "4321" or "1111" or "2222" or "3333"
-            or "4444" or "5555" or "6666" or "7777" or "8888" or "9999")
-            return "⚠ Weak PIN — consider a less predictable combination.";
-        return string.Empty;
-    }
+    private const string WeakPinShortText = "⚠ Weak PIN";
+    private const string WeakPinDetailText = "⚠ Weak PIN — consider a less predictable combination.";
+    private const string WeakMasterPinShortText = "⚠ Weak PIN";
+    private const string WeakMasterPinDetailText = "⚠ Weak — consider a less predictable combination.";
+
+    private static bool IsWeakUserPin(string pin) =>
+        pin is "0000" or "1234" or "4321" or "1111" or "2222" or "3333"
+            or "4444" or "5555" or "6666" or "7777" or "8888" or "9999";
+
+    private static bool IsWeakMasterPin(string pin) =>
+        pin is "000000" or "123456" or "654321" or "111111" or "222222" or "333333"
+            or "444444" or "555555" or "666666" or "777777" or "888888" or "999999";
+
+    private static string GetPinWarning(string pin) => pin.Length >= 4 && IsWeakUserPin(pin)
+        ? WeakPinShortText
+        : string.Empty;
+
+    private static string GetPinWarningDetail(string pin) => pin.Length >= 4 && IsWeakUserPin(pin)
+        ? WeakPinDetailText
+        : string.Empty;
 
     // S5: PIN strength meter (0=empty, 1=weak, 2=fair, 3=strong)
     private static int GetPinStrength(string pin)
     {
         if (pin.Length < 4) return 0;
-        if (pin is "0000" or "1234" or "4321" or "1111" or "2222" or "3333"
-            or "4444" or "5555" or "6666" or "7777" or "8888" or "9999")
+        if (IsWeakUserPin(pin))
             return 1;
         var distinct = pin.Distinct().Count();
         if (distinct <= 2) return 2;
@@ -483,18 +502,19 @@ public partial class SetupViewModel : BaseViewModel
 
     private static string GetMasterPinWarning(string pin)
     {
-        if (pin.Length < 6) return string.Empty;
-        if (pin is "000000" or "123456" or "654321" or "111111" or "222222" or "333333"
-            or "444444" or "555555" or "666666" or "777777" or "888888" or "999999")
-            return "⚠ Weak — consider a less predictable combination.";
-        return string.Empty;
+        return pin.Length >= 6 && IsWeakMasterPin(pin)
+            ? WeakMasterPinShortText
+            : string.Empty;
     }
+
+    private static string GetMasterPinWarningDetail(string pin) => pin.Length >= 6 && IsWeakMasterPin(pin)
+        ? WeakMasterPinDetailText
+        : string.Empty;
 
     private static int GetMasterPinStrength(string pin)
     {
         if (pin.Length < 6) return 0;
-        if (pin is "000000" or "123456" or "654321" or "111111" or "222222" or "333333"
-            or "444444" or "555555" or "666666" or "777777" or "888888" or "999999")
+        if (IsWeakMasterPin(pin))
             return 1;
         var distinct = pin.Distinct().Count();
         if (distinct <= 2) return 2;
