@@ -30,6 +30,9 @@ public static class Win11Backdrop
     {
         if (!IsWindows11OrLater()) return;
 
+        // Transparent background lets DWM glass + caption buttons show through
+        window.Background = System.Windows.Media.Brushes.Transparent;
+
         // Apply WindowChrome for extended title bar.
         // CornerRadius is 0 — DWM handles rounding at the compositor level.
         var chrome = new WindowChrome
@@ -57,6 +60,9 @@ public static class Win11Backdrop
     public static void ApplyDialog(Window window)
     {
         if (!IsWindows11OrLater()) return;
+
+        // Transparent background lets DWM glass + caption buttons show through
+        window.Background = System.Windows.Media.Brushes.Transparent;
 
         var chrome = new WindowChrome
         {

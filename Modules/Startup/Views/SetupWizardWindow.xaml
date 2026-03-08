@@ -162,7 +162,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
                         <DataGridTextColumn Header="Slab %" Binding="{Binding SlabPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleReadOnlyTemplate}" Width="{StaticResource ColumnWidthQty}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -300,7 +300,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="Tax" Binding="{Binding Tax.TaxName}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleReadOnlyTemplate}" Width="{StaticResource ColumnWidthQty}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

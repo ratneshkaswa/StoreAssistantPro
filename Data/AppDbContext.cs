@@ -274,7 +274,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(si => si.ProductVariant)
                   .WithMany()
                   .HasForeignKey(si => si.ProductVariantId)
-                  .OnDelete(DeleteBehavior.SetNull);
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasIndex(si => si.ProductVariantId);
         });
 

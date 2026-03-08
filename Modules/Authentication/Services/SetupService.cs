@@ -11,9 +11,13 @@ public class SetupService(
     IPerformanceMonitor perf) : ISetupService
 {
     public async Task InitializeAppAsync(
-        string firmName, string address, string phone,
-        string email, string gstin, string currencyCode,
-        string adminPin, string managerPin, string userPin, string masterPin,
+        string firmName, string address, string state, string pincode,
+        string phone, string email, string gstin, string pan,
+        string currencyCode, string currencySymbol,
+        int financialYearStartMonth, int financialYearEndMonth,
+        string dateFormat,
+        string adminPin, string managerPin,
+        string userPin, string masterPin,
         CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("SetupService.InitializeAppAsync");
@@ -26,17 +30,17 @@ public class SetupService(
         {
             FirmName = firmName,
             Address = address,
-            State = string.Empty,
-            Pincode = string.Empty,
+            State = string.IsNullOrWhiteSpace(state) ? string.Empty : state,
+            Pincode = string.IsNullOrWhiteSpace(pincode) ? string.Empty : pincode,
             Phone = phone,
             Email = string.IsNullOrWhiteSpace(email) ? string.Empty : email,
             GSTNumber = string.IsNullOrWhiteSpace(gstin) ? null : gstin,
-            PANNumber = null,
+            PANNumber = string.IsNullOrWhiteSpace(pan) ? null : pan,
             CurrencyCode = string.IsNullOrWhiteSpace(currencyCode) ? "INR" : currencyCode,
-            CurrencySymbol = "₹",
-            FinancialYearStartMonth = 4,
-            FinancialYearEndMonth = 3,
-            DateFormat = "dd/MM/yyyy",
+            CurrencySymbol = string.IsNullOrWhiteSpace(currencySymbol) ? "₹" : currencySymbol,
+            FinancialYearStartMonth = financialYearStartMonth is >= 1 and <= 12 ? financialYearStartMonth : 4,
+            FinancialYearEndMonth = financialYearEndMonth is >= 1 and <= 12 ? financialYearEndMonth : 3,
+            DateFormat = string.IsNullOrWhiteSpace(dateFormat) ? "dd/MM/yyyy" : dateFormat,
             NumberFormat = "Indian",
             IsInitialized = true,
             MasterPinHash = PinHasher.Hash(masterPin)
@@ -63,7 +67,7 @@ public class SetupService(
         SeedDefaultTaxSlabs(context);
         SeedColours(context);
         SeedSystemSettings(context);
-        SeedFinancialYear(context);
+        SeedFinancialYear(context, financialYearStartMonth);
 
         try
         {
@@ -114,15 +118,14 @@ public class SetupService(
     }
 
     /// <summary>
-    /// Seeds the initial financial year based on the current date.
-    /// Indian FY runs April 1 – March 31.
+    /// Seeds the initial financial year using the user-selected start month.
     /// </summary>
-    private static void SeedFinancialYear(AppDbContext context)
+    private static void SeedFinancialYear(AppDbContext context, int fyStartMonth)
     {
         var now = DateTime.UtcNow;
-        var fyStart = now.Month >= 4
-            ? new DateTime(now.Year, 4, 1)
-            : new DateTime(now.Year - 1, 4, 1);
+        var fyStart = now.Month >= fyStartMonth
+            ? new DateTime(now.Year, fyStartMonth, 1)
+            : new DateTime(now.Year - 1, fyStartMonth, 1);
         var fyEnd = fyStart.AddYears(1).AddDays(-1);
 
         context.FinancialYears.Add(new FinancialYear

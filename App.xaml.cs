@@ -160,16 +160,12 @@ public partial class App : Application
                 return;
             }
 
-            // First-run setup wizard — runs once after initial login
+            // Auto-mark setup as completed — users configure Firm/Tax/Vendor/Products
+            // from within the main app after login.
             var settingsService = _host.Services.GetRequiredService<ISystemSettingsService>();
             if (!await settingsService.IsSetupCompletedAsync())
             {
-                var wizardFlow = _host.Services.GetRequiredService<ISetupWizardFlow>();
-                if (!wizardFlow.RunSetupWizard())
-                {
-                    // User closed the wizard without finishing — stay in login loop
-                    continue;
-                }
+                await settingsService.MarkSetupCompletedAsync();
             }
 
             // Show main window (blocks until closed)

@@ -24,6 +24,8 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
     [ObservableProperty]
     public partial string DefaultTaxMode { get; set; } = "Exclusive";
 
+    public IReadOnlyList<string> TaxModes { get; } = ["Exclusive", "Inclusive"];
+
     [ObservableProperty]
     public partial string RestoreFilePath { get; set; } = string.Empty;
 

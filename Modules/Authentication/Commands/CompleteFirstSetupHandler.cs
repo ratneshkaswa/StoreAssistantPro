@@ -10,8 +10,11 @@ public class CompleteFirstSetupHandler(ISetupService setupService)
     protected override async Task<CommandResult> ExecuteAsync(CompleteFirstSetupCommand command, CancellationToken ct)
     {
         await setupService.InitializeAppAsync(
-            command.FirmName, command.Address, command.Phone,
-            command.Email, command.GSTIN, command.CurrencyCode,
+            command.FirmName, command.Address, command.State, command.Pincode,
+            command.Phone, command.Email, command.GSTIN, command.PAN,
+            command.CurrencyCode, command.CurrencySymbol,
+            command.FinancialYearStartMonth, command.FinancialYearEndMonth,
+            command.DateFormat,
             command.AdminPin, command.ManagerPin,
             command.UserPin, command.MasterPin, ct);
 

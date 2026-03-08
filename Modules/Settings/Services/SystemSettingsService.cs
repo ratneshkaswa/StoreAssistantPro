@@ -127,8 +127,12 @@ public class SystemSettingsService(
     public async Task MarkSetupCompletedAsync(CancellationToken ct = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        var settings = await context.SystemSettings.FirstOrDefaultAsync(ct).ConfigureAwait(false)
-            ?? throw new InvalidOperationException("System settings not found.");
+        var settings = await context.SystemSettings.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        if (settings is null)
+        {
+            settings = new SystemSettings { DefaultTaxMode = "Exclusive", AutoBackupEnabled = false };
+            context.SystemSettings.Add(settings);
+        }
         settings.SetupCompleted = true;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
         logger.LogInformation("First-run setup wizard completed");

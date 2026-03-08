@@ -76,11 +76,22 @@
         </Setter>
     </Style>
 
-    <!-- Reusable DataTemplate for Active toggle column -->
-    <DataTemplate x:Key="ActiveToggleCellTemplate">
+    <!-- Read-only display toggle (setup wizards, info-only grids) -->
+    <DataTemplate x:Key="ActiveToggleReadOnlyTemplate">
         <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
                   IsChecked="{Binding IsActive, Mode=OneWay}"
                   IsHitTestVisible="False"/>
+    </DataTemplate>
+
+    <!-- Interactive toggle — fires ToggleActiveCommand on the DataGrid's DataContext.
+         Clicking the toggle selects the row (mouse-down) then fires the command (click).
+         Binding stays OneWay so the entity is never mutated locally; the command
+         round-trips through the service and reloads the list. -->
+    <DataTemplate x:Key="ActiveToggleCellTemplate">
+        <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                  IsChecked="{Binding IsActive, Mode=OneWay}"
+                  Command="{Binding DataContext.ToggleActiveCommand,
+                            RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
     </DataTemplate>
 
 </ResourceDictionary>

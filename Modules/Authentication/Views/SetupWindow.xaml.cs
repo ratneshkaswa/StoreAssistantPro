@@ -19,7 +19,8 @@ public partial class SetupWindow : Window
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
 
-        sizing.ConfigureStartupWindow(this, 640, 820);
+        var workArea = System.Windows.SystemParameters.WorkArea;
+        sizing.ConfigureStartupWindow(this, workArea.Width * 0.80, workArea.Height * 0.85);
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this, useMicaAlt: true);
 
         // Enforce numeric-only input + paste protection on all PIN PasswordBoxes
@@ -31,6 +32,18 @@ public partial class SetupWindow : Window
             DataObject.AddPastingHandler(box, OnPastingNumericOnly);
         }
 
+        // Pincode is also numeric-only
+        PincodeBox.PreviewTextInput += OnPreviewNumericOnly;
+        DataObject.AddPastingHandler(PincodeBox, OnPastingNumericOnly);
+
+        // Phone allows digits, +, -, spaces
+        PhoneBox.PreviewTextInput += OnPreviewPhoneOnly;
+        DataObject.AddPastingHandler(PhoneBox, OnPastingPhoneOnly);
+
+        // #8/#9: Force-uppercase pasted text for GSTIN and PAN
+        DataObject.AddPastingHandler(GstinBox, OnPastingUpperCase);
+        DataObject.AddPastingHandler(PanBox, OnPastingUpperCase);
+
         PreviewKeyDown += OnPreviewKeyDown;
 
         // Focus firm name on load
@@ -40,10 +53,28 @@ public partial class SetupWindow : Window
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Enter) return;
         if (DataContext is not SetupViewModel vm) return;
 
-        // IsBusy guard — don't fire commands while a save is in progress
+        // #4: Escape key closes window (triggers OnWindowClosing confirmation)
+        if (e.Key == Key.Escape)
+        {
+            Close();
+            e.Handled = true;
+            return;
+        }
+
+        // #5: Ctrl+Enter saves from anywhere
+        if (e.Key == Key.Enter && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            if (!vm.IsBusy && vm.SaveCommand.CanExecute(null))
+                vm.SaveCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key != Key.Enter) return;
+
+        // IsBusy guard
         if (vm.IsBusy) { e.Handled = true; return; }
 
         // Don't trigger save when focus is inside editable fields
@@ -76,6 +107,23 @@ public partial class SetupWindow : Window
             vm.MasterPin = MasterPinBox.Password;
         else if (sender == MasterPinConfirmBox)
             vm.MasterPinConfirm = MasterPinConfirmBox.Password;
+
+        // Auto-advance focus when PIN reaches max length
+        if (sender is PasswordBox pb && pb.Password.Length == pb.MaxLength)
+            AdvancePinFocus(pb);
+    }
+
+    private void AdvancePinFocus(PasswordBox current)
+    {
+        PasswordBox? next = current == AdminPinBox ? AdminPinConfirmBox
+            : current == AdminPinConfirmBox ? ManagerPinBox
+            : current == ManagerPinBox ? ManagerPinConfirmBox
+            : current == ManagerPinConfirmBox ? UserPinBox
+            : current == UserPinBox ? UserPinConfirmBox
+            : current == MasterPinBox ? MasterPinConfirmBox
+            : null;
+
+        next?.Focus();
     }
 
     /// <summary>Only allow digit characters in PIN fields.</summary>
@@ -99,6 +147,29 @@ public partial class SetupWindow : Window
         }
     }
 
+    /// <summary>
+    /// #8/#9: Force-uppercase pasted text for GSTIN/PAN.
+    /// <c>CharacterCasing="Upper"</c> only affects typed input; pasted text stays lowercase.
+    /// </summary>
+    private static void OnPastingUpperCase(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(typeof(string)))
+        {
+            var text = (string)e.DataObject.GetData(typeof(string))!;
+            var upper = text.ToUpperInvariant();
+            if (upper != text)
+            {
+                e.CancelCommand();
+                if (sender is TextBox tb)
+                {
+                    var caret = tb.CaretIndex;
+                    tb.Text = tb.Text.Insert(caret, upper);
+                    tb.CaretIndex = caret + upper.Length;
+                }
+            }
+        }
+    }
+
     /// <summary>Confirm close if setup is in progress.</summary>
     private void OnWindowClosing(object? sender, CancelEventArgs e)
     {
@@ -117,6 +188,30 @@ public partial class SetupWindow : Window
             e.Cancel = true;
     }
 
+    /// <summary>Allow only digits, +, -, and spaces in Phone field.</summary>
+    private static void OnPreviewPhoneOnly(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = !PhoneCharRegex().IsMatch(e.Text);
+    }
+
+    /// <summary>Reject paste that contains invalid phone characters.</summary>
+    private static void OnPastingPhoneOnly(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(typeof(string)))
+        {
+            var text = (string)e.DataObject.GetData(typeof(string))!;
+            if (!SetupViewModel.PhoneInputRegex().IsMatch(text))
+                e.CancelCommand();
+        }
+        else
+        {
+            e.CancelCommand();
+        }
+    }
+
     [GeneratedRegex(@"^\d+$")]
     private static partial Regex DigitsOnlyRegex();
+
+    [GeneratedRegex(@"^[\d\s\+\-]$")]
+    private static partial Regex PhoneCharRegex();
 }

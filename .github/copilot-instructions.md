@@ -50,6 +50,10 @@ These eight systems are frozen. Extend through existing interfaces only:
 - Field widths: `FieldWidthCompact`, `FieldWidthStandard`, `FieldWidthWide` — never raw numbers.
 - DataGrid columns: `ColumnWidthId`, `ColumnWidthPrice`, `ColumnWidthQty`, etc. One column must be `Width="*"`.
 
+#### Layout Optimization
+
+- App targets 1920×1080 resolution monitors. Layout decisions should be optimized for this resolution.
+
 #### Dialog Field Sizing
 
 - Input field sizes must match their content:

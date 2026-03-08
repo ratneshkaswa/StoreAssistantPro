@@ -46,7 +46,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
                     <DataGridTextColumn Header="Slab %" Binding="{Binding SlabPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleReadOnlyTemplate}" Width="{StaticResource ColumnWidthQty}"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -123,7 +123,16 @@
                           HeadersVisibility="Column" CanUserAddRows="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Group Name" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTemplateColumn Header="Active" Width="{StaticResource ColumnWidthQty}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                                              IsChecked="{Binding IsActive, Mode=OneWay}"
+                                              Command="{Binding DataContext.ToggleGroupActiveCommand,
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -263,7 +272,16 @@
                     <DataGridTextColumn Header="HSN Code" Binding="{Binding Code}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
                     <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                    <DataGridTemplateColumn Header="Active" Width="{StaticResource ColumnWidthQty}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                                          IsChecked="{Binding IsActive, Mode=OneWay}"
+                                          Command="{Binding DataContext.ToggleHSNActiveCommand,
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
 

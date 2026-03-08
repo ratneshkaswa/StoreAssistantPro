@@ -291,6 +291,8 @@
     <Thickness x:Key="StepConnectorMargin">4,0</Thickness>
     <Thickness x:Key="StrengthBarGap">0,2,3,0</Thickness>
     <Thickness x:Key="StrengthLabelGap">6,0,0,0</Thickness>
+    <Thickness x:Key="ValidationHintMargin">0,2,0,0</Thickness>
+    <Thickness x:Key="CrossHintMargin">0,4,0,0</Thickness>
     <Thickness x:Key="RoleSectionPadding">8,4</Thickness>
     <Thickness x:Key="RoleSectionMargin">0,0,0,8</Thickness>
     <Thickness x:Key="BadgeOffset">0,-2,2,0</Thickness>

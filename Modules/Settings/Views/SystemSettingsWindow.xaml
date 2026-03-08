@@ -120,10 +120,8 @@
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <ComboBox Grid.Row="6" Grid.Column="1"
                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                              SelectedItem="{Binding DefaultTaxMode}">
-                        <ComboBoxItem Content="Exclusive"/>
-                        <ComboBoxItem Content="Inclusive"/>
-                    </ComboBox>
+                              ItemsSource="{Binding TaxModes}"
+                              SelectedItem="{Binding DefaultTaxMode}"/>
                 </Grid>
             </StackPanel>
         </ScrollViewer>
