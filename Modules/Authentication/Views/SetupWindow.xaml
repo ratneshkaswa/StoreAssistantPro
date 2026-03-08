@@ -64,6 +64,17 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="SetupSidebarButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="{StaticResource InlineControlSpacing}"/>
+        </Style>
+
+        <Style x:Key="SetupSidebarIconStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeDialogTitle}"/>
+            <Setter Property="Margin" Value="{StaticResource InlineControlSpacing}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="{StaticResource PagePadding}" h:Motion.WindowFadeIn="True"
@@ -86,7 +97,54 @@
         </StackPanel>
 
         <Grid Grid.Row="1">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FieldWidthWide}"/>
+                    <ColumnDefinition Width="{StaticResource FormRowSpacing}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" VerticalAlignment="Top">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionHeaderStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE80F;"/><Run Text=" Setup Home"/></TextBlock>
+                        <StackPanel Margin="{StaticResource StepContentTopSpacing}">
+                            <Button Tag="FirmProfileSection" Style="{StaticResource SetupSidebarButtonStyle}" Click="OnSidebarSectionClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE80F;" FontFamily="{StaticResource FluentIconFont}" Foreground="{StaticResource FluentAccentDefault}" Style="{StaticResource SetupSidebarIconStyle}"/>
+                                    <TextBlock Text="Firm Profile" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Tag="TaxLegalSection" Style="{StaticResource SetupSidebarButtonStyle}" Click="OnSidebarSectionClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8A5;" FontFamily="{StaticResource FluentIconFont}" Foreground="{StaticResource FluentWarning}" Style="{StaticResource SetupSidebarIconStyle}"/>
+                                    <TextBlock Text="Tax and Legal" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Tag="RegionalSection" Style="{StaticResource SetupSidebarButtonStyle}" Click="OnSidebarSectionClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE774;" FontFamily="{StaticResource FluentIconFont}" Foreground="{StaticResource FluentInfo}" Style="{StaticResource SetupSidebarIconStyle}"/>
+                                    <TextBlock Text="Regional Settings" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Tag="SecuritySection" Style="{StaticResource SetupSidebarButtonStyle}" Click="OnSidebarSectionClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE72E;" FontFamily="{StaticResource FluentIconFont}" Foreground="{StaticResource FluentSuccess}" Style="{StaticResource SetupSidebarIconStyle}"/>
+                                    <TextBlock Text="Security Settings" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
                             h:Motion.FadeIn="True">
                     <TextBlock Text="&#xE73E;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}" HorizontalAlignment="Center"
@@ -107,7 +165,7 @@
                 </StackPanel>
 
                 <!-- Responsive layout (3/2/1 columns): Firm Profile | Tax+Master | Security PINs -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               Focusable="False"
                               CanContentScroll="False"
@@ -124,13 +182,12 @@
                             </Style.Triggers>
                         </Style>
                     </ScrollViewer.Style>
-                <UniformGrid VerticalAlignment="Top"
-                             Margin="{StaticResource InlineControlSpacing}"
-                             Columns="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualWidth, Converter={StaticResource SetupColumnsConverter}}">
+                <StackPanel VerticalAlignment="Top"
+                            Margin="{StaticResource InlineControlSpacing}">
 
                     <!-- Column 1: Firm Profile + Tax & Legal -->
                     <StackPanel Margin="{StaticResource InlineControlSpacing}">
-                        <Border Style="{StaticResource CardStyle}" VerticalAlignment="Top" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="0">
+                        <Border x:Name="FirmProfileSection" Style="{StaticResource CardStyle}" VerticalAlignment="Top" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="0">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Firm Profile section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8D2;"/><Run Text=" Firm Profile"/></TextBlock>
                                 <Grid Margin="{StaticResource StepContentTopSpacing}">
@@ -215,7 +272,7 @@
                             </StackPanel>
                         </Border>
 
-                    <Border Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="1">
+                    <Border x:Name="TaxLegalSection" Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="1">
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Tax and Legal section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A5;"/><Run Text=" Tax &amp; Legal"/></TextBlock>
                             <Grid Margin="{StaticResource StepContentTopSpacing}">
@@ -265,7 +322,7 @@
 
                     <!-- Column 2: Regional Settings + Master PIN -->
                     <StackPanel Margin="{StaticResource InlineControlSpacing}">
-                        <Border Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="2">
+                        <Border x:Name="RegionalSection" Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="2">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Regional Settings section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE774;"/><Run Text=" Regional Settings"/></TextBlock>
                                 <Grid Margin="{StaticResource StepContentTopSpacing}">
@@ -323,7 +380,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="3">
+                        <Border x:Name="SecuritySection" Style="{StaticResource CardStyle}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="3">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Master PIN section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE72E;"/><Run Text=" Master PIN"/></TextBlock>
                                 <Grid Margin="{StaticResource StepContentTopSpacing}">
@@ -518,7 +575,7 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-                </UniformGrid>
+                </StackPanel>
                 </ScrollViewer>
         </Grid>
 

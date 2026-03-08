@@ -79,6 +79,15 @@ public partial class SetupWindow : Window
         if (error.Contains("Phone", StringComparison.OrdinalIgnoreCase)) { PhoneBox.Focus(); }
     }
 
+    private void OnSidebarSectionClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string targetName })
+            return;
+
+        if (FindName(targetName) is FrameworkElement target)
+            target.BringIntoView();
+    }
+
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (DataContext is not SetupViewModel vm) return;
