@@ -13,7 +13,6 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Title -->
@@ -31,85 +30,97 @@
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
-        <!-- Customer grid -->
-        <DataGrid AutomationProperties.Name="Customers list" Grid.Row="2"
-                  ItemsSource="{Binding Customers}"
-                  SelectedItem="{Binding SelectedCustomer}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  SelectionMode="Single"
-                  HeadersVisibility="Column" CanUserAddRows="False"
-                  Margin="{StaticResource ItemSpacing}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridTextColumn Header="GSTIN" Binding="{Binding GSTIN}" Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <!-- Form fields -->
-        <Grid Grid.Row="3" Margin="{StaticResource ItemSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- DataGrid + Form share the * row -->
+        <Grid Grid.Row="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" MaxHeight="280"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-            </TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1"
-                     Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="200" h:Watermark.Text="Customer name"/>
+            <!-- Customer grid -->
+            <DataGrid AutomationProperties.Name="Customers list"
+                      ItemsSource="{Binding Customers}"
+                      SelectedItem="{Binding SelectedCustomer}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column" CanUserAddRows="False"
+                      Margin="{StaticResource ItemSpacing}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="GSTIN" Binding="{Binding GSTIN}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Phone"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="2" Grid.Column="1"
-                     Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
-                     Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                     MaxLength="15" h:Watermark.Text="10-digit mobile"/>
+            <!-- Form fields (scrollable when clamped) -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                          Margin="{StaticResource ItemSpacing}"
+                          h:SmoothScroll.IsEnabled="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="4" Grid.Column="1"
-                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="200" h:Watermark.Text="email@example.com"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                        <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    </TextBlock>
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="200" h:Watermark.Text="Customer name"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Text="Address"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="6" Grid.Column="1"
-                     Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="500" h:Watermark.Text="Full address"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Phone"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1"
+                             Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                             MaxLength="15" h:Watermark.Text="10-digit mobile"/>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" Text="GSTIN"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="8" Grid.Column="1"
-                     Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
-                     Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
-                     MaxLength="15" h:Watermark.Text="15-char GST number"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1"
+                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="200" h:Watermark.Text="email@example.com"/>
 
-            <TextBlock Grid.Row="10" Grid.Column="0" Text="Notes"
-                       Style="{StaticResource FormRowLabelStyle}"/>
-            <TextBox Grid.Row="10" Grid.Column="1"
-                     Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="500" h:Watermark.Text="Optional notes"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Address"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="6" Grid.Column="1"
+                             Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="500" h:Watermark.Text="Full address"/>
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="GSTIN"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="8" Grid.Column="1"
+                             Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
+                             MaxLength="15" h:Watermark.Text="15-char GST number"/>
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Notes"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="10" Grid.Column="1"
+                             Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="500" h:Watermark.Text="Optional notes"/>
+                </Grid>
+            </ScrollViewer>
         </Grid>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="4" MinHeight="{StaticResource MessageAreaMinHeight}"
+        <StackPanel Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
                     Margin="{StaticResource FieldLabelSpacing}">
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
             <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
@@ -117,7 +128,7 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right"
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="New" Command="{Binding NewCustomerCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
