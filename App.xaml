@@ -26,7 +26,7 @@
                 <ResourceDictionary Source="Core/Styles/PosStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Global Window background (overridden to Transparent on Win11 by Win11Backdrop for Mica) -->
+            <!-- Global Window background -->
             <Style TargetType="Window">
                 <Setter Property="Background" Value="{StaticResource AppBackgroundBrush}"/>
             </Style>

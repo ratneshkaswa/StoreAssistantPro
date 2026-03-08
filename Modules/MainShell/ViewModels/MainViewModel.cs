@@ -162,7 +162,6 @@ public partial class MainViewModel : BaseViewModel
         AppState.PropertyChanged += OnAppStatePropertyChanged;
         _features.PropertyChanged += OnFeaturesPropertyChanged;
         _eventBus.Subscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
-        _eventBus.Subscribe<DensityChangedEvent>(OnDensityChangedAsync);
 
         RegisterQuickActions();
         foreach (var contributor in contributors)
@@ -226,12 +225,6 @@ public partial class MainViewModel : BaseViewModel
     {
         await _notificationService.ClearAsync();
         IsNotificationsPanelVisible = false;
-    }
-
-    private Task OnDensityChangedAsync(DensityChangedEvent e)
-    {
-        _navigationService.NavigateTo(_currentPage);
-        return Task.CompletedTask;
     }
 
     private void NotifyCombinedVisibility()
@@ -607,7 +600,6 @@ public partial class MainViewModel : BaseViewModel
         AppState.PropertyChanged -= OnAppStatePropertyChanged;
         _features.PropertyChanged -= OnFeaturesPropertyChanged;
         _eventBus.Unsubscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
-        _eventBus.Unsubscribe<DensityChangedEvent>(OnDensityChangedAsync);
         DashboardSummary.Dispose();
         base.Dispose();
     }

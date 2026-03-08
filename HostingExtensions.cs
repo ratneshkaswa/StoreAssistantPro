@@ -80,7 +80,6 @@ internal static class HostingExtensions
         services.AddSingleton<ISessionService, SessionService>();
         services.AddSingleton<IWindowRegistry, WindowRegistry>();
         services.AddSingleton<IWorkflowManager, WorkflowManager>();
-        services.AddSingleton<IZeroClickWorkflowService, ZeroClickWorkflowService>();
         services.AddSingleton<ICommandBus, CommandBus>();
         services.AddSingleton<ICommandExecutionPipeline, CommandExecutionPipeline>();
         services.AddTransient(typeof(ICommandPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
@@ -105,7 +104,6 @@ internal static class HostingExtensions
         services.AddSingleton<IOfflineModeService, OfflineModeService>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IToastService, ToastService>();
-        services.AddSingleton<IDensityService, DensityService>();
         services.AddSingleton<ICalmUIService, CalmUIService>();
         services.AddSingleton<IFocusRuleEngine, FocusRuleEngine>();
         services.AddSingleton<IPredictiveFocusService, PredictiveFocusService>();
@@ -113,14 +111,12 @@ internal static class HostingExtensions
         services.AddSingleton<ITipStateService, TipStateService>();
         services.AddSingleton<ITipRegistryService, TipRegistryService>();
         services.AddSingleton<IOnboardingJourneyService, OnboardingJourneyService>();
-        services.AddSingleton<IUserInteractionTracker, UserInteractionTracker>();
         services.AddSingleton<IContextHelpService, ContextHelpService>();
         services.AddSingleton<ITipRotationService, TipRotationService>();
         services.AddSingleton<OnboardingTipRegistrar>();
         services.AddSingleton<IIntentDetectionService, IntentDetectionService>();
         services.AddSingleton<IZeroClickPinService, ZeroClickPinService>();
         services.AddSingleton<ISmartEnterKeyService, SmartEnterKeyService>();
-        services.AddSingleton<IMicroFeedbackService, MicroFeedbackService>();
         services.AddSingleton<IZeroClickSafetyPolicy, ZeroClickSafetyPolicy>();
         services.AddSingleton<IFlowStateEngine, FlowStateEngine>();
         services.AddSingleton(sp => new Lazy<IFlowStateEngine>(sp.GetRequiredService<IFlowStateEngine>));
