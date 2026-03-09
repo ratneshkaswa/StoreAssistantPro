@@ -236,6 +236,25 @@
         <Setter Property="Effect"      Value="{StaticResource FluentShadowCard}"/>
     </Style>
 
+    <!-- Flat card for setup pages (no shadow, CornerRadius 8, light border) -->
+    <Style x:Key="SetupFlatCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerMedium}"/>
+        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
+        <Setter Property="Margin" Value="{StaticResource SetupSectionSpacing}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+    </Style>
+
+    <!-- Sidebar container for setup (flat, no shadow) -->
+    <Style x:Key="SetupSidebarCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerMedium}"/>
+        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+    </Style>
+
     <!-- ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Inline form card border (inherits FluentCard + shadow) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ -->
     <Style x:Key="FormCardStyle" TargetType="Border"
            BasedOn="{StaticResource FluentCardStyle}">

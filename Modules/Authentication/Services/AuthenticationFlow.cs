@@ -14,10 +14,9 @@ public class AuthenticationFlow(
     public bool RunFirstTimeSetup()
     {
         var window = serviceProvider.GetRequiredService<SetupWindow>();
-        var workArea = System.Windows.SystemParameters.WorkArea;
-        var w = workArea.Width * 0.80;   // 80% — form-only window, not data-heavy like MainWindow
-        var h = workArea.Height * 0.85;
-        sizingService.ConfigureStartupWindow(window, w, h);
+        window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        window.WindowState = WindowState.Maximized;
+        window.ResizeMode = ResizeMode.NoResize;
         return window.ShowDialog() == true;
     }
 

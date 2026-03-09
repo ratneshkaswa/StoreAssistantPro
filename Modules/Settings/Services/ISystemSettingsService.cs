@@ -18,4 +18,7 @@ public record SystemSettingsDto(
     string? BackupTime,
     string? RestoreOption,
     string? DefaultPrinter,
-    string DefaultTaxMode);
+    string DefaultTaxMode,
+    string RoundingMethod,
+    bool NegativeStockAllowed,
+    string NumberToWordsLanguage);

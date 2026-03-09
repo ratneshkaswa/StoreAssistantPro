@@ -189,6 +189,13 @@
 
     <sys:Double x:Key="FormLabelColumnMinWidth">100</sys:Double>
 
+    <!-- Setup window tokens -->
+    <GridLength x:Key="SetupLabelColumnWidth">200</GridLength>
+    <sys:Double x:Key="SetupButtonHeight">40</sys:Double>
+    <sys:Double x:Key="SetupPrimaryButtonWidth">120</sys:Double>
+    <Thickness x:Key="SetupSectionSpacing">0,24,0,0</Thickness>
+    <Thickness x:Key="SetupHeaderMargin">0,0,0,8</Thickness>
+
     <!-- Line height tokens (Win11 spec) -->
     <sys:Double x:Key="LineHeightTitle">36</sys:Double>
     <sys:Double x:Key="LineHeightSubtitle">28</sys:Double>

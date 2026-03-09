@@ -215,7 +215,7 @@ public partial class SetupWizardViewModel(
             FirmName.Trim(), FirmAddress.Trim(), string.Empty, string.Empty,
             FirmPhone.Trim(), FirmEmail.Trim(),
             string.IsNullOrWhiteSpace(FirmGSTIN) ? null : FirmGSTIN.Trim(),
-            null, 4, 3, "₹", "dd/MM/yyyy", "Indian");
+            null, "Regular", 1.0m, null, 4, 3, "₹", "dd/MM/yyyy", "Indian");
 
         await firmService.UpdateFirmAsync(dto, ct);
         FirmSaved = true;

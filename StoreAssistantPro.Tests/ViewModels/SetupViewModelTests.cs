@@ -31,7 +31,7 @@ public class SetupViewModelTests
     public async Task Save_ValidInput_CallsCommandBusAndCloses()
     {
         bool? closeResult = null;
-        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>())
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();
@@ -46,7 +46,7 @@ public class SetupViewModelTests
             c.FirmName == "Test Store" && c.Address == "" && c.Phone == ""
             && c.Email == "" && c.GSTIN == "" && c.CurrencyCode == "INR"
             && c.AdminPin == "2847" && c.ManagerPin == "3916"
-            && c.UserPin == "5023" && c.MasterPin == "760918"));
+            && c.UserPin == "5023" && c.MasterPin == "760918"), Arg.Any<CancellationToken>());
         Assert.True(closeResult);
     }
 
@@ -121,7 +121,7 @@ public class SetupViewModelTests
     [Fact]
     public async Task Save_HandlerFails_SetsErrorMessage()
     {
-        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>())
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
             .Returns(CommandResult.Failure("Already initialized."));
 
         bool? closeResult = null;
@@ -483,7 +483,7 @@ public class SetupViewModelTests
     [InlineData("27AAPFU0939F1ZV")]
     public async Task Save_EmptyOrValidGstin_DoesNotBlock(string gstin)
     {
-        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>())
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();
@@ -585,7 +585,7 @@ public class SetupViewModelTests
     [Fact]
     public async Task Save_PassesRegionalSettings()
     {
-        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>())
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();
@@ -602,7 +602,7 @@ public class SetupViewModelTests
             c.CurrencySymbol == "Rs."
             && c.FinancialYearStartMonth == 1
             && c.FinancialYearEndMonth == 12
-            && c.DateFormat == "yyyy-MM-dd"));
+            && c.DateFormat == "yyyy-MM-dd"), Arg.Any<CancellationToken>());
     }
 
     // -- Indian States collection --
@@ -698,7 +698,9 @@ public class SetupViewModelTests
     public void DateFormatPreview_Default_ShowsTodayFormatted()
     {
         var sut = CreateSut();
-        var expected = DateTime.Today.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+        var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+        var expected = istNow.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
         Assert.Equal($"e.g. {expected}", sut.DateFormatPreview);
     }
 
@@ -707,7 +709,9 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.SelectedDateFormat = "yyyy-MM-dd";
-        var expected = DateTime.Today.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+        var expected = istNow.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
         Assert.Equal($"e.g. {expected}", sut.DateFormatPreview);
     }
 
@@ -716,8 +720,10 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.SelectedDateFormat = "d MMM yyyy";
+        var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
         Assert.Contains("e.g.", sut.DateFormatPreview);
-        Assert.Contains(DateTime.Today.Year.ToString(), sut.DateFormatPreview);
+        Assert.Contains(istNow.Year.ToString(), sut.DateFormatPreview);
     }
 
     // -- Currency preview --
@@ -795,7 +801,7 @@ public class SetupViewModelTests
     [Fact]
     public async Task Save_MasterPinDiffersFromAllRoles_Succeeds()
     {
-        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>())
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();

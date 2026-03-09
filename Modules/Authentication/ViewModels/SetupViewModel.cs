@@ -57,8 +57,8 @@ public partial class SetupViewModel : BaseViewModel
 
     partial void OnGSTINChanged(string value)
     {
-        // Auto-fill State from valid GSTIN state code
-        if (value.Length >= 2 && GstinRegex().IsMatch(value.ToUpperInvariant()))
+        // Auto-fill State from the first 2 digits of GSTIN (state code)
+        if (value.Length >= 2)
         {
             var stateName = GetGstinStateName(value[..2]);
             if (stateName != null && string.IsNullOrWhiteSpace(State))
@@ -91,11 +91,25 @@ public partial class SetupViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
+    [NotifyPropertyChangedFor(nameof(CompositionRateValidationHint))]
     public partial string CompositionRate { get; set; } = "1";
 
     public string CompositionRateHint => IsCompositionScheme
         ? $"Flat {CompositionRate}% on turnover — no CGST/SGST breakup"
         : string.Empty;
+
+    public string CompositionRateValidationHint
+    {
+        get
+        {
+            if (!IsCompositionScheme || string.IsNullOrWhiteSpace(CompositionRate)) return string.Empty;
+            if (!decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out var rate))
+                return "Must be a number (e.g. 1, 1.5, 6)";
+            if (rate < 0 || rate > 100)
+                return "Must be between 0 and 100";
+            return string.Empty;
+        }
+    }
 
     // ── State Code (auto-derived) ──
 
@@ -170,7 +184,12 @@ public partial class SetupViewModel : BaseViewModel
     {
         get
         {
-            try { return $"e.g. {DateTime.Today.ToString(SelectedDateFormat, CultureInfo.InvariantCulture)}"; }
+            try
+            {
+                var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                    TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+                return $"e.g. {istNow.ToString(SelectedDateFormat, CultureInfo.InvariantCulture)}";
+            }
             catch { return string.Empty; }
         }
     }
@@ -221,7 +240,19 @@ public partial class SetupViewModel : BaseViewModel
     public bool IsBackupConfigVisible => AutoBackupEnabled;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BackupTimeValidationHint))]
     public partial string BackupTime { get; set; } = "22:00";
+
+    public string BackupTimeValidationHint
+    {
+        get
+        {
+            if (!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupTime)) return string.Empty;
+            return TimeOnly.TryParseExact(BackupTime.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
+                ? "✓"
+                : "Format: HH:mm (e.g. 22:00)";
+        }
+    }
 
     [ObservableProperty]
     public partial string BackupLocation { get; set; } = System.IO.Path.Combine(
@@ -241,6 +272,8 @@ public partial class SetupViewModel : BaseViewModel
                 return $"✓ {digits[..5]} {digits[5..]}";
             if (digits.Length == 12 && Phone.TrimStart().StartsWith('+'))
                 return $"✓ +{digits[..2]} {digits[2..7]} {digits[7..]}";
+            if (digits.Length < 10)
+                return "At least 10 digits expected";
             return "✓";
         }
     }
@@ -488,6 +521,22 @@ public partial class SetupViewModel : BaseViewModel
         }
     }
 
+    // ── Sidebar navigation ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFirmSection))]
+    [NotifyPropertyChangedFor(nameof(IsTaxSection))]
+    [NotifyPropertyChangedFor(nameof(IsRegionalSection))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySection))]
+    [NotifyPropertyChangedFor(nameof(IsBackupSection))]
+    public partial string SelectedSection { get; set; } = "Firm";
+
+    public bool IsFirmSection => SelectedSection == "Firm";
+    public bool IsTaxSection => SelectedSection == "Tax";
+    public bool IsRegionalSection => SelectedSection == "Regional";
+    public bool IsSecuritySection => SelectedSection == "Security";
+    public bool IsBackupSection => SelectedSection == "Backup";
+
     // S10: Setup complete state
     [ObservableProperty]
     public partial bool IsSetupComplete { get; set; }
@@ -519,12 +568,15 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master PIN must be exactly 6 digits.")
             .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master PIN confirmation does not match.")
             .Rule(!MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin), "Master PIN must not contain any role PIN.")
+            .Rule(!IsCompositionScheme || decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out _), "Composition rate must be a valid number.")
             .Rule(string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.")
             .Rule(string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.")
             .Rule(string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.")
             .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.")
             .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.")
-            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.")))
+            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.")
+            .Rule(!AutoBackupEnabled || TimeOnly.TryParseExact(BackupTime.Trim(), "HH:mm", CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _), "Backup time must be in HH:mm format (e.g. 22:00).")
+            .Rule(!AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.")))
             return;
 
         var fyStartMonth = MonthNameToIndex(SelectedFYStartMonth);
@@ -554,7 +606,7 @@ public partial class SetupViewModel : BaseViewModel
             for (var i = 3; i >= 1; i--)
             {
                 RedirectCountdown = $"Redirecting to login in {i}…";
-                await Task.Delay(500, ct);
+                await Task.Delay(1000, ct);
             }
 
             ClearSensitivePins();

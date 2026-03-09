@@ -181,6 +181,17 @@ public partial class FirmViewModel : BaseViewModel
             PANNumber = value.ToUpperInvariant();
     }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCompositionScheme))]
+    public partial string SelectedGstRegistrationType { get; set; } = "Regular";
+
+    public ObservableCollection<string> GstRegistrationTypes { get; } = ["Regular", "Composition", "Unregistered"];
+
+    public bool IsCompositionScheme => SelectedGstRegistrationType == "Composition";
+
+    [ObservableProperty]
+    public partial string CompositionRate { get; set; } = "1";
+
     // ── Step 3: Regional Settings ──
 
     [ObservableProperty]
@@ -241,6 +252,8 @@ public partial class FirmViewModel : BaseViewModel
         Email = config.Email;
         GSTNumber = config.GSTNumber ?? string.Empty;
         PANNumber = config.PANNumber ?? string.Empty;
+        SelectedGstRegistrationType = config.GstRegistrationType ?? "Regular";
+        CompositionRate = config.CompositionSchemeRate.ToString(CultureInfo.InvariantCulture);
         SelectedCurrencySymbol = config.CurrencySymbol;
         SelectedFYStartMonth = MonthIndexToName(config.FinancialYearStartMonth);
         SelectedDateFormat = config.DateFormat;
@@ -268,6 +281,9 @@ public partial class FirmViewModel : BaseViewModel
             Email: Email.Trim(),
             GSTNumber: GSTNumber.Trim(),
             PANNumber: PANNumber.Trim(),
+            GstRegistrationType: SelectedGstRegistrationType,
+            CompositionSchemeRate: decimal.TryParse(CompositionRate, out var rate) ? rate : 1.0m,
+            StateCode: GetStateCodeFromGstOrState(),
             FinancialYearStartMonth: fyStartMonth,
             FinancialYearEndMonth: fyEndMonth,
             CurrencySymbol: SelectedCurrencySymbol,
@@ -289,4 +305,32 @@ public partial class FirmViewModel : BaseViewModel
                 return i;
         return 4;
     }
+
+    private string? GetStateCodeFromGstOrState()
+    {
+        if (!string.IsNullOrWhiteSpace(GSTNumber) && GSTNumber.Length >= 2)
+        {
+            var code = GSTNumber[..2];
+            if (code.All(char.IsDigit))
+                return code;
+        }
+        return GetStateCodeFromName(State.Trim());
+    }
+
+    private static string? GetStateCodeFromName(string stateName) => stateName switch
+    {
+        "Jammu & Kashmir" => "01", "Himachal Pradesh" => "02", "Punjab" => "03",
+        "Chandigarh" => "04", "Uttarakhand" => "05", "Haryana" => "06",
+        "Delhi" => "07", "Rajasthan" => "08", "Uttar Pradesh" => "09",
+        "Bihar" => "10", "Sikkim" => "11", "Arunachal Pradesh" => "12",
+        "Nagaland" => "13", "Manipur" => "14", "Mizoram" => "15",
+        "Tripura" => "16", "Meghalaya" => "17", "Assam" => "18",
+        "West Bengal" => "19", "Jharkhand" => "20", "Odisha" => "21",
+        "Chhattisgarh" => "22", "Madhya Pradesh" => "23", "Gujarat" => "24",
+        "Dadra & Nagar Haveli" => "26", "Maharashtra" => "27", "Karnataka" => "29",
+        "Goa" => "30", "Lakshadweep" => "31", "Kerala" => "32",
+        "Tamil Nadu" => "33", "Puducherry" => "34", "Andaman & Nicobar" => "35",
+        "Telangana" => "36", "Andhra Pradesh" => "37", "Ladakh" => "38",
+        _ => null
+    };
 }

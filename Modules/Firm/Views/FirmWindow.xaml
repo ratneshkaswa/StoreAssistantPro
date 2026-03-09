@@ -228,32 +228,55 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>  <!-- 0: GST Registration Type -->
+                    <RowDefinition Height="Auto"/>  <!-- 1: Composition Rate (conditional) -->
                     <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>  <!-- 3: GSTIN -->
                     <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>  <!-- 5: PAN -->
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>  <!-- 7: hint -->
                 </Grid.RowDefinitions>
 
+                <!-- GST Registration Type -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                    <Run Text="GST Type"/>
+                </TextBlock>
+                <ComboBox Grid.Row="0" Grid.Column="1"
+                          ItemsSource="{Binding GstRegistrationTypes}"
+                          SelectedItem="{Binding SelectedGstRegistrationType}"
+                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                <!-- Composition Rate (conditional) -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                           Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}">
+                    <Run Text="Rate (%)"/>
+                </TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1"
+                         Text="{Binding CompositionRate, UpdateSourceTrigger=PropertyChanged}"
+                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                         MaxLength="4" h:NumericInput.IsIntegerOnly="True"
+                         Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"/>
+
                 <!-- GSTIN: wide (15 alphanumeric chars) -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="GSTIN"
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="GSTIN"
                            Style="{StaticResource FormRowLabelStyle}"/>
-                <TextBox Grid.Row="0" Grid.Column="1"
+                <TextBox Grid.Row="3" Grid.Column="1"
                          Text="{Binding GSTNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                          MaxLength="15" CharacterCasing="Upper"
                          h:Watermark.Text="e.g. 08ABCDE1234F1Z5"
                          Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
 
                 <!-- PAN: standard (10 alphanumeric chars) -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="PAN"
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="PAN"
                            Style="{StaticResource FormRowLabelStyle}"/>
-                <TextBox Grid.Row="2" Grid.Column="1"
+                <TextBox Grid.Row="5" Grid.Column="1"
                          Text="{Binding PANNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                          MaxLength="10" CharacterCasing="Upper"
                          h:Watermark.Text="e.g. ABCDE1234F"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
                            Text="Business vertical: Clothing Retail"
                            Style="{StaticResource HintTextStyle}"/>
             </Grid>

@@ -27,6 +27,15 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
     public IReadOnlyList<string> TaxModes { get; } = ["Exclusive", "Inclusive"];
 
     [ObservableProperty]
+    public partial string RoundingMethod { get; set; } = "None";
+
+    [ObservableProperty]
+    public partial bool NegativeStockAllowed { get; set; }
+
+    [ObservableProperty]
+    public partial string NumberToWordsLanguage { get; set; } = "English";
+
+    [ObservableProperty]
     public partial string RestoreFilePath { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -41,6 +50,9 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
         BackupTime = settings.BackupTime ?? string.Empty;
         DefaultPrinter = settings.DefaultPrinter ?? string.Empty;
         DefaultTaxMode = settings.DefaultTaxMode;
+        RoundingMethod = settings.RoundingMethod;
+        NegativeStockAllowed = settings.NegativeStockAllowed;
+        NumberToWordsLanguage = settings.NumberToWordsLanguage;
     });
 
     [RelayCommand]
@@ -50,7 +62,8 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
 
         var dto = new SystemSettingsDto(
             BackupLocation, AutoBackupEnabled, BackupTime,
-            null, DefaultPrinter, DefaultTaxMode);
+            null, DefaultPrinter, DefaultTaxMode,
+            RoundingMethod, NegativeStockAllowed, NumberToWordsLanguage);
 
         await settingsService.UpdateAsync(dto, ct);
         SuccessMessage = "Settings saved.";

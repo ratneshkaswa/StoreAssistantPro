@@ -33,6 +33,9 @@ public class FirmService(
         config.Email = dto.Email;
         config.GSTNumber = string.IsNullOrWhiteSpace(dto.GSTNumber) ? null : dto.GSTNumber.Trim();
         config.PANNumber = string.IsNullOrWhiteSpace(dto.PANNumber) ? null : dto.PANNumber.Trim();
+        config.GstRegistrationType = string.IsNullOrWhiteSpace(dto.GstRegistrationType) ? "Regular" : dto.GstRegistrationType;
+        config.CompositionSchemeRate = dto.CompositionSchemeRate;
+        config.StateCode = string.IsNullOrWhiteSpace(dto.StateCode) ? null : dto.StateCode;
         config.CurrencySymbol = string.IsNullOrWhiteSpace(dto.CurrencySymbol) ? "₹" : dto.CurrencySymbol;
         config.FinancialYearStartMonth = dto.FinancialYearStartMonth;
         config.FinancialYearEndMonth = dto.FinancialYearEndMonth;

@@ -1,0 +1,168 @@
+<Page x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupPages.TaxLegalPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+      Background="Transparent"
+      FontFamily="{StaticResource FluentFontFamily}"
+      UseLayoutRounding="True"
+      SnapsToDevicePixels="True">
+
+    <ScrollViewer
+                  Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
+        <StackPanel>
+            <!-- Page Header -->
+            <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
+                       FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
+                       Foreground="{StaticResource FluentTextPrimary}"
+                       Text="Tax &amp; Legal"/>
+            <TextBlock Text="Manage GSTIN, PAN and GST compliance settings."
+                       FontFamily="{StaticResource FluentFontText}"
+                       FontSize="{StaticResource FontSizeBody}"
+                       Foreground="{StaticResource FluentTextSecondary}"
+                       Margin="{StaticResource SetupHeaderMargin}"/>
+
+            <!-- Card: GST Registration -->
+            <Border Style="{StaticResource SetupFlatCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock x:Name="GstRegTypeLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GST Type "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                    <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="9" AutomationProperties.Name="GST Registration Type"
+                              ItemsSource="{Binding GstRegistrationTypes}" SelectedItem="{Binding SelectedGstRegistrationType}"
+                              AutomationProperties.LabeledBy="{Binding ElementName=GstRegTypeLabel}"
+                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                    <TextBlock x:Name="CompRateLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                               Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"><Run Text="Rate (%)"/></TextBlock>
+                    <TextBox Grid.Row="2" Grid.Column="1" TabIndex="10"
+                             Text="{Binding CompositionRate, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                             MaxLength="4" AutomationProperties.Name="Composition Rate"
+                             AutomationProperties.LabeledBy="{Binding ElementName=CompRateLabel}"
+                             Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"/>
+                    <StackPanel Grid.Row="3" Grid.Column="1">
+                        <TextBlock Text="{Binding CompositionRateValidationHint}"
+                                   Foreground="{Binding CompositionRateValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                   FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CompositionRateValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                        <DataTrigger Binding="{Binding CompositionRateValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{Binding CompositionRateHint}"
+                                   Foreground="{StaticResource FluentTextSecondary}"
+                                   FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CompositionRateHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                        <DataTrigger Binding="{Binding CompositionRateHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Card: Tax Identifiers -->
+            <Border Style="{StaticResource SetupFlatCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock x:Name="GstinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GSTIN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="GstinBox" TabIndex="11" AutomationProperties.Name="GSTIN"
+                             Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
+                             AutomationProperties.LabeledBy="{Binding ElementName=GstinLabel}"
+                             MaxLength="15" CharacterCasing="Upper"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                               Text="{Binding GstinValidationHint}"
+                               Foreground="{Binding GstinValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GstinValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding GstinValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="1"
+                               Text="{Binding DerivedStateCodeDisplay}"
+                               Foreground="{StaticResource FluentTextSecondary}"
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DerivedStateCodeDisplay}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding DerivedStateCodeDisplay}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock x:Name="PanLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PAN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                    <TextBox Grid.Row="4" Grid.Column="1" x:Name="PanBox" TabIndex="12" AutomationProperties.Name="PAN"
+                             Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="10"
+                             AutomationProperties.LabeledBy="{Binding ElementName=PanLabel}"
+                             CharacterCasing="Upper"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1"
+                               Text="{Binding PanValidationHint}"
+                               Foreground="{Binding PanValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PanValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding PanValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                               Text="{Binding GstinPanCrossHint}"
+                               Foreground="{Binding GstinPanCrossHint, Converter={StaticResource HintForegroundConverter}}"
+                               Margin="{StaticResource CrossHintMargin}"
+                               FontSize="{StaticResource FontSizeCaption}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GstinPanCrossHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                    <DataTrigger Binding="{Binding GstinPanCrossHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

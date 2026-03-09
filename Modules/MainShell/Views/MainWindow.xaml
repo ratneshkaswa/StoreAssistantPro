@@ -153,8 +153,7 @@
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource FluentCornerLarge}"
                                     SnapsToDevicePixels="True"
-                                    Effect="{StaticResource FluentShadowMedium}"
-                                    h:Motion.SlideFadeIn="True">
+                                    Effect="{StaticResource FluentShadowMedium}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>

@@ -139,9 +139,10 @@ public class SetupService(
     private static void SeedFinancialYear(AppDbContext context, int fyStartMonth)
     {
         var now = DateTime.UtcNow;
-        var fyStart = now.Month >= fyStartMonth
-            ? new DateTime(now.Year, fyStartMonth, 1)
-            : new DateTime(now.Year - 1, fyStartMonth, 1);
+        var istNow = TimeZoneInfo.ConvertTimeFromUtc(now, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+        var fyStart = istNow.Month >= fyStartMonth
+            ? new DateTime(istNow.Year, fyStartMonth, 1)
+            : new DateTime(istNow.Year - 1, fyStartMonth, 1);
         var fyEnd = fyStart.AddYears(1).AddDays(-1);
 
         context.FinancialYears.Add(new FinancialYear

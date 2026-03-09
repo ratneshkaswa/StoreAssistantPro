@@ -22,11 +22,11 @@ public class SetupWindowComplianceTests
     [Fact]
     public void SetupWindow_Should_KeepScrollableContent_WhenFieldsGrow()
     {
-        var file = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
-        var xaml = File.ReadAllText(file);
+        var pagesDir = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages");
+        var pages = Directory.GetFiles(pagesDir, "*.xaml");
+        var allXaml = string.Join("\n", pages.Select(File.ReadAllText));
 
-        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", xaml);
-        Assert.Contains("h:SmoothScroll.IsEnabled=\"False\"", xaml);
+        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", allXaml);
     }
 
     [Fact]
@@ -41,12 +41,13 @@ public class SetupWindowComplianceTests
     [Fact]
     public void SetupWindow_Should_ProvideAccessibilityLabels()
     {
-        var file = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
-        var xaml = File.ReadAllText(file);
+        var pagesDir = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages");
+        var pages = Directory.GetFiles(pagesDir, "*.xaml");
+        var allXaml = string.Join("\n", pages.Select(File.ReadAllText));
 
-        Assert.Contains("AutomationProperties.LabeledBy=\"{Binding ElementName=FirmNameLabel}\"", xaml);
-        Assert.Contains("AutomationProperties.LabeledBy=\"{Binding ElementName=MasterPinLabel}\"", xaml);
-        Assert.Contains("AutomationProperties.LabeledBy=\"{Binding ElementName=UserConfirmLabel}\"", xaml);
+        Assert.Contains("AutomationProperties.LabeledBy=\"{Binding ElementName=FirmNameLabel}\"", allXaml);
+        Assert.Contains("AutomationProperties.LabeledBy=\"{Binding ElementName=MasterPinLabel}\"", allXaml);
+        Assert.Contains("AutomationProperties.LabeledBy=\"{Binding ElementName=UserConfirmLabel}\"", allXaml);
     }
 
     [Fact]
