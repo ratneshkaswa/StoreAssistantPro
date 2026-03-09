@@ -146,10 +146,7 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Firm Profile" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                <TextBlock Text="Business identity and contact" Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                            </StackPanel>
+                            <TextBlock Text="Firm Profile" Style="{StaticResource SidebarNavTitleStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                     <RadioButton x:Name="NavTax" Tag="Tax" GroupName="SetupNav"
@@ -161,10 +158,7 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Tax and Legal" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                <TextBlock Text="GSTIN, PAN and compliance" Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                            </StackPanel>
+                            <TextBlock Text="Tax and Legal" Style="{StaticResource SidebarNavTitleStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                     <RadioButton x:Name="NavRegional" Tag="Regional" GroupName="SetupNav"
@@ -176,10 +170,7 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Regional Settings" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                <TextBlock Text="Currency, dates and preferences" Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                            </StackPanel>
+                            <TextBlock Text="Regional Settings" Style="{StaticResource SidebarNavTitleStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                     <RadioButton x:Name="NavSecurity" Tag="Security" GroupName="SetupNav"
@@ -191,10 +182,7 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Security Settings" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                <TextBlock Text="Role PINs and master security" Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                            </StackPanel>
+                            <TextBlock Text="Security Settings" Style="{StaticResource SidebarNavTitleStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                     <RadioButton x:Name="NavBackup" Tag="Backup" GroupName="SetupNav"
@@ -206,10 +194,19 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Backup &amp; Data" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                <TextBlock Text="Auto backup schedule" Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                            </StackPanel>
+                            <TextBlock Text="Backup &amp; Data" Style="{StaticResource SidebarNavTitleStyle}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton x:Name="NavSystem" Tag="System" GroupName="SetupNav"
+                                 Style="{StaticResource SidebarNavItemStyle}" Click="OnSidebarSectionClick">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="{StaticResource FluentKpiGrayMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
+                                <TextBlock Text="&#xE713;" FontFamily="{StaticResource FluentIconFont}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="{StaticResource FontSizeBody}"/>
+                            </Border>
+                            <TextBlock Text="System Settings" Style="{StaticResource SidebarNavTitleStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                 </StackPanel>

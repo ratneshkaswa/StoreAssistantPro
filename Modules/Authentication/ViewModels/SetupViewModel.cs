@@ -529,6 +529,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsRegionalSection))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySection))]
     [NotifyPropertyChangedFor(nameof(IsBackupSection))]
+    [NotifyPropertyChangedFor(nameof(IsSystemSection))]
     public partial string SelectedSection { get; set; } = "Firm";
 
     public bool IsFirmSection => SelectedSection == "Firm";
@@ -536,6 +537,7 @@ public partial class SetupViewModel : BaseViewModel
     public bool IsRegionalSection => SelectedSection == "Regional";
     public bool IsSecuritySection => SelectedSection == "Security";
     public bool IsBackupSection => SelectedSection == "Backup";
+    public bool IsSystemSection => SelectedSection == "System";
 
     // S10: Setup complete state
     [ObservableProperty]

@@ -7,7 +7,7 @@
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
-    <ScrollViewer
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
         <StackPanel>
             <!-- Page Header -->

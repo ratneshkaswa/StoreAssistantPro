@@ -141,6 +141,8 @@
     <SolidColorBrush x:Key="FluentKpiRedMuted"         Color="#FDE7E9"/>
     <SolidColorBrush x:Key="FluentKpiTeal"             Color="#0E7A6B"/>
     <SolidColorBrush x:Key="FluentKpiTealMuted"        Color="#D1F0EB"/>
+    <SolidColorBrush x:Key="FluentKpiGray"             Color="#616161"/>
+    <SolidColorBrush x:Key="FluentKpiGrayMuted"        Color="#F0F0F0"/>
 
     <!-- Role Identity Palette (soft pastels) -->
     <SolidColorBrush x:Key="RoleAdminBackground"       Color="#E8EEFA"/>

@@ -16,6 +16,7 @@ public partial class SetupWindow : Window
     private readonly RegionalSettingsPage _regionalPage = new();
     private readonly SecuritySettingsPage _securityPage = new();
     private readonly BackupDataPage _backupPage = new();
+    private readonly SystemSettingsPage _systemPage = new();
 
     public SetupWindow(IWindowSizingService sizingService, SetupViewModel vm)
     {
@@ -33,6 +34,7 @@ public partial class SetupWindow : Window
         _regionalPage.DataContext = vm;
         _securityPage.DataContext = vm;
         _backupPage.DataContext = vm;
+        _systemPage.DataContext = vm;
 
         vm.PropertyChanged += OnViewModelPropertyChanged;
 
@@ -104,6 +106,7 @@ public partial class SetupWindow : Window
             "Regional" => _regionalPage,
             "Security" => _securityPage,
             "Backup" => _backupPage,
+            "System" => _systemPage,
             _ => _firmPage
         };
 
@@ -130,6 +133,7 @@ public partial class SetupWindow : Window
             "Regional" => NavRegional,
             "Security" => NavSecurity,
             "Backup" => NavBackup,
+            "System" => NavSystem,
             _ => null
         };
         if (target is not null)

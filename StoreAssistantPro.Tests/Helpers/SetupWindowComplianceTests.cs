@@ -24,9 +24,12 @@ public class SetupWindowComplianceTests
     {
         var pagesDir = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages");
         var pages = Directory.GetFiles(pagesDir, "*.xaml");
-        var allXaml = string.Join("\n", pages.Select(File.ReadAllText));
 
-        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", allXaml);
+        foreach (var page in pages)
+        {
+            var xaml = File.ReadAllText(page);
+            Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", xaml);
+        }
     }
 
     [Fact]
