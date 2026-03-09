@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="One Time Setup"
         Icon="pack://application:,,,/Assets/app.ico"
         FontFamily="{StaticResource FluentFontFamily}"
@@ -79,17 +80,23 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="{StaticResource SetupHeaderMargin}">
-            <TextBlock Text="StoreAssistantPro Setup"
-                       FontFamily="{StaticResource FluentFontDisplay}"
-                       FontSize="{StaticResource FontSizePageTitle}"
-                       FontWeight="Bold"
-                       Foreground="{StaticResource FluentTextPrimary}"/>
-            <TextBlock Text="Configure your store before starting operations."
-                       FontFamily="{StaticResource FluentFontText}"
-                       FontSize="{StaticResource FontSizeBody}"
-                       Foreground="{StaticResource FluentTextSecondary}"
-                       Margin="{StaticResource ValidationHintMargin}"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="{StaticResource SetupHeaderMargin}">
+            <Image Source="/Assets/logo-256.png" Width="36" Height="36"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
+                           FontSize="{StaticResource FontSizeSectionHeader}"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource FluentTextPrimary}">
+                    <Run Text="Store Assistant "/><Run Text="Pro" Foreground="{StaticResource FluentAccentDefault}"/>
+                </TextBlock>
+                <TextBlock Text="Configure your store before starting operations."
+                           FontFamily="{StaticResource FluentFontText}"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentTextSecondary}"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
         </StackPanel>
 
         <Grid Grid.Row="1">
@@ -224,28 +231,6 @@
         </Grid>
 
         <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}" Margin="{StaticResource FieldLabelSpacing}">
-            <Border Background="{StaticResource FluentErrorBackground}"
-                    BorderBrush="{StaticResource FluentStrokeError}"
-                    BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                    CornerRadius="{StaticResource FluentCornerSmall}"
-                    Padding="{StaticResource SmallCardPadding}">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Visible"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <TextBlock Text="Please review highlighted fields and try again."
-                           Style="{StaticResource HintTextStyle}"
-                           Foreground="{StaticResource FluentError}"/>
-            </Border>
             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
                        AutomationProperties.LiveSetting="Assertive"
                        AutomationProperties.HelpText="{Binding ErrorMessage}"/>

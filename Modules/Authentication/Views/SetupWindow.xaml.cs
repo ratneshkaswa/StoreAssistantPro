@@ -24,7 +24,7 @@ public partial class SetupWindow : Window
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
 
-        sizingService.ConfigurePrimaryWindow(this);
+        sizingService.ConfigureStartupWindow(this, 960, 720);
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 

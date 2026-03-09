@@ -2,26 +2,18 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+      xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
       Background="Transparent"
       FontFamily="{StaticResource FluentFontFamily}"
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
     <StackPanel>
-            <!-- Page Header -->
-            <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
-                       FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
-                       Foreground="{StaticResource FluentTextPrimary}"
-                       Text="Regional Settings"/>
-            <TextBlock Text="Currency and date format preferences."
-                       FontFamily="{StaticResource FluentFontText}"
-                       FontSize="{StaticResource FontSizeBody}"
-                       Foreground="{StaticResource FluentTextSecondary}"
-                       Margin="{StaticResource SetupHeaderMargin}"/>
+        <controls:SetupPageHeader Title="Regional Settings"
+                                   Description="Currency and date format preferences."/>
 
-            <!-- Card: Locale -->
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <Grid>
+        <controls:SetupFormCard>
+            <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
                         <ColumnDefinition Width="*"/>
@@ -60,7 +52,7 @@
                               Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
                     <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding DateFormatPreview}"
                                FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
-                </Grid>
-            </Border>
-            </StackPanel>
-        </Page>
+                            </Grid>
+                        </controls:SetupFormCard>
+                    </StackPanel>
+                </Page>

@@ -2,25 +2,17 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+      xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
       Background="Transparent"
       FontFamily="{StaticResource FluentFontFamily}"
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
     <StackPanel>
-        <!-- Page Header -->
-        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
-                   FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
-                   Foreground="{StaticResource FluentTextPrimary}"
-                   Text="Backup &amp; Data"/>
-        <TextBlock Text="Configure automatic backup schedule and storage location."
-                   FontFamily="{StaticResource FluentFontText}"
-                   FontSize="{StaticResource FontSizeBody}"
-                   Foreground="{StaticResource FluentTextSecondary}"
-                   Margin="{StaticResource SetupHeaderMargin}"/>
+        <controls:SetupPageHeader Title="Backup &amp; Data"
+                                   Description="Configure automatic backup schedule and storage location."/>
 
-        <!-- Card: Auto Backup -->
-        <Border Style="{StaticResource SetupFlatCardStyle}">
+        <controls:SetupFormCard>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
@@ -86,6 +78,6 @@
                            Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"
                            Margin="{StaticResource ValidationHintMargin}"/>
             </Grid>
-        </Border>
+        </controls:SetupFormCard>
     </StackPanel>
 </Page>

@@ -156,9 +156,9 @@
                 <!-- Tax list -->
                 <DataGrid AutomationProperties.Name="Tax rates" Grid.Row="2"
                           ItemsSource="{Binding Taxes}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column" CanUserAddRows="False">
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          HeadersVisibility="Column"
+                          ScrollViewer.CanContentScroll="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
                         <DataGridTextColumn Header="Slab %" Binding="{Binding SlabPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -229,9 +229,9 @@
                 <!-- Vendor list -->
                 <DataGrid AutomationProperties.Name="Vendors" Grid.Row="4"
                           ItemsSource="{Binding Vendors}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column" CanUserAddRows="False">
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          HeadersVisibility="Column"
+                          ScrollViewer.CanContentScroll="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Vendor" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -294,9 +294,9 @@
                 <!-- Product list -->
                 <DataGrid AutomationProperties.Name="Products" Grid.Row="4"
                           ItemsSource="{Binding Products}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column" CanUserAddRows="False">
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          HeadersVisibility="Column"
+                          ScrollViewer.CanContentScroll="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="Tax" Binding="{Binding Tax.TaxName}" Width="{StaticResource ColumnWidthPrice}"/>

@@ -40,9 +40,9 @@
 
             <DataGrid AutomationProperties.Name="Tax rates" ItemsSource="{Binding Taxes}"
                       SelectedItem="{Binding SelectedTax}"
-                      AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single"
-                      HeadersVisibility="Column" CanUserAddRows="False">
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      HeadersVisibility="Column"
+                      ScrollViewer.CanContentScroll="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
                     <DataGridTextColumn Header="Slab %" Binding="{Binding SlabPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -118,9 +118,9 @@
 
                 <DataGrid AutomationProperties.Name="Tax groups" ItemsSource="{Binding TaxGroups}"
                           SelectedItem="{Binding SelectedGroup}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column" CanUserAddRows="False">
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          HeadersVisibility="Column"
+                          ScrollViewer.CanContentScroll="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Group Name" Binding="{Binding Name}" Width="*"/>
                         <DataGridTemplateColumn Header="Active" Width="{StaticResource ColumnWidthQty}">
@@ -190,9 +190,9 @@
                 <DataGrid AutomationProperties.Name="Tax slabs" Grid.Row="1"
                           ItemsSource="{Binding GroupSlabs}"
                           SelectedItem="{Binding SelectedSlab}"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column" CanUserAddRows="False"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          HeadersVisibility="Column"
+                          ScrollViewer.CanContentScroll="True"
                           Margin="{StaticResource ItemSpacing}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="GST %" Binding="{Binding GSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -265,9 +265,9 @@
 
             <DataGrid AutomationProperties.Name="HSN codes" ItemsSource="{Binding HSNCodes}"
                       SelectedItem="{Binding SelectedHSN}"
-                      AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single"
-                      HeadersVisibility="Column" CanUserAddRows="False">
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      HeadersVisibility="Column"
+                      ScrollViewer.CanContentScroll="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="HSN Code" Binding="{Binding Code}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>

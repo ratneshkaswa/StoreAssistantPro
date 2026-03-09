@@ -255,6 +255,33 @@
         <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
     </Style>
 
+    <!-- SetupPageHeader -->
+    <Style TargetType="{x:Type controls:SetupPageHeader}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:SetupPageHeader}">
+                    <StackPanel>
+                        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"  FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold" Foreground="{StaticResource FluentTextPrimary}" Text="{TemplateBinding Title}"/>
+                        <TextBlock FontFamily="{StaticResource FluentFontText}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource SetupHeaderMargin}" Text="{TemplateBinding Description}"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- SetupFormCard -->
+    <Style TargetType="{x:Type controls:SetupFormCard}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:SetupFormCard}">
+                    <Border Style="{StaticResource SetupFlatCardStyle}">
+                        <ContentPresenter Content="{TemplateBinding FormContent}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Inline form card border (inherits FluentCard + shadow) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ -->
     <Style x:Key="FormCardStyle" TargetType="Border"
            BasedOn="{StaticResource FluentCardStyle}">

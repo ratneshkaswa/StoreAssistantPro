@@ -23,9 +23,9 @@
         <DataGrid AutomationProperties.Name="Users list" Grid.Row="1"
                   ItemsSource="{Binding Users}"
                   SelectedItem="{Binding SelectedUser}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  SelectionMode="Single"
-                  HeadersVisibility="Column" CanUserAddRows="False"
+                  Style="{StaticResource EnterpriseDataGridStyle}"
+                  HeadersVisibility="Column"
+                  ScrollViewer.CanContentScroll="True"
                   Margin="{StaticResource ItemSpacing}">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">

@@ -2,25 +2,17 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+      xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
       Background="Transparent"
       FontFamily="{StaticResource FluentFontFamily}"
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
     <StackPanel>
-        <!-- Page Header -->
-        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
-                   FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
-                   Foreground="{StaticResource FluentTextPrimary}"
-                   Text="System Settings"/>
-        <TextBlock Text="Tax mode, rounding and billing preferences."
-                   FontFamily="{StaticResource FluentFontText}"
-                   FontSize="{StaticResource FontSizeBody}"
-                   Foreground="{StaticResource FluentTextSecondary}"
-                   Margin="{StaticResource SetupHeaderMargin}"/>
+        <controls:SetupPageHeader Title="System Settings"
+                                   Description="Tax mode, rounding and billing preferences."/>
 
-        <!-- Card: Tax & Billing -->
-        <Border Style="{StaticResource SetupFlatCardStyle}">
+        <controls:SetupFormCard>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
@@ -72,6 +64,6 @@
                                VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
                 </DockPanel>
             </Grid>
-        </Border>
+        </controls:SetupFormCard>
     </StackPanel>
 </Page>

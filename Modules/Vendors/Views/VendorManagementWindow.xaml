@@ -41,9 +41,9 @@
             <!-- Vendor list -->
             <DataGrid AutomationProperties.Name="Vendors list" ItemsSource="{Binding Vendors}"
                       SelectedItem="{Binding SelectedVendor}"
-                      AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single"
-                      HeadersVisibility="Column" CanUserAddRows="False">
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      HeadersVisibility="Column"
+                      ScrollViewer.CanContentScroll="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="City" Binding="{Binding City}" Width="{StaticResource ColumnWidthPrice}"/>
