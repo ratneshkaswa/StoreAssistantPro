@@ -14,9 +14,6 @@ public class AuthenticationFlow(
     public bool RunFirstTimeSetup()
     {
         var window = serviceProvider.GetRequiredService<SetupWindow>();
-        window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        window.WindowState = WindowState.Maximized;
-        window.ResizeMode = ResizeMode.NoResize;
         return window.ShowDialog() == true;
     }
 

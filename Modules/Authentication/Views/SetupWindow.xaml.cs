@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 using StoreAssistantPro.Modules.Authentication.Views.SetupPages;
 
@@ -16,11 +17,13 @@ public partial class SetupWindow : Window
     private readonly SecuritySettingsPage _securityPage = new();
     private readonly BackupDataPage _backupPage = new();
 
-    public SetupWindow(SetupViewModel vm)
+    public SetupWindow(IWindowSizingService sizingService, SetupViewModel vm)
     {
         InitializeComponent();
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
+
+        sizingService.ConfigurePrimaryWindow(this);
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 

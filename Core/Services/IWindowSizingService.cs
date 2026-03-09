@@ -34,4 +34,12 @@ public interface IWindowSizingService
     /// Centers on screen, disables resize.
     /// </summary>
     void ConfigureStartupWindow(Window window, double width, double height);
+
+    /// <summary>
+    /// Configure a primary full-screen window (Setup, Main) at 90% of
+    /// screen work area, centered, no resize.  Unlike
+    /// <see cref="ConfigureMainWindow"/>, this does NOT register the
+    /// window as the dialog-owner reference.
+    /// </summary>
+    void ConfigurePrimaryWindow(Window window);
 }

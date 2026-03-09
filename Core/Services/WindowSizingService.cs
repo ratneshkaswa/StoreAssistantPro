@@ -16,7 +16,7 @@ public class WindowSizingService : IWindowSizingService
 
         window.WindowStartupLocation = WindowStartupLocation.Manual;
         window.WindowState = WindowState.Normal;
-        window.ResizeMode = ResizeMode.CanResize;
+        window.ResizeMode = ResizeMode.NoResize;
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;
         window.Closed += (_, _) => SystemParameters.StaticPropertyChanged -= OnDisplayChanged;
@@ -70,5 +70,16 @@ public class WindowSizingService : IWindowSizingService
         _mainWindow.Height = workArea.Height * MainWindowFillRatio;
         _mainWindow.Left = workArea.Left + (workArea.Width - _mainWindow.Width) / 2;
         _mainWindow.Top = workArea.Top + (workArea.Height - _mainWindow.Height) / 2;
+    }
+
+    public void ConfigurePrimaryWindow(Window window)
+    {
+        var workArea = SystemParameters.WorkArea;
+
+        window.Width = workArea.Width * MainWindowFillRatio;
+        window.Height = workArea.Height * MainWindowFillRatio;
+        window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        window.WindowState = WindowState.Normal;
+        window.ResizeMode = ResizeMode.NoResize;
     }
 }
