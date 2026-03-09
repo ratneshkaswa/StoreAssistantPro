@@ -36,14 +36,14 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock x:Name="GstRegTypeLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GST Type "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
-                    <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="9" AutomationProperties.Name="GST Registration Type"
+                    <ComboBox Grid.Row="0" Grid.Column="1" x:Name="GstRegTypeCombo" TabIndex="9" AutomationProperties.Name="GST Registration Type"
                               ItemsSource="{Binding GstRegistrationTypes}" SelectedItem="{Binding SelectedGstRegistrationType}"
                               AutomationProperties.LabeledBy="{Binding ElementName=GstRegTypeLabel}"
                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
                     <TextBlock x:Name="CompRateLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
                                Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"><Run Text="Rate (%)"/></TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" TabIndex="10"
+                    <TextBox Grid.Row="2" Grid.Column="1" x:Name="CompRateBox" TabIndex="10"
                              Text="{Binding CompositionRate, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                              MaxLength="4" AutomationProperties.Name="Composition Rate"

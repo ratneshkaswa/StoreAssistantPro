@@ -7,88 +7,85 @@
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel>
-            <!-- Page Header -->
-            <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
-                       FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
-                       Foreground="{StaticResource FluentTextPrimary}"
-                       Text="Backup &amp; Data"/>
-            <TextBlock Text="Configure automatic backup schedule and storage location."
-                       FontFamily="{StaticResource FluentFontText}"
-                       FontSize="{StaticResource FontSizeBody}"
-                       Foreground="{StaticResource FluentTextSecondary}"
-                       Margin="{StaticResource SetupHeaderMargin}"/>
+    <StackPanel>
+        <!-- Page Header -->
+        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
+                   FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
+                   Foreground="{StaticResource FluentTextPrimary}"
+                   Text="Backup &amp; Data"/>
+        <TextBlock Text="Configure automatic backup schedule and storage location."
+                   FontFamily="{StaticResource FluentFontText}"
+                   FontSize="{StaticResource FontSizeBody}"
+                   Foreground="{StaticResource FluentTextSecondary}"
+                   Margin="{StaticResource SetupHeaderMargin}"/>
 
-            <!-- Card: Auto Backup -->
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        <!-- Card: Auto Backup -->
+        <Border Style="{StaticResource SetupFlatCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Auto Backup" Style="{StaticResource FormRowLabelStyle}"/>
-                    <DockPanel Grid.Row="0" Grid.Column="1">
-                        <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
-                                  IsChecked="{Binding AutoBackupEnabled}"
-                                  AutomationProperties.Name="Enable Auto Backup"
-                                  DockPanel.Dock="Left"/>
-                        <TextBlock Text="Daily scheduled backup"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"
-                                   VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
-                    </DockPanel>
-
-                    <TextBlock x:Name="BackupTimeLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
-                               Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"><Run Text="Time (HH:mm)"/></TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" TabIndex="40"
-                             Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
-                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="5" AutomationProperties.Name="Backup Time"
-                             AutomationProperties.LabeledBy="{Binding ElementName=BackupTimeLabel}"
-                             Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"/>
-                    <TextBlock Grid.Row="3" Grid.Column="1"
-                               Text="{Binding BackupTimeValidationHint}"
-                               Foreground="{Binding BackupTimeValidationHint, Converter={StaticResource HintForegroundConverter}}"
-                               Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding BackupTimeValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                    <DataTrigger Binding="{Binding BackupTimeValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-
-                    <TextBlock x:Name="BackupPathLabel" Grid.Row="5" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
-                               Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"><Run Text="Location"/></TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" TabIndex="41"
-                             Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"
-                             HorizontalAlignment="Stretch"
-                             AutomationProperties.Name="Backup Location"
-                             AutomationProperties.LabeledBy="{Binding ElementName=BackupPathLabel}"
-                             Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"/>
-                    <TextBlock Grid.Row="6" Grid.Column="1"
-                               Text="Folder must exist. Default: Documents\StoreAssistantPro\Backups"
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Auto Backup" Style="{StaticResource FormRowLabelStyle}"/>
+                <DockPanel Grid.Row="0" Grid.Column="1">
+                    <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                              IsChecked="{Binding AutoBackupEnabled}"
+                              AutomationProperties.Name="Enable Auto Backup"
+                              DockPanel.Dock="Left"/>
+                    <TextBlock Text="Daily scheduled backup"
                                FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"
-                               Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"
-                               Margin="{StaticResource ValidationHintMargin}"/>
-                </Grid>
-            </Border>
-        </StackPanel>
-    </ScrollViewer>
+                               Foreground="{StaticResource FluentTextSecondary}"
+                               VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
+                </DockPanel>
+
+                <TextBlock x:Name="BackupTimeLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"><Run Text="Time (HH:mm)"/></TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="BackupTimeBox" TabIndex="40"
+                         Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
+                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                         MaxLength="5" AutomationProperties.Name="Backup Time"
+                         AutomationProperties.LabeledBy="{Binding ElementName=BackupTimeLabel}"
+                         Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <TextBlock Grid.Row="3" Grid.Column="1"
+                           Text="{Binding BackupTimeValidationHint}"
+                           Foreground="{Binding BackupTimeValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"
+                           FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding BackupTimeValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                <DataTrigger Binding="{Binding BackupTimeValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock x:Name="BackupPathLabel" Grid.Row="5" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"><Run Text="Location"/></TextBlock>
+                <TextBox Grid.Row="5" Grid.Column="1" x:Name="BackupPathBox" TabIndex="41"
+                         Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Stretch"
+                         AutomationProperties.Name="Backup Location"
+                         AutomationProperties.LabeledBy="{Binding ElementName=BackupPathLabel}"
+                         Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <TextBlock Grid.Row="6" Grid.Column="1"
+                           Text="Folder must exist. Default: Documents\StoreAssistantPro\Backups"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"
+                           Margin="{StaticResource ValidationHintMargin}"/>
+            </Grid>
+        </Border>
+    </StackPanel>
 </Page>

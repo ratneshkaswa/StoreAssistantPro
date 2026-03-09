@@ -7,9 +7,7 @@
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel>
+    <StackPanel>
             <!-- Page Header -->
             <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
                        FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
@@ -64,6 +62,5 @@
                                FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
                 </Grid>
             </Border>
-        </StackPanel>
-    </ScrollViewer>
-</Page>
+            </StackPanel>
+        </Page>

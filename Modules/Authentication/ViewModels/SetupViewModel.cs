@@ -592,7 +592,7 @@ public partial class SetupViewModel : BaseViewModel
             AdminPin, ManagerPin, UserPin, MasterPin,
             new SetupBusinessOptions(
                 SelectedGstRegistrationType,
-                decimal.TryParse(CompositionRate, out var rate) ? rate : 1.0m,
+                decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out var rate) ? rate : 1.0m,
                 string.IsNullOrEmpty(DerivedStateCode) ? null : DerivedStateCode,
                 SelectedTaxMode,
                 SelectedRoundingMethod,
@@ -637,11 +637,14 @@ public partial class SetupViewModel : BaseViewModel
 
     private static bool IsWeakUserPin(string pin) =>
         pin is "0000" or "1234" or "4321" or "1111" or "2222" or "3333"
-            or "4444" or "5555" or "6666" or "7777" or "8888" or "9999";
+            or "4444" or "5555" or "6666" or "7777" or "8888" or "9999"
+            or "2345" or "3456" or "4567" or "5678" or "6789"
+            or "9876" or "8765" or "7654" or "6543" or "5432";
 
     private static bool IsWeakMasterPin(string pin) =>
         pin is "000000" or "123456" or "654321" or "111111" or "222222" or "333333"
-            or "444444" or "555555" or "666666" or "777777" or "888888" or "999999";
+            or "444444" or "555555" or "666666" or "777777" or "888888" or "999999"
+            or "234567" or "345678" or "456789" or "987654" or "876543" or "765432";
 
     private static string GetPinWarning(string pin) => pin.Length >= 4 && IsWeakUserPin(pin)
         ? WeakPinShortText

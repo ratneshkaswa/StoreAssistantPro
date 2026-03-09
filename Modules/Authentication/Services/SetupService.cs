@@ -9,6 +9,7 @@ namespace StoreAssistantPro.Modules.Authentication.Services;
 
 public class SetupService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regionalSettings,
     IPerformanceMonitor perf) : ISetupService
 {
     public async Task InitializeAppAsync(
@@ -69,10 +70,12 @@ public class SetupService(
             PinHash = PinHasher.Hash(userPin)
         });
 
-        SeedDefaultTaxSlabs(context);
+        var istNow = regionalSettings.Now;
+
+        SeedDefaultTaxSlabs(context, istNow);
         SeedColours(context);
         SeedSystemSettings(context, businessOptions);
-        SeedFinancialYear(context, financialYearStartMonth);
+        SeedFinancialYear(context, financialYearStartMonth, istNow);
 
         try
         {
@@ -89,9 +92,9 @@ public class SetupService(
     /// Seeds Indian GST tax slabs and matching intra-state profiles.
     /// Called once during first-time setup within the same transaction.
     /// </summary>
-    private static void SeedDefaultTaxSlabs(AppDbContext context)
+    private static void SeedDefaultTaxSlabs(AppDbContext context, DateTime istNow)
     {
-        var now = DateTime.UtcNow;
+        var now = istNow;
 
         context.TaxMasters.AddRange(
             new TaxMaster { TaxName = "GST 0%",  SlabPercent = 0m,  IsActive = true, CreatedDate = now },
@@ -136,10 +139,8 @@ public class SetupService(
     /// <summary>
     /// Seeds the initial financial year using the user-selected start month.
     /// </summary>
-    private static void SeedFinancialYear(AppDbContext context, int fyStartMonth)
+    private static void SeedFinancialYear(AppDbContext context, int fyStartMonth, DateTime istNow)
     {
-        var now = DateTime.UtcNow;
-        var istNow = TimeZoneInfo.ConvertTimeFromUtc(now, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
         var fyStart = istNow.Month >= fyStartMonth
             ? new DateTime(istNow.Year, fyStartMonth, 1)
             : new DateTime(istNow.Year - 1, fyStartMonth, 1);
@@ -152,7 +153,7 @@ public class SetupService(
             EndDate = fyEnd,
             IsCurrent = true,
             BillingCounterResetDate = fyStart,
-            CreatedDate = now
+            CreatedDate = istNow
         });
     }
 }

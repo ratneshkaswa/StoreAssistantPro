@@ -78,11 +78,12 @@ public partial class SetupWindow : Window
         if (error.Contains("unique PIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Security", "AdminPinBox"); return; }
         if (error.Contains("GSTIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Tax", "GstinBox"); return; }
         if (error.Contains("PAN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Tax", "PanBox"); return; }
-        if (error.Contains("Composition rate", StringComparison.OrdinalIgnoreCase)) { _vm!.SelectedSection = "Tax"; return; }
+        if (error.Contains("Composition rate", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Tax", "CompRateBox"); return; }
         if (error.Contains("Pincode", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "PincodeBox"); return; }
         if (error.Contains("Email", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "EmailBox"); return; }
         if (error.Contains("Phone", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "PhoneBox"); return; }
-        if (error.Contains("Backup", StringComparison.OrdinalIgnoreCase)) { _vm!.SelectedSection = "Backup"; return; }
+        if (error.Contains("Backup time", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Backup", "BackupTimeBox"); return; }
+        if (error.Contains("Backup location", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Backup", "BackupPathBox"); return; }
     }
 
     private void NavigateAndFocus(string section, string controlName)
@@ -112,6 +113,24 @@ public partial class SetupWindow : Window
 
         if (ContentFrame.Content != target)
             ContentFrame.Navigate(target);
+
+        // Focus the first input field on the target page
+        string? firstField = section switch
+        {
+            "Firm" => "FirmNameBox",
+            "Tax" => "GstRegTypeCombo",
+            "Security" => "MasterPinBox",
+            _ => null
+        };
+
+        if (firstField is not null)
+        {
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+            {
+                if (ContentFrame.Content is Page page && page.FindName(firstField) is UIElement element)
+                    element.Focus();
+            });
+        }
     }
 
     private void OnSidebarSectionClick(object sender, RoutedEventArgs e)
@@ -120,7 +139,6 @@ public partial class SetupWindow : Window
             return;
 
         _vm.SelectedSection = sectionKey;
-        NavigateToSection(sectionKey);
     }
 
     private void SyncSidebarSelection()

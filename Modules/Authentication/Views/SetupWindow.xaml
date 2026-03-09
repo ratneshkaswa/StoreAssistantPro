@@ -64,12 +64,6 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         </Style>
-
-        <Style x:Key="SidebarNavSubtitleStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
-            <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-            <Setter Property="Margin" Value="0,2,0,0"/>
-        </Style>
     </Window.Resources>
 
     <Grid Margin="{StaticResource PagePadding}"
@@ -279,6 +273,7 @@
             </TextBlock>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Content="Complete Setup" Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                         MinWidth="{StaticResource SetupPrimaryButtonWidth}"
                         MinHeight="{StaticResource SetupButtonHeight}"
                         AutomationProperties.Name="Complete first time setup">

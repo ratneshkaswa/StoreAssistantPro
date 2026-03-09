@@ -7,74 +7,71 @@
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel>
-            <!-- Page Header -->
-            <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
-                       FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
-                       Foreground="{StaticResource FluentTextPrimary}"
-                       Text="System Settings"/>
-            <TextBlock Text="Tax mode, rounding and billing preferences."
-                       FontFamily="{StaticResource FluentFontText}"
-                       FontSize="{StaticResource FontSizeBody}"
-                       Foreground="{StaticResource FluentTextSecondary}"
-                       Margin="{StaticResource SetupHeaderMargin}"/>
+    <StackPanel>
+        <!-- Page Header -->
+        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
+                   FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold"
+                   Foreground="{StaticResource FluentTextPrimary}"
+                   Text="System Settings"/>
+        <TextBlock Text="Tax mode, rounding and billing preferences."
+                   FontFamily="{StaticResource FluentFontText}"
+                   FontSize="{StaticResource FontSizeBody}"
+                   Foreground="{StaticResource FluentTextSecondary}"
+                   Margin="{StaticResource SetupHeaderMargin}"/>
 
-            <!-- Card: Tax & Billing -->
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        <!-- Card: Tax & Billing -->
+        <Border Style="{StaticResource SetupFlatCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Tax Mode" x:Name="TaxModeLabel" Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="30" AutomationProperties.Name="Tax Mode"
-                              ItemsSource="{Binding TaxModes}" SelectedItem="{Binding SelectedTaxMode}"
-                              AutomationProperties.LabeledBy="{Binding ElementName=TaxModeLabel}"
-                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TaxModeHint}"
-                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Tax Mode" x:Name="TaxModeLabel" Style="{StaticResource FormRowLabelStyle}"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="30" AutomationProperties.Name="Tax Mode"
+                          ItemsSource="{Binding TaxModes}" SelectedItem="{Binding SelectedTaxMode}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=TaxModeLabel}"
+                          Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TaxModeHint}"
+                           FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Rounding" x:Name="RoundingLabel" Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="3" Grid.Column="1" TabIndex="31" AutomationProperties.Name="Bill Rounding Method"
-                              ItemsSource="{Binding RoundingMethods}" SelectedItem="{Binding SelectedRoundingMethod}"
-                              AutomationProperties.LabeledBy="{Binding ElementName=RoundingLabel}"
-                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding RoundingPreview}"
-                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Rounding" x:Name="RoundingLabel" Style="{StaticResource FormRowLabelStyle}"/>
+                <ComboBox Grid.Row="3" Grid.Column="1" TabIndex="31" AutomationProperties.Name="Bill Rounding Method"
+                          ItemsSource="{Binding RoundingMethods}" SelectedItem="{Binding SelectedRoundingMethod}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=RoundingLabel}"
+                          Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding RoundingPreview}"
+                           FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Words Lang" x:Name="WordsLangLabel" Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="6" Grid.Column="1" TabIndex="32" AutomationProperties.Name="Number-to-Words Language"
-                              ItemsSource="{Binding NumberToWordsLanguages}" SelectedItem="{Binding SelectedNumberToWordsLanguage}"
-                              AutomationProperties.LabeledBy="{Binding ElementName=WordsLangLabel}"
-                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Words Lang" x:Name="WordsLangLabel" Style="{StaticResource FormRowLabelStyle}"/>
+                <ComboBox Grid.Row="6" Grid.Column="1" TabIndex="32" AutomationProperties.Name="Number-to-Words Language"
+                          ItemsSource="{Binding NumberToWordsLanguages}" SelectedItem="{Binding SelectedNumberToWordsLanguage}"
+                          AutomationProperties.LabeledBy="{Binding ElementName=WordsLangLabel}"
+                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Neg. Stock" Style="{StaticResource FormRowLabelStyle}"/>
-                    <DockPanel Grid.Row="8" Grid.Column="1">
-                        <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
-                                  IsChecked="{Binding NegativeStockAllowed}"
-                                  AutomationProperties.Name="Allow Negative Stock"
-                                  DockPanel.Dock="Left"/>
-                        <TextBlock Text="Allow billing with zero stock"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"
-                                   VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
-                    </DockPanel>
-                </Grid>
-            </Border>
-        </StackPanel>
-    </ScrollViewer>
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="Neg. Stock" Style="{StaticResource FormRowLabelStyle}"/>
+                <DockPanel Grid.Row="8" Grid.Column="1">
+                    <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                              IsChecked="{Binding NegativeStockAllowed}"
+                              AutomationProperties.Name="Allow Negative Stock"
+                              DockPanel.Dock="Left"/>
+                    <TextBlock Text="Allow billing with zero stock"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"
+                               VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
+                </DockPanel>
+            </Grid>
+        </Border>
+    </StackPanel>
 </Page>
