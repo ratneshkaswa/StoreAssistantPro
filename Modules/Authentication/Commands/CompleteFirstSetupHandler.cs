@@ -16,7 +16,8 @@ public class CompleteFirstSetupHandler(ISetupService setupService)
             command.FinancialYearStartMonth, command.FinancialYearEndMonth,
             command.DateFormat,
             command.AdminPin, command.ManagerPin,
-            command.UserPin, command.MasterPin, ct);
+            command.UserPin, command.MasterPin,
+            command.BusinessOptions, ct);
 
         return CommandResult.Success();
     }

@@ -3,6 +3,7 @@ using StoreAssistantPro.Data;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Authentication.Commands;
 
 namespace StoreAssistantPro.Modules.Authentication.Services;
 
@@ -18,6 +19,7 @@ public class SetupService(
         string dateFormat,
         string adminPin, string managerPin,
         string userPin, string masterPin,
+        SetupBusinessOptions businessOptions,
         CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("SetupService.InitializeAppAsync");
@@ -36,6 +38,9 @@ public class SetupService(
             Email = string.IsNullOrWhiteSpace(email) ? string.Empty : email,
             GSTNumber = string.IsNullOrWhiteSpace(gstin) ? null : gstin,
             PANNumber = string.IsNullOrWhiteSpace(pan) ? null : pan,
+            GstRegistrationType = string.IsNullOrWhiteSpace(businessOptions.GstRegistrationType) ? "Regular" : businessOptions.GstRegistrationType,
+            StateCode = string.IsNullOrWhiteSpace(businessOptions.StateCode) ? null : businessOptions.StateCode,
+            CompositionSchemeRate = businessOptions.CompositionSchemeRate,
             CurrencyCode = string.IsNullOrWhiteSpace(currencyCode) ? "INR" : currencyCode,
             CurrencySymbol = string.IsNullOrWhiteSpace(currencySymbol) ? "₹" : currencySymbol,
             FinancialYearStartMonth = financialYearStartMonth is >= 1 and <= 12 ? financialYearStartMonth : 4,
@@ -66,7 +71,7 @@ public class SetupService(
 
         SeedDefaultTaxSlabs(context);
         SeedColours(context);
-        SeedSystemSettings(context);
+        SeedSystemSettings(context, businessOptions);
         SeedFinancialYear(context, financialYearStartMonth);
 
         try
@@ -108,12 +113,23 @@ public class SetupService(
     /// <summary>
     /// Seeds the single SystemSettings row with safe defaults.
     /// </summary>
-    private static void SeedSystemSettings(AppDbContext context)
+    private static void SeedSystemSettings(AppDbContext context, SetupBusinessOptions opts)
     {
         context.SystemSettings.Add(new SystemSettings
         {
-            DefaultTaxMode = "Exclusive",
-            AutoBackupEnabled = false
+            DefaultTaxMode = opts.DefaultTaxMode == "Tax-Inclusive (MRP)" ? "Inclusive" : "Exclusive",
+            RoundingMethod = opts.RoundingMethod switch
+            {
+                "Round to nearest ₹1" => "NearestOne",
+                "Round to nearest ₹5" => "NearestFive",
+                "Round to nearest ₹10" => "NearestTen",
+                _ => "None"
+            },
+            NegativeStockAllowed = opts.NegativeStockAllowed,
+            NumberToWordsLanguage = opts.NumberToWordsLanguage,
+            AutoBackupEnabled = opts.AutoBackupEnabled,
+            BackupTime = opts.BackupTime,
+            BackupLocation = opts.BackupLocation
         });
     }
 

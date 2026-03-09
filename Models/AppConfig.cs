@@ -37,6 +37,17 @@ public class AppConfig
     [MaxLength(10)]
     public string? PANNumber { get; set; }
 
+    /// <summary>GST registration type: Regular, Composition, or Unregistered.</summary>
+    [MaxLength(20)]
+    public string GstRegistrationType { get; set; } = "Regular";
+
+    /// <summary>2-digit GST state code, auto-derived from GSTIN or state selection.</summary>
+    [MaxLength(2)]
+    public string? StateCode { get; set; }
+
+    /// <summary>Flat tax rate for composition scheme dealers (default 1% for garments).</summary>
+    public decimal CompositionSchemeRate { get; set; } = 1.0m;
+
     [MaxLength(10)]
     public string CurrencyCode { get; set; } = "INR";
 

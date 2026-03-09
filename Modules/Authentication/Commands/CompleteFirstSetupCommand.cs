@@ -2,6 +2,22 @@
 
 namespace StoreAssistantPro.Modules.Authentication.Commands;
 
+/// <summary>
+/// Business/system options collected during one-time setup that go into
+/// <c>AppConfig</c> and <c>SystemSettings</c>.
+/// </summary>
+public sealed record SetupBusinessOptions(
+    string GstRegistrationType,
+    decimal CompositionSchemeRate,
+    string? StateCode,
+    string DefaultTaxMode,
+    string RoundingMethod,
+    string NumberToWordsLanguage,
+    bool NegativeStockAllowed,
+    bool AutoBackupEnabled,
+    string? BackupTime,
+    string? BackupLocation);
+
 public sealed record CompleteFirstSetupCommand(
     string FirmName,
     string Address,
@@ -19,4 +35,5 @@ public sealed record CompleteFirstSetupCommand(
     string AdminPin,
     string ManagerPin,
     string UserPin,
-    string MasterPin) : ICommandRequest<Unit>;
+    string MasterPin,
+    SetupBusinessOptions BusinessOptions) : ICommandRequest<Unit>;

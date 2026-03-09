@@ -24,6 +24,8 @@ public partial class SetupViewModel : BaseViewModel
     public partial string Address { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
+    [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     public partial string State { get; set; } = string.Empty;
 
     public ObservableCollection<string> IndianStates { get; } =
@@ -49,6 +51,8 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
     [NotifyPropertyChangedFor(nameof(GstinPanCrossHint))]
+    [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
+    [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     public partial string GSTIN { get; set; } = string.Empty;
 
     partial void OnGSTINChanged(string value)
@@ -73,6 +77,52 @@ public partial class SetupViewModel : BaseViewModel
 
     /// <summary>Currency code is always INR — India-exclusive app.</summary>
     public string CurrencyCode => "INR";
+
+    // ── GST Registration ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCompositionScheme))]
+    [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
+    public partial string SelectedGstRegistrationType { get; set; } = "Regular";
+
+    public ObservableCollection<string> GstRegistrationTypes { get; } = ["Regular", "Composition", "Unregistered"];
+
+    public bool IsCompositionScheme => SelectedGstRegistrationType == "Composition";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
+    public partial string CompositionRate { get; set; } = "1";
+
+    public string CompositionRateHint => IsCompositionScheme
+        ? $"Flat {CompositionRate}% on turnover — no CGST/SGST breakup"
+        : string.Empty;
+
+    // ── State Code (auto-derived) ──
+
+    public string DerivedStateCode
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(GSTIN) && GSTIN.Length >= 2)
+            {
+                var code = GSTIN[..2];
+                if (GetGstinStateName(code) != null)
+                    return code;
+            }
+            return GetStateCodeFromName(State) ?? string.Empty;
+        }
+    }
+
+    public string DerivedStateCodeDisplay
+    {
+        get
+        {
+            var code = DerivedStateCode;
+            if (string.IsNullOrEmpty(code)) return string.Empty;
+            var name = GetGstinStateName(code);
+            return name != null ? $"\u2713 State Code: {code} \u2014 {name}" : string.Empty;
+        }
+    }
 
     // ── Regional settings ──
 
@@ -126,6 +176,57 @@ public partial class SetupViewModel : BaseViewModel
     }
 
     public string CurrencyPreview => $"e.g. {SelectedCurrencySymbol} 1,00,000";
+
+    // ── Business preferences ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TaxModeHint))]
+    public partial string SelectedTaxMode { get; set; } = "Tax-Exclusive";
+
+    public ObservableCollection<string> TaxModes { get; } = ["Tax-Inclusive (MRP)", "Tax-Exclusive"];
+
+    public string TaxModeHint => SelectedTaxMode == "Tax-Inclusive (MRP)"
+        ? "Prices include tax. Tax is back-calculated from MRP."
+        : "Tax is added on top of the base price.";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RoundingPreview))]
+    public partial string SelectedRoundingMethod { get; set; } = "No Rounding";
+
+    public ObservableCollection<string> RoundingMethods { get; } =
+        ["No Rounding", "Round to nearest \u20b91", "Round to nearest \u20b95", "Round to nearest \u20b910"];
+
+    public string RoundingPreview => SelectedRoundingMethod switch
+    {
+        "Round to nearest \u20b91" => "e.g. \u20b91,499.50 \u2192 \u20b91,500",
+        "Round to nearest \u20b95" => "e.g. \u20b91,497 \u2192 \u20b91,495",
+        "Round to nearest \u20b910" => "e.g. \u20b91,493 \u2192 \u20b91,490",
+        _ => string.Empty
+    };
+
+    [ObservableProperty]
+    public partial string SelectedNumberToWordsLanguage { get; set; } = "English";
+
+    public ObservableCollection<string> NumberToWordsLanguages { get; } = ["English", "Hindi"];
+
+    [ObservableProperty]
+    public partial bool NegativeStockAllowed { get; set; }
+
+    // ── Backup ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBackupConfigVisible))]
+    public partial bool AutoBackupEnabled { get; set; }
+
+    public bool IsBackupConfigVisible => AutoBackupEnabled;
+
+    [ObservableProperty]
+    public partial string BackupTime { get; set; } = "22:00";
+
+    [ObservableProperty]
+    public partial string BackupLocation { get; set; } = System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+        "StoreAssistantPro", "Backups");
 
     // ── Live field validation hints ──
 
@@ -202,6 +303,23 @@ public partial class SetupViewModel : BaseViewModel
         "30" => "Goa", "31" => "Lakshadweep", "32" => "Kerala",
         "33" => "Tamil Nadu", "34" => "Puducherry", "35" => "Andaman & Nicobar",
         "36" => "Telangana", "37" => "Andhra Pradesh", "38" => "Ladakh",
+        _ => null
+    };
+
+    private static string? GetStateCodeFromName(string stateName) => stateName switch
+    {
+        "Jammu & Kashmir" => "01", "Himachal Pradesh" => "02", "Punjab" => "03",
+        "Chandigarh" => "04", "Uttarakhand" => "05", "Haryana" => "06",
+        "Delhi" => "07", "Rajasthan" => "08", "Uttar Pradesh" => "09",
+        "Bihar" => "10", "Sikkim" => "11", "Arunachal Pradesh" => "12",
+        "Nagaland" => "13", "Manipur" => "14", "Mizoram" => "15",
+        "Tripura" => "16", "Meghalaya" => "17", "Assam" => "18",
+        "West Bengal" => "19", "Jharkhand" => "20", "Odisha" => "21",
+        "Chhattisgarh" => "22", "Madhya Pradesh" => "23", "Gujarat" => "24",
+        "Dadra & Nagar Haveli" => "26", "Maharashtra" => "27", "Karnataka" => "29",
+        "Goa" => "30", "Lakshadweep" => "31", "Kerala" => "32",
+        "Tamil Nadu" => "33", "Puducherry" => "34", "Andaman & Nicobar" => "35",
+        "Telangana" => "36", "Andhra Pradesh" => "37", "Ladakh" => "38",
         _ => null
     };
 
@@ -417,7 +535,18 @@ public partial class SetupViewModel : BaseViewModel
             Phone.Trim(), Email.Trim(), GSTIN.Trim().ToUpperInvariant(),
             PAN.Trim().ToUpperInvariant(), CurrencyCode,
             SelectedCurrencySymbol, fyStartMonth, fyEndMonth, SelectedDateFormat,
-            AdminPin, ManagerPin, UserPin, MasterPin), ct);
+            AdminPin, ManagerPin, UserPin, MasterPin,
+            new SetupBusinessOptions(
+                SelectedGstRegistrationType,
+                decimal.TryParse(CompositionRate, out var rate) ? rate : 1.0m,
+                string.IsNullOrEmpty(DerivedStateCode) ? null : DerivedStateCode,
+                SelectedTaxMode,
+                SelectedRoundingMethod,
+                SelectedNumberToWordsLanguage,
+                NegativeStockAllowed,
+                AutoBackupEnabled,
+                AutoBackupEnabled ? BackupTime : null,
+                AutoBackupEnabled ? BackupLocation : null)), ct);
 
         if (result.Succeeded)
         {

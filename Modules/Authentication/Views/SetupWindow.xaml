@@ -142,7 +142,7 @@
                                     <TextBlock Text="&#xE774;" FontFamily="{StaticResource FluentIconFont}" Foreground="{StaticResource FluentInfo}" Style="{StaticResource SetupSidebarIconStyle}"/>
                                     <StackPanel VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}">
                                         <TextBlock Text="Regional Settings" Style="{StaticResource FormRowLabelStyle}"/>
-                                        <TextBlock Text="Currency and date preferences" Style="{StaticResource SetupSidebarSubtitleStyle}"/>
+                                        <TextBlock Text="Tax mode, rounding and preferences" Style="{StaticResource SetupSidebarSubtitleStyle}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Button>
@@ -152,6 +152,15 @@
                                     <StackPanel VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}">
                                         <TextBlock Text="Security Settings" Style="{StaticResource FormRowLabelStyle}"/>
                                         <TextBlock Text="Role PIN and master security" Style="{StaticResource SetupSidebarSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="SidebarBackupButton" Tag="BackupSection" Style="{StaticResource SetupSidebarButtonStyle}" Click="OnSidebarSectionClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE74E;" FontFamily="{StaticResource FluentIconFont}" Foreground="{StaticResource FluentTextSecondary}" Style="{StaticResource SetupSidebarIconStyle}"/>
+                                    <StackPanel VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}">
+                                        <TextBlock Text="Backup &amp; Data" Style="{StaticResource FormRowLabelStyle}"/>
+                                        <TextBlock Text="Auto backup schedule" Style="{StaticResource SetupSidebarSubtitleStyle}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Button>
@@ -301,36 +310,65 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>  <!-- 0: GST Registration Type -->
+                                    <RowDefinition Height="Auto"/>  <!-- 1: Composition Rate (conditional) -->
+                                    <RowDefinition Height="Auto"/>  <!-- 2: Composition hint (conditional) -->
                                     <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>  <!-- 4: GSTIN -->
+                                    <RowDefinition Height="Auto"/>  <!-- 5: GSTIN hint -->
+                                    <RowDefinition Height="Auto"/>  <!-- 6: State Code display -->
+                                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                    <RowDefinition Height="Auto"/>  <!-- 8: PAN -->
+                                    <RowDefinition Height="Auto"/>  <!-- 9: PAN hint -->
+                                    <RowDefinition Height="Auto"/>  <!-- 10: Cross hint -->
                                 </Grid.RowDefinitions>
 
-                                <TextBlock x:Name="GstinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GSTIN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
-                                <TextBox Grid.Row="0" Grid.Column="1" x:Name="GstinBox" TabIndex="10" AutomationProperties.Name="GSTIN"
+                                <TextBlock x:Name="GstRegTypeLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GST Type "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
+                                <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="9" AutomationProperties.Name="GST Registration Type"
+                                          ItemsSource="{Binding GstRegistrationTypes}" SelectedItem="{Binding SelectedGstRegistrationType}"
+                                          AutomationProperties.LabeledBy="{Binding ElementName=GstRegTypeLabel}"
+                                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                                <TextBlock x:Name="CompRateLabel" Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                                           Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"><Run Text="Rate (%)"/></TextBlock>
+                                <TextBox Grid.Row="1" Grid.Column="1" TabIndex="10"
+                                         Text="{Binding CompositionRate, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                                         MaxLength="4" AutomationProperties.Name="Composition Rate"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=CompRateLabel}"
+                                         Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"
+                                         h:NumericInput.IsIntegerOnly="True"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1"
+                                           Text="{Binding CompositionRateHint}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
+
+                                <TextBlock x:Name="GstinLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="GSTIN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBox Grid.Row="4" Grid.Column="1" x:Name="GstinBox" TabIndex="11" AutomationProperties.Name="GSTIN"
                                          Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
                                          Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
                                          AutomationProperties.LabeledBy="{Binding ElementName=GstinLabel}"
                                          MaxLength="15" CharacterCasing="Upper"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1"
+                                <TextBlock Grid.Row="5" Grid.Column="1"
                                            Text="{Binding GstinValidationHint}"
                                            Foreground="{Binding GstinValidationHint, Converter={StaticResource HintForegroundConverter}}"
                                            Style="{StaticResource CollapsibleHintTextStyle}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1"
+                                           Text="{Binding DerivedStateCodeDisplay}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           Style="{StaticResource CollapsibleHintTextStyle}"/>
 
-                                <TextBlock x:Name="PanLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PAN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
-                                <TextBox Grid.Row="3" Grid.Column="1" x:Name="PanBox" TabIndex="11" AutomationProperties.Name="PAN"
+                                <TextBlock x:Name="PanLabel" Grid.Row="8" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PAN"/><Run Text=" (optional)" Foreground="{StaticResource FluentTextTertiary}"/></TextBlock>
+                                <TextBox Grid.Row="8" Grid.Column="1" x:Name="PanBox" TabIndex="12" AutomationProperties.Name="PAN"
                                          Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}"
                                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="10"
                                          AutomationProperties.LabeledBy="{Binding ElementName=PanLabel}"
                                          CharacterCasing="Upper"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1"
+                                <TextBlock Grid.Row="9" Grid.Column="1"
                                            Text="{Binding PanValidationHint}"
                                            Foreground="{Binding PanValidationHint, Converter={StaticResource HintForegroundConverter}}"
                                            Style="{StaticResource CollapsibleHintTextStyle}"/>
-                                <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                <TextBlock Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
                                            Text="{Binding GstinPanCrossHint}"
                                            Foreground="{Binding GstinPanCrossHint, Converter={StaticResource HintForegroundConverter}}"
                                            Margin="{StaticResource CrossHintMargin}"
@@ -359,12 +397,22 @@
                                         <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>  <!-- 8 -->
+                                        <RowDefinition Height="Auto"/>  <!-- 9: Tax Mode -->
+                                        <RowDefinition Height="Auto"/>  <!-- 10: Tax Mode hint -->
+                                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                        <RowDefinition Height="Auto"/>  <!-- 12: Rounding -->
+                                        <RowDefinition Height="Auto"/>  <!-- 13: Rounding hint -->
+                                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                        <RowDefinition Height="Auto"/>  <!-- 15: Number-to-Words -->
+                                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                        <RowDefinition Height="Auto"/>  <!-- 17: Negative Stock -->
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Currency"
                                                x:Name="CurrencyLabel"
                                                Style="{StaticResource FormRowLabelStyle}"/>
-                                    <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="12" AutomationProperties.Name="Currency Symbol"
+                                    <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="13" AutomationProperties.Name="Currency Symbol"
                                               ItemsSource="{Binding CurrencySymbols}" SelectedItem="{Binding SelectedCurrencySymbol}"
                                               AutomationProperties.LabeledBy="{Binding ElementName=CurrencyLabel}"
                                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
@@ -376,7 +424,7 @@
                                     <TextBlock Grid.Row="3" Grid.Column="0" Text="FY Start"
                                                x:Name="FyStartLabel"
                                                Style="{StaticResource FormRowLabelStyle}"/>
-                                    <ComboBox Grid.Row="3" Grid.Column="1" TabIndex="13" AutomationProperties.Name="Financial Year Start Month"
+                                    <ComboBox Grid.Row="3" Grid.Column="1" TabIndex="14" AutomationProperties.Name="Financial Year Start Month"
                                               ItemsSource="{Binding Months}" SelectedItem="{Binding SelectedFYStartMonth}"
                                               AutomationProperties.LabeledBy="{Binding ElementName=FyStartLabel}"
                                               Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
@@ -388,7 +436,7 @@
                                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Date Format"
                                                x:Name="DateFormatLabel"
                                                Style="{StaticResource FormRowLabelStyle}"/>
-                                    <ComboBox Grid.Row="6" Grid.Column="1" TabIndex="14" AutomationProperties.Name="Date Format"
+                                    <ComboBox Grid.Row="6" Grid.Column="1" TabIndex="15" AutomationProperties.Name="Date Format"
                                               ItemsSource="{Binding DateFormats}" SelectedItem="{Binding SelectedDateFormat}"
                                               AutomationProperties.LabeledBy="{Binding ElementName=DateFormatLabel}"
                                               Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
@@ -396,6 +444,51 @@
                                                Text="{Binding DateFormatPreview}"
                                                FontSize="{StaticResource FontSizeCaption}"
                                                Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
+
+                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Tax Mode"
+                                               x:Name="TaxModeLabel"
+                                               Style="{StaticResource FormRowLabelStyle}"/>
+                                    <ComboBox Grid.Row="9" Grid.Column="1" TabIndex="16" AutomationProperties.Name="Tax Mode"
+                                              ItemsSource="{Binding TaxModes}" SelectedItem="{Binding SelectedTaxMode}"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=TaxModeLabel}"
+                                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Row="10" Grid.Column="1"
+                                               Text="{Binding TaxModeHint}"
+                                               FontSize="{StaticResource FontSizeCaption}"
+                                               Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
+
+                                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Rounding"
+                                               x:Name="RoundingLabel"
+                                               Style="{StaticResource FormRowLabelStyle}"/>
+                                    <ComboBox Grid.Row="12" Grid.Column="1" TabIndex="17" AutomationProperties.Name="Bill Rounding Method"
+                                              ItemsSource="{Binding RoundingMethods}" SelectedItem="{Binding SelectedRoundingMethod}"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=RoundingLabel}"
+                                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Row="13" Grid.Column="1"
+                                               Text="{Binding RoundingPreview}"
+                                               FontSize="{StaticResource FontSizeCaption}"
+                                               Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
+
+                                    <TextBlock Grid.Row="15" Grid.Column="0" Text="Words Lang"
+                                               x:Name="WordsLangLabel"
+                                               Style="{StaticResource FormRowLabelStyle}"/>
+                                    <ComboBox Grid.Row="15" Grid.Column="1" TabIndex="18" AutomationProperties.Name="Number-to-Words Language"
+                                              ItemsSource="{Binding NumberToWordsLanguages}" SelectedItem="{Binding SelectedNumberToWordsLanguage}"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=WordsLangLabel}"
+                                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
+
+                                    <TextBlock Grid.Row="17" Grid.Column="0" Text="Neg. Stock"
+                                               Style="{StaticResource FormRowLabelStyle}"/>
+                                    <DockPanel Grid.Row="17" Grid.Column="1">
+                                        <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                                                  IsChecked="{Binding NegativeStockAllowed}"
+                                                  AutomationProperties.Name="Allow Negative Stock"
+                                                  DockPanel.Dock="Left"/>
+                                        <TextBlock Text="Allow billing with zero stock"
+                                                   FontSize="{StaticResource FontSizeCaption}"
+                                                   Foreground="{StaticResource FluentTextSecondary}"
+                                                   VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
+                                    </DockPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -427,7 +520,7 @@
                                     </Border>
                                     <TextBlock x:Name="MasterPinLabel" Grid.Row="1" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                     <DockPanel Grid.Row="1" Grid.Column="1">
-                                        <PasswordBox x:Name="MasterPinBox" TabIndex="15" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Master PIN"
+                                        <PasswordBox x:Name="MasterPinBox" TabIndex="20" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Master PIN"
                                                      AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
                                                      Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                         <TextBlock Style="{StaticResource PinWarningTextStyle}"
@@ -442,7 +535,7 @@
 
                                     <TextBlock x:Name="MasterConfirmLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                                     <DockPanel Grid.Row="4" Grid.Column="1">
-                                        <PasswordBox x:Name="MasterPinConfirmBox" TabIndex="16" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Master PIN"
+                                        <PasswordBox x:Name="MasterPinConfirmBox" TabIndex="21" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Master PIN"
                                                      AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
                                                      Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                                         <TextBlock Style="{StaticResource PinInlineHintStyle}"
@@ -590,6 +683,64 @@
                                            Foreground="{StaticResource FluentError}"
                                            Margin="{StaticResource FieldLabelSpacing}"
                                            Style="{StaticResource CollapsibleHintTextStyle}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Backup & Data -->
+                    <Border x:Name="BackupSection" Style="{StaticResource CardStyle}" VerticalAlignment="Top" Margin="{StaticResource InlineControlSpacing}" h:Motion.SlideFadeIn="True" h:Motion.StaggerIndex="5">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" AutomationProperties.Name="Backup and Data section"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE74E;"/><Run Text=" Backup &amp; Data"/></TextBlock>
+                            <Grid Margin="{StaticResource StepContentTopSpacing}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>  <!-- 0: Auto Backup toggle -->
+                                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                    <RowDefinition Height="Auto"/>  <!-- 2: Backup Time -->
+                                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                    <RowDefinition Height="Auto"/>  <!-- 4: Backup Location -->
+                                    <RowDefinition Height="Auto"/>  <!-- 5: Location hint -->
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Auto Backup"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <DockPanel Grid.Row="0" Grid.Column="1">
+                                    <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
+                                              IsChecked="{Binding AutoBackupEnabled}"
+                                              AutomationProperties.Name="Enable Auto Backup"
+                                              DockPanel.Dock="Left"/>
+                                    <TextBlock Text="Daily scheduled backup"
+                                               FontSize="{StaticResource FontSizeCaption}"
+                                               Foreground="{StaticResource FluentTextSecondary}"
+                                               VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>
+                                </DockPanel>
+
+                                <TextBlock x:Name="BackupTimeLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"><Run Text="Time (HH:mm)"/></TextBlock>
+                                <TextBox Grid.Row="2" Grid.Column="1" TabIndex="40"
+                                         Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
+                                         MaxLength="5" AutomationProperties.Name="Backup Time"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=BackupTimeLabel}"
+                                         Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"/>
+
+                                <TextBlock x:Name="BackupPathLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"
+                                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"><Run Text="Location"/></TextBlock>
+                                <TextBox Grid.Row="4" Grid.Column="1" TabIndex="41"
+                                         Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalAlignment="Stretch"
+                                         AutomationProperties.Name="Backup Location"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=BackupPathLabel}"
+                                         Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1"
+                                           Text="Folder must exist. Default: Documents\StoreAssistantPro\Backups"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           Visibility="{Binding IsBackupConfigVisible, Converter={StaticResource BoolToVisibility}}"
+                                           Margin="{StaticResource ValidationHintMargin}"/>
                             </Grid>
                         </StackPanel>
                     </Border>

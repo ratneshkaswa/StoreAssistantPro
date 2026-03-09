@@ -43,6 +43,17 @@ public class SystemSettings
     [MaxLength(20)]
     public string DefaultTaxMode { get; set; } = "Exclusive";
 
+    /// <summary>Bill rounding: None, NearestOne, NearestFive, NearestTen.</summary>
+    [MaxLength(20)]
+    public string RoundingMethod { get; set; } = "None";
+
+    /// <summary>Whether billing allows selling with zero or negative stock.</summary>
+    public bool NegativeStockAllowed { get; set; }
+
+    /// <summary>Language for amount-to-words on invoices: English or Hindi.</summary>
+    [MaxLength(20)]
+    public string NumberToWordsLanguage { get; set; } = "English";
+
     /// <summary>
     /// Set to <c>true</c> after the first-run setup wizard completes all steps
     /// (Firm → Tax → Vendor → Product). Prevents the wizard from re-appearing.

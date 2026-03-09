@@ -1,4 +1,6 @@
-﻿namespace StoreAssistantPro.Modules.Authentication.Services;
+﻿using StoreAssistantPro.Modules.Authentication.Commands;
+
+namespace StoreAssistantPro.Modules.Authentication.Services;
 
 public interface ISetupService
 {
@@ -10,5 +12,6 @@ public interface ISetupService
         string dateFormat,
         string adminPin, string managerPin,
         string userPin, string masterPin,
+        SetupBusinessOptions businessOptions,
         CancellationToken ct = default);
 }
