@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +11,7 @@ namespace StoreAssistantPro.Modules.Authentication.Views;
 public partial class SetupWindow : Window
 {
     private SetupViewModel? _vm;
+    private Button? _activeSidebarButton;
 
     public SetupWindow(SetupViewModel vm)
     {
@@ -30,10 +30,6 @@ public partial class SetupWindow : Window
             DataObject.AddPastingHandler(box, OnPastingNumericOnly);
         }
 
-        // Pincode is also numeric-only
-        PincodeBox.PreviewTextInput += OnPreviewNumericOnly;
-        DataObject.AddPastingHandler(PincodeBox, OnPastingNumericOnly);
-
         // Phone allows digits, +, -, spaces
         PhoneBox.PreviewTextInput += OnPreviewPhoneOnly;
         DataObject.AddPastingHandler(PhoneBox, OnPastingPhoneOnly);
@@ -42,11 +38,13 @@ public partial class SetupWindow : Window
         DataObject.AddPastingHandler(GstinBox, OnPastingUpperCase);
         DataObject.AddPastingHandler(PanBox, OnPastingUpperCase);
 
-        PreviewKeyDown += OnPreviewKeyDown;
         vm.PropertyChanged += OnViewModelPropertyChanged;
 
-        // Focus firm name on load
-        Loaded += (_, _) => FirmNameBox.Focus();
+        // Set initial active sidebar button (AutoFocus handles keyboard focus globally)
+        Loaded += (_, _) =>
+        {
+            SetActiveSidebarButton(SidebarFirmButton);
+        };
         Closed += (_, _) =>
         {
             vm.PropertyChanged -= OnViewModelPropertyChanged;
@@ -81,47 +79,28 @@ public partial class SetupWindow : Window
 
     private void OnSidebarSectionClick(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button { Tag: string targetName })
+        if (sender is not Button button || button.Tag is not string targetName)
             return;
+
+        SetActiveSidebarButton(button);
 
         if (FindName(targetName) is FrameworkElement target)
             target.BringIntoView();
     }
 
-    private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+    private void SetActiveSidebarButton(Button button)
     {
-        if (DataContext is not SetupViewModel vm) return;
-
-        // #4: Escape key closes window (triggers OnWindowClosing confirmation)
-        if (e.Key == Key.Escape)
+        if (_activeSidebarButton is not null)
         {
-            Close();
-            e.Handled = true;
-            return;
+            _activeSidebarButton.ClearValue(BackgroundProperty);
+            _activeSidebarButton.ClearValue(BorderBrushProperty);
         }
 
-        // #5: Keyboard save shortcut from anywhere
-        if (e.Key == Key.Enter && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-        {
-            if (!vm.IsBusy && vm.SaveCommand.CanExecute(null))
-                vm.SaveCommand.Execute(null);
-            e.Handled = true;
-            return;
-        }
-
-        if (e.Key != Key.Enter) return;
-
-        // IsBusy guard
-        if (vm.IsBusy) { e.Handled = true; return; }
-
-        // Don't trigger save when focus is inside editable fields
-        if (Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox)
-            return;
-
-        if (vm.SaveCommand.CanExecute(null))
-            vm.SaveCommand.Execute(null);
-
-        e.Handled = true;
+        _activeSidebarButton = button;
+        if (FindResource("FluentSubtleHover") is System.Windows.Media.Brush activeBackground)
+            button.Background = activeBackground;
+        if (FindResource("FluentAccentDefault") is System.Windows.Media.Brush activeBorder)
+            button.BorderBrush = activeBorder;
     }
 
     private void OnPinChanged(object sender, RoutedEventArgs e)
@@ -200,8 +179,13 @@ public partial class SetupWindow : Window
                 if (sender is TextBox tb)
                 {
                     var caret = tb.CaretIndex;
-                    tb.Text = tb.Text.Insert(caret, upper);
-                    tb.CaretIndex = caret + upper.Length;
+                    var available = tb.MaxLength > 0 ? tb.MaxLength - tb.Text.Length : int.MaxValue;
+                    var insert = upper[..Math.Min(upper.Length, available)];
+                    if (insert.Length > 0)
+                    {
+                        tb.Text = tb.Text.Insert(caret, insert);
+                        tb.CaretIndex = caret + insert.Length;
+                    }
                 }
             }
         }

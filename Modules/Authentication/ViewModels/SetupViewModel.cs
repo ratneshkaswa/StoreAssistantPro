@@ -417,7 +417,7 @@ public partial class SetupViewModel : BaseViewModel
             Phone.Trim(), Email.Trim(), GSTIN.Trim().ToUpperInvariant(),
             PAN.Trim().ToUpperInvariant(), CurrencyCode,
             SelectedCurrencySymbol, fyStartMonth, fyEndMonth, SelectedDateFormat,
-            AdminPin, ManagerPin, UserPin, MasterPin));
+            AdminPin, ManagerPin, UserPin, MasterPin), ct);
 
         if (result.Succeeded)
         {
