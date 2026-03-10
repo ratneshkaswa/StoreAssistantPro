@@ -65,7 +65,8 @@ public class SetupWindowComplianceTests
         Assert.DoesNotContain("x:Name=\"NavRegional\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavBackup\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavSystem\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("Firm Management and System Settings", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("Firm Management and System Settings", xaml, StringComparison.Ordinal);
+        Assert.Contains("advanced preferences later in Settings", xaml, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
