@@ -1,24 +1,25 @@
-﻿using StoreAssistantPro.Core;
-using StoreAssistantPro.Core.Commands;
+﻿using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Modules.Authentication.Services;
 
 namespace StoreAssistantPro.Modules.Authentication.Commands;
 
 public class CompleteFirstSetupHandler(ISetupService setupService)
-    : BaseCommandHandler<CompleteFirstSetupCommand>
+    : ICommandRequestHandler<CompleteFirstSetupCommand, Unit>
 {
-    protected override async Task<CommandResult> ExecuteAsync(CompleteFirstSetupCommand command, CancellationToken ct)
+    public async Task<CommandResult<Unit>> HandleAsync(CompleteFirstSetupCommand command, CancellationToken ct = default)
     {
-        await setupService.InitializeAppAsync(
-            command.FirmName, command.Address, command.State, command.Pincode,
-            command.Phone, command.Email, command.GSTIN, command.PAN,
-            command.CurrencyCode, command.CurrencySymbol,
-            command.FinancialYearStartMonth, command.FinancialYearEndMonth,
-            command.DateFormat,
-            command.AdminPin, command.ManagerPin,
-            command.UserPin, command.MasterPin,
-            command.BusinessOptions, ct);
-
-        return CommandResult.Success();
+        try
+        {
+            await setupService.InitializeAppAsync(command, ct);
+            return CommandResult<Unit>.Success(Unit.Value);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return CommandResult<Unit>.Failure(ex.Message);
+        }
+        catch (Exception)
+        {
+            return CommandResult<Unit>.Failure("Setup failed. Please try again.");
+        }
     }
 }

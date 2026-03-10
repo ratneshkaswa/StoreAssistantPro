@@ -1,4 +1,5 @@
 ﻿using NSubstitute;
+using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Authentication.Services;
 
@@ -21,21 +22,14 @@ public class CompleteFirstSetupHandlerTests
         var result = await CreateSut().HandleAsync(command);
 
         Assert.True(result.Succeeded);
-        await _setupService.Received(1).InitializeAppAsync(
-            "Store", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy",
-            "1234", "5678", "9012", "123456", Arg.Any<SetupBusinessOptions>(), Arg.Any<CancellationToken>());
+        Assert.Equal(Unit.Value, result.Value);
+        await _setupService.Received(1).InitializeAppAsync(command, Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HandleAsync_ServiceThrows_ReturnsFailure()
     {
-        _setupService.InitializeAppAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<int>(), Arg.Any<int>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<SetupBusinessOptions>(), Arg.Any<CancellationToken>())
+        _setupService.InitializeAppAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new InvalidOperationException("Already set up")));
 
         var result = await CreateSut().HandleAsync(
@@ -54,10 +48,7 @@ public class CompleteFirstSetupHandlerTests
 
         await CreateSut().HandleAsync(command);
 
-        await _setupService.Received(1).InitializeAppAsync(
-            "Store", "", "", "", "", "", "", "", "INR", "₹",
-            1, 12, "yyyy-MM-dd",
-            "1234", "5678", "9012", "123456", Arg.Any<SetupBusinessOptions>(), Arg.Any<CancellationToken>());
+        await _setupService.Received(1).InitializeAppAsync(command, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -71,10 +62,19 @@ public class CompleteFirstSetupHandlerTests
 
         await CreateSut().HandleAsync(command);
 
-        await _setupService.Received(1).InitializeAppAsync(
-            "Store", "Addr", "Rajasthan", "302001", "9876543210",
-            "test@test.com", "08AAAAA0000A1Z5", "ABCDE1234F",
-            "INR", "Rs.", 7, 6, "d MMM yyyy",
-            "2847", "3916", "5023", "847291", Arg.Any<SetupBusinessOptions>(), Arg.Any<CancellationToken>());
+        await _setupService.Received(1).InitializeAppAsync(command, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_UnexpectedException_ReturnsGenericMessage()
+    {
+        _setupService.InitializeAppAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new TimeoutException("DB timeout")));
+
+        var result = await CreateSut().HandleAsync(
+            new CompleteFirstSetupCommand("S", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "5678", "9012", "123456", DefaultBusinessOptions));
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("Setup failed. Please try again.", result.ErrorMessage);
     }
 }

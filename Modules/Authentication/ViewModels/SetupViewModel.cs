@@ -6,16 +6,64 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Authentication.Commands;
 
 namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 
 public partial class SetupViewModel : BaseViewModel
 {
+    private static readonly (string Code, string Name)[] IndianStateData =
+    [
+        ("37", "Andhra Pradesh"),
+        ("12", "Arunachal Pradesh"),
+        ("18", "Assam"),
+        ("10", "Bihar"),
+        ("22", "Chhattisgarh"),
+        ("30", "Goa"),
+        ("24", "Gujarat"),
+        ("06", "Haryana"),
+        ("02", "Himachal Pradesh"),
+        ("20", "Jharkhand"),
+        ("29", "Karnataka"),
+        ("32", "Kerala"),
+        ("23", "Madhya Pradesh"),
+        ("27", "Maharashtra"),
+        ("14", "Manipur"),
+        ("17", "Meghalaya"),
+        ("15", "Mizoram"),
+        ("13", "Nagaland"),
+        ("21", "Odisha"),
+        ("03", "Punjab"),
+        ("08", "Rajasthan"),
+        ("11", "Sikkim"),
+        ("33", "Tamil Nadu"),
+        ("36", "Telangana"),
+        ("16", "Tripura"),
+        ("09", "Uttar Pradesh"),
+        ("05", "Uttarakhand"),
+        ("19", "West Bengal"),
+        ("35", "Andaman & Nicobar"),
+        ("04", "Chandigarh"),
+        ("26", "Dadra & Nagar Haveli"),
+        ("07", "Delhi"),
+        ("01", "Jammu & Kashmir"),
+        ("38", "Ladakh"),
+        ("31", "Lakshadweep"),
+        ("34", "Puducherry")
+    ];
+
+    private static readonly Dictionary<string, string> IndianStateNameByCode =
+        IndianStateData.ToDictionary(state => state.Code, state => state.Name);
+
+    private static readonly Dictionary<string, string> IndianStateCodeByName =
+        IndianStateData.ToDictionary(state => state.Name, state => state.Code, StringComparer.OrdinalIgnoreCase);
+
     // ── Firm details ──
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
     public partial string FirmName { get; set; } = string.Empty;
 
     partial void OnFirmNameChanged(string value) => ClearErrorOnEdit();
@@ -26,27 +74,23 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
+    [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
     public partial string State { get; set; } = string.Empty;
 
     public ObservableCollection<string> IndianStates { get; } =
-    [
-        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-        "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
-        "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
-        "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
-        "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-        "Uttar Pradesh", "Uttarakhand", "West Bengal",
-        "Andaman & Nicobar", "Chandigarh", "Dadra & Nagar Haveli",
-        "Delhi", "Jammu & Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
-    ];
+        new(IndianStateData.Select(state => state.Name));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PincodeValidationHint))]
     public partial string Pincode { get; set; } = string.Empty;
 
+    partial void OnPincodeChanged(string value) => ClearErrorOnEdit();
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PhoneValidationHint))]
     public partial string Phone { get; set; } = string.Empty;
+
+    partial void OnPhoneChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
@@ -57,12 +101,18 @@ public partial class SetupViewModel : BaseViewModel
 
     partial void OnGSTINChanged(string value)
     {
+        ClearErrorOnEdit();
         // Auto-fill State from the first 2 digits of GSTIN (state code)
         if (value.Length >= 2)
         {
             var stateName = GetGstinStateName(value[..2]);
-            if (stateName != null && string.IsNullOrWhiteSpace(State))
-                State = stateName;
+            if (stateName != null)
+            {
+                if (string.IsNullOrWhiteSpace(State))
+                    State = stateName;
+                else if (!string.Equals(State, stateName, StringComparison.OrdinalIgnoreCase))
+                    OnPropertyChanged(nameof(GstinValidationHint));
+            }
         }
     }
 
@@ -71,9 +121,13 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(GstinPanCrossHint))]
     public partial string PAN { get; set; } = string.Empty;
 
+    partial void OnPANChanged(string value) => ClearErrorOnEdit();
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EmailValidationHint))]
     public partial string Email { get; set; } = string.Empty;
+
+    partial void OnEmailChanged(string value) => ClearErrorOnEdit();
 
     /// <summary>Currency code is always INR — India-exclusive app.</summary>
     public string CurrencyCode => "INR";
@@ -93,6 +147,8 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
     [NotifyPropertyChangedFor(nameof(CompositionRateValidationHint))]
     public partial string CompositionRate { get; set; } = "1";
+
+    partial void OnCompositionRateChanged(string value) => ClearErrorOnEdit();
 
     public string CompositionRateHint => IsCompositionScheme
         ? $"Flat {CompositionRate}% on turnover — no CGST/SGST breakup"
@@ -140,11 +196,8 @@ public partial class SetupViewModel : BaseViewModel
 
     // ── Regional settings ──
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CurrencyPreview))]
-    public partial string SelectedCurrencySymbol { get; set; } = "₹";
-
-    public ObservableCollection<string> CurrencySymbols { get; } = ["₹", "Rs."];
+    /// <summary>Currency symbol is always ₹ — India-exclusive app.</summary>
+    public string SelectedCurrencySymbol => "\u20b9";
 
     public ObservableCollection<string> Months { get; } = new(
         Enumerable.Range(1, 12).Select(m => CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(m)));
@@ -186,15 +239,14 @@ public partial class SetupViewModel : BaseViewModel
         {
             try
             {
-                var istNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
-                    TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+                var istNow = _regionalSettings.Now;
                 return $"e.g. {istNow.ToString(SelectedDateFormat, CultureInfo.InvariantCulture)}";
             }
-            catch { return string.Empty; }
+            catch (FormatException) { return string.Empty; }
         }
     }
 
-    public string CurrencyPreview => $"e.g. {SelectedCurrencySymbol} 1,00,000";
+    public string CurrencyPreview => "e.g. \u20b9 1,00,000";
 
     // ── Business preferences ──
 
@@ -224,9 +276,14 @@ public partial class SetupViewModel : BaseViewModel
     };
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NumberToWordsPreview))]
     public partial string SelectedNumberToWordsLanguage { get; set; } = "English";
 
     public ObservableCollection<string> NumberToWordsLanguages { get; } = ["English", "Hindi"];
+
+    public string NumberToWordsPreview => SelectedNumberToWordsLanguage == "Hindi"
+        ? "e.g. एक लाख रुपये"
+        : "e.g. One Lakh Rupees";
 
     [ObservableProperty]
     public partial bool NegativeStockAllowed { get; set; }
@@ -243,6 +300,8 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(BackupTimeValidationHint))]
     public partial string BackupTime { get; set; } = "22:00";
 
+    partial void OnBackupTimeChanged(string value) => ClearErrorOnEdit();
+
     public string BackupTimeValidationHint
     {
         get
@@ -258,6 +317,8 @@ public partial class SetupViewModel : BaseViewModel
     public partial string BackupLocation { get; set; } = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
         "StoreAssistantPro", "Backups");
+
+    partial void OnBackupLocationChanged(string value) => ClearErrorOnEdit();
 
     // ── Live field validation hints ──
 
@@ -292,13 +353,18 @@ public partial class SetupViewModel : BaseViewModel
         get
         {
             if (string.IsNullOrWhiteSpace(GSTIN)) return string.Empty;
-            if (!GstinRegex().IsMatch(GSTIN)) return "Format: 22AAAAA0000A1Z5";
-            var stateCode = GSTIN[..2];
+            var gstin = GSTIN.Trim().ToUpperInvariant();
+            if (!GstinRegex().IsMatch(gstin)) return "Format: 22AAAAA0000A1Z5";
+            var stateCode = gstin[..2];
             var stateName = GetGstinStateName(stateCode);
             var prefix = stateName != null ? $"✓ State: {stateName}" : "✓";
-            if (GSTIN.Length == 15 && !VerifyGstinChecksum(GSTIN))
-                return $"{prefix} — check digit mismatch";
-            return prefix;
+            var warnings = new System.Text.StringBuilder(prefix);
+            if (stateName != null && !string.IsNullOrWhiteSpace(State)
+                && !string.Equals(State, stateName, StringComparison.OrdinalIgnoreCase))
+                warnings.Append($" — ⚠ differs from selected state ({State})");
+            if (gstin.Length == 15 && !VerifyGstinChecksum(gstin))
+                warnings.Append(" — check digit mismatch");
+            return warnings.ToString();
         }
     }
 
@@ -322,39 +388,11 @@ public partial class SetupViewModel : BaseViewModel
         return char.ToUpperInvariant(gstin[14]) == chars[checkIdx];
     }
 
-    private static string? GetGstinStateName(string code) => code switch
-    {
-        "01" => "Jammu & Kashmir", "02" => "Himachal Pradesh", "03" => "Punjab",
-        "04" => "Chandigarh", "05" => "Uttarakhand", "06" => "Haryana",
-        "07" => "Delhi", "08" => "Rajasthan", "09" => "Uttar Pradesh",
-        "10" => "Bihar", "11" => "Sikkim", "12" => "Arunachal Pradesh",
-        "13" => "Nagaland", "14" => "Manipur", "15" => "Mizoram",
-        "16" => "Tripura", "17" => "Meghalaya", "18" => "Assam",
-        "19" => "West Bengal", "20" => "Jharkhand", "21" => "Odisha",
-        "22" => "Chhattisgarh", "23" => "Madhya Pradesh", "24" => "Gujarat",
-        "26" => "Dadra & Nagar Haveli", "27" => "Maharashtra", "29" => "Karnataka",
-        "30" => "Goa", "31" => "Lakshadweep", "32" => "Kerala",
-        "33" => "Tamil Nadu", "34" => "Puducherry", "35" => "Andaman & Nicobar",
-        "36" => "Telangana", "37" => "Andhra Pradesh", "38" => "Ladakh",
-        _ => null
-    };
+    private static string? GetGstinStateName(string code) =>
+        IndianStateNameByCode.GetValueOrDefault(code);
 
-    private static string? GetStateCodeFromName(string stateName) => stateName switch
-    {
-        "Jammu & Kashmir" => "01", "Himachal Pradesh" => "02", "Punjab" => "03",
-        "Chandigarh" => "04", "Uttarakhand" => "05", "Haryana" => "06",
-        "Delhi" => "07", "Rajasthan" => "08", "Uttar Pradesh" => "09",
-        "Bihar" => "10", "Sikkim" => "11", "Arunachal Pradesh" => "12",
-        "Nagaland" => "13", "Manipur" => "14", "Mizoram" => "15",
-        "Tripura" => "16", "Meghalaya" => "17", "Assam" => "18",
-        "West Bengal" => "19", "Jharkhand" => "20", "Odisha" => "21",
-        "Chhattisgarh" => "22", "Madhya Pradesh" => "23", "Gujarat" => "24",
-        "Dadra & Nagar Haveli" => "26", "Maharashtra" => "27", "Karnataka" => "29",
-        "Goa" => "30", "Lakshadweep" => "31", "Kerala" => "32",
-        "Tamil Nadu" => "33", "Puducherry" => "34", "Andaman & Nicobar" => "35",
-        "Telangana" => "36", "Andhra Pradesh" => "37", "Ladakh" => "38",
-        _ => null
-    };
+    private static string? GetStateCodeFromName(string stateName) =>
+        IndianStateCodeByName.GetValueOrDefault(stateName);
 
     public string PanValidationHint
     {
@@ -387,7 +425,8 @@ public partial class SetupViewModel : BaseViewModel
         get
         {
             if (string.IsNullOrWhiteSpace(Pincode)) return string.Empty;
-            return Pincode.Length == 6 && Pincode.AsSpan().IndexOfAnyExceptInRange('0', '9') < 0
+            var pincode = Pincode.Trim();
+            return pincode.Length == 6 && pincode.AsSpan().IndexOfAnyExceptInRange('0', '9') < 0
                 ? "✓" : "Must be exactly 6 digits";
         }
     }
@@ -413,6 +452,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(AdminPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string AdminPin { get; set; } = string.Empty;
 
     partial void OnAdminPinChanged(string value) => ClearErrorOnEdit();
@@ -420,6 +460,7 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AdminConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string AdminPinConfirm { get; set; } = string.Empty;
 
     partial void OnAdminPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -430,6 +471,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(ManagerPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string ManagerPin { get; set; } = string.Empty;
 
     partial void OnManagerPinChanged(string value) => ClearErrorOnEdit();
@@ -437,6 +479,7 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ManagerConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string ManagerPinConfirm { get; set; } = string.Empty;
 
     partial void OnManagerPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -447,6 +490,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(UserPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string UserPin { get; set; } = string.Empty;
 
     partial void OnUserPinChanged(string value) => ClearErrorOnEdit();
@@ -454,6 +498,7 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UserConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string UserPinConfirm { get; set; } = string.Empty;
 
     partial void OnUserPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -465,6 +510,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(MasterPinStrength))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string MasterPin { get; set; } = string.Empty;
 
     partial void OnMasterPinChanged(string value) => ClearErrorOnEdit();
@@ -472,6 +518,7 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MasterConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
     public partial string MasterPinConfirm { get; set; } = string.Empty;
 
     partial void OnMasterPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -502,6 +549,16 @@ public partial class SetupViewModel : BaseViewModel
     // S7: Live cross-validation
     public string PinConflictWarning => GetPinConflictWarning();
 
+    // ── Section completion indicators ──
+
+    public bool IsFirmSectionComplete => !string.IsNullOrWhiteSpace(FirmName);
+
+    public bool IsSecuritySectionComplete =>
+        InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm &&
+        InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm &&
+        InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm &&
+        InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm;
+
     // ── Required fields progress ──
 
     public string RequiredFieldsProgress
@@ -524,20 +581,7 @@ public partial class SetupViewModel : BaseViewModel
     // ── Sidebar navigation ──
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFirmSection))]
-    [NotifyPropertyChangedFor(nameof(IsTaxSection))]
-    [NotifyPropertyChangedFor(nameof(IsRegionalSection))]
-    [NotifyPropertyChangedFor(nameof(IsSecuritySection))]
-    [NotifyPropertyChangedFor(nameof(IsBackupSection))]
-    [NotifyPropertyChangedFor(nameof(IsSystemSection))]
     public partial string SelectedSection { get; set; } = "Firm";
-
-    public bool IsFirmSection => SelectedSection == "Firm";
-    public bool IsTaxSection => SelectedSection == "Tax";
-    public bool IsRegionalSection => SelectedSection == "Regional";
-    public bool IsSecuritySection => SelectedSection == "Security";
-    public bool IsBackupSection => SelectedSection == "Backup";
-    public bool IsSystemSection => SelectedSection == "System";
 
     // S10: Setup complete state
     [ObservableProperty]
@@ -548,41 +592,49 @@ public partial class SetupViewModel : BaseViewModel
 
     public Action<bool?>? RequestClose { get; set; }
 
-    public SetupViewModel(ICommandBus commandBus) : base()
+    public SetupViewModel(ICommandBus commandBus, IRegionalSettingsService regionalSettings) : base()
     {
         _commandBus = commandBus;
+        _regionalSettings = regionalSettings;
     }
 
     private readonly ICommandBus _commandBus;
+    private readonly IRegionalSettingsService _regionalSettings;
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>
     {
         if (!Validate(v => v
-            .Rule(InputValidator.IsRequired(FirmName), "Firm name is required.")
-            .Rule(InputValidator.IsValidUserPin(AdminPin), "Admin PIN must be exactly 4 digits.")
-            .Rule(InputValidator.AreEqual(AdminPin, AdminPinConfirm), "Admin PIN confirmation does not match.")
-            .Rule(InputValidator.IsValidUserPin(ManagerPin), "Manager PIN must be exactly 4 digits.")
-            .Rule(InputValidator.AreEqual(ManagerPin, ManagerPinConfirm), "Manager PIN confirmation does not match.")
-            .Rule(InputValidator.IsValidUserPin(UserPin), "User PIN must be exactly 4 digits.")
-            .Rule(InputValidator.AreEqual(UserPin, UserPinConfirm), "User PIN confirmation does not match.")
-            .Rule(InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin), "Each role must have a unique PIN.")
-            .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master PIN must be exactly 6 digits.")
-            .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master PIN confirmation does not match.")
-            .Rule(!MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin), "Master PIN must not contain any role PIN.")
-            .Rule(!IsCompositionScheme || decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out _), "Composition rate must be a valid number.")
-            .Rule(string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.")
-            .Rule(string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.")
-            .Rule(string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.")
-            .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.")
-            .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.")
-            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.")
-            .Rule(!AutoBackupEnabled || TimeOnly.TryParseExact(BackupTime.Trim(), "HH:mm", CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _), "Backup time must be in HH:mm format (e.g. 22:00).")
-            .Rule(!AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.")))
+            .Rule(InputValidator.IsRequired(FirmName), "Firm name is required.", "FirmName")
+            .Rule(InputValidator.IsValidUserPin(AdminPin), "Admin PIN must be exactly 4 digits.", "AdminPin")
+            .Rule(InputValidator.AreEqual(AdminPin, AdminPinConfirm), "Admin PIN confirmation does not match.", "AdminPinConfirm")
+            .Rule(InputValidator.IsValidUserPin(ManagerPin), "Manager PIN must be exactly 4 digits.", "ManagerPin")
+            .Rule(InputValidator.AreEqual(ManagerPin, ManagerPinConfirm), "Manager PIN confirmation does not match.", "ManagerPinConfirm")
+            .Rule(InputValidator.IsValidUserPin(UserPin), "User PIN must be exactly 4 digits.", "UserPin")
+            .Rule(InputValidator.AreEqual(UserPin, UserPinConfirm), "User PIN confirmation does not match.", "UserPinConfirm")
+            .Rule(InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin), "Each role must have a unique PIN.", "PinConflict")
+            .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master PIN must be exactly 6 digits.", "MasterPin")
+            .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master PIN confirmation does not match.", "MasterPinConfirm")
+            .Rule(!MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin), "Master PIN must not contain any role PIN.", "MasterPinContains")
+            .Rule(!IsCompositionScheme || (decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out var compRate) && compRate is >= 0 and <= 100), "Composition rate must be a valid number (0–100).", "CompositionRate")
+            .Rule(string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.", "GSTIN")
+            .Rule(string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.", "GSTINChecksum")
+            .Rule(string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.", "PAN")
+            .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.", "Pincode")
+            .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.", "Email")
+            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.", "Phone")
+            .Rule(string.IsNullOrWhiteSpace(Phone) || new string(Phone.Where(char.IsDigit).ToArray()).Length >= 10, "Phone must have at least 10 digits.", "Phone")
+            .Rule(!AutoBackupEnabled || TimeOnly.TryParseExact(BackupTime.Trim(), "HH:mm", CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
+            .Rule(!AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.", "BackupLocation")
+            .Rule(!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || System.IO.Directory.Exists(BackupLocation.Trim()), "Backup folder does not exist. Please create it first or choose a different path.", "BackupLocation")))
             return;
 
         var fyStartMonth = MonthNameToIndex(SelectedFYStartMonth);
         var fyEndMonth = (fyStartMonth + 10) % 12 + 1;
+
+        var backupPath = AutoBackupEnabled && !string.IsNullOrWhiteSpace(BackupLocation)
+            ? BackupLocation.Trim().TrimEnd(System.IO.Path.DirectorySeparatorChar).Trim('"')
+            : null;
 
         var result = await _commandBus.SendAsync(new CompleteFirstSetupCommand(
             FirmName.Trim(), Address.Trim(), State.Trim(), Pincode.Trim(),
@@ -600,16 +652,20 @@ public partial class SetupViewModel : BaseViewModel
                 NegativeStockAllowed,
                 AutoBackupEnabled,
                 AutoBackupEnabled ? BackupTime : null,
-                AutoBackupEnabled ? BackupLocation : null)), ct);
+                backupPath)), ct);
 
         if (result.Succeeded)
         {
             IsSetupComplete = true;
-            for (var i = 3; i >= 1; i--)
+            try
             {
-                RedirectCountdown = $"Redirecting to login in {i}…";
-                await Task.Delay(1000, ct);
+                for (var i = 3; i >= 1; i--)
+                {
+                    RedirectCountdown = $"Redirecting to login in {i}…";
+                    await Task.Delay(1000, ct);
+                }
             }
+            catch (OperationCanceledException) { /* Window closing — proceed to cleanup */ }
 
             ClearSensitivePins();
             RequestClose?.Invoke(true);
@@ -617,6 +673,16 @@ public partial class SetupViewModel : BaseViewModel
         else
             ErrorMessage = result.ErrorMessage ?? "Setup failed.";
     });
+
+    [RelayCommand]
+    private void CancelSetup() => RequestClose?.Invoke(false);
+
+    [RelayCommand]
+    private void GoToLogin()
+    {
+        ClearSensitivePins();
+        RequestClose?.Invoke(true);
+    }
 
     public void ClearSensitivePins()
     {
@@ -749,4 +815,10 @@ public partial class SetupViewModel : BaseViewModel
 
     private static bool MasterPinContainsRolePin(string master, params string[] rolePins) =>
         rolePins.Any(p => p.Length >= 4 && master.Contains(p, StringComparison.Ordinal));
+
+    public override void Dispose()
+    {
+        RequestClose = null;
+        base.Dispose();
+    }
 }

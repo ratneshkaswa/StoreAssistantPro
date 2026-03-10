@@ -8,6 +8,8 @@ namespace StoreAssistantPro.Modules.Authentication.Views.SetupPages;
 
 public partial class FirmProfilePage : Page
 {
+    private bool _handlersAttached;
+
     public FirmProfilePage()
     {
         InitializeComponent();
@@ -16,6 +18,9 @@ public partial class FirmProfilePage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (_handlersAttached) return;
+        _handlersAttached = true;
+
         PhoneBox.PreviewTextInput += OnPreviewPhoneOnly;
         DataObject.AddPastingHandler(PhoneBox, OnPastingPhoneOnly);
     }

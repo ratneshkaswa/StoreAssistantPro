@@ -1,5 +1,6 @@
 ﻿using NSubstitute;
 using StoreAssistantPro.Core.Commands;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 
@@ -8,8 +9,14 @@ namespace StoreAssistantPro.Tests.ViewModels;
 public class SetupViewModelTests
 {
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
+    private readonly IRegionalSettingsService _regionalSettings = Substitute.For<IRegionalSettingsService>();
 
-    private SetupViewModel CreateSut() => new(_commandBus);
+    private SetupViewModel CreateSut()
+    {
+        _regionalSettings.Now.Returns(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")));
+        return new(_commandBus, _regionalSettings);
+    }
 
     private void FillValidPins(SetupViewModel sut,
         string adminPin = "2847", string adminConfirm = "2847",
@@ -591,7 +598,6 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.RequestClose = _ => { };
         sut.FirmName = "Store";
-        sut.SelectedCurrencySymbol = "Rs.";
         sut.SelectedFYStartMonth = "January";
         sut.SelectedDateFormat = "yyyy-MM-dd";
         FillValidPins(sut);
@@ -599,7 +605,7 @@ public class SetupViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         await _commandBus.Received(1).SendAsync(Arg.Is<CompleteFirstSetupCommand>(c =>
-            c.CurrencySymbol == "Rs."
+            c.CurrencySymbol == "\u20b9"
             && c.FinancialYearStartMonth == 1
             && c.FinancialYearEndMonth == 12
             && c.DateFormat == "yyyy-MM-dd"), Arg.Any<CancellationToken>());
@@ -736,11 +742,17 @@ public class SetupViewModelTests
     }
 
     [Fact]
-    public void CurrencyPreview_Rs_ShowsRsFormat()
+    public void CurrencyPreview_AlwaysShowsRupee()
     {
         var sut = CreateSut();
-        sut.SelectedCurrencySymbol = "Rs.";
-        Assert.Equal("e.g. Rs. 1,00,000", sut.CurrencyPreview);
+        Assert.Equal("e.g. \u20b9 1,00,000", sut.CurrencyPreview);
+    }
+
+    [Fact]
+    public void SelectedCurrencySymbol_IsAlwaysRupee()
+    {
+        var sut = CreateSut();
+        Assert.Equal("\u20b9", sut.SelectedCurrencySymbol);
     }
 
     // -- #1: GSTIN checksum validation --
@@ -870,5 +882,198 @@ public class SetupViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.Contains("check digit", sut.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // -- Section completion indicators --
+
+    [Fact]
+    public void IsFirmSectionComplete_EmptyName_False()
+    {
+        var sut = CreateSut();
+        Assert.False(sut.IsFirmSectionComplete);
+    }
+
+    [Fact]
+    public void IsFirmSectionComplete_WithName_True()
+    {
+        var sut = CreateSut();
+        sut.FirmName = "Test Store";
+        Assert.True(sut.IsFirmSectionComplete);
+    }
+
+    [Fact]
+    public void IsSecuritySectionComplete_NoPins_False()
+    {
+        var sut = CreateSut();
+        Assert.False(sut.IsSecuritySectionComplete);
+    }
+
+    [Fact]
+    public void IsSecuritySectionComplete_AllPinsValid_True()
+    {
+        var sut = CreateSut();
+        FillValidPins(sut);
+        Assert.True(sut.IsSecuritySectionComplete);
+    }
+
+    [Fact]
+    public void IsSecuritySectionComplete_MismatchedConfirm_False()
+    {
+        var sut = CreateSut();
+        FillValidPins(sut, adminConfirm: "9999");
+        Assert.False(sut.IsSecuritySectionComplete);
+    }
+
+    // -- Backup validation --
+
+    [Fact]
+    public async Task Save_BackupEnabled_NonexistentFolder_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+        sut.FirmName = "Store";
+        FillValidPins(sut);
+        sut.AutoBackupEnabled = true;
+        sut.BackupTime = "22:00";
+        sut.BackupLocation = @"C:\Nonexistent\Path\12345";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("folder does not exist", sut.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Save_BackupEnabled_EmptyLocation_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+        sut.FirmName = "Store";
+        FillValidPins(sut);
+        sut.AutoBackupEnabled = true;
+        sut.BackupTime = "22:00";
+        sut.BackupLocation = "";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("Backup location is required", sut.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Save_BackupEnabled_InvalidTime_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+        sut.FirmName = "Store";
+        FillValidPins(sut);
+        sut.AutoBackupEnabled = true;
+        sut.BackupTime = "25:99";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("HH:mm", sut.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // -- GoToLogin command --
+
+    [Fact]
+    public void GoToLogin_ClearsPinsAndCloses()
+    {
+        bool? closeResult = null;
+        var sut = CreateSut();
+        sut.RequestClose = result => closeResult = result;
+        FillValidPins(sut);
+
+        sut.GoToLoginCommand.Execute(null);
+
+        Assert.True(closeResult);
+        Assert.Equal(string.Empty, sut.AdminPin);
+        Assert.Equal(string.Empty, sut.MasterPin);
+    }
+
+    // -- Backup disabled bypasses validation --
+
+    [Fact]
+    public async Task Save_BackupDisabled_InvalidTimeAndPath_Succeeds()
+    {
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
+            .Returns(CommandResult.Success());
+
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+        sut.FirmName = "Store";
+        FillValidPins(sut);
+        sut.AutoBackupEnabled = false;
+        sut.BackupTime = "99:99";
+        sut.BackupLocation = "";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsSetupComplete);
+    }
+
+    // -- Phone digit count validation --
+
+    [Fact]
+    public async Task Save_PhoneTooFewDigits_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.FirmName = "Store";
+        sut.Phone = "123";
+        FillValidPins(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("10 digits", sut.ErrorMessage);
+    }
+
+    // -- Composition rate range validation --
+
+    [Fact]
+    public async Task Save_CompositionRateOutOfRange_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.FirmName = "Store";
+        sut.SelectedGstRegistrationType = "Composition";
+        sut.CompositionRate = "150";
+        FillValidPins(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("0", sut.ErrorMessage);
+        Assert.Contains("100", sut.ErrorMessage);
+    }
+
+    // -- GSTIN state mismatch hint --
+
+    [Fact]
+    public void GstinValidationHint_StateMismatch_ShowsWarning()
+    {
+        var sut = CreateSut();
+        sut.State = "Delhi";
+        sut.GSTIN = "27AAPFU0939F1ZV"; // Valid Maharashtra GSTIN, but State is set to Delhi
+        Assert.Contains("differs from selected state", sut.GstinValidationHint);
+    }
+
+    // -- NumberToWords preview --
+
+    [Theory]
+    [InlineData("English", "One Lakh")]
+    [InlineData("Hindi", "\u090f\u0915 \u0932\u093e\u0916")]
+    public void NumberToWordsPreview_ShowsExample(string language, string expectedFragment)
+    {
+        var sut = CreateSut();
+        sut.SelectedNumberToWordsLanguage = language;
+        Assert.Contains(expectedFragment, sut.NumberToWordsPreview);
+    }
+
+    // -- Dispose clears RequestClose --
+
+    [Fact]
+    public void Dispose_ClearsRequestClose()
+    {
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+        sut.Dispose();
+        Assert.Null(sut.RequestClose);
     }
 }

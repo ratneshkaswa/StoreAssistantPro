@@ -1,6 +1,8 @@
+using System.Windows.Controls;
+
 namespace StoreAssistantPro.Modules.Authentication.Views.SetupPages;
 
-public partial class RegionalSettingsPage : System.Windows.Controls.Page
+public partial class RegionalSettingsPage : Page
 {
     public RegionalSettingsPage()
     {

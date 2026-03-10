@@ -65,6 +65,14 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public partial string ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
+    /// Identifies the field that caused the first validation failure.
+    /// Views use this key for structured focus routing instead of
+    /// parsing <see cref="ErrorMessage"/> text.
+    /// </summary>
+    [ObservableProperty]
+    public partial string FirstErrorFieldKey { get; set; } = string.Empty;
+
+    /// <summary>
     /// Success/confirmation message to display in the View after a
     /// successful action (save, delete, PIN change, etc.).
     /// Typically auto-dismissed by <c>AutoDismiss</c> in the template.
@@ -112,6 +120,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         var error = builder.FirstError;
 
         ErrorMessage = error ?? string.Empty;
+        FirstErrorFieldKey = builder.FirstErrorKey ?? string.Empty;
         return error is null;
     }
 
@@ -122,15 +131,20 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     protected sealed class ValidationBuilder
     {
         internal string? FirstError { get; private set; }
+        internal string? FirstErrorKey { get; private set; }
 
         /// <summary>
         /// Add a validation rule. If <paramref name="condition"/> is
-        /// <c>false</c> and no prior rule has failed, record the error.
+        /// <c>false</c> and no prior rule has failed, record the error
+        /// and optional field key for structured focus routing.
         /// </summary>
-        public ValidationBuilder Rule(bool condition, string errorMessage)
+        public ValidationBuilder Rule(bool condition, string errorMessage, string? fieldKey = null)
         {
             if (FirstError is null && !condition)
+            {
                 FirstError = errorMessage;
+                FirstErrorKey = fieldKey;
+            }
             return this;
         }
     }

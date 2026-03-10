@@ -1,7 +1,6 @@
 <Page x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupPages.SecuritySettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
       xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
       Background="Transparent"
       FontFamily="{StaticResource FluentFontFamily}"
@@ -73,8 +72,9 @@
                         <TextBlock x:Name="MasterPinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="0" Grid.Column="1">
                             <PasswordBox x:Name="MasterPinBox" TabIndex="20" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Master PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinWarningTextStyle}" Text="{Binding MasterPinWarning}" ToolTip="{Binding MasterPinWarningDetail}"/>
                         </DockPanel>
                         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="{StaticResource ValidationHintMargin}">
@@ -86,8 +86,9 @@
                         <TextBlock x:Name="MasterConfirmLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="3" Grid.Column="1">
                             <PasswordBox x:Name="MasterPinConfirmBox" TabIndex="21" MaxLength="6" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Master PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinInlineHintStyle}" Text="{Binding MasterConfirmHint}" Foreground="{Binding MasterConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
 
@@ -120,8 +121,9 @@
                         <TextBlock x:Name="AdminPinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="0" Grid.Column="1">
                             <PasswordBox x:Name="AdminPinBox" TabIndex="30" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Admin PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=AdminPinLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=AdminPinLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinWarningTextStyle}" Text="{Binding AdminPinWarning}" ToolTip="{Binding AdminPinWarningDetail}"/>
                         </DockPanel>
                         <DockPanel Grid.Row="1" Grid.Column="1" Margin="{StaticResource ValidationHintMargin}">
@@ -134,8 +136,9 @@
                         <TextBlock x:Name="AdminConfirmLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="3" Grid.Column="1">
                             <PasswordBox x:Name="AdminPinConfirmBox" TabIndex="31" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Admin PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinInlineHintStyle}" Text="{Binding AdminConfirmHint}" Foreground="{Binding AdminConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
                     </Grid>
@@ -164,8 +167,9 @@
                         <TextBlock x:Name="ManagerPinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="0" Grid.Column="1">
                             <PasswordBox x:Name="ManagerPinBox" TabIndex="32" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Manager PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=ManagerPinLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=ManagerPinLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinWarningTextStyle}" Text="{Binding ManagerPinWarning}" ToolTip="{Binding ManagerPinWarningDetail}"/>
                         </DockPanel>
                         <DockPanel Grid.Row="1" Grid.Column="1" Margin="{StaticResource ValidationHintMargin}">
@@ -178,8 +182,9 @@
                         <TextBlock x:Name="ManagerConfirmLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="3" Grid.Column="1">
                             <PasswordBox x:Name="ManagerPinConfirmBox" TabIndex="33" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm Manager PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=ManagerConfirmLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=ManagerConfirmLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinInlineHintStyle}" Text="{Binding ManagerConfirmHint}" Foreground="{Binding ManagerConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
                     </Grid>
@@ -208,8 +213,9 @@
                         <TextBlock x:Name="UserPinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="0" Grid.Column="1">
                             <PasswordBox x:Name="UserPinBox" TabIndex="34" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="User PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinWarningTextStyle}" Text="{Binding UserPinWarning}" ToolTip="{Binding UserPinWarningDetail}"/>
                         </DockPanel>
                         <DockPanel Grid.Row="1" Grid.Column="1" Margin="{StaticResource ValidationHintMargin}">
@@ -222,8 +228,9 @@
                         <TextBlock x:Name="UserConfirmLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Confirm "/><Run Text="*" Foreground="{StaticResource FluentError}"/></TextBlock>
                         <DockPanel Grid.Row="3" Grid.Column="1">
                             <PasswordBox x:Name="UserPinConfirmBox" TabIndex="35" MaxLength="4" PasswordChanged="OnPinChanged" AutomationProperties.Name="Confirm User PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
-                                         Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                                             AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
+                                             AutomationProperties.IsRequiredForForm="True"
+                                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
                             <TextBlock Style="{StaticResource PinInlineHintStyle}" Text="{Binding UserConfirmHint}" Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
                     </Grid>
@@ -232,18 +239,10 @@
 
             <!-- Pin conflict warning -->
             <TextBlock Text="{Binding PinConflictWarning}"
-                       Foreground="{StaticResource FluentError}"
+                       Foreground="{StaticResource FluentWarning}"
                        Margin="{StaticResource FieldLabelSpacing}"
-                       FontSize="{StaticResource FontSizeCaption}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding PinConflictWarning}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                            <DataTrigger Binding="{Binding PinConflictWarning}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+                       FontSize="{StaticResource FontSizeCaption}"
+                       Style="{StaticResource CollapsibleHintTextStyle}"/>
         </StackPanel>
     </ScrollViewer>
 </Page>

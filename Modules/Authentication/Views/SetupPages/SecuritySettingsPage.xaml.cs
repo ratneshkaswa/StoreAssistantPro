@@ -8,6 +8,8 @@ namespace StoreAssistantPro.Modules.Authentication.Views.SetupPages;
 
 public partial class SecuritySettingsPage : Page
 {
+    private bool _handlersAttached;
+
     public SecuritySettingsPage()
     {
         InitializeComponent();
@@ -16,6 +18,9 @@ public partial class SecuritySettingsPage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (_handlersAttached) return;
+        _handlersAttached = true;
+
         PasswordBox[] pinBoxes = [AdminPinBox, AdminPinConfirmBox, ManagerPinBox, ManagerPinConfirmBox,
                                    UserPinBox, UserPinConfirmBox, MasterPinBox, MasterPinConfirmBox];
         foreach (var box in pinBoxes)
@@ -62,6 +67,23 @@ public partial class SecuritySettingsPage : Page
             : null;
 
         next?.Focus();
+    }
+
+    /// <summary>
+    /// Clears all PasswordBox controls. Called when the ViewModel clears
+    /// sensitive PIN strings so the UI stays in sync (PasswordBox does
+    /// not support data binding on Password).
+    /// </summary>
+    public void ClearAllPinBoxes()
+    {
+        MasterPinBox.Clear();
+        MasterPinConfirmBox.Clear();
+        AdminPinBox.Clear();
+        AdminPinConfirmBox.Clear();
+        ManagerPinBox.Clear();
+        ManagerPinConfirmBox.Clear();
+        UserPinBox.Clear();
+        UserPinConfirmBox.Clear();
     }
 
     private static void OnPreviewNumericOnly(object sender, TextCompositionEventArgs e)

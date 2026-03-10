@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
@@ -9,104 +9,96 @@ namespace StoreAssistantPro.Modules.Authentication.Services;
 
 public class SetupService(
     IDbContextFactory<AppDbContext> contextFactory,
+    ITransactionHelper transactionHelper,
     IRegionalSettingsService regionalSettings,
     IPerformanceMonitor perf) : ISetupService
 {
-    public async Task InitializeAppAsync(
-        string firmName, string address, string state, string pincode,
-        string phone, string email, string gstin, string pan,
-        string currencyCode, string currencySymbol,
-        int financialYearStartMonth, int financialYearEndMonth,
-        string dateFormat,
-        string adminPin, string managerPin,
-        string userPin, string masterPin,
-        SetupBusinessOptions businessOptions,
-        CancellationToken ct = default)
+    public async Task InitializeAppAsync(CompleteFirstSetupCommand command, CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope("SetupService.InitializeAppAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-
-        if (await context.AppConfigs.AnyAsync(ct).ConfigureAwait(false))
-            throw new InvalidOperationException("Application has already been initialized.");
-
-        context.AppConfigs.Add(new AppConfig
-        {
-            FirmName = firmName,
-            Address = address,
-            State = string.IsNullOrWhiteSpace(state) ? string.Empty : state,
-            Pincode = string.IsNullOrWhiteSpace(pincode) ? string.Empty : pincode,
-            Phone = phone,
-            Email = string.IsNullOrWhiteSpace(email) ? string.Empty : email,
-            GSTNumber = string.IsNullOrWhiteSpace(gstin) ? null : gstin,
-            PANNumber = string.IsNullOrWhiteSpace(pan) ? null : pan,
-            GstRegistrationType = string.IsNullOrWhiteSpace(businessOptions.GstRegistrationType) ? "Regular" : businessOptions.GstRegistrationType,
-            StateCode = string.IsNullOrWhiteSpace(businessOptions.StateCode) ? null : businessOptions.StateCode,
-            CompositionSchemeRate = businessOptions.CompositionSchemeRate,
-            CurrencyCode = string.IsNullOrWhiteSpace(currencyCode) ? "INR" : currencyCode,
-            CurrencySymbol = string.IsNullOrWhiteSpace(currencySymbol) ? "₹" : currencySymbol,
-            FinancialYearStartMonth = financialYearStartMonth is >= 1 and <= 12 ? financialYearStartMonth : 4,
-            FinancialYearEndMonth = financialYearEndMonth is >= 1 and <= 12 ? financialYearEndMonth : 3,
-            DateFormat = string.IsNullOrWhiteSpace(dateFormat) ? "dd/MM/yyyy" : dateFormat,
-            NumberFormat = "Indian",
-            IsInitialized = true,
-            MasterPinHash = PinHasher.Hash(masterPin)
-        });
-
-        context.UserCredentials.Add(new UserCredential
-        {
-            UserType = UserType.Admin,
-            PinHash = PinHasher.Hash(adminPin)
-        });
-
-        context.UserCredentials.Add(new UserCredential
-        {
-            UserType = UserType.Manager,
-            PinHash = PinHasher.Hash(managerPin)
-        });
-
-        context.UserCredentials.Add(new UserCredential
-        {
-            UserType = UserType.User,
-            PinHash = PinHasher.Hash(userPin)
-        });
-
-        var istNow = regionalSettings.Now;
-
-        SeedDefaultTaxSlabs(context, istNow);
-        SeedColours(context);
-        SeedSystemSettings(context, businessOptions);
-        SeedFinancialYear(context, financialYearStartMonth, istNow);
+        using var perfScope = perf.BeginScope("SetupService.InitializeAppAsync");
 
         try
         {
-            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await transactionHelper.ExecuteInTransactionAsync(async context =>
+            {
+                if (await context.AppConfigs.AnyAsync(ct).ConfigureAwait(false))
+                    throw new InvalidOperationException("Application has already been initialized.");
+
+                context.AppConfigs.Add(new AppConfig
+                {
+                    FirmName = command.FirmName,
+                    Address = string.IsNullOrWhiteSpace(command.Address) ? string.Empty : command.Address,
+                    State = string.IsNullOrWhiteSpace(command.State) ? string.Empty : command.State,
+                    Pincode = string.IsNullOrWhiteSpace(command.Pincode) ? string.Empty : command.Pincode,
+                    Phone = string.IsNullOrWhiteSpace(command.Phone) ? string.Empty : command.Phone,
+                    Email = string.IsNullOrWhiteSpace(command.Email) ? string.Empty : command.Email,
+                    GSTNumber = string.IsNullOrWhiteSpace(command.GSTIN) ? null : command.GSTIN,
+                    PANNumber = string.IsNullOrWhiteSpace(command.PAN) ? null : command.PAN,
+                    GstRegistrationType = string.IsNullOrWhiteSpace(command.BusinessOptions.GstRegistrationType) ? "Regular" : command.BusinessOptions.GstRegistrationType,
+                    StateCode = string.IsNullOrWhiteSpace(command.BusinessOptions.StateCode) ? null : command.BusinessOptions.StateCode,
+                    CompositionSchemeRate = command.BusinessOptions.CompositionSchemeRate,
+                    CurrencyCode = string.IsNullOrWhiteSpace(command.CurrencyCode) ? "INR" : command.CurrencyCode,
+                    CurrencySymbol = string.IsNullOrWhiteSpace(command.CurrencySymbol) ? "\u20b9" : command.CurrencySymbol,
+                    FinancialYearStartMonth = command.FinancialYearStartMonth is >= 1 and <= 12 ? command.FinancialYearStartMonth : 4,
+                    FinancialYearEndMonth = command.FinancialYearEndMonth is >= 1 and <= 12 ? command.FinancialYearEndMonth : 3,
+                    DateFormat = string.IsNullOrWhiteSpace(command.DateFormat) ? "dd/MM/yyyy" : command.DateFormat,
+                    NumberFormat = "Indian",
+                    IsInitialized = true,
+                    MasterPinHash = PinHasher.Hash(command.MasterPin)
+                });
+
+                context.UserCredentials.Add(new UserCredential
+                {
+                    UserType = UserType.Admin,
+                    PinHash = PinHasher.Hash(command.AdminPin)
+                });
+
+                context.UserCredentials.Add(new UserCredential
+                {
+                    UserType = UserType.Manager,
+                    PinHash = PinHasher.Hash(command.ManagerPin)
+                });
+
+                context.UserCredentials.Add(new UserCredential
+                {
+                    UserType = UserType.User,
+                    PinHash = PinHasher.Hash(command.UserPin)
+                });
+
+                var istNow = regionalSettings.Now;
+
+                SeedDefaultTaxSlabs(context, istNow);
+                SeedColours(context);
+                SeedSystemSettings(context, command.BusinessOptions);
+                SeedFinancialYear(context, command.FinancialYearStartMonth, istNow);
+            }).ConfigureAwait(false);
         }
         catch (DbUpdateException)
         {
             throw new InvalidOperationException(
-                "Application was already initialized by another machine. Please restart the app.");
+                "Setup could not be completed. Another instance may have initialized the application. Please restart.");
         }
+
+        regionalSettings.UpdateSettings(command.CurrencySymbol, command.DateFormat);
     }
 
     /// <summary>
-    /// Seeds Indian GST tax slabs and matching intra-state profiles.
+    /// Seeds Indian GST tax slabs.
     /// Called once during first-time setup within the same transaction.
     /// </summary>
     private static void SeedDefaultTaxSlabs(AppDbContext context, DateTime istNow)
     {
-        var now = istNow;
-
         context.TaxMasters.AddRange(
-            new TaxMaster { TaxName = "GST 0%",  SlabPercent = 0m,  IsActive = true, CreatedDate = now },
-            new TaxMaster { TaxName = "GST 5%",  SlabPercent = 5m,  IsActive = true, CreatedDate = now },
-            new TaxMaster { TaxName = "GST 12%", SlabPercent = 12m, IsActive = true, CreatedDate = now },
-            new TaxMaster { TaxName = "GST 18%", SlabPercent = 18m, IsActive = true, CreatedDate = now },
-            new TaxMaster { TaxName = "GST 28%", SlabPercent = 28m, IsActive = true, CreatedDate = now });
+            new TaxMaster { TaxName = "GST 0%", SlabPercent = 0m, IsActive = true, CreatedDate = istNow },
+            new TaxMaster { TaxName = "GST 5%", SlabPercent = 5m, IsActive = true, CreatedDate = istNow },
+            new TaxMaster { TaxName = "GST 12%", SlabPercent = 12m, IsActive = true, CreatedDate = istNow },
+            new TaxMaster { TaxName = "GST 18%", SlabPercent = 18m, IsActive = true, CreatedDate = istNow },
+            new TaxMaster { TaxName = "GST 28%", SlabPercent = 28m, IsActive = true, CreatedDate = istNow });
     }
 
     /// <summary>
     /// Seeds the predefined 100-colour palette. Users cannot add colours
-    /// outside this list — it is the single source of truth.
+    /// outside this list � it is the single source of truth.
     /// </summary>
     private static void SeedColours(AppDbContext context)
     {
@@ -123,9 +115,9 @@ public class SetupService(
             DefaultTaxMode = opts.DefaultTaxMode == "Tax-Inclusive (MRP)" ? "Inclusive" : "Exclusive",
             RoundingMethod = opts.RoundingMethod switch
             {
-                "Round to nearest ₹1" => "NearestOne",
-                "Round to nearest ₹5" => "NearestFive",
-                "Round to nearest ₹10" => "NearestTen",
+                "Round to nearest \u20b91" => "NearestOne",
+                "Round to nearest \u20b95" => "NearestFive",
+                "Round to nearest \u20b910" => "NearestTen",
                 _ => "None"
             },
             NegativeStockAllowed = opts.NegativeStockAllowed,
@@ -148,7 +140,7 @@ public class SetupService(
 
         context.FinancialYears.Add(new FinancialYear
         {
-            Name = $"{fyStart.Year}–{fyEnd.Year % 100:D2}",
+            Name = $"{fyStart.Year}�{fyEnd.Year % 100:D2}",
             StartDate = fyStart,
             EndDate = fyEnd,
             IsCurrent = true,

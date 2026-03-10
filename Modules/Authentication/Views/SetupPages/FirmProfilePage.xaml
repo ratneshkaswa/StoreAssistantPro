@@ -36,16 +36,17 @@
                              Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
                              MaxLength="100"
                              AutomationProperties.LabeledBy="{Binding ElementName=FirmNameLabel}"
-                             AutomationProperties.Name="Firm Name"/>
+                             AutomationProperties.Name="Firm Name"
+                             AutomationProperties.IsRequiredForForm="True"/>
 
-                    <TextBlock x:Name="AddressLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Address"/></TextBlock>
+                    <TextBlock x:Name="AddressLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}" Text="Address"/>
                     <TextBox Grid.Row="2" Grid.Column="1" TabIndex="1"
                              Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
                              MaxLength="200"
                              AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
                              AutomationProperties.Name="Address"/>
 
-                    <TextBlock x:Name="StateLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="State"/></TextBlock>
+                    <TextBlock x:Name="StateLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}" Text="State"/>
                     <ComboBox Grid.Row="4" Grid.Column="1" TabIndex="2" AutomationProperties.Name="State"
                               ItemsSource="{Binding IndianStates}" IsEditable="True" IsTextSearchEnabled="True"
                               Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"
@@ -72,7 +73,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock x:Name="PincodeLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Pincode"/></TextBlock>
+                    <TextBlock x:Name="PincodeLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}" Text="Pincode"/>
                     <TextBox Grid.Row="0" Grid.Column="1" x:Name="PincodeBox" TabIndex="3" AutomationProperties.Name="Pincode"
                              Text="{Binding Pincode, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
@@ -82,18 +83,11 @@
                     <TextBlock Grid.Row="1" Grid.Column="1"
                                Text="{Binding PincodeValidationHint}"
                                Foreground="{Binding PincodeValidationHint, Converter={StaticResource HintForegroundConverter}}"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PincodeValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                    <DataTrigger Binding="{Binding PincodeValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Margin="{StaticResource ValidationHintMargin}"
+                               Style="{StaticResource CollapsibleHintTextStyle}"/>
 
-                    <TextBlock x:Name="PhoneLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Phone"/></TextBlock>
+                    <TextBlock x:Name="PhoneLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}" Text="Phone"/>
                     <TextBox Grid.Row="3" Grid.Column="1" x:Name="PhoneBox" TabIndex="4"
                              Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
@@ -103,18 +97,11 @@
                     <TextBlock Grid.Row="4" Grid.Column="1"
                                Text="{Binding PhoneValidationHint}"
                                Foreground="{Binding PhoneValidationHint, Converter={StaticResource HintForegroundConverter}}"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PhoneValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                    <DataTrigger Binding="{Binding PhoneValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Margin="{StaticResource ValidationHintMargin}"
+                               Style="{StaticResource CollapsibleHintTextStyle}"/>
 
-                    <TextBlock x:Name="EmailLabel" Grid.Row="6" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}"><Run Text="Email"/></TextBlock>
+                    <TextBlock x:Name="EmailLabel" Grid.Row="6" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}" Text="Email"/>
                     <TextBox Grid.Row="6" Grid.Column="1" x:Name="EmailBox" TabIndex="5"
                              Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
                              MaxLength="100"
@@ -123,16 +110,9 @@
                     <TextBlock Grid.Row="7" Grid.Column="1"
                                Text="{Binding EmailValidationHint}"
                                Foreground="{Binding EmailValidationHint, Converter={StaticResource HintForegroundConverter}}"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource ValidationHintMargin}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EmailValidationHint}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                    <DataTrigger Binding="{Binding EmailValidationHint}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Margin="{StaticResource ValidationHintMargin}"
+                               Style="{StaticResource CollapsibleHintTextStyle}"/>
                 </Grid>
             </controls:SetupFormCard>
         </StackPanel>

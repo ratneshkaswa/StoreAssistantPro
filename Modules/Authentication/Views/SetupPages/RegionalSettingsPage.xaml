@@ -1,25 +1,25 @@
 <Page x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupPages.RegionalSettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
       xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
       Background="Transparent"
       FontFamily="{StaticResource FluentFontFamily}"
       UseLayoutRounding="True"
       SnapsToDevicePixels="True">
 
-    <StackPanel>
-        <controls:SetupPageHeader Title="Regional Settings"
-                                   Description="Currency and date format preferences."/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
+        <StackPanel>
+            <controls:SetupPageHeader Title="Regional Settings"
+                                       Description="Date format and financial year preferences."/>
 
-        <controls:SetupFormCard>
-            <Grid>
+            <controls:SetupFormCard>
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                         <RowDefinition Height="Auto"/>
@@ -29,30 +29,37 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Currency" x:Name="CurrencyLabel" Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="0" Grid.Column="1" TabIndex="13" AutomationProperties.Name="Currency Symbol"
-                              ItemsSource="{Binding CurrencySymbols}" SelectedItem="{Binding SelectedCurrencySymbol}"
-                              AutomationProperties.LabeledBy="{Binding ElementName=CurrencyLabel}"
-                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrencyPreview}"
-                               FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Currency" Style="{StaticResource FormRowLabelStyle}"/>
+                    <Border Grid.Row="0" Grid.Column="1"
+                            Background="{StaticResource FluentInfoBackground}"
+                            CornerRadius="{StaticResource FluentCornerSmall}"
+                            Padding="{StaticResource SetupCurrencyBadgePadding}" HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center"
+                                   Foreground="{StaticResource FluentAccentDefault}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   FontWeight="SemiBold">
+                            <Run Text="₹"/><Run Text=" INR — Indian Rupee (fixed)"/>
+                        </TextBlock>
+                    </Border>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="FY Start" x:Name="FyStartLabel" Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="3" Grid.Column="1" TabIndex="14" AutomationProperties.Name="Financial Year Start Month"
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="FY Start" x:Name="FyStartLabel" Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox x:Name="FyStartCombo" Grid.Row="2" Grid.Column="1" TabIndex="14" AutomationProperties.Name="Financial Year Start Month"
                               ItemsSource="{Binding Months}" SelectedItem="{Binding SelectedFYStartMonth}"
                               AutomationProperties.LabeledBy="{Binding ElementName=FyStartLabel}"
                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding FinancialYearDisplay}"
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding FinancialYearDisplay}"
                                FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Date Format" x:Name="DateFormatLabel" Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="6" Grid.Column="1" TabIndex="15" AutomationProperties.Name="Date Format"
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Date Format" x:Name="DateFormatLabel" Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Row="5" Grid.Column="1" TabIndex="15" AutomationProperties.Name="Date Format"
                               ItemsSource="{Binding DateFormats}" SelectedItem="{Binding SelectedDateFormat}"
                               AutomationProperties.LabeledBy="{Binding ElementName=DateFormatLabel}"
                               Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding DateFormatPreview}"
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DateFormatPreview}"
                                FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource ValidationHintMargin}"/>
-                            </Grid>
-                        </controls:SetupFormCard>
-                    </StackPanel>
-                </Page>
+                </Grid>
+            </controls:SetupFormCard>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

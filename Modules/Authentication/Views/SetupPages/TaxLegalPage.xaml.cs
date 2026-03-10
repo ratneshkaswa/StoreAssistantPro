@@ -5,6 +5,8 @@ namespace StoreAssistantPro.Modules.Authentication.Views.SetupPages;
 
 public partial class TaxLegalPage : Page
 {
+    private bool _handlersAttached;
+
     public TaxLegalPage()
     {
         InitializeComponent();
@@ -13,6 +15,9 @@ public partial class TaxLegalPage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (_handlersAttached) return;
+        _handlersAttached = true;
+
         DataObject.AddPastingHandler(GstinBox, OnPastingUpperCase);
         DataObject.AddPastingHandler(PanBox, OnPastingUpperCase);
     }

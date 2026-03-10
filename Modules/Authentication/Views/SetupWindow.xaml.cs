@@ -18,13 +18,43 @@ public partial class SetupWindow : Window
     private readonly BackupDataPage _backupPage = new();
     private readonly SystemSettingsPage _systemPage = new();
 
-    public SetupWindow(IWindowSizingService sizingService, SetupViewModel vm)
+    private readonly IDialogService _dialogService;
+
+    /// <summary>Maps validation field keys to (sidebar section, control name) for focus routing.</summary>
+    private static readonly Dictionary<string, (string Section, string Control)> FieldFocusMap = new(StringComparer.Ordinal)
+    {
+        ["FirmName"] = ("Firm", "FirmNameBox"),
+        ["Pincode"] = ("Firm", "PincodeBox"),
+        ["Phone"] = ("Firm", "PhoneBox"),
+        ["Email"] = ("Firm", "EmailBox"),
+        ["GSTIN"] = ("Tax", "GstinBox"),
+        ["GSTINChecksum"] = ("Tax", "GstinBox"),
+        ["PAN"] = ("Tax", "PanBox"),
+        ["CompositionRate"] = ("Tax", "CompRateBox"),
+        ["MasterPin"] = ("Security", "MasterPinBox"),
+        ["MasterPinConfirm"] = ("Security", "MasterPinBox"),
+        ["MasterPinContains"] = ("Security", "MasterPinBox"),
+        ["AdminPin"] = ("Security", "AdminPinBox"),
+        ["AdminPinConfirm"] = ("Security", "AdminPinBox"),
+        ["ManagerPin"] = ("Security", "ManagerPinBox"),
+        ["ManagerPinConfirm"] = ("Security", "ManagerPinBox"),
+        ["UserPin"] = ("Security", "UserPinBox"),
+        ["UserPinConfirm"] = ("Security", "UserPinBox"),
+        ["PinConflict"] = ("Security", "AdminPinBox"),
+        ["BackupTime"] = ("Backup", "BackupTimeBox"),
+        ["BackupLocation"] = ("Backup", "BackupPathBox"),
+    };
+
+    public SetupWindow(IWindowSizingService sizingService, IDialogService dialogService, SetupViewModel vm)
     {
         InitializeComponent();
         DataContext = _vm = vm;
+        _dialogService = dialogService;
         vm.RequestClose = result => DialogResult = result;
 
-        sizingService.ConfigureStartupWindow(this, 960, 720);
+        var width = (double)FindResource("SetupWindowWidth");
+        var height = (double)FindResource("SetupWindowHeight");
+        sizingService.ConfigureStartupWindow(this, width, height);
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
@@ -53,10 +83,10 @@ public partial class SetupWindow : Window
         if (sender is not SetupViewModel vm)
             return;
 
-        if (e.PropertyName == nameof(SetupViewModel.ErrorMessage))
+        if (e.PropertyName == nameof(SetupViewModel.FirstErrorFieldKey))
         {
-            if (!string.IsNullOrWhiteSpace(vm.ErrorMessage))
-                Dispatcher.BeginInvoke(() => FocusFirstInvalidField(vm.ErrorMessage));
+            if (!string.IsNullOrWhiteSpace(vm.FirstErrorFieldKey))
+                Dispatcher.BeginInvoke(() => FocusFieldByKey(vm.FirstErrorFieldKey));
         }
         else if (e.PropertyName == nameof(SetupViewModel.SelectedSection))
         {
@@ -68,22 +98,10 @@ public partial class SetupWindow : Window
         }
     }
 
-    private void FocusFirstInvalidField(string error)
+    private void FocusFieldByKey(string fieldKey)
     {
-        if (error.Contains("Firm name", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "FirmNameBox"); return; }
-        if (error.Contains("Admin PIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Security", "AdminPinBox"); return; }
-        if (error.Contains("Manager PIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Security", "ManagerPinBox"); return; }
-        if (error.Contains("User PIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Security", "UserPinBox"); return; }
-        if (error.Contains("Master PIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Security", "MasterPinBox"); return; }
-        if (error.Contains("unique PIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Security", "AdminPinBox"); return; }
-        if (error.Contains("GSTIN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Tax", "GstinBox"); return; }
-        if (error.Contains("PAN", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Tax", "PanBox"); return; }
-        if (error.Contains("Composition rate", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Tax", "CompRateBox"); return; }
-        if (error.Contains("Pincode", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "PincodeBox"); return; }
-        if (error.Contains("Email", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "EmailBox"); return; }
-        if (error.Contains("Phone", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Firm", "PhoneBox"); return; }
-        if (error.Contains("Backup time", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Backup", "BackupTimeBox"); return; }
-        if (error.Contains("Backup location", StringComparison.OrdinalIgnoreCase)) { NavigateAndFocus("Backup", "BackupPathBox"); return; }
+        if (FieldFocusMap.TryGetValue(fieldKey, out var target))
+            NavigateAndFocus(target.Section, target.Control);
     }
 
     private void NavigateAndFocus(string section, string controlName)
@@ -112,14 +130,26 @@ public partial class SetupWindow : Window
         };
 
         if (ContentFrame.Content != target)
+        {
             ContentFrame.Navigate(target);
+
+            // N8: Remove accumulated journal entries to prevent memory growth
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
+            {
+                if (ContentFrame.NavigationService is { } ns)
+                    while (ns.CanGoBack) ns.RemoveBackEntry();
+            });
+        }
 
         // Focus the first input field on the target page
         string? firstField = section switch
         {
             "Firm" => "FirmNameBox",
             "Tax" => "GstRegTypeCombo",
+            "Regional" => "FyStartCombo",
             "Security" => "MasterPinBox",
+            "Backup" => "AutoBackupToggle",
+            "System" => "TaxModeCombo",
             _ => null
         };
 
@@ -166,15 +196,12 @@ public partial class SetupWindow : Window
         // Prevent close during processing
         if (_vm.IsBusy) { e.Cancel = true; return; }
 
-        var result = MessageBox.Show(
-            "Setup is not complete. Are you sure you want to cancel?",
-            "Cancel Setup",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
-
-        if (result == MessageBoxResult.No)
+        if (!_dialogService.Confirm("Setup is not complete. Are you sure you want to cancel?", "Cancel Setup"))
             e.Cancel = true;
         else
+        {
             _vm.ClearSensitivePins();
+            _securityPage.ClearAllPinBoxes();
+        }
     }
 }
