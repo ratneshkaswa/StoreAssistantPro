@@ -9,8 +9,8 @@
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         Background="{StaticResource AppBackgroundBrush}"
-        MinWidth="1180"
-        MinHeight="760">
+        MinWidth="{StaticResource SetupMinWidth}"
+        MinHeight="{StaticResource SetupMinHeight}">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -84,18 +84,18 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="20"
+    <Grid Margin="{StaticResource SetupRootPadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
           KeyboardNavigation.TabNavigation="Continue"
           h:KeyboardNav.EscapeCommand="{Binding CancelSetupCommand}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="18"/>
+            <RowDefinition Height="{StaticResource SetupRowSpacingMedium}"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="14"/>
+            <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="14"/>
+            <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -105,21 +105,21 @@
                 BorderBrush="{StaticResource FluentStrokeDefault}"
                 BorderThickness="{StaticResource FluentBorderThicknessThin}"
                 CornerRadius="{StaticResource FluentCornerLarge}"
-                Padding="20">
+                Padding="{StaticResource SetupHeaderCardPadding}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="{StaticResource SetupHeaderGap}"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <Image Grid.Column="0"
                        Source="/Assets/logo-256.png"
-                       Width="44"
-                       Height="44"
+                       Width="{StaticResource SetupLogoSize}"
+                       Height="{StaticResource SetupLogoSize}"
                        VerticalAlignment="Center"
-                       Margin="0,0,6,0"/>
+                       Margin="{StaticResource SetupLogoMargin}"/>
 
                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
                     <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
@@ -133,14 +133,14 @@
                                FontFamily="{StaticResource FluentFontText}"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextSecondary}"
-                               Margin="0,4,0,0"
+                               Margin="{StaticResource SetupSubtitleMargin}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
 
                 <Border Grid.Column="3"
                         Background="{StaticResource FluentInfoBackground}"
                         CornerRadius="{StaticResource FluentCornerMedium}"
-                        Padding="12,8"
+                        Padding="{StaticResource SetupProgressBadgePadding}"
                         VerticalAlignment="Center">
                     <StackPanel>
                         <TextBlock Text="Setup progress"
@@ -159,8 +159,8 @@
         <!-- Main area -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280"/>
-                <ColumnDefinition Width="18"/>
+                <ColumnDefinition Width="{StaticResource SetupSidebarColumnWidth}"/>
+                <ColumnDefinition Width="{StaticResource SetupRowSpacingMedium}"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -170,7 +170,7 @@
                     BorderBrush="{StaticResource FluentStrokeDefault}"
                     BorderThickness="{StaticResource FluentBorderThicknessThin}"
                     CornerRadius="{StaticResource FluentCornerLarge}"
-                    Padding="12">
+                    Padding="{StaticResource SetupSidebarCardPadding}">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -183,14 +183,14 @@
                 </Border.Style>
 
                 <DockPanel LastChildFill="True">
-                    <StackPanel DockPanel.Dock="Top" Margin="8,4,8,12">
+                    <StackPanel DockPanel.Dock="Top" Margin="{StaticResource SetupSidebarHeaderMargin}">
                         <TextBlock Text="Setup sections"
                                    FontSize="{StaticResource FontSizeBody}"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource FluentTextPrimary}"/>
                         <TextBlock Text="Complete the essentials now. Advanced preferences can be adjusted later."
                                    Style="{StaticResource SectionSummaryLabelStyle}"
-                                   Margin="0,4,0,0"/>
+                                   Margin="{StaticResource SetupSubtitleMargin}"/>
                     </StackPanel>
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -371,14 +371,12 @@
                     Background="{StaticResource FluentSurface}"
                     BorderBrush="{StaticResource FluentStrokeDefault}"
                     BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                    CornerRadius="{StaticResource FluentCornerLarge}"
-                    Padding="0">
+                    CornerRadius="{StaticResource FluentCornerLarge}">
                 <Grid>
                     <Frame x:Name="ContentFrame"
                            NavigationUIVisibility="Hidden"
                            JournalOwnership="OwnsJournal"
-                           Focusable="False"
-                           Margin="0">
+                           Focusable="False">
                         <Frame.Style>
                             <Style TargetType="Frame">
                                 <Setter Property="Visibility" Value="Visible"/>
@@ -394,22 +392,22 @@
                     <!-- Setup complete overlay -->
                     <Grid Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
                           h:Motion.FadeIn="True">
-                        <Border Margin="28"
+                        <Border Margin="{StaticResource SetupCompleteOverlayMargin}"
                                 Background="{StaticResource FluentSurface}"
                                 BorderBrush="{StaticResource FluentStrokeDefault}"
                                 BorderThickness="{StaticResource FluentBorderThicknessThin}"
                                 CornerRadius="{StaticResource FluentCornerLarge}"
-                                Padding="32"
+                                Padding="{StaticResource SetupCompleteCardPadding}"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                MaxWidth="520">
+                                MaxWidth="{StaticResource SetupCompleteMaxWidth}">
                             <StackPanel>
                                 <TextBlock Text="&#xE73E;"
                                            FontFamily="{StaticResource FluentIconFont}"
                                            FontSize="{StaticResource FontSizeIconLarge}"
                                            HorizontalAlignment="Center"
                                            Foreground="{StaticResource FluentSuccess}"
-                                           Margin="0,0,0,12"
+                                           Margin="{StaticResource SetupCompleteIconMargin}"
                                            AutomationProperties.Name="Setup complete checkmark"/>
                                 <TextBlock Text="Setup complete"
                                            FontSize="{StaticResource FontSizeSectionHeader}"
@@ -423,20 +421,20 @@
                                            HorizontalAlignment="Center"
                                            TextAlignment="Center"
                                            TextWrapping="Wrap"
-                                           Margin="0,8,0,0"/>
+                                           Margin="{StaticResource SetupCompleteSubtitleMargin}"/>
                                 <TextBlock Text="{Binding RedirectCountdown}"
                                            FontSize="{StaticResource FontSizeCaption}"
                                            Foreground="{StaticResource FluentTextSecondary}"
                                            AutomationProperties.LiveSetting="Polite"
                                            HorizontalAlignment="Center"
-                                           Margin="0,10,0,0"/>
+                                           Margin="{StaticResource SetupCompleteCountdownMargin}"/>
                                 <Button Content="Go to Login"
                                         Command="{Binding GoToLoginCommand}"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         MinWidth="{StaticResource SetupPrimaryButtonWidth}"
                                         MinHeight="{StaticResource SetupButtonHeight}"
                                         HorizontalAlignment="Center"
-                                        Margin="0,20,0,0"
+                                        Margin="{StaticResource SetupCompleteButtonMargin}"
                                         AutomationProperties.Name="Go to login"/>
                             </StackPanel>
                         </Border>
@@ -451,7 +449,7 @@
                 BorderBrush="{StaticResource FluentStrokeDefault}"
                 BorderThickness="{StaticResource FluentBorderThicknessThin}"
                 CornerRadius="{StaticResource FluentCornerMedium}"
-                Padding="14,10">
+                Padding="{StaticResource SetupMessageCardPadding}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -465,12 +463,10 @@
 
                 <TextBlock Grid.Row="1"
                            Text="{Binding ErrorMessage}"
-                           Style="{StaticResource ErrorMessageStyle}"
                            AutomationProperties.LiveSetting="Assertive">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock" BasedOn="{StaticResource ErrorMessageStyle}">
                             <Setter Property="Visibility" Value="Visible"/>
-                            <Setter Property="Text" Value="{Binding ErrorMessage}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ErrorMessage}" Value="">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -564,17 +560,17 @@
                     CornerRadius="{StaticResource FluentCornerLarge}"
                     BorderBrush="{StaticResource FluentStrokeDefault}"
                     BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                    Padding="24"
+                    Padding="{StaticResource SetupLoadingCardPadding}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    MinWidth="260">
+                    MinWidth="{StaticResource SetupLoadingMinWidth}">
                 <StackPanel>
                     <TextBlock Text="&#xE895;"
                                FontFamily="{StaticResource FluentIconFont}"
                                FontSize="{StaticResource FontSizeIconLarge}"
                                Foreground="{StaticResource FluentAccentDefault}"
                                HorizontalAlignment="Center"
-                               Margin="0,0,0,12"
+                               Margin="{StaticResource SetupLoadingIconMargin}"
                                RenderTransformOrigin="0.5,0.5">
                         <TextBlock.RenderTransform>
                             <RotateTransform/>
@@ -612,8 +608,8 @@
                                TextAlignment="Center"
                                TextWrapping="Wrap"
                                HorizontalAlignment="Center"
-                               Margin="0,6,0,0"
-                               MaxWidth="240"/>
+                               Margin="{StaticResource SetupLoadingDescMargin}"
+                               MaxWidth="{StaticResource SetupLoadingDescMaxWidth}"/>
                 </StackPanel>
             </Border>
         </Grid>

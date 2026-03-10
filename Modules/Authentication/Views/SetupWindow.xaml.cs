@@ -24,7 +24,7 @@ public partial class SetupWindow : Window
 
     /// <summary>
     /// Maps validation field keys to (sidebar section, control name) for direct focus routing.
-    /// Keep these keys aligned with SetupViewModel.LastInvalidFieldKey values.
+    /// Keep these keys aligned with SetupViewModel.FirstErrorFieldKey values.
     /// </summary>
     private static readonly Dictionary<string, (string Section, string Control)> FieldFocusMap = new(StringComparer.Ordinal)
     {
@@ -95,11 +95,11 @@ public partial class SetupWindow : Window
         if (sender is not SetupViewModel vm)
             return;
 
-        if (e.PropertyName == nameof(SetupViewModel.LastInvalidFieldKey))
+        if (e.PropertyName == nameof(SetupViewModel.FirstErrorFieldKey))
         {
-            if (!string.IsNullOrWhiteSpace(vm.LastInvalidFieldKey))
+            if (!string.IsNullOrWhiteSpace(vm.FirstErrorFieldKey))
             {
-                Dispatcher.BeginInvoke(() => FocusFieldByKey(vm.LastInvalidFieldKey));
+                Dispatcher.BeginInvoke(() => FocusFieldByKey(vm.FirstErrorFieldKey));
             }
         }
         else if (e.PropertyName == nameof(SetupViewModel.SelectedSection))
@@ -144,7 +144,7 @@ public partial class SetupWindow : Window
 
     private void NavigateToSection(string section)
     {
-        var target = section switch
+        Page target = section switch
         {
             "Firm" => _firmPage,
             "Tax" => _taxPage,
