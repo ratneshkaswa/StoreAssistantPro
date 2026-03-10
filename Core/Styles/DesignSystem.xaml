@@ -218,9 +218,9 @@
     <GridLength x:Key="SetupRowSpacingSmall">10</GridLength>
     <GridLength x:Key="SetupRowSpacingMedium">14</GridLength>
     <Thickness x:Key="SetupHeaderCardPadding">14</Thickness>
-    <sys:Double x:Key="SetupHeaderGap">12</sys:Double>
+    <GridLength x:Key="SetupHeaderGap">16</GridLength>
     <Thickness x:Key="SetupProgressBadgePadding">10,6</Thickness>
-    <sys:Double x:Key="SetupSidebarColumnWidth">240</sys:Double>
+    <GridLength x:Key="SetupSidebarColumnWidth">280</GridLength>
     <Thickness x:Key="SetupSidebarCardPadding">10</Thickness>
     <Thickness x:Key="SetupSidebarHeaderMargin">4,2,4,8</Thickness>
     <Thickness x:Key="SetupCardPadding">14</Thickness>
