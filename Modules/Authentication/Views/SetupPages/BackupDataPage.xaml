@@ -85,7 +85,7 @@
                                 Click="OnBrowseBackupFolder"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Margin="{StaticResource SetupBrowseButtonMargin}"
-                                MinHeight="32"
+                                MinHeight="{StaticResource SetupBrowseButtonMinHeight}"
                                 AutomationProperties.Name="Browse for backup folder"/>
                         <TextBox x:Name="BackupPathBox" TabIndex="41"
                                  Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"

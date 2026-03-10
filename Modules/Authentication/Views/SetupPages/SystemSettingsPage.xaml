@@ -66,7 +66,7 @@
                                   AutomationProperties.Name="Allow Negative Stock"
                                   AutomationProperties.LabeledBy="{Binding ElementName=NegativeStockLabel}"
                                   DockPanel.Dock="Left"/>
-                        <TextBlock Text="Allow billing with zero stock"
+                        <TextBlock Text="Allow billing when items are out of stock"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentTextSecondary}"
                                    VerticalAlignment="Center" Margin="{StaticResource StrengthLabelGap}"/>

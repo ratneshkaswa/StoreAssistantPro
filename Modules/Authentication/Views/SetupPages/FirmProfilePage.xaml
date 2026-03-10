@@ -47,7 +47,7 @@
                              AutomationProperties.Name="Address"/>
 
                     <TextBlock x:Name="StateLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}" Text="State"/>
-                    <ComboBox Grid.Row="4" Grid.Column="1" TabIndex="2" AutomationProperties.Name="State"
+                    <ComboBox x:Name="StateCombo" Grid.Row="4" Grid.Column="1" TabIndex="2" AutomationProperties.Name="State"
                               ItemsSource="{Binding IndianStates}" IsEditable="True" IsTextSearchEnabled="True"
                               Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"
                               AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"

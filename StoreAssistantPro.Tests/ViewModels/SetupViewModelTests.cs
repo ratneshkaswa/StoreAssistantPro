@@ -342,6 +342,15 @@ public class SetupViewModelTests
     }
 
     [Fact]
+    public void OnGSTINChanged_PartialGstin_DoesNotFillState()
+    {
+        var sut = CreateSut();
+        sut.State = "";
+        sut.GSTIN = "08";
+        Assert.Empty(sut.State);
+    }
+
+    [Fact]
     public void OnGSTINChanged_InvalidGstin_DoesNotFillState()
     {
         var sut = CreateSut();
@@ -1075,5 +1084,53 @@ public class SetupViewModelTests
         sut.RequestClose = _ => { };
         sut.Dispose();
         Assert.Null(sut.RequestClose);
+    }
+
+    // -- B3: Phone regex rejects all-special-char input --
+
+    [Theory]
+    [InlineData("+++")]
+    [InlineData("---")]
+    [InlineData("+ +")]
+    public void PhoneValidationHint_AllSpecialChars_RejectsInput(string input)
+    {
+        var sut = CreateSut();
+        sut.Phone = input;
+        Assert.Contains("Digits", sut.PhoneValidationHint);
+    }
+
+    // -- B5: State freetext validation on Save --
+
+    [Fact]
+    public async Task Save_InvalidStateText_ShowsError()
+    {
+        var sut = CreateSut();
+        sut.FirmName = "Store";
+        sut.State = "Rajastha"; // typo
+        FillValidPins(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("valid Indian state", sut.ErrorMessage);
+    }
+
+    // -- B1: IndianStates are alphabetically sorted --
+
+    [Fact]
+    public void IndianStates_AreSortedAlphabetically()
+    {
+        var sut = CreateSut();
+        var sorted = sut.IndianStates.Order().ToList();
+        Assert.Equal(sorted, sut.IndianStates.ToList());
+    }
+
+    // -- B4: GstinRegex accepts non-Z at position 14 --
+
+    [Fact]
+    public void GstinValidationHint_NonZAtPosition14_IsValid()
+    {
+        var sut = CreateSut();
+        sut.GSTIN = "22AAAAA0000A1A5"; // 'A' at position 14 instead of 'Z'
+        Assert.DoesNotContain("Format:", sut.GstinValidationHint);
     }
 }

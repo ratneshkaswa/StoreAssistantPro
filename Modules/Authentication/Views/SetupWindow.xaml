@@ -151,9 +151,9 @@
                                  Style="{StaticResource SidebarNavItemStyle}" Click="OnSidebarSectionClick"
                                  AutomationProperties.Name="Tax and Legal">
                         <StackPanel Orientation="Horizontal">
-                            <Border Background="{StaticResource FluentSuccessBackground}" Style="{StaticResource SidebarIconBadgeStyle}">
+                            <Border Background="{StaticResource FluentKpiGrayMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
                                 <TextBlock Text="&#xE8A5;" FontFamily="{StaticResource FluentIconFont}"
-                                           Foreground="{StaticResource FluentSuccess}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
@@ -167,9 +167,9 @@
                                  Style="{StaticResource SidebarNavItemStyle}" Click="OnSidebarSectionClick"
                                  AutomationProperties.Name="Regional Settings">
                         <StackPanel Orientation="Horizontal">
-                            <Border Background="{StaticResource FluentKpiTealMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
+                            <Border Background="{StaticResource FluentKpiGrayMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
                                 <TextBlock Text="&#xE774;" FontFamily="{StaticResource FluentIconFont}"
-                                           Foreground="{StaticResource FluentKpiTeal}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
@@ -188,9 +188,9 @@
                                        VerticalAlignment="Center" Margin="{StaticResource SetupSidebarIconMargin}"
                                        Visibility="{Binding IsSecuritySectionComplete, Converter={StaticResource BoolToVisibility}}"/>
                             <StackPanel Orientation="Horizontal">
-                                <Border Background="{StaticResource FluentKpiPurpleMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
+                                <Border Background="{StaticResource FluentInfoBackground}" Style="{StaticResource SidebarIconBadgeStyle}">
                                     <TextBlock Text="&#xE72E;" FontFamily="{StaticResource FluentIconFont}"
-                                               Foreground="{StaticResource FluentKpiPurple}"
+                                               Foreground="{StaticResource FluentAccentDefault}"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                FontSize="{StaticResource FontSizeBody}"/>
                                 </Border>
@@ -205,9 +205,9 @@
                                  Style="{StaticResource SidebarNavItemStyle}" Click="OnSidebarSectionClick"
                                  AutomationProperties.Name="Backup and Data">
                         <StackPanel Orientation="Horizontal">
-                            <Border Background="{StaticResource FluentKpiOrangeMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
+                            <Border Background="{StaticResource FluentKpiGrayMuted}" Style="{StaticResource SidebarIconBadgeStyle}">
                                 <TextBlock Text="&#xE74E;" FontFamily="{StaticResource FluentIconFont}"
-                                           Foreground="{StaticResource FluentKpiOrange}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="{StaticResource FontSizeBody}"/>
                             </Border>

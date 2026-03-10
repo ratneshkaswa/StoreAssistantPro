@@ -27,6 +27,7 @@ public partial class SetupWindow : Window
         ["Pincode"] = ("Firm", "PincodeBox"),
         ["Phone"] = ("Firm", "PhoneBox"),
         ["Email"] = ("Firm", "EmailBox"),
+        ["State"] = ("Firm", "StateCombo"),
         ["GSTIN"] = ("Tax", "GstinBox"),
         ["GSTINChecksum"] = ("Tax", "GstinBox"),
         ["PAN"] = ("Tax", "PanBox"),

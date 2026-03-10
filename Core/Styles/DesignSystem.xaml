@@ -205,6 +205,7 @@
     <Thickness x:Key="SetupSubtitleMargin">0,2,0,0</Thickness>
     <Thickness x:Key="SetupPageDescriptionMargin">0,4,0,0</Thickness>
     <Thickness x:Key="SetupBrowseButtonMargin">8,0,0,0</Thickness>
+    <sys:Double x:Key="SetupBrowseButtonMinHeight">32</sys:Double>
     <Thickness x:Key="SetupCurrencyBadgePadding">12,6</Thickness>
     <Thickness x:Key="SetupCancelButtonMargin">0,0,12,0</Thickness>
 

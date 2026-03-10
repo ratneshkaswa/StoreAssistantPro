@@ -78,7 +78,7 @@ public partial class SetupViewModel : BaseViewModel
     public partial string State { get; set; } = string.Empty;
 
     public ObservableCollection<string> IndianStates { get; } =
-        new(IndianStateData.Select(state => state.Name));
+        new(IndianStateData.Select(state => state.Name).Order());
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PincodeValidationHint))]
@@ -102,17 +102,12 @@ public partial class SetupViewModel : BaseViewModel
     partial void OnGSTINChanged(string value)
     {
         ClearErrorOnEdit();
-        // Auto-fill State from the first 2 digits of GSTIN (state code)
-        if (value.Length >= 2)
+        // Auto-fill State only when a complete GSTIN (15 chars) is entered
+        if (value.Length == 15)
         {
             var stateName = GetGstinStateName(value[..2]);
-            if (stateName != null)
-            {
-                if (string.IsNullOrWhiteSpace(State))
-                    State = stateName;
-                else if (!string.Equals(State, stateName, StringComparison.OrdinalIgnoreCase))
-                    OnPropertyChanged(nameof(GstinValidationHint));
-            }
+            if (stateName != null && string.IsNullOrWhiteSpace(State))
+                State = stateName;
         }
     }
 
@@ -622,6 +617,7 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.", "PAN")
             .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.", "Pincode")
             .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.", "Email")
+            .Rule(string.IsNullOrWhiteSpace(State) || IndianStates.Contains(State.Trim()), "Please select a valid Indian state from the list.", "State")
             .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.", "Phone")
             .Rule(string.IsNullOrWhiteSpace(Phone) || new string(Phone.Where(char.IsDigit).ToArray()).Length >= 10, "Phone must have at least 10 digits.", "Phone")
             .Rule(!AutoBackupEnabled || TimeOnly.TryParseExact(BackupTime.Trim(), "HH:mm", CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
@@ -787,13 +783,13 @@ public partial class SetupViewModel : BaseViewModel
         return 3;
     }
 
-    [GeneratedRegex(@"^[\d\s\+\-]+$")]
+    [GeneratedRegex(@"^[\d\s\+\-]*\d[\d\s\+\-]*$")]
     internal static partial Regex PhoneInputRegex();
 
     [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     private static partial Regex EmailRegex();
 
-    [GeneratedRegex(@"^\d{2}[A-Z]{5}\d{4}[A-Z]\d[Z][A-Z\d]$")]
+    [GeneratedRegex(@"^\d{2}[A-Z]{5}\d{4}[A-Z]\d[A-Z][A-Z\d]$")]
     private static partial Regex GstinRegex();
 
     [GeneratedRegex(@"^[A-Z]{5}\d{4}[A-Z]$")]
