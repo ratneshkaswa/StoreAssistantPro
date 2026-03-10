@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
@@ -11,6 +12,7 @@ namespace StoreAssistantPro.Modules.Authentication.Views;
 public partial class SetupWindow : Window
 {
     private SetupViewModel? _vm;
+
     private readonly FirmProfilePage _firmPage = new();
     private readonly TaxLegalPage _taxPage = new();
     private readonly RegionalSettingsPage _regionalPage = new();
@@ -20,37 +22,46 @@ public partial class SetupWindow : Window
 
     private readonly IDialogService _dialogService;
 
-    /// <summary>Maps validation field keys to (sidebar section, control name) for focus routing.</summary>
+    /// <summary>
+    /// Maps validation field keys to (sidebar section, control name) for direct focus routing.
+    /// Keep these keys aligned with SetupViewModel.LastInvalidFieldKey values.
+    /// </summary>
     private static readonly Dictionary<string, (string Section, string Control)> FieldFocusMap = new(StringComparer.Ordinal)
     {
         ["FirmName"] = ("Firm", "FirmNameBox"),
+        ["State"] = ("Firm", "StateCombo"),
         ["Pincode"] = ("Firm", "PincodeBox"),
         ["Phone"] = ("Firm", "PhoneBox"),
         ["Email"] = ("Firm", "EmailBox"),
-        ["State"] = ("Firm", "StateCombo"),
+
         ["GSTIN"] = ("Tax", "GstinBox"),
         ["GSTINChecksum"] = ("Tax", "GstinBox"),
         ["PAN"] = ("Tax", "PanBox"),
         ["CompositionRate"] = ("Tax", "CompRateBox"),
-        ["MasterPin"] = ("Security", "MasterPinBox"),
-        ["MasterPinConfirm"] = ("Security", "MasterPinBox"),
-        ["MasterPinContains"] = ("Security", "MasterPinBox"),
+        ["StateGstinMismatch"] = ("Tax", "GstinBox"),
+
         ["AdminPin"] = ("Security", "AdminPinBox"),
         ["AdminPinConfirm"] = ("Security", "AdminPinBox"),
         ["ManagerPin"] = ("Security", "ManagerPinBox"),
         ["ManagerPinConfirm"] = ("Security", "ManagerPinBox"),
         ["UserPin"] = ("Security", "UserPinBox"),
         ["UserPinConfirm"] = ("Security", "UserPinBox"),
+        ["MasterPin"] = ("Security", "MasterPinBox"),
+        ["MasterPinConfirm"] = ("Security", "MasterPinBox"),
+        ["MasterPinContains"] = ("Security", "MasterPinBox"),
         ["PinConflict"] = ("Security", "AdminPinBox"),
+
         ["BackupTime"] = ("Backup", "BackupTimeBox"),
-        ["BackupLocation"] = ("Backup", "BackupPathBox"),
+        ["BackupLocation"] = ("Backup", "BackupPathBox")
     };
 
     public SetupWindow(IWindowSizingService sizingService, IDialogService dialogService, SetupViewModel vm)
     {
         InitializeComponent();
+
         DataContext = _vm = vm;
         _dialogService = dialogService;
+
         vm.RequestClose = result => DialogResult = result;
 
         var width = (double)FindResource("SetupWindowWidth");
@@ -59,7 +70,7 @@ public partial class SetupWindow : Window
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
-        // Share the ViewModel as DataContext across all pages
+        // Share the same ViewModel instance across all setup pages.
         _firmPage.DataContext = vm;
         _taxPage.DataContext = vm;
         _regionalPage.DataContext = vm;
@@ -75,8 +86,8 @@ public partial class SetupWindow : Window
             vm.Dispose();
         };
 
-        // Navigate to the default section
         NavigateToSection("Firm");
+        SyncSidebarSelection();
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -84,42 +95,56 @@ public partial class SetupWindow : Window
         if (sender is not SetupViewModel vm)
             return;
 
-        if (e.PropertyName == nameof(SetupViewModel.FirstErrorFieldKey))
+        if (e.PropertyName == nameof(SetupViewModel.LastInvalidFieldKey))
         {
-            if (!string.IsNullOrWhiteSpace(vm.FirstErrorFieldKey))
-                Dispatcher.BeginInvoke(() => FocusFieldByKey(vm.FirstErrorFieldKey));
+            if (!string.IsNullOrWhiteSpace(vm.LastInvalidFieldKey))
+            {
+                Dispatcher.BeginInvoke(() => FocusFieldByKey(vm.LastInvalidFieldKey));
+            }
         }
         else if (e.PropertyName == nameof(SetupViewModel.SelectedSection))
         {
             Dispatcher.BeginInvoke(() =>
             {
                 SyncSidebarSelection();
-                NavigateToSection(_vm!.SelectedSection);
+                NavigateToSection(vm.SelectedSection);
             });
         }
     }
 
     private void FocusFieldByKey(string fieldKey)
     {
+        if (string.IsNullOrWhiteSpace(fieldKey))
+            return;
+
         if (FieldFocusMap.TryGetValue(fieldKey, out var target))
+        {
             NavigateAndFocus(target.Section, target.Control);
+            return;
+        }
+
+        // Safe fallback: just stay on current section if key is unknown.
+        if (_vm is not null)
+            NavigateToSection(_vm.SelectedSection);
     }
 
     private void NavigateAndFocus(string section, string controlName)
     {
-        if (_vm is null) return;
+        if (_vm is null)
+            return;
+
         _vm.SelectedSection = section;
         NavigateToSection(section);
-        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
         {
-            if (ContentFrame.Content is Page page && page.FindName(controlName) is UIElement element)
-                element.Focus();
+            TryFocusControl(controlName);
         });
     }
 
     private void NavigateToSection(string section)
     {
-        Page target = section switch
+        var target = section switch
         {
             "Firm" => _firmPage,
             "Tax" => _taxPage,
@@ -130,37 +155,62 @@ public partial class SetupWindow : Window
             _ => _firmPage
         };
 
-        if (ContentFrame.Content != target)
+        if (!ReferenceEquals(ContentFrame.Content, target))
         {
             ContentFrame.Navigate(target);
 
-            // N8: Remove accumulated journal entries to prevent memory growth
-            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, () =>
+            // Keep frame journal empty to avoid unnecessary back-stack growth.
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
             {
                 if (ContentFrame.NavigationService is { } ns)
-                    while (ns.CanGoBack) ns.RemoveBackEntry();
+                {
+                    while (ns.CanGoBack)
+                        ns.RemoveBackEntry();
+                }
             });
         }
 
-        // Focus the first input field on the target page
-        string? firstField = section switch
+        var firstField = section switch
         {
             "Firm" => "FirmNameBox",
             "Tax" => "GstRegTypeCombo",
             "Regional" => "FyStartCombo",
-            "Security" => "MasterPinBox",
+            "Security" => "AdminPinBox",
             "Backup" => "AutoBackupToggle",
             "System" => "TaxModeCombo",
             _ => null
         };
 
-        if (firstField is not null)
+        if (!string.IsNullOrWhiteSpace(firstField))
         {
-            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
             {
-                if (ContentFrame.Content is Page page && page.FindName(firstField) is UIElement element)
-                    element.Focus();
+                TryFocusControl(firstField);
             });
+        }
+    }
+
+    private void TryFocusControl(string controlName)
+    {
+        if (ContentFrame.Content is not Page page)
+            return;
+
+        if (page.FindName(controlName) is not UIElement element)
+            return;
+
+        switch (element)
+        {
+            case Control control when !control.IsVisible || !control.IsEnabled:
+                return;
+            case UIElement uiElement when !uiElement.IsVisible:
+                return;
+        }
+
+        element.Focus();
+
+        if (element is TextBox textBox)
+        {
+            textBox.SelectAll();
         }
     }
 
@@ -169,13 +219,16 @@ public partial class SetupWindow : Window
         if (sender is not RadioButton rb || rb.Tag is not string sectionKey || _vm is null)
             return;
 
-        _vm.SelectedSection = sectionKey;
+        if (!string.Equals(_vm.SelectedSection, sectionKey, StringComparison.Ordinal))
+            _vm.SelectedSection = sectionKey;
     }
 
     private void SyncSidebarSelection()
     {
-        if (_vm is null) return;
-        RadioButton? target = _vm.SelectedSection switch
+        if (_vm is null)
+            return;
+
+        var target = _vm.SelectedSection switch
         {
             "Firm" => NavFirm,
             "Tax" => NavTax,
@@ -185,24 +238,36 @@ public partial class SetupWindow : Window
             "System" => NavSystem,
             _ => null
         };
-        if (target is not null)
+
+        if (target is not null && target.IsChecked != true)
             target.IsChecked = true;
     }
 
-    /// <summary>Confirm close if setup is in progress.</summary>
+    /// <summary>
+    /// Confirm close if setup is still in progress.
+    /// </summary>
     private void OnWindowClosing(object? sender, CancelEventArgs e)
     {
-        if (_vm is null || _vm.IsSetupComplete || DialogResult == true) return;
+        if (_vm is null || _vm.IsSetupComplete || DialogResult == true)
+            return;
 
-        // Prevent close during processing
-        if (_vm.IsBusy) { e.Cancel = true; return; }
-
-        if (!_dialogService.Confirm("Setup is not complete. Are you sure you want to cancel?", "Cancel Setup"))
-            e.Cancel = true;
-        else
+        if (_vm.IsBusy)
         {
-            _vm.ClearSensitivePins();
-            _securityPage.ClearAllPinBoxes();
+            e.Cancel = true;
+            return;
         }
+
+        var shouldClose = _dialogService.Confirm(
+            "Setup is not complete. Are you sure you want to cancel?",
+            "Cancel Setup");
+
+        if (!shouldClose)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        _vm.ClearSensitivePins();
+        _securityPage.ClearAllPinBoxes();
     }
 }

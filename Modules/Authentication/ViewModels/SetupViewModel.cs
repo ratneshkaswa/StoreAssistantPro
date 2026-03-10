@@ -78,7 +78,7 @@ public partial class SetupViewModel : BaseViewModel
     public partial string State { get; set; } = string.Empty;
 
     public ObservableCollection<string> IndianStates { get; } =
-        new(IndianStateData.Select(state => state.Name).Order());
+        new(IndianStateData.Select(state => state.Name).OrderBy(n => n, StringComparer.OrdinalIgnoreCase));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PincodeValidationHint))]

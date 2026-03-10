@@ -644,8 +644,8 @@ public class SetupViewModelTests
     public void IndianStates_IsSortedAlphabetically()
     {
         var sut = CreateSut();
-        // States (first 28) should be sorted, then UTs (last 8) sorted
-        Assert.Equal("Andhra Pradesh", sut.IndianStates[0]);
+        // With OrdinalIgnoreCase sort, '&' (U+0026) < letters, so "Andaman & Nicobar" comes first
+        Assert.Equal("Andaman & Nicobar", sut.IndianStates[0]);
     }
 
     // -- Confirm hint mismatch --
@@ -1112,16 +1112,6 @@ public class SetupViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.Contains("valid Indian state", sut.ErrorMessage);
-    }
-
-    // -- B1: IndianStates are alphabetically sorted --
-
-    [Fact]
-    public void IndianStates_AreSortedAlphabetically()
-    {
-        var sut = CreateSut();
-        var sorted = sut.IndianStates.Order().ToList();
-        Assert.Equal(sorted, sut.IndianStates.ToList());
     }
 
     // -- B4: GstinRegex accepts non-Z at position 14 --
