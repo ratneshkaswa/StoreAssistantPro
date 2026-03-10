@@ -49,7 +49,7 @@ public sealed class OnboardingJourneyService : IOnboardingJourneyService
 
     private JourneyState _state;
     private UserExperienceProfile _profile;
-    private volatile bool _loaded;
+    private bool _loaded;
 
     private static readonly JsonSerializerOptions WriteOptions = new()
     {

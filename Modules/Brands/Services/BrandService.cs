@@ -15,7 +15,8 @@ public class BrandService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var productCounts = await context.Products
-            .GroupBy(p => p.BrandId)
+            .Where(p => p.BrandId.HasValue)
+            .GroupBy(p => p.BrandId!.Value)
             .Select(g => new { BrandId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(g => g.BrandId, g => g.Count, ct)
             .ConfigureAwait(false);
@@ -63,8 +64,8 @@ public class BrandService(
         {
             var brandIds = brands.Select(b => b.Id).ToList();
             var productCounts = await context.Products
-                .Where(p => brandIds.Contains(p.BrandId ?? 0))
-                .GroupBy(p => p.BrandId)
+                .Where(p => p.BrandId.HasValue && brandIds.Contains(p.BrandId.Value))
+                .GroupBy(p => p.BrandId!.Value)
                 .Select(g => new { BrandId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(g => g.BrandId, g => g.Count, ct)
                 .ConfigureAwait(false);

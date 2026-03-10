@@ -330,7 +330,9 @@ public static class Motion
         w.Opacity = 0;
         w.ContentRendered += static (sender, _) =>
         {
-            var win = (Window)sender;
+            if (sender is not Window win)
+                return;
+
             var duration = GetDuration(win, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
             if (duration == TimeSpan.Zero) { win.Opacity = 1; return; }
             var ease = TryFindEase(win, "FluentEaseDecelerate");

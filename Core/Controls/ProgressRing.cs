@@ -52,7 +52,7 @@ public class ProgressRing : Control
         DependencyProperty.Register(nameof(StrokeThickness), typeof(double), typeof(ProgressRing),
             new PropertyMetadata(3.0, OnDiameterChanged));
 
-    public new double StrokeThickness
+    public double StrokeThickness
     {
         get => (double)GetValue(StrokeThicknessProperty);
         set => SetValue(StrokeThicknessProperty, value);
