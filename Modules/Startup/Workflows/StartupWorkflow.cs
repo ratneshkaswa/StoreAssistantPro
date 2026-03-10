@@ -77,6 +77,7 @@ public class StartupWorkflow(
             return StepResult.Continue;
 
         var result = authFlow.RunFirstTimeSetup();
+        context.Set("IsInitialized", result);
         logger.LogInformation("First-time setup {Result}", result ? "completed" : "cancelled");
         return result ? StepResult.Continue : StepResult.Cancel;
     }

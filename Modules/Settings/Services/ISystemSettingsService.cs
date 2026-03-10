@@ -8,8 +8,6 @@ public interface ISystemSettingsService
     Task UpdateAsync(SystemSettingsDto dto, CancellationToken ct = default);
     Task<string> BackupDatabaseAsync(CancellationToken ct = default);
     Task RestoreDatabaseAsync(string backupPath, CancellationToken ct = default);
-    Task<bool> IsSetupCompletedAsync(CancellationToken ct = default);
-    Task MarkSetupCompletedAsync(CancellationToken ct = default);
 }
 
 public record SystemSettingsDto(

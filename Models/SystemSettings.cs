@@ -55,8 +55,8 @@ public class SystemSettings
     public string NumberToWordsLanguage { get; set; } = "English";
 
     /// <summary>
-    /// Set to <c>true</c> after the first-run setup wizard completes all steps
-    /// (Firm → Tax → Vendor → Product). Prevents the wizard from re-appearing.
+    /// Legacy flag retained for backward compatibility with older builds.
+    /// First-run completion is determined from AppConfig.IsInitialized.
     /// </summary>
     public bool SetupCompleted { get; set; }
 

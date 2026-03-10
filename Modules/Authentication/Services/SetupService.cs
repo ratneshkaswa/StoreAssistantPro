@@ -13,64 +13,61 @@ public class SetupService(
     IRegionalSettingsService regionalSettings,
     IPerformanceMonitor perf) : ISetupService
 {
+    private readonly IDbContextFactory<AppDbContext> _contextFactory = contextFactory;
+
     public async Task InitializeAppAsync(CompleteFirstSetupCommand command, CancellationToken ct = default)
     {
         using var perfScope = perf.BeginScope("SetupService.InitializeAppAsync");
+        _ = _contextFactory;
 
         try
         {
             await transactionHelper.ExecuteInTransactionAsync(async context =>
             {
-                if (await context.AppConfigs.AnyAsync(ct).ConfigureAwait(false))
+                var appConfig = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+                if (appConfig?.IsInitialized == true)
                     throw new InvalidOperationException("Application has already been initialized.");
 
-                context.AppConfigs.Add(new AppConfig
-                {
-                    FirmName = command.FirmName,
-                    Address = string.IsNullOrWhiteSpace(command.Address) ? string.Empty : command.Address,
-                    State = string.IsNullOrWhiteSpace(command.State) ? string.Empty : command.State,
-                    Pincode = string.IsNullOrWhiteSpace(command.Pincode) ? string.Empty : command.Pincode,
-                    Phone = string.IsNullOrWhiteSpace(command.Phone) ? string.Empty : command.Phone,
-                    Email = string.IsNullOrWhiteSpace(command.Email) ? string.Empty : command.Email,
-                    GSTNumber = string.IsNullOrWhiteSpace(command.GSTIN) ? null : command.GSTIN,
-                    PANNumber = string.IsNullOrWhiteSpace(command.PAN) ? null : command.PAN,
-                    GstRegistrationType = string.IsNullOrWhiteSpace(command.BusinessOptions.GstRegistrationType) ? "Regular" : command.BusinessOptions.GstRegistrationType,
-                    StateCode = string.IsNullOrWhiteSpace(command.BusinessOptions.StateCode) ? null : command.BusinessOptions.StateCode,
-                    CompositionSchemeRate = command.BusinessOptions.CompositionSchemeRate,
-                    CurrencyCode = string.IsNullOrWhiteSpace(command.CurrencyCode) ? "INR" : command.CurrencyCode,
-                    CurrencySymbol = string.IsNullOrWhiteSpace(command.CurrencySymbol) ? "\u20b9" : command.CurrencySymbol,
-                    FinancialYearStartMonth = command.FinancialYearStartMonth is >= 1 and <= 12 ? command.FinancialYearStartMonth : 4,
-                    FinancialYearEndMonth = command.FinancialYearEndMonth is >= 1 and <= 12 ? command.FinancialYearEndMonth : 3,
-                    DateFormat = string.IsNullOrWhiteSpace(command.DateFormat) ? "dd/MM/yyyy" : command.DateFormat,
-                    NumberFormat = "Indian",
-                    IsInitialized = true,
-                    MasterPinHash = PinHasher.Hash(command.MasterPin)
-                });
+                appConfig ??= new AppConfig();
+                appConfig.FirmName = command.FirmName;
+                appConfig.Address = string.IsNullOrWhiteSpace(command.Address) ? string.Empty : command.Address;
+                appConfig.State = string.IsNullOrWhiteSpace(command.State) ? string.Empty : command.State;
+                appConfig.Pincode = string.IsNullOrWhiteSpace(command.Pincode) ? string.Empty : command.Pincode;
+                appConfig.Phone = string.IsNullOrWhiteSpace(command.Phone) ? string.Empty : command.Phone;
+                appConfig.Email = string.IsNullOrWhiteSpace(command.Email) ? string.Empty : command.Email;
+                appConfig.GSTNumber = string.IsNullOrWhiteSpace(command.GSTIN) ? null : command.GSTIN;
+                appConfig.PANNumber = string.IsNullOrWhiteSpace(command.PAN) ? null : command.PAN;
+                appConfig.GstRegistrationType = string.IsNullOrWhiteSpace(command.BusinessOptions.GstRegistrationType) ? "Regular" : command.BusinessOptions.GstRegistrationType;
+                appConfig.StateCode = string.IsNullOrWhiteSpace(command.BusinessOptions.StateCode) ? null : command.BusinessOptions.StateCode;
+                appConfig.CompositionSchemeRate = command.BusinessOptions.CompositionSchemeRate;
+                appConfig.CurrencyCode = string.IsNullOrWhiteSpace(command.CurrencyCode) ? "INR" : command.CurrencyCode;
+                appConfig.CurrencySymbol = string.IsNullOrWhiteSpace(command.CurrencySymbol) ? "\u20b9" : command.CurrencySymbol;
+                appConfig.FinancialYearStartMonth = command.FinancialYearStartMonth is >= 1 and <= 12 ? command.FinancialYearStartMonth : 4;
+                appConfig.FinancialYearEndMonth = command.FinancialYearEndMonth is >= 1 and <= 12 ? command.FinancialYearEndMonth : 3;
+                appConfig.DateFormat = string.IsNullOrWhiteSpace(command.DateFormat) ? "dd/MM/yyyy" : command.DateFormat;
+                appConfig.NumberFormat = "Indian";
+                appConfig.IsInitialized = true;
+                appConfig.MasterPinHash = PinHasher.Hash(command.MasterPin);
 
-                context.UserCredentials.Add(new UserCredential
-                {
-                    UserType = UserType.Admin,
-                    PinHash = PinHasher.Hash(command.AdminPin)
-                });
+                if (appConfig.Id == 0)
+                    context.AppConfigs.Add(appConfig);
 
-                context.UserCredentials.Add(new UserCredential
-                {
-                    UserType = UserType.Manager,
-                    PinHash = PinHasher.Hash(command.ManagerPin)
-                });
-
-                context.UserCredentials.Add(new UserCredential
-                {
-                    UserType = UserType.User,
-                    PinHash = PinHasher.Hash(command.UserPin)
-                });
+                UpsertUserCredential(context, UserType.Admin, command.AdminPin);
+                UpsertUserCredential(context, UserType.Manager, command.ManagerPin);
+                UpsertUserCredential(context, UserType.User, command.UserPin);
 
                 var istNow = regionalSettings.Now;
 
-                SeedDefaultTaxSlabs(context, istNow);
-                SeedColours(context);
+                if (!context.TaxMasters.Any())
+                    SeedDefaultTaxSlabs(context, istNow);
+
+                if (!context.Colours.Any())
+                    SeedColours(context);
+
                 SeedSystemSettings(context, command.BusinessOptions);
-                SeedFinancialYear(context, command.FinancialYearStartMonth, istNow);
+
+                if (!context.FinancialYears.Any())
+                    SeedFinancialYear(context, command.FinancialYearStartMonth, istNow);
             }).ConfigureAwait(false);
         }
         catch (DbUpdateException)
@@ -98,11 +95,27 @@ public class SetupService(
 
     /// <summary>
     /// Seeds the predefined 100-colour palette. Users cannot add colours
-    /// outside this list — it is the single source of truth.
+    /// outside this list - it is the single source of truth.
     /// </summary>
     private static void SeedColours(AppDbContext context)
     {
         context.Colours.AddRange(ColourSeedData.GetAll());
+    }
+
+    private static void UpsertUserCredential(AppDbContext context, UserType userType, string pin)
+    {
+        var credential = context.UserCredentials.FirstOrDefault(u => u.UserType == userType);
+        if (credential is null)
+        {
+            context.UserCredentials.Add(new UserCredential
+            {
+                UserType = userType,
+                PinHash = PinHasher.Hash(pin)
+            });
+            return;
+        }
+
+        credential.PinHash = PinHasher.Hash(pin);
     }
 
     /// <summary>
@@ -110,22 +123,26 @@ public class SetupService(
     /// </summary>
     private static void SeedSystemSettings(AppDbContext context, SetupBusinessOptions opts)
     {
-        context.SystemSettings.Add(new SystemSettings
+        var settings = context.SystemSettings.FirstOrDefault();
+        if (settings is null)
         {
-            DefaultTaxMode = opts.DefaultTaxMode == "Tax-Inclusive (MRP)" ? "Inclusive" : "Exclusive",
-            RoundingMethod = opts.RoundingMethod switch
-            {
-                "Round to nearest \u20b91" => "NearestOne",
-                "Round to nearest \u20b95" => "NearestFive",
-                "Round to nearest \u20b910" => "NearestTen",
-                _ => "None"
-            },
-            NegativeStockAllowed = opts.NegativeStockAllowed,
-            NumberToWordsLanguage = opts.NumberToWordsLanguage,
-            AutoBackupEnabled = opts.AutoBackupEnabled,
-            BackupTime = opts.BackupTime,
-            BackupLocation = opts.BackupLocation
-        });
+            settings = new SystemSettings();
+            context.SystemSettings.Add(settings);
+        }
+
+        settings.DefaultTaxMode = opts.DefaultTaxMode == "Tax-Inclusive (MRP)" ? "Inclusive" : "Exclusive";
+        settings.RoundingMethod = opts.RoundingMethod switch
+        {
+            "Round to nearest \u20b91" => "NearestOne",
+            "Round to nearest \u20b95" => "NearestFive",
+            "Round to nearest \u20b910" => "NearestTen",
+            _ => "None"
+        };
+        settings.NegativeStockAllowed = opts.NegativeStockAllowed;
+        settings.NumberToWordsLanguage = opts.NumberToWordsLanguage;
+        settings.AutoBackupEnabled = opts.AutoBackupEnabled;
+        settings.BackupTime = opts.BackupTime;
+        settings.BackupLocation = opts.BackupLocation;
     }
 
     /// <summary>
@@ -140,7 +157,7 @@ public class SetupService(
 
         context.FinancialYears.Add(new FinancialYear
         {
-            Name = $"{fyStart.Year}–{fyEnd.Year % 100:D2}",
+            Name = $"{fyStart.Year}-{fyEnd.Year % 100:D2}",
             StartDate = fyStart,
             EndDate = fyEnd,
             IsCurrent = true,
@@ -149,4 +166,5 @@ public class SetupService(
         });
     }
 }
+
 

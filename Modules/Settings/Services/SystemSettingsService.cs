@@ -117,27 +117,4 @@ public class SystemSettingsService(
         logger.LogInformation("Database restored from {Path}", backupPath);
     }
 
-    public async Task<bool> IsSetupCompletedAsync(CancellationToken ct = default)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        var settings = await context.SystemSettings
-            .AsNoTracking()
-            .FirstOrDefaultAsync(ct)
-            .ConfigureAwait(false);
-        return settings?.SetupCompleted == true;
-    }
-
-    public async Task MarkSetupCompletedAsync(CancellationToken ct = default)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        var settings = await context.SystemSettings.FirstOrDefaultAsync(ct).ConfigureAwait(false);
-        if (settings is null)
-        {
-            settings = new SystemSettings { DefaultTaxMode = "Exclusive", AutoBackupEnabled = false };
-            context.SystemSettings.Add(settings);
-        }
-        settings.SetupCompleted = true;
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
-        logger.LogInformation("First-run setup wizard completed");
-    }
 }

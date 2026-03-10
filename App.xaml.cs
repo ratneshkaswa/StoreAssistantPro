@@ -139,8 +139,8 @@ public partial class App : Application
             return;
         }
 
-        // If setup was cancelled (user closed the One Time Setup window),
-        // shut down the application � do not proceed to login.
+        // If setup was cancelled (user closed first-run setup),
+        // shut down the application and do not proceed to login.
         if (!workflowManager.Context.Get<bool>("IsInitialized")
             && !await _host.Services.GetRequiredService<StoreAssistantPro.Modules.Startup.Services.IStartupService>().IsAppInitializedAsync())
         {
