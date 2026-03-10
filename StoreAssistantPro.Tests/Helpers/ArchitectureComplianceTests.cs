@@ -954,7 +954,7 @@ public partial class ArchitectureComplianceTests
     /// Scans all <c>*Window.xaml.cs</c> code-behind files for the class
     /// declaration. Dialogs (shown via <c>IDialogService</c>) must
     /// inherit <c>BaseDialogWindow</c>. Non-dialog windows
-    /// (MainWindow, LoginWindow, SetupWindow, SetupWizardWindow) are
+    /// (MainWindow, LoginWindow, SetupWindow) are
     /// excluded — they use <c>WindowSizingService</c> directly.
     /// </para>
     /// </summary>
@@ -969,8 +969,7 @@ public partial class ArchitectureComplianceTests
         {
             "MainWindow",
             "LoginWindow",
-            "SetupWindow",
-            "SetupWizardWindow"
+            "SetupWindow"
         };
 
         foreach (var file in GetModuleCsFiles())

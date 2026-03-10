@@ -98,7 +98,7 @@ public class SetupService(
 
     /// <summary>
     /// Seeds the predefined 100-colour palette. Users cannot add colours
-    /// outside this list — it is the single source of truth.
+    /// outside this list â€” it is the single source of truth.
     /// </summary>
     private static void SeedColours(AppDbContext context)
     {
@@ -140,7 +140,7 @@ public class SetupService(
 
         context.FinancialYears.Add(new FinancialYear
         {
-            Name = $"{fyStart.Year}–{fyEnd.Year % 100:D2}",
+            Name = $"{fyStart.Year}â€“{fyEnd.Year % 100:D2}",
             StartDate = fyStart,
             EndDate = fyEnd,
             IsCurrent = true,
@@ -149,3 +149,4 @@ public class SetupService(
         });
     }
 }
+

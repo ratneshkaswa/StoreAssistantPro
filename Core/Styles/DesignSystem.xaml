@@ -187,9 +187,9 @@
     <sys:Double x:Key="FormLabelColumnMinWidth">100</sys:Double>
 
     <!-- Setup window tokens -->
-    <GridLength x:Key="SetupLabelColumnWidth">200</GridLength>
-    <sys:Double x:Key="SetupWindowWidth">960</sys:Double>
-    <sys:Double x:Key="SetupWindowHeight">720</sys:Double>
+    <GridLength x:Key="SetupLabelColumnWidth">180</GridLength>
+    <sys:Double x:Key="SetupWindowWidth">1180</sys:Double>
+    <sys:Double x:Key="SetupWindowHeight">760</sys:Double>
     <sys:Double x:Key="SetupButtonHeight">40</sys:Double>
     <sys:Double x:Key="SetupPrimaryButtonWidth">120</sys:Double>
     <Thickness x:Key="SetupSectionSpacing">0,24,0,0</Thickness>
@@ -204,19 +204,23 @@
     <Thickness x:Key="SetupLogoMargin">0,0,6,0</Thickness>
     <Thickness x:Key="SetupSubtitleMargin">0,4,0,0</Thickness>
     <Thickness x:Key="SetupPageDescriptionMargin">0,4,0,0</Thickness>
+    <Thickness x:Key="SetupPageHeaderMargin">0,0,0,2</Thickness>
+    <Thickness x:Key="SetupSectionTitleMargin">0,0,0,2</Thickness>
+    <Thickness x:Key="SetupSectionHintMargin">0,0,0,10</Thickness>
+    <sys:Double x:Key="SetupHeaderDescriptionMaxWidth">760</sys:Double>
     <Thickness x:Key="SetupBrowseButtonMargin">8,0,0,0</Thickness>
     <sys:Double x:Key="SetupBrowseButtonMinHeight">32</sys:Double>
     <Thickness x:Key="SetupCurrencyBadgePadding">12,6</Thickness>
     <Thickness x:Key="SetupCancelButtonMargin">0,0,12,0</Thickness>
     <sys:Double x:Key="SetupMinWidth">1180</sys:Double>
     <sys:Double x:Key="SetupMinHeight">760</sys:Double>
-    <Thickness x:Key="SetupRootPadding">20</Thickness>
+    <Thickness x:Key="SetupRootPadding">16</Thickness>
     <GridLength x:Key="SetupRowSpacingSmall">14</GridLength>
     <GridLength x:Key="SetupRowSpacingMedium">18</GridLength>
-    <Thickness x:Key="SetupHeaderCardPadding">20</Thickness>
+    <Thickness x:Key="SetupHeaderCardPadding">18</Thickness>
     <sys:Double x:Key="SetupHeaderGap">16</sys:Double>
     <Thickness x:Key="SetupProgressBadgePadding">12,8</Thickness>
-    <sys:Double x:Key="SetupSidebarColumnWidth">280</sys:Double>
+    <sys:Double x:Key="SetupSidebarColumnWidth">252</sys:Double>
     <Thickness x:Key="SetupSidebarCardPadding">12</Thickness>
     <Thickness x:Key="SetupSidebarHeaderMargin">8,4,8,12</Thickness>
     <Thickness x:Key="SetupCompleteOverlayMargin">28</Thickness>

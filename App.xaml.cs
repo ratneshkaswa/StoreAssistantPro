@@ -14,7 +14,6 @@ using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Modules.Authentication.Workflows;
 using StoreAssistantPro.Modules.MainShell.Services;
-using StoreAssistantPro.Modules.Settings.Services;
 using StoreAssistantPro.Modules.Startup.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
 
@@ -149,7 +148,7 @@ public partial class App : Application
             return;
         }
 
-        // Main app loop — login → setup wizard (first run) → main window → logout
+        // Main app loop — login → main window → logout
         while (true)
         {
             await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
@@ -158,14 +157,6 @@ public partial class App : Application
             {
                 Shutdown();
                 return;
-            }
-
-            // Auto-mark setup as completed — users configure Firm/Tax/Vendor/Products
-            // from within the main app after login.
-            var settingsService = _host.Services.GetRequiredService<ISystemSettingsService>();
-            if (!await settingsService.IsSetupCompletedAsync())
-            {
-                await settingsService.MarkSetupCompletedAsync();
             }
 
             // Show main window (blocks until closed)

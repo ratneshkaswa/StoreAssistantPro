@@ -31,6 +31,8 @@ public class WindowSizingService : IWindowSizingService
         // Clamp to work area with a small margin so the window never crops
         dialog.Width = Math.Min(width, workArea.Width - DialogMargin);
         dialog.Height = Math.Min(height, workArea.Height - DialogMargin);
+        dialog.MinWidth = Math.Min(dialog.MinWidth, dialog.Width);
+        dialog.MinHeight = Math.Min(dialog.MinHeight, dialog.Height);
         dialog.ResizeMode = ResizeMode.NoResize;
 
         if (_mainWindow is not null)
@@ -50,6 +52,8 @@ public class WindowSizingService : IWindowSizingService
 
         window.Width = Math.Min(width, workArea.Width - DialogMargin);
         window.Height = Math.Min(height, workArea.Height - DialogMargin);
+        window.MinWidth = Math.Min(window.MinWidth, window.Width);
+        window.MinHeight = Math.Min(window.MinHeight, window.Height);
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         window.ResizeMode = ResizeMode.NoResize;
     }

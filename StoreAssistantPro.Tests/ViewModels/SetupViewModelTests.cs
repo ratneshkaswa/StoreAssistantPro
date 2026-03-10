@@ -34,6 +34,20 @@ public class SetupViewModelTests
         sut.MasterPinConfirm = masterConfirm;
     }
 
+    private static async Task<bool> WaitUntilAsync(Func<bool> condition, int timeoutMs = 5000, int pollMs = 25)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (condition())
+                return true;
+
+            await Task.Delay(pollMs);
+        }
+
+        return condition();
+    }
+
     [Fact]
     public async Task Save_ValidInput_CallsCommandBusAndCloses()
     {
@@ -54,7 +68,7 @@ public class SetupViewModelTests
             && c.Email == "" && c.GSTIN == "" && c.CurrencyCode == "INR"
             && c.AdminPin == "2847" && c.ManagerPin == "3916"
             && c.UserPin == "5023" && c.MasterPin == "760918"), Arg.Any<CancellationToken>());
-        Assert.True(closeResult);
+        Assert.True(await WaitUntilAsync(() => closeResult == true));
     }
 
     [Fact]
@@ -397,7 +411,7 @@ public class SetupViewModelTests
     public void RequiredFieldsProgress_AllEmpty_ShowsZero()
     {
         var sut = CreateSut();
-        Assert.Contains("0 of 5", sut.RequiredFieldsProgress);
+        Assert.Contains("0 of 6", sut.RequiredFieldsProgress);
     }
 
     [Fact]
@@ -405,7 +419,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        Assert.Contains("1 of 5", sut.RequiredFieldsProgress);
+        Assert.Contains("1 of 6", sut.RequiredFieldsProgress);
     }
 
     [Fact]
@@ -424,7 +438,7 @@ public class SetupViewModelTests
         sut.FirmName = "Store";
         sut.AdminPin = "1234";
         // No confirm
-        Assert.Contains("1 of 5", sut.RequiredFieldsProgress);
+        Assert.Contains("1 of 6", sut.RequiredFieldsProgress);
     }
 
     // -- Save format validations --

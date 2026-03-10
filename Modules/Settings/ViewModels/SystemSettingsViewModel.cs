@@ -26,6 +26,10 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
 
     public IReadOnlyList<string> TaxModes { get; } = ["Exclusive", "Inclusive"];
 
+    public IReadOnlyList<string> RoundingMethods { get; } = ["None", "NearestOne", "NearestFive", "NearestTen"];
+
+    public IReadOnlyList<string> NumberToWordsLanguages { get; } = ["English", "Hindi"];
+
     [ObservableProperty]
     public partial string RoundingMethod { get; set; } = "None";
 

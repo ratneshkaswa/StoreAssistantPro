@@ -129,7 +129,7 @@
                         <Run Text="Store Assistant "/>
                         <Run Text="Pro" Foreground="{StaticResource FluentAccentDefault}"/>
                     </TextBlock>
-                    <TextBlock Text="Set up your store details, billing defaults, security and backups before you begin."
+                    <TextBlock Text="Complete essentials now. Advanced preferences can be configured later from Settings."
                                FontFamily="{StaticResource FluentFontText}"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextSecondary}"
@@ -184,11 +184,11 @@
 
                 <DockPanel LastChildFill="True">
                     <StackPanel DockPanel.Dock="Top" Margin="{StaticResource SetupSidebarHeaderMargin}">
-                        <TextBlock Text="Setup sections"
+                        <TextBlock Text="Essential setup"
                                    FontSize="{StaticResource FontSizeBody}"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource FluentTextPrimary}"/>
-                        <TextBlock Text="Complete the essentials now. Advanced preferences can be adjusted later."
+                        <TextBlock Text="Complete business profile and security now. Configure tax, regional, backup, and billing defaults later from Firm Management and System Settings."
                                    Style="{StaticResource SectionSummaryLabelStyle}"
                                    Margin="{StaticResource SetupSubtitleMargin}"/>
                     </StackPanel>
@@ -232,54 +232,6 @@
                                 </DockPanel>
                             </RadioButton>
 
-                            <RadioButton x:Name="NavTax"
-                                         Tag="Tax"
-                                         GroupName="SetupNav"
-                                         Style="{StaticResource SidebarNavItemStyle}"
-                                         Click="OnSidebarSectionClick"
-                                         AutomationProperties.Name="Tax and Legal">
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Background="{StaticResource FluentKpiGrayMuted}"
-                                            Style="{StaticResource SidebarIconBadgeStyle}">
-                                        <TextBlock Text="&#xE8A5;"
-                                                   FontFamily="{StaticResource FluentIconFont}"
-                                                   Foreground="{StaticResource FluentTextSecondary}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="{StaticResource FontSizeBody}"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Tax &amp; Legal" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                        <TextBlock Text="GST registration, GSTIN, PAN and tax defaults"
-                                                   Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </RadioButton>
-
-                            <RadioButton x:Name="NavRegional"
-                                         Tag="Regional"
-                                         GroupName="SetupNav"
-                                         Style="{StaticResource SidebarNavItemStyle}"
-                                         Click="OnSidebarSectionClick"
-                                         AutomationProperties.Name="Regional Settings">
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Background="{StaticResource FluentKpiGrayMuted}"
-                                            Style="{StaticResource SidebarIconBadgeStyle}">
-                                        <TextBlock Text="&#xE774;"
-                                                   FontFamily="{StaticResource FluentIconFont}"
-                                                   Foreground="{StaticResource FluentTextSecondary}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="{StaticResource FontSizeBody}"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Regional Settings" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                        <TextBlock Text="Date format and financial year preferences"
-                                                   Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </RadioButton>
-
                             <RadioButton x:Name="NavSecurity"
                                          Tag="Security"
                                          GroupName="SetupNav"
@@ -312,54 +264,6 @@
                                         </StackPanel>
                                     </StackPanel>
                                 </DockPanel>
-                            </RadioButton>
-
-                            <RadioButton x:Name="NavBackup"
-                                         Tag="Backup"
-                                         GroupName="SetupNav"
-                                         Style="{StaticResource SidebarNavItemStyle}"
-                                         Click="OnSidebarSectionClick"
-                                         AutomationProperties.Name="Backup and Data">
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Background="{StaticResource FluentKpiGrayMuted}"
-                                            Style="{StaticResource SidebarIconBadgeStyle}">
-                                        <TextBlock Text="&#xE74E;"
-                                                   FontFamily="{StaticResource FluentIconFont}"
-                                                   Foreground="{StaticResource FluentTextSecondary}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="{StaticResource FontSizeBody}"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Backup &amp; Data" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                        <TextBlock Text="Automatic backup schedule and storage"
-                                                   Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </RadioButton>
-
-                            <RadioButton x:Name="NavSystem"
-                                         Tag="System"
-                                         GroupName="SetupNav"
-                                         Style="{StaticResource SidebarNavItemStyle}"
-                                         Click="OnSidebarSectionClick"
-                                         AutomationProperties.Name="System Settings">
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Background="{StaticResource FluentKpiGrayMuted}"
-                                            Style="{StaticResource SidebarIconBadgeStyle}">
-                                        <TextBlock Text="&#xE713;"
-                                                   FontFamily="{StaticResource FluentIconFont}"
-                                                   Foreground="{StaticResource FluentTextSecondary}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="{StaticResource FontSizeBody}"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="System Settings" Style="{StaticResource SidebarNavTitleStyle}"/>
-                                        <TextBlock Text="Billing behavior, rounding and inventory rules"
-                                                   Style="{StaticResource SidebarNavSubtitleStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
                             </RadioButton>
                         </StackPanel>
                     </ScrollViewer>
@@ -489,7 +393,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0"
-                       Text="You can change most preferences later from Settings."
+                       Text="Configure tax and regional details in Firm Management, and backup/billing defaults in System Settings."
                        VerticalAlignment="Center"
                        Foreground="{StaticResource FluentTextSecondary}">
                 <TextBlock.Style>

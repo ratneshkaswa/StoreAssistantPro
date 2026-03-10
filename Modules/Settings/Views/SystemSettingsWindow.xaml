@@ -45,6 +45,12 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Backup Location"
@@ -128,6 +134,27 @@
                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                               ItemsSource="{Binding TaxModes}"
                               SelectedItem="{Binding DefaultTaxMode}"/>
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Bill Rounding"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Row="8" Grid.Column="1"
+                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                              ItemsSource="{Binding RoundingMethods}"
+                              SelectedItem="{Binding RoundingMethod}"/>
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Number to Words"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Row="10" Grid.Column="1"
+                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                              ItemsSource="{Binding NumberToWordsLanguages}"
+                              SelectedItem="{Binding NumberToWordsLanguage}"/>
+
+                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Negative Stock"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal">
+                        <CheckBox Content="Allow billing when stock is unavailable"
+                                  IsChecked="{Binding NegativeStockAllowed}"/>
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </ScrollViewer>

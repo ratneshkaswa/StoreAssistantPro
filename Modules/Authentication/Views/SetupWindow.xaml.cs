@@ -14,11 +14,7 @@ public partial class SetupWindow : Window
     private SetupViewModel? _vm;
 
     private readonly FirmProfilePage _firmPage = new();
-    private readonly TaxLegalPage _taxPage = new();
-    private readonly RegionalSettingsPage _regionalPage = new();
     private readonly SecuritySettingsPage _securityPage = new();
-    private readonly BackupDataPage _backupPage = new();
-    private readonly SystemSettingsPage _systemPage = new();
 
     private readonly IDialogService _dialogService;
 
@@ -34,25 +30,16 @@ public partial class SetupWindow : Window
         ["Phone"] = ("Firm", "PhoneBox"),
         ["Email"] = ("Firm", "EmailBox"),
 
-        ["GSTIN"] = ("Tax", "GstinBox"),
-        ["GSTINChecksum"] = ("Tax", "GstinBox"),
-        ["PAN"] = ("Tax", "PanBox"),
-        ["CompositionRate"] = ("Tax", "CompRateBox"),
-        ["StateGstinMismatch"] = ("Tax", "GstinBox"),
-
         ["AdminPin"] = ("Security", "AdminPinBox"),
-        ["AdminPinConfirm"] = ("Security", "AdminPinBox"),
+        ["AdminPinConfirm"] = ("Security", "AdminPinConfirmBox"),
         ["ManagerPin"] = ("Security", "ManagerPinBox"),
-        ["ManagerPinConfirm"] = ("Security", "ManagerPinBox"),
+        ["ManagerPinConfirm"] = ("Security", "ManagerPinConfirmBox"),
         ["UserPin"] = ("Security", "UserPinBox"),
-        ["UserPinConfirm"] = ("Security", "UserPinBox"),
+        ["UserPinConfirm"] = ("Security", "UserPinConfirmBox"),
         ["MasterPin"] = ("Security", "MasterPinBox"),
-        ["MasterPinConfirm"] = ("Security", "MasterPinBox"),
+        ["MasterPinConfirm"] = ("Security", "MasterPinConfirmBox"),
         ["MasterPinContains"] = ("Security", "MasterPinBox"),
-        ["PinConflict"] = ("Security", "AdminPinBox"),
-
-        ["BackupTime"] = ("Backup", "BackupTimeBox"),
-        ["BackupLocation"] = ("Backup", "BackupPathBox")
+        ["PinConflict"] = ("Security", "AdminPinBox")
     };
 
     public SetupWindow(IWindowSizingService sizingService, IDialogService dialogService, SetupViewModel vm)
@@ -72,11 +59,7 @@ public partial class SetupWindow : Window
 
         // Share the same ViewModel instance across all setup pages.
         _firmPage.DataContext = vm;
-        _taxPage.DataContext = vm;
-        _regionalPage.DataContext = vm;
         _securityPage.DataContext = vm;
-        _backupPage.DataContext = vm;
-        _systemPage.DataContext = vm;
 
         vm.PropertyChanged += OnViewModelPropertyChanged;
 
@@ -147,11 +130,7 @@ public partial class SetupWindow : Window
         Page target = section switch
         {
             "Firm" => _firmPage,
-            "Tax" => _taxPage,
-            "Regional" => _regionalPage,
             "Security" => _securityPage,
-            "Backup" => _backupPage,
-            "System" => _systemPage,
             _ => _firmPage
         };
 
@@ -173,11 +152,7 @@ public partial class SetupWindow : Window
         var firstField = section switch
         {
             "Firm" => "FirmNameBox",
-            "Tax" => "GstRegTypeCombo",
-            "Regional" => "FyStartCombo",
             "Security" => "AdminPinBox",
-            "Backup" => "AutoBackupToggle",
-            "System" => "TaxModeCombo",
             _ => null
         };
 
@@ -231,11 +206,7 @@ public partial class SetupWindow : Window
         var target = _vm.SelectedSection switch
         {
             "Firm" => NavFirm,
-            "Tax" => NavTax,
-            "Regional" => NavRegional,
             "Security" => NavSecurity,
-            "Backup" => NavBackup,
-            "System" => NavSystem,
             _ => null
         };
 

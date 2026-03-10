@@ -54,6 +54,21 @@ public class SetupWindowComplianceTests
     }
 
     [Fact]
+    public void SetupWindow_Should_ShowOnlyEssentialSections()
+    {
+        var file = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
+        var xaml = File.ReadAllText(file);
+
+        Assert.Contains("x:Name=\"NavFirm\"", xaml);
+        Assert.Contains("x:Name=\"NavSecurity\"", xaml);
+        Assert.DoesNotContain("x:Name=\"NavTax\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"NavRegional\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"NavBackup\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"NavSystem\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Firm Management and System Settings", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Codebase_Should_NotUseMicaFlag()
     {
         var forbidden = "use" + "MicaAlt";

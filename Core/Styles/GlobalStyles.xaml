@@ -260,9 +260,19 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:SetupPageHeader}">
-                    <StackPanel>
-                        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"  FontSize="{StaticResource FontSizePageTitle}" FontWeight="Bold" Foreground="{StaticResource FluentTextPrimary}" Text="{TemplateBinding Title}"/>
-                        <TextBlock FontFamily="{StaticResource FluentFontText}" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource SetupPageDescriptionMargin}" Text="{TemplateBinding Description}"/>
+                    <StackPanel Margin="{StaticResource SetupPageHeaderMargin}">
+                        <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
+                                   FontSize="{StaticResource FontSizeDialogTitle}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextPrimary}"
+                                   Text="{TemplateBinding Title}"/>
+                        <TextBlock FontFamily="{StaticResource FluentFontText}"
+                                   FontSize="{StaticResource FontSizeLabel}"
+                                   Foreground="{StaticResource FluentTextSecondary}"
+                                   Margin="{StaticResource SetupPageDescriptionMargin}"
+                                   Text="{TemplateBinding Description}"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="{StaticResource SetupHeaderDescriptionMaxWidth}"/>
                     </StackPanel>
                 </ControlTemplate>
             </Setter.Value>
