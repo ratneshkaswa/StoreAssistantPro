@@ -69,25 +69,33 @@ public partial class SetupViewModel : BaseViewModel
     partial void OnFirmNameChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string Address { get; set; } = string.Empty;
+
+    partial void OnAddressChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string State { get; set; } = string.Empty;
+
+    partial void OnStateChanged(string value) => ClearErrorOnEdit();
 
     public ObservableCollection<string> IndianStates { get; } =
         new(IndianStateData.Select(state => state.Name).OrderBy(n => n, StringComparer.OrdinalIgnoreCase));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PincodeValidationHint))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string Pincode { get; set; } = string.Empty;
 
     partial void OnPincodeChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PhoneValidationHint))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string Phone { get; set; } = string.Empty;
 
     partial void OnPhoneChanged(string value) => ClearErrorOnEdit();
@@ -98,6 +106,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     [NotifyPropertyChangedFor(nameof(IsTaxSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string GSTIN { get; set; } = string.Empty;
 
     partial void OnGSTINChanged(string value)
@@ -116,12 +125,14 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(PanValidationHint))]
     [NotifyPropertyChangedFor(nameof(GstinPanCrossHint))]
     [NotifyPropertyChangedFor(nameof(IsTaxSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string PAN { get; set; } = string.Empty;
 
     partial void OnPANChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EmailValidationHint))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string Email { get; set; } = string.Empty;
 
     partial void OnEmailChanged(string value) => ClearErrorOnEdit();
@@ -136,6 +147,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
     [NotifyPropertyChangedFor(nameof(CompositionRateValidationHint))]
     [NotifyPropertyChangedFor(nameof(IsTaxSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string SelectedGstRegistrationType { get; set; } = "Unregistered";
 
     public ObservableCollection<string> GstRegistrationTypes { get; } = ["Regular", "Composition", "Unregistered"];
@@ -146,6 +158,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
     [NotifyPropertyChangedFor(nameof(CompositionRateValidationHint))]
     [NotifyPropertyChangedFor(nameof(IsTaxSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string CompositionRate { get; set; } = "1";
 
     partial void OnCompositionRateChanged(string value) => ClearErrorOnEdit();
@@ -159,7 +172,7 @@ public partial class SetupViewModel : BaseViewModel
         get
         {
             if (!IsCompositionScheme || string.IsNullOrWhiteSpace(CompositionRate)) return string.Empty;
-            if (!decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
+            if (!TryParseRate(CompositionRate, out _))
                 return "Must be a number (e.g. 1, 1.5, 6)";
             if (!IsValidCompositionRate(CompositionRate))
                 return "Must be between 0 and 100";
@@ -299,6 +312,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsBackupConfigVisible))]
     [NotifyPropertyChangedFor(nameof(BackupTimeValidationHint))]
     [NotifyPropertyChangedFor(nameof(IsBackupSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial bool AutoBackupEnabled { get; set; }
 
     public bool IsBackupConfigVisible => AutoBackupEnabled;
@@ -306,6 +320,7 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BackupTimeValidationHint))]
     [NotifyPropertyChangedFor(nameof(IsBackupSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string BackupTime { get; set; } = "22:00";
 
     partial void OnBackupTimeChanged(string value) => ClearErrorOnEdit();
@@ -323,6 +338,7 @@ public partial class SetupViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBackupSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string BackupLocation { get; set; } = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
         "StoreAssistantPro", "Backups");
@@ -581,7 +597,7 @@ public partial class SetupViewModel : BaseViewModel
 
     public bool IsBackupSectionComplete =>
         !AutoBackupEnabled ||
-        (IsValidBackupTime(BackupTime) && !string.IsNullOrWhiteSpace(BackupLocation) && System.IO.Directory.Exists(BackupLocation.Trim()));
+        (IsValidBackupTime(BackupTime) && !string.IsNullOrWhiteSpace(BackupLocation) && BackupFolderExists(BackupLocation));
 
     public bool IsSystemSectionComplete =>
         TaxModes.Contains(SelectedTaxMode)
@@ -605,7 +621,12 @@ public partial class SetupViewModel : BaseViewModel
             if (InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin)
                 && !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin)) done++;
 
-            return done == total ? "\u2713 Ready" : $"{done} of {total} required checks complete";
+            if (done < total)
+                return $"{done} of {total} required checks complete";
+
+            return HasNoOptionalValidationErrors()
+                ? "\u2713 Ready"
+                : "6 of 6 required checks complete - review optional field errors";
         }
     }
 
@@ -652,6 +673,7 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.", "GSTIN")
             .Rule(string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.", "GSTINChecksum")
             .Rule(string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.", "PAN")
+            .Rule(IsGstinStateConsistent(GSTIN, State), "GSTIN state code does not match selected state.", "State")
             .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.", "Pincode")
             .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.", "Email")
             .Rule(string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim()), "Please select a valid Indian state from the list.", "State")
@@ -659,14 +681,15 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(string.IsNullOrWhiteSpace(Phone) || new string(Phone.Where(char.IsDigit).ToArray()).Length >= 10, "Phone must have at least 10 digits.", "Phone")
             .Rule(!AutoBackupEnabled || IsValidBackupTime(BackupTime), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
             .Rule(!AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.", "BackupLocation")
-            .Rule(!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || System.IO.Directory.Exists(BackupLocation.Trim()), "Backup folder does not exist. Please create it first or choose a different path.", "BackupLocation")))
+            .Rule(!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation), "Backup location path is invalid.", "BackupLocation")
+            .Rule(!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || BackupFolderExists(BackupLocation), "Backup folder does not exist. Please create it first or choose a different path.", "BackupLocation")))
             return;
 
         var fyStartMonth = MonthNameToIndex(SelectedFYStartMonth);
         var fyEndMonth = (fyStartMonth + 10) % 12 + 1;
 
-        var backupPath = AutoBackupEnabled && !string.IsNullOrWhiteSpace(BackupLocation)
-            ? BackupLocation.Trim().TrimEnd(System.IO.Path.DirectorySeparatorChar).Trim('"')
+        var backupPath = AutoBackupEnabled
+            ? NormalizeBackupPath(BackupLocation)
             : null;
 
         var result = await _commandBus.SendAsync(new CompleteFirstSetupCommand(
@@ -677,7 +700,7 @@ public partial class SetupViewModel : BaseViewModel
             AdminPin, ManagerPin, UserPin, MasterPin,
             new SetupBusinessOptions(
                 SelectedGstRegistrationType,
-                decimal.TryParse(CompositionRate, NumberStyles.Number, CultureInfo.InvariantCulture, out var rate) ? rate : 1.0m,
+                TryParseRate(CompositionRate, out var rate) ? rate : 1.0m,
                 string.IsNullOrEmpty(DerivedStateCode) ? null : DerivedStateCode,
                 SelectedTaxMode,
                 SelectedRoundingMethod,
@@ -871,12 +894,135 @@ public partial class SetupViewModel : BaseViewModel
         return 4;
     }
 
+    private bool HasNoOptionalValidationErrors()
+    {
+        var stateValid = string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim());
+        var pincodeValid = string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0);
+        var emailValid = string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim());
+        var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
+        var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
+            || (PhoneInputRegex().IsMatch(phoneNormalized) && new string(phoneNormalized.Where(char.IsDigit).ToArray()).Length >= 10);
+        var gstinFormatValid = string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant());
+        var gstinChecksumValid = string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant());
+        var panValid = string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant());
+        var compositionValid = !IsCompositionScheme || IsValidCompositionRate(CompositionRate);
+        var gstStateConsistent = IsGstinStateConsistent(GSTIN, State);
+        var backupTimeValid = !AutoBackupEnabled || IsValidBackupTime(BackupTime);
+        var backupLocationPresent = !AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation);
+        var backupPathValid = !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation);
+        var backupPathExists = !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || BackupFolderExists(BackupLocation);
+
+        return stateValid
+            && pincodeValid
+            && emailValid
+            && phoneValid
+            && gstinFormatValid
+            && gstinChecksumValid
+            && panValid
+            && compositionValid
+            && gstStateConsistent
+            && backupTimeValid
+            && backupLocationPresent
+            && backupPathValid
+            && backupPathExists;
+    }
+
+    private static bool IsGstinStateConsistent(string gstinValue, string stateValue)
+    {
+        if (string.IsNullOrWhiteSpace(gstinValue) || string.IsNullOrWhiteSpace(stateValue))
+            return true;
+
+        var gstin = gstinValue.Trim().ToUpperInvariant();
+        if (!GstinRegex().IsMatch(gstin))
+            return true;
+
+        var stateFromGstin = GetGstinStateName(gstin[..2]);
+        return stateFromGstin is null
+            || string.Equals(stateFromGstin, stateValue.Trim(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? NormalizeBackupPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        var trimmed = path.Trim().Trim('"');
+        if (trimmed.Length == 0)
+            return null;
+
+        var root = System.IO.Path.GetPathRoot(trimmed);
+        var normalized = trimmed.TrimEnd(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+
+        if (!string.IsNullOrWhiteSpace(root))
+        {
+            var normalizedRoot = root.TrimEnd(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+            if (string.Equals(normalized, normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                return root;
+        }
+
+        return normalized;
+    }
+
+    private static bool IsValidBackupLocationPath(string value)
+    {
+        var normalized = NormalizeBackupPath(value);
+        if (string.IsNullOrWhiteSpace(normalized))
+            return false;
+
+        if (!System.IO.Path.IsPathRooted(normalized))
+            return false;
+
+        return normalized.IndexOfAny(System.IO.Path.GetInvalidPathChars()) < 0;
+    }
+
+    private static bool BackupFolderExists(string value)
+    {
+        var normalized = NormalizeBackupPath(value);
+        return !string.IsNullOrWhiteSpace(normalized) && System.IO.Directory.Exists(normalized);
+    }
+
+    private static bool TryParseRate(string value, out decimal rate)
+    {
+        rate = 0;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var trimmed = value.Trim();
+        if (decimal.TryParse(trimmed, NumberStyles.Number, CultureInfo.InvariantCulture, out rate))
+            return true;
+
+        var normalized = trimmed.Replace(" ", string.Empty);
+
+        if (!normalized.Contains('.'))
+        {
+            var commaCount = normalized.Count(c => c == ',');
+            if (commaCount == 1)
+            {
+                var commaIndex = normalized.IndexOf(',');
+                var decimals = normalized.Length - commaIndex - 1;
+                normalized = decimals is >= 1 and <= 2
+                    ? normalized.Replace(',', '.')
+                    : normalized.Replace(",", string.Empty);
+            }
+            else
+            {
+                normalized = normalized.Replace(",", string.Empty);
+            }
+        }
+        else
+        {
+            normalized = normalized.Replace(",", string.Empty);
+        }
+
+        return decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out rate);
+    }
+
     private static bool IsValidCompositionRate(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return false;
 
-        return decimal.TryParse(value.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var rate)
+        return TryParseRate(value, out var rate)
             && rate is >= 0 and <= 100;
     }
 
@@ -909,6 +1055,9 @@ public partial class SetupViewModel : BaseViewModel
     {
         if (!string.IsNullOrEmpty(ErrorMessage))
             ErrorMessage = string.Empty;
+
+        if (!string.IsNullOrEmpty(FirstErrorFieldKey))
+            FirstErrorFieldKey = string.Empty;
     }
 
     private static bool MasterPinContainsRolePin(string master, params string[] rolePins) =>

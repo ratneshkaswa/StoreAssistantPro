@@ -120,7 +120,14 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         var error = builder.FirstError;
 
         ErrorMessage = error ?? string.Empty;
-        FirstErrorFieldKey = builder.FirstErrorKey ?? string.Empty;
+        var nextErrorKey = builder.FirstErrorKey ?? string.Empty;
+        if (!string.IsNullOrEmpty(nextErrorKey)
+            && string.Equals(FirstErrorFieldKey, nextErrorKey, StringComparison.Ordinal))
+        {
+            FirstErrorFieldKey = string.Empty;
+        }
+
+        FirstErrorFieldKey = nextErrorKey;
         return error is null;
     }
 

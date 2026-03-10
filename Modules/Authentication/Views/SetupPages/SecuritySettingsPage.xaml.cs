@@ -51,7 +51,9 @@ public partial class SecuritySettingsPage : Page
         else if (sender == MasterPinConfirmBox)
             vm.MasterPinConfirm = MasterPinConfirmBox.Password;
 
-        if (sender is PasswordBox pb && pb.Password.Length == pb.MaxLength)
+        if (sender is PasswordBox pb
+            && pb.IsKeyboardFocused
+            && pb.Password.Length == pb.MaxLength)
             AdvancePinFocus(pb);
     }
 

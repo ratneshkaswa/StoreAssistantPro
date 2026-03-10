@@ -12,7 +12,7 @@
                   Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
         <StackPanel>
             <!-- Card: Business Details -->
-            <controls:SetupFormCard>
+            <controls:SetupFormCard Margin="0">
                 <StackPanel>
                     <TextBlock Text="Business details" Style="{StaticResource SetupSectionHeaderStyle}"/>
                     <TextBlock Text="Used on invoices and statutory records."
@@ -43,14 +43,14 @@
                                   AutomationProperties.IsRequiredForForm="True"/>
 
                         <TextBlock x:Name="AddressLabel" Grid.Row="2" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}" Text="Address"/>
-                        <TextBox Grid.Row="2" Grid.Column="1" TabIndex="1"
+                        <TextBox Grid.Row="2" Grid.Column="1" x:Name="AddressBox" TabIndex="1"
                                  Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                                  MaxLength="200"
-                                  h:Watermark.Text="Shop/Street, Area"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
-                                  AutomationProperties.Name="Address"/>
+                                   MaxLength="200"
+                                   h:Watermark.Text="Shop/Street, Area"
+                                   AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
+                                   AutomationProperties.Name="Address"/>
 
-                        <TextBlock x:Name="StateLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}" Text="State / UT"/>
+                        <TextBlock x:Name="StateLabel" Grid.Row="4" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}" Text="State/UT"/>
                         <ComboBox x:Name="StateCombo" Grid.Row="4" Grid.Column="1" TabIndex="2" AutomationProperties.Name="State"
                                   ItemsSource="{Binding IndianStates}" IsEditable="True" IsTextSearchEnabled="True"
                                   Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"

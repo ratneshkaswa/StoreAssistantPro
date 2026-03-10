@@ -12,6 +12,7 @@ namespace StoreAssistantPro.Modules.Authentication.Views;
 public partial class SetupWindow : Window
 {
     private SetupViewModel? _vm;
+    private bool _suppressSectionAutoFocus;
 
     private readonly FirmProfilePage _firmPage = new();
     private readonly SecuritySettingsPage _securityPage = new();
@@ -25,10 +26,17 @@ public partial class SetupWindow : Window
     private static readonly Dictionary<string, (string Section, string Control)> FieldFocusMap = new(StringComparer.Ordinal)
     {
         ["FirmName"] = ("Firm", "FirmNameBox"),
+        ["Address"] = ("Firm", "AddressBox"),
         ["State"] = ("Firm", "StateCombo"),
         ["Pincode"] = ("Firm", "PincodeBox"),
         ["Phone"] = ("Firm", "PhoneBox"),
         ["Email"] = ("Firm", "EmailBox"),
+        ["GSTIN"] = ("Firm", "StateCombo"),
+        ["GSTINChecksum"] = ("Firm", "StateCombo"),
+        ["PAN"] = ("Firm", "StateCombo"),
+        ["CompositionRate"] = ("Firm", "StateCombo"),
+        ["BackupTime"] = ("Firm", "StateCombo"),
+        ["BackupLocation"] = ("Firm", "StateCombo"),
 
         ["AdminPin"] = ("Security", "AdminPinBox"),
         ["AdminPinConfirm"] = ("Security", "AdminPinConfirmBox"),
@@ -69,7 +77,7 @@ public partial class SetupWindow : Window
             vm.Dispose();
         };
 
-        NavigateToSection("Firm");
+        NavigateToSection("Firm", focusFirstField: true);
         SyncSidebarSelection();
     }
 
@@ -90,7 +98,7 @@ public partial class SetupWindow : Window
             Dispatcher.BeginInvoke(() =>
             {
                 SyncSidebarSelection();
-                NavigateToSection(vm.SelectedSection);
+                NavigateToSection(vm.SelectedSection, focusFirstField: !_suppressSectionAutoFocus);
             });
         }
     }
@@ -108,7 +116,7 @@ public partial class SetupWindow : Window
 
         // Safe fallback: just stay on current section if key is unknown.
         if (_vm is not null)
-            NavigateToSection(_vm.SelectedSection);
+            NavigateToSection(_vm.SelectedSection, focusFirstField: true);
     }
 
     private void NavigateAndFocus(string section, string controlName)
@@ -116,16 +124,21 @@ public partial class SetupWindow : Window
         if (_vm is null)
             return;
 
-        _vm.SelectedSection = section;
-        NavigateToSection(section);
+        _suppressSectionAutoFocus = true;
+
+        if (!string.Equals(_vm.SelectedSection, section, StringComparison.Ordinal))
+            _vm.SelectedSection = section;
+
+        NavigateToSection(section, focusFirstField: false);
 
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
         {
             TryFocusControl(controlName);
+            _suppressSectionAutoFocus = false;
         });
     }
 
-    private void NavigateToSection(string section)
+    private void NavigateToSection(string section, bool focusFirstField)
     {
         Page target = section switch
         {
@@ -156,7 +169,7 @@ public partial class SetupWindow : Window
             _ => null
         };
 
-        if (!string.IsNullOrWhiteSpace(firstField))
+        if (focusFirstField && !string.IsNullOrWhiteSpace(firstField))
         {
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
             {
