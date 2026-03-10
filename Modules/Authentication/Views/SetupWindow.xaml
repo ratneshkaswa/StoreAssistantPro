@@ -23,12 +23,12 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <Border Grid.Row="0"
+                Margin="{StaticResource SetupHeaderMargin}"
                 Background="{StaticResource FluentSurface}"
                 BorderBrush="{StaticResource FluentStrokeDefault}"
                 BorderThickness="{StaticResource FluentBorderThicknessThin}"
@@ -57,7 +57,7 @@
                         <Run Text="Store Assistant "/>
                         <Run Text="Pro" Foreground="{StaticResource FluentAccentDefault}"/>
                     </TextBlock>
-                    <TextBlock Text="Complete essential setup now. You can configure advanced preferences later in Settings."
+                    <TextBlock Text="Complete essential setup now. Fields marked * are required. You can configure advanced preferences later in Settings."
                                FontFamily="{StaticResource FluentFontText}"
                                FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextSecondary}"
@@ -93,14 +93,9 @@
             </Grid.ColumnDefinitions>
 
             <!-- Sidebar -->
-            <Border Grid.Column="0"
-                    Background="{StaticResource FluentSurface}"
-                    BorderBrush="{StaticResource FluentStrokeDefault}"
-                    BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                    CornerRadius="{StaticResource FluentCornerLarge}"
-                    Padding="{StaticResource SetupSidebarCardPadding}">
+            <Border Grid.Column="0">
                 <Border.Style>
-                    <Style TargetType="Border">
+                    <Style TargetType="Border" BasedOn="{StaticResource SetupSidebarCardStyle}">
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
@@ -152,6 +147,19 @@
                                             <TextBlock Text="Firm profile" Style="{StaticResource SetupSidebarNavTitleStyle}"/>
                                             <TextBlock Text="Business name, address, and contact details"
                                                        Style="{StaticResource SetupSidebarNavSubtitleStyle}"/>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource SetupSectionSummaryLabelStyle}">
+                                                        <Setter Property="Text" Value="In progress"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsFirmSectionComplete}" Value="True">
+                                                                <Setter Property="Text" Value="Complete"/>
+                                                                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </StackPanel>
                                     </StackPanel>
                                 </DockPanel>
@@ -186,6 +194,19 @@
                                             <TextBlock Text="Security settings" Style="{StaticResource SetupSidebarNavTitleStyle}"/>
                                             <TextBlock Text="Role PINs and master security PIN"
                                                        Style="{StaticResource SetupSidebarNavSubtitleStyle}"/>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource SetupSectionSummaryLabelStyle}">
+                                                        <Setter Property="Text" Value="In progress"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSecuritySectionComplete}" Value="True">
+                                                                <Setter Property="Text" Value="Complete"/>
+                                                                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </StackPanel>
                                     </StackPanel>
                                 </DockPanel>
@@ -251,6 +272,13 @@
                                            TextAlignment="Center"
                                            TextWrapping="Wrap"
                                            Margin="{StaticResource SetupCompleteSubtitleMargin}"/>
+                                <TextBlock Text="Advanced preferences can be configured anytime from Settings after login."
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           Margin="{StaticResource SetupSectionHintMargin}"/>
                                 <TextBlock Text="{Binding RedirectCountdown}"
                                            FontSize="{StaticResource FontSizeCaption}"
                                            Foreground="{StaticResource FluentTextSecondary}"
@@ -285,29 +313,8 @@
                     <Style.Triggers>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding SuccessMessage}" Value=""/>
-                                <Condition Binding="{Binding ErrorMessage}" Value=""/>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </MultiDataTrigger>
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding SuccessMessage}" Value="{x:Null}"/>
-                                <Condition Binding="{Binding ErrorMessage}" Value="{x:Null}"/>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </MultiDataTrigger>
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding SuccessMessage}" Value="{x:Null}"/>
-                                <Condition Binding="{Binding ErrorMessage}" Value=""/>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </MultiDataTrigger>
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding SuccessMessage}" Value=""/>
-                                <Condition Binding="{Binding ErrorMessage}" Value="{x:Null}"/>
+                                <Condition Binding="{Binding HasSuccess}" Value="False"/>
+                                <Condition Binding="{Binding HasError}" Value="False"/>
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </MultiDataTrigger>
@@ -322,45 +329,46 @@
 
                 <TextBlock Grid.Row="0"
                            Text="{Binding SuccessMessage}"
+                           Style="{StaticResource SuccessMessageStyle}"
+                           Visibility="{Binding HasSuccess, Converter={StaticResource BoolToVisibility}}"
                            AutomationProperties.LiveSetting="Polite">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock" BasedOn="{StaticResource SuccessMessageStyle}">
-                            <Setter Property="Visibility" Value="Visible"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SuccessMessage}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding SuccessMessage}" Value="{x:Null}">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
                 </TextBlock>
 
                 <TextBlock Grid.Row="1"
                            Text="{Binding ErrorMessage}"
+                           Style="{StaticResource ErrorMessageStyle}"
+                           Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}"
                            AutomationProperties.LiveSetting="Assertive">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock" BasedOn="{StaticResource ErrorMessageStyle}">
-                            <Setter Property="Visibility" Value="Visible"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ErrorMessage}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
                 </TextBlock>
             </Grid>
         </Border>
 
         <!-- Footer actions -->
-        <Grid Grid.Row="6">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Grid Grid.Row="5">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Review details before finishing setup."
+                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
+                       VerticalAlignment="Center"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel"
                         Command="{Binding CancelSetupCommand}"
                         MinWidth="{StaticResource SetupPrimaryButtonWidth}"
@@ -403,7 +411,7 @@
 
         <!-- Loading overlay -->
         <Grid Grid.Row="0"
-              Grid.RowSpan="7"
+              Grid.RowSpan="6"
               Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"
               IsHitTestVisible="True"
               Focusable="True"
