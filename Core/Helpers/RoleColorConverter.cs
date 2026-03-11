@@ -22,7 +22,6 @@ public class RoleColorConverter : IValueConverter
         var key = value switch
         {
             UserType.Admin   => $"RoleAdmin{suffix}",
-            UserType.Manager => $"RoleManager{suffix}",
             UserType.User    => $"RoleUser{suffix}",
             _                => null
         };

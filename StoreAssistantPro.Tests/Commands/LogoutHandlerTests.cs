@@ -27,7 +27,7 @@ public class LogoutHandlerTests
     [Fact]
     public async Task HandleAsync_CallsSessionLogout()
     {
-        await CreateSut().HandleAsync(new LogoutCommand(UserType.Manager));
+        await CreateSut().HandleAsync(new LogoutCommand(UserType.User));
 
         _sessionService.Received(1).Logout();
     }

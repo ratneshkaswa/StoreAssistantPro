@@ -12,12 +12,12 @@ public class CompleteFirstSetupHandlerTests
     private CompleteFirstSetupHandler CreateSut() => new(_setupService);
 
     private static SetupBusinessOptions DefaultBusinessOptions => new(
-        "Regular", 1.0m, null, "Tax-Exclusive", "No Rounding", "English", false, false, null, null);
+        false, "Regular", 1.0m, null, "Tax-Exclusive", "No Rounding", "English", false, false, null, null);
 
     [Fact]
     public async Task HandleAsync_Success_ReturnsSuccess()
     {
-        var command = new CompleteFirstSetupCommand("Store", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "5678", "9012", "123456", DefaultBusinessOptions);
+        var command = new CompleteFirstSetupCommand("Store", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "9012", "123456", DefaultBusinessOptions);
 
         var result = await CreateSut().HandleAsync(command);
 
@@ -33,7 +33,7 @@ public class CompleteFirstSetupHandlerTests
             .Returns(Task.FromException(new InvalidOperationException("Already set up")));
 
         var result = await CreateSut().HandleAsync(
-            new CompleteFirstSetupCommand("S", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "5678", "9012", "123456", DefaultBusinessOptions));
+            new CompleteFirstSetupCommand("S", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "9012", "123456", DefaultBusinessOptions));
 
         Assert.False(result.Succeeded);
         Assert.Equal("Already set up", result.ErrorMessage);
@@ -44,7 +44,7 @@ public class CompleteFirstSetupHandlerTests
     {
         var command = new CompleteFirstSetupCommand(
             "Store", "", "", "", "", "", "", "", "INR", "₹",
-            1, 12, "yyyy-MM-dd", "1234", "5678", "9012", "123456", DefaultBusinessOptions);
+            1, 12, "yyyy-MM-dd", "1234", "9012", "123456", DefaultBusinessOptions);
 
         await CreateSut().HandleAsync(command);
 
@@ -58,7 +58,7 @@ public class CompleteFirstSetupHandlerTests
             "Store", "Addr", "Rajasthan", "302001", "9876543210",
             "test@test.com", "08AAAAA0000A1Z5", "ABCDE1234F",
             "INR", "Rs.", 7, 6, "d MMM yyyy",
-            "2847", "3916", "5023", "847291", DefaultBusinessOptions);
+            "2847", "5023", "847291", DefaultBusinessOptions);
 
         await CreateSut().HandleAsync(command);
 
@@ -72,7 +72,7 @@ public class CompleteFirstSetupHandlerTests
             .Returns(Task.FromException(new TimeoutException("DB timeout")));
 
         var result = await CreateSut().HandleAsync(
-            new CompleteFirstSetupCommand("S", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "5678", "9012", "123456", DefaultBusinessOptions));
+            new CompleteFirstSetupCommand("S", "", "", "", "", "", "", "", "INR", "₹", 4, 3, "dd/MM/yyyy", "1234", "9012", "123456", DefaultBusinessOptions));
 
         Assert.False(result.Succeeded);
         Assert.Equal("Setup failed. Please try again.", result.ErrorMessage);

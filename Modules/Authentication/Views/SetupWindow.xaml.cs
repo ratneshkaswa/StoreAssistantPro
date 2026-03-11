@@ -34,8 +34,6 @@ public partial class SetupWindow : Window
 
         ["AdminPin"] = ("Security", "AdminPinBox"),
         ["AdminPinConfirm"] = ("Security", "AdminPinConfirmBox"),
-        ["ManagerPin"] = ("Security", "ManagerPinBox"),
-        ["ManagerPinConfirm"] = ("Security", "ManagerPinConfirmBox"),
         ["UserPin"] = ("Security", "UserPinBox"),
         ["UserPinConfirm"] = ("Security", "UserPinConfirmBox"),
         ["MasterPin"] = ("Security", "MasterPinBox"),
@@ -159,7 +157,7 @@ public partial class SetupWindow : Window
         var firstField = section switch
         {
             "Firm" => "FirmNameBox",
-            "Security" => "MasterPinBox",
+            "Security" => "AdminPinBox",
             _ => null
         };
 

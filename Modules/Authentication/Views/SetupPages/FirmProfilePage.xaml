@@ -10,7 +10,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel>
+        <StackPanel Margin="{StaticResource SetupCardPadding}">
             <!-- Card: Business Details -->
             <controls:SetupFormCard Margin="0">
                 <StackPanel>
@@ -38,7 +38,7 @@
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="FirmNameBox" TabIndex="0"
                                  Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
                                  MaxLength="100"
-                                 h:Watermark.Text="e.g. Sharma Garments"
+                                 ToolTip="Example: Sharma Garments"
                                  AutomationProperties.LabeledBy="{Binding ElementName=FirmNameLabel}"
                                   AutomationProperties.Name="Firm Name"
                                   AutomationProperties.IsRequiredForForm="True"/>
@@ -47,7 +47,7 @@
                         <TextBox Grid.Row="2" Grid.Column="1" x:Name="AddressBox" TabIndex="1"
                                  Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
                                    MaxLength="200"
-                                   h:Watermark.Text="Shop/Street, Area"
+                                   ToolTip="Example: Shop/Street, Area"
                                    AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
                                    AutomationProperties.Name="Address"/>
 
@@ -94,7 +94,7 @@
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="PincodeBox" TabIndex="3" AutomationProperties.Name="Pincode"
                                  Text="{Binding Pincode, UpdateSourceTrigger=PropertyChanged}"
                                   Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                                 h:Watermark.Text="302001"
+                                 ToolTip="Example: 302001"
                                  AutomationProperties.LabeledBy="{Binding ElementName=PincodeLabel}"
                                  MaxLength="6"
                                  h:NumericInput.IsIntegerOnly="True"/>
@@ -109,7 +109,7 @@
                         <TextBox Grid.Row="3" Grid.Column="1" x:Name="PhoneBox" TabIndex="4"
                                  Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                                   Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                                 h:Watermark.Text="e.g. 9876543210"
+                                 ToolTip="Example: 9876543210"
                                  MaxLength="15"
                                  AutomationProperties.LabeledBy="{Binding ElementName=PhoneLabel}"
                                  AutomationProperties.Name="Phone"/>
@@ -124,7 +124,7 @@
                         <TextBox Grid.Row="6" Grid.Column="1" x:Name="EmailBox" TabIndex="5"
                                  Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
                                   MaxLength="100"
-                                 h:Watermark.Text="e.g. shop@example.com"
+                                 ToolTip="Example: shop@example.com"
                                  AutomationProperties.LabeledBy="{Binding ElementName=EmailLabel}"
                                  AutomationProperties.Name="Email"/>
                         <TextBlock Grid.Row="7" Grid.Column="1"

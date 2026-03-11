@@ -59,7 +59,6 @@ public class SetupService(
                     context.AppConfigs.Add(appConfig);
 
                 UpsertUserCredential(context, UserType.Admin, command.AdminPin);
-                UpsertUserCredential(context, UserType.Manager, command.ManagerPin);
                 UpsertUserCredential(context, UserType.User, command.UserPin);
 
                 var istNow = regionalSettings.Now;

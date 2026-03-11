@@ -17,7 +17,10 @@ public static class Win11Backdrop
         nint hwnd, int attribute, ref int value, int size);
 
     private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+    private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
     private const int DWMWCP_ROUND = 2;
+    private const int DWMSBT_NONE = 1;
 
     /// <summary>
     /// Applies DWM rounded corners to a top-level window.
@@ -33,6 +36,8 @@ public static class Win11Backdrop
         int cornerPref = DWMWCP_ROUND;
         DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE,
             ref cornerPref, sizeof(int));
+
+        ApplyLightNoBackdrop(hwnd);
     }
 
     /// <summary>
@@ -49,6 +54,21 @@ public static class Win11Backdrop
         int cornerPref = DWMWCP_ROUND;
         DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE,
             ref cornerPref, sizeof(int));
+
+        ApplyLightNoBackdrop(hwnd);
+    }
+
+    private static void ApplyLightNoBackdrop(nint hwnd)
+    {
+        // Force light title bar chrome regardless of OS dark mode.
+        int useDarkMode = 0;
+        DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+            ref useDarkMode, sizeof(int));
+
+        // Disable Mica/Acrylic/Tabbed backdrop for a flat surface.
+        int backdrop = DWMSBT_NONE;
+        DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE,
+            ref backdrop, sizeof(int));
     }
 
     private static bool IsWindows11OrLater()

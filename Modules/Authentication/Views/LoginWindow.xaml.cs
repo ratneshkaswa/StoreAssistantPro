@@ -57,7 +57,7 @@ public partial class LoginWindow : Window
     /// <summary>
     /// Routes physical keyboard input to PIN pad commands and role
     /// selection shortcuts so the entire login flow is keyboard-driven.
-    /// F1/F2/F3 select Admin/Manager/User respectively.
+    /// F1/F2 select Admin/User respectively.
     /// ESC uses layered escape: clear PIN first, then deselect role.
     /// In forgot-PIN mode, ESC cancels and Enter resets.
     /// </summary>
@@ -106,11 +106,7 @@ public partial class LoginWindow : Window
                 vm.SelectUserCommand.Execute(UserType.Admin);
                 e.Handled = true;
                 return;
-            case Key.F2 when vm.SelectUserCommand.CanExecute(UserType.Manager):
-                vm.SelectUserCommand.Execute(UserType.Manager);
-                e.Handled = true;
-                return;
-            case Key.F3 when vm.SelectUserCommand.CanExecute(UserType.User):
+            case Key.F2 when vm.SelectUserCommand.CanExecute(UserType.User):
                 vm.SelectUserCommand.Execute(UserType.User);
                 e.Handled = true;
                 return;

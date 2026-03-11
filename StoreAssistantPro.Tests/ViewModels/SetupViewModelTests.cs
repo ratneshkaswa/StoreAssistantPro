@@ -20,14 +20,11 @@ public class SetupViewModelTests
 
     private void FillValidPins(SetupViewModel sut,
         string adminPin = "2847", string adminConfirm = "2847",
-        string managerPin = "3916", string managerConfirm = "3916",
         string userPin = "5023", string userConfirm = "5023",
         string masterPin = "760918", string masterConfirm = "760918")
     {
         sut.AdminPin = adminPin;
         sut.AdminPinConfirm = adminConfirm;
-        sut.ManagerPin = managerPin;
-        sut.ManagerPinConfirm = managerConfirm;
         sut.UserPin = userPin;
         sut.UserPinConfirm = userConfirm;
         sut.MasterPin = masterPin;
@@ -66,7 +63,7 @@ public class SetupViewModelTests
         await _commandBus.Received(1).SendAsync(Arg.Is<CompleteFirstSetupCommand>(c =>
             c.FirmName == "Test Store" && c.Address == "" && c.Phone == ""
             && c.Email == "" && c.GSTIN == "" && c.CurrencyCode == "INR"
-            && c.AdminPin == "2847" && c.ManagerPin == "3916"
+            && c.AdminPin == "2847"
             && c.UserPin == "5023" && c.MasterPin == "760918"), Arg.Any<CancellationToken>());
         Assert.True(await WaitUntilAsync(() => closeResult == true));
     }
@@ -123,15 +120,13 @@ public class SetupViewModelTests
     }
 
     [Theory]
-    [InlineData("1234", "1234", "5678")]
-    [InlineData("1234", "5678", "1234")]
-    [InlineData("5678", "1234", "1234")]
-    public async Task Save_DuplicatePins_ShowsError(string admin, string manager, string user)
+    [InlineData("1234", "1234")]
+    [InlineData("5678", "5678")]
+    public async Task Save_DuplicatePins_ShowsError(string admin, string user)
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
         FillValidPins(sut, adminPin: admin, adminConfirm: admin,
-                      managerPin: manager, managerConfirm: manager,
                       userPin: user, userConfirm: user);
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -411,7 +406,7 @@ public class SetupViewModelTests
     public void RequiredFieldsProgress_AllEmpty_ShowsZero()
     {
         var sut = CreateSut();
-        Assert.Contains("0 of 6", sut.RequiredFieldsProgress);
+        Assert.Contains("0 of 5", sut.RequiredFieldsProgress);
     }
 
     [Fact]
@@ -419,7 +414,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        Assert.Contains("1 of 6", sut.RequiredFieldsProgress);
+        Assert.Contains("1 of 5", sut.RequiredFieldsProgress);
     }
 
     [Fact]
@@ -438,7 +433,7 @@ public class SetupViewModelTests
         sut.FirmName = "Store";
         sut.AdminPin = "1234";
         // No confirm
-        Assert.Contains("1 of 6", sut.RequiredFieldsProgress);
+        Assert.Contains("2 of 5", sut.RequiredFieldsProgress);
     }
 
     // -- Save format validations --
@@ -594,7 +589,6 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.AdminPin = "1234";
-        sut.ManagerPin = "5678";
         sut.UserPin = "9012";
         sut.MasterPin = "012345";
         Assert.Contains("Master contains Admin", sut.PinConflictWarning);
@@ -605,7 +599,6 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.AdminPin = "1234";
-        sut.ManagerPin = "5678";
         sut.UserPin = "9012";
         sut.MasterPin = "654789";
         Assert.Empty(sut.PinConflictWarning);
@@ -843,7 +836,6 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.FirmName = "Test";
         FillValidPins(sut, adminPin: "1234", adminConfirm: "1234",
-            managerPin: "5678", managerConfirm: "5678",
             userPin: "9012", userConfirm: "9012",
             masterPin: "123456", masterConfirm: "123456");
 
@@ -862,7 +854,6 @@ public class SetupViewModelTests
         sut.RequestClose = _ => { };
         sut.FirmName = "Test";
         FillValidPins(sut, adminPin: "1234", adminConfirm: "1234",
-            managerPin: "5678", managerConfirm: "5678",
             userPin: "9012", userConfirm: "9012",
             masterPin: "654321", masterConfirm: "654321");
 
@@ -917,7 +908,6 @@ public class SetupViewModelTests
         sut.FirmName = "Test";
         sut.UseEssentialSetupValidationOnly = false;
         FillValidPins(sut, adminPin: "2847", adminConfirm: "2847",
-            managerPin: "3916", managerConfirm: "3916",
             userPin: "5023", userConfirm: "5023",
             masterPin: "764108", masterConfirm: "764108");
         sut.GSTIN = "27AAPFU0939F1ZX";
@@ -941,7 +931,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Test Store";
-        Assert.False(sut.IsFirmSectionComplete);
+        Assert.True(sut.IsFirmSectionComplete);
     }
 
     [Fact]
@@ -982,7 +972,7 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.FirmName = "Test Store";
 
-        Assert.Equal("Add business details", sut.FirmSectionStatusText);
+        Assert.Equal("Required details complete", sut.FirmSectionStatusText);
     }
 
     [Fact]
@@ -992,7 +982,7 @@ public class SetupViewModelTests
         sut.AdminPin = "2847";
         sut.AdminPinConfirm = "2847";
 
-        Assert.Equal("1 of 5 checks", sut.SecuritySectionStatusText);
+        Assert.Equal("2 of 4 checks", sut.SecuritySectionStatusText);
     }
 
     [Fact]

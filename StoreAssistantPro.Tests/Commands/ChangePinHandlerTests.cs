@@ -17,15 +17,15 @@ public class ChangePinHandlerTests
     private ChangePinHandler CreateSut() => new(_userService, _loginService, _eventBus);
 
     [Fact]
-    public async Task HandleAsync_ManagerPin_SucceedsWithoutMasterPin()
+    public async Task HandleAsync_UserPin_SucceedsWithoutMasterPin()
     {
         var result = await CreateSut().HandleAsync(
-            new ChangePinCommand(UserType.Manager, "1234", null));
+            new ChangePinCommand(UserType.User, "1234", null));
 
         Assert.True(result.Succeeded);
-        await _userService.Received(1).ChangePinAsync(UserType.Manager, "1234", Arg.Any<CancellationToken>());
+        await _userService.Received(1).ChangePinAsync(UserType.User, "1234", Arg.Any<CancellationToken>());
         await _eventBus.Received(1).PublishAsync(Arg.Is<PinChangedEvent>(e =>
-            e.UserType == UserType.Manager));
+            e.UserType == UserType.User));
     }
 
     [Fact]

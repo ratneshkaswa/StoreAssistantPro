@@ -34,7 +34,6 @@ public sealed record CompleteFirstSetupCommand(
     int FinancialYearEndMonth,
     string DateFormat,
     string AdminPin,
-    string ManagerPin,
     string UserPin,
     string MasterPin,
     SetupBusinessOptions BusinessOptions) : ICommandRequest<Unit>;

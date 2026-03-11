@@ -42,7 +42,7 @@ public class LoginViewModelTests
     {
         var sut = CreateSut();
         sut.PinPad.AddDigitCommand.Execute("1");
-        sut.SelectUserCommand.Execute(UserType.Manager);
+        sut.SelectUserCommand.Execute(UserType.User);
 
         Assert.Empty(sut.PinPad.Pin);
         Assert.Empty(sut.ErrorMessage);
@@ -145,7 +145,7 @@ public class LoginViewModelTests
 
         var sut = CreateSut();
         sut.RequestClose = result => closeResult = result;
-        sut.SelectUserCommand.Execute(UserType.Manager);
+        sut.SelectUserCommand.Execute(UserType.User);
         sut.PinPad.AddDigitCommand.Execute("1");
         sut.PinPad.AddDigitCommand.Execute("2");
         sut.PinPad.AddDigitCommand.Execute("3");
@@ -153,7 +153,7 @@ public class LoginViewModelTests
         await Task.Delay(50);
 
         Assert.True(closeResult);
-        Assert.Equal(UserType.Manager, sut.SelectedUserType);
+        Assert.Equal(UserType.User, sut.SelectedUserType);
     }
 
     // ── Login failure ────────────────────────────────────────────────

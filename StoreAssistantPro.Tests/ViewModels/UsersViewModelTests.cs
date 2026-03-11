@@ -20,15 +20,14 @@ public class UsersViewModelTests
         var users = new List<UserCredential>
         {
             new() { Id = 1, UserType = UserType.Admin, PinHash = "hash1" },
-            new() { Id = 2, UserType = UserType.Manager, PinHash = "hash2" },
-            new() { Id = 3, UserType = UserType.User, PinHash = "hash3" }
+            new() { Id = 2, UserType = UserType.User, PinHash = "hash2" }
         };
         _userService.GetAllUsersAsync(Arg.Any<CancellationToken>()).Returns(users);
 
         var sut = CreateSut();
         await sut.LoadUsersCommand.ExecuteAsync(null);
 
-        Assert.Equal(3, sut.Users.Count);
+        Assert.Equal(2, sut.Users.Count);
     }
 
     [Fact]
@@ -46,7 +45,7 @@ public class UsersViewModelTests
     public async Task ChangePin_InvalidPin_SetsError()
     {
         var sut = CreateSut();
-        sut.SelectedUser = new UserCredential { UserType = UserType.Manager };
+        sut.SelectedUser = new UserCredential { UserType = UserType.User };
         sut.NewPin = "12";
         sut.ConfirmPin = "12";
 
@@ -59,7 +58,7 @@ public class UsersViewModelTests
     public async Task ChangePin_Mismatch_SetsError()
     {
         var sut = CreateSut();
-        sut.SelectedUser = new UserCredential { UserType = UserType.Manager };
+        sut.SelectedUser = new UserCredential { UserType = UserType.User };
         sut.NewPin = "1234";
         sut.ConfirmPin = "5678";
 
@@ -69,21 +68,21 @@ public class UsersViewModelTests
     }
 
     [Fact]
-    public async Task ChangePin_Manager_Succeeds()
+    public async Task ChangePin_User_Succeeds()
     {
         _commandBus.SendAsync(Arg.Any<ChangePinCommand>())
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();
-        sut.SelectedUser = new UserCredential { UserType = UserType.Manager };
+        sut.SelectedUser = new UserCredential { UserType = UserType.User };
         sut.NewPin = "1234";
         sut.ConfirmPin = "1234";
 
         await sut.ChangePinCommand.ExecuteAsync(null);
 
         await _commandBus.Received(1).SendAsync(Arg.Is<ChangePinCommand>(c =>
-            c.UserType == UserType.Manager && c.NewPin == "1234" && c.MasterPin == null));
-        Assert.Contains("Manager PIN changed", sut.SuccessMessage);
+            c.UserType == UserType.User && c.NewPin == "1234" && c.MasterPin == null));
+        Assert.Contains("User PIN changed", sut.SuccessMessage);
         Assert.Empty(sut.NewPin);
         Assert.Empty(sut.ConfirmPin);
     }

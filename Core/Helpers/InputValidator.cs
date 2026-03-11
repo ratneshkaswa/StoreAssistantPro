@@ -10,7 +10,7 @@
 /// </summary>
 public static class InputValidator
 {
-    /// <summary>Validate a user PIN (Admin/Manager/User): exactly 4 digits.</summary>
+    /// <summary>Validate a user PIN (Admin/User): exactly 4 digits.</summary>
     public static bool IsValidUserPin(string pin) =>
         IsDigitsOfLength(pin, 4);
 

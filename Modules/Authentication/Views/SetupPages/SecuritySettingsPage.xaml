@@ -9,7 +9,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel>
+        <StackPanel Margin="{StaticResource SetupCardPadding}">
             <controls:InfoBar Severity="Info"
                               Title="Security setup"
                               Message="Set one PIN for each role. Role PINs must stay unique, and the master PIN should only be used for recovery or high-risk actions."
@@ -25,13 +25,11 @@
                     <Grid Margin="{StaticResource SecuritySectionTopMargin}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource SecurityRoleLabelWidth}"/>
-                            <ColumnDefinition Width="{StaticResource SecurityRolePinColumnWidth}"/>
-                            <ColumnDefinition Width="{StaticResource SecurityRolePinColumnWidth}"/>
+                            <ColumnDefinition Width="Auto" MinWidth="132"/>
+                            <ColumnDefinition Width="Auto" MinWidth="132"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
                             <RowDefinition Height="Auto"/>
@@ -44,7 +42,7 @@
                         </TextBlock>
                         <PasswordBox x:Name="AdminPinBox"
                                      Grid.Row="0" Grid.Column="1"
-                                     TabIndex="8"
+                                     TabIndex="6"
                                      MaxLength="4"
                                      Width="{StaticResource SecurityRolePinBoxWidth}"
                                      HorizontalAlignment="Left"
@@ -54,67 +52,41 @@
                                      AutomationProperties.IsRequiredForForm="True"/>
                         <PasswordBox x:Name="AdminPinConfirmBox"
                                      Grid.Row="0" Grid.Column="2"
-                                     TabIndex="9"
+                                     TabIndex="7"
                                      MaxLength="4"
                                      Width="{StaticResource SecurityRolePinBoxWidth}"
                                      HorizontalAlignment="Left"
                                      PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Confirm Admin PIN"/>
+                                     AutomationProperties.Name="Confirm Admin PIN"
+                                     AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
+                                     AutomationProperties.IsRequiredForForm="True"/>
+                        <TextBlock x:Name="AdminConfirmLabel"
+                                   Grid.Row="0" Grid.Column="2"
+                                   Visibility="Collapsed"
+                                   Text="Confirm Admin PIN"/>
                         <StackPanel Grid.Row="0" Grid.Column="3"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
+                                    Orientation="Vertical"
+                                    VerticalAlignment="Center"
+                                    Margin="{StaticResource InlineLeftGap}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
                                 <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
                                 <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                             </StackPanel>
-                            <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding AdminPinWarning}" ToolTip="{Binding AdminPinWarningDetail}"/>
-                            <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding AdminConfirmHint}" Foreground="{Binding AdminConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
+                            <WrapPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding AdminPinWarning}" ToolTip="{Binding AdminPinWarningDetail}"/>
+                                <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding AdminConfirmHint}" Foreground="{Binding AdminConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
+                            </WrapPanel>
                         </StackPanel>
 
-                        <TextBlock x:Name="ManagerPinLabel" Grid.Row="2" Grid.Column="0"
-                                   Style="{StaticResource SetupFormRowLabelStyle}"
-                                   VerticalAlignment="Center">
-                            <Run Text="Manager PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-                        </TextBlock>
-                        <PasswordBox x:Name="ManagerPinBox"
-                                     Grid.Row="2" Grid.Column="1"
-                                     TabIndex="10"
-                                     MaxLength="4"
-                                     Width="{StaticResource SecurityRolePinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Manager PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=ManagerPinLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <PasswordBox x:Name="ManagerPinConfirmBox"
-                                     Grid.Row="2" Grid.Column="2"
-                                     TabIndex="11"
-                                     MaxLength="4"
-                                     Width="{StaticResource SecurityRolePinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Confirm Manager PIN"/>
-                        <StackPanel Grid.Row="2" Grid.Column="3"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding ManagerPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
-                            </StackPanel>
-                            <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding ManagerPinWarning}" ToolTip="{Binding ManagerPinWarningDetail}"/>
-                            <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding ManagerConfirmHint}" Foreground="{Binding ManagerConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
-                        </StackPanel>
-
-                        <TextBlock x:Name="UserPinLabel" Grid.Row="4" Grid.Column="0"
+                        <TextBlock x:Name="UserPinLabel" Grid.Row="2" Grid.Column="0"
                                    Style="{StaticResource SetupFormRowLabelStyle}"
                                    VerticalAlignment="Center">
                             <Run Text="User PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                         </TextBlock>
                         <PasswordBox x:Name="UserPinBox"
-                                     Grid.Row="4" Grid.Column="1"
-                                     TabIndex="12"
+                                     Grid.Row="2" Grid.Column="1"
+                                     TabIndex="8"
                                      MaxLength="4"
                                      Width="{StaticResource SecurityRolePinBoxWidth}"
                                      HorizontalAlignment="Left"
@@ -123,12 +95,12 @@
                                      AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
                                      AutomationProperties.IsRequiredForForm="True"/>
                         <TextBlock x:Name="UserConfirmLabel"
-                                   Grid.Row="4" Grid.Column="2"
+                                   Grid.Row="2" Grid.Column="2"
                                    Visibility="Collapsed"
                                    Text="Confirm User PIN"/>
                         <PasswordBox x:Name="UserPinConfirmBox"
-                                     Grid.Row="4" Grid.Column="2"
-                                     TabIndex="13"
+                                     Grid.Row="2" Grid.Column="2"
+                                     TabIndex="9"
                                      MaxLength="4"
                                      Width="{StaticResource SecurityRolePinBoxWidth}"
                                      HorizontalAlignment="Left"
@@ -136,16 +108,19 @@
                                      AutomationProperties.Name="Confirm User PIN"
                                      AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
                                      AutomationProperties.IsRequiredForForm="True"/>
-                        <StackPanel Grid.Row="4" Grid.Column="3"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
+                        <StackPanel Grid.Row="2" Grid.Column="3"
+                                    Orientation="Vertical"
+                                    VerticalAlignment="Center"
+                                    Margin="{StaticResource InlineLeftGap}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
                                 <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
                                 <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                             </StackPanel>
-                            <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding UserPinWarning}" ToolTip="{Binding UserPinWarningDetail}"/>
-                            <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding UserConfirmHint}" Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
+                            <WrapPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding UserPinWarning}" ToolTip="{Binding UserPinWarningDetail}"/>
+                                <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding UserConfirmHint}" Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
+                            </WrapPanel>
                         </StackPanel>
                     </Grid>
 
@@ -167,8 +142,8 @@
                     <Grid Margin="{StaticResource SecuritySectionTopMargin}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
-                            <ColumnDefinition Width="{StaticResource SecurityRecoveryPinColumnWidth}"/>
-                            <ColumnDefinition Width="{StaticResource SecurityRecoveryPinColumnWidth}"/>
+                            <ColumnDefinition Width="Auto" MinWidth="144"/>
+                            <ColumnDefinition Width="Auto" MinWidth="144"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -185,7 +160,7 @@
                         </TextBlock>
                         <PasswordBox x:Name="MasterPinBox"
                                      Grid.Row="0" Grid.Column="1"
-                                     TabIndex="6"
+                                     TabIndex="10"
                                      MaxLength="6"
                                      Width="{StaticResource SecurityMasterPinBoxWidth}"
                                      HorizontalAlignment="Left"
@@ -195,7 +170,7 @@
                                      AutomationProperties.IsRequiredForForm="True"/>
                         <PasswordBox x:Name="MasterPinConfirmBox"
                                      Grid.Row="0" Grid.Column="2"
-                                     TabIndex="7"
+                                     TabIndex="11"
                                      MaxLength="6"
                                      Width="{StaticResource SecurityMasterPinBoxWidth}"
                                      HorizontalAlignment="Left"
@@ -204,10 +179,13 @@
                                      AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
                                      AutomationProperties.IsRequiredForForm="True"/>
                         <StackPanel Grid.Row="0" Grid.Column="3"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding MasterPinWarning}" ToolTip="{Binding MasterPinWarningDetail}"/>
-                            <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding MasterConfirmHint}" Foreground="{Binding MasterConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
+                                    Orientation="Vertical"
+                                    VerticalAlignment="Center"
+                                    Margin="{StaticResource InlineLeftGap}">
+                            <WrapPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding MasterPinWarning}" ToolTip="{Binding MasterPinWarningDetail}"/>
+                                <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding MasterConfirmHint}" Foreground="{Binding MasterConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
+                            </WrapPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Grid.Column="1"
@@ -219,7 +197,12 @@
                             <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
                         </StackPanel>
 
-                        <TextBlock x:Name="MasterConfirmLabel" Grid.Row="3" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
+                        <TextBlock x:Name="MasterConfirmLabel"
+                                   Grid.Row="0"
+                                   Grid.Column="2"
+                                   Visibility="Collapsed"
+                                   Text="Confirm Master PIN"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
                             <Run Text="Purpose"/>
                         </TextBlock>
                         <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"

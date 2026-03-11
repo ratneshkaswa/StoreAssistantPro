@@ -29,25 +29,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        <!-- Manager button — purple pastel -->
-        <Style x:Key="ManagerButtonStyle" TargetType="Button"
-               BasedOn="{StaticResource SelectableUserButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource RoleManagerBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource RoleManagerBorder}"/>
-            <Style.Triggers>
-                <DataTrigger Value="True">
-                    <DataTrigger.Binding>
-                        <MultiBinding Converter="{StaticResource EqualityConverter}">
-                            <Binding RelativeSource="{RelativeSource Self}" Path="Tag"/>
-                            <Binding Path="SelectedUserType"/>
-                        </MultiBinding>
-                    </DataTrigger.Binding>
-                    <Setter Property="Background" Value="{StaticResource RoleManagerAccent}"/>
-                    <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource RoleManagerAccent}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
         <!-- User button — green pastel -->
         <Style x:Key="UserButtonStyle" TargetType="Button"
                BasedOn="{StaticResource SelectableUserButtonStyle}">
@@ -92,7 +73,7 @@
                                       Margin="{StaticResource ItemSpacing}"/>
 
             <!-- ── Row 1: Role buttons ────────────────────────── -->
-                <UniformGrid Grid.Row="1" Columns="3"
+                <UniformGrid Grid.Row="1" Columns="2"
                              Margin="{StaticResource ItemSpacing}">
                     <Button Margin="{StaticResource RoleButtonGap}"
                             Style="{StaticResource AdminButtonStyle}"
@@ -109,26 +90,12 @@
                         </StackPanel>
                     </Button>
                     <Button Margin="{StaticResource RoleButtonGap}"
-                            Style="{StaticResource ManagerButtonStyle}"
-                            Tag="{x:Static models:UserType.Manager}"
-                            Command="{Binding SelectUserCommand}"
-                            CommandParameter="{x:Static models:UserType.Manager}"
-                            AutomationProperties.Name="Manager login"
-                            ToolTip="F2 — Manager">
-                        <StackPanel>
-                            <TextBlock Text="&#xE77B;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                       HorizontalAlignment="Center"/>
-                            <TextBlock Text="Manager" HorizontalAlignment="Center"
-                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Margin="{StaticResource RoleButtonGap}"
                             Style="{StaticResource UserButtonStyle}"
                             Tag="{x:Static models:UserType.User}"
                             Command="{Binding SelectUserCommand}"
                             CommandParameter="{x:Static models:UserType.User}"
                             AutomationProperties.Name="User login"
-                            ToolTip="F3 — User">
+                            ToolTip="F2 — User">
                         <StackPanel>
                             <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                        HorizontalAlignment="Center"/>

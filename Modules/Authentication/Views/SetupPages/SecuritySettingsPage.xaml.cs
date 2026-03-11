@@ -21,8 +21,7 @@ public partial class SecuritySettingsPage : Page
         if (_handlersAttached) return;
         _handlersAttached = true;
 
-        PasswordBox[] pinBoxes = [AdminPinBox, AdminPinConfirmBox, ManagerPinBox, ManagerPinConfirmBox,
-                                   UserPinBox, UserPinConfirmBox, MasterPinBox, MasterPinConfirmBox];
+        PasswordBox[] pinBoxes = [AdminPinBox, AdminPinConfirmBox, UserPinBox, UserPinConfirmBox, MasterPinBox, MasterPinConfirmBox];
         foreach (var box in pinBoxes)
         {
             box.PreviewTextInput += OnPreviewNumericOnly;
@@ -38,10 +37,6 @@ public partial class SecuritySettingsPage : Page
             vm.AdminPin = AdminPinBox.Password;
         else if (sender == AdminPinConfirmBox)
             vm.AdminPinConfirm = AdminPinConfirmBox.Password;
-        else if (sender == ManagerPinBox)
-            vm.ManagerPin = ManagerPinBox.Password;
-        else if (sender == ManagerPinConfirmBox)
-            vm.ManagerPinConfirm = ManagerPinConfirmBox.Password;
         else if (sender == UserPinBox)
             vm.UserPin = UserPinBox.Password;
         else if (sender == UserPinConfirmBox)
@@ -62,9 +57,7 @@ public partial class SecuritySettingsPage : Page
         PasswordBox? next = current == MasterPinBox ? MasterPinConfirmBox
             : current == MasterPinConfirmBox ? AdminPinBox
             : current == AdminPinBox ? AdminPinConfirmBox
-            : current == AdminPinConfirmBox ? ManagerPinBox
-            : current == ManagerPinBox ? ManagerPinConfirmBox
-            : current == ManagerPinConfirmBox ? UserPinBox
+            : current == AdminPinConfirmBox ? UserPinBox
             : current == UserPinBox ? UserPinConfirmBox
             : null;
 
@@ -82,8 +75,6 @@ public partial class SecuritySettingsPage : Page
         MasterPinConfirmBox.Clear();
         AdminPinBox.Clear();
         AdminPinConfirmBox.Clear();
-        ManagerPinBox.Clear();
-        ManagerPinConfirmBox.Clear();
         UserPinBox.Clear();
         UserPinConfirmBox.Clear();
     }

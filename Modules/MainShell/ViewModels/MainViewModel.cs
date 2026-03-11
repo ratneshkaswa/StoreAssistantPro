@@ -429,7 +429,7 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "Users",
             Command = OpenUserManagementCommand,
             SortOrder = 50,
-            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.UserManagement
         });
         _quickActionService.Register(new QuickAction
@@ -449,7 +449,7 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "Vendors",
             Command = OpenVendorManagementCommand,
             SortOrder = 60,
-            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.VendorManagement
         });
         _quickActionService.Register(new QuickAction
@@ -459,7 +459,7 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "Products",
             Command = OpenProductManagementCommand,
             SortOrder = 65,
-            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.Products
         });
         _quickActionService.Register(new QuickAction
@@ -469,7 +469,7 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "Categories",
             Command = OpenCategoryManagementCommand,
             SortOrder = 66,
-            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.Products
         });
         _quickActionService.Register(new QuickAction
@@ -479,7 +479,7 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "Brands",
             Command = OpenBrandManagementCommand,
             SortOrder = 67,
-            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.Products
         });
         _quickActionService.Register(new QuickAction
@@ -534,7 +534,7 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "PurchaseOrders",
             Command = OpenPurchaseOrdersCommand,
             SortOrder = 77,
-            RequiredRoles = [UserType.Admin, UserType.Manager],
+            RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.PurchaseOrders
         });
         _quickActionService.Register(new QuickAction

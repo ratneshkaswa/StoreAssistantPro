@@ -601,7 +601,7 @@ internal sealed class ExperienceLevelAdapter
             "Update your store details — firm name, address, contact information, and GST/tax registration numbers that appear on receipts.",
             null),
         ["Users"] = (
-            "Manage who can access the system. Add new users, assign roles (Admin, Manager, User), set PINs, and deactivate accounts.",
+            "Manage who can access the system. Add new users, assign roles (Admin, User), set PINs, and deactivate accounts.",
             null),
         ["Tax"] = (
             "Set up tax categories and rates that apply to your products. Each product is linked to a tax category so the correct tax is calculated automatically.",

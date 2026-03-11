@@ -17,6 +17,7 @@
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
           KeyboardNavigation.TabNavigation="Continue"
+          h:KeyboardNav.DefaultCommand="{Binding SaveCommand}"
           h:KeyboardNav.EscapeCommand="{Binding CancelSetupCommand}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -42,16 +43,14 @@
 
                 <StackPanel Grid.Column="0">
                     <DockPanel LastChildFill="False">
-                        <Border Background="{StaticResource FluentInfoBackground}"
-                                CornerRadius="{StaticResource FluentCornerMedium}"
-                                Padding="{StaticResource SetupEyebrowPadding}"
-                                Margin="{StaticResource SetupEyebrowMargin}"
-                                DockPanel.Dock="Left">
-                            <TextBlock Text="First-run setup"
-                                       FontSize="{StaticResource FontSizeCaption}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentAccentDefault}"/>
-                        </Border>
+                        <Image Source="pack://application:,,,/Assets/logo-256.png"
+                               Width="{StaticResource SetupLogoSize}"
+                               Height="{StaticResource SetupLogoSize}"
+                               Stretch="Uniform"
+                               Margin="{StaticResource SetupLogoMargin}"
+                               VerticalAlignment="Center"
+                               AutomationProperties.Name="Store Assistant Pro logo"
+                               DockPanel.Dock="Left"/>
                     </DockPanel>
 
                     <TextBlock FontFamily="{StaticResource FluentFontDisplay}"
@@ -62,7 +61,7 @@
                         <Run Text="Store Assistant Pro" Foreground="{StaticResource FluentAccentDefault}"/>
                     </TextBlock>
 
-                    <TextBlock Text="Essential business and security details only. Advanced settings stay out of the way until later."
+                    <TextBlock Text="Business and security details only. Advanced settings stay out of the way until later."
                                FontFamily="{StaticResource FluentFontText}"
                                FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource FluentTextSecondary}"
@@ -78,10 +77,7 @@
                         Padding="{StaticResource SetupProgressBadgePadding}"
                         VerticalAlignment="Top"
                         Margin="{StaticResource SetupProgressCardMargin}">
-                    <StackPanel MinWidth="220">
-                        <TextBlock Text="Essential setup"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                    <StackPanel MinWidth="180" MaxWidth="260">
                         <TextBlock Text="{Binding RequiredFieldsProgress}"
                                    FontSize="{StaticResource FontSizeBody}"
                                    FontWeight="SemiBold"
@@ -99,7 +95,7 @@
         </Border>
 
         <Border Grid.Row="2"
-                Background="{StaticResource FluentSurface}"
+                Background="{StaticResource FluentBackgroundSecondary}"
                 BorderBrush="{StaticResource FluentStrokeDefault}"
                 BorderThickness="{StaticResource FluentBorderThicknessThin}"
                 CornerRadius="{StaticResource FluentCornerLarge}">
@@ -112,7 +108,7 @@
 
                 <Border Grid.Row="0"
                         Padding="{StaticResource SetupStepperPadding}"
-                        Background="{StaticResource FluentBackgroundSecondary}"
+                        Background="Transparent"
                         CornerRadius="{StaticResource FluentCornerLarge}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -243,7 +239,7 @@
 
                 <Grid Grid.Row="2">
                     <Frame x:Name="ContentFrame"
-                           Margin="0"
+                           Margin="{StaticResource SetupCardPadding}"
                            NavigationUIVisibility="Hidden"
                            JournalOwnership="OwnsJournal"
                            Focusable="False">
@@ -353,17 +349,19 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0"
-                        Orientation="Horizontal"
                         VerticalAlignment="Center">
-                <TextBlock Text="Required: business name and all security PINs."
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextSecondary}"/>
-                <TextBlock Text=" Optional details can be added now or later."
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextTertiary}"/>
+                <TextBlock FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentTextSecondary}"
+                           TextWrapping="Wrap">
+                    <Run Text="Required: business name and all security PINs. "/>
+                    <Run Text="Optional details can be added now or later."
+                         Foreground="{StaticResource FluentTextTertiary}"/>
+                </TextBlock>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <WrapPanel Grid.Column="1"
+                       Orientation="Horizontal"
+                       HorizontalAlignment="Right">
                 <Button Content="Cancel"
                         Command="{Binding CancelSetupCommand}"
                         MinWidth="{StaticResource SetupPrimaryButtonWidth}"
@@ -401,7 +399,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-            </StackPanel>
+            </WrapPanel>
         </Grid>
 
         <controls:LoadingOverlay Grid.Row="0"

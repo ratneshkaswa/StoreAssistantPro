@@ -315,27 +315,6 @@ public partial class SetupViewModel : BaseViewModel
     partial void OnAdminPinConfirmChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ManagerPinWarning))]
-    [NotifyPropertyChangedFor(nameof(ManagerPinWarningDetail))]
-    [NotifyPropertyChangedFor(nameof(ManagerPinStrength))]
-    [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
-    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
-    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
-    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
-    public partial string ManagerPin { get; set; } = string.Empty;
-
-    partial void OnManagerPinChanged(string value) => ClearErrorOnEdit();
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ManagerConfirmHint))]
-    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
-    [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
-    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
-    public partial string ManagerPinConfirm { get; set; } = string.Empty;
-
-    partial void OnManagerPinConfirmChanged(string value) => ClearErrorOnEdit();
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UserPinWarning))]
     [NotifyPropertyChangedFor(nameof(UserPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(UserPinStrength))]
@@ -382,8 +361,6 @@ public partial class SetupViewModel : BaseViewModel
 
     public string AdminPinWarning => GetPinWarning(AdminPin);
     public string AdminPinWarningDetail => GetPinWarningDetail(AdminPin);
-    public string ManagerPinWarning => GetPinWarning(ManagerPin);
-    public string ManagerPinWarningDetail => GetPinWarningDetail(ManagerPin);
     public string UserPinWarning => GetPinWarning(UserPin);
     public string UserPinWarningDetail => GetPinWarningDetail(UserPin);
     public string MasterPinWarning => GetMasterPinWarning(MasterPin);
@@ -391,13 +368,11 @@ public partial class SetupViewModel : BaseViewModel
 
     // S5: PIN strength (0-3: empty, weak, fair, strong)
     public int AdminPinStrength => GetPinStrength(AdminPin);
-    public int ManagerPinStrength => GetPinStrength(ManagerPin);
     public int UserPinStrength => GetPinStrength(UserPin);
     public int MasterPinStrength => GetMasterPinStrength(MasterPin);
 
     // Live confirm mismatch hints
     public string AdminConfirmHint => GetConfirmHint(AdminPin, AdminPinConfirm, 4);
-    public string ManagerConfirmHint => GetConfirmHint(ManagerPin, ManagerPinConfirm, 4);
     public string UserConfirmHint => GetConfirmHint(UserPin, UserPinConfirm, 4);
     public string MasterConfirmHint => GetConfirmHint(MasterPin, MasterPinConfirm, 6);
 
@@ -408,7 +383,6 @@ public partial class SetupViewModel : BaseViewModel
 
     public bool IsFirmSectionComplete =>
         !string.IsNullOrWhiteSpace(FirmName)
-        && HasAnySupportingFirmDetail()
         && HasNoVisibleFirmDetailErrors();
 
     public string FirmSectionStatusText
@@ -418,32 +392,30 @@ public partial class SetupViewModel : BaseViewModel
             if (string.IsNullOrWhiteSpace(FirmName))
                 return "Required name missing";
 
-            if (!HasAnySupportingFirmDetail())
-                return "Add business details";
-
             if (!HasNoVisibleFirmDetailErrors())
                 return "Review highlighted details";
 
-            return "Ready";
+            return HasAnySupportingFirmDetail()
+                ? "Ready"
+                : "Required details complete";
         }
     }
 
     public bool IsSecuritySectionComplete =>
         InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm &&
-        InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm &&
         InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm &&
         InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm &&
-        InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin) &&
-        !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin);
+        InputValidator.AreAllDistinct(AdminPin, UserPin) &&
+        !MasterPinContainsRolePin(MasterPin, AdminPin, UserPin);
 
     public string SecuritySectionStatusText =>
         IsSecuritySectionComplete
             ? "Ready"
-            : $"{GetCompletedSecurityChecks()} of 5 checks";
+            : $"{GetCompletedSecurityChecks()} of 4 checks";
 
     // -- Required fields progress --
 
-    private const int RequiredChecksTotal = 6;
+    private const int RequiredChecksTotal = 5;
 
     private int GetCompletedRequiredChecks()
     {
@@ -451,11 +423,10 @@ public partial class SetupViewModel : BaseViewModel
 
         if (!string.IsNullOrWhiteSpace(FirmName)) done++;
         if (InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm) done++;
-        if (InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm) done++;
         if (InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm) done++;
         if (InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm) done++;
-        if (InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin)
-            && !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin)) done++;
+        if (InputValidator.AreAllDistinct(AdminPin, UserPin)
+            && !MasterPinContainsRolePin(MasterPin, AdminPin, UserPin)) done++;
 
         return done;
     }
@@ -465,11 +436,10 @@ public partial class SetupViewModel : BaseViewModel
         var done = 0;
 
         if (InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm) done++;
-        if (InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm) done++;
         if (InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm) done++;
         if (InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm) done++;
-        if (InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin)
-            && !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin)) done++;
+        if (InputValidator.AreAllDistinct(AdminPin, UserPin)
+            && !MasterPinContainsRolePin(MasterPin, AdminPin, UserPin)) done++;
 
         return done;
     }
@@ -497,7 +467,7 @@ public partial class SetupViewModel : BaseViewModel
         get
         {
             if (IsReadyForSave)
-                return "All essential setup checks are complete.";
+                return "All setup checks are complete.";
 
             var setupChecksMessage = RequiredFieldsProgress.StartsWith("\u2713", StringComparison.Ordinal)
                 ? $"{RequiredChecksTotal} of {RequiredChecksTotal} setup checks complete"
@@ -556,14 +526,12 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(InputValidator.IsRequired(FirmName), "Firm name is required.", "FirmName")
             .Rule(InputValidator.IsValidUserPin(AdminPin), "Admin PIN must be exactly 4 digits.", "AdminPin")
             .Rule(InputValidator.AreEqual(AdminPin, AdminPinConfirm), "Admin PIN confirmation does not match.", "AdminPinConfirm")
-            .Rule(InputValidator.IsValidUserPin(ManagerPin), "Manager PIN must be exactly 4 digits.", "ManagerPin")
-            .Rule(InputValidator.AreEqual(ManagerPin, ManagerPinConfirm), "Manager PIN confirmation does not match.", "ManagerPinConfirm")
             .Rule(InputValidator.IsValidUserPin(UserPin), "User PIN must be exactly 4 digits.", "UserPin")
             .Rule(InputValidator.AreEqual(UserPin, UserPinConfirm), "User PIN confirmation does not match.", "UserPinConfirm")
-            .Rule(InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin), "Each role must have a unique PIN.", "PinConflict")
+            .Rule(InputValidator.AreAllDistinct(AdminPin, UserPin), "Each role must have a unique PIN.", "PinConflict")
             .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master PIN must be exactly 6 digits.", "MasterPin")
             .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master PIN confirmation does not match.", "MasterPinConfirm")
-            .Rule(!MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin), "Master PIN must not contain any role PIN.", "MasterPinContains")
+            .Rule(!MasterPinContainsRolePin(MasterPin, AdminPin, UserPin), "Master PIN must not contain any role PIN.", "MasterPinContains")
             .Rule(!ShouldValidateAdvancedSetupFields || !IsCompositionScheme || IsValidCompositionRate(CompositionRate), "Composition rate must be a valid number (0-100).", "CompositionRate")
             .Rule(!ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.", "GSTIN")
             .Rule(!ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.", "GSTINChecksum")
@@ -592,7 +560,7 @@ public partial class SetupViewModel : BaseViewModel
             Phone.Trim(), Email.Trim(), GSTIN.Trim().ToUpperInvariant(),
             PAN.Trim().ToUpperInvariant(), CurrencyCode,
             SelectedCurrencySymbol, fyStartMonth, fyEndMonth, SelectedDateFormat,
-            AdminPin, ManagerPin, UserPin, MasterPin,
+            AdminPin, UserPin, MasterPin,
             new SetupBusinessOptions(
                 !UseEssentialSetupValidationOnly,
                 SelectedGstRegistrationType,
@@ -677,8 +645,6 @@ public partial class SetupViewModel : BaseViewModel
     {
         AdminPin = string.Empty;
         AdminPinConfirm = string.Empty;
-        ManagerPin = string.Empty;
-        ManagerPinConfirm = string.Empty;
         UserPin = string.Empty;
         UserPinConfirm = string.Empty;
         MasterPin = string.Empty;
@@ -732,20 +698,14 @@ public partial class SetupViewModel : BaseViewModel
     {
         var conflicts = new List<string>();
 
-        if (AdminPin.Length == 4 && ManagerPin.Length == 4 && AdminPin == ManagerPin)
-            conflicts.Add("Admin = Manager");
         if (AdminPin.Length == 4 && UserPin.Length == 4 && AdminPin == UserPin)
             conflicts.Add("Admin = User");
-        if (ManagerPin.Length == 4 && UserPin.Length == 4 && ManagerPin == UserPin)
-            conflicts.Add("Manager = User");
 
         // Master PIN must also be unique from role PINs
         if (MasterPin.Length == 6)
         {
             if (AdminPin.Length == 4 && MasterPin.Contains(AdminPin))
                 conflicts.Add("Master contains Admin");
-            if (ManagerPin.Length == 4 && MasterPin.Contains(ManagerPin))
-                conflicts.Add("Master contains Manager");
             if (UserPin.Length == 4 && MasterPin.Contains(UserPin))
                 conflicts.Add("Master contains User");
         }
