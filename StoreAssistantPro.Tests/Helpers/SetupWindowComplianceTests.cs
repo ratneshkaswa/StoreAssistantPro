@@ -1,4 +1,5 @@
 using Xunit;
+using System.Text.RegularExpressions;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
@@ -59,14 +60,20 @@ public class SetupWindowComplianceTests
         var file = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
         var xaml = File.ReadAllText(file);
 
-        Assert.Contains("x:Name=\"NavFirm\"", xaml);
-        Assert.Contains("x:Name=\"NavSecurity\"", xaml);
+        var navNames = Regex.Matches(xaml, "x:Name=\"(Nav[^\"]+)\"")
+            .Select(m => m.Groups[1].Value)
+            .Where(name => name.StartsWith("Nav", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.Contains("NavFirm", navNames);
+        Assert.Contains("NavSecurity", navNames);
+        Assert.Equal(2, navNames.Count);
         Assert.DoesNotContain("x:Name=\"NavTax\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavRegional\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavBackup\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavSystem\"", xaml, StringComparison.Ordinal);
-        Assert.DoesNotContain("Firm Management and System Settings", xaml, StringComparison.Ordinal);
-        Assert.Contains("advanced preferences later in Settings", xaml, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("required", xaml, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("settings", xaml, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

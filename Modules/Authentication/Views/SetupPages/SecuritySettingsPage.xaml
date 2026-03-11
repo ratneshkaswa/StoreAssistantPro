@@ -10,14 +10,12 @@
                   Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
         <StackPanel>
             <!-- Card: Master PIN -->
-            <Border Style="{StaticResource SetupFlatCardStyle}" Margin="0">
-                <StackPanel>
-                    <Border Background="{StaticResource FluentInfoBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentTextPrimary}" FontSize="{StaticResource FontSizeBody}"
-                                   ToolTip="Used to recover or change role PINs if forgotten."><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE72E;"/><Run Text=" Master PIN (6 digits)"/></TextBlock>
-                    </Border>
-                    <Grid Margin="{StaticResource StepContentTopSpacing}">
+            <HeaderedContentControl Style="{StaticResource SetupRolePinCardStyle}"
+                                    Header=" Master PIN (6 digits)"
+                                    Tag="&#xE72E;"
+                                    ToolTip="Used to recover or change role PINs if forgotten."
+                                    Margin="0">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
                             <ColumnDefinition Width="*"/>
@@ -58,17 +56,13 @@
                                    Text="Master PIN is used for high-risk actions and PIN recovery."
                                    Style="{StaticResource SetupSectionHintTextStyle}"/>
                     </Grid>
-                </StackPanel>
-            </Border>
+            </HeaderedContentControl>
 
             <!-- Card: Admin PIN -->
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <StackPanel>
-                    <Border Background="{StaticResource FluentInfoBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentTextPrimary}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE83D;"/><Run Text=" Admin PIN (4 digits)"/></TextBlock>
-                    </Border>
-                    <Grid Margin="{StaticResource StepContentTopSpacing}">
+            <HeaderedContentControl Style="{StaticResource SetupRolePinCardStyle}"
+                                    Header=" Admin PIN (4 digits)"
+                                    Tag="&#xE83D;">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
                             <ColumnDefinition Width="*"/>
@@ -104,17 +98,13 @@
                             <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding AdminConfirmHint}" Foreground="{Binding AdminConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
                     </Grid>
-                </StackPanel>
-            </Border>
+            </HeaderedContentControl>
 
             <!-- Card: Manager PIN -->
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <StackPanel>
-                    <Border Background="{StaticResource FluentInfoBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentTextPrimary}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE77B;"/><Run Text=" Manager PIN (4 digits)"/></TextBlock>
-                    </Border>
-                    <Grid Margin="{StaticResource StepContentTopSpacing}">
+            <HeaderedContentControl Style="{StaticResource SetupRolePinCardStyle}"
+                                    Header=" Manager PIN (4 digits)"
+                                    Tag="&#xE77B;">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
                             <ColumnDefinition Width="*"/>
@@ -150,17 +140,13 @@
                             <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding ManagerConfirmHint}" Foreground="{Binding ManagerConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
                     </Grid>
-                </StackPanel>
-            </Border>
+            </HeaderedContentControl>
 
             <!-- Card: User PIN -->
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <StackPanel>
-                    <Border Background="{StaticResource FluentInfoBackground}"
-                            CornerRadius="{StaticResource FluentCornerSmall}" Padding="{StaticResource RoleSectionPadding}" Margin="{StaticResource RoleSectionMargin}">
-                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentTextPrimary}" FontSize="{StaticResource FontSizeBody}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7EE;"/><Run Text=" User PIN (4 digits)"/></TextBlock>
-                    </Border>
-                    <Grid Margin="{StaticResource StepContentTopSpacing}">
+            <HeaderedContentControl Style="{StaticResource SetupRolePinCardStyle}"
+                                    Header=" User PIN (4 digits)"
+                                    Tag="&#xE7EE;">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
                             <ColumnDefinition Width="*"/>
@@ -196,8 +182,7 @@
                             <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding UserConfirmHint}" Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                         </DockPanel>
                     </Grid>
-                </StackPanel>
-            </Border>
+            </HeaderedContentControl>
 
             <!-- Pin conflict warning -->
             <TextBlock Text="{Binding PinConflictWarning}"

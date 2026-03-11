@@ -372,6 +372,33 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="SetupRolePinCardStyle" TargetType="HeaderedContentControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="HeaderedContentControl">
+                    <Border Style="{StaticResource SetupFlatCardStyle}">
+                        <StackPanel>
+                            <Border Background="{StaticResource FluentInfoBackground}"
+                                    CornerRadius="{StaticResource FluentCornerSmall}"
+                                    Padding="{StaticResource RoleSectionPadding}"
+                                    Margin="{StaticResource RoleSectionMargin}"
+                                    ToolTip="{TemplateBinding ToolTip}">
+                                <TextBlock FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextPrimary}"
+                                           FontSize="{StaticResource FontSizeBody}">
+                                    <Run FontFamily="{StaticResource FluentIconFont}" Text="{TemplateBinding Tag}"/>
+                                    <Run Text="{TemplateBinding Header}"/>
+                                </TextBlock>
+                            </Border>
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              Margin="{StaticResource StepContentTopSpacing}"/>
+                        </StackPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- SetupFormCard -->
     <Style TargetType="{x:Type controls:SetupFormCard}">
         <Setter Property="Template">

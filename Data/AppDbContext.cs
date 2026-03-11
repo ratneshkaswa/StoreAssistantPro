@@ -54,6 +54,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(c => c.UserType).IsUnique();
         });
 
+        modelBuilder.Entity<AppConfig>(entity =>
+        {
+            // Enforces exactly one logical AppConfig row.
+            entity.Property(c => c.SingletonKey).HasDefaultValue(1);
+            entity.HasIndex(c => c.SingletonKey).IsUnique();
+        });
+
         modelBuilder.Entity<Product>(entity =>
         {
             entity.Property(p => p.SalePrice).HasColumnType("decimal(18,2)");

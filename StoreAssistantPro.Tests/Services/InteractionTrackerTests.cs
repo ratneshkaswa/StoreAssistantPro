@@ -386,7 +386,7 @@ public class InteractionTrackerTests : IDisposable
     // ═══════════════════════════════════════════════════════════════
 
     [Fact]
-    public void ConcurrentRecords_DoNotCorruptState()
+    public async Task ConcurrentRecords_DoNotCorruptState()
     {
         // Simulate concurrent input from multiple threads
         var tasks = new Task[4];
@@ -407,7 +407,7 @@ public class InteractionTrackerTests : IDisposable
             });
         }
 
-        Task.WaitAll(tasks);
+        await Task.WhenAll(tasks);
         _sut.Tick();
 
         // No corruption — snapshot computes without exception

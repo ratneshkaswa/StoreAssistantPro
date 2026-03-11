@@ -24,15 +24,13 @@ public class SetupService(
         {
             await transactionHelper.ExecuteInTransactionAsync(async context =>
             {
-                var appConfigs = await context.AppConfigs
-                    .OrderBy(config => config.Id)
-                    .ToListAsync(ct)
+                var appConfig = await context.AppConfigs
+                    .SingleOrDefaultAsync(ct)
                     .ConfigureAwait(false);
 
-                if (appConfigs.Any(config => config.IsInitialized))
+                if (appConfig?.IsInitialized == true)
                     throw new InvalidOperationException("Application has already been initialized.");
 
-                var appConfig = appConfigs.FirstOrDefault();
                 appConfig ??= new AppConfig();
                 appConfig.FirmName = command.FirmName;
                 appConfig.Address = string.IsNullOrWhiteSpace(command.Address) ? string.Empty : command.Address;

@@ -42,24 +42,22 @@ public class StartupService(
     public async Task<bool> IsAppInitializedAsync(CancellationToken ct = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.AppConfigs
+        var config = await context.AppConfigs
             .AsNoTracking()
-            .AnyAsync(config => config.IsInitialized, ct)
+            .SingleOrDefaultAsync(ct)
             .ConfigureAwait(false);
+        return config?.IsInitialized == true;
     }
 
     public async Task LoadFirmInfoAsync(CancellationToken ct = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        var firmName = await context.AppConfigs
+        var config = await context.AppConfigs
             .AsNoTracking()
-            .OrderByDescending(config => config.IsInitialized)
-            .ThenBy(config => config.Id)
-            .Select(config => config.FirmName)
-            .FirstOrDefaultAsync(ct)
+            .SingleOrDefaultAsync(ct)
             .ConfigureAwait(false);
 
-        appState.SetFirmInfo(firmName ?? string.Empty);
+        appState.SetFirmInfo(config?.FirmName ?? string.Empty);
     }
 
     public void LoadFeatureFlags()

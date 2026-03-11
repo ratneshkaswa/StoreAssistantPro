@@ -5,6 +5,7 @@ namespace StoreAssistantPro.Models;
 public class AppConfig
 {
     public int Id { get; set; }
+    public int SingletonKey { get; set; } = 1;
 
     [Required, MaxLength(100)]
     public string FirmName { get; set; } = string.Empty;
