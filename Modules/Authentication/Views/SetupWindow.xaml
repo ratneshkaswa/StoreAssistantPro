@@ -391,14 +391,21 @@
 
                 <Button Content="Save and finish setup"
                         Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                         MinWidth="{StaticResource SetupPrimaryButtonWidth}"
                         MinHeight="{StaticResource SetupButtonHeight}"
                         ToolTip="{Binding RequiredFieldsProgress}"
                         AutomationProperties.Name="Save setup and continue">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                            <Setter Property="IsEnabled" Value="False"/>
                             <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsBusy}" Value="False"/>
+                                        <Condition Binding="{Binding RequiredFieldsProgress}" Value="✓ Ready"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                </MultiDataTrigger>
                                 <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
