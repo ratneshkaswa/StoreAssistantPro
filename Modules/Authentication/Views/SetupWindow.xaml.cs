@@ -49,7 +49,6 @@ public partial class SetupWindow : Window
         InitializeComponent();
 
         DataContext = _vm = vm;
-        vm.UseEssentialSetupValidationOnly = true;
         _dialogService = dialogService;
 
         vm.RequestClose = result => DialogResult = result;
@@ -197,7 +196,7 @@ public partial class SetupWindow : Window
         }
     }
 
-    private void OnSidebarSectionClick(object sender, RoutedEventArgs e)
+    private void OnSidebarSectionChecked(object sender, RoutedEventArgs e)
     {
         if (sender is not RadioButton rb || rb.Tag is not string sectionKey || _vm is null)
             return;
@@ -227,8 +226,15 @@ public partial class SetupWindow : Window
     /// </summary>
     private void OnWindowClosing(object? sender, CancelEventArgs e)
     {
-        if (_vm is null || _vm.IsSetupComplete || DialogResult == true)
+        if (_vm is null)
             return;
+
+        if (_vm.IsSetupComplete || DialogResult == true)
+        {
+            _vm.ClearSensitivePins();
+            _securityPage.ClearAllPinBoxes();
+            return;
+        }
 
         if (_vm.IsBusy)
         {

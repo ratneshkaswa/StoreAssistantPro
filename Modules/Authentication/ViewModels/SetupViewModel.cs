@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -78,6 +79,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
+    [NotifyPropertyChangedFor(nameof(StateValidationHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string State { get; set; } = string.Empty;
 
@@ -105,6 +107,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(GstinPanCrossHint))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCode))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
+    [NotifyPropertyChangedFor(nameof(StateValidationHint))]
     [NotifyPropertyChangedFor(nameof(IsTaxSectionComplete))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     public partial string GSTIN { get; set; } = string.Empty;
@@ -246,6 +249,24 @@ public partial class SetupViewModel : BaseViewModel
         }
     }
 
+    public string StateValidationHint
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(State))
+                return string.Empty;
+
+            var trimmed = State.Trim();
+            if (!IndianStateCodeByName.ContainsKey(trimmed))
+                return "Select a valid Indian state from the list";
+
+            if (!IsGstinStateConsistent(GSTIN, trimmed))
+                return "GSTIN state code does not match selected state";
+
+            return "\u2713";
+        }
+    }
+
     public string GstinPanCrossHint
     {
         get
@@ -378,25 +399,36 @@ public partial class SetupViewModel : BaseViewModel
 
     // -- Required fields progress --
 
+    private const int RequiredChecksTotal = 6;
+
+    private int GetCompletedRequiredChecks()
+    {
+        var done = 0;
+
+        if (!string.IsNullOrWhiteSpace(FirmName)) done++;
+        if (InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm) done++;
+        if (InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm) done++;
+        if (InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm) done++;
+        if (InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm) done++;
+        if (InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin)
+            && !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin)) done++;
+
+        return done;
+    }
+
+    public bool IsReadyForSave =>
+        GetCompletedRequiredChecks() == RequiredChecksTotal
+        && HasNoOptionalValidationErrors();
+
     public string RequiredFieldsProgress
     {
         get
         {
-            var done = 0;
-            const int total = 6;
+            var done = GetCompletedRequiredChecks();
+            if (done < RequiredChecksTotal)
+                return $"{done} of {RequiredChecksTotal} required checks complete";
 
-            if (!string.IsNullOrWhiteSpace(FirmName)) done++;
-            if (InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm) done++;
-            if (InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm) done++;
-            if (InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm) done++;
-            if (InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm) done++;
-            if (InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin)
-                && !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin)) done++;
-
-            if (done < total)
-                return $"{done} of {total} required checks complete";
-
-            return HasNoOptionalValidationErrors()
+            return IsReadyForSave
                 ? "\u2713 Ready"
                 : "6 of 6 required checks complete - review optional field errors";
         }
@@ -426,11 +458,18 @@ public partial class SetupViewModel : BaseViewModel
     {
         _commandBus = commandBus;
         _regionalSettings = regionalSettings;
+        PropertyChanged += OnSetupPropertyChanged;
     }
 
     private readonly ICommandBus _commandBus;
     private readonly IRegionalSettingsService _regionalSettings;
     private CancellationTokenSource? _redirectCts;
+
+    private void OnSetupPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(RequiredFieldsProgress))
+            OnPropertyChanged(nameof(IsReadyForSave));
+    }
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>
@@ -500,6 +539,12 @@ public partial class SetupViewModel : BaseViewModel
     [RelayCommand]
     private void CancelSetup()
     {
+        if (IsSetupComplete)
+        {
+            GoToLogin();
+            return;
+        }
+
         CancelRedirectCountdown();
         RequestClose?.Invoke(false);
     }
@@ -712,6 +757,7 @@ public partial class SetupViewModel : BaseViewModel
 
     public override void Dispose()
     {
+        PropertyChanged -= OnSetupPropertyChanged;
         CancelRedirectCountdown();
         RequestClose = null;
         base.Dispose();

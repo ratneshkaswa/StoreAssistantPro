@@ -14,7 +14,11 @@ public class AuthenticationFlow(
     public bool RunFirstTimeSetup()
     {
         var window = serviceProvider.GetRequiredService<SetupWindow>();
-        return window.ShowDialog() == true;
+        var dialogResult = window.ShowDialog();
+        if (dialogResult == true)
+            return true;
+
+        return (window.DataContext as SetupViewModel)?.IsSetupComplete == true;
     }
 
     public bool TryLogin(out UserType userType)
