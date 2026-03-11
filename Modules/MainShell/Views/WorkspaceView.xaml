@@ -5,102 +5,143 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="960"
+             d:DesignHeight="600"
+             d:DesignWidth="960"
              Loaded="OnLoaded">
     <Grid Margin="{StaticResource PagePadding}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Border Background="{StaticResource FluentSurfaceElevated}"
+                BorderBrush="{StaticResource FluentSurfaceStroke}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource FluentCornerXLarge}"
+                Padding="{StaticResource CardPadding}"
+                Margin="{StaticResource SectionSpacing}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <!-- Row 0: Title bar -->
-        <DockPanel Margin="{StaticResource SectionSpacing}">
-            <TextBlock Text="Home" Style="{StaticResource PageTitleStyle}" Margin="0"
-                       DockPanel.Dock="Left"/>
-        </DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- Row 1: Welcome hero -->
-        <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-              MaxWidth="520">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <!-- Hero icon -->
-            <TextBlock Grid.Row="0" Text="&#xE719;" FontFamily="{StaticResource FluentIconFont}"
-                       FontSize="{StaticResource FontSizeIconHero}"
-                       HorizontalAlignment="Center"
-                       Margin="{StaticResource CompactItemSpacing}"/>
-
-            <!-- Welcome text -->
-            <StackPanel Grid.Row="1" HorizontalAlignment="Center"
-                        Margin="{StaticResource CompactItemSpacing}">
-                <TextBlock Text="Welcome to Store Assistant Pro"
-                           Style="{StaticResource HeroTitleStyle}"/>
-                <TextBlock Text="Your enterprise retail management workspace"
-                           Style="{StaticResource HeroSubtitleStyle}"/>
-            </StackPanel>
-
-            <!-- Quick-start cards -->
-            <UniformGrid Grid.Row="2" Columns="3"
-                         Margin="{StaticResource HeroSectionTopSpacing}">
-                <!-- Firm card -->
-                <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
-                        Cursor="Hand"
-                        Visibility="{Binding DataContext.IsFirmManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
-                    <Border.InputBindings>
-                        <MouseBinding Gesture="LeftClick"
-                                      Command="{Binding DataContext.OpenFirmManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                    </Border.InputBindings>
-                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
-                        <TextBlock Text="&#xE731;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="Firm" Style="{StaticResource CardItemTitleStyle}"/>
-                        <TextBlock Text="Manage details" Style="{StaticResource CardItemSubtitleStyle}"/>
+                    <StackPanel>
+                        <TextBlock Text="Home"
+                                   Style="{StaticResource PageTitleStyle}"
+                                   Margin="0"/>
+                        <TextBlock Text="A lighter, calmer workspace for daily retail operations."
+                                   Style="{StaticResource HeroSubtitleStyle}"
+                                   HorizontalAlignment="Left"
+                                   Margin="{StaticResource SubtitleGap}"/>
+                        <TextBlock Text="Use the command bar above for frequent tasks, or start with one of the core work areas below."
+                                   Style="{StaticResource HintTextStyle}"
+                                   Margin="{StaticResource HeroHintSpacing}"/>
                     </StackPanel>
-                </Border>
 
-                <!-- Users card -->
-                <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
-                        Cursor="Hand"
-                        Visibility="{Binding DataContext.IsUserManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
-                    <Border.InputBindings>
-                        <MouseBinding Gesture="LeftClick"
-                                      Command="{Binding DataContext.OpenUserManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                    </Border.InputBindings>
-                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
-                        <TextBlock Text="&#xE716;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="Users" Style="{StaticResource CardItemTitleStyle}"/>
-                        <TextBlock Text="Manage team" Style="{StaticResource CardItemSubtitleStyle}"/>
-                    </StackPanel>
-                </Border>
+                    <Border Grid.Column="1"
+                            Background="{StaticResource FluentSurface}"
+                            BorderBrush="{StaticResource FluentSurfaceStroke}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource FluentCornerLarge}"
+                            Padding="{StaticResource CardPadding}">
+                        <StackPanel>
+                            <TextBlock Text="Session Overview"
+                                       Style="{StaticResource SectionHeaderStyle}"/>
+                            <TextBlock Text="{Binding DataContext.AppState.FirmName, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUser, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Style="{StaticResource HintTextStyle}"
+                                       Margin="{StaticResource HeroHintSpacing}"/>
+                            <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       Style="{StaticResource HintTextStyle}"
+                                       Margin="{StaticResource HintTextSpacing}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
 
-                <!-- Refresh card -->
-                <Border Margin="{StaticResource QuickStartCardGap}" Style="{StaticResource SectionCardStyle}"
-                        Cursor="Hand">
-                    <Border.InputBindings>
-                        <MouseBinding Gesture="LeftClick"
-                                      Command="{Binding DataContext.RefreshCurrentViewCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                    </Border.InputBindings>
-                    <StackPanel HorizontalAlignment="Center" Margin="{StaticResource QuickStartCardPadding}">
-                        <TextBlock Text="&#xE72C;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconLarge}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="Refresh" Style="{StaticResource CardItemTitleStyle}"/>
-                        <TextBlock Text="Reload data" Style="{StaticResource CardItemSubtitleStyle}"/>
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
+                <StackPanel Grid.Row="1"
+                            Margin="{StaticResource HeroSectionTopSpacing}">
+                    <TextBlock Text="Start Here"
+                               Style="{StaticResource SectionHeaderStyle}"/>
+                    <UniformGrid Columns="3"
+                                 Margin="{StaticResource StepContentTopSpacing}">
+                        <Border Margin="{StaticResource QuickStartCardGap}"
+                                Style="{StaticResource SectionCardStyle}"
+                                Cursor="Hand"
+                                Visibility="{Binding DataContext.IsFirmManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+                            <Border.InputBindings>
+                                <MouseBinding Gesture="LeftClick"
+                                              Command="{Binding DataContext.OpenFirmManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </Border.InputBindings>
+                            <StackPanel HorizontalAlignment="Center"
+                                        Margin="{StaticResource QuickStartCardPadding}">
+                                <TextBlock Text="&#xE80F;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconLarge}"
+                                           Foreground="{StaticResource FluentAccentDefault}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Firm"
+                                           Style="{StaticResource CardItemTitleStyle}"/>
+                                <TextBlock Text="Business profile and defaults"
+                                           Style="{StaticResource CardItemSubtitleStyle}"/>
+                            </StackPanel>
+                        </Border>
 
-            <!-- Hint -->
-            <TextBlock Grid.Row="3"
-                       Text="Tip: Use Ctrl+D to return here anytime"
-                       Style="{StaticResource HintTextStyle}"
-                       HorizontalAlignment="Center"
-                       Margin="{StaticResource HeroHintSpacing}"/>
-        </Grid>
+                        <Border Margin="{StaticResource QuickStartCardGap}"
+                                Style="{StaticResource SectionCardStyle}"
+                                Cursor="Hand"
+                                Visibility="{Binding DataContext.IsUserManagementVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+                            <Border.InputBindings>
+                                <MouseBinding Gesture="LeftClick"
+                                              Command="{Binding DataContext.OpenUserManagementCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </Border.InputBindings>
+                            <StackPanel HorizontalAlignment="Center"
+                                        Margin="{StaticResource QuickStartCardPadding}">
+                                <TextBlock Text="&#xE716;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconLarge}"
+                                           Foreground="{StaticResource FluentAccentDefault}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Users"
+                                           Style="{StaticResource CardItemTitleStyle}"/>
+                                <TextBlock Text="Access, PINs, and roles"
+                                           Style="{StaticResource CardItemSubtitleStyle}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="{StaticResource QuickStartCardGap}"
+                                Style="{StaticResource SectionCardStyle}"
+                                Cursor="Hand">
+                            <Border.InputBindings>
+                                <MouseBinding Gesture="LeftClick"
+                                              Command="{Binding DataContext.RefreshCurrentViewCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </Border.InputBindings>
+                            <StackPanel HorizontalAlignment="Center"
+                                        Margin="{StaticResource QuickStartCardPadding}">
+                                <TextBlock Text="&#xE72C;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconLarge}"
+                                           Foreground="{StaticResource FluentAccentDefault}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Refresh"
+                                           Style="{StaticResource CardItemTitleStyle}"/>
+                                <TextBlock Text="Reload dashboard and current data"
+                                           Style="{StaticResource CardItemSubtitleStyle}"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2"
+                           Text="Tip: Press Ctrl+D anytime to return to Home."
+                           Style="{StaticResource HintTextStyle}"
+                           HorizontalAlignment="Left"
+                           Margin="{StaticResource HeroHintSpacing}"/>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
