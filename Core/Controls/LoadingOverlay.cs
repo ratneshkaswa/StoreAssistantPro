@@ -38,7 +38,7 @@ public class LoadingOverlay : Control
 
     public static readonly DependencyProperty MessageProperty =
         DependencyProperty.Register(nameof(Message), typeof(string), typeof(LoadingOverlay),
-            new PropertyMetadata("Loading…"));
+            new PropertyMetadata("Loading..."));
 
     public string Message
     {

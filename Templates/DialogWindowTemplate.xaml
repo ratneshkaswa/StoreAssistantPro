@@ -31,6 +31,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         Title="WINDOW TITLE"
         ConfirmCommand="{Binding SaveCommand}">
@@ -131,13 +132,19 @@
 
         <!-- ═══════════════════════════════════════════════════════════
              ROW 2 — Error / success messages
+             Prefer InfoBar over plain text so all windows use the same
+             Win11-style status surface.
              ═══════════════════════════════════════════════════════════ -->
-        <StackPanel Grid.Row="2" Margin="{StaticResource MessageBarSpacing}">
-            <TextBlock Text="{Binding ErrorMessage}"
-                       Style="{StaticResource ErrorMessageStyle}"/>
-            <TextBlock Text="{Binding SuccessMessage}"
-                       Style="{StaticResource SuccessMessageStyle}"/>
-        </StackPanel>
+        <Grid Grid.Row="2" Margin="{StaticResource MessageBarSpacing}">
+            <controls:InfoBar Severity="Error"
+                              Title="Action failed"
+                              Message="{Binding ErrorMessage}"
+                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+            <controls:InfoBar Severity="Success"
+                              Title="Saved"
+                              Message="{Binding SuccessMessage}"
+                              Visibility="{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+        </Grid>
 
 
         <!-- ═══════════════════════════════════════════════════════════
@@ -152,6 +159,10 @@
             <Button Content="Close" IsCancel="True"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </StackPanel>
+
+        <!-- Shared busy state -->
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Working..."/>
 
     </Grid>
 </core:BaseDialogWindow>

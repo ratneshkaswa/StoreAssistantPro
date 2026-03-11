@@ -937,10 +937,19 @@ public class SetupViewModelTests
     }
 
     [Fact]
-    public void IsFirmSectionComplete_WithName_True()
+    public void IsFirmSectionComplete_WithNameOnly_False()
     {
         var sut = CreateSut();
         sut.FirmName = "Test Store";
+        Assert.False(sut.IsFirmSectionComplete);
+    }
+
+    [Fact]
+    public void IsFirmSectionComplete_NameAndBusinessDetail_True()
+    {
+        var sut = CreateSut();
+        sut.FirmName = "Test Store";
+        sut.State = "Rajasthan";
         Assert.True(sut.IsFirmSectionComplete);
     }
 
@@ -965,6 +974,33 @@ public class SetupViewModelTests
         var sut = CreateSut();
         FillValidPins(sut, adminConfirm: "9999");
         Assert.False(sut.IsSecuritySectionComplete);
+    }
+
+    [Fact]
+    public void FirmSectionStatusText_OnlyName_PromptsForBusinessDetails()
+    {
+        var sut = CreateSut();
+        sut.FirmName = "Test Store";
+
+        Assert.Equal("Add business details", sut.FirmSectionStatusText);
+    }
+
+    [Fact]
+    public void SecuritySectionStatusText_TracksCompletedChecks()
+    {
+        var sut = CreateSut();
+        sut.AdminPin = "2847";
+        sut.AdminPinConfirm = "2847";
+
+        Assert.Equal("1 of 5 checks", sut.SecuritySectionStatusText);
+    }
+
+    [Fact]
+    public void SaveReadinessMessage_NotReady_UsesSetupChecksLanguage()
+    {
+        var sut = CreateSut();
+
+        Assert.Contains("setup checks complete", sut.SaveReadinessMessage);
     }
 
     // -- Backup validation --

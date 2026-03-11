@@ -65,12 +65,15 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(FirmSectionStatusText))]
     public partial string FirmName { get; set; } = string.Empty;
 
     partial void OnFirmNameChanged(string value) => ClearErrorOnEdit();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(FirmSectionStatusText))]
     public partial string Address { get; set; } = string.Empty;
 
     partial void OnAddressChanged(string value) => ClearErrorOnEdit();
@@ -81,6 +84,8 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
     [NotifyPropertyChangedFor(nameof(StateValidationHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(FirmSectionStatusText))]
     public partial string State { get; set; } = string.Empty;
 
     partial void OnStateChanged(string value) => ClearErrorOnEdit();
@@ -91,6 +96,8 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PincodeValidationHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(FirmSectionStatusText))]
     public partial string Pincode { get; set; } = string.Empty;
 
     partial void OnPincodeChanged(string value) => ClearErrorOnEdit();
@@ -98,6 +105,8 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PhoneValidationHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(FirmSectionStatusText))]
     public partial string Phone { get; set; } = string.Empty;
 
     partial void OnPhoneChanged(string value) => ClearErrorOnEdit();
@@ -136,6 +145,8 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EmailValidationHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    [NotifyPropertyChangedFor(nameof(IsFirmSectionComplete))]
+    [NotifyPropertyChangedFor(nameof(FirmSectionStatusText))]
     public partial string Email { get; set; } = string.Empty;
 
     partial void OnEmailChanged(string value) => ClearErrorOnEdit();
@@ -289,6 +300,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string AdminPin { get; set; } = string.Empty;
 
     partial void OnAdminPinChanged(string value) => ClearErrorOnEdit();
@@ -297,6 +309,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(AdminConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string AdminPinConfirm { get; set; } = string.Empty;
 
     partial void OnAdminPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -308,6 +321,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string ManagerPin { get; set; } = string.Empty;
 
     partial void OnManagerPinChanged(string value) => ClearErrorOnEdit();
@@ -316,6 +330,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(ManagerConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string ManagerPinConfirm { get; set; } = string.Empty;
 
     partial void OnManagerPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -327,6 +342,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string UserPin { get; set; } = string.Empty;
 
     partial void OnUserPinChanged(string value) => ClearErrorOnEdit();
@@ -335,6 +351,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(UserConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string UserPinConfirm { get; set; } = string.Empty;
 
     partial void OnUserPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -347,6 +364,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string MasterPin { get; set; } = string.Empty;
 
     partial void OnMasterPinChanged(string value) => ClearErrorOnEdit();
@@ -355,6 +373,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(MasterConfirmHint))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
+    [NotifyPropertyChangedFor(nameof(SecuritySectionStatusText))]
     public partial string MasterPinConfirm { get; set; } = string.Empty;
 
     partial void OnMasterPinConfirmChanged(string value) => ClearErrorOnEdit();
@@ -387,7 +406,27 @@ public partial class SetupViewModel : BaseViewModel
 
     // -- Section completion indicators --
 
-    public bool IsFirmSectionComplete => !string.IsNullOrWhiteSpace(FirmName);
+    public bool IsFirmSectionComplete =>
+        !string.IsNullOrWhiteSpace(FirmName)
+        && HasAnySupportingFirmDetail()
+        && HasNoVisibleFirmDetailErrors();
+
+    public string FirmSectionStatusText
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(FirmName))
+                return "Required name missing";
+
+            if (!HasAnySupportingFirmDetail())
+                return "Add business details";
+
+            if (!HasNoVisibleFirmDetailErrors())
+                return "Review highlighted details";
+
+            return "Ready";
+        }
+    }
 
     public bool IsSecuritySectionComplete =>
         InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm &&
@@ -396,6 +435,11 @@ public partial class SetupViewModel : BaseViewModel
         InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm &&
         InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin) &&
         !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin);
+
+    public string SecuritySectionStatusText =>
+        IsSecuritySectionComplete
+            ? "Ready"
+            : $"{GetCompletedSecurityChecks()} of 5 checks";
 
     // -- Required fields progress --
 
@@ -416,6 +460,20 @@ public partial class SetupViewModel : BaseViewModel
         return done;
     }
 
+    private int GetCompletedSecurityChecks()
+    {
+        var done = 0;
+
+        if (InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm) done++;
+        if (InputValidator.IsValidUserPin(ManagerPin) && ManagerPin == ManagerPinConfirm) done++;
+        if (InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm) done++;
+        if (InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm) done++;
+        if (InputValidator.AreAllDistinct(AdminPin, ManagerPin, UserPin)
+            && !MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin)) done++;
+
+        return done;
+    }
+
     public bool IsReadyForSave =>
         GetCompletedRequiredChecks() == RequiredChecksTotal
         && HasNoOptionalValidationErrors();
@@ -426,11 +484,28 @@ public partial class SetupViewModel : BaseViewModel
         {
             var done = GetCompletedRequiredChecks();
             if (done < RequiredChecksTotal)
-                return $"{done} of {RequiredChecksTotal} required checks complete";
+                return $"{done} of {RequiredChecksTotal} setup checks complete";
 
             return IsReadyForSave
-                ? "\u2713 Ready"
-                : "6 of 6 required checks complete - review optional field errors";
+                ? "\u2713 Ready to save"
+                : $"{RequiredChecksTotal} of {RequiredChecksTotal} setup checks complete - review highlighted optional details";
+        }
+    }
+
+    public string SaveReadinessMessage
+    {
+        get
+        {
+            if (IsReadyForSave)
+                return "All essential setup checks are complete.";
+
+            var setupChecksMessage = RequiredFieldsProgress.StartsWith("\u2713", StringComparison.Ordinal)
+                ? $"{RequiredChecksTotal} of {RequiredChecksTotal} setup checks complete"
+                : RequiredFieldsProgress;
+
+            return HasNoOptionalValidationErrors()
+                ? setupChecksMessage
+                : $"{setupChecksMessage}. Review highlighted optional details before saving.";
         }
     }
 
@@ -468,7 +543,10 @@ public partial class SetupViewModel : BaseViewModel
     private void OnSetupPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(RequiredFieldsProgress))
+        {
             OnPropertyChanged(nameof(IsReadyForSave));
+            OnPropertyChanged(nameof(SaveReadinessMessage));
+        }
     }
 
     [RelayCommand]
@@ -755,6 +833,25 @@ public partial class SetupViewModel : BaseViewModel
 
     private static bool MasterPinContainsRolePin(string master, params string[] rolePins) =>
         rolePins.Any(p => p.Length >= 4 && master.Contains(p, StringComparison.Ordinal));
+
+    private bool HasAnySupportingFirmDetail() =>
+        !string.IsNullOrWhiteSpace(Address)
+        || !string.IsNullOrWhiteSpace(State)
+        || !string.IsNullOrWhiteSpace(Pincode)
+        || !string.IsNullOrWhiteSpace(Phone)
+        || !string.IsNullOrWhiteSpace(Email);
+
+    private bool HasNoVisibleFirmDetailErrors()
+    {
+        var stateValid = string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim());
+        var pincodeValid = string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0);
+        var emailValid = string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim());
+        var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
+        var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
+            || (PhoneInputRegex().IsMatch(phoneNormalized) && new string(phoneNormalized.Where(char.IsDigit).ToArray()).Length >= 10);
+
+        return stateValid && pincodeValid && emailValid && phoneValid;
+    }
 
     public override void Dispose()
     {
