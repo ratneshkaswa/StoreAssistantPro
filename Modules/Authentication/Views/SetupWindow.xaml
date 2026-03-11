@@ -272,13 +272,6 @@
                                            TextAlignment="Center"
                                            TextWrapping="Wrap"
                                            Margin="{StaticResource SetupCompleteSubtitleMargin}"/>
-                                <TextBlock Text="Advanced preferences can be configured anytime from Settings after login."
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"
-                                           HorizontalAlignment="Center"
-                                           TextAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           Margin="{StaticResource SetupSectionHintMargin}"/>
                                 <TextBlock Text="{Binding RedirectCountdown}"
                                            FontSize="{StaticResource FontSizeCaption}"
                                            Foreground="{StaticResource FluentTextSecondary}"
@@ -362,11 +355,6 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0"
-                       Text="Review details before finishing setup."
-                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
-                       VerticalAlignment="Center"/>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel"
