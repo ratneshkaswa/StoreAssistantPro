@@ -8,12 +8,13 @@
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
         Icon="pack://application:,,,/Assets/app.ico"
+        Background="{StaticResource AppBackgroundBrush}"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
 
     <!-- InputBindings are generated at runtime by ShortcutService -->
 
-    <Grid>
+    <Grid Margin="{StaticResource PagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -102,7 +103,9 @@
         </Menu>
 
         <!-- QUICK ACTION BAR -->
-        <Border Grid.Row="1" Style="{StaticResource FluentToolbarStyle}">
+        <Border Grid.Row="1"
+                Style="{StaticResource FluentToolbarStyle}"
+                Margin="{StaticResource ItemSpacing}">
             <DockPanel>
                 <!-- Notification bell + indicators (right-docked) -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
@@ -339,8 +342,14 @@
         </Border>
 
         <!-- BODY: WORKSPACE -->
-        <controls:ResponsiveContentControl Grid.Row="2"
-            Content="{Binding CurrentView}"/>
+        <Border Grid.Row="2"
+                Margin="{StaticResource ItemSpacing}"
+                Background="{StaticResource FluentSurface}"
+                BorderBrush="{StaticResource FluentSurfaceStroke}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource FluentCornerXLarge}">
+            <controls:ResponsiveContentControl Content="{Binding CurrentView}"/>
+        </Border>
 
         <!-- BOTTOM STATUS BAR -->
         <StatusBar Grid.Row="3" Style="{StaticResource FluentStatusBarStyle}">
