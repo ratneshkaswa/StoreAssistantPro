@@ -9,7 +9,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('Assets\app.ico')">Assets\app.ico</ApplicationIcon>
-    <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**;Templates\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**;Templates\**;.codex_obj\**;**\*wpftmp*;**\*.BuildWithSkipAnalyzers</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

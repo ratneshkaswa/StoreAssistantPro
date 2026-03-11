@@ -26,7 +26,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0"
                 Margin="{StaticResource SetupHeaderMargin}"
                 Background="{StaticResource FluentSurface}"
@@ -84,7 +83,6 @@
             </Grid>
         </Border>
 
-        <!-- Main area -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{StaticResource SetupSidebarColumnWidth}"/>
@@ -92,7 +90,6 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Sidebar -->
             <Border Grid.Column="0">
                 <Border.Style>
                     <Style TargetType="Border" BasedOn="{StaticResource SetupSidebarCardStyle}">
@@ -216,7 +213,6 @@
                 </DockPanel>
             </Border>
 
-            <!-- Content shell -->
             <Border Grid.Column="2"
                     Background="{StaticResource FluentSurface}"
                     BorderBrush="{StaticResource FluentStrokeDefault}"
@@ -239,7 +235,6 @@
                         </Frame.Style>
                     </Frame>
 
-                    <!-- Setup complete overlay -->
                     <Grid Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
                           h:Motion.FadeIn="True">
                         <Border Margin="{StaticResource SetupCompleteOverlayMargin}"
@@ -293,7 +288,6 @@
             </Border>
         </Grid>
 
-        <!-- Message area -->
         <Border Grid.Row="4"
                 Background="{StaticResource FluentSurface}"
                 BorderBrush="{StaticResource FluentStrokeDefault}"
@@ -324,19 +318,16 @@
                            Text="{Binding SuccessMessage}"
                            Style="{StaticResource SuccessMessageStyle}"
                            Visibility="{Binding HasSuccess, Converter={StaticResource BoolToVisibility}}"
-                           AutomationProperties.LiveSetting="Polite">
-                </TextBlock>
+                           AutomationProperties.LiveSetting="Polite"/>
 
                 <TextBlock Grid.Row="1"
                            Text="{Binding ErrorMessage}"
                            Style="{StaticResource ErrorMessageStyle}"
                            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}"
-                           AutomationProperties.LiveSetting="Assertive">
-                </TextBlock>
+                           AutomationProperties.LiveSetting="Assertive"/>
             </Grid>
         </Border>
 
-        <!-- Footer actions -->
         <Grid Grid.Row="5">
             <Grid.Style>
                 <Style TargetType="Grid">
@@ -387,13 +378,6 @@
                         <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
                             <Setter Property="IsEnabled" Value="{Binding IsReadyForSave}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsBusy}" Value="False"/>
-                                        <Condition Binding="{Binding RequiredFieldsProgress}" Value="✓ Ready"/>
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="IsEnabled" Value="True"/>
-                                </MultiDataTrigger>
                                 <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
@@ -404,7 +388,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- Loading overlay -->
         <Grid Grid.Row="0"
               Grid.RowSpan="6"
               Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"

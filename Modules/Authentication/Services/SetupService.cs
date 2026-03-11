@@ -38,16 +38,19 @@ public class SetupService(
                 appConfig.Pincode = string.IsNullOrWhiteSpace(command.Pincode) ? string.Empty : command.Pincode;
                 appConfig.Phone = string.IsNullOrWhiteSpace(command.Phone) ? string.Empty : command.Phone;
                 appConfig.Email = string.IsNullOrWhiteSpace(command.Email) ? string.Empty : command.Email;
-                appConfig.GSTNumber = string.IsNullOrWhiteSpace(command.GSTIN) ? null : command.GSTIN;
-                appConfig.PANNumber = string.IsNullOrWhiteSpace(command.PAN) ? null : command.PAN;
-                appConfig.GstRegistrationType = string.IsNullOrWhiteSpace(command.BusinessOptions.GstRegistrationType) ? "Regular" : command.BusinessOptions.GstRegistrationType;
-                appConfig.StateCode = string.IsNullOrWhiteSpace(command.BusinessOptions.StateCode) ? null : command.BusinessOptions.StateCode;
-                appConfig.CompositionSchemeRate = command.BusinessOptions.CompositionSchemeRate;
-                appConfig.CurrencyCode = string.IsNullOrWhiteSpace(command.CurrencyCode) ? "INR" : command.CurrencyCode;
-                appConfig.CurrencySymbol = string.IsNullOrWhiteSpace(command.CurrencySymbol) ? "\u20b9" : command.CurrencySymbol;
-                appConfig.FinancialYearStartMonth = command.FinancialYearStartMonth is >= 1 and <= 12 ? command.FinancialYearStartMonth : 4;
-                appConfig.FinancialYearEndMonth = command.FinancialYearEndMonth is >= 1 and <= 12 ? command.FinancialYearEndMonth : 3;
-                appConfig.DateFormat = string.IsNullOrWhiteSpace(command.DateFormat) ? "dd/MM/yyyy" : command.DateFormat;
+                if (command.BusinessOptions.ApplyAdvancedOptions)
+                {
+                    appConfig.GSTNumber = string.IsNullOrWhiteSpace(command.GSTIN) ? null : command.GSTIN;
+                    appConfig.PANNumber = string.IsNullOrWhiteSpace(command.PAN) ? null : command.PAN;
+                    appConfig.GstRegistrationType = string.IsNullOrWhiteSpace(command.BusinessOptions.GstRegistrationType) ? "Regular" : command.BusinessOptions.GstRegistrationType;
+                    appConfig.StateCode = string.IsNullOrWhiteSpace(command.BusinessOptions.StateCode) ? null : command.BusinessOptions.StateCode;
+                    appConfig.CompositionSchemeRate = command.BusinessOptions.CompositionSchemeRate;
+                    appConfig.CurrencyCode = string.IsNullOrWhiteSpace(command.CurrencyCode) ? "INR" : command.CurrencyCode;
+                    appConfig.CurrencySymbol = string.IsNullOrWhiteSpace(command.CurrencySymbol) ? "\u20b9" : command.CurrencySymbol;
+                    appConfig.FinancialYearStartMonth = command.FinancialYearStartMonth is >= 1 and <= 12 ? command.FinancialYearStartMonth : 4;
+                    appConfig.FinancialYearEndMonth = command.FinancialYearEndMonth is >= 1 and <= 12 ? command.FinancialYearEndMonth : 3;
+                    appConfig.DateFormat = string.IsNullOrWhiteSpace(command.DateFormat) ? "dd/MM/yyyy" : command.DateFormat;
+                }
                 appConfig.NumberFormat = "Indian";
                 appConfig.IsInitialized = true;
                 appConfig.MasterPinHash = PinHasher.Hash(command.MasterPin);
@@ -70,7 +73,7 @@ public class SetupService(
                 SeedSystemSettings(context, command.BusinessOptions);
 
                 if (!context.FinancialYears.Any())
-                    SeedFinancialYear(context, command.FinancialYearStartMonth, istNow);
+                    SeedFinancialYear(context, command.BusinessOptions.ApplyAdvancedOptions ? command.FinancialYearStartMonth : 4, istNow);
             }).ConfigureAwait(false);
         }
         catch (DbUpdateException)
@@ -79,7 +82,8 @@ public class SetupService(
                 "Setup could not be completed. Another instance may have initialized the application. Please restart.");
         }
 
-        regionalSettings.UpdateSettings(command.CurrencySymbol, command.DateFormat);
+        if (command.BusinessOptions.ApplyAdvancedOptions)
+            regionalSettings.UpdateSettings(command.CurrencySymbol, command.DateFormat);
     }
 
     /// <summary>
@@ -132,6 +136,9 @@ public class SetupService(
             settings = new SystemSettings();
             context.SystemSettings.Add(settings);
         }
+
+        if (!opts.ApplyAdvancedOptions)
+            return;
 
         settings.DefaultTaxMode = opts.DefaultTaxMode == "Tax-Inclusive (MRP)" ? "Inclusive" : "Exclusive";
         settings.RoundingMethod = opts.RoundingMethod switch

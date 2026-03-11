@@ -448,6 +448,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
+        sut.UseEssentialSetupValidationOnly = false;
         sut.GSTIN = "INVALID";
         FillValidPins(sut);
 
@@ -461,6 +462,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
+        sut.UseEssentialSetupValidationOnly = false;
         sut.PAN = "INVALID";
         FillValidPins(sut);
 
@@ -520,6 +522,23 @@ public class SetupViewModelTests
         sut.RequestClose = _ => { };
         sut.FirmName = "Store";
         sut.GSTIN = gstin;
+        FillValidPins(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsSetupComplete);
+    }
+
+    [Fact]
+    public async Task Save_InvalidAdvancedField_DoesNotBlock_EssentialSetupMode()
+    {
+        _commandBus.SendAsync(Arg.Any<CompleteFirstSetupCommand>(), Arg.Any<CancellationToken>())
+            .Returns(CommandResult.Success());
+
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+        sut.FirmName = "Store";
+        sut.GSTIN = "INVALID";
         FillValidPins(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -896,6 +915,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Test";
+        sut.UseEssentialSetupValidationOnly = false;
         FillValidPins(sut, adminPin: "2847", adminConfirm: "2847",
             managerPin: "3916", managerConfirm: "3916",
             userPin: "5023", userConfirm: "5023",
@@ -955,6 +975,7 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.RequestClose = _ => { };
         sut.FirmName = "Store";
+        sut.UseEssentialSetupValidationOnly = false;
         FillValidPins(sut);
         sut.AutoBackupEnabled = true;
         sut.BackupTime = "22:00";
@@ -971,6 +992,7 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.RequestClose = _ => { };
         sut.FirmName = "Store";
+        sut.UseEssentialSetupValidationOnly = false;
         FillValidPins(sut);
         sut.AutoBackupEnabled = true;
         sut.BackupTime = "22:00";
@@ -987,6 +1009,7 @@ public class SetupViewModelTests
         var sut = CreateSut();
         sut.RequestClose = _ => { };
         sut.FirmName = "Store";
+        sut.UseEssentialSetupValidationOnly = false;
         FillValidPins(sut);
         sut.AutoBackupEnabled = true;
         sut.BackupTime = "25:99";
@@ -1056,6 +1079,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
+        sut.UseEssentialSetupValidationOnly = false;
         sut.SelectedGstRegistrationType = "Composition";
         sut.CompositionRate = "150";
         FillValidPins(sut);

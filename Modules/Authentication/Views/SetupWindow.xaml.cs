@@ -159,7 +159,7 @@ public partial class SetupWindow : Window
         var firstField = section switch
         {
             "Firm" => "FirmNameBox",
-            "Security" => "AdminPinBox",
+            "Security" => "MasterPinBox",
             _ => null
         };
 

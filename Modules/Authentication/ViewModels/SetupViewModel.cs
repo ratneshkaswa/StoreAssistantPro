@@ -441,7 +441,7 @@ public partial class SetupViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
-    public partial bool UseEssentialSetupValidationOnly { get; set; }
+    public partial bool UseEssentialSetupValidationOnly { get; set; } = true;
 
     private bool ShouldValidateAdvancedSetupFields => !UseEssentialSetupValidationOnly;
 
@@ -516,6 +516,7 @@ public partial class SetupViewModel : BaseViewModel
             SelectedCurrencySymbol, fyStartMonth, fyEndMonth, SelectedDateFormat,
             AdminPin, ManagerPin, UserPin, MasterPin,
             new SetupBusinessOptions(
+                !UseEssentialSetupValidationOnly,
                 SelectedGstRegistrationType,
                 TryParseRate(CompositionRate, out var rate) ? rate : 1.0m,
                 string.IsNullOrEmpty(DerivedStateCode) ? null : DerivedStateCode,

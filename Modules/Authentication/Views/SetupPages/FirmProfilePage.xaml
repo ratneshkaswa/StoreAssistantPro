@@ -29,6 +29,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock x:Name="FirmNameLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
@@ -56,6 +57,12 @@
                                   Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"
                                   AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"
                                   MaxDropDownHeight="300"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1"
+                                   Text="{Binding StateValidationHint}"
+                                   Foreground="{Binding StateValidationHint, Converter={StaticResource HintForegroundConverter}}"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Margin="{StaticResource ValidationHintMargin}"
+                                   Style="{StaticResource CollapsibleHintTextStyle}"/>
                     </Grid>
                 </StackPanel>
             </controls:SetupFormCard>

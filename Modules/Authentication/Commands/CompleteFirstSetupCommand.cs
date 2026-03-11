@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Authentication.Commands;
 /// <c>AppConfig</c> and <c>SystemSettings</c>.
 /// </summary>
 public sealed record SetupBusinessOptions(
+    bool ApplyAdvancedOptions,
     string GstRegistrationType,
     decimal CompositionSchemeRate,
     string? StateCode,
