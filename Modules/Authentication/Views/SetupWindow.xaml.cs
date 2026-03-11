@@ -31,12 +31,6 @@ public partial class SetupWindow : Window
         ["Pincode"] = ("Firm", "PincodeBox"),
         ["Phone"] = ("Firm", "PhoneBox"),
         ["Email"] = ("Firm", "EmailBox"),
-        ["GSTIN"] = ("Firm", "StateCombo"),
-        ["GSTINChecksum"] = ("Firm", "StateCombo"),
-        ["PAN"] = ("Firm", "StateCombo"),
-        ["CompositionRate"] = ("Firm", "StateCombo"),
-        ["BackupTime"] = ("Firm", "StateCombo"),
-        ["BackupLocation"] = ("Firm", "StateCombo"),
 
         ["AdminPin"] = ("Security", "AdminPinBox"),
         ["AdminPinConfirm"] = ("Security", "AdminPinConfirmBox"),
@@ -55,6 +49,7 @@ public partial class SetupWindow : Window
         InitializeComponent();
 
         DataContext = _vm = vm;
+        vm.UseEssentialSetupValidationOnly = true;
         _dialogService = dialogService;
 
         vm.RequestClose = result => DialogResult = result;

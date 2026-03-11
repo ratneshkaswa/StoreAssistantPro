@@ -635,6 +635,12 @@ public partial class SetupViewModel : BaseViewModel
     [ObservableProperty]
     public partial string SelectedSection { get; set; } = "Firm";
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
+    public partial bool UseEssentialSetupValidationOnly { get; set; }
+
+    private bool ShouldValidateAdvancedSetupFields => !UseEssentialSetupValidationOnly;
+
     // S10: Setup complete state
     [ObservableProperty]
     public partial bool IsSetupComplete { get; set; }
@@ -669,20 +675,20 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(InputValidator.IsValidMasterPin(MasterPin), "Master PIN must be exactly 6 digits.", "MasterPin")
             .Rule(InputValidator.AreEqual(MasterPin, MasterPinConfirm), "Master PIN confirmation does not match.", "MasterPinConfirm")
             .Rule(!MasterPinContainsRolePin(MasterPin, AdminPin, ManagerPin, UserPin), "Master PIN must not contain any role PIN.", "MasterPinContains")
-            .Rule(!IsCompositionScheme || IsValidCompositionRate(CompositionRate), "Composition rate must be a valid number (0-100).", "CompositionRate")
-            .Rule(string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.", "GSTIN")
-            .Rule(string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.", "GSTINChecksum")
-            .Rule(string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.", "PAN")
-            .Rule(IsGstinStateConsistent(GSTIN, State), "GSTIN state code does not match selected state.", "State")
+            .Rule(!ShouldValidateAdvancedSetupFields || !IsCompositionScheme || IsValidCompositionRate(CompositionRate), "Composition rate must be a valid number (0-100).", "CompositionRate")
+            .Rule(!ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant()), "GSTIN format is invalid.", "GSTIN")
+            .Rule(!ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant()), "GSTIN check digit is invalid.", "GSTINChecksum")
+            .Rule(!ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant()), "PAN format is invalid.", "PAN")
+            .Rule(!ShouldValidateAdvancedSetupFields || IsGstinStateConsistent(GSTIN, State), "GSTIN state code does not match selected state.", "State")
             .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.", "Pincode")
             .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.", "Email")
             .Rule(string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim()), "Please select a valid Indian state from the list.", "State")
             .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.", "Phone")
             .Rule(string.IsNullOrWhiteSpace(Phone) || new string(Phone.Where(char.IsDigit).ToArray()).Length >= 10, "Phone must have at least 10 digits.", "Phone")
-            .Rule(!AutoBackupEnabled || IsValidBackupTime(BackupTime), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
-            .Rule(!AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.", "BackupLocation")
-            .Rule(!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation), "Backup location path is invalid.", "BackupLocation")
-            .Rule(!AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || BackupFolderExists(BackupLocation), "Backup folder does not exist. Please create it first or choose a different path.", "BackupLocation")))
+            .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || IsValidBackupTime(BackupTime), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
+            .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.", "BackupLocation")
+            .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation), "Backup location path is invalid.", "BackupLocation")
+            .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || BackupFolderExists(BackupLocation), "Backup folder does not exist. Please create it first or choose a different path.", "BackupLocation")))
             return;
 
         var fyStartMonth = MonthNameToIndex(SelectedFYStartMonth);
@@ -902,15 +908,15 @@ public partial class SetupViewModel : BaseViewModel
         var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
         var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
             || (PhoneInputRegex().IsMatch(phoneNormalized) && new string(phoneNormalized.Where(char.IsDigit).ToArray()).Length >= 10);
-        var gstinFormatValid = string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant());
-        var gstinChecksumValid = string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant());
-        var panValid = string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant());
-        var compositionValid = !IsCompositionScheme || IsValidCompositionRate(CompositionRate);
-        var gstStateConsistent = IsGstinStateConsistent(GSTIN, State);
-        var backupTimeValid = !AutoBackupEnabled || IsValidBackupTime(BackupTime);
-        var backupLocationPresent = !AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation);
-        var backupPathValid = !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation);
-        var backupPathExists = !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || BackupFolderExists(BackupLocation);
+        var gstinFormatValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant());
+        var gstinChecksumValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant());
+        var panValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant());
+        var compositionValid = !ShouldValidateAdvancedSetupFields || !IsCompositionScheme || IsValidCompositionRate(CompositionRate);
+        var gstStateConsistent = !ShouldValidateAdvancedSetupFields || IsGstinStateConsistent(GSTIN, State);
+        var backupTimeValid = !ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || IsValidBackupTime(BackupTime);
+        var backupLocationPresent = !ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation);
+        var backupPathValid = !ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation);
+        var backupPathExists = !ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || BackupFolderExists(BackupLocation);
 
         return stateValid
             && pincodeValid
