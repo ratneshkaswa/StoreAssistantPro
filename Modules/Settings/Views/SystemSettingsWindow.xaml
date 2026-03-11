@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         Title="System Settings"
         ConfirmCommand="{Binding SaveCommand}"
@@ -166,16 +167,21 @@
         </ScrollViewer>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
-                    Margin="{StaticResource FieldLabelSpacing}">
-            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
-                       AutomationProperties.LiveSetting="Assertive"
-                       AutomationProperties.HelpText="{Binding ErrorMessage}"/>
-            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
-                       AutomationProperties.LiveSetting="Polite"
-                       AutomationProperties.HelpText="{Binding SuccessMessage}"
-                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
-        </StackPanel>
+        <Grid Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Severity="Error"
+                              Title="Settings issue"
+                              Message="{Binding ErrorMessage}"
+                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              AutomationProperties.LiveSetting="Assertive"
+                              AutomationProperties.HelpText="{Binding ErrorMessage}"/>
+            <controls:InfoBar Severity="Success"
+                              Title="Settings saved"
+                              Message="{Binding SuccessMessage}"
+                              Visibility="{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              AutomationProperties.LiveSetting="Polite"
+                              AutomationProperties.HelpText="{Binding SuccessMessage}"/>
+        </Grid>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
@@ -185,5 +191,8 @@
             <Button Content="Close" IsCancel="True"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </StackPanel>
+
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Saving system settings..."/>
     </Grid>
 </core:BaseDialogWindow>

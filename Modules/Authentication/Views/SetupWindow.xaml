@@ -33,7 +33,7 @@
                 BorderBrush="{StaticResource FluentStrokeDefault}"
                 BorderThickness="{StaticResource FluentBorderThicknessThin}"
                 CornerRadius="{StaticResource FluentCornerLarge}"
-                Padding="20,18">
+                Padding="{StaticResource SetupShellPadding}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -44,8 +44,8 @@
                     <DockPanel LastChildFill="False">
                         <Border Background="{StaticResource FluentInfoBackground}"
                                 CornerRadius="{StaticResource FluentCornerMedium}"
-                                Padding="8,4"
-                                Margin="0,0,0,10"
+                                Padding="{StaticResource SetupEyebrowPadding}"
+                                Margin="{StaticResource SetupEyebrowMargin}"
                                 DockPanel.Dock="Left">
                             <TextBlock Text="First-run setup"
                                        FontSize="{StaticResource FontSizeCaption}"
@@ -66,7 +66,7 @@
                                FontFamily="{StaticResource FluentFontText}"
                                FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource FluentTextSecondary}"
-                               Margin="0,6,0,0"
+                               Margin="{StaticResource SetupIntroTextMargin}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
 
@@ -75,9 +75,9 @@
                         BorderBrush="{StaticResource FluentStrokeDefault}"
                         BorderThickness="{StaticResource FluentBorderThicknessThin}"
                         CornerRadius="{StaticResource FluentCornerLarge}"
-                        Padding="14,10"
+                        Padding="{StaticResource SetupProgressBadgePadding}"
                         VerticalAlignment="Top"
-                        Margin="24,0,0,0">
+                        Margin="{StaticResource SetupProgressCardMargin}">
                     <StackPanel MinWidth="220">
                         <TextBlock Text="Essential setup"
                                    FontSize="{StaticResource FontSizeCaption}"
@@ -86,12 +86,12 @@
                                    FontSize="{StaticResource FontSizeBody}"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource FluentTextPrimary}"
-                                   Margin="0,2,0,0"
+                                   Margin="{StaticResource SetupProgressTextMargin}"
                                    AutomationProperties.LiveSetting="Polite"/>
                         <TextBlock Text="{Binding SaveReadinessMessage}"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentTextSecondary}"
-                                   Margin="0,6,0,0"
+                                   Margin="{StaticResource SetupProgressHintMargin}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
@@ -111,7 +111,7 @@
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0"
-                        Padding="18,16,18,14"
+                        Padding="{StaticResource SetupStepperPadding}"
                         Background="{StaticResource FluentBackgroundSecondary}"
                         CornerRadius="{StaticResource FluentCornerLarge}">
                     <Grid>
@@ -137,11 +137,11 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0"
-                                        Width="36"
-                                        Height="36"
+                                        Width="{StaticResource SetupStepIconSize}"
+                                        Height="{StaticResource SetupStepIconSize}"
                                         CornerRadius="{StaticResource FluentCornerSmall}"
                                         Background="{StaticResource FluentInfoBackground}"
-                                        Margin="0,0,12,0">
+                                        Margin="{StaticResource SetupStepIconMargin}">
                                     <TextBlock Text="&#xE913;"
                                                FontFamily="{StaticResource FluentIconFont}"
                                                Foreground="{StaticResource FluentAccentDefault}"
@@ -193,11 +193,11 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0"
-                                        Width="36"
-                                        Height="36"
+                                        Width="{StaticResource SetupStepIconSize}"
+                                        Height="{StaticResource SetupStepIconSize}"
                                         CornerRadius="{StaticResource FluentCornerSmall}"
                                         Background="{StaticResource FluentInfoBackground}"
-                                        Margin="0,0,12,0">
+                                        Margin="{StaticResource SetupStepIconMargin}">
                                     <TextBlock Text="&#xE72E;"
                                                FontFamily="{StaticResource FluentIconFont}"
                                                Foreground="{StaticResource FluentAccentDefault}"
@@ -237,9 +237,9 @@
                 </Border>
 
                 <Border Grid.Row="1"
-                        Height="1"
+                        Height="{StaticResource SetupDividerThickness}"
                         Background="{StaticResource FluentStrokeDefault}"
-                        Margin="18,0"/>
+                        Margin="{StaticResource SetupDividerMargin}"/>
 
                 <Grid Grid.Row="2">
                     <Frame x:Name="ContentFrame"
@@ -271,12 +271,12 @@
                                 VerticalAlignment="Center"
                                 MaxWidth="{StaticResource SetupCompleteMaxWidth}">
                             <StackPanel>
-                                <Border Width="56"
-                                        Height="56"
+                                <Border Width="{StaticResource SetupCompleteBadgeSize}"
+                                        Height="{StaticResource SetupCompleteBadgeSize}"
                                         Background="{StaticResource FluentInfoBackground}"
-                                        CornerRadius="28"
+                                        CornerRadius="{StaticResource SetupCompleteBadgeCorner}"
                                         HorizontalAlignment="Center"
-                                        Margin="0,0,0,12">
+                                        Margin="{StaticResource SetupCompleteBadgeMargin}">
                                     <TextBlock Text="&#xE73E;"
                                                FontFamily="{StaticResource FluentIconFont}"
                                                FontSize="{StaticResource FontSizeIconLarge}"

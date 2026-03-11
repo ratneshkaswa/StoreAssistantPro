@@ -70,77 +70,83 @@
     </Window.Resources>
 
     <Grid>
-        <Grid MaxWidth="{StaticResource LoginCardMaxWidth}" VerticalAlignment="Center" HorizontalAlignment="Center"
-              Margin="{StaticResource DialogPadding}"
-              >
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
-                <RowDefinition Height="Auto"/>  <!-- 1: Role buttons -->
-                <RowDefinition Height="Auto"/>  <!-- 2: PIN card -->
-                <RowDefinition Height="Auto"/>  <!-- 3: Footer -->
-            </Grid.RowDefinitions>
+        <Border MaxWidth="{StaticResource LoginCardMaxWidth}"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Margin="{StaticResource DialogPadding}"
+                Background="{StaticResource FluentSurface}"
+                BorderBrush="{StaticResource FluentStrokeDefault}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource FluentCornerLarge}"
+                Padding="{StaticResource CardPadding}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
+                    <RowDefinition Height="Auto"/>  <!-- 1: Role buttons -->
+                    <RowDefinition Height="Auto"/>  <!-- 2: PIN card -->
+                    <RowDefinition Height="Auto"/>  <!-- 3: Footer -->
+                </Grid.RowDefinitions>
 
             <!-- ── Row 0: Logo + title ──────────────────────── -->
-            <controls:AppBranding Grid.Row="0" LogoSize="56" Subtitle="{Binding FirmName}"
-                                  Margin="{StaticResource ItemSpacing}"/>
+                <controls:AppBranding Grid.Row="0" LogoSize="56" Subtitle="{Binding FirmName}"
+                                      Margin="{StaticResource ItemSpacing}"/>
 
             <!-- ── Row 1: Role buttons ────────────────────────── -->
-            <UniformGrid Grid.Row="1" Columns="3"
-                         Margin="{StaticResource ItemSpacing}">
-                <Button Margin="{StaticResource RoleButtonGap}"
-                        Style="{StaticResource AdminButtonStyle}"
-                        Tag="{x:Static models:UserType.Admin}"
-                        Command="{Binding SelectUserCommand}"
-                        CommandParameter="{x:Static models:UserType.Admin}"
-                        AutomationProperties.Name="Admin login"
-                        ToolTip="F1 — Admin">
-                    <StackPanel>
-                        <TextBlock Text="&#xE83D;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                   HorizontalAlignment="Center"/>
-                         <TextBlock Text="Admin" HorizontalAlignment="Center"
-                                   FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                    </StackPanel>
-                </Button>
-                <Button Margin="{StaticResource RoleButtonGap}"
-                        Style="{StaticResource ManagerButtonStyle}"
-                        Tag="{x:Static models:UserType.Manager}"
-                        Command="{Binding SelectUserCommand}"
-                        CommandParameter="{x:Static models:UserType.Manager}"
-                        AutomationProperties.Name="Manager login"
-                        ToolTip="F2 — Manager">
-                    <StackPanel>
-                        <TextBlock Text="&#xE77B;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                   HorizontalAlignment="Center"/>
-                         <TextBlock Text="Manager" HorizontalAlignment="Center"
-                                   FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                    </StackPanel>
-                </Button>
-                <Button Margin="{StaticResource RoleButtonGap}"
-                        Style="{StaticResource UserButtonStyle}"
-                        Tag="{x:Static models:UserType.User}"
-                        Command="{Binding SelectUserCommand}"
-                        CommandParameter="{x:Static models:UserType.User}"
-                        AutomationProperties.Name="User login"
-                        ToolTip="F3 — User">
-                    <StackPanel>
-                        <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
-                                   HorizontalAlignment="Center"/>
-                         <TextBlock Text="User" HorizontalAlignment="Center"
-                                   FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
-                    </StackPanel>
-                </Button>
-            </UniformGrid>
+                <UniformGrid Grid.Row="1" Columns="3"
+                             Margin="{StaticResource ItemSpacing}">
+                    <Button Margin="{StaticResource RoleButtonGap}"
+                            Style="{StaticResource AdminButtonStyle}"
+                            Tag="{x:Static models:UserType.Admin}"
+                            Command="{Binding SelectUserCommand}"
+                            CommandParameter="{x:Static models:UserType.Admin}"
+                            AutomationProperties.Name="Admin login"
+                            ToolTip="F1 — Admin">
+                        <StackPanel>
+                            <TextBlock Text="&#xE83D;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Admin" HorizontalAlignment="Center"
+                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="{StaticResource RoleButtonGap}"
+                            Style="{StaticResource ManagerButtonStyle}"
+                            Tag="{x:Static models:UserType.Manager}"
+                            Command="{Binding SelectUserCommand}"
+                            CommandParameter="{x:Static models:UserType.Manager}"
+                            AutomationProperties.Name="Manager login"
+                            ToolTip="F2 — Manager">
+                        <StackPanel>
+                            <TextBlock Text="&#xE77B;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Manager" HorizontalAlignment="Center"
+                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="{StaticResource RoleButtonGap}"
+                            Style="{StaticResource UserButtonStyle}"
+                            Tag="{x:Static models:UserType.User}"
+                            Command="{Binding SelectUserCommand}"
+                            CommandParameter="{x:Static models:UserType.User}"
+                            AutomationProperties.Name="User login"
+                            ToolTip="F3 — User">
+                        <StackPanel>
+                            <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="User" HorizontalAlignment="Center"
+                                       FontSize="{StaticResource FontSizeBody}" Margin="{StaticResource HintTextSpacing}"/>
+                        </StackPanel>
+                    </Button>
+                </UniformGrid>
 
             <!-- ── Row 2: PIN card (disabled until role selected) ── -->
-            <Border Grid.Row="2"
-                    Background="{StaticResource FluentSurfaceElevated}"
-                    BorderBrush="{StaticResource FluentStrokeDefault}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource FluentCornerMedium}"
-                    Padding="{StaticResource CardPadding}"
-                    Margin="{StaticResource ItemSpacing}"
-                    Effect="{StaticResource FluentShadowSmall}"
-                    IsEnabled="{Binding IsUserSelected}">
+                <Border Grid.Row="2"
+                        Background="{StaticResource FluentBackgroundSecondary}"
+                        BorderBrush="{StaticResource FluentStrokeDefault}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource FluentCornerMedium}"
+                        Padding="{StaticResource CardPadding}"
+                        Margin="{StaticResource ItemSpacing}"
+                        IsEnabled="{Binding IsUserSelected}">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Opacity" Value="1"/>
@@ -155,31 +161,29 @@
                     <!-- Normal PIN entry mode (Hidden, not Collapsed, to preserve card height) -->
                     <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToHiddenVisibility}}"
                                 IsHitTestVisible="{Binding IsNormalMode}">
-                        <!-- Success message after PIN reset (MinHeight reserves space) -->
-                    <TextBlock Text="{Binding ResetSuccessMessage}"
-                               HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentSuccess}"
-                               MinHeight="{StaticResource ErrorAreaMinHeight}"
-                               Margin="{StaticResource ItemSpacing}"/>
-
                         <!-- Role hint / instruction (always visible, layout-stable) -->
-                    <TextBlock Text="{Binding RoleHintText}"
-                               HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               FontWeight="SemiBold"
-                               Margin="{StaticResource ItemSpacing}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsUserSelected}" Value="False">
-                                        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                        <controls:InfoBar Severity="Success"
+                                          Title="PIN reset complete"
+                                          Message="{Binding ResetSuccessMessage}"
+                                          Visibility="{Binding ResetSuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                          Margin="{StaticResource ItemSpacing}"/>
+
+                        <TextBlock Text="{Binding RoleHintText}"
+                                   HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   FontWeight="SemiBold"
+                                   Margin="{StaticResource ItemSpacing}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUserSelected}" Value="False">
+                                            <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
                     <!-- PIN dots -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
@@ -195,13 +199,11 @@
                                  Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=3}"/>
                     </StackPanel>
 
-                    <!-- Error (MinHeight for layout stability) -->
-                    <StackPanel HorizontalAlignment="Center" MinHeight="{StaticResource ErrorAreaMinHeight}"
-                                Margin="{StaticResource ItemSpacing}">
-                        <TextBlock Text="{Binding ErrorMessage}"
-                                   Style="{StaticResource ErrorMessageStyle}"
-                                   HorizontalAlignment="Center" Margin="0"/>
-                    </StackPanel>
+                        <controls:InfoBar Severity="Error"
+                                          Title="Login issue"
+                                          Message="{Binding ErrorMessage}"
+                                          Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                          Margin="{StaticResource ItemSpacing}"/>
 
                     <!-- Keypad -->
                     <Grid Margin="{StaticResource KeypadInset}">
@@ -232,21 +234,21 @@
                     </Grid>
 
                     <!-- Keyboard hint -->
-                    <TextBlock Text="Or use keyboard 0–9"
-                               Style="{StaticResource HintTextStyle}"
-                               HorizontalAlignment="Center"
-                               Margin="{StaticResource ItemSpacing}"/>
+                        <TextBlock Text="Or use keyboard 0–9"
+                                   Style="{StaticResource HintTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   Margin="{StaticResource ItemSpacing}"/>
 
                     <!-- Forgot PIN link -->
-                    <TextBlock HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Margin="{StaticResource ItemSpacing}">
-                        <Hyperlink Command="{Binding ForgotPinCommand}"
-                                   Foreground="{StaticResource FluentAccentDefault}"
-                                   TextDecorations="None">
-                            Forgot PIN?
-                        </Hyperlink>
-                    </TextBlock>
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="{StaticResource FontSizeCaption}"
+                                   Margin="{StaticResource ItemSpacing}">
+                            <Hyperlink Command="{Binding ForgotPinCommand}"
+                                       Foreground="{StaticResource FluentAccentDefault}"
+                                       TextDecorations="None">
+                                Forgot PIN?
+                            </Hyperlink>
+                        </TextBlock>
                     </StackPanel>
 
                     <!-- Forgot PIN recovery form (anchored top within reserved card space) -->
@@ -310,11 +312,11 @@
                                    Visibility="Collapsed"
                                    Margin="{StaticResource ItemSpacing}"/>
 
-                        <!-- Error (MinHeight reserves space) -->
-                        <TextBlock Text="{Binding ErrorMessage}"
-                                   Style="{StaticResource ErrorMessageStyle}"
-                                   MinHeight="{StaticResource ErrorAreaMinHeight}"
-                                   HorizontalAlignment="Center" Margin="0"/>
+                        <controls:InfoBar Severity="Error"
+                                          Title="Reset issue"
+                                          Message="{Binding ErrorMessage}"
+                                          Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                          Margin="{StaticResource ItemSpacing}"/>
 
                         <!-- Action buttons -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
@@ -331,23 +333,13 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Verifying overlay -->
-                    <Border CornerRadius="{StaticResource FluentCornerMedium}"
-                            Background="{StaticResource FluentControlFillDefault}"
-                            Opacity="{StaticResource OverlayOpacity}"
-                            IsHitTestVisible="True"
-                            Visibility="{Binding IsVerifying, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock Text="Verifying…"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentAccentDefault}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
+                    <controls:LoadingOverlay IsActive="{Binding IsVerifying}"
+                                             Message="Verifying login..."/>
                 </Grid>
-            </Border>
+                </Border>
 
             <!-- ── Row 3: Footer ──────────────────────────────── -->
-            <StackPanel Grid.Row="3" Margin="{StaticResource ItemSpacing}">
+                <StackPanel Grid.Row="3" Margin="{StaticResource ItemSpacing}">
                 <!-- Separator -->
                 <Border Height="{StaticResource SeparatorHeight}" Background="{StaticResource FluentStrokeDefault}"
                         Margin="{StaticResource ItemSpacing}"/>
@@ -376,7 +368,8 @@
                 <TextBlock Style="{StaticResource FooterTextStyle}">
                     <Run Text="v"/><Run Text="{Binding AppVersion, Mode=OneWay}"/><Run Text=" &#x00B7; Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
                 </TextBlock>
-            </StackPanel>
-        </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

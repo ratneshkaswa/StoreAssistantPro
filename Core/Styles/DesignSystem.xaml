@@ -143,9 +143,9 @@
     <SolidColorBrush x:Key="RoleAdminBackground"       Color="#E8EEFA"/>
     <SolidColorBrush x:Key="RoleAdminBorder"           Color="#B4C8ED"/>
     <SolidColorBrush x:Key="RoleAdminAccent"           Color="#3B6FC0"/>
-    <SolidColorBrush x:Key="RoleManagerBackground"     Color="#F0E6FA"/>
-    <SolidColorBrush x:Key="RoleManagerBorder"         Color="#D4BEF0"/>
-    <SolidColorBrush x:Key="RoleManagerAccent"         Color="#7B3FAF"/>
+    <SolidColorBrush x:Key="RoleManagerBackground"     Color="#EAF1FB"/>
+    <SolidColorBrush x:Key="RoleManagerBorder"         Color="#BDD0F1"/>
+    <SolidColorBrush x:Key="RoleManagerAccent"         Color="#4C6FB3"/>
     <SolidColorBrush x:Key="RoleUserBackground"        Color="#E3F4EC"/>
     <SolidColorBrush x:Key="RoleUserBorder"            Color="#B0DCC5"/>
     <SolidColorBrush x:Key="RoleUserAccent"            Color="#1D7B4E"/>
@@ -231,6 +231,29 @@
     <Thickness x:Key="SetupLoadingIconMargin">0,0,0,10</Thickness>
     <Thickness x:Key="SetupLoadingDescMargin">0,4,0,0</Thickness>
     <sys:Double x:Key="SetupLoadingDescMaxWidth">240</sys:Double>
+    <Thickness x:Key="SetupShellPadding">20,18</Thickness>
+    <Thickness x:Key="SetupEyebrowPadding">8,4</Thickness>
+    <Thickness x:Key="SetupEyebrowMargin">0,0,0,10</Thickness>
+    <Thickness x:Key="SetupIntroTextMargin">0,6,0,0</Thickness>
+    <Thickness x:Key="SetupProgressCardMargin">24,0,0,0</Thickness>
+    <Thickness x:Key="SetupProgressTextMargin">0,2,0,0</Thickness>
+    <Thickness x:Key="SetupProgressHintMargin">0,6,0,0</Thickness>
+    <Thickness x:Key="SetupStepperPadding">18,16,18,14</Thickness>
+    <sys:Double x:Key="SetupStepIconSize">36</sys:Double>
+    <Thickness x:Key="SetupStepIconMargin">0,0,12,0</Thickness>
+    <sys:Double x:Key="SetupDividerThickness">1</sys:Double>
+    <Thickness x:Key="SetupDividerMargin">18,0</Thickness>
+    <sys:Double x:Key="SetupCompleteBadgeSize">56</sys:Double>
+    <CornerRadius x:Key="SetupCompleteBadgeCorner">28</CornerRadius>
+    <Thickness x:Key="SetupCompleteBadgeMargin">0,0,0,12</Thickness>
+    <Thickness x:Key="SecurityInfoBarMargin">0,0,0,12</Thickness>
+    <Thickness x:Key="SecuritySectionTopMargin">0,6,0,0</Thickness>
+    <Thickness x:Key="SecurityConflictMargin">0,12,0,0</Thickness>
+    <GridLength x:Key="SecurityRoleLabelWidth">132</GridLength>
+    <GridLength x:Key="SecurityRolePinColumnWidth">150</GridLength>
+    <GridLength x:Key="SecurityRecoveryPinColumnWidth">160</GridLength>
+    <sys:Double x:Key="SecurityRolePinBoxWidth">128</sys:Double>
+    <sys:Double x:Key="SecurityMasterPinBoxWidth">140</sys:Double>
 
     <!-- Line height tokens (Win11 spec) -->
     <sys:Double x:Key="LineHeightTitle">36</sys:Double>
