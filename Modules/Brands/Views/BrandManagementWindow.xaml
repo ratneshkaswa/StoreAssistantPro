@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Brand Management"
         Loaded="OnLoaded">
     <Grid Margin="{StaticResource DialogPadding}">
@@ -78,12 +79,15 @@
         </Grid>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="5" MinHeight="{StaticResource MessageAreaMinHeight}"
-                    Margin="{StaticResource FieldLabelSpacing}">
-            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
-            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
-                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
-        </StackPanel>
+        <Grid Grid.Row="5" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasErrorMessage}"/>
+            <controls:InfoBar Message="{Binding SuccessMessage}"
+                              Severity="Success"
+                              IsOpen="{Binding HasSuccessMessage}"/>
+        </Grid>
 
         <!-- Close -->
         <Grid Grid.Row="6" Margin="{StaticResource FormActionBarSpacing}">
@@ -94,5 +98,7 @@
             <Button Grid.Column="1" Content="Close" IsCancel="True"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </Grid>
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Saving brand changes..."/>
     </Grid>
 </core:BaseDialogWindow>

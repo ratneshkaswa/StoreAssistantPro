@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+        xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Purchase Orders"
         Loaded="OnLoaded">
     <Grid Margin="{StaticResource DialogPadding}">
@@ -124,12 +125,15 @@
         </Grid>
 
         <!-- Messages -->
-        <StackPanel Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
-                    Margin="{StaticResource FieldLabelSpacing}">
-            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"/>
-            <TextBlock Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
-                       h:AutoDismiss.IsEnabled="True" h:AutoDismiss.Seconds="4"/>
-        </StackPanel>
+        <Grid Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasErrorMessage}"/>
+            <controls:InfoBar Message="{Binding SuccessMessage}"
+                              Severity="Success"
+                              IsOpen="{Binding HasSuccessMessage}"/>
+        </Grid>
 
         <!-- Action buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
@@ -143,5 +147,7 @@
             <Button Content="Close" IsCancel="True"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </StackPanel>
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Processing purchase order..."/>
     </Grid>
 </core:BaseDialogWindow>
