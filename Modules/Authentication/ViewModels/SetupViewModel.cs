@@ -26,50 +26,13 @@ public partial class SetupViewModel : BaseViewModel
         "setup-draft.dat");
 
     private static readonly (string Code, string Name)[] IndianStateData =
-    [
-        ("37", "Andhra Pradesh"),
-        ("12", "Arunachal Pradesh"),
-        ("18", "Assam"),
-        ("10", "Bihar"),
-        ("22", "Chhattisgarh"),
-        ("30", "Goa"),
-        ("24", "Gujarat"),
-        ("06", "Haryana"),
-        ("02", "Himachal Pradesh"),
-        ("20", "Jharkhand"),
-        ("29", "Karnataka"),
-        ("32", "Kerala"),
-        ("23", "Madhya Pradesh"),
-        ("27", "Maharashtra"),
-        ("14", "Manipur"),
-        ("17", "Meghalaya"),
-        ("15", "Mizoram"),
-        ("13", "Nagaland"),
-        ("21", "Odisha"),
-        ("03", "Punjab"),
-        ("08", "Rajasthan"),
-        ("11", "Sikkim"),
-        ("33", "Tamil Nadu"),
-        ("36", "Telangana"),
-        ("16", "Tripura"),
-        ("09", "Uttar Pradesh"),
-        ("05", "Uttarakhand"),
-        ("19", "West Bengal"),
-        ("35", "Andaman & Nicobar"),
-        ("04", "Chandigarh"),
-        ("26", "Dadra & Nagar Haveli"),
-        ("07", "Delhi"),
-        ("01", "Jammu & Kashmir"),
-        ("38", "Ladakh"),
-        ("31", "Lakshadweep"),
-        ("34", "Puducherry")
-    ];
+        BusinessProfileRules.IndianStateData.ToArray();
 
     private static readonly Dictionary<string, string> IndianStateNameByCode =
-        IndianStateData.ToDictionary(state => state.Code, state => state.Name);
+        new(BusinessProfileRules.IndianStateNameByCode, StringComparer.OrdinalIgnoreCase);
 
     private static readonly Dictionary<string, string> IndianStateCodeByName =
-        IndianStateData.ToDictionary(state => state.Name, state => state.Code, StringComparer.OrdinalIgnoreCase);
+        new(BusinessProfileRules.IndianStateCodeByName, StringComparer.OrdinalIgnoreCase);
 
     // -- Firm details --
 
@@ -102,7 +65,7 @@ public partial class SetupViewModel : BaseViewModel
     partial void OnStateChanged(string value) => ClearErrorOnEdit();
 
     public ObservableCollection<string> IndianStates { get; } =
-        new(IndianStateData.Select(state => state.Name).OrderBy(n => n, StringComparer.OrdinalIgnoreCase));
+        new(BusinessProfileRules.IndianStateNames);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PincodeValidationHint))]
@@ -174,7 +137,7 @@ public partial class SetupViewModel : BaseViewModel
         {
             if (string.IsNullOrWhiteSpace(Phone)) return string.Empty;
             var normalized = Phone.Trim();
-            if (!PhoneInputRegex().IsMatch(normalized)) return "Enter a 10-digit phone number";
+            if (!BusinessProfileRules.IsValidPhone(normalized)) return "Enter a 10-digit phone number";
             return $"\u2713 {normalized[..5]} {normalized[5..]}";
         }
     }
@@ -211,22 +174,8 @@ public partial class SetupViewModel : BaseViewModel
     /// <summary>
     /// Verifies the GSTIN check digit (15th character) per the official algorithm.
     /// </summary>
-    public static bool VerifyGstinChecksum(string gstin)
-    {
-        if (gstin.Length != 15) return false;
-        const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        var sum = 0;
-        for (var i = 0; i < 14; i++)
-        {
-            var idx = chars.IndexOf(char.ToUpperInvariant(gstin[i]));
-            if (idx < 0) return false;
-            var factor = (i % 2 == 0) ? 1 : 2;
-            var product = idx * factor;
-            sum += product / 36 + product % 36;
-        }
-        var checkIdx = (36 - sum % 36) % 36;
-        return char.ToUpperInvariant(gstin[14]) == chars[checkIdx];
-    }
+    public static bool VerifyGstinChecksum(string gstin) =>
+        BusinessProfileRules.VerifyGstinChecksum(gstin);
 
     public string PanValidationHint
     {
@@ -273,7 +222,7 @@ public partial class SetupViewModel : BaseViewModel
                 return string.Empty;
 
             var trimmed = State.Trim();
-            if (!IndianStateCodeByName.ContainsKey(trimmed))
+            if (!BusinessProfileRules.IsValidIndianState(trimmed))
                 return "Select a valid Indian state from the list";
 
             if (!IsGstinStateConsistent(GSTIN, trimmed))
@@ -592,8 +541,8 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(!ShouldValidateAdvancedSetupFields || IsGstinStateConsistent(GSTIN, State), "GSTIN state code does not match selected state.", "State")
             .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.", "Pincode")
             .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.", "Email")
-            .Rule(string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim()), "Please select a valid Indian state from the list.", "State")
-            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone must be exactly 10 digits.", "Phone")
+            .Rule(BusinessProfileRules.IsValidIndianState(State), "Please select a valid Indian state from the list.", "State")
+            .Rule(string.IsNullOrWhiteSpace(Phone) || BusinessProfileRules.IsValidPhone(Phone.Trim()), "Phone must be exactly 10 digits.", "Phone")
             .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || IsValidBackupTime(BackupTime), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
             .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.", "BackupLocation")
             .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation), "Backup location path is invalid.", "BackupLocation")
@@ -816,12 +765,12 @@ public partial class SetupViewModel : BaseViewModel
 
     private bool HasNoOptionalValidationErrors()
     {
-        var stateValid = string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim());
+        var stateValid = BusinessProfileRules.IsValidIndianState(State);
         var pincodeValid = string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0);
         var emailValid = string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim());
         var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
         var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
-            || PhoneInputRegex().IsMatch(phoneNormalized);
+            || BusinessProfileRules.IsValidPhone(phoneNormalized);
         var gstinFormatValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant());
         var gstinChecksumValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant());
         var panValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant());
@@ -869,12 +818,12 @@ public partial class SetupViewModel : BaseViewModel
 
     private bool HasNoVisibleFirmDetailErrors()
     {
-        var stateValid = string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim());
+        var stateValid = BusinessProfileRules.IsValidIndianState(State);
         var pincodeValid = string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0);
         var emailValid = string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim());
         var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
         var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
-            || PhoneInputRegex().IsMatch(phoneNormalized);
+            || BusinessProfileRules.IsValidPhone(phoneNormalized);
 
         return stateValid && pincodeValid && emailValid && phoneValid;
     }
@@ -917,7 +866,7 @@ public partial class SetupViewModel : BaseViewModel
 
             // Keep setup resilient when validation rules evolve:
             // drop previously persisted phone formats that are no longer valid.
-            if (!string.IsNullOrWhiteSpace(Phone) && !PhoneInputRegex().IsMatch(Phone.Trim()))
+            if (!string.IsNullOrWhiteSpace(Phone) && !BusinessProfileRules.IsValidPhone(Phone.Trim()))
                 Phone = string.Empty;
 
             HasRecoveredDraft =

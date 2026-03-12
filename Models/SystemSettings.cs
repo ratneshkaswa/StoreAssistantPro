@@ -4,7 +4,8 @@ namespace StoreAssistantPro.Models;
 
 /// <summary>
 /// Application-wide system settings. Single row in the database.
-/// Covers backup configuration, printer defaults, and tax mode.
+/// Stores workstation/operations settings plus legacy business-rule
+/// fields that are now edited from Firm Management.
 /// </summary>
 public class SystemSettings
 {
@@ -38,19 +39,20 @@ public class SystemSettings
     public string? DefaultPrinter { get; set; }
 
     /// <summary>
-    /// Default tax application mode: "Inclusive" (MRP includes GST) or "Exclusive" (GST added on top).
+    /// Business rule owned by Firm Management: "Inclusive" (MRP includes
+    /// GST) or "Exclusive" (GST added on top).
     /// </summary>
     [MaxLength(20)]
     public string DefaultTaxMode { get; set; } = "Exclusive";
 
-    /// <summary>Bill rounding: None, NearestOne, NearestFive, NearestTen.</summary>
+    /// <summary>Business rule owned by Firm Management: None, NearestOne, NearestFive, NearestTen.</summary>
     [MaxLength(20)]
     public string RoundingMethod { get; set; } = "None";
 
-    /// <summary>Whether billing allows selling with zero or negative stock.</summary>
+    /// <summary>Business rule owned by Firm Management.</summary>
     public bool NegativeStockAllowed { get; set; }
 
-    /// <summary>Language for amount-to-words on invoices: English or Hindi.</summary>
+    /// <summary>Business rule owned by Firm Management: English or Hindi.</summary>
     [MaxLength(20)]
     public string NumberToWordsLanguage { get; set; } = "English";
 

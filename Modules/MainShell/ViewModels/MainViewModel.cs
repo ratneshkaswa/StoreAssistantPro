@@ -279,7 +279,6 @@ public partial class MainViewModel : BaseViewModel
     private void OpenFirmManagement()
     {
         _dialogService.ShowDialog(FirmManagementDialog);
-        _statusBar.Post("Firm management closed");
     }
 
     [RelayCommand]

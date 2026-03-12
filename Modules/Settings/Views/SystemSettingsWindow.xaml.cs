@@ -7,8 +7,11 @@ namespace StoreAssistantPro.Modules.Settings.Views;
 
 public partial class SystemSettingsWindow : BaseDialogWindow
 {
-    protected override double DialogWidth => 550;
-    protected override double DialogHeight => 580;
+    protected override double DialogWidth => 860;
+    protected override double DialogHeight => 720;
+    protected override double DialogMinWidth => 700;
+    protected override double DialogMinHeight => 600;
+    protected override bool AllowResize => true;
 
     public SystemSettingsWindow(
         IWindowSizingService sizingService,

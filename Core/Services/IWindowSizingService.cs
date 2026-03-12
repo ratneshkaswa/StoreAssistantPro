@@ -8,8 +8,8 @@ namespace StoreAssistantPro.Core.Services;
 /// <b>Main window:</b> 90% of screen working area, centered, no resize.
 /// </para>
 /// <para>
-/// <b>Dialog windows:</b> Fixed size relative to main window,
-/// centered over owner, no resize.
+/// <b>Dialog windows:</b> Preferred size relative to the work area,
+/// centered over owner. Derived windows may opt into resize behavior.
 /// </para>
 /// <para>
 /// <b>Startup windows:</b> Fixed size, centered on screen (no owner).
@@ -25,7 +25,8 @@ public interface IWindowSizingService
 
     /// <summary>
     /// Configure a modal dialog window.
-    /// Sets owner, centers relative to owner, disables resize.
+    /// Sets owner, centers relative to owner, and clamps the initial size
+    /// to the current work area.
     /// </summary>
     void ConfigureDialogWindow(Window dialog, double width, double height);
 

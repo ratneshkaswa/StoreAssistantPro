@@ -682,8 +682,8 @@ public class SetupViewModelTests
     public void IndianStates_IsSortedAlphabetically()
     {
         var sut = CreateSut();
-        // With OrdinalIgnoreCase sort, '&' (U+0026) < letters, so "Andaman & Nicobar" comes first
-        Assert.Equal("Andaman & Nicobar", sut.IndianStates[0]);
+        // With OrdinalIgnoreCase sort, '&' (U+0026) < letters, so the Andaman entry comes first.
+        Assert.Equal("Andaman & Nicobar Islands", sut.IndianStates[0]);
     }
 
     // -- Confirm hint mismatch --

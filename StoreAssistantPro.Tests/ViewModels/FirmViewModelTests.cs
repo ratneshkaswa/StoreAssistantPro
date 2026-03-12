@@ -1,6 +1,6 @@
-﻿using NSubstitute;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using StoreAssistantPro.Core.Events;
-using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.Firm.Services;
 using StoreAssistantPro.Modules.Firm.ViewModels;
@@ -15,52 +15,105 @@ public class FirmViewModelTests
     private FirmViewModel CreateSut() => new(_firmService, _eventBus);
 
     [Fact]
-    public async Task LoadFirm_PopulatesFields()
+    public async Task LoadFirm_PopulatesUnifiedFields()
     {
-        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new AppConfig
-        {
-            FirmName = "Test Store",
-            Address = "123 Main St",
-            State = "Rajasthan",
-            Pincode = "302001",
-            Phone = "9876543210",
-            Email = "test@store.com",
-            GSTNumber = "08ABCDE1234F1Z5",
-            PANNumber = "ABCDE1234F",
-            CurrencySymbol = "Rs.",
-            FinancialYearStartMonth = 4,
-            DateFormat = "dd-MM-yyyy"
-        });
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: "Sonali Collection",
+            Address: "12 Station Road",
+            State: "Maharashtra",
+            Pincode: "400001",
+            Phone: "9876543210",
+            Email: "firm@example.com",
+            GSTNumber: "27AAPFU0939F1ZV",
+            PANNumber: "AAPFU0939F",
+            GstRegistrationType: "Composition",
+            CompositionSchemeRate: 1.5m,
+            StateCode: "27",
+            FinancialYearStartMonth: 7,
+            FinancialYearEndMonth: 6,
+            CurrencySymbol: "Rs.",
+            DateFormat: "yyyy-MM-dd",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Inclusive",
+            RoundingMethod: "NearestFive",
+            NegativeStockAllowed: true,
+            NumberToWordsLanguage: "Hindi"));
 
         var sut = CreateSut();
+
         await sut.LoadFirmCommand.ExecuteAsync(null);
 
-        Assert.Equal("Test Store", sut.FirmName);
-        Assert.Equal("123 Main St", sut.Address);
-        Assert.Equal("Rajasthan", sut.State);
-        Assert.Equal("302001", sut.Pincode);
+        Assert.Equal("Sonali Collection", sut.FirmName);
+        Assert.Equal("12 Station Road", sut.Address);
+        Assert.Equal("Maharashtra", sut.State);
+        Assert.Equal("400001", sut.Pincode);
         Assert.Equal("9876543210", sut.Phone);
-        Assert.Equal("test@store.com", sut.Email);
-        Assert.Equal("08ABCDE1234F1Z5", sut.GSTNumber);
-        Assert.Equal("ABCDE1234F", sut.PANNumber);
+        Assert.Equal("firm@example.com", sut.Email);
+        Assert.Equal("27AAPFU0939F1ZV", sut.GSTNumber);
+        Assert.Equal("AAPFU0939F", sut.PANNumber);
+        Assert.Equal("Composition", sut.SelectedGstRegistrationType);
+        Assert.Equal("1.5", sut.CompositionRate);
         Assert.Equal("Rs.", sut.SelectedCurrencySymbol);
-        Assert.Equal("April", sut.SelectedFYStartMonth);
-        Assert.Equal("dd-MM-yyyy", sut.SelectedDateFormat);
+        Assert.Equal("July", sut.SelectedFYStartMonth);
+        Assert.Equal("yyyy-MM-dd", sut.SelectedDateFormat);
+        Assert.Equal("Tax-Inclusive (MRP)", sut.SelectedTaxMode);
+        Assert.Equal("Round to nearest \u20B95", sut.SelectedRoundingMethod);
+        Assert.Equal("Hindi", sut.SelectedNumberToWordsLanguage);
+        Assert.True(sut.NegativeStockAllowed);
+        Assert.False(sut.IsDirty);
     }
 
     [Fact]
-    public async Task LoadFirm_NullConfig_DoesNotThrow()
+    public async Task LoadFirm_WithStateCodeFallback_UsesCanonicalState()
     {
-        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns((AppConfig?)null);
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: "Firm",
+            Address: string.Empty,
+            State: string.Empty,
+            Pincode: string.Empty,
+            Phone: string.Empty,
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 1m,
+            StateCode: "08",
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English"));
 
         var sut = CreateSut();
+
+        await sut.LoadFirmCommand.ExecuteAsync(null);
+
+        Assert.Equal("Rajasthan", sut.State);
+        Assert.Equal("State code: 08 - Rajasthan", sut.DerivedStateCodeDisplay);
+        Assert.False(sut.IsDirty);
+    }
+
+    [Fact]
+    public async Task LoadFirm_NullSnapshot_LeavesDefaults()
+    {
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns((FirmManagementSnapshot?)null);
+
+        var sut = CreateSut();
+
         await sut.LoadFirmCommand.ExecuteAsync(null);
 
         Assert.Empty(sut.FirmName);
+        Assert.Equal("April", sut.SelectedFYStartMonth);
+        Assert.Equal("\u20B9", sut.SelectedCurrencySymbol);
+        Assert.False(sut.IsDirty);
     }
 
     [Fact]
-    public async Task SaveFirm_EmptyName_HasValidationErrors()
+    public async Task SaveFirm_EmptyName_BlocksSave()
     {
         var sut = CreateSut();
         sut.FirmName = "   ";
@@ -68,48 +121,76 @@ public class FirmViewModelTests
         await sut.SaveFirmCommand.ExecuteAsync(null);
 
         Assert.True(sut.HasErrors);
+        Assert.Equal(nameof(FirmViewModel.FirmName), sut.FirstErrorFieldKey);
+        Assert.Equal("Review the highlighted business fields before saving.", sut.ErrorMessage);
         await _firmService.DidNotReceive().UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task SaveFirm_ValidInput_CallsServiceAndShowsSuccess()
+    public async Task SaveFirm_ValidInput_PersistsUnifiedBusinessSettings()
     {
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
         var sut = CreateSut();
-        sut.FirmName = "Updated Store";
-        sut.Address = "456 Oak Ave";
-        sut.State = "Gujarat";
-        sut.Pincode = "380001";
+        sut.FirmName = "  Updated Store  ";
+        sut.Address = "456 Oak Avenue";
+        sut.State = "Maharashtra";
+        sut.Pincode = "400001";
         sut.Phone = "9876543210";
         sut.Email = "info@updated.com";
-        sut.GSTNumber = "";
-        sut.PANNumber = "";
+        sut.GSTNumber = "27AAPFU0939F1ZV";
+        sut.PANNumber = "AAPFU0939F";
+        sut.SelectedGstRegistrationType = "Composition";
+        sut.CompositionRate = "1.5";
+        sut.SelectedCurrencySymbol = "Rs.";
+        sut.SelectedFYStartMonth = "July";
+        sut.SelectedDateFormat = "yyyy-MM-dd";
+        sut.SelectedTaxMode = "Tax-Inclusive (MRP)";
+        sut.SelectedRoundingMethod = "Round to nearest \u20B95";
+        sut.SelectedNumberToWordsLanguage = "Hindi";
+        sut.NegativeStockAllowed = true;
 
         await sut.SaveFirmCommand.ExecuteAsync(null);
 
-        await _firmService.Received(1).UpdateFirmAsync(Arg.Is<FirmUpdateDto>(d =>
-            d.FirmName == "Updated Store" &&
-            d.Address == "456 Oak Ave" &&
-            d.State == "Gujarat" &&
-            d.Pincode == "380001" &&
-            d.Phone == "9876543210" &&
-            d.CurrencySymbol == "\u20B9" &&
-            d.DateFormat == "dd/MM/yyyy" &&
-            d.NumberFormat == "Indian"), Arg.Any<CancellationToken>());
+        await _firmService.Received(1).UpdateFirmAsync(Arg.Is<FirmUpdateDto>(dto =>
+            dto.FirmName == "Updated Store"
+            && dto.Address == "456 Oak Avenue"
+            && dto.State == "Maharashtra"
+            && dto.Pincode == "400001"
+            && dto.Phone == "9876543210"
+            && dto.Email == "info@updated.com"
+            && dto.GSTNumber == "27AAPFU0939F1ZV"
+            && dto.PANNumber == "AAPFU0939F"
+            && dto.GstRegistrationType == "Composition"
+            && dto.CompositionSchemeRate == 1.5m
+            && dto.StateCode == "27"
+            && dto.FinancialYearStartMonth == 7
+            && dto.FinancialYearEndMonth == 6
+            && dto.CurrencySymbol == "Rs."
+            && dto.DateFormat == "yyyy-MM-dd"
+            && dto.NumberFormat == "Indian"
+            && dto.DefaultTaxMode == "Inclusive"
+            && dto.RoundingMethod == "NearestFive"
+            && dto.NegativeStockAllowed
+            && dto.NumberToWordsLanguage == "Hindi"), Arg.Any<CancellationToken>());
         await _eventBus.Received(1).PublishAsync(Arg.Is<FirmUpdatedEvent>(e =>
-            e.FirmName == "Updated Store" &&
-            e.CurrencySymbol == "\u20B9" &&
-            e.DateFormat == "dd/MM/yyyy"));
-        Assert.Equal("Firm information saved.", sut.SuccessMessage);
+            e.FirmName == "Updated Store"
+            && e.CurrencySymbol == "Rs."
+            && e.DateFormat == "yyyy-MM-dd"));
+        Assert.Equal("Business settings saved.", sut.SuccessMessage);
         Assert.Empty(sut.ErrorMessage);
+        Assert.False(sut.IsDirty);
     }
 
     [Fact]
     public async Task SaveFirm_ServiceThrows_SetsError()
     {
-        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromException(new InvalidOperationException("DB error")));
-
         var sut = CreateSut();
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new InvalidOperationException("DB error"));
         sut.FirmName = "Store";
 
         await sut.SaveFirmCommand.ExecuteAsync(null);
@@ -119,137 +200,160 @@ public class FirmViewModelTests
     }
 
     [Fact]
-    public void WizardNavigation_NextAndBack()
+    public async Task SaveFirm_InvalidGstinChecksum_BlocksSave()
     {
         var sut = CreateSut();
-        sut.FirmName = "Test Store";
-
-        Assert.Equal(1, sut.CurrentStep);
-        Assert.True(sut.IsStep1);
-        Assert.False(sut.CanGoBack);
-        Assert.True(sut.CanGoNext);
-
-        sut.NextCommand.Execute(null);
-        Assert.Equal(2, sut.CurrentStep);
-        Assert.True(sut.IsStep2);
-        Assert.True(sut.CanGoBack);
-
-        sut.NextCommand.Execute(null);
-        Assert.Equal(3, sut.CurrentStep);
-        Assert.True(sut.IsStep3);
-        Assert.True(sut.IsLastStep);
-        Assert.False(sut.CanGoNext);
-
-        sut.BackCommand.Execute(null);
-        Assert.Equal(2, sut.CurrentStep);
-    }
-
-    [Fact]
-    public async Task SaveFirm_IncludesFinancialYear()
-    {
-        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
-
-        var sut = CreateSut();
-        sut.FirmName = "FY Test";
-        sut.SelectedFYStartMonth = "July";
+        sut.FirmName = "Store";
+        sut.State = "Maharashtra";
+        sut.GSTNumber = "27AAPFU0939F1ZX";
 
         await sut.SaveFirmCommand.ExecuteAsync(null);
 
-        await _firmService.Received(1).UpdateFirmAsync(Arg.Is<FirmUpdateDto>(d =>
-            d.FinancialYearStartMonth == 7 &&
-            d.FinancialYearEndMonth == 6), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public void FinancialYearDisplay_UpdatesWithMonth()
-    {
-        var sut = CreateSut();
-        sut.SelectedFYStartMonth = "January";
-        Assert.Equal("January \u2013 December", sut.FinancialYearDisplay);
-
-        sut.SelectedFYStartMonth = "April";
-        Assert.Equal("April \u2013 March", sut.FinancialYearDisplay);
-    }
-
-    [Fact]
-    public void Constructor_DefaultCurrencySymbolIsRupee()
-    {
-        var sut = CreateSut();
-        Assert.Equal("\u20B9", sut.SelectedCurrencySymbol);
-    }
-
-    [Fact]
-    public void NextAndBack_ClearMessages()
-    {
-        var sut = CreateSut();
-        sut.FirmName = "Test";
-
-        sut.NextCommand.Execute(null);
-        Assert.Equal(2, sut.CurrentStep);
-        Assert.Empty(sut.ErrorMessage);
-        Assert.Empty(sut.SuccessMessage);
-
-        sut.BackCommand.Execute(null);
-        Assert.Equal(1, sut.CurrentStep);
-        Assert.Empty(sut.ErrorMessage);
-        Assert.Empty(sut.SuccessMessage);
-    }
-
-    [Fact]
-    public void Next_WithValidationErrors_StaysOnStep()
-    {
-        var sut = CreateSut();
-        sut.FirmName = "";
-
-        sut.NextCommand.Execute(null);
-
-        Assert.Equal(1, sut.CurrentStep);
         Assert.True(sut.HasErrors);
-        Assert.Equal("Please fix the highlighted fields.", sut.ErrorMessage);
+        Assert.Contains("check digit", sut.GstinValidationHint, StringComparison.OrdinalIgnoreCase);
+        await _firmService.DidNotReceive().UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public void Next_CrossStepValidation_DoesNotBleed()
+    public async Task SaveFirm_GstinStateMismatch_BlocksSave()
     {
-        // Step 1 valid, go to Step 2
         var sut = CreateSut();
-        sut.FirmName = "Test Store";
-        sut.NextCommand.Execute(null);
-        Assert.Equal(2, sut.CurrentStep);
+        sut.FirmName = "Store";
+        sut.State = "Delhi";
+        sut.GSTNumber = "27AAPFU0939F1ZV";
 
-        // Enter invalid PAN on Step 2
-        sut.PANNumber = "BAD";
+        await sut.SaveFirmCommand.ExecuteAsync(null);
 
-        // Go back to Step 1
-        sut.BackCommand.Execute(null);
-        Assert.Equal(1, sut.CurrentStep);
+        Assert.True(sut.HasErrors);
+        Assert.Contains("selected state", sut.GstinValidationHint, StringComparison.OrdinalIgnoreCase);
+        await _firmService.DidNotReceive().UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>());
+    }
 
-        // Next must succeed — Step 2's PAN error must NOT block Step 1
-        sut.NextCommand.Execute(null);
-        Assert.Equal(2, sut.CurrentStep);
+    [Fact]
+    public async Task SaveFirm_CompositionRate_WithDecimalComma_PersistsParsedRate()
+    {
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+        sut.FirmName = "Store";
+        sut.State = "Maharashtra";
+        sut.SelectedGstRegistrationType = "Composition";
+        sut.CompositionRate = "1,5";
+
+        await sut.SaveFirmCommand.ExecuteAsync(null);
+
+        await _firmService.Received(1).UpdateFirmAsync(Arg.Is<FirmUpdateDto>(dto =>
+            dto.GstRegistrationType == "Composition"
+            && dto.CompositionSchemeRate == 1.5m), Arg.Any<CancellationToken>());
         Assert.Empty(sut.ErrorMessage);
     }
 
     [Fact]
-    public void Next_OptionalFieldErrors_DoNotBlockNavigation()
+    public async Task SaveFirm_NonComposition_StoresZeroCompositionRate()
     {
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
         var sut = CreateSut();
-        sut.FirmName = "Test Store";
+        sut.FirmName = "Store";
+        sut.SelectedGstRegistrationType = "Regular";
+        sut.CompositionRate = "12.5";
 
-        // Enter invalid optional fields on Step 1
-        sut.Email = "not-an-email";
-        sut.Pincode = "123";
+        await sut.SaveFirmCommand.ExecuteAsync(null);
 
-        // Next must succeed — optional format errors don't block
-        sut.NextCommand.Execute(null);
-        Assert.Equal(2, sut.CurrentStep);
+        await _firmService.Received(1).UpdateFirmAsync(Arg.Is<FirmUpdateDto>(dto =>
+            dto.GstRegistrationType == "Regular"
+            && dto.CompositionSchemeRate == 0m), Arg.Any<CancellationToken>());
+    }
 
-        // Enter invalid optional fields on Step 2
-        sut.GSTNumber = "BAD";
-        sut.PANNumber = "XY";
+    [Fact]
+    public async Task LoadFirm_InFlight_ExposesWorkingState()
+    {
+        var pendingLoad = new TaskCompletionSource<FirmManagementSnapshot?>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>())
+            .Returns(_ => pendingLoad.Task);
 
-        // Next must succeed — optional format errors don't block
-        sut.NextCommand.Execute(null);
-        Assert.Equal(3, sut.CurrentStep);
+        var sut = CreateSut();
+
+        var loadTask = sut.LoadFirmCommand.ExecuteAsync(null);
+        await Task.Yield();
+
+        Assert.True(sut.IsLoading);
+        Assert.True(sut.IsWorking);
+        Assert.Equal("Loading business settings...", sut.WorkingMessage);
+
+        pendingLoad.SetResult(new FirmManagementSnapshot(
+            FirmName: "Store",
+            Address: string.Empty,
+            State: "Rajasthan",
+            Pincode: string.Empty,
+            Phone: string.Empty,
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 0m,
+            StateCode: "08",
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English"));
+
+        await loadTask;
+
+        Assert.False(sut.IsWorking);
+    }
+
+    [Fact]
+    public async Task IsDirty_LoadEditSave_TracksChanges()
+    {
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: "Store",
+            Address: string.Empty,
+            State: "Rajasthan",
+            Pincode: string.Empty,
+            Phone: "9876543210",
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 0m,
+            StateCode: "08",
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English"));
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+
+        await sut.LoadFirmCommand.ExecuteAsync(null);
+        Assert.False(sut.IsDirty);
+
+        sut.Phone = "9123456789";
+        Assert.True(sut.IsDirty);
+
+        await sut.SaveFirmCommand.ExecuteAsync(null);
+
+        Assert.False(sut.IsDirty);
     }
 }

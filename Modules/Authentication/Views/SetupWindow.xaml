@@ -14,21 +14,27 @@
         MinWidth="{StaticResource SetupMinWidth}"
         MinHeight="{StaticResource SetupMinHeight}">
 
-    <Grid Margin="{StaticResource SetupRootPadding}"
-          TextOptions.TextFormattingMode="Display"
-          TextOptions.TextRenderingMode="ClearType"
-          KeyboardNavigation.TabNavigation="Continue"
-          h:KeyboardNav.DefaultCommand="{Binding SaveCommand}"
-          h:KeyboardNav.EscapeCommand="{Binding CancelSetupCommand}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="{StaticResource SetupRowSpacingMedium}"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Border Margin="{StaticResource CardMargin}"
+                Background="{StaticResource FluentSurface}"
+                BorderBrush="{StaticResource FluentSurfaceStroke}"
+                BorderThickness="{StaticResource FluentBorderThicknessThin}"
+                CornerRadius="{StaticResource FluentCornerXLarge}">
+            <Grid Margin="{StaticResource SetupRootPadding}"
+                  TextOptions.TextFormattingMode="Display"
+                  TextOptions.TextRenderingMode="ClearType"
+                  KeyboardNavigation.TabNavigation="Continue"
+                  h:KeyboardNav.DefaultCommand="{Binding SaveCommand}"
+                  h:KeyboardNav.EscapeCommand="{Binding CancelSetupCommand}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource SetupRowSpacingMedium}"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{StaticResource SetupRowSpacingSmall}"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
                 Background="Transparent"
@@ -240,5 +246,7 @@
                                  Grid.RowSpan="7"
                                  IsActive="{Binding IsBusy}"
                                  Message="Saving your setup..."/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

@@ -36,8 +36,16 @@ public class RegionalSettingsService : IRegionalSettingsService
         }
     }
 
-    public string FormatCurrency(decimal amount) =>
-        amount.ToString("C", Culture);
+    public string FormatCurrency(decimal amount)
+    {
+        string currencySymbol;
+        lock (_lock)
+            currencySymbol = _currencySymbol;
+
+        var culture = (CultureInfo)Culture.Clone();
+        culture.NumberFormat.CurrencySymbol = currencySymbol;
+        return amount.ToString("C", culture);
+    }
 
     public string FormatNumber(decimal number) =>
         number.ToString("N2", Culture);

@@ -15,8 +15,4 @@ public record SystemSettingsDto(
     bool AutoBackupEnabled,
     string? BackupTime,
     string? RestoreOption,
-    string? DefaultPrinter,
-    string DefaultTaxMode,
-    string RoundingMethod,
-    bool NegativeStockAllowed,
-    string NumberToWordsLanguage);
+    string? DefaultPrinter);

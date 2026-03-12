@@ -9,8 +9,8 @@ namespace StoreAssistantPro.Core;
 /// Base class for all modal dialog windows.  Provides the complete
 /// enterprise dialog standard out of the box:
 /// <list type="bullet">
-///   <item><b>Fixed size</b> — set via <see cref="DialogWidth"/> / <see cref="DialogHeight"/>.</item>
-///   <item><b>No resize</b> — <c>ResizeMode.NoResize</c>.</item>
+///   <item><b>Preferred size</b> — set via <see cref="DialogWidth"/> / <see cref="DialogHeight"/>.</item>
+///   <item><b>Fixed by default</b> — dialogs stay non-resizable unless a derived window opts in.</item>
 ///   <item><b>Centered over owner</b> — via <see cref="IWindowSizingService"/>.</item>
 ///   <item><b>Modal</b> — always shown with <c>ShowDialog()</c>.</item>
 ///   <item><b>Enter = confirm</b> — bind <see cref="ConfirmCommand"/> in XAML.</item>
@@ -55,11 +55,29 @@ public abstract class BaseDialogWindow : Window
 {
     // ── Size ─────────────────────────────────────────────────────────
 
-    /// <summary>Fixed width for this dialog.</summary>
+    /// <summary>Preferred width for this dialog.</summary>
     protected abstract double DialogWidth { get; }
 
-    /// <summary>Fixed height for this dialog.</summary>
+    /// <summary>Preferred height for this dialog.</summary>
     protected abstract double DialogHeight { get; }
+
+    /// <summary>
+    /// Minimum width after the dialog is clamped to the current work area.
+    /// Leave at 0 to keep the configured width as the effective minimum.
+    /// </summary>
+    protected virtual double DialogMinWidth => 0;
+
+    /// <summary>
+    /// Minimum height after the dialog is clamped to the current work area.
+    /// Leave at 0 to keep the configured height as the effective minimum.
+    /// </summary>
+    protected virtual double DialogMinHeight => 0;
+
+    /// <summary>
+    /// Allows rich settings dialogs to resize while preserving the app-wide
+    /// centered modal behavior. Defaults to fixed-size dialogs.
+    /// </summary>
+    protected virtual bool AllowResize => false;
 
     // ── Enter = confirm ──────────────────────────────────────────────
 
@@ -132,6 +150,17 @@ public abstract class BaseDialogWindow : Window
         UseLayoutRounding = true;
         SnapsToDevicePixels = true;
         sizingService.ConfigureDialogWindow(this, DialogWidth, DialogHeight);
+
+        var workArea = SystemParameters.WorkArea;
+        MaxWidth = workArea.Width - 16;
+        MaxHeight = workArea.Height - 16;
+        MinWidth = Math.Min(
+            DialogMinWidth > 0 ? DialogMinWidth : Width,
+            Width);
+        MinHeight = Math.Min(
+            DialogMinHeight > 0 ? DialogMinHeight : Height,
+            Height);
+        ResizeMode = AllowResize ? ResizeMode.CanResizeWithGrip : ResizeMode.NoResize;
 
         // Set app icon (gracefully skips if asset not found)
         TrySetAppIcon();

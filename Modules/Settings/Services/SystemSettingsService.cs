@@ -30,7 +30,6 @@ public class SystemSettingsService(
         // Seed default row if none exists
         settings = new SystemSettings
         {
-            DefaultTaxMode = "Exclusive",
             AutoBackupEnabled = false
         };
         context.SystemSettings.Add(settings);
@@ -53,10 +52,6 @@ public class SystemSettingsService(
         settings.BackupTime = dto.BackupTime?.Trim();
         settings.RestoreOption = dto.RestoreOption?.Trim();
         settings.DefaultPrinter = dto.DefaultPrinter?.Trim();
-        settings.DefaultTaxMode = string.IsNullOrWhiteSpace(dto.DefaultTaxMode) ? "Exclusive" : dto.DefaultTaxMode.Trim();
-        settings.RoundingMethod = string.IsNullOrWhiteSpace(dto.RoundingMethod) ? "None" : dto.RoundingMethod.Trim();
-        settings.NegativeStockAllowed = dto.NegativeStockAllowed;
-        settings.NumberToWordsLanguage = string.IsNullOrWhiteSpace(dto.NumberToWordsLanguage) ? "English" : dto.NumberToWordsLanguage.Trim();
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
         logger.LogInformation("System settings updated");

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StoreAssistantPro.Core.Helpers;
 
 namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 
@@ -52,13 +53,7 @@ public partial class SetupViewModel
     {
         get
         {
-            if (!string.IsNullOrWhiteSpace(GSTIN) && GSTIN.Length >= 2)
-            {
-                var code = GSTIN[..2];
-                if (GetGstinStateName(code) != null)
-                    return code;
-            }
-            return GetStateCodeFromName(State) ?? string.Empty;
+            return BusinessProfileRules.GetStateCodeFromGstinOrState(GSTIN, State) ?? string.Empty;
         }
     }
 
@@ -232,10 +227,10 @@ public partial class SetupViewModel
         && NumberToWordsLanguages.Contains(SelectedNumberToWordsLanguage);
 
     private static string? GetGstinStateName(string code) =>
-        IndianStateNameByCode.GetValueOrDefault(code);
+        BusinessProfileRules.GetStateNameByCode(code);
 
     private static string? GetStateCodeFromName(string stateName) =>
-        IndianStateCodeByName.GetValueOrDefault(stateName);
+        BusinessProfileRules.GetStateCodeFromName(stateName);
 
     private static int MonthNameToIndex(string name)
     {
@@ -245,19 +240,8 @@ public partial class SetupViewModel
         return 4;
     }
 
-    private static bool IsGstinStateConsistent(string gstinValue, string stateValue)
-    {
-        if (string.IsNullOrWhiteSpace(gstinValue) || string.IsNullOrWhiteSpace(stateValue))
-            return true;
-
-        var gstin = gstinValue.Trim().ToUpperInvariant();
-        if (!GstinRegex().IsMatch(gstin))
-            return true;
-
-        var stateFromGstin = GetGstinStateName(gstin[..2]);
-        return stateFromGstin is null
-            || string.Equals(stateFromGstin, stateValue.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
+    private static bool IsGstinStateConsistent(string gstinValue, string stateValue) =>
+        BusinessProfileRules.IsGstinStateConsistent(gstinValue, stateValue);
 
     private static string? NormalizeBackupPath(string? path)
     {
@@ -299,50 +283,11 @@ public partial class SetupViewModel
         return !string.IsNullOrWhiteSpace(normalized) && System.IO.Directory.Exists(normalized);
     }
 
-    private static bool TryParseRate(string value, out decimal rate)
-    {
-        rate = 0;
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
+    private static bool TryParseRate(string value, out decimal rate) =>
+        BusinessProfileRules.TryParseCompositionRate(value, out rate);
 
-        var trimmed = value.Trim();
-        if (decimal.TryParse(trimmed, NumberStyles.Number, CultureInfo.InvariantCulture, out rate))
-            return true;
-
-        var normalized = trimmed.Replace(" ", string.Empty);
-
-        if (!normalized.Contains('.'))
-        {
-            var commaCount = normalized.Count(c => c == ',');
-            if (commaCount == 1)
-            {
-                var commaIndex = normalized.IndexOf(',');
-                var decimals = normalized.Length - commaIndex - 1;
-                normalized = decimals is >= 1 and <= 2
-                    ? normalized.Replace(',', '.')
-                    : normalized.Replace(",", string.Empty);
-            }
-            else
-            {
-                normalized = normalized.Replace(",", string.Empty);
-            }
-        }
-        else
-        {
-            normalized = normalized.Replace(",", string.Empty);
-        }
-
-        return decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out rate);
-    }
-
-    private static bool IsValidCompositionRate(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
-
-        return TryParseRate(value, out var rate)
-            && rate is >= 0 and <= 100;
-    }
+    private static bool IsValidCompositionRate(string value) =>
+        BusinessProfileRules.IsValidCompositionRate(value);
 
     private static bool IsValidBackupTime(string value)
     {
@@ -352,21 +297,9 @@ public partial class SetupViewModel
         return TimeOnly.TryParseExact(value.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
     }
 
-    private static bool IsValidGstin(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
+    private static bool IsValidGstin(string value) =>
+        BusinessProfileRules.IsValidGstin(value);
 
-        var gstin = value.Trim().ToUpperInvariant();
-        return GstinRegex().IsMatch(gstin) && VerifyGstinChecksum(gstin);
-    }
-
-    private static bool IsValidPan(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
-
-        return PanRegex().IsMatch(value.Trim().ToUpperInvariant());
-    }
+    private static bool IsValidPan(string value) =>
+        BusinessProfileRules.IsValidPan(value);
 }
-

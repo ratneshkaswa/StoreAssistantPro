@@ -185,14 +185,15 @@
         <Setter Property="Margin" Value="{StaticResource FieldLabelSpacing}"/>
     </Style>
 
-    <!-- Inline form-row label (right-aligned, vertically centered) -->
+    <!-- Inline form-row label (left-aligned, vertically centered) -->
     <Style x:Key="FormRowLabelStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="TextAlignment" Value="Left"/>
         <Setter Property="Margin" Value="{StaticResource FormColumnGap}"/>
     </Style>
 

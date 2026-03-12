@@ -21,7 +21,7 @@ public partial class LoginWindow : Window
         vm.RequestClose = result => DialogResult = result;
         vm.Initialize();
 
-        sizing.ConfigureStartupWindow(this, 480, 740);
+        sizing.ConfigureStartupWindow(this, 560, 760);
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
 
         PreviewKeyDown += OnPreviewKeyDown;
@@ -111,6 +111,9 @@ public partial class LoginWindow : Window
                 e.Handled = true;
                 return;
         }
+
+        if (!vm.IsUserSelected)
+            return;
 
         // Skip digit/key routing when focus is inside editable fields
         if (focusInEditable)

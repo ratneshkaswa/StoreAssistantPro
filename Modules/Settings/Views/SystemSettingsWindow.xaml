@@ -1,4 +1,4 @@
-﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Settings.Views.SystemSettingsWindow"
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Settings.Views.SystemSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -11,6 +11,24 @@
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
           KeyboardNavigation.TabNavigation="Continue">
+        <Grid.Resources>
+            <Style x:Key="SummaryLabelStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+                <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="SummaryValueStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+                <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+        </Grid.Resources>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -18,156 +36,246 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Title -->
-        <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE713;"/><Run Text=" System Settings"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource DialogTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE713;"/>
+                <Run Text=" System Settings"/>
+            </TextBlock>
+            <TextBlock Text="Manage backups, restore operations, and workstation defaults without changing firm-wide billing rules."
+                       Style="{StaticResource HintTextStyle}"
+                       AutomationProperties.Name="System settings summary"/>
+        </StackPanel>
 
-        <!-- Settings sections -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                    Focusable="False"
-                    CanContentScroll="True"
-                    PanningMode="VerticalOnly"
-                    h:SmoothScroll.IsEnabled="True">
-            <StackPanel>
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Focusable="False"
+                      CanContentScroll="True"
+                      PanningMode="VerticalOnly"
+                      h:SmoothScroll.IsEnabled="True">
+            <StackPanel Margin="{StaticResource ItemSpacing}"
+                        MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"
+                        HorizontalAlignment="Center">
+                <WrapPanel Margin="{StaticResource SectionSpacing}"
+                           ItemWidth="{StaticResource SettingsSummaryCardWidth}">
+                    <Border Style="{StaticResource StatCardStyle}"
+                            Background="{StaticResource FluentKpiBlueMuted}"
+                            BorderBrush="{StaticResource FluentKpiBlue}"
+                            Margin="{StaticResource InlineControlSpacing}"
+                            AutomationProperties.Name="Backup summary card">
+                        <StackPanel>
+                            <TextBlock Text="Backup posture"
+                                       Style="{StaticResource SummaryLabelStyle}"/>
+                            <TextBlock Text="{Binding BackupModeTitle}"
+                                       Style="{StaticResource SummaryValueStyle}"/>
+                            <TextBlock Text="{Binding BackupModeSubtitle}"
+                                       Style="{StaticResource HintTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
 
-                <!-- Database section -->
-                <TextBlock Text="Database" Style="{StaticResource SectionHeaderStyle}"
-                           Margin="{StaticResource SectionSpacing}"/>
+                    <Border Style="{StaticResource StatCardStyle}"
+                            Background="{StaticResource FluentKpiTealMuted}"
+                            BorderBrush="{StaticResource FluentKpiTeal}"
+                            Margin="{StaticResource InlineControlSpacing}"
+                            AutomationProperties.Name="Printer summary card">
+                        <StackPanel>
+                            <TextBlock Text="Printer default"
+                                       Style="{StaticResource SummaryLabelStyle}"/>
+                            <TextBlock Text="{Binding PrinterSummaryText}"
+                                       Style="{StaticResource SummaryValueStyle}"/>
+                            <TextBlock Text="Used by the current workstation for bill and receipt printing."
+                                       Style="{StaticResource HintTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource StatCardStyle}"
+                            Background="{StaticResource FluentKpiOrangeMuted}"
+                            BorderBrush="{StaticResource FluentKpiOrange}"
+                            Margin="{StaticResource InlineControlSpacing}"
+                            AutomationProperties.Name="Restore summary card">
+                        <StackPanel>
+                            <TextBlock Text="Restore readiness"
+                                       Style="{StaticResource SummaryLabelStyle}"/>
+                            <TextBlock Text="{Binding RestoreStatusText}"
+                                       Style="{StaticResource SummaryValueStyle}"/>
+                            <TextBlock Text="{Binding LastBackupSummary}"
+                                       Style="{StaticResource HintTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Backup Location"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"
-                             h:Watermark.Text="Default: app folder\Backups"/>
+                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+                    <StackPanel>
+                        <TextBlock Text="Backup &amp; Restore" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Text="Protect the local database and control where backup files are written."
+                                   Style="{StaticResource HintTextStyle}"/>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Backup"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                        <Button Content="Backup Now" Command="{Binding BackupCommand}"
-                                Style="{StaticResource PrimaryButtonStyle}"/>
-                        <TextBlock Text="{Binding LastBackupPath}"
-                                   Margin="{StaticResource InlineControlSpacing}"
-                                   VerticalAlignment="Center"
-                                   Foreground="{StaticResource FluentTextTertiary}"
-                                   FontSize="{StaticResource FontSizeCaption}"/>
+                        <Grid Margin="{StaticResource ItemSpacing}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="{StaticResource ItemSpacing}">
+                                <TextBlock x:Name="BackupLocationLabel"
+                                           Text="Backup Location"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <TextBox Text="{Binding BackupLocation, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Backup location"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=BackupLocationLabel}"
+                                         h:Watermark.Text="Default: app folder\\Backups"/>
+                                <TextBlock Text="{Binding BackupModeSubtitle}"
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="{StaticResource ItemSpacing}">
+                                <TextBlock x:Name="BackupTimeLabel"
+                                           Text="Backup Time"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <TextBox Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}"
+                                         HorizontalAlignment="Left"
+                                         IsEnabled="{Binding AutoBackupEnabled}"
+                                         AutomationProperties.Name="Daily backup time"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=BackupTimeLabel}"
+                                         h:Watermark.Text="HH:mm"/>
+                                <TextBlock Text="{Binding BackupScheduleSummary}"
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <Border Grid.Row="1" Grid.ColumnSpan="3"
+                                    Style="{StaticResource SectionCardStyle}"
+                                    Margin="{StaticResource ItemSpacing}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding AutoBackupEnabled}"
+                                              VerticalAlignment="Top"
+                                              AutomationProperties.Name="Enable automatic backup"/>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Run a backup automatically every day"
+                                                   Style="{StaticResource FormRowLabelStyle}"/>
+                                        <TextBlock Text="When enabled, the backup time becomes required and the app will use the selected backup location."
+                                                   Style="{StaticResource HintTextStyle}"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="{StaticResource ItemSpacing}">
+                                <TextBlock Text="Backup Now"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Create Backup"
+                                            Command="{Binding BackupCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            AutomationProperties.Name="Create database backup"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding LastBackupSummary}"
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="{StaticResource ItemSpacing}">
+                                <TextBlock x:Name="RestoreFileLabel"
+                                           Text="Restore File"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <TextBox Text="{Binding RestoreFilePath, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Restore file path"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=RestoreFileLabel}"
+                                         h:Watermark.Text="Path to .bak file"/>
+                                <StackPanel Orientation="Horizontal" Margin="{StaticResource ValidationHintMargin}">
+                                    <Button Content="Restore Backup"
+                                            Command="{Binding RestoreCommand}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            AutomationProperties.Name="Restore database from backup"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding RestoreStatusText}"
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <controls:InfoBar Grid.Row="3"
+                                              Grid.ColumnSpan="3"
+                                              Severity="Warning"
+                                              Title="Restore caution"
+                                              Message="Restoring a backup replaces the current database. Restart the application after a successful restore."
+                                              Margin="{StaticResource ItemSpacing}"
+                                              AutomationProperties.Name="Restore caution"/>
+                        </Grid>
                     </StackPanel>
+                </Border>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Restore"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <Grid Grid.Row="4" Grid.Column="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Text="{Binding RestoreFilePath, UpdateSourceTrigger=PropertyChanged}"
-                                 h:Watermark.Text="Path to .bak file"/>
-                        <Button Grid.Column="1" Content="Restore" Command="{Binding RestoreCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Margin="{StaticResource InlineControlSpacing}"/>
-                    </Grid>
+                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+                    <StackPanel>
+                        <TextBlock Text="Workstation Defaults" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Text="These defaults affect the current machine without changing shared business rules."
+                                   Style="{StaticResource HintTextStyle}"/>
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
-                               Style="{StaticResource HintTextStyle}"
-                               Text="⚠ Restore will replace the current database. Restart required after restore."/>
-                </Grid>
+                        <Grid Margin="{StaticResource ItemSpacing}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                <!-- General section -->
-                <TextBlock Text="General" Style="{StaticResource SectionHeaderStyle}"
-                           Margin="{StaticResource SectionSpacing}"/>
+                            <StackPanel Grid.Column="0" Margin="{StaticResource ItemSpacing}">
+                                <TextBlock x:Name="DefaultPrinterLabel"
+                                           Text="Default Printer"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <TextBox Text="{Binding DefaultPrinter, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Default printer"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=DefaultPrinterLabel}"
+                                         h:Watermark.Text="System default"/>
+                                <TextBlock Text="Leave blank to use the Windows default printer."
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Default Printer"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             Text="{Binding DefaultPrinter, UpdateSourceTrigger=PropertyChanged}"
-                             h:Watermark.Text="System default"/>
-
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Auto Backup"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                        <CheckBox Content="Enable Auto Backup" IsChecked="{Binding AutoBackupEnabled}"/>
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource SectionCardStyle}"
+                                    Margin="{StaticResource ItemSpacing}">
+                                <StackPanel>
+                                    <TextBlock Text="Current workstation summary"
+                                               Style="{StaticResource FormRowLabelStyle}"/>
+                                    <TextBlock Text="{Binding PrinterSummaryText}"
+                                               Style="{StaticResource HintTextStyle}"
+                                               TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding BackupScheduleSummary}"
+                                               Margin="{StaticResource ValidationHintMargin}"
+                                               Style="{StaticResource HintTextStyle}"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </StackPanel>
-
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Backup Time"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="4" Grid.Column="1"
-                             Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
-                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             h:Watermark.Text="HH:mm"/>
-
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Tax Mode"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="6" Grid.Column="1"
-                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                              ItemsSource="{Binding TaxModes}"
-                              SelectedItem="{Binding DefaultTaxMode}"/>
-
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Bill Rounding"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="8" Grid.Column="1"
-                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                              ItemsSource="{Binding RoundingMethods}"
-                              SelectedItem="{Binding RoundingMethod}"/>
-
-                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Number to Words"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="10" Grid.Column="1"
-                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                              ItemsSource="{Binding NumberToWordsLanguages}"
-                              SelectedItem="{Binding NumberToWordsLanguage}"/>
-
-                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Negative Stock"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal">
-                        <CheckBox Content="Allow billing when stock is unavailable"
-                                  IsChecked="{Binding NegativeStockAllowed}"/>
-                    </StackPanel>
-                </Grid>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Messages -->
-        <Grid Grid.Row="2" MinHeight="{StaticResource MessageAreaMinHeight}"
+        <Grid Grid.Row="2"
+              MinHeight="{StaticResource MessageAreaMinHeight}"
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Severity="Error"
                               Title="Settings issue"
@@ -183,12 +291,16 @@
                               AutomationProperties.HelpText="{Binding SuccessMessage}"/>
         </Grid>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="Save Settings" Command="{Binding SaveCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Close" IsCancel="True"
+            <Button Content="Save Settings"
+                    Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Close"
+                    IsCancel="True"
                     Style="{StaticResource SecondaryButtonStyle}"/>
         </StackPanel>
 

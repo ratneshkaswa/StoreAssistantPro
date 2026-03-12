@@ -10,9 +10,32 @@
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
     <Window.Resources>
+        <Style x:Key="LoginRoleButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource SelectableUserButtonStyle}">
+            <Setter Property="MinHeight" Value="{StaticResource LoginRoleButtonMinHeight}"/>
+            <Setter Property="Padding" Value="{StaticResource ButtonPaddingLarge}"/>
+        </Style>
+
+        <Style x:Key="LoginKeypadButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource PosKeypadButtonStyle}">
+            <Setter Property="MinWidth" Value="{StaticResource LoginKeypadButtonMinSize}"/>
+            <Setter Property="MinHeight" Value="{StaticResource LoginKeypadButtonMinSize}"/>
+        </Style>
+
+        <Style x:Key="LoginInteractiveRegionStyle" TargetType="FrameworkElement">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="IsHitTestVisible" Value="True"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsUserSelected}" Value="False">
+                    <Setter Property="Opacity" Value="0.58"/>
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Admin button — blue pastel, deepens on selection -->
         <Style x:Key="AdminButtonStyle" TargetType="Button"
-               BasedOn="{StaticResource SelectableUserButtonStyle}">
+               BasedOn="{StaticResource LoginRoleButtonStyle}">
             <Setter Property="Background" Value="{StaticResource RoleAdminBackground}"/>
             <Setter Property="BorderBrush" Value="{StaticResource RoleAdminBorder}"/>
             <Style.Triggers>
@@ -31,7 +54,7 @@
         </Style>
         <!-- User button — green pastel -->
         <Style x:Key="UserButtonStyle" TargetType="Button"
-               BasedOn="{StaticResource SelectableUserButtonStyle}">
+               BasedOn="{StaticResource LoginRoleButtonStyle}">
             <Setter Property="Background" Value="{StaticResource RoleUserBackground}"/>
             <Setter Property="BorderBrush" Value="{StaticResource RoleUserBorder}"/>
             <Style.Triggers>
@@ -48,18 +71,20 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="{StaticResource AppBackgroundBrush}">
         <Border MaxWidth="{StaticResource LoginCardMaxWidth}"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"
-                Margin="{StaticResource DialogPadding}"
+                Margin="{StaticResource CardMargin}"
                 Background="{StaticResource FluentSurface}"
-                BorderBrush="{StaticResource FluentStrokeDefault}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource FluentCornerLarge}"
-                Padding="{StaticResource CardPadding}">
+                BorderBrush="{StaticResource FluentSurfaceStroke}"
+                BorderThickness="{StaticResource FluentBorderThicknessThin}"
+                CornerRadius="{StaticResource FluentCornerXLarge}"
+                Padding="{StaticResource CardPadding}"
+                Effect="{StaticResource FluentShadowMedium}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
@@ -69,12 +94,12 @@
                 </Grid.RowDefinitions>
 
             <!-- ── Row 0: Logo + title ──────────────────────── -->
-                <controls:AppBranding Grid.Row="0" LogoSize="56" Subtitle="{Binding FirmName}"
-                                      Margin="{StaticResource ItemSpacing}"/>
+                <controls:AppBranding Grid.Row="0" LogoSize="52" Subtitle="{Binding FirmName}"
+                                      Margin="{StaticResource FieldLabelSpacing}"/>
 
             <!-- ── Row 1: Role buttons ────────────────────────── -->
                 <UniformGrid Grid.Row="1" Columns="2"
-                             Margin="{StaticResource ItemSpacing}">
+                             Margin="{StaticResource FieldLabelSpacing}">
                     <Button Margin="{StaticResource RoleButtonGap}"
                             Style="{StaticResource AdminButtonStyle}"
                             Tag="{x:Static models:UserType.Admin}"
@@ -112,18 +137,7 @@
                         BorderThickness="1"
                         CornerRadius="{StaticResource FluentCornerMedium}"
                         Padding="{StaticResource CardPadding}"
-                        Margin="{StaticResource ItemSpacing}"
-                        IsEnabled="{Binding IsUserSelected}">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Opacity" Value="1"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsUserSelected}" Value="False">
-                                <Setter Property="Opacity" Value="0.4"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
+                        Margin="{StaticResource ItemSpacing}">
                 <Grid>
                     <!-- Normal PIN entry mode (Hidden, not Collapsed, to preserve card height) -->
                     <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToHiddenVisibility}}"
@@ -137,9 +151,9 @@
 
                         <TextBlock Text="{Binding RoleHintText}"
                                    HorizontalAlignment="Center"
-                                   FontSize="{StaticResource FontSizeCaption}"
+                                   FontSize="{StaticResource FontSizeSectionHeader}"
                                    FontWeight="SemiBold"
-                                   Margin="{StaticResource ItemSpacing}">
+                                   Margin="{StaticResource FieldLabelSpacing}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
@@ -152,70 +166,82 @@
                             </TextBlock.Style>
                         </TextBlock>
 
-                    <!-- PIN dots -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                Margin="{StaticResource ItemSpacing}"
-                                AutomationProperties.Name="PIN entry progress">
-                        <Ellipse Style="{StaticResource PinDotStyle}"
-                                 Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=0}"/>
-                        <Ellipse Style="{StaticResource PinDotStyle}"
-                                 Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=1}"/>
-                        <Ellipse Style="{StaticResource PinDotStyle}"
-                                 Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=2}"/>
-                        <Ellipse Style="{StaticResource PinDotStyle}"
-                                 Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=3}"/>
-                    </StackPanel>
-
-                        <controls:InfoBar Severity="Error"
-                                          Title="Login issue"
-                                          Message="{Binding ErrorMessage}"
-                                          Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
-                                          Margin="{StaticResource ItemSpacing}"/>
-
-                    <!-- Keypad -->
-                    <Grid Margin="{StaticResource KeypadInset}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
-                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
-                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
-                            <RowDefinition MinHeight="{StaticResource KeypadRowMinHeight}"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Row="0" Grid.Column="0" Content="1" x:Name="Digit1Button" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="1" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="0" Grid.Column="1" Content="2" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="2" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="0" Grid.Column="2" Content="3" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="3" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="1" Grid.Column="0" Content="4" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="4" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="1" Grid.Column="1" Content="5" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="5" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="1" Grid.Column="2" Content="6" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="6" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="2" Grid.Column="0" Content="7" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="7" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="2" Grid.Column="1" Content="8" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="8" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="2" Grid.Column="2" Content="9" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="9" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="3" Grid.Column="0" Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource PosKeypadButtonStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                        <Button Grid.Row="3" Grid.Column="1" Content="0" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="0" Style="{StaticResource PosKeypadButtonStyle}"/>
-                        <Button Grid.Row="3" Grid.Column="2" Content="⌫" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource PosKeypadButtonStyle}"
-                                AutomationProperties.Name="Backspace"/>
-                    </Grid>
-
-                    <!-- Keyboard hint -->
-                        <TextBlock Text="Or use keyboard 0–9"
-                                   Style="{StaticResource HintTextStyle}"
+                        <TextBlock Text="Choose Admin or User to unlock PIN entry."
                                    HorizontalAlignment="Center"
-                                   Margin="{StaticResource ItemSpacing}"/>
-
-                    <!-- Forgot PIN link -->
-                        <TextBlock HorizontalAlignment="Center"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Margin="{StaticResource ItemSpacing}">
-                            <Hyperlink Command="{Binding ForgotPinCommand}"
-                                       Foreground="{StaticResource FluentAccentDefault}"
-                                       TextDecorations="None">
-                                Forgot PIN?
-                            </Hyperlink>
+                                   TextAlignment="Center"
+                                   Margin="{StaticResource FieldLabelSpacing}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource HintTextStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUserSelected}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
                         </TextBlock>
+
+                        <StackPanel Style="{StaticResource LoginInteractiveRegionStyle}">
+                            <!-- PIN dots -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                        Margin="{StaticResource FieldLabelSpacing}"
+                                        AutomationProperties.Name="PIN entry progress">
+                                <Ellipse Style="{StaticResource PinDotStyle}"
+                                         Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=0}"/>
+                                <Ellipse Style="{StaticResource PinDotStyle}"
+                                         Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=1}"/>
+                                <Ellipse Style="{StaticResource PinDotStyle}"
+                                         Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=2}"/>
+                                <Ellipse Style="{StaticResource PinDotStyle}"
+                                         Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=3}"/>
+                            </StackPanel>
+
+                            <controls:InfoBar Severity="Error"
+                                              Title="Login issue"
+                                              Message="{Binding ErrorMessage}"
+                                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                              Margin="{StaticResource ItemSpacing}"/>
+
+                            <!-- Fixed square keypad keeps the login screen compact and aligned. -->
+                            <UniformGrid Columns="3"
+                                         Rows="4"
+                                         Width="{StaticResource LoginKeypadWidth}"
+                                         Height="{StaticResource LoginKeypadHeight}"
+                                         HorizontalAlignment="Center"
+                                         Margin="{StaticResource KeypadInset}">
+                                <Button Content="1" x:Name="Digit1Button" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="1" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="2" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="2" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="3" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="3" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="4" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="4" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="5" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="5" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="6" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="6" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="7" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="7" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="8" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="8" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="9" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="9" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource LoginKeypadButtonStyle}" FontSize="{StaticResource FontSizeBody}"/>
+                                <Button Content="0" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="0" Style="{StaticResource LoginKeypadButtonStyle}"/>
+                                <Button Content="⌫" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource LoginKeypadButtonStyle}"
+                                        AutomationProperties.Name="Backspace"/>
+                            </UniformGrid>
+
+                            <!-- Keyboard hint -->
+                            <TextBlock Text="Or use keyboard 0–9"
+                                       Style="{StaticResource HintTextStyle}"
+                                       HorizontalAlignment="Center"
+                                       Margin="{StaticResource FieldLabelSpacing}"/>
+
+                            <!-- Forgot PIN link -->
+                            <TextBlock HorizontalAlignment="Center"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       Margin="{StaticResource CompactItemSpacing}">
+                                <Hyperlink Command="{Binding ForgotPinCommand}"
+                                           Foreground="{StaticResource FluentAccentDefault}"
+                                           TextDecorations="None">
+                                    Forgot PIN?
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Forgot PIN recovery form (anchored top within reserved card space) -->
@@ -306,33 +332,36 @@
                 </Border>
 
             <!-- ── Row 3: Footer ──────────────────────────────── -->
-                <StackPanel Grid.Row="3" Margin="{StaticResource ItemSpacing}">
+                <StackPanel Grid.Row="3" Margin="{StaticResource CompactItemSpacing}">
                 <!-- Separator -->
                 <Border Height="{StaticResource SeparatorHeight}" Background="{StaticResource FluentStrokeDefault}"
-                        Margin="{StaticResource ItemSpacing}"/>
-                <TextBlock HorizontalAlignment="Center"
-                           FontSize="{StaticResource FontSizeLabel}"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           FontWeight="SemiBold"
-                           Text="{Binding CurrentTime}"
-                           Margin="{StaticResource ItemSpacing}"/>
-                <!-- Connection status -->
-                <TextBlock HorizontalAlignment="Center"
-                           FontSize="{StaticResource FontSizeStatusBar}"
-                           Margin="{StaticResource ItemSpacing}">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOffline}" Value="True">
-                                    <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                    <Run Text="{Binding ConnectionStatus, Mode=OneWay}"/>
-                </TextBlock>
-                <TextBlock Style="{StaticResource FooterTextStyle}">
+                        Margin="{StaticResource CompactItemSpacing}"/>
+                <WrapPanel HorizontalAlignment="Center"
+                           Margin="{StaticResource CompactItemSpacing}">
+                    <TextBlock HorizontalAlignment="Center"
+                               FontSize="{StaticResource FontSizeLabel}"
+                               Foreground="{StaticResource FluentTextSecondary}"
+                               FontWeight="SemiBold"
+                               Text="{Binding CurrentTime}"
+                               Margin="{StaticResource RoleButtonGap}"/>
+                    <TextBlock HorizontalAlignment="Center"
+                               FontSize="{StaticResource FontSizeLabel}"
+                               Margin="{StaticResource InlineLeftGap}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOffline}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <Run Text="{Binding ConnectionStatus, Mode=OneWay}"/>
+                    </TextBlock>
+                </WrapPanel>
+                <TextBlock Style="{StaticResource FooterTextStyle}"
+                           Margin="{StaticResource FieldLabelSpacing}">
                     <Run Text="v"/><Run Text="{Binding AppVersion, Mode=OneWay}"/><Run Text=" &#x00B7; Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
                 </TextBlock>
                 </StackPanel>
