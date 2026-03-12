@@ -63,12 +63,12 @@
                               Focusable="False"
                               CanContentScroll="False"
                               PanningMode="VerticalOnly">
-                    <StackPanel Margin="0,0,2,0"
+                    <StackPanel Margin="{StaticResource SetupScrollContentMargin}"
                                 HorizontalAlignment="Center"
                                 MaxWidth="920">
                         <Border Style="{StaticResource SetupFlatCardStyle}"
-                                Margin="0,0,0,10"
-                                Padding="12">
+                                Margin="{StaticResource SetupCardStackSpacing}"
+                                Padding="{StaticResource SetupHeaderCardPadding}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -78,13 +78,13 @@
                                            Style="{StaticResource SetupSectionHeaderStyle}"/>
                                 <setupPages:FirmProfilePage x:Name="FirmProfileSection"
                                                             Grid.Row="1"
-                                                            Margin="0,8,0,0"/>
+                                                            Margin="{StaticResource SetupSectionSpacing}"/>
                             </Grid>
                         </Border>
 
                         <Border Style="{StaticResource SetupFlatCardStyle}"
                                 Margin="0"
-                                Padding="12">
+                                Padding="{StaticResource SetupHeaderCardPadding}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -94,7 +94,7 @@
                                            Style="{StaticResource SetupSectionHeaderStyle}"/>
                                 <setupPages:SecuritySettingsPage x:Name="SecuritySettingsSection"
                                                                  Grid.Row="1"
-                                                                 Margin="0,8,0,0"/>
+                                                                 Margin="{StaticResource SetupSectionSpacing}"/>
                             </Grid>
                         </Border>
                     </StackPanel>
@@ -169,7 +169,7 @@
         </Grid>
 
         <Border Grid.Row="6"
-                Padding="0,10,0,0"
+                Padding="{StaticResource SetupFooterTopPadding}"
                 BorderBrush="{StaticResource FluentStrokeDefault}"
                 BorderThickness="0,1,0,0"
                 Background="Transparent">

@@ -191,6 +191,7 @@
     <sys:Double x:Key="SetupPrimaryButtonWidth">116</sys:Double>
     <Thickness x:Key="SetupSectionSpacing">0,8,0,0</Thickness>
     <Thickness x:Key="SetupHeaderMargin">0,0,0,8</Thickness>
+    <Thickness x:Key="SetupPageTopInset">0,2,0,0</Thickness>
     <sys:Double x:Key="SetupSidebarIconSize">36</sys:Double>
     <Thickness x:Key="SetupSidebarIconMargin">0,0,12,0</Thickness>
     <Thickness x:Key="SetupSidebarNavBorderThickness">3,0,0,0</Thickness>
@@ -222,6 +223,7 @@
     <Thickness x:Key="SetupCompleteSubtitleMargin">0,6,0,0</Thickness>
     <Thickness x:Key="SetupCompleteCountdownMargin">0,8,0,0</Thickness>
     <Thickness x:Key="SetupCompleteButtonMargin">0,12,0,0</Thickness>
+    <Thickness x:Key="SetupCardStackSpacing">0,0,0,10</Thickness>
     <Thickness x:Key="SetupMessageCardPadding">10,8</Thickness>
     <Thickness x:Key="SetupLoadingCardPadding">20</Thickness>
     <sys:Double x:Key="SetupLoadingMinWidth">260</sys:Double>
@@ -229,6 +231,7 @@
     <Thickness x:Key="SetupLoadingDescMargin">0,4,0,0</Thickness>
     <sys:Double x:Key="SetupLoadingDescMaxWidth">240</sys:Double>
     <Thickness x:Key="SetupShellPadding">16,14</Thickness>
+    <Thickness x:Key="SetupScrollContentMargin">0,0,2,0</Thickness>
     <Thickness x:Key="SetupEyebrowPadding">8,4</Thickness>
     <Thickness x:Key="SetupEyebrowMargin">0,0,0,8</Thickness>
     <Thickness x:Key="SetupIntroTextMargin">0,4,0,0</Thickness>
@@ -245,6 +248,7 @@
     <sys:Double x:Key="SetupCompleteBadgeSize">56</sys:Double>
     <CornerRadius x:Key="SetupCompleteBadgeCorner">28</CornerRadius>
     <Thickness x:Key="SetupCompleteBadgeMargin">0,0,0,12</Thickness>
+    <Thickness x:Key="SetupFooterTopPadding">0,10,0,0</Thickness>
     <Thickness x:Key="SecurityInfoBarMargin">0,0,0,8</Thickness>
     <Thickness x:Key="SecuritySectionTopMargin">0,4,0,0</Thickness>
     <Thickness x:Key="SecurityConflictMargin">0,8,0,0</Thickness>

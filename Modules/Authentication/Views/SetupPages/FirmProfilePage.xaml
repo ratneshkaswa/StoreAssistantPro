@@ -58,7 +58,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,2,0,0">
+    <Grid Margin="{StaticResource SetupPageTopInset}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="8"/>
@@ -74,14 +74,14 @@
                        FontWeight="SemiBold"
                        Foreground="{StaticResource FluentTextPrimary}"
                        HorizontalAlignment="Left"
-                       Margin="0,0,0,6"/>
+                       Margin="{StaticResource CompactItemSpacing}"/>
             <TextBox x:Name="FirmNameBox"
+                     AutomationProperties.Name="Firm Name"
                      TabIndex="0"
                      Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged}"
                      MaxLength="100"
                      MinHeight="36"
                      AutomationProperties.LabeledBy="{Binding ElementName=FirmNameLabel}"
-                     AutomationProperties.Name="Firm Name"
                      AutomationProperties.IsRequiredForForm="True"/>
         </StackPanel>
 
@@ -113,18 +113,18 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource FluentTextPrimary}"
                            HorizontalAlignment="Left"
-                           Margin="0,0,0,6"/>
+                           Margin="{StaticResource CompactItemSpacing}"/>
                 <TextBox x:Name="AddressBox"
+                         AutomationProperties.Name="Address"
                          TabIndex="1"
                          Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
                          MaxLength="60"
                          MinHeight="36"
-                         Height="36"
                          TextWrapping="NoWrap"
                          AcceptsReturn="False"
                          VerticalContentAlignment="Center"
                          AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
-                         AutomationProperties.Name="Address"/>
+                         />
             </StackPanel>
 
             <StackPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch">
@@ -134,16 +134,16 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource FluentTextPrimary}"
                            HorizontalAlignment="Left"
-                           Margin="0,0,0,6"/>
+                           Margin="{StaticResource CompactItemSpacing}"/>
                 <TextBox x:Name="EmailBox"
+                         AutomationProperties.Name="Email"
                          TabIndex="3"
                          Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
                          MaxLength="100"
                          MinHeight="36"
-                         AutomationProperties.LabeledBy="{Binding ElementName=EmailLabel}"
-                         AutomationProperties.Name="Email"/>
+                         AutomationProperties.LabeledBy="{Binding ElementName=EmailLabel}"/>
                 <TextBlock Text="{Binding EmailValidationHint}"
-                           Margin="0,4,0,0"
+                           Margin="{StaticResource ValidationHintMargin}"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextSecondary}"
                            TextWrapping="Wrap"
@@ -157,11 +157,11 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource FluentTextPrimary}"
                            HorizontalAlignment="Left"
-                           Margin="0,0,0,6"/>
+                           Margin="{StaticResource CompactItemSpacing}"/>
                 <ComboBox x:Name="StateCombo"
+                          AutomationProperties.Name="State"
                           TabIndex="2"
                           MinHeight="36"
-                          AutomationProperties.Name="State"
                           ItemsSource="{Binding IndianStates}"
                           IsEditable="False"
                           IsTextSearchEnabled="True"
@@ -169,7 +169,7 @@
                           AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"
                           MaxDropDownHeight="300"/>
                 <TextBlock Text="{Binding StateValidationHint}"
-                           Margin="0,4,0,0"
+                           Margin="{StaticResource ValidationHintMargin}"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextSecondary}"
                            TextWrapping="Wrap"
@@ -183,8 +183,9 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource FluentTextPrimary}"
                            HorizontalAlignment="Left"
-                           Margin="0,0,0,6"/>
+                           Margin="{StaticResource CompactItemSpacing}"/>
                 <TextBox x:Name="PhoneBox"
+                         AutomationProperties.Name="Phone"
                          TabIndex="4"
                          Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                          MinHeight="36"
@@ -194,9 +195,9 @@
                          h:NumericInput.IsIntegerOnly="True"
                          AutomationProperties.LabeledBy="{Binding ElementName=PhoneLabel}"
                          AutomationProperties.HelpText="10 digits"
-                         AutomationProperties.Name="Phone"/>
+                         />
                 <TextBlock Text="{Binding PhoneValidationHint}"
-                           Margin="0,4,0,0"
+                           Margin="{StaticResource ValidationHintMargin}"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextSecondary}"
                            TextWrapping="Wrap"
@@ -210,10 +211,10 @@
                            FontWeight="SemiBold"
                            Foreground="{StaticResource FluentTextPrimary}"
                            HorizontalAlignment="Left"
-                           Margin="0,0,0,6"/>
+                           Margin="{StaticResource CompactItemSpacing}"/>
                 <TextBox x:Name="PincodeBox"
-                          TabIndex="5"
                          AutomationProperties.Name="Postal PIN"
+                         TabIndex="5"
                          Text="{Binding Pincode, UpdateSourceTrigger=PropertyChanged}"
                          MinHeight="36"
                          HorizontalAlignment="Stretch"
@@ -223,7 +224,7 @@
                          MaxLength="6"
                          h:NumericInput.IsIntegerOnly="True"/>
                 <TextBlock Text="{Binding PincodeValidationHint}"
-                           Margin="0,4,0,0"
+                           Margin="{StaticResource ValidationHintMargin}"
                            FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextSecondary}"
                            TextWrapping="Wrap"
