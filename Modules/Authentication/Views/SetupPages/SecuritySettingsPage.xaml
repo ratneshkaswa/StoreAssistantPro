@@ -71,7 +71,7 @@
                BasedOn="{StaticResource SetupPinInlineHintStyle}">
             <Setter Property="MinHeight" Value="18"/>
             <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
-            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="TextAlignment" Value="Left"/>
         </Style>
     </UserControl.Resources>
 
@@ -88,11 +88,12 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0"
+              HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="32"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0"
@@ -272,10 +273,12 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2"
+              Width="608"
+              HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="32"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -296,7 +299,7 @@
             <TextBlock Grid.Column="2"
                        Text="{Binding PinConflictWarning}"
                        VerticalAlignment="Center"
-                       HorizontalAlignment="Stretch"
+                       HorizontalAlignment="Left"
                        Style="{StaticResource SetupPinConflictTextStyle}"/>
         </Grid>
 
@@ -305,7 +308,7 @@
                 Background="{StaticResource FluentStrokeDefault}"/>
 
         <Grid Grid.Row="6"
-              HorizontalAlignment="Center"
+              HorizontalAlignment="Left"
               Width="336">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="160"/>
@@ -396,7 +399,7 @@
         <StackPanel Grid.Row="8"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
+                    HorizontalAlignment="Left">
             <CheckBox IsChecked="{Binding ShowMasterPins}"
                       Style="{StaticResource FluentToggleSwitchStyle}"
                       AutomationProperties.Name="Show master PIN toggle"/>
