@@ -1,6 +1,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,6 +18,13 @@ namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 
 public partial class SetupViewModel : BaseViewModel
 {
+    private static readonly TimeSpan DraftAutoSaveInterval = TimeSpan.FromSeconds(5);
+    private static readonly byte[] DraftEntropy = Encoding.UTF8.GetBytes("StoreAssistantPro.SetupDraft.v1");
+    private static readonly string DraftFilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "StoreAssistantPro",
+        "setup-draft.dat");
+
     private static readonly (string Code, string Name)[] IndianStateData =
     [
         ("37", "Andhra Pradesh"),
@@ -297,6 +308,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(AdminPinWarning))]
     [NotifyPropertyChangedFor(nameof(AdminPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(AdminPinStrength))]
+    [NotifyPropertyChangedFor(nameof(AdminPinStrengthText))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
@@ -318,6 +330,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(UserPinWarning))]
     [NotifyPropertyChangedFor(nameof(UserPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(UserPinStrength))]
+    [NotifyPropertyChangedFor(nameof(UserPinStrengthText))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
@@ -340,6 +353,7 @@ public partial class SetupViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(MasterPinWarning))]
     [NotifyPropertyChangedFor(nameof(MasterPinWarningDetail))]
     [NotifyPropertyChangedFor(nameof(MasterPinStrength))]
+    [NotifyPropertyChangedFor(nameof(MasterPinStrengthText))]
     [NotifyPropertyChangedFor(nameof(PinConflictWarning))]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
     [NotifyPropertyChangedFor(nameof(IsSecuritySectionComplete))]
@@ -370,6 +384,9 @@ public partial class SetupViewModel : BaseViewModel
     public int AdminPinStrength => GetPinStrength(AdminPin);
     public int UserPinStrength => GetPinStrength(UserPin);
     public int MasterPinStrength => GetMasterPinStrength(MasterPin);
+    public string AdminPinStrengthText => GetPinStrengthText(AdminPinStrength);
+    public string UserPinStrengthText => GetPinStrengthText(UserPinStrength);
+    public string MasterPinStrengthText => GetPinStrengthText(MasterPinStrength);
 
     // Live confirm mismatch hints
     public string AdminConfirmHint => GetConfirmHint(AdminPin, AdminPinConfirm, 4);
@@ -467,22 +484,31 @@ public partial class SetupViewModel : BaseViewModel
         get
         {
             if (IsReadyForSave)
-                return "All setup checks are complete.";
+                return "Ready to save.";
 
-            var setupChecksMessage = RequiredFieldsProgress.StartsWith("\u2713", StringComparison.Ordinal)
-                ? $"{RequiredChecksTotal} of {RequiredChecksTotal} setup checks complete"
-                : RequiredFieldsProgress;
-
-            return HasNoOptionalValidationErrors()
-                ? setupChecksMessage
-                : $"{setupChecksMessage}. Review highlighted optional details before saving.";
+            return SaveBlockingIssue;
         }
     }
 
-    // -- Sidebar navigation --
-
-    [ObservableProperty]
-    public partial string SelectedSection { get; set; } = "Firm";
+    public string SaveBlockingIssue
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(FirmName))
+                return "Firm name is required.";
+            if (!(InputValidator.IsValidUserPin(AdminPin) && AdminPin == AdminPinConfirm))
+                return "Admin PIN must be 4 digits and confirmed.";
+            if (!(InputValidator.IsValidUserPin(UserPin) && UserPin == UserPinConfirm))
+                return "User PIN must be 4 digits and confirmed.";
+            if (!(InputValidator.IsValidMasterPin(MasterPin) && MasterPin == MasterPinConfirm))
+                return "Master PIN must be 6 digits and confirmed.";
+            if (!InputValidator.AreAllDistinct(AdminPin, UserPin) || MasterPinContainsRolePin(MasterPin, AdminPin, UserPin))
+                return "All PINs must be unique.";
+            if (!HasNoOptionalValidationErrors())
+                return "Review highlighted details before saving.";
+            return "Complete setup checks to continue.";
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiredFieldsProgress))]
@@ -504,19 +530,43 @@ public partial class SetupViewModel : BaseViewModel
         _commandBus = commandBus;
         _regionalSettings = regionalSettings;
         PropertyChanged += OnSetupPropertyChanged;
+        _draftAutoSaveTimer = new Timer(_ => AutoSaveDraftSafe(), null, DraftAutoSaveInterval, DraftAutoSaveInterval);
+        RestoreDraftSafe();
+        IsDirty = false;
     }
 
     private readonly ICommandBus _commandBus;
     private readonly IRegionalSettingsService _regionalSettings;
     private CancellationTokenSource? _redirectCts;
+    private readonly Timer _draftAutoSaveTimer;
+    private volatile bool _isRestoringDraft;
+    private volatile bool _isPersistingDraft;
+
+    [ObservableProperty]
+    public partial bool IsDirty { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AdminPinRevealText))]
+    [NotifyPropertyChangedFor(nameof(UserPinRevealText))]
+    public partial bool ShowRolePins { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MasterPinRevealText))]
+    public partial bool ShowMasterPins { get; set; }
 
     private void OnSetupPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(RequiredFieldsProgress))
-        {
-            OnPropertyChanged(nameof(IsReadyForSave));
-            OnPropertyChanged(nameof(SaveReadinessMessage));
-        }
+        if (e.PropertyName is nameof(IsDirty) or nameof(ErrorMessage) or nameof(SuccessMessage)
+            or nameof(FirstErrorFieldKey) or nameof(IsBusy) or nameof(IsSetupComplete)
+            or nameof(RedirectCountdown))
+            return;
+
+        if (!_isRestoringDraft)
+            IsDirty = true;
+
+        OnPropertyChanged(nameof(IsReadyForSave));
+        OnPropertyChanged(nameof(SaveBlockingIssue));
+        OnPropertyChanged(nameof(SaveReadinessMessage));
     }
 
     [RelayCommand]
@@ -577,6 +627,8 @@ public partial class SetupViewModel : BaseViewModel
         if (result.Succeeded)
         {
             IsSetupComplete = true;
+            IsDirty = false;
+            DeleteDraftSafe();
             StartRedirectCountdown();
         }
         else
@@ -616,11 +668,8 @@ public partial class SetupViewModel : BaseViewModel
     {
         try
         {
-            for (var i = 3; i >= 1; i--)
-            {
-                RedirectCountdown = $"Redirecting to login in {i}...";
-                await Task.Delay(1000, ct);
-            }
+            RedirectCountdown = "Opening login...";
+            await Task.Delay(1200, ct);
 
             ClearSensitivePins();
             RequestClose?.Invoke(true);
@@ -650,6 +699,10 @@ public partial class SetupViewModel : BaseViewModel
         MasterPin = string.Empty;
         MasterPinConfirm = string.Empty;
     }
+
+    public string AdminPinRevealText => ShowRolePins ? AdminPin : string.Empty;
+    public string UserPinRevealText => ShowRolePins ? UserPin : string.Empty;
+    public string MasterPinRevealText => ShowMasterPins ? MasterPin : string.Empty;
 
     private const string WeakPinShortText = "\u26a0 Weak PIN";
     private const string WeakPinDetailText = "\u26a0 Weak PIN \u2014 consider a less predictable combination.";
@@ -736,6 +789,14 @@ public partial class SetupViewModel : BaseViewModel
         return 3;
     }
 
+    private static string GetPinStrengthText(int strength) => strength switch
+    {
+        0 => "Not set",
+        1 => "Weak",
+        2 => "Good",
+        _ => "Strong"
+    };
+
     [GeneratedRegex(@"^[\d\s\+\-]*\d[\d\s\+\-]*$")]
     internal static partial Regex PhoneInputRegex();
 
@@ -813,10 +874,126 @@ public partial class SetupViewModel : BaseViewModel
         return stateValid && pincodeValid && emailValid && phoneValid;
     }
 
+    private void RestoreDraftSafe()
+    {
+        try
+        {
+            if (!File.Exists(DraftFilePath))
+                return;
+
+            var encryptedBytes = Convert.FromBase64String(File.ReadAllText(DraftFilePath));
+            var plainBytes = ProtectedData.Unprotect(encryptedBytes, DraftEntropy, DataProtectionScope.CurrentUser);
+            var draft = JsonSerializer.Deserialize<SetupDraftState>(plainBytes);
+            if (draft is null)
+                return;
+
+            _isRestoringDraft = true;
+            FirmName = draft.FirmName ?? string.Empty;
+            Address = draft.Address ?? string.Empty;
+            State = draft.State ?? string.Empty;
+            Pincode = draft.Pincode ?? string.Empty;
+            Phone = draft.Phone ?? string.Empty;
+            Email = draft.Email ?? string.Empty;
+            AdminPin = draft.AdminPin ?? string.Empty;
+            AdminPinConfirm = draft.AdminPinConfirm ?? string.Empty;
+            UserPin = draft.UserPin ?? string.Empty;
+            UserPinConfirm = draft.UserPinConfirm ?? string.Empty;
+            MasterPin = draft.MasterPin ?? string.Empty;
+            MasterPinConfirm = draft.MasterPinConfirm ?? string.Empty;
+            UseEssentialSetupValidationOnly = draft.UseEssentialSetupValidationOnly;
+            ShowRolePins = draft.ShowRolePins;
+            ShowMasterPins = draft.ShowMasterPins;
+        }
+        catch
+        {
+            // Best-effort draft restore; ignore corrupted/incompatible drafts.
+        }
+        finally
+        {
+            _isRestoringDraft = false;
+        }
+    }
+
+    private void AutoSaveDraftSafe()
+    {
+        if (_isPersistingDraft || _isRestoringDraft || IsSetupComplete || !IsDirty)
+            return;
+
+        try
+        {
+            _isPersistingDraft = true;
+            Directory.CreateDirectory(Path.GetDirectoryName(DraftFilePath)!);
+
+            var state = new SetupDraftState
+            {
+                FirmName = FirmName,
+                Address = Address,
+                State = State,
+                Pincode = Pincode,
+                Phone = Phone,
+                Email = Email,
+                AdminPin = AdminPin,
+                AdminPinConfirm = AdminPinConfirm,
+                UserPin = UserPin,
+                UserPinConfirm = UserPinConfirm,
+                MasterPin = MasterPin,
+                MasterPinConfirm = MasterPinConfirm,
+                UseEssentialSetupValidationOnly = UseEssentialSetupValidationOnly,
+                ShowRolePins = ShowRolePins,
+                ShowMasterPins = ShowMasterPins
+            };
+
+            var plainBytes = JsonSerializer.SerializeToUtf8Bytes(state);
+            var encryptedBytes = ProtectedData.Protect(plainBytes, DraftEntropy, DataProtectionScope.CurrentUser);
+            File.WriteAllText(DraftFilePath, Convert.ToBase64String(encryptedBytes));
+        }
+        catch
+        {
+            // Best-effort draft autosave.
+        }
+        finally
+        {
+            _isPersistingDraft = false;
+        }
+    }
+
+    private static void DeleteDraftSafe()
+    {
+        try
+        {
+            if (File.Exists(DraftFilePath))
+                File.Delete(DraftFilePath);
+        }
+        catch
+        {
+            // Best-effort cleanup.
+        }
+    }
+
+    private sealed class SetupDraftState
+    {
+        public string? FirmName { get; set; }
+        public string? Address { get; set; }
+        public string? State { get; set; }
+        public string? Pincode { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? AdminPin { get; set; }
+        public string? AdminPinConfirm { get; set; }
+        public string? UserPin { get; set; }
+        public string? UserPinConfirm { get; set; }
+        public string? MasterPin { get; set; }
+        public string? MasterPinConfirm { get; set; }
+        public bool UseEssentialSetupValidationOnly { get; set; } = true;
+        public bool ShowRolePins { get; set; }
+        public bool ShowMasterPins { get; set; }
+    }
+
     public override void Dispose()
     {
         PropertyChanged -= OnSetupPropertyChanged;
         CancelRedirectCountdown();
+        _draftAutoSaveTimer.Dispose();
         RequestClose = null;
         base.Dispose();
     }

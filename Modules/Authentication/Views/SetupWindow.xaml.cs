@@ -11,8 +11,8 @@ namespace StoreAssistantPro.Modules.Authentication.Views;
 
 public partial class SetupWindow : Window
 {
+    internal const double AdaptiveStackBreakpointWidth = 1240d;
     private SetupViewModel? _vm;
-    private bool _suppressSectionAutoFocus;
 
     private readonly FirmProfilePage _firmPage = new();
     private readonly SecuritySettingsPage _securityPage = new();
@@ -56,6 +56,7 @@ public partial class SetupWindow : Window
         sizingService.ConfigureStartupWindow(this, width, height);
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
+        SizeChanged += (_, _) => UpdateAdaptiveLayout();
 
         // Share the same ViewModel instance across all setup pages.
         _firmPage.DataContext = vm;
@@ -69,8 +70,14 @@ public partial class SetupWindow : Window
             vm.Dispose();
         };
 
-        NavigateToSection("Firm", focusFirstField: true);
-        SyncSidebarSelection();
+        FirmContentFrame.Navigate(_firmPage);
+        SecurityContentFrame.Navigate(_securityPage);
+
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+        {
+            TryFocusControl(_firmPage, "FirmNameBox");
+            UpdateAdaptiveLayout();
+        });
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -85,14 +92,6 @@ public partial class SetupWindow : Window
                 Dispatcher.BeginInvoke(() => FocusFieldByKey(vm.FirstErrorFieldKey));
             }
         }
-        else if (e.PropertyName == nameof(SetupViewModel.SelectedSection))
-        {
-            Dispatcher.BeginInvoke(() =>
-            {
-                SyncSidebarSelection();
-                NavigateToSection(vm.SelectedSection, focusFirstField: !_suppressSectionAutoFocus);
-            });
-        }
     }
 
     private void FocusFieldByKey(string fieldKey)
@@ -102,79 +101,17 @@ public partial class SetupWindow : Window
 
         if (FieldFocusMap.TryGetValue(fieldKey, out var target))
         {
-            NavigateAndFocus(target.Section, target.Control);
-            return;
-        }
-
-        // Safe fallback: just stay on current section if key is unknown.
-        if (_vm is not null)
-            NavigateToSection(_vm.SelectedSection, focusFirstField: true);
-    }
-
-    private void NavigateAndFocus(string section, string controlName)
-    {
-        if (_vm is null)
-            return;
-
-        _suppressSectionAutoFocus = true;
-
-        if (!string.Equals(_vm.SelectedSection, section, StringComparison.Ordinal))
-            _vm.SelectedSection = section;
-
-        NavigateToSection(section, focusFirstField: false);
-
-        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
-        {
-            TryFocusControl(controlName);
-            _suppressSectionAutoFocus = false;
-        });
-    }
-
-    private void NavigateToSection(string section, bool focusFirstField)
-    {
-        Page target = section switch
-        {
-            "Firm" => _firmPage,
-            "Security" => _securityPage,
-            _ => _firmPage
-        };
-
-        if (!ReferenceEquals(ContentFrame.Content, target))
-        {
-            ContentFrame.Navigate(target);
-
-            // Keep frame journal empty to avoid unnecessary back-stack growth.
-            Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
-            {
-                if (ContentFrame.NavigationService is { } ns)
-                {
-                    while (ns.CanGoBack)
-                        ns.RemoveBackEntry();
-                }
-            });
-        }
-
-        var firstField = section switch
-        {
-            "Firm" => "FirmNameBox",
-            "Security" => "AdminPinBox",
-            _ => null
-        };
-
-        if (focusFirstField && !string.IsNullOrWhiteSpace(firstField))
-        {
+            Page page = target.Section == "Security" ? _securityPage : _firmPage;
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
             {
-                TryFocusControl(firstField);
+                TryFocusControl(page, target.Control);
             });
+            return;
         }
     }
 
-    private void TryFocusControl(string controlName)
+    private static void TryFocusControl(Page page, string controlName)
     {
-        if (ContentFrame.Content is not Page page)
-            return;
-
         if (page.FindName(controlName) is not UIElement element)
             return;
 
@@ -194,29 +131,44 @@ public partial class SetupWindow : Window
         }
     }
 
-    private void OnSidebarSectionChecked(object sender, RoutedEventArgs e)
+    private void UpdateAdaptiveLayout()
     {
-        if (sender is not RadioButton rb || rb.Tag is not string sectionKey || _vm is null)
-            return;
+        var stack = ActualWidth < AdaptiveStackBreakpointWidth;
 
-        if (!string.Equals(_vm.SelectedSection, sectionKey, StringComparison.Ordinal))
-            _vm.SelectedSection = sectionKey;
-    }
-
-    private void SyncSidebarSelection()
-    {
-        if (_vm is null)
-            return;
-
-        var target = _vm.SelectedSection switch
+        if (stack)
         {
-            "Firm" => NavFirm,
-            "Security" => NavSecurity,
-            _ => null
-        };
+            Grid.SetRow(FirmPane, 0);
+            Grid.SetColumn(FirmPane, 0);
+            Grid.SetColumnSpan(FirmPane, 3);
 
-        if (target is not null && target.IsChecked != true)
-            target.IsChecked = true;
+            Grid.SetRow(SecurityPane, 1);
+            Grid.SetColumn(SecurityPane, 0);
+            Grid.SetColumnSpan(SecurityPane, 3);
+
+            if (SetupContentGrid.RowDefinitions.Count < 3)
+            {
+                SetupContentGrid.RowDefinitions.Clear();
+                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength((double)FindResource("SetupRowSpacingMedium")) });
+                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            }
+        }
+        else
+        {
+            Grid.SetRow(FirmPane, 0);
+            Grid.SetColumn(FirmPane, 0);
+            Grid.SetColumnSpan(FirmPane, 1);
+
+            Grid.SetRow(SecurityPane, 0);
+            Grid.SetColumn(SecurityPane, 2);
+            Grid.SetColumnSpan(SecurityPane, 1);
+
+            if (SetupContentGrid.RowDefinitions.Count != 1)
+            {
+                SetupContentGrid.RowDefinitions.Clear();
+                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            }
+        }
     }
 
     /// <summary>
@@ -241,7 +193,9 @@ public partial class SetupWindow : Window
         }
 
         var shouldClose = _dialogService.Confirm(
-            "Setup is not complete. Are you sure you want to cancel?",
+            _vm.IsDirty
+                ? "You have unsaved setup changes. Discard and close?"
+                : "Setup is not complete. Are you sure you want to cancel?",
             "Cancel Setup");
 
         if (!shouldClose)

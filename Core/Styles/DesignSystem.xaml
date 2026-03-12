@@ -235,6 +235,8 @@
     <Thickness x:Key="SetupProgressCardMargin">8,0,0,0</Thickness>
     <Thickness x:Key="SetupProgressTextMargin">0,2,0,0</Thickness>
     <Thickness x:Key="SetupProgressHintMargin">0,4,0,0</Thickness>
+    <Thickness x:Key="SetupStatusChipPadding">10,4</Thickness>
+    <Thickness x:Key="SetupStatusChipMargin">0,0,8,0</Thickness>
     <Thickness x:Key="SetupStepperPadding">14,12,14,10</Thickness>
     <sys:Double x:Key="SetupStepIconSize">32</sys:Double>
     <Thickness x:Key="SetupStepIconMargin">0,0,8,0</Thickness>

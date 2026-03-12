@@ -9,7 +9,7 @@
         Closing="OnWindowClosing"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
-        Background="{StaticResource AppBackgroundBrush}"
+        Background="{StaticResource FluentBackgroundPrimary}"
         MinWidth="{StaticResource SetupMinWidth}"
         MinHeight="{StaticResource SetupMinHeight}">
 
@@ -30,15 +30,13 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="{StaticResource FluentSurface}"
-                BorderBrush="{StaticResource FluentStrokeDefault}"
-                BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                CornerRadius="{StaticResource FluentCornerLarge}"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0"
                 Padding="{StaticResource SetupShellPadding}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
@@ -67,261 +65,146 @@
                                Foreground="{StaticResource FluentTextSecondary}"
                                Margin="{StaticResource SetupIntroTextMargin}"
                                TextWrapping="Wrap"/>
+
+                    <WrapPanel Margin="{StaticResource SetupSectionSpacing}">
+                        <Border Style="{StaticResource SetupFlatCardStyle}"
+                                Padding="{StaticResource SetupStatusChipPadding}"
+                                Margin="{StaticResource SetupStatusChipMargin}">
+                            <TextBlock Style="{StaticResource SetupSectionSummaryLabelStyle}">
+                                <Run Text="Firm: "/>
+                                <Run Text="{Binding FirmSectionStatusText}"/>
+                            </TextBlock>
+                        </Border>
+                        <Border Style="{StaticResource SetupFlatCardStyle}"
+                                Padding="{StaticResource SetupStatusChipPadding}">
+                            <TextBlock Style="{StaticResource SetupSectionSummaryLabelStyle}">
+                                <Run Text="Security: "/>
+                                <Run Text="{Binding SecuritySectionStatusText}"/>
+                            </TextBlock>
+                        </Border>
+                    </WrapPanel>
                 </StackPanel>
 
-                <Border Grid.Column="1"
-                        Background="{StaticResource FluentBackgroundSecondary}"
-                        BorderBrush="{StaticResource FluentStrokeDefault}"
-                        BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                        CornerRadius="{StaticResource FluentCornerLarge}"
-                        Padding="{StaticResource SetupProgressBadgePadding}"
-                        VerticalAlignment="Top"
-                        Margin="{StaticResource SetupProgressCardMargin}">
-                    <StackPanel MinWidth="180" MaxWidth="260">
-                        <TextBlock Text="{Binding RequiredFieldsProgress}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"
-                                   Margin="{StaticResource SetupProgressTextMargin}"
-                                   AutomationProperties.LiveSetting="Polite"/>
-                        <TextBlock Text="{Binding SaveReadinessMessage}"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"
-                                   Margin="{StaticResource SetupProgressHintMargin}"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
             </Grid>
         </Border>
 
         <Border Grid.Row="2"
-                Background="{StaticResource FluentBackgroundSecondary}"
-                BorderBrush="{StaticResource FluentStrokeDefault}"
-                BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                CornerRadius="{StaticResource FluentCornerLarge}">
-            <Grid>
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0">
+            <Grid x:Name="SetupContentGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="{StaticResource SetupRowSpacingMedium}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Grid.Row="0"
-                        Padding="{StaticResource SetupStepperPadding}"
-                        Background="Transparent"
-                        CornerRadius="{StaticResource FluentCornerLarge}">
+                <Border x:Name="FirmPane"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource SetupFlatCardStyle}"
+                        Margin="0">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="{StaticResource SetupRowSpacingMedium}"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <RadioButton x:Name="NavFirm"
-                                     Grid.Column="0"
-                                     Tag="Firm"
-                                     GroupName="SetupNav"
-                                     IsChecked="True"
-                                     Style="{StaticResource SetupSidebarNavItemStyle}"
-                                     Checked="OnSidebarSectionChecked"
-                                     AutomationProperties.Name="Firm Profile">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Border Grid.Column="0"
-                                        Width="{StaticResource SetupStepIconSize}"
-                                        Height="{StaticResource SetupStepIconSize}"
-                                        CornerRadius="{StaticResource FluentCornerSmall}"
-                                        Background="{StaticResource FluentInfoBackground}"
-                                        Margin="{StaticResource SetupStepIconMargin}">
-                                    <TextBlock Text="&#xE913;"
-                                               FontFamily="{StaticResource FluentIconFont}"
-                                               Foreground="{StaticResource FluentAccentDefault}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontSize="{StaticResource FontSizeBody}"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="Firm profile" Style="{StaticResource SetupSidebarNavTitleStyle}"/>
-                                    <TextBlock Text="Business identity and contact details"
-                                               Style="{StaticResource SetupSidebarNavSubtitleStyle}"/>
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock" BasedOn="{StaticResource SetupSectionSummaryLabelStyle}">
-                                                <Setter Property="Text" Value="{Binding FirmSectionStatusText}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsFirmSectionComplete}" Value="True">
-                                                        <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-
-                                <TextBlock Grid.Column="2"
-                                           Text="&#xE73E;"
-                                           FontFamily="{StaticResource FluentIconFont}"
-                                           Foreground="{StaticResource FluentSuccess}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           VerticalAlignment="Center"
-                                           Visibility="{Binding IsFirmSectionComplete, Converter={StaticResource BoolToVisibility}}"/>
-                            </Grid>
-                        </RadioButton>
-
-                        <RadioButton x:Name="NavSecurity"
-                                     Grid.Column="2"
-                                     Tag="Security"
-                                     GroupName="SetupNav"
-                                     Style="{StaticResource SetupSidebarNavItemStyle}"
-                                     Checked="OnSidebarSectionChecked"
-                                     AutomationProperties.Name="Security Settings">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Border Grid.Column="0"
-                                        Width="{StaticResource SetupStepIconSize}"
-                                        Height="{StaticResource SetupStepIconSize}"
-                                        CornerRadius="{StaticResource FluentCornerSmall}"
-                                        Background="{StaticResource FluentInfoBackground}"
-                                        Margin="{StaticResource SetupStepIconMargin}">
-                                    <TextBlock Text="&#xE72E;"
-                                               FontFamily="{StaticResource FluentIconFont}"
-                                               Foreground="{StaticResource FluentAccentDefault}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontSize="{StaticResource FontSizeBody}"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="Security settings" Style="{StaticResource SetupSidebarNavTitleStyle}"/>
-                                    <TextBlock Text="Role PINs and recovery protection"
-                                               Style="{StaticResource SetupSidebarNavSubtitleStyle}"/>
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock" BasedOn="{StaticResource SetupSectionSummaryLabelStyle}">
-                                                <Setter Property="Text" Value="{Binding SecuritySectionStatusText}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSecuritySectionComplete}" Value="True">
-                                                        <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-
-                                <TextBlock Grid.Column="2"
-                                           Text="&#xE73E;"
-                                           FontFamily="{StaticResource FluentIconFont}"
-                                           Foreground="{StaticResource FluentSuccess}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           VerticalAlignment="Center"
-                                           Visibility="{Binding IsSecuritySectionComplete, Converter={StaticResource BoolToVisibility}}"/>
-                            </Grid>
-                        </RadioButton>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Firm profile"
+                                   Style="{StaticResource SetupSectionHeaderStyle}"/>
+                        <Frame x:Name="FirmContentFrame"
+                               Grid.Row="1"
+                               Margin="{StaticResource SetupSectionSpacing}"
+                               NavigationUIVisibility="Hidden"
+                               JournalOwnership="OwnsJournal"
+                               Focusable="False"/>
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="1"
-                        Height="{StaticResource SetupDividerThickness}"
-                        Background="{StaticResource FluentStrokeDefault}"
-                        Margin="{StaticResource SetupDividerMargin}"/>
-
-                <Grid Grid.Row="2">
-                    <Frame x:Name="ContentFrame"
-                           Margin="{StaticResource SetupCardPadding}"
-                           NavigationUIVisibility="Hidden"
-                           JournalOwnership="OwnsJournal"
-                           Focusable="False">
-                        <Frame.Style>
-                            <Style TargetType="Frame">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsSetupComplete}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Frame.Style>
-                    </Frame>
-
-                    <Grid Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
-                          h:Motion.FadeIn="True">
-                        <Border Margin="{StaticResource SetupCompleteOverlayMargin}"
-                                Background="{StaticResource FluentBackgroundSecondary}"
-                                BorderBrush="{StaticResource FluentStrokeDefault}"
-                                BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                                CornerRadius="{StaticResource FluentCornerLarge}"
-                                Padding="{StaticResource SetupCompleteCardPadding}"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                MaxWidth="{StaticResource SetupCompleteMaxWidth}">
-                            <StackPanel>
-                                <Border Width="{StaticResource SetupCompleteBadgeSize}"
-                                        Height="{StaticResource SetupCompleteBadgeSize}"
-                                        Background="{StaticResource FluentInfoBackground}"
-                                        CornerRadius="{StaticResource SetupCompleteBadgeCorner}"
-                                        HorizontalAlignment="Center"
-                                        Margin="{StaticResource SetupCompleteBadgeMargin}">
-                                    <TextBlock Text="&#xE73E;"
-                                               FontFamily="{StaticResource FluentIconFont}"
-                                               FontSize="{StaticResource FontSizeIconLarge}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Foreground="{StaticResource FluentSuccess}"
-                                               AutomationProperties.Name="Setup complete checkmark"/>
-                                </Border>
-                                <TextBlock Text="Setup complete"
-                                           FontSize="{StaticResource FontSizeSectionHeader}"
-                                           FontWeight="Bold"
-                                           HorizontalAlignment="Center"
-                                           Foreground="{StaticResource FluentTextPrimary}"
-                                           AutomationProperties.LiveSetting="Polite"/>
-                                <TextBlock Text="Your essential store setup is saved. You can review advanced preferences after sign-in."
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           Foreground="{StaticResource FluentTextSecondary}"
-                                           HorizontalAlignment="Center"
-                                           TextAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           Margin="{StaticResource SetupCompleteSubtitleMargin}"/>
-                                <TextBlock Text="{Binding RedirectCountdown}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"
-                                           AutomationProperties.LiveSetting="Polite"
-                                           HorizontalAlignment="Center"
-                                           Margin="{StaticResource SetupCompleteCountdownMargin}"/>
-                                <Button Content="Go to Login"
-                                        Command="{Binding GoToLoginCommand}"
-                                        Style="{StaticResource PrimaryButtonStyle}"
-                                        MinWidth="{StaticResource SetupPrimaryButtonWidth}"
-                                        MinHeight="{StaticResource SetupButtonHeight}"
-                                        HorizontalAlignment="Center"
-                                        Margin="{StaticResource SetupCompleteButtonMargin}"
-                                        AutomationProperties.Name="Go to login"/>
-                            </StackPanel>
-                        </Border>
+                <Border x:Name="SecurityPane"
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Style="{StaticResource SetupFlatCardStyle}"
+                        Margin="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Security settings"
+                                   Style="{StaticResource SetupSectionHeaderStyle}"/>
+                        <Frame x:Name="SecurityContentFrame"
+                               Grid.Row="1"
+                               Margin="{StaticResource SetupSectionSpacing}"
+                               NavigationUIVisibility="Hidden"
+                               JournalOwnership="OwnsJournal"
+                               Focusable="False"/>
                     </Grid>
+                </Border>
+
+                <Grid Grid.ColumnSpan="3"
+                      Visibility="{Binding IsSetupComplete, Converter={StaticResource BoolToVisibility}}"
+                      h:Motion.FadeIn="True">
+                    <Border Margin="{StaticResource SetupCompleteOverlayMargin}"
+                            Background="{StaticResource FluentBackgroundSecondary}"
+                            BorderBrush="{StaticResource FluentStrokeDefault}"
+                            BorderThickness="{StaticResource FluentBorderThicknessThin}"
+                            CornerRadius="{StaticResource FluentCornerLarge}"
+                            Padding="{StaticResource SetupCompleteCardPadding}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            MaxWidth="{StaticResource SetupCompleteMaxWidth}">
+                        <StackPanel>
+                            <Border Width="{StaticResource SetupCompleteBadgeSize}"
+                                    Height="{StaticResource SetupCompleteBadgeSize}"
+                                    Background="{StaticResource FluentInfoBackground}"
+                                    CornerRadius="{StaticResource SetupCompleteBadgeCorner}"
+                                    HorizontalAlignment="Center"
+                                    Margin="{StaticResource SetupCompleteBadgeMargin}">
+                                <TextBlock Text="&#xE73E;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconLarge}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{StaticResource FluentSuccess}"
+                                           AutomationProperties.Name="Setup complete checkmark"/>
+                            </Border>
+                            <TextBlock Text="Setup complete"
+                                       FontSize="{StaticResource FontSizeSectionHeader}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{StaticResource FluentTextPrimary}"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                            <TextBlock Text="Your setup is saved. You can review advanced preferences after sign-in."
+                                       FontSize="{StaticResource FontSizeBody}"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Margin="{StaticResource SetupCompleteSubtitleMargin}"/>
+                            <TextBlock Text="{Binding RedirectCountdown}"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       HorizontalAlignment="Center"
+                                       Margin="{StaticResource SetupCompleteCountdownMargin}"/>
+                            <Button Content="Go to Login"
+                                    Command="{Binding GoToLoginCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    MinWidth="{StaticResource SetupPrimaryButtonWidth}"
+                                    MinHeight="{StaticResource SetupButtonHeight}"
+                                    HorizontalAlignment="Center"
+                                    Margin="{StaticResource SetupCompleteButtonMargin}"
+                                    AutomationProperties.Name="Go to login"/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </Grid>
         </Border>
 
         <Grid Grid.Row="4">
-            <controls:InfoBar Severity="Success"
-                              Title="Setup saved"
-                              Message="{Binding SuccessMessage}"
-                              Visibility="{Binding HasSuccess, Converter={StaticResource BoolToVisibility}}"
-                              AutomationProperties.LiveSetting="Polite"/>
-
             <controls:InfoBar Severity="Error"
                               Title="Setup issue"
                               Message="{Binding ErrorMessage}"
@@ -350,13 +233,11 @@
 
             <StackPanel Grid.Column="0"
                         VerticalAlignment="Center">
-                <TextBlock FontSize="{StaticResource FontSizeCaption}"
+                <TextBlock Text="{Binding SaveReadinessMessage}"
+                           FontSize="{StaticResource FontSizeCaption}"
                            Foreground="{StaticResource FluentTextSecondary}"
-                           TextWrapping="Wrap">
-                    <Run Text="Required: business name and all security PINs. "/>
-                    <Run Text="Optional details can be added now or later."
-                         Foreground="{StaticResource FluentTextTertiary}"/>
-                </TextBlock>
+                           MinWidth="180" MaxWidth="260"
+                           TextWrapping="Wrap"/>
             </StackPanel>
 
             <WrapPanel Grid.Column="1"

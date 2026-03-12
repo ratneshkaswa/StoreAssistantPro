@@ -9,31 +9,25 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel Margin="{StaticResource SetupCardPadding}">
-            <controls:InfoBar Severity="Info"
-                              Title="Security setup"
-                              Message="Set one PIN for each role. Role PINs must stay unique, and the master PIN should only be used for recovery or high-risk actions."
-                              Margin="{StaticResource SecurityInfoBarMargin}"/>
+        <StackPanel Margin="0">
+            <StackPanel Margin="0">
+                <TextBlock Text="Access PINs"
+                           Style="{StaticResource SetupSectionHeaderStyle}"/>
+                <TextBlock Text="These are the day-to-day role PINs used across the app."
+                           Style="{StaticResource SetupSectionHintTextStyle}"/>
 
-            <Border Style="{StaticResource SetupFlatCardStyle}" Margin="0">
-                <StackPanel>
-                    <TextBlock Text="Access PINs"
-                               Style="{StaticResource SetupSectionHeaderStyle}"/>
-                    <TextBlock Text="These are the day-to-day role PINs used across the app."
-                               Style="{StaticResource SetupSectionHintTextStyle}"/>
-
-                    <Grid Margin="{StaticResource SecuritySectionTopMargin}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{StaticResource SecurityRoleLabelWidth}"/>
-                            <ColumnDefinition Width="Auto" MinWidth="132"/>
-                            <ColumnDefinition Width="Auto" MinWidth="132"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                <Grid Margin="{StaticResource SecuritySectionTopMargin}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource SecurityRoleLabelWidth}"/>
+                        <ColumnDefinition Width="Auto" MinWidth="132"/>
+                        <ColumnDefinition Width="Auto" MinWidth="132"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
                         <TextBlock x:Name="AdminPinLabel" Grid.Row="0" Grid.Column="0"
                                    Style="{StaticResource SetupFormRowLabelStyle}"
@@ -68,15 +62,18 @@
                                     Orientation="Vertical"
                                     VerticalAlignment="Center"
                                     Margin="{StaticResource InlineLeftGap}">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding AdminPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
-                            </StackPanel>
+                            <TextBlock Text="{Binding AdminPinStrengthText}" Style="{StaticResource SetupSectionSummaryLabelStyle}"/>
                             <WrapPanel Orientation="Horizontal">
+                                <CheckBox Content="Show role PINs"
+                                          IsChecked="{Binding ShowRolePins}"
+                                          VerticalAlignment="Center"
+                                          Margin="{StaticResource StrengthLabelGap}"/>
                                 <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding AdminPinWarning}" ToolTip="{Binding AdminPinWarningDetail}"/>
                                 <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding AdminConfirmHint}" Foreground="{Binding AdminConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                             </WrapPanel>
+                            <TextBlock Text="{Binding AdminPinRevealText}"
+                                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
+                                       Visibility="{Binding ShowRolePins, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
 
                         <TextBlock x:Name="UserPinLabel" Grid.Row="2" Grid.Column="0"
@@ -112,48 +109,48 @@
                                     Orientation="Vertical"
                                     VerticalAlignment="Center"
                                     Margin="{StaticResource InlineLeftGap}">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                                <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding UserPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
-                            </StackPanel>
+                            <TextBlock Text="{Binding UserPinStrengthText}" Style="{StaticResource SetupSectionSummaryLabelStyle}"/>
                             <WrapPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding UserPinWarning}" ToolTip="{Binding UserPinWarningDetail}"/>
                                 <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding UserConfirmHint}" Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                             </WrapPanel>
+                            <TextBlock Text="{Binding UserPinRevealText}"
+                                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
+                                       Visibility="{Binding ShowRolePins, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
-                    </Grid>
+                </Grid>
 
-                    <controls:InfoBar Severity="Warning"
-                                      Title="PIN conflict"
-                                      Message="{Binding PinConflictWarning}"
-                                      Visibility="{Binding PinConflictWarning, Converter={StaticResource NonEmptyStringToVisibility}}"
-                                      Margin="{StaticResource SecurityConflictMargin}"/>
-                </StackPanel>
-            </Border>
+                <controls:InfoBar Severity="Warning"
+                                  Title="PIN conflict"
+                                  Message="{Binding PinConflictWarning}"
+                                  Visibility="{Binding PinConflictWarning, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                  Margin="{StaticResource SecurityConflictMargin}"/>
+            </StackPanel>
 
-            <Border Style="{StaticResource SetupFlatCardStyle}">
-                <StackPanel>
-                    <TextBlock Text="Recovery PIN"
-                               Style="{StaticResource SetupSectionHeaderStyle}"/>
-                    <TextBlock Text="Use this only for recovery and restricted actions. It must stay different from all role PINs."
-                               Style="{StaticResource SetupSectionHintTextStyle}"/>
+            <Border Height="1"
+                    Margin="0,14,0,14"
+                    Background="{StaticResource FluentStrokeDefault}"/>
 
-                    <Grid Margin="{StaticResource SecuritySectionTopMargin}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
-                            <ColumnDefinition Width="Auto" MinWidth="144"/>
-                            <ColumnDefinition Width="Auto" MinWidth="144"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+            <StackPanel Margin="0">
+                <TextBlock Text="Recovery PIN"
+                           Style="{StaticResource SetupSectionHeaderStyle}"/>
+                <TextBlock Text="Use this only for recovery and restricted actions. It must stay different from all role PINs."
+                           Style="{StaticResource SetupSectionHintTextStyle}"/>
+
+                <Grid Margin="{StaticResource SecuritySectionTopMargin}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
+                        <ColumnDefinition Width="Auto" MinWidth="144"/>
+                        <ColumnDefinition Width="Auto" MinWidth="144"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
                         <TextBlock x:Name="MasterPinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
                             <Run Text="Master PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
@@ -182,19 +179,18 @@
                                     Orientation="Vertical"
                                     VerticalAlignment="Center"
                                     Margin="{StaticResource InlineLeftGap}">
+                            <TextBlock Text="{Binding MasterPinStrengthText}" Style="{StaticResource SetupSectionSummaryLabelStyle}"/>
                             <WrapPanel Orientation="Horizontal">
+                                <CheckBox Content="Show master PIN"
+                                          IsChecked="{Binding ShowMasterPins}"
+                                          VerticalAlignment="Center"
+                                          Margin="{StaticResource StrengthLabelGap}"/>
                                 <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding MasterPinWarning}" ToolTip="{Binding MasterPinWarningDetail}"/>
                                 <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding MasterConfirmHint}" Foreground="{Binding MasterConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
                             </WrapPanel>
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="1" Grid.Column="1"
-                                    Grid.ColumnSpan="2"
-                                    Orientation="Horizontal"
-                                    Margin="{StaticResource ValidationHintMargin}">
-                            <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=0}"/>
-                            <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=1}"/>
-                            <Border Style="{StaticResource SetupPinStrengthSegmentStyle}" Background="{Binding MasterPinStrength, Converter={StaticResource PinStrengthConverter}, ConverterParameter=2}"/>
+                            <TextBlock Text="{Binding MasterPinRevealText}"
+                                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
+                                       Visibility="{Binding ShowMasterPins, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
 
                         <TextBlock x:Name="MasterConfirmLabel"
@@ -202,20 +198,19 @@
                                    Grid.Column="2"
                                    Visibility="Collapsed"
                                    Text="Confirm Master PIN"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
+                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
                             <Run Text="Purpose"/>
                         </TextBlock>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
+                        <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
                                    Text="PIN recovery, protected settings, and high-risk actions."
                                    Style="{StaticResource SetupSectionHintTextStyle}"
                                    Margin="0"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
+                        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"
                                    Text="Keep the master PIN private and separate from day-to-day staff access."
                                    Style="{StaticResource SetupSectionHintTextStyle}"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
+                </Grid>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>

@@ -61,7 +61,7 @@ public class SetupWindowComplianceTests
     }
 
     [Fact]
-    public void SetupWindow_Should_SubmitOnEnter_And_StartSecurityTabOnAdminPin()
+    public void SetupWindow_Should_SubmitOnEnter_And_FocusSecurityFieldMapping()
     {
         var windowFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
         var windowCodeBehind = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml.cs");
@@ -72,7 +72,7 @@ public class SetupWindowComplianceTests
         var securityXaml = File.ReadAllText(securityPageFile);
 
         Assert.Contains("h:KeyboardNav.DefaultCommand=\"{Binding SaveCommand}\"", windowXaml, StringComparison.Ordinal);
-        Assert.Contains("\"Security\" => \"AdminPinBox\"", windowCs, StringComparison.Ordinal);
+        Assert.Contains("[\"AdminPin\"] = (\"Security\", \"AdminPinBox\")", windowCs, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"AdminPinBox\"", securityXaml, StringComparison.Ordinal);
         Assert.Contains("TabIndex=\"6\"", securityXaml, StringComparison.Ordinal);
     }
@@ -101,6 +101,21 @@ public class SetupWindowComplianceTests
         Assert.DoesNotContain("SecurityRecoveryPinColumnWidth", xaml, StringComparison.Ordinal);
         Assert.Contains("Orientation=\"Vertical\"", xaml, StringComparison.Ordinal);
         Assert.True(Regex.Matches(xaml, "<WrapPanel Orientation=\"Horizontal\">").Count >= 3);
+    }
+
+    [Fact]
+    public void SetupWindow_Should_UseAdaptiveTwoPaneLayoutWithStackBreakpoint()
+    {
+        var windowFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
+        var codeBehindFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml.cs");
+        var xaml = File.ReadAllText(windowFile);
+        var cs = File.ReadAllText(codeBehindFile);
+
+        Assert.Contains("x:Name=\"SetupContentGrid\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"FirmPane\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"SecurityPane\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("AdaptiveStackBreakpointWidth = 1240d", cs, StringComparison.Ordinal);
+        Assert.Contains("UpdateAdaptiveLayout()", cs, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -147,20 +162,16 @@ public class SetupWindowComplianceTests
         var file = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
         var xaml = File.ReadAllText(file);
 
-        var navNames = Regex.Matches(xaml, "x:Name=\"(Nav[^\"]+)\"")
-            .Select(m => m.Groups[1].Value)
-            .Where(name => name.StartsWith("Nav", StringComparison.Ordinal))
-            .ToList();
-
-        Assert.Contains("NavFirm", navNames);
-        Assert.Contains("NavSecurity", navNames);
-        Assert.Equal(2, navNames.Count);
+        Assert.Contains("x:Name=\"FirmContentFrame\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"SecurityContentFrame\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"NavFirm\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"NavSecurity\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavTax\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavRegional\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavBackup\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavSystem\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("required", xaml, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("settings", xaml, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Firm profile", xaml, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Security settings", xaml, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

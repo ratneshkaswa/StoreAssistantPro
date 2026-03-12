@@ -986,11 +986,11 @@ public class SetupViewModelTests
     }
 
     [Fact]
-    public void SaveReadinessMessage_NotReady_UsesSetupChecksLanguage()
+    public void SaveReadinessMessage_NotReady_ShowsBlockingReason()
     {
         var sut = CreateSut();
 
-        Assert.Contains("setup checks complete", sut.SaveReadinessMessage);
+        Assert.Equal("Firm name is required.", sut.SaveReadinessMessage);
     }
 
     // -- Backup validation --
