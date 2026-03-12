@@ -1,216 +1,410 @@
-<Page x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupPages.SecuritySettingsPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
-      Background="Transparent"
-      FontFamily="{StaticResource FluentFontFamily}"
-      UseLayoutRounding="True"
-      SnapsToDevicePixels="True">
+<UserControl x:Class="StoreAssistantPro.Modules.Authentication.Views.SetupPages.SecuritySettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent"
+             FontFamily="{StaticResource FluentFontFamily}"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <Style x:Key="RolePinPasswordBoxStyle"
+               TargetType="PasswordBox"
+               BasedOn="{StaticResource {x:Type PasswordBox}}">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowRolePins}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  Focusable="False" CanContentScroll="False" PanningMode="VerticalOnly">
-        <StackPanel Margin="0">
-            <StackPanel Margin="0">
-                <TextBlock Text="Access PINs"
-                           Style="{StaticResource SetupSectionHeaderStyle}"/>
-                <TextBlock Text="These are the day-to-day role PINs used across the app."
-                           Style="{StaticResource SetupSectionHintTextStyle}"/>
+        <Style x:Key="RolePinTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowRolePins}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
-                <Grid Margin="{StaticResource SecuritySectionTopMargin}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{StaticResource SecurityRoleLabelWidth}"/>
-                        <ColumnDefinition Width="Auto" MinWidth="132"/>
-                        <ColumnDefinition Width="Auto" MinWidth="132"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        <Style x:Key="MasterPinPasswordBoxStyle"
+               TargetType="PasswordBox"
+               BasedOn="{StaticResource {x:Type PasswordBox}}">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowMasterPins}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
-                        <TextBlock x:Name="AdminPinLabel" Grid.Row="0" Grid.Column="0"
-                                   Style="{StaticResource SetupFormRowLabelStyle}"
-                                   VerticalAlignment="Center">
-                            <Run Text="Admin PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-                        </TextBlock>
-                        <PasswordBox x:Name="AdminPinBox"
-                                     Grid.Row="0" Grid.Column="1"
-                                     TabIndex="6"
-                                     MaxLength="4"
-                                     Width="{StaticResource SecurityRolePinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Admin PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=AdminPinLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <PasswordBox x:Name="AdminPinConfirmBox"
-                                     Grid.Row="0" Grid.Column="2"
-                                     TabIndex="7"
-                                     MaxLength="4"
-                                     Width="{StaticResource SecurityRolePinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Confirm Admin PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <TextBlock x:Name="AdminConfirmLabel"
-                                   Grid.Row="0" Grid.Column="2"
-                                   Visibility="Collapsed"
-                                   Text="Confirm Admin PIN"/>
-                        <StackPanel Grid.Row="0" Grid.Column="3"
-                                    Orientation="Vertical"
-                                    VerticalAlignment="Center"
-                                    Margin="{StaticResource InlineLeftGap}">
-                            <TextBlock Text="{Binding AdminPinStrengthText}" Style="{StaticResource SetupSectionSummaryLabelStyle}"/>
-                            <WrapPanel Orientation="Horizontal">
-                                <CheckBox Content="Show role PINs"
-                                          IsChecked="{Binding ShowRolePins}"
-                                          VerticalAlignment="Center"
-                                          Margin="{StaticResource StrengthLabelGap}"/>
-                                <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding AdminPinWarning}" ToolTip="{Binding AdminPinWarningDetail}"/>
-                                <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding AdminConfirmHint}" Foreground="{Binding AdminConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
-                            </WrapPanel>
-                            <TextBlock Text="{Binding AdminPinRevealText}"
-                                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
-                                       Visibility="{Binding ShowRolePins, Converter={StaticResource BoolToVisibility}}"/>
-                        </StackPanel>
+        <Style x:Key="MasterPinTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowMasterPins}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
-                        <TextBlock x:Name="UserPinLabel" Grid.Row="2" Grid.Column="0"
-                                   Style="{StaticResource SetupFormRowLabelStyle}"
-                                   VerticalAlignment="Center">
-                            <Run Text="User PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-                        </TextBlock>
-                        <PasswordBox x:Name="UserPinBox"
-                                     Grid.Row="2" Grid.Column="1"
-                                     TabIndex="8"
-                                     MaxLength="4"
-                                     Width="{StaticResource SecurityRolePinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="User PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <TextBlock x:Name="UserConfirmLabel"
-                                   Grid.Row="2" Grid.Column="2"
-                                   Visibility="Collapsed"
-                                   Text="Confirm User PIN"/>
-                        <PasswordBox x:Name="UserPinConfirmBox"
-                                     Grid.Row="2" Grid.Column="2"
-                                     TabIndex="9"
-                                     MaxLength="4"
-                                     Width="{StaticResource SecurityRolePinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Confirm User PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <StackPanel Grid.Row="2" Grid.Column="3"
-                                    Orientation="Vertical"
-                                    VerticalAlignment="Center"
-                                    Margin="{StaticResource InlineLeftGap}">
-                            <TextBlock Text="{Binding UserPinStrengthText}" Style="{StaticResource SetupSectionSummaryLabelStyle}"/>
-                            <WrapPanel Orientation="Horizontal">
-                                <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding UserPinWarning}" ToolTip="{Binding UserPinWarningDetail}"/>
-                                <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding UserConfirmHint}" Foreground="{Binding UserConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
-                            </WrapPanel>
-                            <TextBlock Text="{Binding UserPinRevealText}"
-                                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
-                                       Visibility="{Binding ShowRolePins, Converter={StaticResource BoolToVisibility}}"/>
-                        </StackPanel>
+        <Style x:Key="SetupPinFieldLabelStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SetupFormRowLabelStyle}">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        </Style>
+
+        <Style x:Key="SetupPinFeedbackTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SetupPinInlineHintStyle}">
+            <Setter Property="Margin" Value="0,4,0,0"/>
+            <Setter Property="MinHeight" Value="18"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        </Style>
+
+        <Style x:Key="SetupPinConflictTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SetupPinInlineHintStyle}">
+            <Setter Property="MinHeight" Value="18"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="0,2,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="1"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="32"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0"
+                  HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="136"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="136"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="22"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="AdminPinLabel"
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           Text="Admin PIN *"
+                           Style="{StaticResource SetupPinFieldLabelStyle}"/>
+                <TextBlock x:Name="AdminConfirmLabel"
+                           Grid.Row="0"
+                           Grid.Column="2"
+                           Text="Confirm"
+                           Style="{StaticResource SetupPinFieldLabelStyle}"/>
+
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <PasswordBox x:Name="AdminPinBox"
+                                 TabIndex="6"
+                                 MaxLength="4"
+                                 Width="136"
+                                 MinHeight="36"
+                                 HorizontalContentAlignment="Center"
+                                 Style="{StaticResource RolePinPasswordBoxStyle}"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Admin PIN"
+                                 AutomationProperties.HelpText="4 digits"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=AdminPinLabel}"
+                                 AutomationProperties.IsRequiredForForm="True"/>
+                    <TextBox x:Name="AdminPinTextBox"
+                             TabIndex="6"
+                             MaxLength="4"
+                             Width="136"
+                             MinHeight="36"
+                             HorizontalContentAlignment="Center"
+                             Style="{StaticResource RolePinTextBoxStyle}"
+                             Text="{Binding AdminPin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             TextChanged="OnPinTextChanged"
+                             AutomationProperties.Name="Admin PIN (visible)"
+                             AutomationProperties.HelpText="4 digits"
+                             AutomationProperties.LabeledBy="{Binding ElementName=AdminPinLabel}"
+                             AutomationProperties.IsRequiredForForm="True"/>
                 </Grid>
 
-                <controls:InfoBar Severity="Warning"
-                                  Title="PIN conflict"
-                                  Message="{Binding PinConflictWarning}"
-                                  Visibility="{Binding PinConflictWarning, Converter={StaticResource NonEmptyStringToVisibility}}"
-                                  Margin="{StaticResource SecurityConflictMargin}"/>
-            </StackPanel>
-
-            <Border Height="1"
-                    Margin="0,14,0,14"
-                    Background="{StaticResource FluentStrokeDefault}"/>
-
-            <StackPanel Margin="0">
-                <TextBlock Text="Recovery PIN"
-                           Style="{StaticResource SetupSectionHeaderStyle}"/>
-                <TextBlock Text="Use this only for recovery and restricted actions. It must stay different from all role PINs."
-                           Style="{StaticResource SetupSectionHintTextStyle}"/>
-
-                <Grid Margin="{StaticResource SecuritySectionTopMargin}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{StaticResource SetupLabelColumnWidth}"/>
-                        <ColumnDefinition Width="Auto" MinWidth="144"/>
-                        <ColumnDefinition Width="Auto" MinWidth="144"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                        <TextBlock x:Name="MasterPinLabel" Grid.Row="0" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
-                            <Run Text="Master PIN "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-                        </TextBlock>
-                        <PasswordBox x:Name="MasterPinBox"
-                                     Grid.Row="0" Grid.Column="1"
-                                     TabIndex="10"
-                                     MaxLength="6"
-                                     Width="{StaticResource SecurityMasterPinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Master PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <PasswordBox x:Name="MasterPinConfirmBox"
-                                     Grid.Row="0" Grid.Column="2"
-                                     TabIndex="11"
-                                     MaxLength="6"
-                                     Width="{StaticResource SecurityMasterPinBoxWidth}"
-                                     HorizontalAlignment="Left"
-                                     PasswordChanged="OnPinChanged"
-                                     AutomationProperties.Name="Confirm Master PIN"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
-                                     AutomationProperties.IsRequiredForForm="True"/>
-                        <StackPanel Grid.Row="0" Grid.Column="3"
-                                    Orientation="Vertical"
-                                    VerticalAlignment="Center"
-                                    Margin="{StaticResource InlineLeftGap}">
-                            <TextBlock Text="{Binding MasterPinStrengthText}" Style="{StaticResource SetupSectionSummaryLabelStyle}"/>
-                            <WrapPanel Orientation="Horizontal">
-                                <CheckBox Content="Show master PIN"
-                                          IsChecked="{Binding ShowMasterPins}"
-                                          VerticalAlignment="Center"
-                                          Margin="{StaticResource StrengthLabelGap}"/>
-                                <TextBlock Style="{StaticResource SetupPinWarningTextStyle}" Text="{Binding MasterPinWarning}" ToolTip="{Binding MasterPinWarningDetail}"/>
-                                <TextBlock Style="{StaticResource SetupPinInlineHintStyle}" Text="{Binding MasterConfirmHint}" Foreground="{Binding MasterConfirmHint, Converter={StaticResource HintForegroundConverter}}"/>
-                            </WrapPanel>
-                            <TextBlock Text="{Binding MasterPinRevealText}"
-                                       Style="{StaticResource SetupSectionSummaryLabelStyle}"
-                                       Visibility="{Binding ShowMasterPins, Converter={StaticResource BoolToVisibility}}"/>
-                        </StackPanel>
-
-                        <TextBlock x:Name="MasterConfirmLabel"
-                                   Grid.Row="0"
-                                   Grid.Column="2"
-                                   Visibility="Collapsed"
-                                   Text="Confirm Master PIN"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource SetupFormRowLabelStyle}">
-                            <Run Text="Purpose"/>
-                        </TextBlock>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
-                                   Text="PIN recovery, protected settings, and high-risk actions."
-                                   Style="{StaticResource SetupSectionHintTextStyle}"
-                                   Margin="0"/>
-
-                        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"
-                                   Text="Keep the master PIN private and separate from day-to-day staff access."
-                                   Style="{StaticResource SetupSectionHintTextStyle}"/>
+                <Grid Grid.Row="2" Grid.Column="2">
+                    <PasswordBox x:Name="AdminPinConfirmBox"
+                                 TabIndex="7"
+                                 MaxLength="4"
+                                 Width="136"
+                                 MinHeight="36"
+                                 HorizontalContentAlignment="Center"
+                                 Style="{StaticResource RolePinPasswordBoxStyle}"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Confirm Admin PIN"
+                                 AutomationProperties.HelpText="4 digits"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
+                                 AutomationProperties.IsRequiredForForm="True"/>
+                    <TextBox x:Name="AdminPinConfirmTextBox"
+                             TabIndex="7"
+                             MaxLength="4"
+                             Width="136"
+                             MinHeight="36"
+                             HorizontalContentAlignment="Center"
+                             Style="{StaticResource RolePinTextBoxStyle}"
+                             Text="{Binding AdminPinConfirm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             TextChanged="OnPinTextChanged"
+                             AutomationProperties.Name="Confirm Admin PIN (visible)"
+                             AutomationProperties.HelpText="4 digits"
+                             AutomationProperties.LabeledBy="{Binding ElementName=AdminConfirmLabel}"
+                             AutomationProperties.IsRequiredForForm="True"/>
                 </Grid>
+
+                <TextBlock Grid.Row="3"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="3"
+                           Text="{Binding AdminConfirmHint}"
+                           Style="{StaticResource SetupPinFeedbackTextStyle}"/>
+            </Grid>
+
+            <Grid Grid.Column="2"
+                  HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="136"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="136"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="22"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="UserPinLabel"
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           Text="User PIN *"
+                           Style="{StaticResource SetupPinFieldLabelStyle}"/>
+                <TextBlock x:Name="UserConfirmLabel"
+                           Grid.Row="0"
+                           Grid.Column="2"
+                           Text="Confirm"
+                           Style="{StaticResource SetupPinFieldLabelStyle}"/>
+
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <PasswordBox x:Name="UserPinBox"
+                                 TabIndex="8"
+                                 MaxLength="4"
+                                 Width="136"
+                                 MinHeight="36"
+                                 HorizontalContentAlignment="Center"
+                                 Style="{StaticResource RolePinPasswordBoxStyle}"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="User PIN"
+                                 AutomationProperties.HelpText="4 digits"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
+                                 AutomationProperties.IsRequiredForForm="True"/>
+                    <TextBox x:Name="UserPinTextBox"
+                             TabIndex="8"
+                             MaxLength="4"
+                             Width="136"
+                             MinHeight="36"
+                             HorizontalContentAlignment="Center"
+                             Style="{StaticResource RolePinTextBoxStyle}"
+                             Text="{Binding UserPin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             TextChanged="OnPinTextChanged"
+                             AutomationProperties.Name="User PIN (visible)"
+                             AutomationProperties.HelpText="4 digits"
+                             AutomationProperties.LabeledBy="{Binding ElementName=UserPinLabel}"
+                             AutomationProperties.IsRequiredForForm="True"/>
+                </Grid>
+
+                <Grid Grid.Row="2" Grid.Column="2">
+                    <PasswordBox x:Name="UserPinConfirmBox"
+                                 TabIndex="9"
+                                 MaxLength="4"
+                                 Width="136"
+                                 MinHeight="36"
+                                 HorizontalContentAlignment="Center"
+                                 Style="{StaticResource RolePinPasswordBoxStyle}"
+                                 PasswordChanged="OnPinChanged"
+                                 AutomationProperties.Name="Confirm User PIN"
+                                 AutomationProperties.HelpText="4 digits"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
+                                 AutomationProperties.IsRequiredForForm="True"/>
+                    <TextBox x:Name="UserPinConfirmTextBox"
+                             TabIndex="9"
+                             MaxLength="4"
+                             Width="136"
+                             MinHeight="36"
+                             HorizontalContentAlignment="Center"
+                             Style="{StaticResource RolePinTextBoxStyle}"
+                             Text="{Binding UserPinConfirm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             TextChanged="OnPinTextChanged"
+                             AutomationProperties.Name="Confirm User PIN (visible)"
+                             AutomationProperties.HelpText="4 digits"
+                             AutomationProperties.LabeledBy="{Binding ElementName=UserConfirmLabel}"
+                             AutomationProperties.IsRequiredForForm="True"/>
+                </Grid>
+
+                <TextBlock Grid.Row="3"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="3"
+                           Text="{Binding UserConfirmHint}"
+                           Style="{StaticResource SetupPinFeedbackTextStyle}"/>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left">
+                <CheckBox IsChecked="{Binding ShowRolePins}"
+                          Style="{StaticResource FluentToggleSwitchStyle}"
+                          AutomationProperties.Name="Show role PINs toggle"/>
+                <TextBlock Text="Show role PINs"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource FluentTextPrimary}"
+                           FontSize="{StaticResource FontSizeBody}"/>
             </StackPanel>
+
+            <TextBlock Grid.Column="2"
+                       Text="{Binding PinConflictWarning}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Stretch"
+                       Style="{StaticResource SetupPinConflictTextStyle}"/>
+        </Grid>
+
+        <Border Grid.Row="4"
+                Height="1"
+                Background="{StaticResource FluentStrokeDefault}"/>
+
+        <Grid Grid.Row="6"
+              HorizontalAlignment="Center"
+              Width="336">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="160"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="22"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="MasterPinLabel"
+                       Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Master PIN *"
+                       Style="{StaticResource SetupPinFieldLabelStyle}"/>
+            <TextBlock x:Name="MasterConfirmLabel"
+                       Grid.Row="0"
+                       Grid.Column="2"
+                       Text="Confirm"
+                       Style="{StaticResource SetupPinFieldLabelStyle}"/>
+
+            <Grid Grid.Row="2" Grid.Column="0">
+                <PasswordBox x:Name="MasterPinBox"
+                             TabIndex="10"
+                             MaxLength="6"
+                             Width="160"
+                             MinHeight="36"
+                             HorizontalContentAlignment="Center"
+                             Style="{StaticResource MasterPinPasswordBoxStyle}"
+                             PasswordChanged="OnPinChanged"
+                             AutomationProperties.Name="Master PIN"
+                             AutomationProperties.HelpText="6 digits"
+                             AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
+                             AutomationProperties.IsRequiredForForm="True"/>
+                <TextBox x:Name="MasterPinTextBox"
+                         TabIndex="10"
+                         MaxLength="6"
+                         Width="160"
+                         MinHeight="36"
+                         HorizontalContentAlignment="Center"
+                         Style="{StaticResource MasterPinTextBoxStyle}"
+                         Text="{Binding MasterPin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         TextChanged="OnPinTextChanged"
+                         AutomationProperties.Name="Master PIN (visible)"
+                         AutomationProperties.HelpText="6 digits"
+                         AutomationProperties.LabeledBy="{Binding ElementName=MasterPinLabel}"
+                         AutomationProperties.IsRequiredForForm="True"/>
+            </Grid>
+
+            <Grid Grid.Row="2" Grid.Column="2">
+                <PasswordBox x:Name="MasterPinConfirmBox"
+                             TabIndex="11"
+                             MaxLength="6"
+                             Width="160"
+                             MinHeight="36"
+                             HorizontalContentAlignment="Center"
+                             Style="{StaticResource MasterPinPasswordBoxStyle}"
+                             PasswordChanged="OnPinChanged"
+                             AutomationProperties.Name="Confirm Master PIN"
+                             AutomationProperties.HelpText="6 digits"
+                             AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
+                             AutomationProperties.IsRequiredForForm="True"/>
+                <TextBox x:Name="MasterPinConfirmTextBox"
+                         TabIndex="11"
+                         MaxLength="6"
+                         Width="160"
+                         MinHeight="36"
+                         HorizontalContentAlignment="Center"
+                         Style="{StaticResource MasterPinTextBoxStyle}"
+                         Text="{Binding MasterPinConfirm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         TextChanged="OnPinTextChanged"
+                         AutomationProperties.Name="Confirm Master PIN (visible)"
+                         AutomationProperties.HelpText="6 digits"
+                         AutomationProperties.LabeledBy="{Binding ElementName=MasterConfirmLabel}"
+                         AutomationProperties.IsRequiredForForm="True"/>
+            </Grid>
+
+            <TextBlock Grid.Row="3"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="3"
+                       Text="{Binding MasterConfirmHint}"
+                       Style="{StaticResource SetupPinFeedbackTextStyle}"/>
+        </Grid>
+
+        <StackPanel Grid.Row="8"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+            <CheckBox IsChecked="{Binding ShowMasterPins}"
+                      Style="{StaticResource FluentToggleSwitchStyle}"
+                      AutomationProperties.Name="Show master PIN toggle"/>
+            <TextBlock Text="Show master PIN"
+                       Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource FluentTextPrimary}"
+                       FontSize="{StaticResource FontSizeBody}"/>
         </StackPanel>
-    </ScrollViewer>
-</Page>
+    </Grid>
+</UserControl>

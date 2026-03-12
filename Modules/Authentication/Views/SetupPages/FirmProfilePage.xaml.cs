@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,7 +7,7 @@ using StoreAssistantPro.Modules.Authentication.ViewModels;
 
 namespace StoreAssistantPro.Modules.Authentication.Views.SetupPages;
 
-public partial class FirmProfilePage : Page
+public partial class FirmProfilePage : UserControl
 {
     private bool _handlersAttached;
 
@@ -23,6 +24,10 @@ public partial class FirmProfilePage : Page
 
         PhoneBox.PreviewTextInput += OnPreviewPhoneOnly;
         DataObject.AddPastingHandler(PhoneBox, OnPastingPhoneOnly);
+        PhoneBox.TextChanged += OnPhoneTextChanged;
+
+        PincodeBox.PreviewTextInput += OnPreviewPhoneOnly;
+        DataObject.AddPastingHandler(PincodeBox, OnPastingPhoneOnly);
     }
 
     private static void OnPreviewPhoneOnly(object sender, TextCompositionEventArgs e)
@@ -35,7 +40,7 @@ public partial class FirmProfilePage : Page
         if (e.DataObject.GetDataPresent(typeof(string)))
         {
             var text = (string)e.DataObject.GetData(typeof(string))!;
-            if (!SetupViewModel.PhoneInputRegex().IsMatch(text))
+            if (!DigitsOnlyRegex().IsMatch(text))
                 e.CancelCommand();
         }
         else
@@ -44,6 +49,32 @@ public partial class FirmProfilePage : Page
         }
     }
 
-    [GeneratedRegex(@"^[\d\s\+\-]$")]
+    private void OnPhoneTextChanged(object sender, TextChangedEventArgs e)
+    {
+        var digitsOnly = NonDigitsRegex().Replace(PhoneBox.Text, string.Empty);
+        if (digitsOnly.Length > 10)
+            digitsOnly = digitsOnly[..10];
+
+        if (!string.Equals(PhoneBox.Text, digitsOnly, StringComparison.Ordinal))
+        {
+            var caret = digitsOnly.Length;
+            PhoneBox.Text = digitsOnly;
+            PhoneBox.CaretIndex = caret;
+        }
+    }
+
+    private void OnToggleOptionalFieldsClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is SetupViewModel vm)
+            vm.ShowOptionalFirmFields = !vm.ShowOptionalFirmFields;
+    }
+
+    [GeneratedRegex(@"^\d$")]
     private static partial Regex PhoneCharRegex();
+
+    [GeneratedRegex(@"^\d+$")]
+    private static partial Regex DigitsOnlyRegex();
+
+    [GeneratedRegex(@"\D+")]
+    private static partial Regex NonDigitsRegex();
 }

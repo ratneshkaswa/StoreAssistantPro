@@ -15,7 +15,19 @@ public class SetupViewModelTests
     {
         _regionalSettings.Now.Returns(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
             TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")));
-        return new(_commandBus, _regionalSettings);
+        var sut = new SetupViewModel(_commandBus, _regionalSettings)
+        {
+            FirmName = string.Empty,
+            Address = string.Empty,
+            State = string.Empty,
+            Pincode = string.Empty,
+            Phone = string.Empty,
+            Email = string.Empty,
+            GSTIN = string.Empty,
+            PAN = string.Empty
+        };
+        sut.ClearSensitivePins();
+        return sut;
     }
 
     private void FillValidPins(SetupViewModel sut,
@@ -216,7 +228,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.Phone = "abc";
-        Assert.Equal("Digits, +, - and spaces only", sut.PhoneValidationHint);
+        Assert.Equal("Enter a 10-digit phone number", sut.PhoneValidationHint);
     }
 
     // -- Currency code (hardcoded INR for India) --
@@ -406,7 +418,7 @@ public class SetupViewModelTests
     public void RequiredFieldsProgress_AllEmpty_ShowsZero()
     {
         var sut = CreateSut();
-        Assert.Contains("0 of 5", sut.RequiredFieldsProgress);
+        Assert.Contains("0 / 5", sut.RequiredFieldsProgress);
     }
 
     [Fact]
@@ -414,7 +426,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.FirmName = "Store";
-        Assert.Contains("1 of 5", sut.RequiredFieldsProgress);
+        Assert.Contains("1 / 5", sut.RequiredFieldsProgress);
     }
 
     [Fact]
@@ -433,7 +445,7 @@ public class SetupViewModelTests
         sut.FirmName = "Store";
         sut.AdminPin = "1234";
         // No confirm
-        Assert.Contains("2 of 5", sut.RequiredFieldsProgress);
+        Assert.Contains("2 / 5", sut.RequiredFieldsProgress);
     }
 
     // -- Save format validations --
@@ -502,7 +514,7 @@ public class SetupViewModelTests
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.Equal("Phone may only contain digits, +, - and spaces.", sut.ErrorMessage);
+        Assert.Equal("Phone must be exactly 10 digits.", sut.ErrorMessage);
     }
 
     [Theory]
@@ -1160,7 +1172,7 @@ public class SetupViewModelTests
     {
         var sut = CreateSut();
         sut.Phone = input;
-        Assert.Contains("Digits", sut.PhoneValidationHint);
+        Assert.Contains("10-digit", sut.PhoneValidationHint);
     }
 
     // -- B5: State freetext validation on Save --

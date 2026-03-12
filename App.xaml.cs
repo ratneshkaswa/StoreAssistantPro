@@ -54,8 +54,12 @@ public partial class App : Application
 
     private async Task InitializeAndRunAsync(long startupTimestamp)
     {
-        // Build DI container
-        var builder = Host.CreateApplicationBuilder();
+        // Build DI container from the executable directory so appsettings.json
+        // resolves correctly even when launched from shortcuts/other folders.
+        var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+        {
+            ContentRootPath = AppContext.BaseDirectory
+        });
 
         builder.Services
             .AddDataAccess(builder.Configuration)

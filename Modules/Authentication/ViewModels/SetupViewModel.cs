@@ -173,15 +173,9 @@ public partial class SetupViewModel : BaseViewModel
         get
         {
             if (string.IsNullOrWhiteSpace(Phone)) return string.Empty;
-            if (!PhoneInputRegex().IsMatch(Phone)) return "Digits, +, - and spaces only";
-            var digits = new string(Phone.Where(char.IsDigit).ToArray());
-            if (digits.Length == 10)
-                return $"\u2713 {digits[..5]} {digits[5..]}";
-            if (digits.Length == 12 && Phone.TrimStart().StartsWith('+'))
-                return $"\u2713 +{digits[..2]} {digits[2..7]} {digits[7..]}";
-            if (digits.Length < 10)
-                return "At least 10 digits expected";
-            return "\u2713";
+            var normalized = Phone.Trim();
+            if (!PhoneInputRegex().IsMatch(normalized)) return "Enter a 10-digit phone number";
+            return $"\u2713 {normalized[..5]} {normalized[5..]}";
         }
     }
 
@@ -471,11 +465,11 @@ public partial class SetupViewModel : BaseViewModel
         {
             var done = GetCompletedRequiredChecks();
             if (done < RequiredChecksTotal)
-                return $"{done} of {RequiredChecksTotal} setup checks complete";
+                return $"{done} / {RequiredChecksTotal} required items complete";
 
             return IsReadyForSave
                 ? "\u2713 Ready to save"
-                : $"{RequiredChecksTotal} of {RequiredChecksTotal} setup checks complete - review highlighted optional details";
+                : "Required items complete - review highlighted optional details";
         }
     }
 
@@ -505,7 +499,7 @@ public partial class SetupViewModel : BaseViewModel
             if (!InputValidator.AreAllDistinct(AdminPin, UserPin) || MasterPinContainsRolePin(MasterPin, AdminPin, UserPin))
                 return "All PINs must be unique.";
             if (!HasNoOptionalValidationErrors())
-                return "Review highlighted details before saving.";
+                return "Correct optional details before saving.";
             return "Complete setup checks to continue.";
         }
     }
@@ -546,19 +540,28 @@ public partial class SetupViewModel : BaseViewModel
     public partial bool IsDirty { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(AdminPinRevealText))]
-    [NotifyPropertyChangedFor(nameof(UserPinRevealText))]
     public partial bool ShowRolePins { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(MasterPinRevealText))]
     public partial bool ShowMasterPins { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OptionalFirmToggleText))]
+    public partial bool ShowOptionalFirmFields { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasRecoveredDraft { get; set; }
 
     private void OnSetupPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(ErrorMessage) or nameof(FirstErrorFieldKey))
+            OnPropertyChanged(nameof(ShouldShowGlobalError));
+
         if (e.PropertyName is nameof(IsDirty) or nameof(ErrorMessage) or nameof(SuccessMessage)
             or nameof(FirstErrorFieldKey) or nameof(IsBusy) or nameof(IsSetupComplete)
-            or nameof(RedirectCountdown))
+            or nameof(RedirectCountdown)
+            or nameof(IsReadyForSave) or nameof(SaveBlockingIssue) or nameof(SaveReadinessMessage)
+            or nameof(ShouldShowGlobalError) or nameof(OptionalFirmToggleText))
             return;
 
         if (!_isRestoringDraft)
@@ -590,8 +593,7 @@ public partial class SetupViewModel : BaseViewModel
             .Rule(string.IsNullOrWhiteSpace(Pincode) || (Pincode.Trim().Length == 6 && Pincode.Trim().AsSpan().IndexOfAnyExceptInRange('0', '9') < 0), "Pincode must be exactly 6 digits.", "Pincode")
             .Rule(string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim()), "Email format is invalid.", "Email")
             .Rule(string.IsNullOrWhiteSpace(State) || IndianStateCodeByName.ContainsKey(State.Trim()), "Please select a valid Indian state from the list.", "State")
-            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone may only contain digits, +, - and spaces.", "Phone")
-            .Rule(string.IsNullOrWhiteSpace(Phone) || new string(Phone.Where(char.IsDigit).ToArray()).Length >= 10, "Phone must have at least 10 digits.", "Phone")
+            .Rule(string.IsNullOrWhiteSpace(Phone) || PhoneInputRegex().IsMatch(Phone.Trim()), "Phone must be exactly 10 digits.", "Phone")
             .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || IsValidBackupTime(BackupTime), "Backup time must be in HH:mm format (e.g. 22:00).", "BackupTime")
             .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || !string.IsNullOrWhiteSpace(BackupLocation), "Backup location is required when auto backup is enabled.", "BackupLocation")
             .Rule(!ShouldValidateAdvancedSetupFields || !AutoBackupEnabled || string.IsNullOrWhiteSpace(BackupLocation) || IsValidBackupLocationPath(BackupLocation), "Backup location path is invalid.", "BackupLocation")
@@ -628,6 +630,7 @@ public partial class SetupViewModel : BaseViewModel
         {
             IsSetupComplete = true;
             IsDirty = false;
+            HasRecoveredDraft = false;
             DeleteDraftSafe();
             StartRedirectCountdown();
         }
@@ -700,9 +703,11 @@ public partial class SetupViewModel : BaseViewModel
         MasterPinConfirm = string.Empty;
     }
 
-    public string AdminPinRevealText => ShowRolePins ? AdminPin : string.Empty;
-    public string UserPinRevealText => ShowRolePins ? UserPin : string.Empty;
-    public string MasterPinRevealText => ShowMasterPins ? MasterPin : string.Empty;
+    public bool ShouldShowGlobalError =>
+        HasError && string.IsNullOrWhiteSpace(FirstErrorFieldKey);
+
+    public string OptionalFirmToggleText =>
+        ShowOptionalFirmFields ? "Less business details" : "More business details";
 
     private const string WeakPinShortText = "\u26a0 Weak PIN";
     private const string WeakPinDetailText = "\u26a0 Weak PIN \u2014 consider a less predictable combination.";
@@ -797,7 +802,7 @@ public partial class SetupViewModel : BaseViewModel
         _ => "Strong"
     };
 
-    [GeneratedRegex(@"^[\d\s\+\-]*\d[\d\s\+\-]*$")]
+    [GeneratedRegex(@"^\d{10}$")]
     internal static partial Regex PhoneInputRegex();
 
     [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
@@ -816,7 +821,7 @@ public partial class SetupViewModel : BaseViewModel
         var emailValid = string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim());
         var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
         var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
-            || (PhoneInputRegex().IsMatch(phoneNormalized) && new string(phoneNormalized.Where(char.IsDigit).ToArray()).Length >= 10);
+            || PhoneInputRegex().IsMatch(phoneNormalized);
         var gstinFormatValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GstinRegex().IsMatch(GSTIN.Trim().ToUpperInvariant());
         var gstinChecksumValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(GSTIN) || GSTIN.Trim().Length != 15 || VerifyGstinChecksum(GSTIN.Trim().ToUpperInvariant());
         var panValid = !ShouldValidateAdvancedSetupFields || string.IsNullOrWhiteSpace(PAN) || PanRegex().IsMatch(PAN.Trim().ToUpperInvariant());
@@ -869,7 +874,7 @@ public partial class SetupViewModel : BaseViewModel
         var emailValid = string.IsNullOrWhiteSpace(Email) || EmailRegex().IsMatch(Email.Trim());
         var phoneNormalized = string.IsNullOrWhiteSpace(Phone) ? string.Empty : Phone.Trim();
         var phoneValid = string.IsNullOrWhiteSpace(phoneNormalized)
-            || (PhoneInputRegex().IsMatch(phoneNormalized) && new string(phoneNormalized.Where(char.IsDigit).ToArray()).Length >= 10);
+            || PhoneInputRegex().IsMatch(phoneNormalized);
 
         return stateValid && pincodeValid && emailValid && phoneValid;
     }
@@ -903,6 +908,28 @@ public partial class SetupViewModel : BaseViewModel
             UseEssentialSetupValidationOnly = draft.UseEssentialSetupValidationOnly;
             ShowRolePins = draft.ShowRolePins;
             ShowMasterPins = draft.ShowMasterPins;
+            ShowOptionalFirmFields = draft.ShowOptionalFirmFields
+                || !string.IsNullOrWhiteSpace(Address)
+                || !string.IsNullOrWhiteSpace(State)
+                || !string.IsNullOrWhiteSpace(Pincode)
+                || !string.IsNullOrWhiteSpace(Phone)
+                || !string.IsNullOrWhiteSpace(Email);
+
+            // Keep setup resilient when validation rules evolve:
+            // drop previously persisted phone formats that are no longer valid.
+            if (!string.IsNullOrWhiteSpace(Phone) && !PhoneInputRegex().IsMatch(Phone.Trim()))
+                Phone = string.Empty;
+
+            HasRecoveredDraft =
+                !string.IsNullOrWhiteSpace(FirmName)
+                || !string.IsNullOrWhiteSpace(Address)
+                || !string.IsNullOrWhiteSpace(State)
+                || !string.IsNullOrWhiteSpace(Pincode)
+                || !string.IsNullOrWhiteSpace(Phone)
+                || !string.IsNullOrWhiteSpace(Email)
+                || !string.IsNullOrWhiteSpace(AdminPin)
+                || !string.IsNullOrWhiteSpace(UserPin)
+                || !string.IsNullOrWhiteSpace(MasterPin);
         }
         catch
         {
@@ -940,7 +967,8 @@ public partial class SetupViewModel : BaseViewModel
                 MasterPinConfirm = MasterPinConfirm,
                 UseEssentialSetupValidationOnly = UseEssentialSetupValidationOnly,
                 ShowRolePins = ShowRolePins,
-                ShowMasterPins = ShowMasterPins
+                ShowMasterPins = ShowMasterPins,
+                ShowOptionalFirmFields = ShowOptionalFirmFields
             };
 
             var plainBytes = JsonSerializer.SerializeToUtf8Bytes(state);
@@ -987,6 +1015,7 @@ public partial class SetupViewModel : BaseViewModel
         public bool UseEssentialSetupValidationOnly { get; set; } = true;
         public bool ShowRolePins { get; set; }
         public bool ShowMasterPins { get; set; }
+        public bool ShowOptionalFirmFields { get; set; }
     }
 
     public override void Dispose()

@@ -263,6 +263,15 @@
         <Setter Property="Margin" Value="{StaticResource SetupSectionSpacing}"/>
         <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="10"
+                                  ShadowDepth="1"
+                                  Direction="270"
+                                  Opacity="0.10"
+                                  Color="#000000"/>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Sidebar container for setup (flat, no shadow) -->
@@ -1049,7 +1058,8 @@
                             <!-- Close button -->
                             <Button x:Name="PART_CloseButton"
                                     Grid.Column="3"
-                                    Content="ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢"
+                                    Content="&#xE10A;"
+                                    FontFamily="{StaticResource FluentIconFont}"
                                     FontSize="{StaticResource FontSizeStatusBar}"
                                     Padding="5,3"
                                     Margin="6,0,8,0"
@@ -1151,7 +1161,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="controls:AppBranding">
                     <StackPanel HorizontalAlignment="Center">
-                        <Image x:Name="PART_Logo" Source="/Assets/logo-256.png"
+                        <Image x:Name="PART_Logo" Source="pack://application:,,,/Assets/logo-256.png"
                                Width="{TemplateBinding LogoSize}" Height="{TemplateBinding LogoSize}"
                                HorizontalAlignment="Center"
                                RenderOptions.BitmapScalingMode="HighQuality"

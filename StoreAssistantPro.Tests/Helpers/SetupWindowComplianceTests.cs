@@ -23,14 +23,9 @@ public class SetupWindowComplianceTests
     [Fact]
     public void SetupWindow_Should_KeepScrollableContent_WhenFieldsGrow()
     {
-        var pagesDir = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages");
-        var pages = Directory.GetFiles(pagesDir, "*.xaml");
-
-        foreach (var page in pages)
-        {
-            var xaml = File.ReadAllText(page);
-            Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", xaml);
-        }
+        var windowFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
+        var xaml = File.ReadAllText(windowFile);
+        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", xaml);
     }
 
     [Fact]
@@ -78,44 +73,48 @@ public class SetupWindowComplianceTests
     }
 
     [Fact]
-    public void SetupWindow_Should_UseResponsiveFooterAndProgressCardLayout()
+    public void SetupWindow_Should_UseCleanFooterWithoutHelperCopy()
     {
         var windowFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
         var xaml = File.ReadAllText(windowFile);
 
         Assert.Contains("<WrapPanel Grid.Column=\"1\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("TextWrapping=\"Wrap\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("MinWidth=\"180\" MaxWidth=\"260\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("All fields are editable. Press Enter to move next.", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("Business and security details only.", xaml, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("<StackPanel Grid.Column=\"1\" Orientation=\"Horizontal\" HorizontalAlignment=\"Right\">", xaml, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void SetupWindow_Should_UseAdaptiveSecurityColumnsAndWrappingHintLanes()
+    public void SetupWindow_Should_UseCompactTwoColumnSecurityLayout()
     {
         var securityFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages", "SecuritySettingsPage.xaml");
         var xaml = File.ReadAllText(securityFile);
 
-        Assert.Contains("ColumnDefinition Width=\"Auto\" MinWidth=\"132\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("ColumnDefinition Width=\"Auto\" MinWidth=\"144\"", xaml, StringComparison.Ordinal);
-        Assert.DoesNotContain("SecurityRolePinColumnWidth", xaml, StringComparison.Ordinal);
-        Assert.DoesNotContain("SecurityRecoveryPinColumnWidth", xaml, StringComparison.Ordinal);
-        Assert.Contains("Orientation=\"Vertical\"", xaml, StringComparison.Ordinal);
-        Assert.True(Regex.Matches(xaml, "<WrapPanel Orientation=\"Horizontal\">").Count >= 3);
+        Assert.Contains("<ColumnDefinition Width=\"*\"/>", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"AdminPinBox\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"UserPinBox\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"MasterPinBox\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"MasterPinConfirmBox\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("SecurityRoleLabelWidth", xaml, StringComparison.Ordinal);
+        Assert.Contains("Text=\"Confirm\"", xaml, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void SetupWindow_Should_UseAdaptiveTwoPaneLayoutWithStackBreakpoint()
+    public void SetupWindow_Should_UseSingleContinuousSetupView()
     {
         var windowFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
         var codeBehindFile = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml.cs");
         var xaml = File.ReadAllText(windowFile);
         var cs = File.ReadAllText(codeBehindFile);
 
-        Assert.Contains("x:Name=\"SetupContentGrid\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"FirmPane\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"SecurityPane\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("AdaptiveStackBreakpointWidth = 1240d", cs, StringComparison.Ordinal);
-        Assert.Contains("UpdateAdaptiveLayout()", cs, StringComparison.Ordinal);
+        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"FirmProfileSection\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"SecuritySettingsSection\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Frame", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"SetupContentGrid\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"FirmPane\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"SecurityPane\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("UpdateAdaptiveLayout()", cs, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -149,8 +148,8 @@ public class SetupWindowComplianceTests
         var designTokensFile = Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml");
         var tokens = File.ReadAllText(designTokensFile);
 
-        Assert.Contains("<sys:Double x:Key=\"SetupMinWidth\">920</sys:Double>", tokens, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"SetupMinHeight\">620</sys:Double>", tokens, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"SetupMinWidth\">1000</sys:Double>", tokens, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"SetupMinHeight\">820</sys:Double>", tokens, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"SecurityRolePinBoxWidth\">116</sys:Double>", tokens, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"SecurityMasterPinBoxWidth\">128</sys:Double>", tokens, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"FieldWidthStandard\">144</sys:Double>", tokens, StringComparison.Ordinal);
@@ -162,8 +161,8 @@ public class SetupWindowComplianceTests
         var file = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml");
         var xaml = File.ReadAllText(file);
 
-        Assert.Contains("x:Name=\"FirmContentFrame\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"SecurityContentFrame\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"FirmProfileSection\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"SecuritySettingsSection\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavFirm\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavSecurity\"", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("x:Name=\"NavTax\"", xaml, StringComparison.Ordinal);

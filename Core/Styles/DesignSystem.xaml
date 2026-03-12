@@ -185,8 +185,8 @@
 
     <!-- Setup window tokens -->
     <GridLength x:Key="SetupLabelColumnWidth">160</GridLength>
-    <sys:Double x:Key="SetupWindowWidth">1080</sys:Double>
-    <sys:Double x:Key="SetupWindowHeight">700</sys:Double>
+    <sys:Double x:Key="SetupWindowWidth">1100</sys:Double>
+    <sys:Double x:Key="SetupWindowHeight">900</sys:Double>
     <sys:Double x:Key="SetupButtonHeight">36</sys:Double>
     <sys:Double x:Key="SetupPrimaryButtonWidth">116</sys:Double>
     <Thickness x:Key="SetupSectionSpacing">0,8,0,0</Thickness>
@@ -202,8 +202,8 @@
     <Thickness x:Key="SetupSectionTitleMargin">0,0,0,2</Thickness>
     <Thickness x:Key="SetupSectionHintMargin">0,0,0,6</Thickness>
     <Thickness x:Key="SetupCancelButtonMargin">0,0,12,0</Thickness>
-    <sys:Double x:Key="SetupMinWidth">920</sys:Double>
-    <sys:Double x:Key="SetupMinHeight">620</sys:Double>
+    <sys:Double x:Key="SetupMinWidth">1000</sys:Double>
+    <sys:Double x:Key="SetupMinHeight">820</sys:Double>
     <Thickness x:Key="SetupRootPadding">10</Thickness>
     <GridLength x:Key="SetupRowSpacingSmall">8</GridLength>
     <GridLength x:Key="SetupRowSpacingMedium">12</GridLength>

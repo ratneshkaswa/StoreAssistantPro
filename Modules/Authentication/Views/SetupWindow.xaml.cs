@@ -11,11 +11,7 @@ namespace StoreAssistantPro.Modules.Authentication.Views;
 
 public partial class SetupWindow : Window
 {
-    internal const double AdaptiveStackBreakpointWidth = 1240d;
     private SetupViewModel? _vm;
-
-    private readonly FirmProfilePage _firmPage = new();
-    private readonly SecuritySettingsPage _securityPage = new();
 
     private readonly IDialogService _dialogService;
 
@@ -56,11 +52,10 @@ public partial class SetupWindow : Window
         sizingService.ConfigureStartupWindow(this, width, height);
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
-        SizeChanged += (_, _) => UpdateAdaptiveLayout();
 
-        // Share the same ViewModel instance across all setup pages.
-        _firmPage.DataContext = vm;
-        _securityPage.DataContext = vm;
+        // Share the same ViewModel instance across setup sections.
+        FirmProfileSection.DataContext = vm;
+        SecuritySettingsSection.DataContext = vm;
 
         vm.PropertyChanged += OnViewModelPropertyChanged;
 
@@ -70,13 +65,9 @@ public partial class SetupWindow : Window
             vm.Dispose();
         };
 
-        FirmContentFrame.Navigate(_firmPage);
-        SecurityContentFrame.Navigate(_securityPage);
-
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
         {
-            TryFocusControl(_firmPage, "FirmNameBox");
-            UpdateAdaptiveLayout();
+            TryFocusControl(FirmProfileSection, "FirmNameBox");
         });
     }
 
@@ -101,7 +92,16 @@ public partial class SetupWindow : Window
 
         if (FieldFocusMap.TryGetValue(fieldKey, out var target))
         {
-            Page page = target.Section == "Security" ? _securityPage : _firmPage;
+            if (_vm is not null
+                && target.Section == "Firm"
+                && !string.Equals(fieldKey, "FirmName", StringComparison.Ordinal))
+            {
+                _vm.ShowOptionalFirmFields = true;
+            }
+
+            FrameworkElement page = target.Section == "Security"
+                ? SecuritySettingsSection
+                : FirmProfileSection;
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
             {
                 TryFocusControl(page, target.Control);
@@ -110,10 +110,17 @@ public partial class SetupWindow : Window
         }
     }
 
-    private static void TryFocusControl(Page page, string controlName)
+    private static void TryFocusControl(FrameworkElement page, string controlName)
     {
         if (page.FindName(controlName) is not UIElement element)
             return;
+
+        if (!element.IsVisible
+            && page.FindName(GetVisibleInputFallbackName(controlName)) is UIElement fallbackElement
+            && fallbackElement.IsVisible)
+        {
+            element = fallbackElement;
+        }
 
         switch (element)
         {
@@ -131,45 +138,16 @@ public partial class SetupWindow : Window
         }
     }
 
-    private void UpdateAdaptiveLayout()
+    private static string GetVisibleInputFallbackName(string controlName) => controlName switch
     {
-        var stack = ActualWidth < AdaptiveStackBreakpointWidth;
-
-        if (stack)
-        {
-            Grid.SetRow(FirmPane, 0);
-            Grid.SetColumn(FirmPane, 0);
-            Grid.SetColumnSpan(FirmPane, 3);
-
-            Grid.SetRow(SecurityPane, 1);
-            Grid.SetColumn(SecurityPane, 0);
-            Grid.SetColumnSpan(SecurityPane, 3);
-
-            if (SetupContentGrid.RowDefinitions.Count < 3)
-            {
-                SetupContentGrid.RowDefinitions.Clear();
-                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength((double)FindResource("SetupRowSpacingMedium")) });
-                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            }
-        }
-        else
-        {
-            Grid.SetRow(FirmPane, 0);
-            Grid.SetColumn(FirmPane, 0);
-            Grid.SetColumnSpan(FirmPane, 1);
-
-            Grid.SetRow(SecurityPane, 0);
-            Grid.SetColumn(SecurityPane, 2);
-            Grid.SetColumnSpan(SecurityPane, 1);
-
-            if (SetupContentGrid.RowDefinitions.Count != 1)
-            {
-                SetupContentGrid.RowDefinitions.Clear();
-                SetupContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            }
-        }
-    }
+        "AdminPinBox" => "AdminPinTextBox",
+        "AdminPinConfirmBox" => "AdminPinConfirmTextBox",
+        "UserPinBox" => "UserPinTextBox",
+        "UserPinConfirmBox" => "UserPinConfirmTextBox",
+        "MasterPinBox" => "MasterPinTextBox",
+        "MasterPinConfirmBox" => "MasterPinConfirmTextBox",
+        _ => controlName
+    };
 
     /// <summary>
     /// Confirm close if setup is still in progress.
@@ -182,7 +160,7 @@ public partial class SetupWindow : Window
         if (_vm.IsSetupComplete || DialogResult == true)
         {
             _vm.ClearSensitivePins();
-            _securityPage.ClearAllPinBoxes();
+            SecuritySettingsSection.ClearAllPinBoxes();
             return;
         }
 
@@ -205,6 +183,6 @@ public partial class SetupWindow : Window
         }
 
         _vm.ClearSensitivePins();
-        _securityPage.ClearAllPinBoxes();
+        SecuritySettingsSection.ClearAllPinBoxes();
     }
 }
