@@ -1,0 +1,65 @@
+<core:BaseDialogWindow
+    x:Class="StoreAssistantPro.Core.Views.AppMessageDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="clr-namespace:StoreAssistantPro.Core"
+    Title="Message">
+
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Style="{StaticResource FluentCardElevatedStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border x:Name="IconBadge"
+                        Width="44"
+                        Height="44"
+                        VerticalAlignment="Top"
+                        Background="{StaticResource FluentInfoBackground}"
+                        CornerRadius="22">
+                    <TextBlock x:Name="IconGlyph"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontFamily="{StaticResource FluentFontDisplay}"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentInfo}"
+                               Text="?"/>
+                </Border>
+
+                <TextBlock x:Name="MessageText"
+                           Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource FluentTextPrimary}"
+                           FontSize="{StaticResource FontSizeBody}"
+                           TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button x:Name="SecondaryButton"
+                    MinWidth="108"
+                    MinHeight="{StaticResource ButtonHeight}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"
+                    Click="OnSecondaryClick"/>
+            <Button x:Name="PrimaryButton"
+                    MinWidth="108"
+                    MinHeight="{StaticResource ButtonHeight}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="OnPrimaryClick"/>
+        </StackPanel>
+    </Grid>
+</core:BaseDialogWindow>

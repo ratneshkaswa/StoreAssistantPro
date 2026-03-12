@@ -56,6 +56,8 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="0,0,0,6"/>
             <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="TextAlignment" Value="Left"/>
         </Style>
 
         <Style x:Key="SetupPinFeedbackTextStyle"
@@ -309,7 +311,7 @@
 
         <Grid Grid.Row="6"
               HorizontalAlignment="Left"
-              Width="336">
+              Width="608">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="160"/>
                 <ColumnDefinition Width="16"/>
@@ -396,18 +398,21 @@
                        Style="{StaticResource SetupPinFeedbackTextStyle}"/>
         </Grid>
 
-        <StackPanel Grid.Row="8"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Left">
-            <CheckBox IsChecked="{Binding ShowMasterPins}"
-                      Style="{StaticResource FluentToggleSwitchStyle}"
-                      AutomationProperties.Name="Show master PIN toggle"/>
-            <TextBlock Text="Show master PIN"
-                       Margin="10,0,0,0"
-                       VerticalAlignment="Center"
-                       Foreground="{StaticResource FluentTextPrimary}"
-                       FontSize="{StaticResource FontSizeBody}"/>
-        </StackPanel>
+        <Grid Grid.Row="8"
+              Width="608"
+              HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left">
+                <CheckBox IsChecked="{Binding ShowMasterPins}"
+                          Style="{StaticResource FluentToggleSwitchStyle}"
+                          AutomationProperties.Name="Show master PIN toggle"/>
+                <TextBlock Text="Show master PIN"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource FluentTextPrimary}"
+                           FontSize="{StaticResource FontSizeBody}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
