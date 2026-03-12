@@ -72,8 +72,6 @@ public partial class FirmViewModel : BaseViewModel
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ChangeStatusText))]
-    [NotifyPropertyChangedFor(nameof(ChangeStatusHint))]
     public partial bool IsDirty { get; set; }
 
     [ObservableProperty]
@@ -99,8 +97,6 @@ public partial class FirmViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(StateValidationHint))]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
-    [NotifyPropertyChangedFor(nameof(BusinessSummarySubtitle))]
-    [NotifyPropertyChangedFor(nameof(TaxSummarySubtitle))]
     public partial string State { get; set; } = string.Empty;
 
     partial void OnStateChanged(string value)
@@ -121,7 +117,6 @@ public partial class FirmViewModel : BaseViewModel
     [NotifyDataErrorInfo]
     [RegularExpression(@"^$|^\d{10}$", ErrorMessage = "Phone must be exactly 10 digits.")]
     [NotifyPropertyChangedFor(nameof(PhoneValidationHint))]
-    [NotifyPropertyChangedFor(nameof(BusinessSummarySubtitle))]
     public partial string Phone { get; set; } = string.Empty;
 
     partial void OnPhoneChanged(string value) => OnEditableFieldChanged();
@@ -140,7 +135,6 @@ public partial class FirmViewModel : BaseViewModel
     [CustomValidation(typeof(BusinessProfileRules), nameof(BusinessProfileRules.ValidateGstin))]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
     [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
-    [NotifyPropertyChangedFor(nameof(TaxSummarySubtitle))]
     public partial string GSTNumber { get; set; } = string.Empty;
 
     partial void OnGSTNumberChanged(string value)
@@ -207,7 +201,6 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrencyPreview))]
-    [NotifyPropertyChangedFor(nameof(InvoiceSummarySubtitle))]
     public partial string SelectedCurrencySymbol { get; set; }
 
     partial void OnSelectedCurrencySymbolChanged(string value) => OnEditableFieldChanged();
@@ -216,7 +209,6 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FinancialYearDisplay))]
-    [NotifyPropertyChangedFor(nameof(InvoiceSummarySubtitle))]
     public partial string SelectedFYStartMonth { get; set; }
 
     partial void OnSelectedFYStartMonthChanged(string value) => OnEditableFieldChanged();
@@ -225,7 +217,6 @@ public partial class FirmViewModel : BaseViewModel
         Enumerable.Range(1, 12).Select(month => CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(month)));
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(InvoiceSummarySubtitle))]
     public partial string SelectedDateFormat { get; set; } = "dd/MM/yyyy";
 
     partial void OnSelectedDateFormatChanged(string value) => OnEditableFieldChanged();
@@ -253,7 +244,6 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RoundingPreview))]
-    [NotifyPropertyChangedFor(nameof(OperationsSummarySubtitle))]
     public partial string SelectedRoundingMethod { get; set; } = "No Rounding";
 
     partial void OnSelectedRoundingMethodChanged(string value) => OnEditableFieldChanged();
@@ -263,7 +253,6 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NumberToWordsPreview))]
-    [NotifyPropertyChangedFor(nameof(OperationsSummarySubtitle))]
     public partial string SelectedNumberToWordsLanguage { get; set; } = "English";
 
     partial void OnSelectedNumberToWordsLanguageChanged(string value) => OnEditableFieldChanged();
@@ -293,12 +282,6 @@ public partial class FirmViewModel : BaseViewModel
 
     public string CurrencyPreview => $"Invoice preview: {SelectedCurrencySymbol} 1,00,000.00";
 
-    public string ChangeStatusText => IsDirty ? "Unsaved changes" : "All changes saved";
-
-    public string ChangeStatusHint => IsDirty
-        ? "Save to apply the latest business rules across billing, invoices, and reports."
-        : "Billing, invoices, and reports are aligned with the saved business profile.";
-
     public bool IsWorking => IsBusy || IsLoading;
 
     public string WorkingMessage => IsLoading
@@ -309,22 +292,6 @@ public partial class FirmViewModel : BaseViewModel
         ? "Business profile"
         : FirmName.Trim();
 
-    public string BusinessSummarySubtitle
-    {
-        get
-        {
-            var parts = new List<string>();
-            if (!string.IsNullOrWhiteSpace(State))
-                parts.Add(State.Trim());
-            if (BusinessProfileRules.IsValidPhone(Phone))
-                parts.Add(Phone.Trim());
-
-            return parts.Count > 0
-                ? string.Join(" | ", parts)
-                : "Identity details used on invoices, receipts, and reports.";
-        }
-    }
-
     public string TaxSummaryTitle => SelectedGstRegistrationType switch
     {
         "Composition" => "Composition GST",
@@ -332,23 +299,13 @@ public partial class FirmViewModel : BaseViewModel
         _ => "Regular GST"
     };
 
-    public string TaxSummarySubtitle => string.IsNullOrWhiteSpace(GSTNumber)
-        ? "Add GSTIN and PAN to keep filings aligned."
-        : DerivedStateCodeDisplay;
-
     public string InvoiceSummaryTitle => SelectedTaxMode == "Tax-Inclusive (MRP)"
         ? "MRP tax inclusive"
         : "Tax added at billing";
 
-    public string InvoiceSummarySubtitle =>
-        $"{SelectedCurrencySymbol} | {SelectedDateFormat} | FY {FinancialYearDisplay}";
-
     public string OperationsSummaryTitle => NegativeStockAllowed
         ? "Negative stock allowed"
         : "Negative stock blocked";
-
-    public string OperationsSummarySubtitle =>
-        $"{SelectedRoundingMethod} | {SelectedNumberToWordsLanguage}";
 
     public string TaxModeHint => SelectedTaxMode == "Tax-Inclusive (MRP)"
         ? "Prices already include GST. Tax is back-calculated from the final amount."

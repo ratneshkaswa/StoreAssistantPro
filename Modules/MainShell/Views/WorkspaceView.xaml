@@ -19,7 +19,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Grid>
@@ -32,13 +31,6 @@
                         <TextBlock Text="Home"
                                    Style="{StaticResource PageTitleStyle}"
                                    Margin="0"/>
-                        <TextBlock Text="A lighter, calmer workspace for daily retail operations."
-                                   Style="{StaticResource HeroSubtitleStyle}"
-                                   HorizontalAlignment="Left"
-                                   Margin="{StaticResource SubtitleGap}"/>
-                        <TextBlock Text="Use the command bar above for frequent tasks, or start with one of the core work areas below."
-                                   Style="{StaticResource HintTextStyle}"
-                                   Margin="{StaticResource HeroHintSpacing}"/>
                     </StackPanel>
 
                     <Border Grid.Column="1"
@@ -86,8 +78,6 @@
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="Firm"
                                            Style="{StaticResource CardItemTitleStyle}"/>
-                                <TextBlock Text="Business profile and defaults"
-                                           Style="{StaticResource CardItemSubtitleStyle}"/>
                             </StackPanel>
                         </Border>
 
@@ -108,8 +98,6 @@
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="Users"
                                            Style="{StaticResource CardItemTitleStyle}"/>
-                                <TextBlock Text="Access, PINs, and roles"
-                                           Style="{StaticResource CardItemSubtitleStyle}"/>
                             </StackPanel>
                         </Border>
 
@@ -129,18 +117,10 @@
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="Refresh"
                                            Style="{StaticResource CardItemTitleStyle}"/>
-                                <TextBlock Text="Reload dashboard and current data"
-                                           Style="{StaticResource CardItemSubtitleStyle}"/>
                             </StackPanel>
                         </Border>
                     </UniformGrid>
                 </StackPanel>
-
-                <TextBlock Grid.Row="2"
-                           Text="Tip: Press Ctrl+D anytime to return to Home."
-                           Style="{StaticResource HintTextStyle}"
-                           HorizontalAlignment="Left"
-                           Margin="{StaticResource HeroHintSpacing}"/>
             </Grid>
         </Border>
     </Grid>

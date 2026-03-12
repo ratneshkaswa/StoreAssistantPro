@@ -21,7 +21,7 @@
         <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness"         Value="1"/>
-        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="Padding"                 Value="{StaticResource ControlPadding}"/>
         <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"                Value="{StaticResource FontSizeBody}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -103,7 +103,7 @@
         <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness"         Value="1"/>
-        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="Padding"                 Value="{StaticResource ControlPadding}"/>
         <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"                Value="{StaticResource FontSizeBody}"/>
         <Setter Property="MinHeight"               Value="{StaticResource ControlHeight}"/>
@@ -312,7 +312,7 @@
         <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness"         Value="1"/>
-        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="Padding"                 Value="{StaticResource ControlPadding}"/>
         <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"                Value="{StaticResource FontSizeBody}"/>
         <Setter Property="MinHeight"               Value="{StaticResource ControlHeight}"/>
@@ -1659,7 +1659,7 @@
         <Setter Property="Foreground"              Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness"         Value="1"/>
-        <Setter Property="Padding"                 Value="10,8"/>
+        <Setter Property="Padding"                 Value="{StaticResource ControlPadding}"/>
         <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"                Value="{StaticResource FontSizeBody}"/>
         <Setter Property="MinHeight"               Value="{StaticResource ControlHeight}"/>
@@ -1932,7 +1932,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox x:Name="PART_TextBox" Grid.Column="0"
                                          Background="Transparent" BorderThickness="0"
-                                         Padding="10,8"
+                                         Padding="{StaticResource ControlPadding}"
                                          VerticalContentAlignment="Center"
                                          FontFamily="{TemplateBinding FontFamily}"
                                          FontSize="{TemplateBinding FontSize}"

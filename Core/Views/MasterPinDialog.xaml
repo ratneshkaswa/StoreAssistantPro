@@ -22,6 +22,7 @@
         <!-- Row 1: PIN entry -->
         <PasswordBox Grid.Row="1"
                      x:Name="PinBox"
+                     AutomationProperties.Name="Master PIN"
                      MaxLength="6"
                      VerticalAlignment="Top"
                      Margin="{StaticResource FieldGroupSpacing}"/>

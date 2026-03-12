@@ -157,8 +157,6 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
@@ -169,9 +167,6 @@
                           SelectedItem="{Binding ParcelCount}"
                           Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                           Style="{StaticResource HintTextStyle}"
-                           Text="Select 1–10 parcels for this inward entry."/>
             </Grid>
 
             <!-- Step 2: Transport charges -->
@@ -183,8 +178,6 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Transport Charges (₹)"
@@ -194,9 +187,6 @@
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                          h:Watermark.Text="0"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                           Style="{StaticResource HintTextStyle}"
-                           Text="Total transport charges will be split equally across parcels."/>
             </Grid>
 
             <!-- Step 3: Parcels with products -->

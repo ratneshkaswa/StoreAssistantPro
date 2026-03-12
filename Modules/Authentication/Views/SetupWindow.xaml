@@ -139,13 +139,6 @@
                                        HorizontalAlignment="Center"
                                        Foreground="{StaticResource FluentTextPrimary}"
                                        AutomationProperties.LiveSetting="Polite"/>
-                            <TextBlock Text="Your setup is saved. You can review advanced preferences after sign-in."
-                                       FontSize="{StaticResource FontSizeBody}"
-                                       Foreground="{StaticResource FluentTextSecondary}"
-                                       HorizontalAlignment="Center"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       Margin="{StaticResource SetupCompleteSubtitleMargin}"/>
                             <TextBlock Text="{Binding RedirectCountdown}"
                                        FontSize="{StaticResource FontSizeCaption}"
                                        Foreground="{StaticResource FluentTextSecondary}"

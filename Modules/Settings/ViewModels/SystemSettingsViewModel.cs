@@ -11,13 +11,11 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BackupModeTitle))]
-    [NotifyPropertyChangedFor(nameof(BackupModeSubtitle))]
     public partial string BackupLocation { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BackupScheduleSummary))]
     [NotifyPropertyChangedFor(nameof(BackupModeTitle))]
-    [NotifyPropertyChangedFor(nameof(BackupModeSubtitle))]
     public partial bool AutoBackupEnabled { get; set; }
 
     [ObservableProperty]
@@ -48,10 +46,6 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
             ? "Auto backup needs a time"
             : $"Daily backup at {BackupTime.Trim()}"
         : "Manual backups only";
-
-    public string BackupModeSubtitle => string.IsNullOrWhiteSpace(BackupLocation)
-        ? "Backups will use the app's default Backups folder."
-        : $"Saving backups to {BackupLocation.Trim()}";
 
     public string PrinterSummaryText => string.IsNullOrWhiteSpace(DefaultPrinter)
         ? "System default printer"

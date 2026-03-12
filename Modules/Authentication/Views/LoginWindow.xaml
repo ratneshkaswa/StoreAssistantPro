@@ -166,22 +166,6 @@
                             </TextBlock.Style>
                         </TextBlock>
 
-                        <TextBlock Text="Choose Admin or User to unlock PIN entry."
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   Margin="{StaticResource FieldLabelSpacing}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock" BasedOn="{StaticResource HintTextStyle}">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsUserSelected}" Value="False">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
                         <StackPanel Style="{StaticResource LoginInteractiveRegionStyle}">
                             <!-- PIN dots -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
@@ -225,12 +209,6 @@
                                         AutomationProperties.Name="Backspace"/>
                             </UniformGrid>
 
-                            <!-- Keyboard hint -->
-                            <TextBlock Text="Or use keyboard 0–9"
-                                       Style="{StaticResource HintTextStyle}"
-                                       HorizontalAlignment="Center"
-                                       Margin="{StaticResource FieldLabelSpacing}"/>
-
                             <!-- Forgot PIN link -->
                             <TextBlock HorizontalAlignment="Center"
                                        FontSize="{StaticResource FontSizeCaption}"
@@ -252,15 +230,6 @@
                                    FontWeight="Bold"
                                    Foreground="{StaticResource FluentAccentDefault}"
                                    Margin="{StaticResource ItemSpacing}"/>
-                        <TextBlock HorizontalAlignment="Center"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"
-                                   Margin="{StaticResource ItemSpacing}">
-                            <Run Text="Enter Master PIN to reset"/>
-                            <Run Text="{Binding SelectedUserType, Mode=OneWay}"/>
-                            <Run Text="PIN"/>
-                        </TextBlock>
-
                         <Grid Margin="{StaticResource ItemSpacing}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>

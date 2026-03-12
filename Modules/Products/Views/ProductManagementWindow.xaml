@@ -78,9 +78,6 @@
                         <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
@@ -161,13 +158,6 @@
                           Margin="{StaticResource InlineControlSpacing}"/>
             </WrapPanel>
 
-            <TextBlock Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2"
-                       Style="{StaticResource HintTextStyle}"
-                       Text="Tax Rate is for quick billing. GST Group + HSN enables enterprise price-based slab resolution."/>
-
-            <TextBlock Grid.Row="18" Grid.Column="0" Grid.ColumnSpan="2"
-                       Style="{StaticResource HintTextStyle}"
-                       Text="Only enabled attributes will appear during inward entry and billing."/>
                 </Grid>
             </ScrollViewer>
         </Grid>

@@ -41,9 +41,6 @@
                 <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE713;"/>
                 <Run Text=" System Settings"/>
             </TextBlock>
-            <TextBlock Text="Manage backups, restore operations, and workstation defaults without changing firm-wide billing rules."
-                       Style="{StaticResource HintTextStyle}"
-                       AutomationProperties.Name="System settings summary"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1"
@@ -67,9 +64,6 @@
                                        Style="{StaticResource SummaryLabelStyle}"/>
                             <TextBlock Text="{Binding BackupModeTitle}"
                                        Style="{StaticResource SummaryValueStyle}"/>
-                            <TextBlock Text="{Binding BackupModeSubtitle}"
-                                       Style="{StaticResource HintTextStyle}"
-                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
 
@@ -83,9 +77,6 @@
                                        Style="{StaticResource SummaryLabelStyle}"/>
                             <TextBlock Text="{Binding PrinterSummaryText}"
                                        Style="{StaticResource SummaryValueStyle}"/>
-                            <TextBlock Text="Used by the current workstation for bill and receipt printing."
-                                       Style="{StaticResource HintTextStyle}"
-                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
 
@@ -99,9 +90,6 @@
                                        Style="{StaticResource SummaryLabelStyle}"/>
                             <TextBlock Text="{Binding RestoreStatusText}"
                                        Style="{StaticResource SummaryValueStyle}"/>
-                            <TextBlock Text="{Binding LastBackupSummary}"
-                                       Style="{StaticResource HintTextStyle}"
-                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
                 </WrapPanel>
@@ -109,8 +97,6 @@
                 <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
                         <TextBlock Text="Backup &amp; Restore" Style="{StaticResource SectionHeaderStyle}"/>
-                        <TextBlock Text="Protect the local database and control where backup files are written."
-                                   Style="{StaticResource HintTextStyle}"/>
 
                         <Grid Margin="{StaticResource ItemSpacing}">
                             <Grid.ColumnDefinitions>
@@ -133,10 +119,6 @@
                                          AutomationProperties.Name="Backup location"
                                          AutomationProperties.LabeledBy="{Binding ElementName=BackupLocationLabel}"
                                          h:Watermark.Text="Default: app folder\\Backups"/>
-                                <TextBlock Text="{Binding BackupModeSubtitle}"
-                                           Margin="{StaticResource ValidationHintMargin}"
-                                           Style="{StaticResource HintTextStyle}"
-                                           TextWrapping="Wrap"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="2" Margin="{StaticResource ItemSpacing}">
@@ -173,9 +155,6 @@
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Run a backup automatically every day"
                                                    Style="{StaticResource FormRowLabelStyle}"/>
-                                        <TextBlock Text="When enabled, the backup time becomes required and the app will use the selected backup location."
-                                                   Style="{StaticResource HintTextStyle}"
-                                                   TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -229,8 +208,6 @@
                 <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
                         <TextBlock Text="Workstation Defaults" Style="{StaticResource SectionHeaderStyle}"/>
-                        <TextBlock Text="These defaults affect the current machine without changing shared business rules."
-                                   Style="{StaticResource HintTextStyle}"/>
 
                         <Grid Margin="{StaticResource ItemSpacing}">
                             <Grid.ColumnDefinitions>
@@ -247,10 +224,6 @@
                                          AutomationProperties.Name="Default printer"
                                          AutomationProperties.LabeledBy="{Binding ElementName=DefaultPrinterLabel}"
                                          h:Watermark.Text="System default"/>
-                                <TextBlock Text="Leave blank to use the Windows default printer."
-                                           Margin="{StaticResource ValidationHintMargin}"
-                                           Style="{StaticResource HintTextStyle}"
-                                           TextWrapping="Wrap"/>
                             </StackPanel>
 
                             <Border Grid.Column="2"
