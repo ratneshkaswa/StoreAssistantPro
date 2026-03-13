@@ -29,7 +29,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                     h:Watermark.Text="Search by name or phone…"/>
+                     AutomationProperties.Name="Search customers"
+                     h:Watermark.Text="e.g. Aarav or 9876543210"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
@@ -45,6 +46,7 @@
             <DataGrid AutomationProperties.Name="Customers list"
                       ItemsSource="{Binding Customers}"
                       SelectedItem="{Binding SelectedCustomer}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False"
@@ -63,7 +65,6 @@
             <!-- Form fields (scrollable when clamped) -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                           Focusable="False"
-                          CanContentScroll="True"
                           PanningMode="VerticalOnly"
                           Margin="{StaticResource ItemSpacing}"
                           h:SmoothScroll.IsEnabled="True">
@@ -91,39 +92,51 @@
                     </TextBlock>
                     <TextBox Grid.Row="0" Grid.Column="1"
                              Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="200" h:Watermark.Text="Customer name"/>
+                             MaxLength="200"
+                             AutomationProperties.Name="Customer name"
+                             h:Watermark.Text="e.g. Amit Sharma"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Phone"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="2" Grid.Column="1"
                              Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Customer phone"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="15" h:Watermark.Text="10-digit mobile"/>
+                             MaxLength="15"
+                             h:Watermark.Text="e.g. 9876543210"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="4" Grid.Column="1"
                              Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="200" h:Watermark.Text="email@example.com"/>
+                             MaxLength="200"
+                             AutomationProperties.Name="Customer email"
+                             h:Watermark.Text="e.g. amit@example.com"/>
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Address"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="6" Grid.Column="1"
                              Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="500" h:Watermark.Text="Full address"/>
+                             MaxLength="500"
+                             AutomationProperties.Name="Customer address"
+                             h:Watermark.Text="e.g. 24 MI Road, Jaipur"/>
 
                     <TextBlock Grid.Row="8" Grid.Column="0" Text="GSTIN"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="8" Grid.Column="1"
                              Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Customer GSTIN"
                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
-                             MaxLength="15" h:Watermark.Text="15-char GST number"/>
+                             MaxLength="15"
+                             h:Watermark.Text="e.g. 08ABCDE1234F1Z5"/>
 
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Notes"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="10" Grid.Column="1"
                              Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="500" h:Watermark.Text="Optional notes"/>
+                             MaxLength="500"
+                             AutomationProperties.Name="Customer notes"
+                             h:Watermark.Text="e.g. Prefers WhatsApp updates"/>
                 </Grid>
             </ScrollViewer>
         </Grid>

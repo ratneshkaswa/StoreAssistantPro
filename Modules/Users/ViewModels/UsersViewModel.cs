@@ -14,21 +14,26 @@ public partial class UsersViewModel(
     IUserService userService,
     ICommandBus commandBus) : BaseViewModel
 {
+    [NotifyCanExecuteChangedFor(nameof(ChangePinCommand))]
     [ObservableProperty]
     public partial ObservableCollection<UserCredential> Users { get; set; } = [];
 
+    [NotifyCanExecuteChangedFor(nameof(ChangePinCommand))]
     [ObservableProperty]
     public partial string NewPin { get; set; } = string.Empty;
 
+    [NotifyCanExecuteChangedFor(nameof(ChangePinCommand))]
     [ObservableProperty]
     public partial string ConfirmPin { get; set; } = string.Empty;
 
+    [NotifyCanExecuteChangedFor(nameof(ChangePinCommand))]
     [ObservableProperty]
     public partial string MasterPin { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool IsMasterPinRequired { get; set; }
 
+    [NotifyCanExecuteChangedFor(nameof(ChangePinCommand))]
     [ObservableProperty]
     public partial UserCredential? SelectedUser { get; set; }
 
@@ -49,18 +54,21 @@ public partial class UsersViewModel(
         Users = new ObservableCollection<UserCredential>(users);
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanChangePin))]
     private Task ChangePinAsync() => RunAsync(async ct =>
     {
         SuccessMessage = string.Empty;
+        var selectedUser = SelectedUser;
 
         if (!Validate(v => v
-            .Rule(SelectedUser is not null, "Please select a user.")
+            .Rule(selectedUser is not null, "Please select a user.")
             .Rule(InputValidator.IsValidUserPin(NewPin), "New PIN must be exactly 4 digits.")
-            .Rule(InputValidator.AreEqual(NewPin, ConfirmPin), "PINs do not match.")))
+            .Rule(InputValidator.AreEqual(NewPin, ConfirmPin), "PINs do not match.")
+            .Rule(selectedUser?.UserType != UserType.Admin || InputValidator.IsValidMasterPin(MasterPin),
+                "Master PIN must be exactly 6 digits.")))
             return;
 
-        var user = SelectedUser!;
+        var user = selectedUser!;
         var result = await commandBus.SendAsync(new ChangePinCommand(
             user.UserType, NewPin,
             user.UserType == UserType.Admin ? MasterPin : null));
@@ -79,4 +87,15 @@ public partial class UsersViewModel(
                 MasterPin = string.Empty;
         }
     });
+
+    private bool CanChangePin()
+    {
+        if (SelectedUser is null)
+            return false;
+
+        if (!InputValidator.IsValidUserPin(NewPin) || !InputValidator.IsValidUserPin(ConfirmPin))
+            return false;
+
+        return SelectedUser.UserType != UserType.Admin || InputValidator.IsValidMasterPin(MasterPin);
+    }
 }

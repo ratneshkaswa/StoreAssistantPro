@@ -32,6 +32,7 @@
             <DataGrid AutomationProperties.Name="Products list"
                       ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False"
@@ -52,7 +53,6 @@
             <!-- Form fields (scrollable when clamped) -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                           Focusable="False"
-                          CanContentScroll="True"
                           PanningMode="VerticalOnly"
                           Margin="{StaticResource ItemSpacing}"
                           h:SmoothScroll.IsEnabled="True">
@@ -85,16 +85,20 @@
             </TextBlock>
             <TextBox Grid.Row="0" Grid.Column="1"
                      Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="200" h:Watermark.Text="e.g. Shirt, Pant, Kurta"/>
+                     MaxLength="200"
+                     AutomationProperties.Name="Product name"
+                     h:Watermark.Text="e.g. Oxford Shirt"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Product Type"
                        Style="{StaticResource FormRowLabelStyle}"/>
             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                 <ComboBox ItemsSource="{Binding ProductTypes}"
                           SelectedItem="{Binding SelectedProductType}"
+                          AutomationProperties.Name="Product type"
                           Width="{StaticResource FieldWidthStandard}"/>
                 <ComboBox ItemsSource="{Binding ProductUnits}"
                           SelectedItem="{Binding SelectedUnit}"
+                          AutomationProperties.Name="Product unit"
                           Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
             </StackPanel>
 
@@ -103,6 +107,7 @@
             <ComboBox Grid.Row="4" Grid.Column="1"
                       ItemsSource="{Binding Categories}"
                       SelectedItem="{Binding SelectedCategory}"
+                      AutomationProperties.Name="Product category"
                       DisplayMemberPath="Name"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
@@ -111,6 +116,7 @@
             <ComboBox Grid.Row="6" Grid.Column="1"
                       ItemsSource="{Binding Brands}"
                       SelectedItem="{Binding SelectedBrand}"
+                      AutomationProperties.Name="Product brand"
                       DisplayMemberPath="Name"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
@@ -119,6 +125,7 @@
             <ComboBox Grid.Row="8" Grid.Column="1"
                       ItemsSource="{Binding Vendors}"
                       SelectedItem="{Binding SelectedVendor}"
+                      AutomationProperties.Name="Preferred vendor"
                       DisplayMemberPath="Name"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
@@ -127,6 +134,7 @@
             <ComboBox Grid.Row="10" Grid.Column="1"
                       ItemsSource="{Binding Taxes}"
                       SelectedItem="{Binding SelectedTax}"
+                      AutomationProperties.Name="Tax rate"
                       DisplayMemberPath="TaxName"
                       Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
@@ -135,10 +143,12 @@
             <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal">
                 <ComboBox ItemsSource="{Binding TaxGroups}"
                           SelectedItem="{Binding SelectedTaxGroup}"
+                          AutomationProperties.Name="GST group"
                           DisplayMemberPath="Name"
                           Width="{StaticResource FieldWidthStandard}"/>
                 <ComboBox ItemsSource="{Binding HSNCodes}"
                           SelectedItem="{Binding SelectedHSNCode}"
+                          AutomationProperties.Name="HSN code"
                           DisplayMemberPath="Code"
                           Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
                 <CheckBox Content="Override allowed" IsChecked="{Binding OverrideAllowed}"

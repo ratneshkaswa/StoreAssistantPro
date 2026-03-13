@@ -6,7 +6,10 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         Title="Billing"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
             <RowDefinition Height="Auto"/>  <!-- Search + Barcode -->
@@ -23,21 +26,28 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     h:Watermark.Text="Search product name…"/>
+                     AutomationProperties.Name="Search products"
+                     h:Watermark.Text="e.g. Black T-shirt"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchProductsCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="2" Content="Add Selected"
+                    Command="{Binding AddProductToCartCommand}"
+                    CommandParameter="{Binding SelectedSearchResult}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
 
-            <TextBox Grid.Column="3"
+            <TextBox Grid.Column="4"
                      Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="Barcode input"
                      Width="{StaticResource FieldWidthStandard}"
-                     h:Watermark.Text="Scan barcode…"/>
-            <Button Grid.Column="4" Content="Scan" Command="{Binding ScanBarcodeCommand}"
+                     h:Watermark.Text="e.g. 8901234567890"/>
+            <Button Grid.Column="5" Content="Scan" Command="{Binding ScanBarcodeCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
@@ -59,22 +69,24 @@
                 </Grid.RowDefinitions>
 
                 <!-- Search results dropdown (collapsed when empty) -->
-                <DataGrid AutomationProperties.Name="Product search results" ItemsSource="{Binding SearchResults}"
+                <DataGrid x:Name="SearchResultsGrid"
+                          AutomationProperties.Name="Product search results"
+                          ItemsSource="{Binding SearchResults}"
+                          SelectedItem="{Binding SelectedSearchResult}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
                           AutoGenerateColumns="False" IsReadOnly="True"
                           SelectionMode="Single"
                           HeadersVisibility="Column" CanUserAddRows="False"
                           MaxHeight="{StaticResource SearchListMaxHeight}"
-                          Margin="{StaticResource ItemSpacing}">
+                          Margin="{StaticResource ItemSpacing}"
+                          Visibility="{Binding HasSearchResults, Converter={StaticResource BoolToVisibility}}"
+                          MouseDoubleClick="OnSearchResultsDoubleClick"
+                          KeyDown="OnSearchResultsKeyDown">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="Price" Binding="{Binding SalePrice, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTextColumn Header="Stock" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
                     </DataGrid.Columns>
-                    <DataGrid.InputBindings>
-                        <MouseBinding Gesture="LeftDoubleClick"
-                                      Command="{Binding AddProductToCartCommand}"
-                                      CommandParameter="{Binding SearchResults/}"/>
-                    </DataGrid.InputBindings>
                 </DataGrid>
 
                 <!-- Cart items -->
@@ -104,7 +116,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Totals -->
@@ -115,7 +126,7 @@
                     </TextBlock>
                     <TextBlock>
                         <Run Text="Discount: " FontWeight="SemiBold"/>
-                        <Run Text="{Binding DiscountAmount, StringFormat=−{0:C}, Mode=OneWay}"
+                        <Run Text="{Binding DiscountAmount, StringFormat=-{0:C}, Mode=OneWay}"
                              Foreground="{StaticResource FluentError}"/>
                     </TextBlock>
                     <TextBlock FontSize="{StaticResource FontSizeHeadline}"
@@ -142,9 +153,11 @@
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                         <ComboBox ItemsSource="{Binding DiscountTypes}"
+                                  AutomationProperties.Name="Discount type"
                                   SelectedItem="{Binding SelectedDiscountType}"
                                   Width="{StaticResource FieldWidthCompact}"/>
                         <TextBox Text="{Binding DiscountInput, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="Discount value"
                                  Width="{StaticResource FieldWidthCompact}"
                                  Margin="{StaticResource InlineControlSpacing}"
                                  MaxLength="8"/>
@@ -154,7 +167,8 @@
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="2" Grid.Column="1"
                              Text="{Binding DiscountReason, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="200" h:Watermark.Text="Optional"/>
+                             AutomationProperties.Name="Discount reason"
+                             MaxLength="200" h:Watermark.Text="e.g. Loyalty adjustment"/>
                 </Grid>
 
                 <!-- Payment method -->
@@ -163,38 +177,49 @@
                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Pay By"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding PaymentMethods}"
+                              AutomationProperties.Name="Payment method"
+                              SelectedItem="{Binding PaymentMethod}"
+                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
+                </Grid>
+
+                <!-- Cash details -->
+                <Grid Grid.Row="3" Margin="{StaticResource StepContentTopSpacing}"
+                      Visibility="{Binding IsCashPayment, Converter={StaticResource BoolToVisibility}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="{StaticResource FormRowSpacing}"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Pay By"
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Cash Given"
                                Style="{StaticResource FormRowLabelStyle}"/>
-                    <ComboBox Grid.Row="0" Grid.Column="1"
-                              ItemsSource="{Binding PaymentMethods}"
-                              SelectedItem="{Binding PaymentMethod}"
-                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
-
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Cash Given"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="2" Grid.Column="1"
+                    <TextBox Grid.Row="0" Grid.Column="1"
                              Text="{Binding CashTendered, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Cash given"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="10"/>
+                             MaxLength="10"
+                             h:Watermark.Text="e.g. 2500"/>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Change"
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Change"
                                Style="{StaticResource FormRowLabelStyle}" FontWeight="Bold"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1"
+                    <TextBlock Grid.Row="2" Grid.Column="1"
                                FontWeight="Bold" Foreground="{StaticResource FluentSuccess}">
                         <Run Text="{Binding ChangeAmount, StringFormat={}{0:C}, Mode=OneWay}"/>
                     </TextBlock>
                 </Grid>
 
                 <!-- Reference -->
-                <Grid Grid.Row="3" Margin="{StaticResource StepContentTopSpacing}">
+                <Grid Grid.Row="4" Margin="{StaticResource StepContentTopSpacing}"
+                      Visibility="{Binding RequiresPaymentReference, Converter={StaticResource BoolToVisibility}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
                         <ColumnDefinition Width="*"/>
@@ -204,7 +229,8 @@
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Column="1"
                              Text="{Binding PaymentReference, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="100" h:Watermark.Text="UPI/Card reference"/>
+                             AutomationProperties.Name="Payment reference"
+                             MaxLength="100" h:Watermark.Text="e.g. UPI 835214"/>
                 </Grid>
             </Grid>
         </Grid>
@@ -247,3 +273,5 @@
                                  Message="Processing billing..."/>
     </Grid>
 </core:BaseDialogWindow>
+
+

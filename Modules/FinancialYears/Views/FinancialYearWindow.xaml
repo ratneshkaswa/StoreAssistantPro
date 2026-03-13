@@ -7,7 +7,10 @@
         Title="Change Financial Year"
         ConfirmCommand="{Binding SetCurrentCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -50,6 +53,7 @@
         <DataGrid AutomationProperties.Name="Financial years" Grid.Row="2"
                   ItemsSource="{Binding FinancialYears}"
                   SelectedItem="{Binding SelectedYear}"
+                  Style="{StaticResource EnterpriseDataGridStyle}"
                   AutoGenerateColumns="False" IsReadOnly="True"
                   SelectionMode="Single"
                   HeadersVisibility="Column" CanUserAddRows="False"

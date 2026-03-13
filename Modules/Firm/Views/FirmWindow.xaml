@@ -12,40 +12,6 @@
           TextOptions.TextRenderingMode="ClearType"
           KeyboardNavigation.TabNavigation="Continue">
         <Grid.Resources>
-            <Style x:Key="SummaryLabelStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-                <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
-                <Setter Property="TextWrapping" Value="Wrap"/>
-            </Style>
-
-            <Style x:Key="SummaryValueStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-                <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
-                <Setter Property="TextWrapping" Value="Wrap"/>
-            </Style>
-
-            <Style x:Key="FirmSummaryCardStyle" TargetType="Border" BasedOn="{StaticResource StatCardStyle}">
-                <Setter Property="MinHeight" Value="88"/>
-                <Setter Property="Padding" Value="16,14"/>
-                <Setter Property="Margin" Value="0"/>
-            </Style>
-
-            <Style x:Key="FirmSummaryValueStyle" TargetType="TextBlock" BasedOn="{StaticResource SummaryValueStyle}">
-                <Setter Property="FontSize" Value="{StaticResource FontSizeSectionHeader}"/>
-                <Setter Property="TextWrapping" Value="NoWrap"/>
-                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                <Setter Property="Margin" Value="0,4,0,0"/>
-            </Style>
-
-            <Style x:Key="FirmInsetCardStyle" TargetType="Border" BasedOn="{StaticResource SectionCardStyle}">
-                <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
-                <Setter Property="Padding" Value="{StaticResource CardContentPadding}"/>
-            </Style>
-
             <Style x:Key="FirmFieldPanelStyle" TargetType="StackPanel">
                 <Setter Property="Margin" Value="{StaticResource ItemSpacing}"/>
             </Style>
@@ -66,78 +32,12 @@
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
                       Focusable="False"
-                      CanContentScroll="True"
                       PanningMode="VerticalOnly"
                       h:SmoothScroll.IsEnabled="True">
             <StackPanel Margin="{StaticResource ItemSpacing}"
                         Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                         MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"
                         HorizontalAlignment="Center">
-                <Grid Margin="{StaticResource SectionSpacing}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource SetupFormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" Grid.Column="0"
-                            Style="{StaticResource FirmSummaryCardStyle}"
-                            Background="{StaticResource FluentKpiBlueMuted}"
-                            BorderBrush="{StaticResource FluentKpiBlue}"
-                            AutomationProperties.Name="Business summary card">
-                        <StackPanel>
-                            <TextBlock Text="Business"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding BusinessSummaryTitle}"
-                                       Style="{StaticResource FirmSummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="0" Grid.Column="2"
-                            Style="{StaticResource FirmSummaryCardStyle}"
-                            Background="{StaticResource FluentKpiGreenMuted}"
-                            BorderBrush="{StaticResource FluentKpiGreen}"
-                            AutomationProperties.Name="Tax summary card">
-                        <StackPanel>
-                            <TextBlock Text="Tax profile"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding TaxSummaryTitle}"
-                                       Style="{StaticResource FirmSummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="2" Grid.Column="0"
-                            Style="{StaticResource FirmSummaryCardStyle}"
-                            Background="{StaticResource FluentKpiOrangeMuted}"
-                            BorderBrush="{StaticResource FluentKpiOrange}"
-                            AutomationProperties.Name="Invoice summary card">
-                        <StackPanel>
-                            <TextBlock Text="Invoice rules"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding InvoiceSummaryTitle}"
-                                       Style="{StaticResource FirmSummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="2" Grid.Column="2"
-                            Style="{StaticResource FirmSummaryCardStyle}"
-                            Background="{StaticResource FluentKpiTealMuted}"
-                            BorderBrush="{StaticResource FluentKpiTeal}"
-                            AutomationProperties.Name="Operations summary card">
-                        <StackPanel>
-                            <TextBlock Text="Inventory behavior"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding OperationsSummaryTitle}"
-                                       Style="{StaticResource FirmSummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
                 <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
                         <TextBlock Text="Business Profile" Style="{StaticResource SectionHeaderStyle}"/>
@@ -173,12 +73,12 @@
                                            Text="State / UT"
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <ComboBox x:Name="StateCombo"
+                                          AutomationProperties.Name="State or union territory"
+                                          AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"
                                           ItemsSource="{Binding IndianStates}"
                                           SelectedItem="{Binding State, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                                           IsTextSearchEnabled="True"
-                                          MinHeight="{StaticResource ControlHeight}"
-                                          AutomationProperties.Name="State or union territory"
-                                          AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"/>
+                                          MinHeight="{StaticResource ControlHeight}"/>
                                 <TextBlock Text="{Binding StateValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"
@@ -191,11 +91,11 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="PhoneBox"
                                          Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                                         MaxLength="10"
-                                         h:NumericInput.IsIntegerOnly="True"
                                          AutomationProperties.Name="Primary phone"
                                          AutomationProperties.LabeledBy="{Binding ElementName=PhoneLabel}"
                                          AutomationProperties.HelpText="10 digits"
+                                         MaxLength="10"
+                                         h:NumericInput.IsIntegerOnly="True"
                                          h:Watermark.Text="e.g. 9876543210"/>
                                 <TextBlock Text="{Binding PhoneValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
@@ -209,12 +109,12 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="PincodeBox"
                                          Text="{Binding Pincode, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                         AutomationProperties.Name="Postal PIN"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=PincodeLabel}"
                                          MaxLength="6"
                                          Width="{StaticResource FieldWidthCompact}"
                                          HorizontalAlignment="Left"
                                          h:NumericInput.IsIntegerOnly="True"
-                                         AutomationProperties.Name="Postal PIN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=PincodeLabel}"
                                          h:Watermark.Text="e.g. 302001"/>
                             </StackPanel>
 
@@ -236,10 +136,10 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="AddressBox"
                                          Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                                         MaxLength="200"
-                                         MinHeight="{StaticResource ControlHeight}"
                                          AutomationProperties.Name="Address"
                                          AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
+                                         MaxLength="200"
+                                         MinHeight="{StaticResource ControlHeight}"
                                          h:Watermark.Text="Street, area, city"/>
                             </StackPanel>
                         </Grid>
@@ -257,7 +157,6 @@
                                 <ColumnDefinition Width="*" MinWidth="{StaticResource FieldWidthWide}"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
@@ -280,12 +179,12 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="CompositionRateBox"
                                          Text="{Binding CompositionRate, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                         AutomationProperties.Name="Composition scheme rate"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=CompositionRateLabel}"
                                          Width="{StaticResource FieldWidthCompact}"
                                          HorizontalAlignment="Left"
                                          MaxLength="6"
                                          h:NumericInput.IsDecimalOnly="True"
-                                         AutomationProperties.Name="Composition scheme rate"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=CompositionRateLabel}"
                                          h:Watermark.Text="e.g. 1 or 1.5"/>
                                 <TextBlock Text="{Binding CompositionRateValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
@@ -299,10 +198,10 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="GstinBox"
                                          Text="{Binding GSTNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                                         MaxLength="15"
-                                         CharacterCasing="Upper"
                                          AutomationProperties.Name="GSTIN"
                                          AutomationProperties.LabeledBy="{Binding ElementName=GstinLabel}"
+                                         MaxLength="15"
+                                         CharacterCasing="Upper"
                                          h:Watermark.Text="e.g. 27ABCDE1234F1Z5"/>
                                 <TextBlock Text="{Binding GstinValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
@@ -316,12 +215,12 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="PanBox"
                                          Text="{Binding PANNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                         AutomationProperties.Name="PAN"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=PanLabel}"
                                          MaxLength="10"
                                          CharacterCasing="Upper"
                                          Width="{StaticResource FieldWidthStandard}"
                                          HorizontalAlignment="Left"
-                                         AutomationProperties.Name="PAN"
-                                         AutomationProperties.LabeledBy="{Binding ElementName=PanLabel}"
                                          h:Watermark.Text="e.g. ABCDE1234F"/>
                                 <TextBlock Text="{Binding PanValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
@@ -329,20 +228,6 @@
                                            Visibility="{Binding PanValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
                             </StackPanel>
 
-                            <Border Grid.Row="2" Grid.ColumnSpan="3"
-                                    Style="{StaticResource FirmInsetCardStyle}"
-                                    Margin="{StaticResource ItemSpacing}">
-                                <StackPanel>
-                                    <TextBlock Text="Compliance Summary"
-                                               Style="{StaticResource FormRowLabelStyle}"/>
-                                    <TextBlock Text="{Binding DerivedStateCodeDisplay}"
-                                               Style="{StaticResource HintTextStyle}"
-                                               AutomationProperties.Name="Derived state code summary"/>
-                                    <TextBlock Text="{Binding CompositionRateHint}"
-                                               Style="{StaticResource HintTextStyle}"
-                                               Visibility="{Binding IsCompositionScheme, Converter={StaticResource BoolToVisibility}}"/>
-                                </StackPanel>
-                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -361,7 +246,6 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}">
@@ -369,12 +253,12 @@
                                            Text="Invoice Symbol"
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <ComboBox x:Name="CurrencyCombo"
+                                          AutomationProperties.Name="Invoice currency symbol"
+                                          AutomationProperties.LabeledBy="{Binding ElementName=CurrencyLabel}"
                                           ItemsSource="{Binding CurrencySymbols}"
                                           SelectedItem="{Binding SelectedCurrencySymbol}"
                                           MinWidth="{StaticResource FieldWidthStandard}"
-                                          HorizontalAlignment="Left"
-                                          AutomationProperties.Name="Invoice currency symbol"
-                                          AutomationProperties.LabeledBy="{Binding ElementName=CurrencyLabel}"/>
+                                          HorizontalAlignment="Left"/>
                                 <TextBlock Text="{Binding CurrencyPreview}"
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"/>
@@ -403,6 +287,9 @@
                                           SelectedItem="{Binding SelectedDateFormat}"
                                           AutomationProperties.Name="Date format"
                                           AutomationProperties.LabeledBy="{Binding ElementName=DateFormatLabel}"/>
+                                <TextBlock Text="{Binding DateFormatPreview}"
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}">
@@ -448,30 +335,6 @@
                                            Style="{StaticResource HintTextStyle}"/>
                             </StackPanel>
 
-                            <Border Grid.Row="3" Grid.ColumnSpan="3"
-                                    Style="{StaticResource FirmInsetCardStyle}"
-                                    Margin="{StaticResource ItemSpacing}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <CheckBox Grid.Column="0"
-                                              x:Name="NegativeStockCheckBox"
-                                              IsChecked="{Binding NegativeStockAllowed}"
-                                              Content="Allow billing with negative stock"
-                                              VerticalAlignment="Center"
-                                              FontWeight="SemiBold"
-                                              Foreground="{StaticResource FluentTextPrimary}"
-                                              AutomationProperties.Name="Allow billing with negative stock"/>
-                                    <TextBlock Grid.Column="2"
-                                               Text="{Binding OperationsSummaryTitle}"
-                                               Style="{StaticResource SummaryLabelStyle}"
-                                               VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>

@@ -6,7 +6,10 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Category Management"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
             <RowDefinition Height="Auto"/>  <!-- Tab buttons -->
@@ -19,12 +22,12 @@
         <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8B7;"/><Run Text=" Category Management"/></TextBlock>
 
         <!-- Tab selector -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Button Content="Category Types" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
                     Style="{StaticResource SegmentedButtonStyle}"/>
             <Button Content="Categories" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
                     Style="{StaticResource SegmentedButtonStyle}"/>
-        </StackPanel>
+        </WrapPanel>
 
         <!-- ═══════════════════════════════════════════════════════════
              Tab 0: Category Types
@@ -39,6 +42,7 @@
 
             <DataGrid AutomationProperties.Name="Category types" ItemsSource="{Binding CategoryTypes}"
                       SelectedItem="{Binding SelectedType}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -49,6 +53,7 @@
                             <DataTemplate>
                                 <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
                                           IsChecked="{Binding IsActive, Mode=OneWay}"
+                                          CommandParameter="{Binding}"
                                           Command="{Binding DataContext.ToggleTypeActiveCommand,
                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                             </DataTemplate>
@@ -67,6 +72,7 @@
                     <Run Text="Type Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Column="1"
+                         AutomationProperties.Name="Category type name"
                          Text="{Binding TypeName, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                          MaxLength="100" h:Watermark.Text="e.g. Men's Wear"/>
@@ -105,8 +111,9 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding CategorySearchText, UpdateSourceTrigger=PropertyChanged}"
-                         h:Watermark.Text="Search categories…"/>
+                <TextBox AutomationProperties.Name="Category search"
+                         Text="{Binding CategorySearchText, UpdateSourceTrigger=PropertyChanged}"
+                         h:Watermark.Text="e.g. Shirts"/>
                 <Button Grid.Column="1" Content="Search" Command="{Binding SearchCategoriesCommand}"
                         Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
@@ -114,6 +121,7 @@
             <DataGrid AutomationProperties.Name="Categories list" Grid.Row="1"
                       ItemsSource="{Binding Categories}"
                       SelectedItem="{Binding SelectedCategory}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -125,6 +133,7 @@
                             <DataTemplate>
                                 <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
                                           IsChecked="{Binding IsActive, Mode=OneWay}"
+                                          CommandParameter="{Binding}"
                                           Command="{Binding DataContext.ToggleCategoryActiveCommand,
                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                             </DataTemplate>
@@ -148,6 +157,7 @@
                     <Run Text="Category Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
+                         AutomationProperties.Name="Category name"
                          Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                          MaxLength="100" h:Watermark.Text="e.g. Shirts"/>
@@ -155,6 +165,7 @@
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Type"
                            Style="{StaticResource FormRowLabelStyle}"/>
                 <ComboBox Grid.Row="2" Grid.Column="1"
+                          AutomationProperties.Name="Category type"
                           ItemsSource="{Binding CategoryTypes}"
                           SelectedItem="{Binding SelectedCategoryType}"
                           DisplayMemberPath="Name"

@@ -44,6 +44,7 @@ public partial class InventoryViewModel(
     public partial ObservableCollection<Product> Products { get; set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedProduct))]
     public partial Product? SelectedProduct { get; set; }
 
     [ObservableProperty]
@@ -66,13 +67,17 @@ public partial class InventoryViewModel(
         AdjustmentReason.Other
     ];
 
+    public bool HasSelectedProduct => SelectedProduct is not null;
+
     partial void OnSelectedProductChanged(Product? value)
     {
+        AdjustCommand.NotifyCanExecuteChanged();
+
         if (value is not null)
             NewQuantity = value.Quantity.ToString();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanAdjust))]
     private Task AdjustAsync() => RunAsync(async ct =>
     {
         ClearMessages();
@@ -82,9 +87,10 @@ public partial class InventoryViewModel(
             .Rule(int.TryParse(NewQuantity, out var q) && q >= 0, "Quantity must be a non-negative number.")))
             return;
 
+        var selectedProductId = SelectedProduct!.Id;
         var userId = (int)appState.CurrentUserType;
         var dto = new StockAdjustmentDto(
-            SelectedProduct!.Id,
+            selectedProductId,
             null,
             int.Parse(NewQuantity),
             SelectedReason,
@@ -96,6 +102,9 @@ public partial class InventoryViewModel(
 
         await ReloadProductsAsync(ct);
         await ReloadLogAsync(ct);
+        await ReloadAlertsAsync(ct);
+        SelectedProduct = Products.FirstOrDefault(product => product.Id == selectedProductId);
+        AdjustmentNotes = string.Empty;
     });
 
     // ═══════════════════════════════════════════════════════════════
@@ -159,4 +168,6 @@ public partial class InventoryViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
     }
+
+    private bool CanAdjust() => SelectedProduct is not null;
 }

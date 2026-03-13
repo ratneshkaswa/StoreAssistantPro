@@ -1,0 +1,83 @@
+using Xunit;
+
+namespace StoreAssistantPro.Tests.Helpers;
+
+public sealed class SmoothScrollComplianceTests
+{
+    private static readonly string SolutionRoot = FindSolutionRoot();
+
+    [Fact]
+    public void SmoothScroll_Should_Use_PixelScrolling_And_SystemWheelSettings()
+    {
+        var content = File.ReadAllText(Path.Combine(
+            SolutionRoot,
+            "Core",
+            "Helpers",
+            "SmoothScroll.cs"));
+
+        Assert.Contains("sv.CanContentScroll = false;", content, StringComparison.Ordinal);
+        Assert.Contains("OriginalCanContentScrollProperty", content, StringComparison.Ordinal);
+        Assert.Contains("SystemParameters.WheelScrollLines", content, StringComparison.Ordinal);
+        Assert.Contains("Mouse.MouseWheelDeltaForOneLine", content, StringComparison.Ordinal);
+        Assert.Contains("PixelsPerScrollLine", content, StringComparison.Ordinal);
+        Assert.Contains("MinimumScrollAmount", content, StringComparison.Ordinal);
+        Assert.Contains("ViewportHeight * 0.35", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("private const double ScrollAmount = 80;", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("sv.Tag is ScrollViewerOffsetMediator", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Views_Using_SmoothScroll_Should_Use_Consistent_ScrollViewer_Settings()
+    {
+        var windowFiles = Directory.EnumerateFiles(
+            Path.Combine(SolutionRoot, "Modules"),
+            "*Window.xaml",
+            SearchOption.AllDirectories);
+
+        var violations = new List<string>();
+
+        foreach (var file in windowFiles)
+        {
+            var content = File.ReadAllText(file);
+            var matches = System.Text.RegularExpressions.Regex.Matches(
+                content,
+                @"<ScrollViewer\b(?:(?!>).|\r|\n)*h:SmoothScroll\.IsEnabled=""True""(?:(?!>).|\r|\n)*>",
+                System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                var block = match.Value;
+                if (!block.Contains("Focusable=\"False\"", StringComparison.Ordinal) ||
+                    !block.Contains("PanningMode=\"VerticalOnly\"", StringComparison.Ordinal) ||
+                    block.Contains("CanContentScroll=\"True\"", StringComparison.Ordinal))
+                {
+                    violations.Add(Path.GetRelativePath(SolutionRoot, file));
+                    break;
+                }
+            }
+        }
+
+        Assert.True(
+            violations.Count == 0,
+            "SmoothScroll windows must use Focusable=\"False\", PanningMode=\"VerticalOnly\", and must not set CanContentScroll=\"True\".\n"
+            + string.Join("\n", violations.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(path => path)));
+    }
+
+    private static string FindSolutionRoot()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (dir is not null)
+        {
+            if (Directory.GetFiles(dir, "*.sln").Length > 0 ||
+                Directory.GetFiles(dir, "*.slnx").Length > 0)
+            {
+                return dir;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new InvalidOperationException(
+            "Could not find solution root from " + AppContext.BaseDirectory);
+    }
+}

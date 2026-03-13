@@ -6,7 +6,10 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Inventory Management"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
             <RowDefinition Height="Auto"/>  <!-- Tab buttons -->
@@ -19,14 +22,14 @@
         <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inventory Management"/></TextBlock>
 
         <!-- Tab selector -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Button Content="Stock Adjust" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
                     Style="{StaticResource SegmentedButtonStyle}"/>
             <Button Content="Adjustment Log" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
                     Style="{StaticResource SegmentedButtonStyle}"/>
             <Button Content="Alerts" Tag="2" Command="{Binding SwitchTabCommand}" CommandParameter="2"
                     Style="{StaticResource SegmentedButtonStyle}"/>
-        </StackPanel>
+        </WrapPanel>
 
         <!-- ═══════════════════════════════════════════════════════════
              Tab 0: Stock Adjustment
@@ -41,6 +44,7 @@
 
             <DataGrid AutomationProperties.Name="Stock overview" ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -70,7 +74,9 @@
                     <Run Text="New Quantity "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
+                         AutomationProperties.Name="New quantity"
                          Text="{Binding NewQuantity, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding HasSelectedProduct}"
                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                          MaxLength="8" h:Watermark.Text="e.g. 50"/>
 
@@ -78,15 +84,19 @@
                     <Run Text="Reason "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <ComboBox Grid.Row="2" Grid.Column="1"
+                          AutomationProperties.Name="Adjustment reason"
                           ItemsSource="{Binding Reasons}"
                           SelectedItem="{Binding SelectedReason}"
+                          IsEnabled="{Binding HasSelectedProduct}"
                           Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes"
                            Style="{StaticResource FormRowLabelStyle}"/>
                 <TextBox Grid.Row="4" Grid.Column="1"
+                         AutomationProperties.Name="Adjustment notes"
                          Text="{Binding AdjustmentNotes, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="300" h:Watermark.Text="Optional notes"/>
+                         IsEnabled="{Binding HasSelectedProduct}"
+                         MaxLength="300" h:Watermark.Text="e.g. Cycle count correction"/>
             </Grid>
 
             <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
@@ -105,6 +115,7 @@
         <Grid Grid.Row="2"
               Visibility="{Binding IsTabLog, Converter={StaticResource BoolToVisibility}}">
             <DataGrid AutomationProperties.Name="Adjustment log" ItemsSource="{Binding AdjustmentLog}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -140,9 +151,10 @@
 
             <!-- Out of Stock -->
             <TextBlock Grid.Row="1" Style="{StaticResource SectionHeaderStyle}"
-                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentError}" Text="●"/><Run Text=" Out of Stock"/></TextBlock>
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentError}" Text="&#x2022;"/><Run Text=" Out of Stock"/></TextBlock>
             <DataGrid AutomationProperties.Name="Out of stock products" Grid.Row="2"
                       ItemsSource="{Binding OutOfStockProducts}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False"
@@ -156,9 +168,10 @@
 
             <!-- Low Stock -->
             <TextBlock Grid.Row="3" Style="{StaticResource SectionHeaderStyle}"
-                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentWarning}" Text="●"/><Run Text=" Low Stock"/></TextBlock>
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentWarning}" Text="&#x2022;"/><Run Text=" Low Stock"/></TextBlock>
             <DataGrid AutomationProperties.Name="Low stock products" Grid.Row="4"
                       ItemsSource="{Binding LowStockProducts}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False"
@@ -196,3 +209,5 @@
                                  Message="Updating inventory..."/>
     </Grid>
 </core:BaseDialogWindow>
+
+

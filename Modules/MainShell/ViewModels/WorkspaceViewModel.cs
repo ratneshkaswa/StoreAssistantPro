@@ -1,14 +1,7 @@
-﻿using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
-using StoreAssistantPro.Modules.MainShell.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
-public partial class WorkspaceViewModel(IDashboardService dashboardService) : BaseViewModel
+public sealed class WorkspaceViewModel : BaseViewModel
 {
-    [RelayCommand]
-    private Task LoadMainWorkspaceAsync() => RunLoadAsync(async ct =>
-    {
-        await dashboardService.GetSummaryAsync(ct);
-    });
 }

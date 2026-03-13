@@ -105,7 +105,7 @@ public partial class InwardEntryViewModel(
         {
             if (ParcelCount < 1 || ParcelCount > 10)
             {
-                ErrorMessage = "Select 1–10 parcels.";
+                ErrorMessage = "Select 1-10 parcels.";
                 return;
             }
             CurrentStep = 2;
@@ -114,7 +114,7 @@ public partial class InwardEntryViewModel(
         {
             if (!decimal.TryParse(TransportCharges, out var charges) || charges < 0)
             {
-                ErrorMessage = "Enter a valid transport charge (≥ 0).";
+                ErrorMessage = "Enter a valid transport charge (0 or more).";
                 return;
             }
 
@@ -153,8 +153,7 @@ public partial class InwardEntryViewModel(
                 TransportCharge = chargePerParcel
             };
 
-            for (var j = 0; j < 3; j++)
-                parcel.ProductRows.Add(new ProductRowModel());
+            parcel.AddBlankRow();
 
             parcels.Add(parcel);
         }
@@ -171,13 +170,24 @@ public partial class InwardEntryViewModel(
         foreach (var parcel in Parcels)
         {
             var productDtos = new List<InwardProductDto>();
-            foreach (var row in parcel.ProductRows)
+            for (var rowIndex = 0; rowIndex < parcel.ProductRows.Count; rowIndex++)
             {
-                if (row.SelectedProduct is null) continue;
+                var row = parcel.ProductRows[rowIndex];
+
+                if (row.SelectedProduct is null)
+                {
+                    if (row.HasEnteredValues)
+                    {
+                        ErrorMessage = $"Select a product for parcel {parcel.ParcelNumber}, row {rowIndex + 1}.";
+                        return;
+                    }
+
+                    continue;
+                }
 
                 if (!decimal.TryParse(row.Quantity, out var qty) || qty <= 0)
                 {
-                    ErrorMessage = $"Invalid quantity in parcel {parcel.ParcelNumber}.";
+                    ErrorMessage = $"Enter a valid quantity for parcel {parcel.ParcelNumber}, row {rowIndex + 1}.";
                     return;
                 }
 
@@ -211,7 +221,17 @@ public partial class InwardEntryViewModel(
 
         await inwardService.CreateAsync(dto, ct);
         SuccessMessage = "Inward entry saved successfully.";
+        ResetEntry();
     });
+
+    private void ResetEntry()
+    {
+        CurrentStep = 1;
+        ParcelCount = 1;
+        TransportCharges = "0";
+        Parcels = [];
+        ParcelNumbers = [];
+    }
 }
 
 /// <summary>UI model for a single parcel entry in the wizard.</summary>
@@ -227,26 +247,133 @@ public partial class ParcelEntryModel : ObservableObject
     public partial decimal TransportCharge { get; set; }
 
     public ObservableCollection<ProductRowModel> ProductRows { get; } = [];
+
+    [RelayCommand]
+    private void AddProductRow() => AddBlankRow();
+
+    [RelayCommand(CanExecute = nameof(CanRemoveProductRow))]
+    private void RemoveProductRow(ProductRowModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        ProductRows.Remove(row);
+        row.Owner = null;
+
+        if (ProductRows.Count == 0)
+        {
+            AddBlankRow();
+            return;
+        }
+
+        NotifyProductRowCommandStates();
+    }
+
+    internal void AddBlankRow()
+    {
+        var row = new ProductRowModel
+        {
+            Owner = this
+        };
+
+        ProductRows.Add(row);
+        NotifyProductRowCommandStates();
+    }
+
+    private bool CanRemoveProductRow(ProductRowModel? row) =>
+        row is not null && (ProductRows.Count > 1 || row.HasEnteredValues);
+
+    internal void NotifyProductRowCommandStates() =>
+        RemoveProductRowCommand.NotifyCanExecuteChanged();
 }
 
 /// <summary>UI model for a single product row within a parcel.</summary>
 public partial class ProductRowModel : ObservableObject
 {
+    internal ParcelEntryModel? Owner { get; set; }
+
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedProduct))]
+    [NotifyPropertyChangedFor(nameof(HasEnteredValues))]
+    [NotifyPropertyChangedFor(nameof(CanSelectColour))]
+    [NotifyPropertyChangedFor(nameof(CanSelectSize))]
+    [NotifyPropertyChangedFor(nameof(CanSelectPattern))]
+    [NotifyPropertyChangedFor(nameof(CanSelectVariantType))]
     public partial Product? SelectedProduct { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEnteredValues))]
     public partial string Quantity { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEnteredValues))]
     public partial Colour? SelectedColour { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEnteredValues))]
     public partial ProductSize? SelectedSize { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEnteredValues))]
     public partial ProductPattern? SelectedPattern { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEnteredValues))]
     public partial ProductVariantType? SelectedVariantType { get; set; }
+
+    public bool HasSelectedProduct => SelectedProduct is not null;
+
+    public bool CanSelectColour => SelectedProduct?.SupportsColour == true;
+
+    public bool CanSelectSize => SelectedProduct?.SupportsSize == true;
+
+    public bool CanSelectPattern => SelectedProduct?.SupportsPattern == true;
+
+    public bool CanSelectVariantType => SelectedProduct?.SupportsType == true;
+
+    public bool HasEnteredValues =>
+        SelectedProduct is not null
+        || !string.IsNullOrWhiteSpace(Quantity)
+        || SelectedColour is not null
+        || SelectedSize is not null
+        || SelectedPattern is not null
+        || SelectedVariantType is not null;
+
+    partial void OnSelectedProductChanged(Product? value)
+    {
+        if (!CanSelectColour)
+        {
+            SelectedColour = null;
+        }
+
+        if (!CanSelectSize)
+        {
+            SelectedSize = null;
+        }
+
+        if (!CanSelectPattern)
+        {
+            SelectedPattern = null;
+        }
+
+        if (!CanSelectVariantType)
+        {
+            SelectedVariantType = null;
+        }
+
+        Owner?.NotifyProductRowCommandStates();
+    }
+
+    partial void OnQuantityChanged(string value) => Owner?.NotifyProductRowCommandStates();
+
+    partial void OnSelectedColourChanged(Colour? value) => Owner?.NotifyProductRowCommandStates();
+
+    partial void OnSelectedSizeChanged(ProductSize? value) => Owner?.NotifyProductRowCommandStates();
+
+    partial void OnSelectedPatternChanged(ProductPattern? value) => Owner?.NotifyProductRowCommandStates();
+
+    partial void OnSelectedVariantTypeChanged(ProductVariantType? value) => Owner?.NotifyProductRowCommandStates();
 }
+

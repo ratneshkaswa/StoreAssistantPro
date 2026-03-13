@@ -5,8 +5,12 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Sale History"
+        ConfirmCommand="{Binding SearchCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
             <RowDefinition Height="Auto"/>  <!-- Filters -->
@@ -32,16 +36,19 @@
 
             <TextBlock Text="From:" VerticalAlignment="Center" Margin="{StaticResource InlineLabelGap}"/>
             <DatePicker Grid.Column="1" SelectedDate="{Binding DateFrom}"
+                        AutomationProperties.Name="From date"
                         Width="{StaticResource FieldWidthCompact}"/>
 
             <TextBlock Grid.Column="2" Text="To:" VerticalAlignment="Center"
                        Margin="{StaticResource InlineControlSpacing}"/>
             <DatePicker Grid.Column="3" SelectedDate="{Binding DateTo}"
+                        AutomationProperties.Name="To date"
                         Width="{StaticResource FieldWidthCompact}"/>
 
             <TextBox Grid.Column="4" Text="{Binding InvoiceSearch, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="Invoice search"
                      Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}"
-                     h:Watermark.Text="Invoice #"/>
+                     h:Watermark.Text="e.g. INV-1024"/>
 
             <Button Grid.Column="6" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"/>
@@ -58,6 +65,7 @@
             <!-- Sale list -->
             <DataGrid AutomationProperties.Name="Sale history" ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -91,7 +99,9 @@
 
                 <!-- Receipt preview -->
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                            h:SmoothScroll.IsEnabled="True">
+                              Focusable="False"
+                              PanningMode="VerticalOnly"
+                              h:SmoothScroll.IsEnabled="True">
                     <TextBlock Text="{Binding ReceiptPreview}"
                                FontFamily="{StaticResource FluentFontMono}" FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextPrimary}"

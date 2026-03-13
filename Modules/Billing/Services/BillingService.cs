@@ -15,6 +15,21 @@ public class BillingService(
         ArgumentNullException.ThrowIfNull(dto);
         if (dto.Items.Count == 0)
             throw new InvalidOperationException("Cart is empty.");
+        if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
+            throw new InvalidOperationException("Payment method is required.");
+        if (!string.Equals(dto.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase)
+            && string.IsNullOrWhiteSpace(dto.PaymentReference))
+            throw new InvalidOperationException("Payment reference is required for non-cash sales.");
+        if (dto.DiscountValue < 0)
+            throw new InvalidOperationException("Discount value cannot be negative.");
+        if (dto.DiscountType == DiscountType.Percentage && dto.DiscountValue > 100)
+            throw new InvalidOperationException("Discount percentage must be between 0 and 100.");
+        if (dto.Items.Any(item => item.Quantity <= 0))
+            throw new InvalidOperationException("Cart item quantity must be greater than zero.");
+        if (dto.Items.Any(item => item.UnitPrice < 0))
+            throw new InvalidOperationException("Cart item price cannot be negative.");
+        if (dto.Items.Any(item => item.ItemDiscountRate is < 0 or > 100))
+            throw new InvalidOperationException("Cart item discount must be between 0 and 100.");
 
         using var _ = perf.BeginScope("BillingService.CompleteSaleAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);

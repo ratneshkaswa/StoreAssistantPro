@@ -8,6 +8,8 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Globalization;
+using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -18,6 +20,20 @@ public static class Watermark
 {
     private static readonly Regex TrailingDecorationPattern =
         new(@"\s*\([^)]*\)\s*$|\s*[:*]+\s*$", RegexOptions.Compiled);
+    private static readonly DependencyPropertyDescriptor? ComboBoxTextPropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(ComboBox.TextProperty, typeof(ComboBox));
+    private static readonly DependencyPropertyDescriptor? ComboBoxSelectedItemPropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(Selector.SelectedItemProperty, typeof(ComboBox));
+    private static readonly DependencyPropertyDescriptor? ComboBoxSelectedValuePropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(Selector.SelectedValueProperty, typeof(ComboBox));
+    private static readonly DependencyPropertyDescriptor? ComboBoxSelectedIndexPropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(Selector.SelectedIndexProperty, typeof(ComboBox));
+    private static readonly DependencyPropertyDescriptor? ComboBoxItemsSourcePropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(ItemsControl.ItemsSourceProperty, typeof(ComboBox));
+    private static readonly DependencyPropertyDescriptor? DatePickerTextPropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(DatePicker.TextProperty, typeof(DatePicker));
+    private static readonly DependencyPropertyDescriptor? DatePickerSelectedDatePropertyDescriptor =
+        DependencyPropertyDescriptor.FromProperty(DatePicker.SelectedDateProperty, typeof(DatePicker));
 
     public static readonly DependencyProperty TextProperty =
         DependencyProperty.RegisterAttached(
@@ -133,6 +149,7 @@ public static class Watermark
         comboBox.GotKeyboardFocus -= OnControlKeyboardFocusChanged;
         comboBox.LostKeyboardFocus -= OnControlKeyboardFocusChanged;
         comboBox.IsVisibleChanged -= OnControlIsVisibleChanged;
+        UnhookComboBoxValueChanges(comboBox);
         UnhookHostedTextBox(comboBox, "PART_EditableTextBox");
 
         if (!HasWatermarkText(comboBox))
@@ -147,6 +164,7 @@ public static class Watermark
         comboBox.GotKeyboardFocus += OnControlKeyboardFocusChanged;
         comboBox.LostKeyboardFocus += OnControlKeyboardFocusChanged;
         comboBox.IsVisibleChanged += OnControlIsVisibleChanged;
+        HookComboBoxValueChanges(comboBox);
         HookHostedTextBox(comboBox, "PART_EditableTextBox");
         UpdateAdorner(comboBox);
     }
@@ -159,6 +177,7 @@ public static class Watermark
         datePicker.GotKeyboardFocus -= OnControlKeyboardFocusChanged;
         datePicker.LostKeyboardFocus -= OnControlKeyboardFocusChanged;
         datePicker.IsVisibleChanged -= OnControlIsVisibleChanged;
+        UnhookDatePickerValueChanges(datePicker);
         UnhookHostedTextBox(datePicker, "PART_TextBox");
 
         if (!HasWatermarkText(datePicker))
@@ -173,8 +192,9 @@ public static class Watermark
         datePicker.GotKeyboardFocus += OnControlKeyboardFocusChanged;
         datePicker.LostKeyboardFocus += OnControlKeyboardFocusChanged;
         datePicker.IsVisibleChanged += OnControlIsVisibleChanged;
+        HookDatePickerValueChanges(datePicker);
         HookHostedTextBox(datePicker, "PART_TextBox");
-        UpdateAdorner(datePicker);
+        RefreshAdorner(datePicker);
     }
 
     private static void OnControlLoaded(object? sender, RoutedEventArgs e)
@@ -183,11 +203,11 @@ public static class Watermark
         {
             case ComboBox comboBox:
                 HookHostedTextBox(comboBox, "PART_EditableTextBox");
-                UpdateAdorner(comboBox);
+                RefreshAdorner(comboBox);
                 break;
             case DatePicker datePicker:
                 HookHostedTextBox(datePicker, "PART_TextBox");
-                UpdateAdorner(datePicker);
+                RefreshAdorner(datePicker);
                 break;
             case Control control:
                 UpdateAdorner(control);
@@ -200,10 +220,12 @@ public static class Watermark
         switch (sender)
         {
             case ComboBox comboBox:
+                UnhookComboBoxValueChanges(comboBox);
                 UnhookHostedTextBox(comboBox, "PART_EditableTextBox");
                 RemoveAdorner(comboBox);
                 break;
             case DatePicker datePicker:
+                UnhookDatePickerValueChanges(datePicker);
                 UnhookHostedTextBox(datePicker, "PART_TextBox");
                 RemoveAdorner(datePicker);
                 break;
@@ -241,6 +263,18 @@ public static class Watermark
     {
         if (sender is Control control)
             UpdateAdorner(control);
+    }
+
+    private static void OnComboBoxValueChanged(object? sender, EventArgs e)
+    {
+        if (sender is ComboBox comboBox)
+            RefreshAdorner(comboBox);
+    }
+
+    private static void OnDatePickerValueChanged(object? sender, EventArgs e)
+    {
+        if (sender is DatePicker datePicker)
+            RefreshAdorner(datePicker);
     }
 
     private static void OnHostedEditorTextChanged(object? sender, TextChangedEventArgs e)
@@ -284,6 +318,45 @@ public static class Watermark
         textBox.GotKeyboardFocus -= OnHostedEditorFocusChanged;
         textBox.LostKeyboardFocus -= OnHostedEditorFocusChanged;
         SetHostedOwner(textBox, null);
+    }
+
+    private static void HookComboBoxValueChanges(ComboBox comboBox)
+    {
+        ComboBoxTextPropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedItemPropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedValuePropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedIndexPropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxItemsSourcePropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+
+        ComboBoxTextPropertyDescriptor?.AddValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedItemPropertyDescriptor?.AddValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedValuePropertyDescriptor?.AddValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedIndexPropertyDescriptor?.AddValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxItemsSourcePropertyDescriptor?.AddValueChanged(comboBox, OnComboBoxValueChanged);
+    }
+
+    private static void UnhookComboBoxValueChanges(ComboBox comboBox)
+    {
+        ComboBoxTextPropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedItemPropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedValuePropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxSelectedIndexPropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+        ComboBoxItemsSourcePropertyDescriptor?.RemoveValueChanged(comboBox, OnComboBoxValueChanged);
+    }
+
+    private static void HookDatePickerValueChanges(DatePicker datePicker)
+    {
+        DatePickerTextPropertyDescriptor?.RemoveValueChanged(datePicker, OnDatePickerValueChanged);
+        DatePickerSelectedDatePropertyDescriptor?.RemoveValueChanged(datePicker, OnDatePickerValueChanged);
+
+        DatePickerTextPropertyDescriptor?.AddValueChanged(datePicker, OnDatePickerValueChanged);
+        DatePickerSelectedDatePropertyDescriptor?.AddValueChanged(datePicker, OnDatePickerValueChanged);
+    }
+
+    private static void UnhookDatePickerValueChanges(DatePicker datePicker)
+    {
+        DatePickerTextPropertyDescriptor?.RemoveValueChanged(datePicker, OnDatePickerValueChanged);
+        DatePickerSelectedDatePropertyDescriptor?.RemoveValueChanged(datePicker, OnDatePickerValueChanged);
     }
 
     private static bool HasWatermarkText(Control control) =>
@@ -394,10 +467,35 @@ public static class Watermark
         {
             TextBox textBox => string.IsNullOrWhiteSpace(textBox.Text),
             PasswordBox passwordBox => string.IsNullOrWhiteSpace(passwordBox.Password),
-            ComboBox comboBox => string.IsNullOrWhiteSpace(GetComboBoxText(comboBox)),
-            DatePicker datePicker => string.IsNullOrWhiteSpace(GetDatePickerText(datePicker)),
+            ComboBox comboBox => !HasComboBoxValue(comboBox),
+            DatePicker datePicker => !HasDatePickerValue(datePicker),
             _ => false
         };
+
+    private static bool HasComboBoxValue(ComboBox comboBox)
+    {
+        if (comboBox.IsEditable &&
+            comboBox.Template?.FindName("PART_EditableTextBox", comboBox) is TextBox editableTextBox &&
+            !string.IsNullOrWhiteSpace(editableTextBox.Text))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(comboBox.Text))
+            return true;
+
+        if (comboBox.SelectedIndex >= 0 || comboBox.SelectedItem is not null)
+            return true;
+
+        if (comboBox.SelectedValue is not null &&
+            !ReferenceEquals(comboBox.SelectedValue, DependencyProperty.UnsetValue) &&
+            !string.IsNullOrWhiteSpace(comboBox.SelectedValue.ToString()))
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(GetComboBoxText(comboBox));
+    }
 
     private static string GetComboBoxText(ComboBox comboBox)
     {
@@ -412,6 +510,10 @@ public static class Watermark
 
         return comboBox.SelectionBoxItem?.ToString() ?? string.Empty;
     }
+
+    private static bool HasDatePickerValue(DatePicker datePicker) =>
+        datePicker.SelectedDate is not null ||
+        !string.IsNullOrWhiteSpace(GetDatePickerText(datePicker));
 
     private static string GetDatePickerText(DatePicker datePicker)
     {
@@ -540,6 +642,19 @@ public static class Watermark
         var height = Math.Max(0, Math.Min(Math.Round(bounds.Height), finalSize.Height - top));
 
         return new Rect(left, top, width, height);
+    }
+
+    private static void RefreshAdorner(Control control)
+    {
+        if (!control.IsLoaded)
+        {
+            UpdateAdorner(control);
+            return;
+        }
+
+        control.Dispatcher.BeginInvoke(
+            DispatcherPriority.Loaded,
+            new Action(() => UpdateAdorner(control)));
     }
 
     private static TextAlignment GetTextAlignment(Control control)

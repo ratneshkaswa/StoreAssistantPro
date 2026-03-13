@@ -114,10 +114,10 @@ public partial class CustomerManagementViewModel(
     });
 
     [RelayCommand]
-    private Task ToggleActiveAsync() => RunAsync(async ct =>
+    private Task ToggleActiveAsync(Customer? customer) => RunAsync(async ct =>
     {
-        if (SelectedCustomer is null) return;
-        await customerService.ToggleActiveAsync(SelectedCustomer.Id, ct);
+        if (customer is null) return;
+        await customerService.ToggleActiveAsync(customer.Id, ct);
         var list = await customerService.GetAllAsync(ct);
         Customers = new ObservableCollection<Customer>(list);
         SuccessMessage = "Active status toggled.";

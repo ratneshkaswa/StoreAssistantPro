@@ -7,7 +7,10 @@
         Title="Vendor Management"
         ConfirmCommand="{Binding SaveCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,7 +29,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     h:Watermark.Text="Search by name, GSTIN, city…"/>
+                     AutomationProperties.Name="Search vendors"
+                     h:Watermark.Text="e.g. Jaipur Textiles or 08ABCDE1234F1Z5"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
@@ -43,8 +47,7 @@
             <DataGrid AutomationProperties.Name="Vendors list" ItemsSource="{Binding Vendors}"
                       SelectedItem="{Binding SelectedVendor}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
-                      HeadersVisibility="Column"
-                      ScrollViewer.CanContentScroll="True">
+                      HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="City" Binding="{Binding City}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -54,7 +57,10 @@
 
             <!-- Vendor form -->
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
-                        h:SmoothScroll.IsEnabled="True">
+                          Focusable="False"
+                          PanningMode="VerticalOnly"
+                          Margin="{StaticResource ItemSpacing}"
+                          h:SmoothScroll.IsEnabled="True">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -90,60 +96,81 @@
                         <Run Text="Vendor Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                     </TextBlock>
                     <TextBox Grid.Row="0" Grid.Column="1"
-                             Text="{Binding VendorName, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"/>
+                             Text="{Binding VendorName, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                             AutomationProperties.Name="Vendor name"
+                             h:Watermark.Text="e.g. Jaipur Textiles"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Contact Person" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="2" Grid.Column="1"
-                             Text="{Binding ContactPerson, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"/>
+                             Text="{Binding ContactPerson, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                             AutomationProperties.Name="Contact person"
+                             h:Watermark.Text="e.g. Ravi Mehta"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Mobile" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="4" Grid.Column="1"
                              Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
-                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="15"/>
+                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="15"
+                             AutomationProperties.Name="Vendor mobile"
+                             h:Watermark.Text="e.g. 9876543210"/>
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Email" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="6" Grid.Column="1"
-                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"/>
+                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                             AutomationProperties.Name="Vendor email"
+                             h:Watermark.Text="e.g. sales@jaipurtextiles.in"/>
 
                     <TextBlock Grid.Row="8" Grid.Column="0" Text="Address" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="8" Grid.Column="1"
-                             Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"/>
+                             Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"
+                             AutomationProperties.Name="Vendor address"
+                             h:Watermark.Text="e.g. Sitapura Industrial Area"/>
 
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Address Line 2" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="10" Grid.Column="1"
-                             Text="{Binding AddressLine2, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"/>
+                             Text="{Binding AddressLine2, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"
+                             AutomationProperties.Name="Vendor address line 2"
+                             h:Watermark.Text="e.g. Near EPIP Gate"/>
 
                     <TextBlock Grid.Row="12" Grid.Column="0" Text="City" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="12" Grid.Column="1"
                              Text="{Binding City, UpdateSourceTrigger=PropertyChanged}"
-                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="100"/>
+                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="100"
+                             AutomationProperties.Name="Vendor city"
+                             h:Watermark.Text="e.g. Jaipur"/>
 
                     <TextBlock Grid.Row="14" Grid.Column="0" Text="State" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="14" Grid.Column="1"
                              Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"
-                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="50"/>
+                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="50"
+                             AutomationProperties.Name="Vendor state"
+                             h:Watermark.Text="e.g. Rajasthan"/>
 
                     <TextBlock Grid.Row="16" Grid.Column="0" Text="Pincode" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="16" Grid.Column="1"
                              Text="{Binding PinCode, UpdateSourceTrigger=PropertyChanged}"
-                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left" MaxLength="6"/>
+                             Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left" MaxLength="6"
+                             AutomationProperties.Name="Vendor postal PIN"
+                             h:Watermark.Text="e.g. 302022"/>
 
                     <TextBlock Grid.Row="18" Grid.Column="0" Text="GSTIN" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="18" Grid.Column="1"
                              Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left" MaxLength="15"
-                             h:Watermark.Text="15-char GST number"/>
+                             AutomationProperties.Name="Vendor GSTIN"
+                             h:Watermark.Text="e.g. 08ABCDE1234F1Z5"/>
 
                     <TextBlock Grid.Row="20" Grid.Column="0" Text="PAN" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="20" Grid.Column="1"
                              Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="10"
-                             h:Watermark.Text="ABCDE1234F"/>
+                             AutomationProperties.Name="Vendor PAN"
+                             h:Watermark.Text="e.g. ABCDE1234F"/>
 
                     <TextBlock Grid.Row="22" Grid.Column="0" Text="Transport" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="22" Grid.Column="1"
                              Text="{Binding TransportPreference, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
-                             h:Watermark.Text="Road / Courier / Self"/>
+                             AutomationProperties.Name="Transport preference"
+                             h:Watermark.Text="e.g. Road or courier"/>
                 </Grid>
             </ScrollViewer>
         </Grid>

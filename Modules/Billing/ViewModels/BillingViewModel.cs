@@ -24,6 +24,8 @@ public partial class BillingViewModel(
     [ObservableProperty]
     public partial CartLineViewModel? SelectedCartItem { get; set; }
 
+    partial void OnSelectedCartItemChanged(CartLineViewModel? value) => UpdateCartCommandStates();
+
     // ═══════════════════════════════════════════════════════════════
     //  Totals (recalculated on every cart change)
     // ═══════════════════════════════════════════════════════════════
@@ -65,6 +67,8 @@ public partial class BillingViewModel(
     // ═══════════════════════════════════════════════════════════════
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCashPayment))]
+    [NotifyPropertyChangedFor(nameof(RequiresPaymentReference))]
     public partial string PaymentMethod { get; set; } = "Cash";
 
     [ObservableProperty]
@@ -76,8 +80,25 @@ public partial class BillingViewModel(
     [ObservableProperty]
     public partial decimal ChangeAmount { get; set; }
 
+    public bool IsCashPayment => string.Equals(PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase);
+    public bool RequiresPaymentReference => !IsCashPayment;
+
     public ObservableCollection<string> PaymentMethods { get; } =
         ["Cash", "UPI", "Card"];
+
+    partial void OnPaymentMethodChanged(string value)
+    {
+        if (IsCashPayment)
+        {
+            PaymentReference = string.Empty;
+        }
+        else
+        {
+            CashTendered = "0";
+        }
+
+        RecalculateChange();
+    }
 
     partial void OnCashTenderedChanged(string value) => RecalculateChange();
 
@@ -89,20 +110,33 @@ public partial class BillingViewModel(
     public partial string SearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSearchResults))]
     public partial ObservableCollection<Product> SearchResults { get; set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedSearchResult))]
+    public partial Product? SelectedSearchResult { get; set; }
+
+    [ObservableProperty]
     public partial string BarcodeInput { get; set; } = string.Empty;
+
+    public bool HasSearchResults => SearchResults.Count > 0;
+    public bool HasSelectedSearchResult => SelectedSearchResult is not null;
+
+    partial void OnSelectedSearchResultChanged(Product? value) => AddProductToCartCommand.NotifyCanExecuteChanged();
 
     [RelayCommand]
     private Task SearchProductsAsync() => RunAsync(async ct =>
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
+            SelectedSearchResult = null;
             SearchResults = [];
             return;
         }
-        var results = await billingService.SearchProductsAsync(SearchText, ct);
+
+        SelectedSearchResult = null;
+        var results = await billingService.SearchProductsAsync(SearchText.Trim(), ct);
         SearchResults = new ObservableCollection<Product>(results);
     });
 
@@ -124,13 +158,14 @@ public partial class BillingViewModel(
         BarcodeInput = string.Empty;
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanAddProductToCart))]
     private void AddProductToCart(Product? product)
     {
         if (product is null) return;
         AddToCart(product, null);
         SearchText = string.Empty;
         SearchResults = [];
+        SelectedSearchResult = null;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -167,20 +202,22 @@ public partial class BillingViewModel(
             CartItems.Add(line);
         }
 
+        UpdateCartCommandStates();
         RecalculateTotals();
         ClearMessages();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanRemoveCartItem))]
     private void RemoveCartItem()
     {
         if (SelectedCartItem is null) return;
         CartItems.Remove(SelectedCartItem);
         SelectedCartItem = null;
+        UpdateCartCommandStates();
         RecalculateTotals();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanClearCart))]
     private void ClearCart()
     {
         if (CartItems.Count == 0) return;
@@ -190,6 +227,7 @@ public partial class BillingViewModel(
         CartItems.Clear();
         SelectedCartItem = null;
         ResetPayment();
+        UpdateCartCommandStates();
         RecalculateTotals();
         ClearMessages();
     }
@@ -198,20 +236,39 @@ public partial class BillingViewModel(
     //  Complete Sale
     // ═══════════════════════════════════════════════════════════════
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanCompleteSale))]
     private Task CompleteSaleAsync() => RunAsync(async ct =>
     {
         ClearMessages();
 
+        if (!TryParseDiscountValue(out var discountValue, out var discountError))
+        {
+            ErrorMessage = discountError!;
+            return;
+        }
+
         if (!Validate(v => v
             .Rule(CartItems.Count > 0, "Cart is empty.")
-            .Rule(!string.IsNullOrWhiteSpace(PaymentMethod), "Select a payment method.")))
+            .Rule(!string.IsNullOrWhiteSpace(PaymentMethod), "Select a payment method.")
+            .Rule(IsValidCart(), "Fix cart lines with invalid quantity, price, or discount.")
+            .Rule(!RequiresPaymentReference || !string.IsNullOrWhiteSpace(PaymentReference),
+                  "Enter a payment reference for non-cash payments.")))
             return;
 
-        if (PaymentMethod == "Cash" && decimal.TryParse(CashTendered, out var tendered) && tendered < GrandTotal)
+        var cashTendered = 0m;
+        if (IsCashPayment)
         {
-            ErrorMessage = "Cash tendered is less than the total amount.";
-            return;
+            if (!decimal.TryParse(CashTendered, out cashTendered))
+            {
+                ErrorMessage = "Enter a valid cash amount.";
+                return;
+            }
+
+            if (cashTendered < GrandTotal)
+            {
+                ErrorMessage = "Cash tendered is less than the total amount.";
+                return;
+            }
         }
 
         var items = CartItems.Select(c => new CartItemDto(
@@ -221,25 +278,24 @@ public partial class BillingViewModel(
             c.UnitPrice,
             c.ItemDiscountRate)).ToList();
 
-        _ = decimal.TryParse(DiscountInput, out var discVal);
-
         var dto = new CompleteSaleDto(
             items,
             PaymentMethod,
             string.IsNullOrWhiteSpace(PaymentReference) ? null : PaymentReference.Trim(),
             SelectedDiscountType,
-            discVal,
+            discountValue,
             string.IsNullOrWhiteSpace(DiscountReason) ? null : DiscountReason.Trim(),
-            decimal.TryParse(CashTendered, out var cash) ? cash : 0,
+            cashTendered,
             appState.CurrentUserType.ToString(),
             Guid.NewGuid());
 
         var sale = await billingService.CompleteSaleAsync(dto, ct);
-        SuccessMessage = $"Sale {sale.InvoiceNumber} completed — {regional.FormatCurrency(sale.TotalAmount)}";
+        SuccessMessage = $"Sale {sale.InvoiceNumber} completed - {regional.FormatCurrency(sale.TotalAmount)}";
 
         CartItems.Clear();
         SelectedCartItem = null;
         ResetPayment();
+        UpdateCartCommandStates();
         RecalculateTotals();
     });
 
@@ -282,10 +338,54 @@ public partial class BillingViewModel(
         ChangeAmount = 0;
     }
 
+    private bool CanRemoveCartItem() => SelectedCartItem is not null;
+
+    private bool CanClearCart() => CartItems.Count > 0;
+
+    private bool CanCompleteSale() => CartItems.Count > 0;
+
+    private void UpdateCartCommandStates()
+    {
+        RemoveCartItemCommand.NotifyCanExecuteChanged();
+        ClearCartCommand.NotifyCanExecuteChanged();
+        CompleteSaleCommand.NotifyCanExecuteChanged();
+    }
+
     private void ClearMessages()
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private bool CanAddProductToCart(Product? product) => product is not null;
+
+    private bool IsValidCart() =>
+        CartItems.All(item =>
+            item.Quantity > 0
+            && item.UnitPrice >= 0
+            && item.ItemDiscountRate is >= 0 and <= 100);
+
+    private bool TryParseDiscountValue(out decimal discountValue, out string? errorMessage)
+    {
+        discountValue = 0;
+        errorMessage = null;
+
+        if (SelectedDiscountType == DiscountType.None)
+            return true;
+
+        if (!decimal.TryParse(DiscountInput, out discountValue) || discountValue < 0)
+        {
+            errorMessage = "Enter a valid discount value.";
+            return false;
+        }
+
+        if (SelectedDiscountType == DiscountType.Percentage && discountValue > 100)
+        {
+            errorMessage = "Discount percentage must be between 0 and 100.";
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -314,3 +414,4 @@ public partial class CartLineViewModel : ObservableObject
 
     public decimal LineTotal => Quantity * UnitPrice * (1 - ItemDiscountRate / 100m);
 }
+

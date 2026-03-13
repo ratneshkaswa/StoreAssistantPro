@@ -61,7 +61,17 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
 
     partial void OnSelectedVendorChanged(Vendor? value)
     {
-        if (value is null) return;
+        if (value is null)
+        {
+            ResetForm(clearMessages: false);
+            return;
+        }
+
+        PopulateForm(value);
+    }
+
+    private void PopulateForm(Vendor value)
+    {
         VendorName = value.Name;
         ContactPerson = value.ContactPerson ?? string.Empty;
         Phone = value.Phone ?? string.Empty;
@@ -79,34 +89,8 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
         SuccessMessage = string.Empty;
     }
 
-    [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private void ResetForm(bool clearMessages)
     {
-        await ReloadVendorsAsync(ct);
-    });
-
-    private async Task ReloadVendorsAsync(CancellationToken ct)
-    {
-        var vendors = await vendorService.GetAllAsync(ct);
-        Vendors = new ObservableCollection<Vendor>(vendors);
-    }
-
-    [RelayCommand]
-    private Task SearchAsync() => RunAsync(async ct =>
-    {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            await ReloadVendorsAsync(ct);
-            return;
-        }
-        var results = await vendorService.SearchAsync(SearchText, ct);
-        Vendors = new ObservableCollection<Vendor>(results);
-    });
-
-    [RelayCommand]
-    private void NewVendor()
-    {
-        SelectedVendor = null;
         VendorName = string.Empty;
         ContactPerson = string.Empty;
         Phone = string.Empty;
@@ -120,7 +104,44 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
         PAN = string.Empty;
         TransportPreference = string.Empty;
         IsEditing = false;
-        ClearMessages();
+
+        if (clearMessages)
+            ClearMessages();
+    }
+
+    [RelayCommand]
+    private Task LoadAsync() => RunLoadAsync(async ct =>
+    {
+        await ReloadVendorsAsync(ct);
+    });
+
+    private async Task ReloadVendorsAsync(CancellationToken ct, int? selectedVendorId = null)
+    {
+        var vendors = await vendorService.GetAllAsync(ct);
+        Vendors = new ObservableCollection<Vendor>(vendors);
+        SelectedVendor = selectedVendorId.HasValue
+            ? Vendors.FirstOrDefault(v => v.Id == selectedVendorId.Value)
+            : null;
+    }
+
+    [RelayCommand]
+    private Task SearchAsync() => RunAsync(async ct =>
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            await ReloadVendorsAsync(ct);
+            return;
+        }
+        var results = await vendorService.SearchAsync(SearchText, ct);
+        Vendors = new ObservableCollection<Vendor>(results);
+        SelectedVendor = null;
+    });
+
+    [RelayCommand]
+    private void NewVendor()
+    {
+        SelectedVendor = null;
+        ResetForm(clearMessages: true);
     }
 
     [RelayCommand]
@@ -148,15 +169,17 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
         }
 
         await ReloadVendorsAsync(ct);
-        NewVendor();
+        SelectedVendor = null;
+        ResetForm(clearMessages: false);
     });
 
     [RelayCommand]
-    private Task ToggleActiveAsync() => RunAsync(async ct =>
+    private Task ToggleActiveAsync(Vendor? vendor) => RunAsync(async ct =>
     {
-        if (SelectedVendor is null) return;
-        await vendorService.ToggleActiveAsync(SelectedVendor.Id, ct);
-        await ReloadVendorsAsync(ct);
+        if (vendor is null) return;
+        var selectedVendorId = SelectedVendor?.Id == vendor.Id ? vendor.Id : SelectedVendor?.Id;
+        await vendorService.ToggleActiveAsync(vendor.Id, ct);
+        await ReloadVendorsAsync(ct, selectedVendorId ?? vendor.Id);
         SuccessMessage = "Status toggled.";
     });
 

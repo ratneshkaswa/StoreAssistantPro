@@ -7,7 +7,10 @@
         Title="Inward Entry"
         ConfirmCommand="{Binding ConfirmStepCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -163,6 +166,7 @@
                     <Run Text="Number of Parcels "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <ComboBox Grid.Row="0" Grid.Column="1"
+                          AutomationProperties.Name="Number of parcels"
                           ItemsSource="{Binding ParcelCounts}"
                           SelectedItem="{Binding ParcelCount}"
                           Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"/>
@@ -183,14 +187,19 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Transport Charges (₹)"
                            Style="{StaticResource FormRowLabelStyle}"/>
                 <TextBox Grid.Row="0" Grid.Column="1"
+                         AutomationProperties.Name="Transport charges"
                          Text="{Binding TransportCharges, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         h:Watermark.Text="0"/>
+                         h:Watermark.Text="e.g. 250"/>
 
             </Grid>
 
             <!-- Step 3: Parcels with products -->
             <ScrollViewer Visibility="{Binding IsStep3, Converter={StaticResource BoolToVisibility}}"
+                          AutomationProperties.Name="Parcel entry list"
+                          Focusable="False"
+                          h:SmoothScroll.IsEnabled="True"
+                          PanningMode="VerticalOnly"
                           VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Parcels}">
                     <ItemsControl.ItemTemplate>
@@ -206,10 +215,20 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <!-- Parcel header -->
-                                    <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentAccentDefault}">
-                                        <Run Text="Parcel "/>
-                                        <Run Text="{Binding ParcelNumber, Mode=OneWay}"/>
-                                    </TextBlock>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource FluentAccentDefault}">
+                                            <Run Text="Parcel "/>
+                                            <Run Text="{Binding ParcelNumber, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <Button Grid.Column="1"
+                                                Content="Add Row"
+                                                Command="{Binding AddProductRowCommand}"
+                                                Style="{StaticResource SecondaryButtonStyle}"/>
+                                    </Grid>
 
                                     <!-- Vendor selection -->
                                     <Grid Grid.Row="1" Margin="{StaticResource FieldLabelSpacing}">
@@ -219,50 +238,101 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Vendor" Style="{StaticResource FormRowLabelStyle}"/>
                                         <ComboBox Grid.Column="1"
+                                                  AutomationProperties.Name="Parcel vendor"
                                                   ItemsSource="{Binding DataContext.Vendors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                   SelectedItem="{Binding SelectedVendor}"
                                                   DisplayMemberPath="Name"/>
                                     </Grid>
 
                                     <!-- Product rows -->
-                                    <ItemsControl Grid.Row="2" ItemsSource="{Binding ProductRows}" Margin="{StaticResource FieldLabelSpacing}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="{StaticResource FieldLabelSpacing}">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FieldWidthCompact}"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <ComboBox ItemsSource="{Binding DataContext.Products, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                              SelectedItem="{Binding SelectedProduct}"
-                                                              DisplayMemberPath="Name"/>
-                                                    <TextBox Grid.Column="1"
-                                                             Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
-                                                             Margin="{StaticResource InlineControlSpacing}" MaxLength="8"/>
-                                                    <ComboBox Grid.Column="2"
-                                                              ItemsSource="{Binding DataContext.Colours, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                              SelectedItem="{Binding SelectedColour}"
-                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
-                                                    <ComboBox Grid.Column="3"
-                                                              ItemsSource="{Binding DataContext.Sizes, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                              SelectedItem="{Binding SelectedSize}"
-                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
-                                                    <ComboBox Grid.Column="4"
-                                                              ItemsSource="{Binding DataContext.Patterns, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                              SelectedItem="{Binding SelectedPattern}"
-                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
-                                                    <ComboBox Grid.Column="5"
-                                                              ItemsSource="{Binding DataContext.VariantTypes, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                              SelectedItem="{Binding SelectedVariantType}"
-                                                              DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <Grid Grid.Row="2" Margin="{StaticResource FieldLabelSpacing}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Margin="{StaticResource FieldLabelSpacing}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto" MinWidth="{StaticResource FieldWidthCompact}"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Product"
+                                                       Style="{StaticResource FormRowLabelStyle}"/>
+                                            <TextBlock Grid.Column="1" Text="Qty"
+                                                       Style="{StaticResource FormRowLabelStyle}"/>
+                                            <TextBlock Grid.Column="2" Text="Colour"
+                                                       Style="{StaticResource FormRowLabelStyle}"/>
+                                            <TextBlock Grid.Column="3" Text="Size"
+                                                       Style="{StaticResource FormRowLabelStyle}"/>
+                                            <TextBlock Grid.Column="4" Text="Pattern"
+                                                       Style="{StaticResource FormRowLabelStyle}"/>
+                                            <TextBlock Grid.Column="5" Text="Type"
+                                                       Style="{StaticResource FormRowLabelStyle}"/>
+                                        </Grid>
+
+                                        <ItemsControl Grid.Row="1" ItemsSource="{Binding ProductRows}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="{StaticResource FieldLabelSpacing}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FieldWidthCompact}"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ComboBox ItemsSource="{Binding DataContext.Products, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  AutomationProperties.Name="Parcel product"
+                                                                  SelectedItem="{Binding SelectedProduct}"
+                                                                  DisplayMemberPath="Name"/>
+                                                        <TextBox Grid.Column="1"
+                                                                 AutomationProperties.Name="Parcel quantity"
+                                                                 Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                                                                 IsEnabled="{Binding HasSelectedProduct}"
+                                                                 Margin="{StaticResource InlineControlSpacing}" MaxLength="8"
+                                                                 h:Watermark.Text="e.g. 12"/>
+                                                        <ComboBox Grid.Column="2"
+                                                                  AutomationProperties.Name="Parcel colour"
+                                                                  ItemsSource="{Binding DataContext.Colours, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  SelectedItem="{Binding SelectedColour}"
+                                                                  IsEnabled="{Binding CanSelectColour}"
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                        <ComboBox Grid.Column="3"
+                                                                  AutomationProperties.Name="Parcel size"
+                                                                  ItemsSource="{Binding DataContext.Sizes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  SelectedItem="{Binding SelectedSize}"
+                                                                  IsEnabled="{Binding CanSelectSize}"
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                        <ComboBox Grid.Column="4"
+                                                                  AutomationProperties.Name="Parcel pattern"
+                                                                  ItemsSource="{Binding DataContext.Patterns, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  SelectedItem="{Binding SelectedPattern}"
+                                                                  IsEnabled="{Binding CanSelectPattern}"
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                        <ComboBox Grid.Column="5"
+                                                                  AutomationProperties.Name="Parcel variant type"
+                                                                  ItemsSource="{Binding DataContext.VariantTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  SelectedItem="{Binding SelectedVariantType}"
+                                                                  IsEnabled="{Binding CanSelectVariantType}"
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                        <Button Grid.Column="6"
+                                                                Content="Remove"
+                                                                Command="{Binding DataContext.RemoveProductRowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                                Margin="{StaticResource InlineControlSpacing}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
                                 </Grid>
                             </Border>
                         </DataTemplate>

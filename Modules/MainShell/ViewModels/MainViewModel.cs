@@ -169,6 +169,7 @@ public partial class MainViewModel : BaseViewModel
         RefreshQuickActions();
 
         _navigationService.NavigateTo(MainWorkspacePage);
+        _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
     }
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -253,7 +254,7 @@ public partial class MainViewModel : BaseViewModel
     {
         _navigationService.NavigateTo(MainWorkspacePage);
         _currentPage = MainWorkspacePage;
-        _statusBar.SetPersistent("Home");
+        _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
     }
 
     // ── Menu commands ──
@@ -278,105 +279,91 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenFirmManagement()
     {
-        _dialogService.ShowDialog(FirmManagementDialog);
+        OpenDialog(FirmManagementDialog, "Firm management");
     }
 
     [RelayCommand]
     private void OpenUserManagement()
     {
-        _dialogService.ShowDialog(UserManagementDialog);
-        _statusBar.Post("User management closed");
+        OpenDialog(UserManagementDialog, "User management", "User management closed");
     }
 
     [RelayCommand]
     private void OpenTaxManagement()
     {
-        _dialogService.ShowDialog(TaxManagementDialog);
-        _statusBar.Post("Tax management closed");
+        OpenDialog(TaxManagementDialog, "Tax management", "Tax management closed");
     }
 
     [RelayCommand]
     private void OpenVendorManagement()
     {
-        _dialogService.ShowDialog(VendorManagementDialog);
-        _statusBar.Post("Vendor management closed");
+        OpenDialog(VendorManagementDialog, "Vendor management", "Vendor management closed");
     }
 
     [RelayCommand]
     private void OpenProductManagement()
     {
-        _dialogService.ShowDialog(ProductManagementDialog);
-        _statusBar.Post("Product management closed");
+        OpenDialog(ProductManagementDialog, "Product management", "Product management closed");
     }
 
     [RelayCommand]
     private void OpenCategoryManagement()
     {
-        _dialogService.ShowDialog(CategoryManagementDialog);
-        _statusBar.Post("Category management closed");
+        OpenDialog(CategoryManagementDialog, "Category management", "Category management closed");
     }
 
     [RelayCommand]
     private void OpenBrandManagement()
     {
-        _dialogService.ShowDialog(BrandManagementDialog);
-        _statusBar.Post("Brand management closed");
+        OpenDialog(BrandManagementDialog, "Brand management", "Brand management closed");
     }
 
     [RelayCommand]
     private void OpenFinancialYear()
     {
-        _dialogService.ShowDialog(FinancialYearDialog);
-        _statusBar.Post("Financial year dialog closed");
+        OpenDialog(FinancialYearDialog, "Financial year", "Financial year dialog closed");
     }
 
     [RelayCommand]
     private void OpenSystemSettings()
     {
-        _dialogService.ShowDialog(SystemSettingsDialog);
-        _statusBar.Post("System settings closed");
+        OpenDialog(SystemSettingsDialog, "System settings", "System settings closed");
     }
 
     [RelayCommand]
     private void OpenInwardEntry()
     {
-        _dialogService.ShowDialog(InwardEntryDialog);
-        _statusBar.Post("Inward entry closed");
+        OpenDialog(InwardEntryDialog, "Inward entry", "Inward entry closed");
     }
 
     [RelayCommand]
     private void OpenInventory()
     {
-        _dialogService.ShowDialog(InventoryDialog);
-        _statusBar.Post("Inventory management closed");
+        OpenDialog(InventoryDialog, "Inventory management", "Inventory management closed");
     }
 
     [RelayCommand]
     private void OpenBilling()
     {
-        _dialogService.ShowDialog(BillingDialog);
-        _statusBar.Post("Billing closed");
+        OpenDialog(BillingDialog, "Billing", "Billing closed");
     }
 
     [RelayCommand]
     private void OpenSaleHistory()
     {
-        _dialogService.ShowDialog(SaleHistoryDialog);
-        _statusBar.Post("Sale history closed");
+        OpenDialog(SaleHistoryDialog, "Sale history", "Sale history closed");
     }
 
     [RelayCommand]
     private void OpenCustomerManagement()
     {
-        _dialogService.ShowDialog(CustomerManagementDialog);
-        _statusBar.Post("Customer management closed");
+        OpenDialog(CustomerManagementDialog, "Customer management", "Customer management closed");
     }
 
     [RelayCommand]
     private void OpenPurchaseOrders()
     {
-        _dialogService.ShowDialog(PurchaseOrdersDialog);
-        _statusBar.Post("Purchase orders closed");
+        OpenDialog(PurchaseOrdersDialog, "Purchase orders", "Purchase orders closed");
     }
 
     // ── Logout ──
@@ -579,6 +566,18 @@ public partial class MainViewModel : BaseViewModel
         QuickActions.Clear();
         foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType, _features))
             QuickActions.Add(action);
+    }
+
+    private void OpenDialog(string dialogKey, string displayName, string? closedStatus = null)
+    {
+        if (_dialogService.ShowDialog(dialogKey) == false)
+        {
+            _statusBar.Post($"Unable to open {displayName}");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(closedStatus))
+            _statusBar.Post(closedStatus);
     }
 
     /// <summary>

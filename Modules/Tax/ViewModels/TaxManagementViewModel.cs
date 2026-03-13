@@ -55,6 +55,8 @@ public partial class TaxManagementViewModel(
 
     partial void OnSelectedTaxChanged(TaxMaster? value)
     {
+        DeleteRateCommand.NotifyCanExecuteChanged();
+
         if (value is null) return;
         TaxName = value.TaxName;
         SlabPercent = value.SlabPercent.ToString("G");
@@ -100,7 +102,7 @@ public partial class TaxManagementViewModel(
         ClearForm();
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanDeleteRate))]
     private Task DeleteRateAsync() => RunAsync(async ct =>
     {
         if (SelectedTax is null) return;
@@ -146,6 +148,9 @@ public partial class TaxManagementViewModel(
     partial void OnSelectedGroupChanged(TaxGroup? value)
     {
         ClearMessages();
+        ClearSlabForm();
+        AddSlabCommand.NotifyCanExecuteChanged();
+
         if (value is null)
         {
             GroupSlabs = [];
@@ -156,6 +161,8 @@ public partial class TaxManagementViewModel(
         GroupDescription = value.Description ?? string.Empty;
         GroupSlabs = new ObservableCollection<TaxSlab>(value.Slabs);
     }
+
+    partial void OnSelectedSlabChanged(TaxSlab? value) => DeleteSlabCommand.NotifyCanExecuteChanged();
 
     [RelayCommand]
     private void ClearGroupForm()
@@ -195,11 +202,11 @@ public partial class TaxManagementViewModel(
     });
 
     [RelayCommand]
-    private Task ToggleGroupActiveAsync() => RunAsync(async ct =>
+    private Task ToggleGroupActiveAsync(TaxGroup? group) => RunAsync(async ct =>
     {
-        if (SelectedGroup is null) return;
-        await taxGroupService.ToggleGroupActiveAsync(SelectedGroup.Id, ct);
-        SuccessMessage = $"Group '{SelectedGroup.Name}' {(SelectedGroup.IsActive ? "deactivated" : "activated")}.";
+        if (group is null) return;
+        await taxGroupService.ToggleGroupActiveAsync(group.Id, ct);
+        SuccessMessage = $"Group '{group.Name}' {(group.IsActive ? "deactivated" : "activated")}.";
         await ReloadGroupsAsync(ct);
     });
 
@@ -213,7 +220,7 @@ public partial class TaxManagementViewModel(
         SlabPriceTo = string.Empty;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanAddSlab))]
     private Task AddSlabAsync() => RunAsync(async ct =>
     {
         ClearMessages();
@@ -250,7 +257,7 @@ public partial class TaxManagementViewModel(
         ClearSlabForm();
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanDeleteSlab))]
     private Task DeleteSlabAsync() => RunAsync(async ct =>
     {
         if (SelectedSlab is null) return;
@@ -332,11 +339,11 @@ public partial class TaxManagementViewModel(
     });
 
     [RelayCommand]
-    private Task ToggleHSNActiveAsync() => RunAsync(async ct =>
+    private Task ToggleHSNActiveAsync(HSNCode? hsnCode) => RunAsync(async ct =>
     {
-        if (SelectedHSN is null) return;
-        await taxGroupService.ToggleHSNActiveAsync(SelectedHSN.Id, ct);
-        SuccessMessage = $"HSN '{SelectedHSN.Code}' {(SelectedHSN.IsActive ? "deactivated" : "activated")}.";
+        if (hsnCode is null) return;
+        await taxGroupService.ToggleHSNActiveAsync(hsnCode.Id, ct);
+        SuccessMessage = $"HSN '{hsnCode.Code}' {(hsnCode.IsActive ? "deactivated" : "activated")}.";
         await ReloadHSNAsync(ct);
     });
 
@@ -385,4 +392,10 @@ public partial class TaxManagementViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
     }
+
+    private bool CanDeleteRate() => SelectedTax is not null;
+
+    private bool CanAddSlab() => SelectedGroup is not null;
+
+    private bool CanDeleteSlab() => SelectedSlab is not null;
 }

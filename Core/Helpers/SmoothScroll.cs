@@ -21,8 +21,9 @@ namespace StoreAssistantPro.Core.Helpers;
 /// </summary>
 public static class SmoothScroll
 {
-    private const double ScrollAmount = 80;
-    private static readonly Duration AnimationDuration = new(TimeSpan.FromMilliseconds(200));
+    private const double PixelsPerScrollLine = 16;
+    private const double MinimumScrollAmount = 32;
+    private static readonly Duration AnimationDuration = new(TimeSpan.FromMilliseconds(180));
     private static readonly IEasingFunction Easing = new CubicEase { EasingMode = EasingMode.EaseOut };
 
     public static readonly DependencyProperty IsEnabledProperty =
@@ -38,14 +39,52 @@ public static class SmoothScroll
             "TargetOffset", typeof(double), typeof(SmoothScroll),
             new PropertyMetadata(0.0));
 
+    private static readonly DependencyProperty OriginalCanContentScrollProperty =
+        DependencyProperty.RegisterAttached(
+            "OriginalCanContentScroll", typeof(bool?), typeof(SmoothScroll),
+            new PropertyMetadata(null));
+
+    private static readonly DependencyProperty MediatorProperty =
+        DependencyProperty.RegisterAttached(
+            "Mediator", typeof(ScrollViewerOffsetMediator), typeof(SmoothScroll),
+            new PropertyMetadata(null));
+
+    private static bool? GetOriginalCanContentScroll(DependencyObject obj) =>
+        (bool?)obj.GetValue(OriginalCanContentScrollProperty);
+
+    private static void SetOriginalCanContentScroll(DependencyObject obj, bool? value) =>
+        obj.SetValue(OriginalCanContentScrollProperty, value);
+
+    private static ScrollViewerOffsetMediator? GetMediator(DependencyObject obj) =>
+        obj.GetValue(MediatorProperty) as ScrollViewerOffsetMediator;
+
+    private static void SetMediator(DependencyObject obj, ScrollViewerOffsetMediator? value) =>
+        obj.SetValue(MediatorProperty, value);
+
     private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not ScrollViewer sv) return;
 
         if ((bool)e.NewValue)
+        {
+            if (GetOriginalCanContentScroll(sv) is null)
+                SetOriginalCanContentScroll(sv, sv.CanContentScroll);
+
+            // Smooth scrolling expects pixel offsets. Logical item scrolling
+            // makes wheel deltas jump too far on form-style views.
+            sv.CanContentScroll = false;
             sv.PreviewMouseWheel += OnPreviewMouseWheel;
+        }
         else
+        {
             sv.PreviewMouseWheel -= OnPreviewMouseWheel;
+            var original = GetOriginalCanContentScroll(sv);
+            if (original.HasValue)
+            {
+                sv.CanContentScroll = original.Value;
+                SetOriginalCanContentScroll(sv, null);
+            }
+        }
     }
 
     private static void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -77,12 +116,13 @@ public static class SmoothScroll
         e.Handled = true;
 
         var currentTarget = (double)sv.GetValue(TargetOffsetProperty);
+        var wheelAmount = GetWheelScrollAmount(sv, e.Delta);
 
         // If animation hasn't started yet or offset was manually changed, sync
-        if (Math.Abs(currentTarget - sv.VerticalOffset) > ScrollAmount * 2)
+        if (Math.Abs(currentTarget - sv.VerticalOffset) > wheelAmount * 2)
             currentTarget = sv.VerticalOffset;
 
-        var delta = e.Delta > 0 ? -ScrollAmount : ScrollAmount;
+        var delta = e.Delta > 0 ? -wheelAmount : wheelAmount;
         var newTarget = Math.Clamp(currentTarget + delta, 0, sv.ScrollableHeight);
 
         sv.SetValue(TargetOffsetProperty, newTarget);
@@ -100,6 +140,19 @@ public static class SmoothScroll
         // Use a mediator to animate ScrollViewer.VerticalOffset (read-only DP)
         var mediator = GetOrCreateMediator(sv);
         mediator.BeginAnimation(ScrollViewerOffsetMediator.VerticalOffsetProperty, animation);
+    }
+
+    private static double GetWheelScrollAmount(ScrollViewer sv, int mouseWheelDelta)
+    {
+        if (SystemParameters.WheelScrollLines < 0)
+            return Math.Max(MinimumScrollAmount, Math.Min(sv.ViewportHeight * 0.85, sv.ScrollableHeight));
+
+        var wheelSteps = Math.Max(1d, Math.Abs((double)mouseWheelDelta) / Mouse.MouseWheelDeltaForOneLine);
+        var lineCount = Math.Max(1, SystemParameters.WheelScrollLines);
+        var preferredAmount = lineCount * PixelsPerScrollLine * wheelSteps;
+        var maximumAmount = Math.Max(MinimumScrollAmount, sv.ViewportHeight * 0.35);
+
+        return Math.Clamp(preferredAmount, MinimumScrollAmount, maximumAmount);
     }
 
     private static bool IsInsideComboBox(DependencyObject start)
@@ -141,11 +194,11 @@ public static class SmoothScroll
 
     private static ScrollViewerOffsetMediator GetOrCreateMediator(ScrollViewer sv)
     {
-        if (sv.Tag is ScrollViewerOffsetMediator existing)
+        if (GetMediator(sv) is ScrollViewerOffsetMediator existing)
             return existing;
 
         var mediator = new ScrollViewerOffsetMediator(sv);
-        sv.Tag = mediator;
+        SetMediator(sv, mediator);
         return mediator;
     }
 }

@@ -7,7 +7,10 @@
         Title="User Management"
         ConfirmCommand="{Binding ChangePinCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -26,7 +29,6 @@
                   SelectedItem="{Binding SelectedUser}"
                   Style="{StaticResource EnterpriseDataGridStyle}"
                   HeadersVisibility="Column"
-                  ScrollViewer.CanContentScroll="True"
                   Margin="{StaticResource ItemSpacing}">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
@@ -67,6 +69,7 @@
             <TextBlock Grid.Row="2" Grid.Column="0" Text="New PIN (4 digits)"
                        Style="{StaticResource FormRowLabelStyle}"/>
             <PasswordBox Grid.Row="2" Grid.Column="1"
+                         AutomationProperties.Name="New PIN"
                          x:Name="NewPinBox" MaxLength="4"
                          PasswordChanged="OnNewPinChanged"/>
 
@@ -74,6 +77,7 @@
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Confirm PIN"
                        Style="{StaticResource FormRowLabelStyle}"/>
             <PasswordBox Grid.Row="4" Grid.Column="1"
+                         AutomationProperties.Name="Confirm PIN"
                          x:Name="ConfirmPinBox" MaxLength="4"
                          PasswordChanged="OnConfirmPinChanged"/>
 
@@ -83,6 +87,7 @@
                        Foreground="{StaticResource FluentError}"
                        Visibility="{Binding IsMasterPinRequired, Converter={StaticResource BoolToVisibility}}"/>
             <PasswordBox Grid.Row="6" Grid.Column="1"
+                         AutomationProperties.Name="Master PIN"
                          x:Name="MasterPinBox" MaxLength="6"
                          PasswordChanged="OnMasterPinChanged"
                          Visibility="{Binding IsMasterPinRequired, Converter={StaticResource BoolToVisibility}}"/>

@@ -68,6 +68,8 @@ public partial class VariantManagementViewModel(
 
     partial void OnSelectedVariantChanged(ProductVariant? value)
     {
+        DeleteCommand.NotifyCanExecuteChanged();
+
         if (value is null) return;
         SelectedSize = Sizes.FirstOrDefault(s => s.Id == value.SizeId);
         SelectedColour = Colours.FirstOrDefault(c => c.Id == value.ColourId);
@@ -160,15 +162,15 @@ public partial class VariantManagementViewModel(
     });
 
     [RelayCommand]
-    private Task ToggleActiveAsync() => RunAsync(async ct =>
+    private Task ToggleActiveAsync(ProductVariant? variant) => RunAsync(async ct =>
     {
-        if (SelectedVariant is null) return;
-        await variantService.ToggleActiveAsync(SelectedVariant.Id, ct);
-        SuccessMessage = $"Variant {(SelectedVariant.IsActive ? "deactivated" : "activated")}.";
+        if (variant is null) return;
+        await variantService.ToggleActiveAsync(variant.Id, ct);
+        SuccessMessage = $"Variant {(variant.IsActive ? "deactivated" : "activated")}.";
         await LoadDataAsync(ct);
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanDeleteVariant))]
     private Task DeleteAsync() => RunAsync(async ct =>
     {
         if (SelectedVariant is null) return;
@@ -204,6 +206,8 @@ public partial class VariantManagementViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
     }
+
+    private bool CanDeleteVariant() => SelectedVariant is not null;
 }
 
 /// <summary>Wrapper for multi-select checkboxes in bulk creation.</summary>

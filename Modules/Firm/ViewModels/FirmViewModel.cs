@@ -78,7 +78,6 @@ public partial class FirmViewModel : BaseViewModel
     [NotifyDataErrorInfo]
     [Required(ErrorMessage = "Firm name is required.")]
     [MaxLength(100, ErrorMessage = "Firm name cannot exceed 100 characters.")]
-    [NotifyPropertyChangedFor(nameof(BusinessSummaryTitle))]
     public partial string FirmName { get; set; } = string.Empty;
 
     partial void OnFirmNameChanged(string value) => OnEditableFieldChanged();
@@ -96,7 +95,6 @@ public partial class FirmViewModel : BaseViewModel
     [CustomValidation(typeof(BusinessProfileRules), nameof(BusinessProfileRules.ValidateIndianState))]
     [NotifyPropertyChangedFor(nameof(StateValidationHint))]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
-    [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     public partial string State { get; set; } = string.Empty;
 
     partial void OnStateChanged(string value)
@@ -134,7 +132,6 @@ public partial class FirmViewModel : BaseViewModel
     [MaxLength(15, ErrorMessage = "GSTIN cannot exceed 15 characters.")]
     [CustomValidation(typeof(BusinessProfileRules), nameof(BusinessProfileRules.ValidateGstin))]
     [NotifyPropertyChangedFor(nameof(GstinValidationHint))]
-    [NotifyPropertyChangedFor(nameof(DerivedStateCodeDisplay))]
     public partial string GSTNumber { get; set; } = string.Empty;
 
     partial void OnGSTNumberChanged(string value)
@@ -171,9 +168,7 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCompositionScheme))]
-    [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
     [NotifyPropertyChangedFor(nameof(CompositionRateValidationHint))]
-    [NotifyPropertyChangedFor(nameof(TaxSummaryTitle))]
     public partial string SelectedGstRegistrationType { get; set; } = "Regular";
 
     partial void OnSelectedGstRegistrationTypeChanged(string value)
@@ -189,7 +184,6 @@ public partial class FirmViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyDataErrorInfo]
     [CustomValidation(typeof(BusinessProfileRules), nameof(BusinessProfileRules.ValidateCompositionRate))]
-    [NotifyPropertyChangedFor(nameof(CompositionRateHint))]
     [NotifyPropertyChangedFor(nameof(CompositionRateValidationHint))]
     public partial string CompositionRate { get; set; } = "1";
 
@@ -217,6 +211,7 @@ public partial class FirmViewModel : BaseViewModel
         Enumerable.Range(1, 12).Select(month => CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(month)));
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DateFormatPreview))]
     public partial string SelectedDateFormat { get; set; } = "dd/MM/yyyy";
 
     partial void OnSelectedDateFormatChanged(string value) => OnEditableFieldChanged();
@@ -235,7 +230,6 @@ public partial class FirmViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TaxModeHint))]
-    [NotifyPropertyChangedFor(nameof(InvoiceSummaryTitle))]
     public partial string SelectedTaxMode { get; set; } = "Tax-Exclusive";
 
     partial void OnSelectedTaxModeChanged(string value) => OnEditableFieldChanged();
@@ -260,7 +254,6 @@ public partial class FirmViewModel : BaseViewModel
     public ObservableCollection<string> NumberToWordsLanguages { get; } = ["English", "Hindi"];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(OperationsSummaryTitle))]
     public partial bool NegativeStockAllowed { get; set; }
 
     partial void OnNegativeStockAllowedChanged(bool value) => OnEditableFieldChanged();
@@ -282,30 +275,26 @@ public partial class FirmViewModel : BaseViewModel
 
     public string CurrencyPreview => $"Invoice preview: {SelectedCurrencySymbol} 1,00,000.00";
 
+    public string DateFormatPreview
+    {
+        get
+        {
+            try
+            {
+                return $"e.g. {DateTime.Today.ToString(SelectedDateFormat, CultureInfo.InvariantCulture)}";
+            }
+            catch (FormatException)
+            {
+                return string.Empty;
+            }
+        }
+    }
+
     public bool IsWorking => IsBusy || IsLoading;
 
     public string WorkingMessage => IsLoading
         ? "Loading business settings..."
         : "Saving business settings...";
-
-    public string BusinessSummaryTitle => string.IsNullOrWhiteSpace(FirmName)
-        ? "Business profile"
-        : FirmName.Trim();
-
-    public string TaxSummaryTitle => SelectedGstRegistrationType switch
-    {
-        "Composition" => "Composition GST",
-        "Unregistered" => "Unregistered business",
-        _ => "Regular GST"
-    };
-
-    public string InvoiceSummaryTitle => SelectedTaxMode == "Tax-Inclusive (MRP)"
-        ? "MRP tax inclusive"
-        : "Tax added at billing";
-
-    public string OperationsSummaryTitle => NegativeStockAllowed
-        ? "Negative stock allowed"
-        : "Negative stock blocked";
 
     public string TaxModeHint => SelectedTaxMode == "Tax-Inclusive (MRP)"
         ? "Prices already include GST. Tax is back-calculated from the final amount."
@@ -322,10 +311,6 @@ public partial class FirmViewModel : BaseViewModel
     public string NumberToWordsPreview => SelectedNumberToWordsLanguage == "Hindi"
         ? "Example: \u090F\u0915 \u0932\u093E\u0916 \u0930\u0941\u092A\u092F\u0947"
         : "Example: One Lakh Rupees";
-
-    public string CompositionRateHint => IsCompositionScheme
-        ? $"Flat {CompositionRate}% on turnover with no CGST/SGST breakup"
-        : "Composition rate is only used for composition GST.";
 
     public string CompositionRateValidationHint
     {
@@ -417,21 +402,6 @@ public partial class FirmViewModel : BaseViewModel
 
             var entityType = PANNumber.Length >= 4 ? GetPanEntityType(PANNumber[3]) : null;
             return entityType is null ? "\u2713" : $"\u2713 {entityType}";
-        }
-    }
-
-    public string DerivedStateCodeDisplay
-    {
-        get
-        {
-            var code = BusinessProfileRules.GetStateCodeFromGstinOrState(GSTNumber, State);
-            if (string.IsNullOrWhiteSpace(code))
-                return "State code will be derived from GSTIN or state selection.";
-
-            var stateName = BusinessProfileRules.GetStateNameByCode(code);
-            return stateName is null
-                ? $"State code: {code}"
-                : $"State code: {code} - {stateName}";
         }
     }
 

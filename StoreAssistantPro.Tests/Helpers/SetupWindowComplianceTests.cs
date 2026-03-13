@@ -29,16 +29,35 @@ public class SetupWindowComplianceTests
     }
 
     [Fact]
-    public void SetupWindow_Should_NotUseWatermarkAdorners()
+    public void SetupWindow_Should_Use_Explicit_Example_Watermarks()
     {
-        var pagesDir = Path.Combine(SolutionRoot, "Modules", "Authentication", "Views");
-        var xamlFiles = Directory.EnumerateFiles(pagesDir, "*.xaml", SearchOption.AllDirectories);
+        var firmProfileFile = Path.Combine(
+            SolutionRoot,
+            "Modules",
+            "Authentication",
+            "Views",
+            "SetupPages",
+            "FirmProfilePage.xaml");
+        var securityFile = Path.Combine(
+            SolutionRoot,
+            "Modules",
+            "Authentication",
+            "Views",
+            "SetupPages",
+            "SecuritySettingsPage.xaml");
 
-        foreach (var file in xamlFiles)
-        {
-            var xaml = File.ReadAllText(file);
-            Assert.DoesNotContain("h:Watermark.Text=", xaml, StringComparison.Ordinal);
-        }
+        var firmProfileXaml = File.ReadAllText(firmProfileFile);
+        var securityXaml = File.ReadAllText(securityFile);
+
+        Assert.Contains("h:Watermark.Text=\"e.g. Sonali Collection\"", firmProfileXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 12 Bapu Bazaar, Jaipur\"", firmProfileXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. Rajasthan\"", firmProfileXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 9876543210\"", firmProfileXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 302001\"", firmProfileXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. hello@yourstore.in\"", firmProfileXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 2480\"", securityXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 1357\"", securityXaml, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 482913\"", securityXaml, StringComparison.Ordinal);
     }
 
     [Fact]

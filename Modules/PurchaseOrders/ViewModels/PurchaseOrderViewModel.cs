@@ -3,25 +3,29 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.PurchaseOrders.Services;
 
 namespace StoreAssistantPro.Modules.PurchaseOrders.ViewModels;
 
 public partial class PurchaseOrderViewModel(
-    IPurchaseOrderService poService) : BaseViewModel
+    IPurchaseOrderService poService,
+    IProductService productService) : BaseViewModel
 {
-    // ── Data ──
-
     [ObservableProperty]
     public partial ObservableCollection<PurchaseOrder> Orders { get; set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedOrder))]
     public partial PurchaseOrder? SelectedOrder { get; set; }
 
     [ObservableProperty]
     public partial ObservableCollection<Supplier> Suppliers { get; set; } = [];
 
-    // ── Filters ──
+    [ObservableProperty]
+    public partial ObservableCollection<Product> Products { get; set; } = [];
+
+    public bool HasSelectedOrder => SelectedOrder is not null;
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
@@ -31,15 +35,13 @@ public partial class PurchaseOrderViewModel(
 
     public ObservableCollection<PurchaseOrderStatus?> StatusOptions { get; } =
     [
-        null, // All
+        null,
         PurchaseOrderStatus.Draft,
         PurchaseOrderStatus.Ordered,
         PurchaseOrderStatus.PartialReceived,
         PurchaseOrderStatus.Received,
         PurchaseOrderStatus.Cancelled
     ];
-
-    // ── New PO form ──
 
     [ObservableProperty]
     public partial Supplier? SelectedSupplier { get; set; }
@@ -53,7 +55,24 @@ public partial class PurchaseOrderViewModel(
     [ObservableProperty]
     public partial ObservableCollection<PurchaseOrderLineInput> LineItems { get; set; } = [];
 
-    // ── Commands ──
+    [ObservableProperty]
+    public partial PurchaseOrderLineInput? SelectedLineItem { get; set; }
+
+    partial void OnSelectedOrderChanged(PurchaseOrder? value)
+    {
+        MarkOrderedCommand.NotifyCanExecuteChanged();
+        CancelOrderCommand.NotifyCanExecuteChanged();
+        ReceiveAllCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnLineItemsChanged(ObservableCollection<PurchaseOrderLineInput> value)
+    {
+        AttachLineItems(value);
+        SelectedLineItem ??= value.FirstOrDefault();
+        UpdateLineItemCommandStates();
+    }
+
+    partial void OnSelectedLineItemChanged(PurchaseOrderLineInput? value) => UpdateLineItemCommandStates();
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
@@ -63,6 +82,11 @@ public partial class PurchaseOrderViewModel(
 
         var suppliers = await poService.GetActiveSuppliersAsync(ct);
         Suppliers = new ObservableCollection<Supplier>(suppliers);
+
+        var products = await productService.GetActiveAsync(ct);
+        Products = new ObservableCollection<Product>(products);
+
+        EnsureSeedLine();
     });
 
     [RelayCommand]
@@ -78,57 +102,131 @@ public partial class PurchaseOrderViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
+        var enteredItems = LineItems
+            .Where(line => line.ProductId > 0 || line.Quantity > 0 || line.UnitCost > 0)
+            .ToList();
+
         if (!Validate(v => v
             .Rule(SelectedSupplier is not null, "Select a supplier.")
-            .Rule(LineItems.Count > 0, "Add at least one item.")))
+            .Rule(enteredItems.Count > 0, "Add at least one item.")))
+        {
             return;
+        }
+
+        var invalidLine = enteredItems
+            .Select((line, index) => new { line, index })
+            .FirstOrDefault(x => x.line.ProductId <= 0 || x.line.Quantity <= 0 || x.line.UnitCost <= 0);
+
+        if (invalidLine is not null)
+        {
+            ErrorMessage = $"Complete line {invalidLine.index + 1} with a product, quantity, and unit cost.";
+            return;
+        }
 
         var dto = new CreatePurchaseOrderDto(
             SelectedSupplier!.Id,
             ExpectedDate,
             string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
-            LineItems.Select(l => new PurchaseOrderLineDto(l.ProductId, l.Quantity, l.UnitCost)).ToList());
+            enteredItems.Select(line => new PurchaseOrderLineDto(line.ProductId, line.Quantity, line.UnitCost)).ToList());
 
         var po = await poService.CreateAsync(dto, ct);
         SuccessMessage = $"PO {po.OrderNumber} created.";
 
-        LineItems.Clear();
-        Notes = string.Empty;
+        SelectedSupplier = null;
         ExpectedDate = null;
+        Notes = string.Empty;
+        LineItems.Clear();
+        EnsureSeedLine();
 
         var orders = await poService.GetAllAsync(ct);
         Orders = new ObservableCollection<PurchaseOrder>(orders);
     });
 
     [RelayCommand]
+    private void AddLineItem()
+    {
+        var line = new PurchaseOrderLineInput
+        {
+            Owner = this
+        };
+        LineItems.Add(line);
+        SelectedLineItem = line;
+        UpdateLineItemCommandStates();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRemoveLineItem))]
+    private void RemoveLineItem()
+    {
+        if (SelectedLineItem is null)
+        {
+            return;
+        }
+
+        LineItems.Remove(SelectedLineItem);
+
+        if (LineItems.Count == 0)
+        {
+            EnsureSeedLine();
+            return;
+        }
+
+        SelectedLineItem = LineItems.FirstOrDefault();
+        UpdateLineItemCommandStates();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMarkOrdered))]
     private Task MarkOrderedAsync() => RunAsync(async ct =>
     {
-        if (SelectedOrder is null) return;
-        await poService.UpdateStatusAsync(SelectedOrder.Id, PurchaseOrderStatus.Ordered, ct);
-        SuccessMessage = $"PO {SelectedOrder.OrderNumber} marked as Ordered.";
+        if (SelectedOrder is null)
+        {
+            return;
+        }
+
+        var orderId = SelectedOrder.Id;
+        var orderNumber = SelectedOrder.OrderNumber;
+
+        await poService.UpdateStatusAsync(orderId, PurchaseOrderStatus.Ordered, ct);
+        SuccessMessage = $"PO {orderNumber} marked as Ordered.";
+
         var orders = await poService.GetAllAsync(ct);
         Orders = new ObservableCollection<PurchaseOrder>(orders);
+        SelectedOrder = Orders.FirstOrDefault(po => po.Id == orderId);
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanCancelOrder))]
     private Task CancelOrderAsync() => RunAsync(async ct =>
     {
-        if (SelectedOrder is null) return;
-        await poService.UpdateStatusAsync(SelectedOrder.Id, PurchaseOrderStatus.Cancelled, ct);
-        SuccessMessage = $"PO {SelectedOrder.OrderNumber} cancelled.";
+        if (SelectedOrder is null)
+        {
+            return;
+        }
+
+        var orderId = SelectedOrder.Id;
+        var orderNumber = SelectedOrder.OrderNumber;
+
+        await poService.UpdateStatusAsync(orderId, PurchaseOrderStatus.Cancelled, ct);
+        SuccessMessage = $"PO {orderNumber} cancelled.";
+
         var orders = await poService.GetAllAsync(ct);
         Orders = new ObservableCollection<PurchaseOrder>(orders);
+        SelectedOrder = Orders.FirstOrDefault(po => po.Id == orderId);
     });
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanReceiveAll))]
     private Task ReceiveAllAsync() => RunAsync(async ct =>
     {
-        if (SelectedOrder is null) return;
+        if (SelectedOrder is null)
+        {
+            return;
+        }
+
         ErrorMessage = string.Empty;
+        var orderId = SelectedOrder.Id;
+        var orderNumber = SelectedOrder.OrderNumber;
 
         var lines = SelectedOrder.Items
-            .Where(i => i.QuantityReceived < i.Quantity)
-            .Select(i => new ReceiveLineDto(i.Id, i.Quantity - i.QuantityReceived))
+            .Where(item => item.QuantityReceived < item.Quantity)
+            .Select(item => new ReceiveLineDto(item.Id, item.Quantity - item.QuantityReceived))
             .ToList();
 
         if (lines.Count == 0)
@@ -137,25 +235,84 @@ public partial class PurchaseOrderViewModel(
             return;
         }
 
-        await poService.ReceiveItemsAsync(SelectedOrder.Id, lines, ct);
-        SuccessMessage = $"PO {SelectedOrder.OrderNumber} — all items received. Stock updated.";
+        await poService.ReceiveItemsAsync(orderId, lines, ct);
+        SuccessMessage = $"PO {orderNumber} - all items received. Stock updated.";
 
         var orders = await poService.GetAllAsync(ct);
         Orders = new ObservableCollection<PurchaseOrder>(orders);
+        SelectedOrder = Orders.FirstOrDefault(po => po.Id == orderId);
     });
+
+    private void EnsureSeedLine()
+    {
+        if (LineItems.Count > 0)
+        {
+            AttachLineItems(LineItems);
+            SelectedLineItem ??= LineItems.FirstOrDefault();
+            UpdateLineItemCommandStates();
+            return;
+        }
+
+        var line = new PurchaseOrderLineInput
+        {
+            Owner = this
+        };
+        LineItems.Add(line);
+        SelectedLineItem = line;
+        UpdateLineItemCommandStates();
+    }
+
+    private bool CanRemoveLineItem()
+    {
+        if (SelectedLineItem is null)
+        {
+            return false;
+        }
+
+        return LineItems.Count > 1 || IsLineEntered(SelectedLineItem);
+    }
+
+    private bool CanMarkOrdered() =>
+        SelectedOrder?.Status == PurchaseOrderStatus.Draft;
+
+    private bool CanCancelOrder() =>
+        SelectedOrder is { Status: not PurchaseOrderStatus.Cancelled and not PurchaseOrderStatus.Received };
+
+    private bool CanReceiveAll() =>
+        SelectedOrder is { Status: PurchaseOrderStatus.Ordered or PurchaseOrderStatus.PartialReceived }
+        && SelectedOrder.Items.Any(item => item.QuantityReceived < item.Quantity);
+
+    private void UpdateLineItemCommandStates() =>
+        RemoveLineItemCommand.NotifyCanExecuteChanged();
+
+    private void AttachLineItems(IEnumerable<PurchaseOrderLineInput> items)
+    {
+        foreach (var line in items)
+        {
+            line.Owner = this;
+        }
+    }
+
+    private static bool IsLineEntered(PurchaseOrderLineInput line) =>
+        line.ProductId > 0 || line.Quantity > 0 || line.UnitCost > 0;
 }
 
-/// <summary>Line item input for creating a new PO.</summary>
 public partial class PurchaseOrderLineInput : ObservableObject
 {
-    public int ProductId { get; set; }
+    internal PurchaseOrderViewModel? Owner { get; set; }
 
     [ObservableProperty]
-    public partial string ProductName { get; set; } = string.Empty;
+    public partial int ProductId { get; set; }
 
     [ObservableProperty]
-    public partial int Quantity { get; set; } = 1;
+    public partial int Quantity { get; set; }
 
     [ObservableProperty]
     public partial decimal UnitCost { get; set; }
+
+    partial void OnProductIdChanged(int value) => Owner?.RemoveLineItemCommand.NotifyCanExecuteChanged();
+
+    partial void OnQuantityChanged(int value) => Owner?.RemoveLineItemCommand.NotifyCanExecuteChanged();
+
+    partial void OnUnitCostChanged(decimal value) => Owner?.RemoveLineItemCommand.NotifyCanExecuteChanged();
 }

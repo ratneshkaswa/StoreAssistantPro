@@ -6,7 +6,10 @@
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Tax Management"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
             <RowDefinition Height="Auto"/>  <!-- Tab buttons -->
@@ -19,14 +22,14 @@
         <TextBlock Style="{StaticResource DialogTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8C7;"/><Run Text=" Tax Management"/></TextBlock>
 
         <!-- Tab selector buttons -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Button Content="Tax Rates" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
                     Style="{StaticResource SegmentedButtonStyle}"/>
             <Button Content="Tax Groups" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
                     Style="{StaticResource SegmentedButtonStyle}"/>
             <Button Content="HSN Codes" Tag="2" Command="{Binding SwitchTabCommand}" CommandParameter="2"
                     Style="{StaticResource SegmentedButtonStyle}"/>
-        </StackPanel>
+        </WrapPanel>
 
         <!-- ═══════════════════════════════════════════════════════════
              Tab 0: Tax Rates (TaxMaster)
@@ -42,8 +45,7 @@
             <DataGrid AutomationProperties.Name="Tax rates" ItemsSource="{Binding Taxes}"
                       SelectedItem="{Binding SelectedTax}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
-                      HeadersVisibility="Column"
-                      ScrollViewer.CanContentScroll="True">
+                      HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
                     <DataGridTextColumn Header="Slab %" Binding="{Binding SlabPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -67,6 +69,7 @@
                     <Run Text="Tax Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
+                         AutomationProperties.Name="Tax name"
                          Text="{Binding TaxName, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                          MaxLength="100" h:Watermark.Text="e.g. GST 5%"/>
@@ -75,6 +78,7 @@
                     <Run Text="Slab % "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1"
+                         AutomationProperties.Name="Tax slab percentage"
                          Text="{Binding SlabPercent, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                          MaxLength="6" h:Watermark.Text="e.g. 5"/>
@@ -120,8 +124,7 @@
                 <DataGrid AutomationProperties.Name="Tax groups" ItemsSource="{Binding TaxGroups}"
                           SelectedItem="{Binding SelectedGroup}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
-                          HeadersVisibility="Column"
-                          ScrollViewer.CanContentScroll="True">
+                          HeadersVisibility="Column">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Group Name" Binding="{Binding Name}" Width="*"/>
                         <DataGridTemplateColumn Header="Active" Width="{StaticResource ColumnWidthQty}">
@@ -129,6 +132,7 @@
                                 <DataTemplate>
                                     <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
                                               IsChecked="{Binding IsActive, Mode=OneWay}"
+                                              CommandParameter="{Binding}"
                                               Command="{Binding DataContext.ToggleGroupActiveCommand,
                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                                 </DataTemplate>
@@ -152,14 +156,16 @@
                         <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                     </TextBlock>
                     <TextBox Grid.Row="0" Grid.Column="1"
+                             AutomationProperties.Name="Tax group name"
                              Text="{Binding GroupName, UpdateSourceTrigger=PropertyChanged}"
                              MaxLength="100" h:Watermark.Text="e.g. GST Garments"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Description"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="2" Grid.Column="1"
+                             AutomationProperties.Name="Tax group description"
                              Text="{Binding GroupDescription, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="300" h:Watermark.Text="Optional description"/>
+                             MaxLength="300" h:Watermark.Text="e.g. Garments up to Rs. 1000"/>
                 </Grid>
 
                 <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
@@ -193,7 +199,6 @@
                           SelectedItem="{Binding SelectedSlab}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
                           HeadersVisibility="Column"
-                          ScrollViewer.CanContentScroll="True"
                           Margin="{StaticResource ItemSpacing}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="GST %" Binding="{Binding GSTPercent, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -219,6 +224,7 @@
                         <Run Text="GST % "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                     </TextBlock>
                     <TextBox Grid.Row="0" Grid.Column="1"
+                             AutomationProperties.Name="Slab GST percentage"
                              Text="{Binding SlabGST, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                              MaxLength="6" h:Watermark.Text="e.g. 5"/>
@@ -226,6 +232,7 @@
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Price From ₹"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="2" Grid.Column="1"
+                             AutomationProperties.Name="Slab price from"
                              Text="{Binding SlabPriceFrom, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                              MaxLength="12" h:Watermark.Text="e.g. 0"/>
@@ -233,9 +240,10 @@
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Price To ₹"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="4" Grid.Column="1"
+                             AutomationProperties.Name="Slab price to"
                              Text="{Binding SlabPriceTo, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="12" h:Watermark.Text="Leave blank for no limit"/>
+                             MaxLength="12" h:Watermark.Text="e.g. 1000 or blank"/>
                 </Grid>
 
                 <Grid Grid.Row="3" Margin="{StaticResource FormActionBarSpacing}">
@@ -247,7 +255,7 @@
 
                     <Button Grid.Column="1" Content="Delete Slab" Command="{Binding DeleteSlabCommand}"
                             Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Grid.Column="2" Content="➕ Add Slab" Command="{Binding AddSlabCommand}"
+                    <Button Grid.Column="2" Content="Add Slab" Command="{Binding AddSlabCommand}"
                             Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 </Grid>
             </Grid>
@@ -267,8 +275,7 @@
             <DataGrid AutomationProperties.Name="HSN codes" ItemsSource="{Binding HSNCodes}"
                       SelectedItem="{Binding SelectedHSN}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
-                      HeadersVisibility="Column"
-                      ScrollViewer.CanContentScroll="True">
+                      HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="HSN Code" Binding="{Binding Code}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
@@ -278,6 +285,7 @@
                             <DataTemplate>
                                 <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
                                           IsChecked="{Binding IsActive, Mode=OneWay}"
+                                          CommandParameter="{Binding}"
                                           Command="{Binding DataContext.ToggleHSNActiveCommand,
                                                     RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                             </DataTemplate>
@@ -303,6 +311,7 @@
                     <Run Text="HSN Code "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
+                         AutomationProperties.Name="HSN code"
                          Text="{Binding HSNCodeValue, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                          MaxLength="8" h:Watermark.Text="e.g. 6109"/>
@@ -311,12 +320,14 @@
                     <Run Text="Description "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                 </TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1"
+                         AutomationProperties.Name="HSN description"
                          Text="{Binding HSNDescription, UpdateSourceTrigger=PropertyChanged}"
                          MaxLength="300" h:Watermark.Text="e.g. T-shirts, singlets and other vests"/>
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Category"
                            Style="{StaticResource FormRowLabelStyle}"/>
                 <ComboBox Grid.Row="4" Grid.Column="1"
+                          AutomationProperties.Name="HSN category"
                           ItemsSource="{Binding HSNCategories}"
                           SelectedItem="{Binding HSNCategory}"
                           Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>

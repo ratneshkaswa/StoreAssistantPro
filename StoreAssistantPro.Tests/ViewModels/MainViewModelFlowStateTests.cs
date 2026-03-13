@@ -20,11 +20,15 @@ public class MainViewModelFlowStateTests
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
     private readonly IDashboardService _dashboardService = Substitute.For<IDashboardService>();
+    private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
+    private readonly IStatusBarService _statusBar = Substitute.For<IStatusBarService>();
+    private readonly IFeatureToggleService _features = Substitute.For<IFeatureToggleService>();
 
     public MainViewModelFlowStateTests()
     {
         _appState.Notifications.Returns(new ObservableCollection<AppNotification>());
         _appState.CurrentMode.Returns(OperationalMode.Management);
+        _appState.CurrentUserType.Returns(UserType.Admin);
         _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
     }
 
@@ -34,13 +38,13 @@ public class MainViewModelFlowStateTests
         return new MainViewModel(
             nav,
             Substitute.For<ISessionService>(),
-            Substitute.For<IDialogService>(),
+            _dialogService,
             _appState,
             Substitute.For<IWorkflowManager>(),
             Substitute.For<ICommandBus>(),
             _eventBus,
-            Substitute.For<IFeatureToggleService>(),
-            Substitute.For<IStatusBarService>(),
+            _features,
+            _statusBar,
             Substitute.For<IQuickActionService>(),
             Substitute.For<IShortcutService>(),
             _dashboardService,
@@ -54,6 +58,18 @@ public class MainViewModelFlowStateTests
     {
         var sut = CreateSut();
         Assert.NotNull(sut);
+    }
+
+    [Fact]
+    public void OpenVendorManagement_WhenDialogFails_PostsOpenFailureInsteadOfClosedStatus()
+    {
+        _dialogService.ShowDialog("VendorManagement").Returns(false);
+        var sut = CreateSut();
+
+        sut.OpenVendorManagementCommand.Execute(null);
+
+        _statusBar.Received(1).Post("Unable to open Vendor management");
+        _statusBar.DidNotReceive().Post("Vendor management closed");
     }
 
     // ── Stub for INavigationService (must be ObservableObject) ───

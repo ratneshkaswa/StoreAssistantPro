@@ -85,11 +85,11 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
     });
 
     [RelayCommand]
-    private Task ToggleTypeActiveAsync() => RunAsync(async ct =>
+    private Task ToggleTypeActiveAsync(CategoryType? categoryType) => RunAsync(async ct =>
     {
-        if (SelectedType is null) return;
-        await categoryService.ToggleTypeActiveAsync(SelectedType.Id, ct);
-        SuccessMessage = $"Type '{SelectedType.Name}' {(SelectedType.IsActive ? "deactivated" : "activated")}.";
+        if (categoryType is null) return;
+        await categoryService.ToggleTypeActiveAsync(categoryType.Id, ct);
+        SuccessMessage = $"Type '{categoryType.Name}' {(categoryType.IsActive ? "deactivated" : "activated")}.";
         await ReloadTypesAsync(ct);
     });
 
@@ -160,11 +160,11 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
     });
 
     [RelayCommand]
-    private Task ToggleCategoryActiveAsync() => RunAsync(async ct =>
+    private Task ToggleCategoryActiveAsync(Category? category) => RunAsync(async ct =>
     {
-        if (SelectedCategory is null) return;
-        await categoryService.ToggleActiveAsync(SelectedCategory.Id, ct);
-        SuccessMessage = $"Category '{SelectedCategory.Name}' {(SelectedCategory.IsActive ? "deactivated" : "activated")}.";
+        if (category is null) return;
+        await categoryService.ToggleActiveAsync(category.Id, ct);
+        SuccessMessage = $"Category '{category.Name}' {(category.IsActive ? "deactivated" : "activated")}.";
         await ReloadCategoriesAsync(ct);
     });
 

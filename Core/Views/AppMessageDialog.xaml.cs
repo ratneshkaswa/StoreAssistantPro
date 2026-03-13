@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using StoreAssistantPro.Core.Services;
@@ -12,8 +13,10 @@ public enum AppMessageDialogKind
 
 public partial class AppMessageDialog : BaseDialogWindow
 {
-    protected override double DialogWidth => 460;
-    protected override double DialogHeight => 256;
+    protected override double DialogWidth => 420;
+    protected override double DialogHeight => 180;
+    protected override double DialogMinWidth => 360;
+    protected override double DialogMinHeight => 0;
 
     public AppMessageDialog(
         IWindowSizingService sizingService,
@@ -25,9 +28,15 @@ public partial class AppMessageDialog : BaseDialogWindow
         : base(sizingService)
     {
         InitializeComponent();
+        SizeToContent = SizeToContent.Height;
+        MinHeight = 0;
 
-        Title = title;
+        Title = string.IsNullOrWhiteSpace(title) ? "Message" : title;
+        DialogTitleText.Text = Title;
         MessageText.Text = message;
+        MessageText.Visibility = string.IsNullOrWhiteSpace(message)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
         PrimaryButton.Content = primaryButtonText;
 
         if (string.IsNullOrWhiteSpace(secondaryButtonText))
@@ -48,8 +57,11 @@ public partial class AppMessageDialog : BaseDialogWindow
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        UpdateDialogWidth();
+
         if (SecondaryButton.Visibility == Visibility.Visible)
         {
+            SecondaryButton.IsCancel = true;
             SecondaryButton.IsDefault = true;
             SecondaryButton.Focus();
             return;
@@ -57,6 +69,23 @@ public partial class AppMessageDialog : BaseDialogWindow
 
         PrimaryButton.IsDefault = true;
         PrimaryButton.Focus();
+    }
+
+    private void UpdateDialogWidth()
+    {
+        var longestButtonText = new[]
+        {
+            PrimaryButton.Content?.ToString(),
+            SecondaryButton.Visibility == Visibility.Visible ? SecondaryButton.Content?.ToString() : null
+        }
+        .Where(text => !string.IsNullOrWhiteSpace(text))
+        .MaxBy(text => text!.Length);
+
+        var messageLength = MessageText.Text?.Length ?? 0;
+        var hasLongContent = messageLength > 90 || (longestButtonText?.Length ?? 0) > 10;
+
+        Width = hasLongContent ? 460 : 420;
+        MinWidth = 360;
     }
 
     private void ApplyKind(AppMessageDialogKind kind)
@@ -74,8 +103,8 @@ public partial class AppMessageDialog : BaseDialogWindow
                 break;
             default:
                 glyph = "?";
-                badgeBackground = (Brush)FindResource("FluentInfoBackground");
-                glyphForeground = (Brush)FindResource("FluentInfo");
+                badgeBackground = (Brush)FindResource("FluentWarningBackground");
+                glyphForeground = (Brush)FindResource("FluentWarning");
                 break;
         }
 

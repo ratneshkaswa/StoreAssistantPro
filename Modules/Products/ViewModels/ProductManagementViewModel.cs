@@ -99,7 +99,21 @@ public partial class ProductManagementViewModel(
 
     partial void OnSelectedProductChanged(Product? value)
     {
-        if (value is null) return;
+        ManageVariantsCommand.NotifyCanExecuteChanged();
+
+        if (value is null)
+        {
+            ResetForm(clearMessages: false);
+            return;
+        }
+
+        PopulateForm(value);
+        ClearMappingSelection();
+        _ = LoadMappingForProductCommand.ExecuteAsync(value.Id);
+    }
+
+    private void PopulateForm(Product value)
+    {
         ProductName = value.Name;
         SelectedProductType = value.ProductType;
         SelectedUnit = value.Unit;
@@ -114,14 +128,15 @@ public partial class ProductManagementViewModel(
         IsEditing = true;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
-
-        LoadMappingForProductCommand.ExecuteAsync(value.Id);
     }
 
     [RelayCommand]
     private Task LoadMappingForProductAsync(int productId) => RunLoadAsync(async ct =>
     {
         var mapping = await taxGroupService.GetMappingByProductAsync(productId, ct);
+        if (SelectedProduct?.Id != productId)
+            return;
+
         if (mapping is not null)
         {
             SelectedTaxGroup = TaxGroups.FirstOrDefault(g => g.Id == mapping.TaxGroupId);
@@ -139,39 +154,23 @@ public partial class ProductManagementViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        var products = await productService.GetAllAsync(ct);
-        Products = new ObservableCollection<Product>(products);
-
-        var taxes = await productService.GetActiveTaxesAsync(ct);
-        Taxes = new ObservableCollection<TaxMaster>(taxes);
-
-        var groups = await taxGroupService.GetActiveGroupsAsync(ct);
-        TaxGroups = new ObservableCollection<TaxGroup>(groups);
-
-        var codes = await taxGroupService.GetActiveHSNCodesAsync(ct);
-        HSNCodes = new ObservableCollection<HSNCode>(codes);
-
-        var categories = await productService.GetActiveCategoriesAsync(ct);
-        Categories = new ObservableCollection<Category>(categories);
-
-        var brands = await productService.GetActiveBrandsAsync(ct);
-        Brands = new ObservableCollection<Brand>(brands);
-
-        var vendors = await productService.GetActiveVendorsAsync(ct);
-        Vendors = new ObservableCollection<Vendor>(vendors);
+        await ReloadProductsAsync(ct);
     });
 
     [RelayCommand]
     private void NewProduct()
     {
         SelectedProduct = null;
+        ResetForm(clearMessages: true);
+    }
+
+    private void ResetForm(bool clearMessages)
+    {
         ProductName = string.Empty;
         SelectedProductType = ProductType.Readymade;
         SelectedUnit = ProductUnit.Piece;
         SelectedTax = null;
-        SelectedTaxGroup = null;
-        SelectedHSNCode = null;
-        OverrideAllowed = false;
+        ClearMappingSelection();
         SelectedCategory = null;
         SelectedBrand = null;
         SelectedVendor = null;
@@ -180,8 +179,12 @@ public partial class ProductManagementViewModel(
         SupportsPattern = false;
         SupportsType = false;
         IsEditing = false;
-        ErrorMessage = string.Empty;
-        SuccessMessage = string.Empty;
+
+        if (clearMessages)
+        {
+            ErrorMessage = string.Empty;
+            SuccessMessage = string.Empty;
+        }
     }
 
     [RelayCommand]
@@ -223,16 +226,17 @@ public partial class ProductManagementViewModel(
             await taxGroupService.RemoveProductMappingAsync(productId, ct);
         }
 
-        await LoadAsync();
-        NewProduct();
+        await ReloadProductsAsync(ct);
+        SelectedProduct = null;
+        ResetForm(clearMessages: false);
     });
 
     [RelayCommand]
-    private Task ToggleActiveAsync() => RunAsync(async ct =>
+    private Task ToggleActiveAsync(Product? product) => RunAsync(async ct =>
     {
-        if (SelectedProduct is null) return;
-        await productService.ToggleActiveAsync(SelectedProduct.Id, ct);
-        await LoadAsync();
+        if (product is null) return;
+        await productService.ToggleActiveAsync(product.Id, ct);
+        await ReloadProductsAsync(ct, product.Id);
         SuccessMessage = "Status toggled.";
     });
 
@@ -242,10 +246,47 @@ public partial class ProductManagementViewModel(
     /// </summary>
     public Action<Product>? OpenVariantsDialog { get; set; }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanManageVariants))]
     private void ManageVariants()
     {
         if (SelectedProduct is null) return;
         OpenVariantsDialog?.Invoke(SelectedProduct);
+    }
+
+    private bool CanManageVariants() => SelectedProduct is not null;
+
+    private void ClearMappingSelection()
+    {
+        SelectedTaxGroup = null;
+        SelectedHSNCode = null;
+        OverrideAllowed = false;
+    }
+
+    private async Task ReloadProductsAsync(CancellationToken ct, int? selectedProductId = null)
+    {
+        var products = await productService.GetAllAsync(ct);
+        Products = new ObservableCollection<Product>(products);
+
+        var taxes = await productService.GetActiveTaxesAsync(ct);
+        Taxes = new ObservableCollection<TaxMaster>(taxes);
+
+        var groups = await taxGroupService.GetActiveGroupsAsync(ct);
+        TaxGroups = new ObservableCollection<TaxGroup>(groups);
+
+        var codes = await taxGroupService.GetActiveHSNCodesAsync(ct);
+        HSNCodes = new ObservableCollection<HSNCode>(codes);
+
+        var categories = await productService.GetActiveCategoriesAsync(ct);
+        Categories = new ObservableCollection<Category>(categories);
+
+        var brands = await productService.GetActiveBrandsAsync(ct);
+        Brands = new ObservableCollection<Brand>(brands);
+
+        var vendors = await productService.GetActiveVendorsAsync(ct);
+        Vendors = new ObservableCollection<Vendor>(vendors);
+
+        SelectedProduct = selectedProductId.HasValue
+            ? Products.FirstOrDefault(p => p.Id == selectedProductId.Value)
+            : null;
     }
 }

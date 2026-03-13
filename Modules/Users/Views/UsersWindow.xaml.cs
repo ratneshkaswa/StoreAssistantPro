@@ -26,6 +26,9 @@ public partial class UsersWindow : BaseDialogWindow
         NewPinBox.PreviewTextInput += OnPreviewNumericOnly;
         ConfirmPinBox.PreviewTextInput += OnPreviewNumericOnly;
         MasterPinBox.PreviewTextInput += OnPreviewNumericOnly;
+        DataObject.AddPastingHandler(NewPinBox, OnPasteNumericOnly);
+        DataObject.AddPastingHandler(ConfirmPinBox, OnPasteNumericOnly);
+        DataObject.AddPastingHandler(MasterPinBox, OnPasteNumericOnly);
 
         Closed += (_, _) =>
         {
@@ -86,6 +89,16 @@ public partial class UsersWindow : BaseDialogWindow
     private static void OnPreviewNumericOnly(object sender, TextCompositionEventArgs e)
     {
         e.Handled = !DigitsOnlyRegex().IsMatch(e.Text);
+    }
+
+    private static void OnPasteNumericOnly(object sender, DataObjectPastingEventArgs e)
+    {
+        var pastedText =
+            e.DataObject.GetData(DataFormats.UnicodeText) as string ??
+            e.DataObject.GetData(DataFormats.Text) as string;
+
+        if (string.IsNullOrEmpty(pastedText) || !DigitsOnlyRegex().IsMatch(pastedText))
+            e.CancelCommand();
     }
 
     [GeneratedRegex(@"^\d+$")]

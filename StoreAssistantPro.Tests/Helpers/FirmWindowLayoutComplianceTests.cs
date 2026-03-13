@@ -18,21 +18,32 @@ public sealed class FirmWindowLayoutComplianceTests
     }
 
     [Fact]
-    public void FirmWindow_Should_Not_Use_WrapPanel_For_SummaryCards()
+    public void FirmWindow_Should_Not_Use_KpiSummaryCards()
     {
         var content = ReadFirmWindow();
 
-        Assert.DoesNotContain("<WrapPanel", content, StringComparison.Ordinal);
-        Assert.Contains("FirmSummaryCardStyle", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("FirmSummaryCardStyle", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("FluentKpiBlueMuted", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("AutomationProperties.Name=\"Business summary card\"", content, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void FirmWindow_Should_Use_Padded_InsetCards_For_InnerPanels()
+    public void FirmWindow_Should_Not_Render_Removed_Inline_Summary_Blocks()
     {
         var content = ReadFirmWindow();
 
-        Assert.Contains("FirmInsetCardStyle", content, StringComparison.Ordinal);
-        Assert.Contains("Padding=\"{StaticResource CardContentPadding}\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("FirmInsetCardStyle", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("Compliance Summary", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("Allow billing with negative stock", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FirmWindow_Should_Avoid_LogicalScrolling_With_SmoothScroll()
+    {
+        var content = ReadFirmWindow();
+
+        Assert.Contains("h:SmoothScroll.IsEnabled=\"True\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("CanContentScroll=\"True\"", content, StringComparison.Ordinal);
     }
 
     private static string ReadFirmWindow() =>

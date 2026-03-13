@@ -73,6 +73,41 @@ public class PurchaseOrderService(
         using var _ = perf.BeginScope("PurchaseOrderService.CreateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
+        if (dto.SupplierId <= 0)
+            throw new InvalidOperationException("Supplier is required.");
+
+        var supplierExists = await context.Suppliers
+            .AsNoTracking()
+            .AnyAsync(s => s.Id == dto.SupplierId, ct)
+            .ConfigureAwait(false);
+
+        if (!supplierExists)
+            throw new InvalidOperationException("Selected supplier no longer exists.");
+
+        foreach (var item in dto.Items)
+        {
+            if (item.ProductId <= 0)
+                throw new InvalidOperationException("Each PO line must include a product.");
+
+            if (item.Quantity <= 0)
+                throw new InvalidOperationException("Each PO line must have a quantity greater than zero.");
+
+            if (item.UnitCost <= 0)
+                throw new InvalidOperationException("Each PO line must have a unit cost greater than zero.");
+        }
+
+        var productIds = dto.Items.Select(i => i.ProductId).Distinct().ToList();
+        var existingProductIds = await context.Products
+            .AsNoTracking()
+            .Where(p => productIds.Contains(p.Id))
+            .Select(p => p.Id)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var missingProductId = productIds.Except(existingProductIds).FirstOrDefault();
+        if (missingProductId != 0)
+            throw new InvalidOperationException($"Product Id {missingProductId} no longer exists.");
+
         var orderNumber = await GenerateOrderNumberAsync(context, ct);
 
         var po = new PurchaseOrder

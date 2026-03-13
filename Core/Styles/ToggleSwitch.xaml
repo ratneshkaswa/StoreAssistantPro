@@ -103,6 +103,7 @@
     <DataTemplate x:Key="ActiveToggleCellTemplate">
         <CheckBox Style="{StaticResource FluentToggleSwitchStyle}"
                   IsChecked="{Binding IsActive, Mode=OneWay}"
+                  CommandParameter="{Binding}"
                   Command="{Binding DataContext.ToggleActiveCommand,
                             RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
     </DataTemplate>

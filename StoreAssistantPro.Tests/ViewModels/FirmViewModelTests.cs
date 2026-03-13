@@ -93,7 +93,6 @@ public class FirmViewModelTests
         await sut.LoadFirmCommand.ExecuteAsync(null);
 
         Assert.Equal("Rajasthan", sut.State);
-        Assert.Equal("State code: 08 - Rajasthan", sut.DerivedStateCodeDisplay);
         Assert.False(sut.IsDirty);
     }
 
@@ -197,6 +196,17 @@ public class FirmViewModelTests
 
         Assert.Equal("DB error", sut.ErrorMessage);
         Assert.Empty(sut.SuccessMessage);
+    }
+
+    [Fact]
+    public void DateFormatPreview_ReflectsSelectedFormat()
+    {
+        var sut = CreateSut();
+        var expected = DateTime.Today.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+
+        sut.SelectedDateFormat = "dd MMM yyyy";
+
+        Assert.Equal($"e.g. {expected}", sut.DateFormatPreview);
     }
 
     [Fact]

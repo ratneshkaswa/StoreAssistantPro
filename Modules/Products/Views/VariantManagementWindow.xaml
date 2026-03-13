@@ -74,6 +74,7 @@
                         <Run Text="Size "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                     </TextBlock>
                     <ComboBox Grid.Row="0" Grid.Column="1"
+                              AutomationProperties.Name="Variant size"
                               ItemsSource="{Binding Sizes}"
                               SelectedItem="{Binding SelectedSize}"
                               DisplayMemberPath="Name"
@@ -83,6 +84,7 @@
                         <Run Text="Colour "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
                     </TextBlock>
                     <ComboBox Grid.Row="2" Grid.Column="1"
+                              AutomationProperties.Name="Variant colour"
                               ItemsSource="{Binding Colours}"
                               SelectedItem="{Binding SelectedColour}"
                               DisplayMemberPath="Name"
@@ -92,22 +94,25 @@
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="4" Grid.Column="1"
                              Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Variant barcode"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="50" h:Watermark.Text="Unique barcode (optional)"/>
+                             MaxLength="50" h:Watermark.Text="e.g. BAR-1001"/>
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Quantity"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="6" Grid.Column="1"
                              Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Variant quantity"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="8" h:Watermark.Text="0"/>
+                             MaxLength="8" h:Watermark.Text="e.g. 12"/>
 
                     <TextBlock Grid.Row="8" Grid.Column="0" Text="± Price"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="8" Grid.Column="1"
                              Text="{Binding AdditionalPrice, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Variant additional price"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="10" h:Watermark.Text="0"/>
+                             MaxLength="10" h:Watermark.Text="e.g. 49.50"/>
                 </Grid>
 
                 <!-- Buttons -->
@@ -147,7 +152,9 @@
                 <TextBlock Grid.Row="1" Text="Sizes" Style="{StaticResource FormRowLabelStyle}"
                            Margin="{StaticResource StepContentTopSpacing}"/>
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                            h:SmoothScroll.IsEnabled="True">
+                              Focusable="False"
+                              PanningMode="VerticalOnly"
+                              h:SmoothScroll.IsEnabled="True">
                     <ItemsControl ItemsSource="{Binding BulkSizes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -162,7 +169,9 @@
                 <TextBlock Grid.Row="3" Text="Colours" Style="{StaticResource FormRowLabelStyle}"
                            Margin="{StaticResource StepContentTopSpacing}"/>
                 <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto"
-                            h:SmoothScroll.IsEnabled="True">
+                              Focusable="False"
+                              PanningMode="VerticalOnly"
+                              h:SmoothScroll.IsEnabled="True">
                     <ItemsControl ItemsSource="{Binding BulkColours}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

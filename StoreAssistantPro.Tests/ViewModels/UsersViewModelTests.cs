@@ -1,4 +1,4 @@
-﻿using NSubstitute;
+using NSubstitute;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Users.Commands;
@@ -31,27 +31,34 @@ public class UsersViewModelTests
     }
 
     [Fact]
-    public async Task ChangePin_NoSelection_SetsError()
+    public void ChangePinCommand_RequiresSelectedUser()
     {
         var sut = CreateSut();
-        sut.SelectedUser = null;
 
-        await sut.ChangePinCommand.ExecuteAsync(null);
-
-        Assert.Equal("Please select a user.", sut.ErrorMessage);
+        Assert.False(sut.ChangePinCommand.CanExecute(null));
     }
 
     [Fact]
-    public async Task ChangePin_InvalidPin_SetsError()
+    public void ChangePinCommand_RequiresValidUserPinShape()
     {
         var sut = CreateSut();
         sut.SelectedUser = new UserCredential { UserType = UserType.User };
         sut.NewPin = "12";
         sut.ConfirmPin = "12";
 
-        await sut.ChangePinCommand.ExecuteAsync(null);
+        Assert.False(sut.ChangePinCommand.CanExecute(null));
+    }
 
-        Assert.Equal("New PIN must be exactly 4 digits.", sut.ErrorMessage);
+    [Fact]
+    public void ChangePinCommand_AdminRequiresValidMasterPinShape()
+    {
+        var sut = CreateSut();
+        sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
+        sut.NewPin = "1234";
+        sut.ConfirmPin = "1234";
+        sut.MasterPin = "123";
+
+        Assert.False(sut.ChangePinCommand.CanExecute(null));
     }
 
     [Fact]
@@ -88,37 +95,20 @@ public class UsersViewModelTests
     }
 
     [Fact]
-    public async Task ChangePin_Admin_SendsMasterPinInCommand()
-    {
-        _commandBus.SendAsync(Arg.Any<ChangePinCommand>())
-            .Returns(CommandResult.Failure("Master PIN is required to change Admin PIN."));
-
-                    var sut = CreateSut();
-                    sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
-                    sut.NewPin = "1234";
-                    sut.ConfirmPin = "1234";
-                    sut.MasterPin = "";
-
-                    await sut.ChangePinCommand.ExecuteAsync(null);
-
-                    Assert.Equal("Master PIN is required to change Admin PIN.", sut.ErrorMessage);
-    }
-
-    [Fact]
     public async Task ChangePin_Admin_InvalidMasterPin_SetsError()
     {
         _commandBus.SendAsync(Arg.Any<ChangePinCommand>())
             .Returns(CommandResult.Failure("Invalid Master PIN."));
 
-                    var sut = CreateSut();
-                    sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
-                    sut.NewPin = "1234";
-                    sut.ConfirmPin = "1234";
-                    sut.MasterPin = "000000";
+        var sut = CreateSut();
+        sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
+        sut.NewPin = "1234";
+        sut.ConfirmPin = "1234";
+        sut.MasterPin = "000000";
 
-                    await sut.ChangePinCommand.ExecuteAsync(null);
+        await sut.ChangePinCommand.ExecuteAsync(null);
 
-                    Assert.Equal("Invalid Master PIN.", sut.ErrorMessage);
+        Assert.Equal("Invalid Master PIN.", sut.ErrorMessage);
         Assert.Empty(sut.MasterPin);
     }
 

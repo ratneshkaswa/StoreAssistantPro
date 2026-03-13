@@ -51,6 +51,19 @@ public class SharedSpacingAndWatermarkComplianceTests
         Assert.Contains("PART_ContentHost", helper, StringComparison.Ordinal);
         Assert.Contains("\"ContentSite\"", helper, StringComparison.Ordinal);
         Assert.Contains("GetTextAlignment", helper, StringComparison.Ordinal);
+        Assert.Contains("DependencyPropertyDescriptor", helper, StringComparison.Ordinal);
+        Assert.Contains("ComboBox.TextProperty", helper, StringComparison.Ordinal);
+        Assert.Contains("Selector.SelectedItemProperty", helper, StringComparison.Ordinal);
+        Assert.Contains("ItemsControl.ItemsSourceProperty", helper, StringComparison.Ordinal);
+        Assert.Contains("DatePicker.TextProperty", helper, StringComparison.Ordinal);
+        Assert.Contains("DatePicker.SelectedDateProperty", helper, StringComparison.Ordinal);
+        Assert.Contains("HookComboBoxValueChanges", helper, StringComparison.Ordinal);
+        Assert.Contains("OnComboBoxValueChanged", helper, StringComparison.Ordinal);
+        Assert.Contains("HookDatePickerValueChanges", helper, StringComparison.Ordinal);
+        Assert.Contains("HasComboBoxValue", helper, StringComparison.Ordinal);
+        Assert.Contains("HasDatePickerValue", helper, StringComparison.Ordinal);
+        Assert.Contains("RefreshAdorner", helper, StringComparison.Ordinal);
+        Assert.Contains("DispatcherPriority.Loaded", helper, StringComparison.Ordinal);
         Assert.Contains("FormattedText", helper, StringComparison.Ordinal);
         Assert.Contains("drawingContext.DrawText", helper, StringComparison.Ordinal);
         Assert.Contains("UseLayoutRounding = true", helper, StringComparison.Ordinal);
@@ -74,5 +87,22 @@ public class SharedSpacingAndWatermarkComplianceTests
         Assert.Contains("<sys:Double x:Key=\"ButtonHeight\">40</sys:Double>", tokens, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"SetupButtonHeight\">40</sys:Double>", tokens, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"FieldWidthCompact\">104</sys:Double>", tokens, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SearchInputs_Should_Use_Explicit_Example_Watermarks()
+    {
+        var billing = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Billing", "Views", "BillingWindow.xaml"));
+        var customers = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Customers", "Views", "CustomerManagementWindow.xaml"));
+        var vendors = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Vendors", "Views", "VendorManagementWindow.xaml"));
+
+        Assert.Contains("h:Watermark.Text=\"e.g. Black T-shirt\"", billing, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. 8901234567890\"", billing, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. Aarav or 9876543210\"", customers, StringComparison.Ordinal);
+        Assert.Contains("h:Watermark.Text=\"e.g. Jaipur Textiles or 08ABCDE1234F1Z5\"", vendors, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("h:Watermark.Text=\"Search product name...\"", billing, StringComparison.Ordinal);
+        Assert.DoesNotContain("h:Watermark.Text=\"Search by name or phone…\"", customers, StringComparison.Ordinal);
+        Assert.DoesNotContain("h:Watermark.Text=\"Search by name, GSTIN, city…\"", vendors, StringComparison.Ordinal);
     }
 }

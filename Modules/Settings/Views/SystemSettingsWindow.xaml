@@ -11,24 +11,6 @@
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
           KeyboardNavigation.TabNavigation="Continue">
-        <Grid.Resources>
-            <Style x:Key="SummaryLabelStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-                <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
-                <Setter Property="TextWrapping" Value="Wrap"/>
-            </Style>
-
-            <Style x:Key="SummaryValueStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-                <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
-                <Setter Property="TextWrapping" Value="Wrap"/>
-            </Style>
-        </Grid.Resources>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -46,54 +28,11 @@
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
                       Focusable="False"
-                      CanContentScroll="True"
                       PanningMode="VerticalOnly"
                       h:SmoothScroll.IsEnabled="True">
             <StackPanel Margin="{StaticResource ItemSpacing}"
                         MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"
                         HorizontalAlignment="Center">
-                <WrapPanel Margin="{StaticResource SectionSpacing}"
-                           ItemWidth="{StaticResource SettingsSummaryCardWidth}">
-                    <Border Style="{StaticResource StatCardStyle}"
-                            Background="{StaticResource FluentKpiBlueMuted}"
-                            BorderBrush="{StaticResource FluentKpiBlue}"
-                            Margin="{StaticResource InlineControlSpacing}"
-                            AutomationProperties.Name="Backup summary card">
-                        <StackPanel>
-                            <TextBlock Text="Backup posture"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding BackupModeTitle}"
-                                       Style="{StaticResource SummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource StatCardStyle}"
-                            Background="{StaticResource FluentKpiTealMuted}"
-                            BorderBrush="{StaticResource FluentKpiTeal}"
-                            Margin="{StaticResource InlineControlSpacing}"
-                            AutomationProperties.Name="Printer summary card">
-                        <StackPanel>
-                            <TextBlock Text="Printer default"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding PrinterSummaryText}"
-                                       Style="{StaticResource SummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource StatCardStyle}"
-                            Background="{StaticResource FluentKpiOrangeMuted}"
-                            BorderBrush="{StaticResource FluentKpiOrange}"
-                            Margin="{StaticResource InlineControlSpacing}"
-                            AutomationProperties.Name="Restore summary card">
-                        <StackPanel>
-                            <TextBlock Text="Restore readiness"
-                                       Style="{StaticResource SummaryLabelStyle}"/>
-                            <TextBlock Text="{Binding RestoreStatusText}"
-                                       Style="{StaticResource SummaryValueStyle}"/>
-                        </StackPanel>
-                    </Border>
-                </WrapPanel>
-
                 <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
                         <TextBlock Text="Backup &amp; Restore" Style="{StaticResource SectionHeaderStyle}"/>
@@ -126,10 +65,10 @@
                                            Text="Backup Time"
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox Text="{Binding BackupTime, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Daily backup time"
                                          Width="{StaticResource FieldWidthCompact}"
                                          HorizontalAlignment="Left"
                                          IsEnabled="{Binding AutoBackupEnabled}"
-                                         AutomationProperties.Name="Daily backup time"
                                          AutomationProperties.LabeledBy="{Binding ElementName=BackupTimeLabel}"
                                          h:Watermark.Text="HH:mm"/>
                                 <TextBlock Text="{Binding BackupScheduleSummary}"

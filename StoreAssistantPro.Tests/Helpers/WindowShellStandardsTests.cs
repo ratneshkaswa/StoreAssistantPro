@@ -54,6 +54,25 @@ public sealed class WindowShellStandardsTests
     }
 
     [Fact]
+    public void AppMessageDialog_Should_Use_Standard_DialogLayout()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml"));
+        var codeBehind = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml.cs"));
+
+        Assert.Contains("Style=\"{StaticResource FormCardStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"DialogTitleText\"", content, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"MessageText\"", content, StringComparison.Ordinal);
+        Assert.Contains("<RowDefinition Height=\"Auto\"/>", content, StringComparison.Ordinal);
+        Assert.Contains("<Viewbox Width=\"16\"", content, StringComparison.Ordinal);
+        Assert.Contains("BorderBrush=\"{StaticResource FluentSurfaceStroke}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource SecondaryButtonStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource PrimaryButtonStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("SizeToContent = SizeToContent.Height;", codeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void FormRowLabelStyle_Should_Be_LeftAligned()
     {
         var content = File.ReadAllText(
@@ -62,6 +81,51 @@ public sealed class WindowShellStandardsTests
         Assert.Contains("<Setter Property=\"HorizontalAlignment\" Value=\"Left\"/>", content, StringComparison.Ordinal);
         Assert.Contains("<Setter Property=\"TextAlignment\" Value=\"Left\"/>", content, StringComparison.Ordinal);
         Assert.DoesNotContain("<Setter Property=\"HorizontalAlignment\" Value=\"Right\"/>", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void WindowViews_Should_Not_Use_KpiSummaryCards()
+    {
+        var windowFiles = Directory.EnumerateFiles(
+            Path.Combine(SolutionRoot, "Modules"),
+            "*Window.xaml",
+            SearchOption.AllDirectories);
+
+        var violations = windowFiles
+            .Select(path => new
+            {
+                Path = path,
+                Content = File.ReadAllText(path)
+            })
+            .Where(file =>
+                file.Content.Contains("StatCardStyle", StringComparison.Ordinal) ||
+                file.Content.Contains("summary card", StringComparison.OrdinalIgnoreCase) ||
+                file.Content.Contains("FluentKpiBlueMuted", StringComparison.Ordinal) ||
+                file.Content.Contains("FluentKpiGreenMuted", StringComparison.Ordinal) ||
+                file.Content.Contains("FluentKpiOrangeMuted", StringComparison.Ordinal) ||
+                file.Content.Contains("FluentKpiTealMuted", StringComparison.Ordinal))
+            .Select(file => Path.GetRelativePath(SolutionRoot, file.Path))
+            .OrderBy(path => path)
+            .ToList();
+
+        Assert.True(
+            violations.Count == 0,
+            "Window views should not use colored KPI summary cards.\n" + string.Join("\n", violations));
+    }
+
+    [Fact]
+    public void WorkspaceView_Should_Be_Minimal_And_BillingFirst()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "WorkspaceView.xaml"));
+
+        Assert.Contains("Start Billing", content, StringComparison.Ordinal);
+        Assert.Contains("OpenBillingCommand", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("Session Overview", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("Start Here", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("OpenFirmManagementCommand", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("OpenUserManagementCommand", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("RefreshCurrentViewCommand", content, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

@@ -72,11 +72,11 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
     });
 
     [RelayCommand]
-    private Task ToggleActiveAsync() => RunAsync(async ct =>
+    private Task ToggleActiveAsync(Brand? brand) => RunAsync(async ct =>
     {
-        if (SelectedBrand is null) return;
-        await brandService.ToggleActiveAsync(SelectedBrand.Id, ct);
-        SuccessMessage = $"Brand '{SelectedBrand.Name}' {(SelectedBrand.IsActive ? "deactivated" : "activated")}.";
+        if (brand is null) return;
+        await brandService.ToggleActiveAsync(brand.Id, ct);
+        SuccessMessage = $"Brand '{brand.Name}' {(brand.IsActive ? "deactivated" : "activated")}.";
         await ReloadAsync(ct);
     });
 

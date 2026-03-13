@@ -32,7 +32,7 @@ public partial class StyleComplianceTests
     private const int FontBaseline = 0;
 
     /// <summary>Input controls missing AutomationProperties.Name. Lower as you add labels.</summary>
-    private const int AccessibilityBaseline = 110;
+    private const int AccessibilityBaseline = 0;
 
     private readonly ITestOutputHelper _output;
 
@@ -682,9 +682,9 @@ public partial class StyleComplianceTests
         RegexOptions.Compiled)]
     private static partial Regex StaticResourceRefRegex();
 
-    /// <summary>Matches opening tags for input controls: TextBox, PasswordBox, ComboBox.</summary>
+    /// <summary>Matches opening tags for input controls: TextBox, PasswordBox, ComboBox, DatePicker.</summary>
     [GeneratedRegex(
-        @"<(TextBox|PasswordBox|ComboBox)\b",
+        @"<(TextBox|PasswordBox|ComboBox|DatePicker)\b",
         RegexOptions.Compiled)]
     private static partial Regex InputControlRegex();
 
@@ -757,8 +757,9 @@ public partial class StyleComplianceTests
     // ═══════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Accessibility: every <c>TextBox</c>, <c>PasswordBox</c>, and
-    /// <c>ComboBox</c> should have <c>AutomationProperties.Name</c>
+    /// Accessibility: every <c>TextBox</c>, <c>PasswordBox</c>,
+    /// <c>ComboBox</c>, and <c>DatePicker</c> should have
+    /// <c>AutomationProperties.Name</c>
     /// for screen readers. Uses a baseline to allow incremental cleanup.
     /// </summary>
     [Fact]

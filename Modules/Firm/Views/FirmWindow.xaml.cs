@@ -27,8 +27,7 @@ public partial class FirmWindow : BaseDialogWindow
         [nameof(FirmViewModel.SelectedDateFormat)] = "DateFormatCombo",
         [nameof(FirmViewModel.SelectedTaxMode)] = "TaxModeCombo",
         [nameof(FirmViewModel.SelectedRoundingMethod)] = "RoundingCombo",
-        [nameof(FirmViewModel.SelectedNumberToWordsLanguage)] = "NumberToWordsCombo",
-        [nameof(FirmViewModel.NegativeStockAllowed)] = "NegativeStockCheckBox"
+        [nameof(FirmViewModel.SelectedNumberToWordsLanguage)] = "NumberToWordsCombo"
     };
 
     private readonly IDialogService _dialogService;

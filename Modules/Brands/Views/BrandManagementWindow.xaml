@@ -5,8 +5,12 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Brand Management"
+        ConfirmCommand="{Binding SaveCommand}"
         Loaded="OnLoaded">
-    <Grid Margin="{StaticResource DialogPadding}">
+    <Grid Margin="{StaticResource DialogPadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title -->
             <RowDefinition Height="Auto"/>  <!-- Search -->
@@ -26,8 +30,9 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     h:Watermark.Text="Search brands…"/>
+            <TextBox AutomationProperties.Name="Brand search"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="e.g. Raymond"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
@@ -36,6 +41,7 @@
         <DataGrid AutomationProperties.Name="Brands list" Grid.Row="2"
                   ItemsSource="{Binding Brands}"
                   SelectedItem="{Binding SelectedBrand}"
+                  Style="{StaticResource EnterpriseDataGridStyle}"
                   AutoGenerateColumns="False" IsReadOnly="True"
                   SelectionMode="Single"
                   HeadersVisibility="Column" CanUserAddRows="False"
@@ -58,6 +64,7 @@
                 <Run Text="Brand Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
             </TextBlock>
             <TextBox Grid.Column="1"
+                     AutomationProperties.Name="Brand name"
                      Text="{Binding BrandName, UpdateSourceTrigger=PropertyChanged}"
                      Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                      MaxLength="100" h:Watermark.Text="e.g. Raymond"/>
