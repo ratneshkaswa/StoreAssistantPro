@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -77,14 +77,15 @@ public partial class PurchaseOrderViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        var orders = await poService.GetAllAsync(ct);
-        Orders = new ObservableCollection<PurchaseOrder>(orders);
+        var ordersTask = poService.GetAllAsync(ct);
+        var suppliersTask = poService.GetActiveSuppliersAsync(ct);
+        var productsTask = productService.GetActiveAsync(ct);
 
-        var suppliers = await poService.GetActiveSuppliersAsync(ct);
-        Suppliers = new ObservableCollection<Supplier>(suppliers);
+        await Task.WhenAll(ordersTask, suppliersTask, productsTask);
 
-        var products = await productService.GetActiveAsync(ct);
-        Products = new ObservableCollection<Product>(products);
+        Orders = new ObservableCollection<PurchaseOrder>(ordersTask.Result);
+        Suppliers = new ObservableCollection<Supplier>(suppliersTask.Result);
+        Products = new ObservableCollection<Product>(productsTask.Result);
 
         EnsureSeedLine();
     });
@@ -316,3 +317,4 @@ public partial class PurchaseOrderLineInput : ObservableObject
 
     partial void OnUnitCostChanged(decimal value) => Owner?.RemoveLineItemCommand.NotifyCanExecuteChanged();
 }
+

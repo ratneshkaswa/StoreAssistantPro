@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -13,9 +13,9 @@ public partial class TaxManagementViewModel(
     ITaxGroupService taxGroupService,
     IRegionalSettingsService regional) : BaseViewModel
 {
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Tab Navigation
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTabRates))]
@@ -34,9 +34,9 @@ public partial class TaxManagementViewModel(
         ClearMessages();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 0 — Tax Rates (TaxMaster — simple quick-setup rates)
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 0 â€” Tax Rates (TaxMaster â€” simple quick-setup rates)
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<TaxMaster> Taxes { get; set; } = [];
@@ -112,9 +112,9 @@ public partial class TaxManagementViewModel(
         ClearForm();
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 1 — Tax Groups & Slabs
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 1 â€” Tax Groups & Slabs
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<TaxGroup> TaxGroups { get; set; } = [];
@@ -210,7 +210,7 @@ public partial class TaxManagementViewModel(
         await ReloadGroupsAsync(ct);
     });
 
-    // ── Slab management ──
+    // â”€â”€ Slab management â”€â”€
 
     private void ClearSlabForm()
     {
@@ -232,7 +232,7 @@ public partial class TaxManagementViewModel(
         }
 
         if (!Validate(v => v
-            .Rule(decimal.TryParse(SlabGST, out var g) && g >= 0 && g <= 100, "GST % must be 0–100.")
+            .Rule(decimal.TryParse(SlabGST, out var g) && g >= 0 && g <= 100, "GST % must be 0â€“100.")
             .Rule(decimal.TryParse(SlabPriceFrom, out _), "Price From is required.")
             .Rule(string.IsNullOrWhiteSpace(SlabPriceTo) || decimal.TryParse(SlabPriceTo, out _), "Price To must be a number.")))
             return;
@@ -269,9 +269,9 @@ public partial class TaxManagementViewModel(
         ClearSlabForm();
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 2 — HSN Codes
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 2 â€” HSN Codes
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<HSNCode> HSNCodes { get; set; } = [];
@@ -317,7 +317,7 @@ public partial class TaxManagementViewModel(
 
         if (!Validate(v => v
             .Rule(!string.IsNullOrWhiteSpace(HSNCodeValue), "HSN code is required.")
-            .Rule(HSNCodeValue.Trim().Length is >= 4 and <= 8, "HSN code must be 4–8 digits.")
+            .Rule(HSNCodeValue.Trim().Length is >= 4 and <= 8, "HSN code must be 4â€“8 digits.")
             .Rule(!string.IsNullOrWhiteSpace(HSNDescription), "Description is required.")))
             return;
 
@@ -347,21 +347,22 @@ public partial class TaxManagementViewModel(
         await ReloadHSNAsync(ct);
     });
 
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Load
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        await ReloadRatesAsync(ct);
-        await ReloadGroupsAsync(ct);
-        await ReloadHSNAsync(ct);
+        await Task.WhenAll(
+            ReloadRatesAsync(ct),
+            ReloadGroupsAsync(ct),
+            ReloadHSNAsync(ct));
     });
 
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Reload helpers
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     private async Task ReloadRatesAsync(CancellationToken ct)
     {
@@ -399,3 +400,4 @@ public partial class TaxManagementViewModel(
 
     private bool CanDeleteSlab() => SelectedSlab is not null;
 }
+

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -32,12 +32,13 @@ public partial class VariantManagementWindow : BaseDialogWindow
     /// </summary>
     public void SetProduct(Product product) => _vm.Product = product;
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        if (_vm.Product is not null)
+    private void OnLoaded(object sender, RoutedEventArgs e) =>
+        RunDeferredInitialLoad(async () =>
         {
-            try { await _vm.InitializeAsync(_vm.Product); }
-            catch { /* RunLoadAsync handles logging */ }
-        }
-    }
+            if (_vm.Product is not null)
+            {
+                try { await _vm.InitializeAsync(_vm.Product); }
+                catch { /* RunLoadAsync handles logging */ }
+            }
+        });
 }

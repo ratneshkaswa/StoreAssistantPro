@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -9,9 +9,9 @@ namespace StoreAssistantPro.Modules.Categories.ViewModels;
 
 public partial class CategoryManagementViewModel(ICategoryService categoryService) : BaseViewModel
 {
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Tab Navigation (Types / Categories)
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTabTypes))]
@@ -28,9 +28,9 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         ClearMessages();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 0 — Category Types
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 0 â€” Category Types
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<CategoryType> CategoryTypes { get; set; } = [];
@@ -93,9 +93,9 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         await ReloadTypesAsync(ct);
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 1 — Categories
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 1 â€” Categories
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<Category> Categories { get; set; } = [];
@@ -180,15 +180,16 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         Categories = new ObservableCollection<Category>(results);
     });
 
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Load
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        await ReloadTypesAsync(ct);
-        await ReloadCategoriesAsync(ct);
+        await Task.WhenAll(
+            ReloadTypesAsync(ct),
+            ReloadCategoriesAsync(ct));
     });
 
     private async Task ReloadTypesAsync(CancellationToken ct)
@@ -209,3 +210,4 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         SuccessMessage = string.Empty;
     }
 }
+

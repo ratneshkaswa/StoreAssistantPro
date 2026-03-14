@@ -32,7 +32,7 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Admin button — blue pastel, deepens on selection -->
+        <!-- Admin button â€” blue pastel, deepens on selection -->
         <Style x:Key="AdminButtonStyle" TargetType="Button"
                BasedOn="{StaticResource LoginRoleButtonStyle}">
             <Setter Property="Background" Value="{StaticResource RoleAdminBackground}"/>
@@ -51,7 +51,7 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        <!-- User button — green pastel -->
+        <!-- User button â€” green pastel -->
         <Style x:Key="UserButtonStyle" TargetType="Button"
                BasedOn="{StaticResource LoginRoleButtonStyle}">
             <Setter Property="Background" Value="{StaticResource RoleUserBackground}"/>
@@ -89,22 +89,20 @@
                           Focusable="False"
                           CanContentScroll="False"
                           PanningMode="Both">
-                <controls:ViewportConstrainedPanel
-                    ViewportWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                    ViewportHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
-                    <Grid>
-                <Grid.RowDefinitions>
+                <Grid MinWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                      MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                    <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
                     <RowDefinition Height="Auto"/>  <!-- 1: Role buttons -->
                     <RowDefinition Height="Auto"/>  <!-- 2: PIN card -->
                     <RowDefinition Height="Auto"/>  <!-- 3: Footer -->
                 </Grid.RowDefinitions>
 
-            <!-- ── Row 0: Logo + title ──────────────────────── -->
+            <!-- â”€â”€ Row 0: Logo + title â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <controls:AppBranding Grid.Row="0" LogoSize="52" Subtitle="{Binding FirmName}"
                                       Margin="{StaticResource FieldLabelSpacing}"/>
 
-            <!-- ── Row 1: Role buttons ────────────────────────── -->
+            <!-- â”€â”€ Row 1: Role buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <UniformGrid Grid.Row="1" Columns="2"
                              Margin="{StaticResource FieldLabelSpacing}">
                     <Button Margin="{StaticResource RoleButtonGap}"
@@ -112,8 +110,7 @@
                             Tag="{x:Static models:UserType.Admin}"
                             Command="{Binding SelectUserCommand}"
                             CommandParameter="{x:Static models:UserType.Admin}"
-                            AutomationProperties.Name="Admin login"
-                            ToolTip="F1 — Admin">
+                            AutomationProperties.Name="Admin login">
                         <StackPanel>
                             <TextBlock Text="&#xE83D;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                        HorizontalAlignment="Center"/>
@@ -126,8 +123,7 @@
                             Tag="{x:Static models:UserType.User}"
                             Command="{Binding SelectUserCommand}"
                             CommandParameter="{x:Static models:UserType.User}"
-                            AutomationProperties.Name="User login"
-                            ToolTip="F2 — User">
+                            AutomationProperties.Name="User login">
                         <StackPanel>
                             <TextBlock Text="&#xE7EE;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                        HorizontalAlignment="Center"/>
@@ -137,7 +133,7 @@
                     </Button>
                 </UniformGrid>
 
-            <!-- ── Row 2: PIN card (disabled until role selected) ── -->
+            <!-- â”€â”€ Row 2: PIN card (disabled until role selected) â”€â”€ -->
                 <Border Grid.Row="2"
                         Background="{StaticResource FluentBackgroundSecondary}"
                         BorderBrush="{StaticResource FluentStrokeDefault}"
@@ -156,7 +152,7 @@
                                           Visibility="{Binding ResetSuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
                                           Margin="{StaticResource ItemSpacing}"/>
 
-                        <TextBlock Text="{Binding RoleHintText}"
+                        <TextBlock Visibility="Collapsed" Text="{Binding RoleHintText}"
                                    HorizontalAlignment="Center"
                                    FontSize="{StaticResource FontSizeSectionHeader}"
                                    FontWeight="SemiBold"
@@ -212,7 +208,7 @@
                                 <Button Content="9" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="9" Style="{StaticResource LoginKeypadButtonStyle}"/>
                                 <Button Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource LoginKeypadButtonStyle}" FontSize="{StaticResource FontSizeBody}"/>
                                 <Button Content="0" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="0" Style="{StaticResource LoginKeypadButtonStyle}"/>
-                                <Button Content="⌫" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource LoginKeypadButtonStyle}"
+                                <Button Content="Back" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource LoginKeypadButtonStyle}"
                                         AutomationProperties.Name="Backspace"/>
                             </UniformGrid>
 
@@ -274,7 +270,7 @@
 
                         <!-- CapsLock warning -->
                         <TextBlock x:Name="CapsLockWarning"
-                                   Text="⚠ Caps Lock is on"
+                                   Text="Caps Lock is on"
                                    FontSize="{StaticResource FontSizeCaption}"
                                    Foreground="{StaticResource FluentWarning}"
                                    HorizontalAlignment="Center"
@@ -307,7 +303,7 @@
                 </Grid>
                 </Border>
 
-            <!-- ── Row 3: Footer ──────────────────────────────── -->
+            <!-- â”€â”€ Row 3: Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <StackPanel Grid.Row="3" Margin="{StaticResource CompactItemSpacing}">
                 <!-- Separator -->
                 <Border Height="{StaticResource SeparatorHeight}" Background="{StaticResource FluentStrokeDefault}"
@@ -342,8 +338,10 @@
                 </TextBlock>
                 </StackPanel>
                     </Grid>
-                </controls:ViewportConstrainedPanel>
+
             </ScrollViewer>
         </Border>
     </Grid>
 </Window>
+
+

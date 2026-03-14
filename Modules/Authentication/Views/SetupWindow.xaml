@@ -217,7 +217,7 @@
                             Command="{Binding SaveCommand}"
                             MinWidth="190"
                             MinHeight="{StaticResource SetupButtonHeight}"
-                            ToolTip="{Binding SaveReadinessMessage}"
+
                             AutomationProperties.Name="Save setup and continue">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">

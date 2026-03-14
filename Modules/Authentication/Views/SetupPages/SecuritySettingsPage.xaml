@@ -65,6 +65,7 @@
                TargetType="TextBlock"
                BasedOn="{StaticResource SetupPinInlineHintStyle}">
             <Setter Property="Margin" Value="{StaticResource ValidationHintMargin}"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
             <Setter Property="MinHeight" Value="18"/>
             <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         </Style>

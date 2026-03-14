@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core.Helpers;
@@ -32,7 +32,8 @@ public partial class AppStateService : ObservableObject, IAppStateService
     {
         _regional = regional;
 
-        SmartTooltipsEnabled = true;
+        SmartTooltipsEnabled = false;
+        SmartTooltip.GlobalEnabled = false;
 
         Notifications = [];
         Notifications.CollectionChanged += OnNotificationsChanged;
@@ -163,8 +164,8 @@ public partial class AppStateService : ObservableObject, IAppStateService
         CurrentBillingSession = BillingSessionState.None;
         IsOfflineMode = false;
         LastConnectionCheck = null;
-        SmartTooltipsEnabled = true;
-        SmartTooltip.GlobalEnabled = true;
+        SmartTooltipsEnabled = false;
+        SmartTooltip.GlobalEnabled = false;
         Notifications.Clear();
     }
 }

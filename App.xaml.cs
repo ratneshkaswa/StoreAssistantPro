@@ -173,10 +173,13 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        var host = _host;
+
         try
         {
             _logger?.LogInformation("Application exiting");
-            await _host.StopAsync(TimeSpan.FromSeconds(5));
+            if (host is not null)
+                await host.StopAsync(TimeSpan.FromSeconds(5));
         }
         catch (Exception ex)
         {
@@ -184,7 +187,7 @@ public partial class App : Application
         }
         finally
         {
-            _host.Dispose();
+            host?.Dispose();
             base.OnExit(e);
         }
     }

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.PurchaseOrders.ViewModels;
@@ -22,12 +22,13 @@ public partial class PurchaseOrderWindow : BaseDialogWindow
         Closed += (_, _) => vm.Dispose();
     }
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is PurchaseOrderViewModel vm)
+    private void OnLoaded(object sender, RoutedEventArgs e) =>
+        RunDeferredInitialLoad(async () =>
         {
-            try { await vm.LoadCommand.ExecuteAsync(null); }
-            catch { /* RunLoadAsync handles logging */ }
-        }
-    }
+            if (DataContext is PurchaseOrderViewModel vm)
+            {
+                try { await vm.LoadCommand.ExecuteAsync(null); }
+                catch { /* RunLoadAsync handles logging */ }
+            }
+        });
 }

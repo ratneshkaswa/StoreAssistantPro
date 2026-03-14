@@ -145,12 +145,6 @@
                          MaxLength="100"
                          MinHeight="{StaticResource ControlHeight}"
                          AutomationProperties.LabeledBy="{Binding ElementName=EmailLabel}"/>
-                <TextBlock Text="{Binding EmailValidationHint}"
-                           Margin="{StaticResource ValidationHintMargin}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           TextWrapping="Wrap"
-                           Visibility="{Binding EmailValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
             </StackPanel>
 
             <StackPanel Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch">
@@ -172,12 +166,6 @@
                           h:Watermark.Text="e.g. Rajasthan"
                           AutomationProperties.LabeledBy="{Binding ElementName=StateLabel}"
                           MaxDropDownHeight="300"/>
-                <TextBlock Text="{Binding StateValidationHint}"
-                           Margin="{StaticResource ValidationHintMargin}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           TextWrapping="Wrap"
-                           Visibility="{Binding StateValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
             </StackPanel>
 
             <StackPanel Grid.Row="4" Grid.Column="0" HorizontalAlignment="Stretch">
@@ -200,14 +188,7 @@
                          h:NumericInput.IsIntegerOnly="True"
                          AutomationProperties.LabeledBy="{Binding ElementName=PhoneLabel}"
                          AutomationProperties.HelpText="10 digits"
-                         />
-                <TextBlock Text="{Binding PhoneValidationHint}"
-                           Margin="{StaticResource ValidationHintMargin}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           TextWrapping="Wrap"
-                           Visibility="{Binding PhoneValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
-            </StackPanel>
+                         />            </StackPanel>
 
             <StackPanel Grid.Row="4" Grid.Column="2" HorizontalAlignment="Stretch">
                 <TextBlock x:Name="PincodeLabel"
@@ -229,12 +210,6 @@
                          AutomationProperties.HelpText="6 digits"
                          MaxLength="6"
                          h:NumericInput.IsIntegerOnly="True"/>
-                <TextBlock Text="{Binding PincodeValidationHint}"
-                           Margin="{StaticResource ValidationHintMargin}"
-                           FontSize="{StaticResource FontSizeCaption}"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           TextWrapping="Wrap"
-                           Visibility="{Binding PincodeValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
             </StackPanel>
         </Grid>
 

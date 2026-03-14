@@ -1,7 +1,8 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Controls;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
@@ -15,6 +16,8 @@ namespace StoreAssistantPro.Core;
 public abstract class BaseDialogWindow : Window
 {
     private bool _overflowHostApplied;
+    private bool _deferredInitialLoadScheduled;
+    private bool _deferredInitialLoadFailed;
 
     protected abstract double DialogWidth { get; }
     protected abstract double DialogHeight { get; }
@@ -97,6 +100,64 @@ public abstract class BaseDialogWindow : Window
             KeyboardNav.SetEscapeCommand(this, new CloseDialogCommand(this));
     }
 
+    protected void RunDeferredInitialLoad(Func<Task> loadAsync, bool closeOnFailure = true)
+    {
+        if (_deferredInitialLoadScheduled)
+            return;
+
+        _deferredInitialLoadScheduled = true;
+
+        Action run = async () =>
+        {
+            if (!IsLoaded || !IsVisible)
+                return;
+
+            try
+            {
+                await Task.Yield();
+
+                if (!IsLoaded || !IsVisible)
+                    return;
+
+                await loadAsync();
+            }
+            catch (OperationCanceledException)
+            {
+                // Window closed or operation superseded.
+            }
+            catch (Exception ex)
+            {
+                if (_deferredInitialLoadFailed)
+                    return;
+
+                _deferredInitialLoadFailed = true;
+
+                var windowName = string.IsNullOrWhiteSpace(Title)
+                    ? GetType().Name
+                    : Title;
+
+                AppDialogPresenter.ShowError(
+                    "Unable to Open Window",
+                    $"{windowName} could not finish loading.\n\n{ex.Message}\n\nThe window will be closed.",
+                    Owner);
+
+                if (!closeOnFailure)
+                    return;
+
+                try
+                {
+                    DialogResult ??= false;
+                }
+                catch (InvalidOperationException)
+                {
+                    Close();
+                }
+            }
+        };
+
+        Dispatcher.BeginInvoke(run, DispatcherPriority.ContextIdle);
+    }
+
     private static void OnConfirmCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is BaseDialogWindow window)
@@ -120,6 +181,7 @@ public abstract class BaseDialogWindow : Window
         }
 
         _overflowHostApplied = true;
+        Content = null;
         Content = CreateOverflowHost(content);
     }
 
@@ -168,3 +230,4 @@ public abstract class BaseDialogWindow : Window
         public event EventHandler? CanExecuteChanged { add { } remove { } }
     }
 }
+

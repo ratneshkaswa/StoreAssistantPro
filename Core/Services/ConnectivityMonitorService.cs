@@ -29,6 +29,7 @@ public sealed class ConnectivityMonitorService : IConnectivityMonitorService
     private readonly Lock _lock = new();
 
     private Timer? _timer;
+    private readonly SemaphoreSlim _checkGate = new(1, 1);
     private bool _isConnected = true;
     private Stopwatch? _downtimeStopwatch;
     private bool _started;
@@ -103,6 +104,130 @@ public sealed class ConnectivityMonitorService : IConnectivityMonitorService
     /// </summary>
     public async Task CheckNowAsync(CancellationToken ct = default)
     {
+        await _checkGate.WaitAsync(ct).ConfigureAwait(false);
+
+        try
+        {
+            var reachable = await PingDatabaseAsync(ct).ConfigureAwait(false);
+
+            bool wasConnected;
+            var downtime = TimeSpan.Zero;
+
+            lock (_lock)
+            {
+                wasConnected = _isConnected;
+
+                if (wasConnected && !reachable)
+                {
+                    _isConnected = false;
+                    _downtimeStopwatch = Stopwatch.StartNew();
+                }
+                else if (!wasConnected && reachable)
+                {
+                    _isConnected = true;
+                    downtime = _downtimeStopwatch?.Elapsed ?? TimeSpan.Zero;
+                    _downtimeStopwatch = null;
+                }
+                else
+                {
+                    // No state change — nothing to publish.
+                    return;
+                }
+            }
+
+            // Publish events only on transitions.
+            if (wasConnected && !reachable)
+            {
+                _logger.LogWarning("Database connectivity lost");
+                await PublishSafeAsync(new ConnectionLostEvent()).ConfigureAwait(false);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Database connectivity restored after {Downtime}", downtime);
+                await PublishSafeAsync(new ConnectionRestoredEvent(downtime))
+                    .ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            _checkGate.Release();
+        }
+    }
+
+    // ── Internals ──────────────────────────────────────────────────
+
+    private async Task<bool> PingDatabaseAsync(CancellationToken ct)
+    {
+        try
+        {
+            await using var context = await _contextFactory
+                .CreateDbContextAsync(ct).ConfigureAwait(false);
+            return await context.Database.CanConnectAsync(ct)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw; // Respect cancellation.
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Database ping failed");
+            return false;
+        }
+    }
+
+    private async void OnTimerElapsed(object? state)
+    {
+        try
+        {
+            if (!await _checkGate.WaitAsync(0, CancellationToken.None).ConfigureAwait(false))
+                return;
+
+            try
+            {
+                await CheckNowCoreAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+            finally
+            {
+                _checkGate.Release();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Connectivity check failed unexpectedly");
+        }
+    }
+
+    private async Task PublishSafeAsync<TEvent>(TEvent @event)
+        where TEvent : IEvent
+    {
+        try
+        {
+            await _eventBus.PublishAsync(@event).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "Failed to publish {EventType} — event swallowed",
+                typeof(TEvent).Name);
+        }
+    }
+
+    // ── Cleanup ────────────────────────────────────────────────────
+
+    public void Dispose()
+    {
+        // Change timer to never fire again, then dispose.
+        // This prevents a race where the callback fires after Dispose.
+        _timer?.Change(Timeout.Infinite, Timeout.Infinite);
+        _timer?.Dispose();
+        _timer = null;
+        _checkGate.Dispose();
+    }
+
+    private async Task CheckNowCoreAsync(CancellationToken ct)
+    {
         var reachable = await PingDatabaseAsync(ct).ConfigureAwait(false);
 
         bool wasConnected;
@@ -143,65 +268,5 @@ public sealed class ConnectivityMonitorService : IConnectivityMonitorService
             await PublishSafeAsync(new ConnectionRestoredEvent(downtime))
                 .ConfigureAwait(false);
         }
-    }
-
-    // ── Internals ──────────────────────────────────────────────────
-
-    private async Task<bool> PingDatabaseAsync(CancellationToken ct)
-    {
-        try
-        {
-            await using var context = await _contextFactory
-                .CreateDbContextAsync(ct).ConfigureAwait(false);
-            return await context.Database.CanConnectAsync(ct)
-                .ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            throw; // Respect cancellation.
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "Database ping failed");
-            return false;
-        }
-    }
-
-    private async void OnTimerElapsed(object? state)
-    {
-        try
-        {
-            await CheckNowAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Connectivity check failed unexpectedly");
-        }
-    }
-
-    private async Task PublishSafeAsync<TEvent>(TEvent @event)
-        where TEvent : IEvent
-    {
-        try
-        {
-            await _eventBus.PublishAsync(@event).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex,
-                "Failed to publish {EventType} — event swallowed",
-                typeof(TEvent).Name);
-        }
-    }
-
-    // ── Cleanup ────────────────────────────────────────────────────
-
-    public void Dispose()
-    {
-        // Change timer to never fire again, then dispose.
-        // This prevents a race where the callback fires after Dispose.
-        _timer?.Change(Timeout.Infinite, Timeout.Infinite);
-        _timer?.Dispose();
-        _timer = null;
     }
 }

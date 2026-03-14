@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -59,29 +59,30 @@ public partial class FirmWindow : BaseDialogWindow
         };
     }
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        try
+    private void OnLoaded(object sender, RoutedEventArgs e) =>
+        RunDeferredInitialLoad(async () =>
         {
-            await _vm.LoadFirmCommand.ExecuteAsync(null);
-
-            _ = Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+            try
             {
-                if (!string.IsNullOrWhiteSpace(_vm.FirstErrorFieldKey))
-                {
-                    FocusFieldByKey(_vm.FirstErrorFieldKey);
-                    return;
-                }
+                await _vm.LoadFirmCommand.ExecuteAsync(null);
 
-                TryFocusControl("FirmNameBox");
-            });
-        }
-        catch (Exception)
-        {
-            // RunLoadAsync inside the VM already captures and logs
-            // exceptions. This guard is defensive against command errors.
-        }
-    }
+                _ = Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+                {
+                    if (!string.IsNullOrWhiteSpace(_vm.FirstErrorFieldKey))
+                    {
+                        FocusFieldByKey(_vm.FirstErrorFieldKey);
+                        return;
+                    }
+
+                    TryFocusControl("FirmNameBox");
+                });
+            }
+            catch (Exception)
+            {
+                // RunLoadAsync inside the VM already captures and logs
+                // exceptions. This guard is defensive against command errors.
+            }
+        });
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Brands.ViewModels;
@@ -22,12 +22,13 @@ public partial class BrandManagementWindow : BaseDialogWindow
         Closed += (_, _) => vm.Dispose();
     }
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is BrandManagementViewModel vm)
+    private void OnLoaded(object sender, RoutedEventArgs e) =>
+        RunDeferredInitialLoad(async () =>
         {
-            try { await vm.LoadCommand.ExecuteAsync(null); }
-            catch { /* RunLoadAsync handles logging */ }
-        }
-    }
+            if (DataContext is BrandManagementViewModel vm)
+            {
+                try { await vm.LoadCommand.ExecuteAsync(null); }
+                catch { /* RunLoadAsync handles logging */ }
+            }
+        });
 }

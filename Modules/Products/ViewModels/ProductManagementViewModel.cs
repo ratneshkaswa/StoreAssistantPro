@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -23,7 +23,7 @@ public partial class ProductManagementViewModel(
     [ObservableProperty]
     public partial ObservableCollection<TaxMaster> Taxes { get; set; } = [];
 
-    // ── Enterprise GST dropdowns ──
+    // â”€â”€ Enterprise GST dropdowns â”€â”€
 
     [ObservableProperty]
     public partial ObservableCollection<TaxGroup> TaxGroups { get; set; } = [];
@@ -40,7 +40,7 @@ public partial class ProductManagementViewModel(
     [ObservableProperty]
     public partial bool OverrideAllowed { get; set; }
 
-    // ── Category & Brand dropdowns ──
+    // â”€â”€ Category & Brand dropdowns â”€â”€
 
     [ObservableProperty]
     public partial ObservableCollection<Category> Categories { get; set; } = [];
@@ -54,7 +54,7 @@ public partial class ProductManagementViewModel(
     [ObservableProperty]
     public partial Brand? SelectedBrand { get; set; }
 
-    // ── Vendor dropdown ──
+    // â”€â”€ Vendor dropdown â”€â”€
 
     [ObservableProperty]
     public partial ObservableCollection<Vendor> Vendors { get; set; } = [];
@@ -62,7 +62,7 @@ public partial class ProductManagementViewModel(
     [ObservableProperty]
     public partial Vendor? SelectedVendor { get; set; }
 
-    // ── Form fields ──
+    // â”€â”€ Form fields â”€â”€
 
     [ObservableProperty]
     public partial string ProductName { get; set; } = string.Empty;
@@ -264,29 +264,34 @@ public partial class ProductManagementViewModel(
 
     private async Task ReloadProductsAsync(CancellationToken ct, int? selectedProductId = null)
     {
-        var products = await productService.GetAllAsync(ct);
-        Products = new ObservableCollection<Product>(products);
+        var productsTask = productService.GetAllAsync(ct);
+        var taxesTask = productService.GetActiveTaxesAsync(ct);
+        var groupsTask = taxGroupService.GetActiveGroupsAsync(ct);
+        var codesTask = taxGroupService.GetActiveHSNCodesAsync(ct);
+        var categoriesTask = productService.GetActiveCategoriesAsync(ct);
+        var brandsTask = productService.GetActiveBrandsAsync(ct);
+        var vendorsTask = productService.GetActiveVendorsAsync(ct);
 
-        var taxes = await productService.GetActiveTaxesAsync(ct);
-        Taxes = new ObservableCollection<TaxMaster>(taxes);
+        await Task.WhenAll(
+            productsTask,
+            taxesTask,
+            groupsTask,
+            codesTask,
+            categoriesTask,
+            brandsTask,
+            vendorsTask);
 
-        var groups = await taxGroupService.GetActiveGroupsAsync(ct);
-        TaxGroups = new ObservableCollection<TaxGroup>(groups);
-
-        var codes = await taxGroupService.GetActiveHSNCodesAsync(ct);
-        HSNCodes = new ObservableCollection<HSNCode>(codes);
-
-        var categories = await productService.GetActiveCategoriesAsync(ct);
-        Categories = new ObservableCollection<Category>(categories);
-
-        var brands = await productService.GetActiveBrandsAsync(ct);
-        Brands = new ObservableCollection<Brand>(brands);
-
-        var vendors = await productService.GetActiveVendorsAsync(ct);
-        Vendors = new ObservableCollection<Vendor>(vendors);
+        Products = new ObservableCollection<Product>(productsTask.Result);
+        Taxes = new ObservableCollection<TaxMaster>(taxesTask.Result);
+        TaxGroups = new ObservableCollection<TaxGroup>(groupsTask.Result);
+        HSNCodes = new ObservableCollection<HSNCode>(codesTask.Result);
+        Categories = new ObservableCollection<Category>(categoriesTask.Result);
+        Brands = new ObservableCollection<Brand>(brandsTask.Result);
+        Vendors = new ObservableCollection<Vendor>(vendorsTask.Result);
 
         SelectedProduct = selectedProductId.HasValue
             ? Products.FirstOrDefault(p => p.Id == selectedProductId.Value)
             : null;
     }
 }
+

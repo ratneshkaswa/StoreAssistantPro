@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Reflection;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
@@ -271,6 +272,61 @@ public class ConnectivityMonitorServiceTests : IDisposable
         await sut.CheckNowAsync();
 
         Assert.False(sut.IsConnected);
+    }
+
+    [Fact]
+    public async Task TimerCallback_WhenPreviousCheckStillRunning_DoesNotOverlap()
+    {
+        var context = Substitute.For<AppDbContext>(
+            new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options);
+
+        var dbFacade = Substitute.For<DatabaseFacade>(CreateFakeContext());
+        dbFacade.CanConnectAsync(Arg.Any<CancellationToken>())
+            .Returns(true);
+        context.Database.Returns(dbFacade);
+
+        var firstCheckGate = new TaskCompletionSource<AppDbContext>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var createCalls = 0;
+
+        _contextFactory.CreateDbContextAsync(Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                var call = Interlocked.Increment(ref createCalls);
+                return call == 1
+                    ? firstCheckGate.Task
+                    : Task.FromResult(context);
+            });
+
+        var sut = new ConnectivityMonitorService(
+            _contextFactory,
+            _eventBus,
+            NullLogger<ConnectivityMonitorService>.Instance,
+            TimeSpan.FromMilliseconds(10));
+
+        var callback = typeof(ConnectivityMonitorService).GetMethod(
+            "OnTimerElapsed",
+            BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Could not locate timer callback.");
+
+        callback.Invoke(sut, [null]);
+        await Task.Delay(30);
+        callback.Invoke(sut, [null]);
+        await Task.Delay(30);
+
+        Assert.Equal(1, Volatile.Read(ref createCalls));
+
+        firstCheckGate.SetResult(context);
+        await Task.Delay(30);
+
+        callback.Invoke(sut, [null]);
+        await Task.Delay(30);
+
+        Assert.Equal(2, Volatile.Read(ref createCalls));
+
+        sut.Dispose();
     }
 
     // ══════════════════════════════════════════════════════════════

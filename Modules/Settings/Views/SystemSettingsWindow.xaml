@@ -132,14 +132,6 @@
                                            Style="{StaticResource HintTextStyle}"
                                            TextWrapping="Wrap"/>
                             </StackPanel>
-
-                            <controls:InfoBar Grid.Row="3"
-                                              Grid.ColumnSpan="3"
-                                              Severity="Warning"
-                                              Title="Restore caution"
-                                              Message="Restoring a backup replaces the current database. Restart the application after a successful restore."
-                                              Margin="{StaticResource ItemSpacing}"
-                                              AutomationProperties.Name="Restore caution"/>
                         </Grid>
                     </StackPanel>
                 </Border>

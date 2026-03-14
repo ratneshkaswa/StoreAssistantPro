@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -16,7 +16,7 @@ public partial class InwardEntryViewModel(
     IProductService productService,
     IRegionalSettingsService regional) : BaseViewModel
 {
-    // ── Step tracking ──
+    // â”€â”€ Step tracking â”€â”€
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStep1))]
@@ -34,7 +34,7 @@ public partial class InwardEntryViewModel(
     public bool CanGoNext => CurrentStep < 3;
     public bool IsLastStep => CurrentStep == 3;
 
-    // ── Step 1: Parcel count ──
+    // â”€â”€ Step 1: Parcel count â”€â”€
 
     [ObservableProperty]
     public partial int ParcelCount { get; set; } = 1;
@@ -42,12 +42,12 @@ public partial class InwardEntryViewModel(
     public ObservableCollection<int> ParcelCounts { get; } =
         new(Enumerable.Range(1, 10));
 
-    // ── Step 2: Transport charges ──
+    // â”€â”€ Step 2: Transport charges â”€â”€
 
     [ObservableProperty]
     public partial string TransportCharges { get; set; } = "0";
 
-    // ── Step 3: Parcels ──
+    // â”€â”€ Step 3: Parcels â”€â”€
 
     [ObservableProperty]
     public partial ObservableCollection<ParcelEntryModel> Parcels { get; set; } = [];
@@ -76,23 +76,21 @@ public partial class InwardEntryViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        var vendors = await vendorService.GetActiveAsync(ct);
-        Vendors = new ObservableCollection<Vendor>(vendors);
+        var vendorsTask = vendorService.GetActiveAsync(ct);
+        var productsTask = productService.GetActiveAsync(ct);
+        var coloursTask = productService.GetColoursAsync(ct);
+        var sizesTask = productService.GetSizesAsync(ct);
+        var patternsTask = productService.GetPatternsAsync(ct);
+        var variantTypesTask = productService.GetVariantTypesAsync(ct);
 
-        var products = await productService.GetActiveAsync(ct);
-        Products = new ObservableCollection<Product>(products);
+        await Task.WhenAll(vendorsTask, productsTask, coloursTask, sizesTask, patternsTask, variantTypesTask);
 
-        var colours = await productService.GetColoursAsync(ct);
-        Colours = new ObservableCollection<Colour>(colours);
-
-        var sizes = await productService.GetSizesAsync(ct);
-        Sizes = new ObservableCollection<ProductSize>(sizes);
-
-        var patterns = await productService.GetPatternsAsync(ct);
-        Patterns = new ObservableCollection<ProductPattern>(patterns);
-
-        var variantTypes = await productService.GetVariantTypesAsync(ct);
-        VariantTypes = new ObservableCollection<ProductVariantType>(variantTypes);
+        Vendors = new ObservableCollection<Vendor>(vendorsTask.Result);
+        Products = new ObservableCollection<Product>(productsTask.Result);
+        Colours = new ObservableCollection<Colour>(coloursTask.Result);
+        Sizes = new ObservableCollection<ProductSize>(sizesTask.Result);
+        Patterns = new ObservableCollection<ProductPattern>(patternsTask.Result);
+        VariantTypes = new ObservableCollection<ProductVariantType>(variantTypesTask.Result);
     });
 
     [RelayCommand]
@@ -376,4 +374,5 @@ public partial class ProductRowModel : ObservableObject
 
     partial void OnSelectedVariantTypeChanged(ProductVariantType? value) => Owner?.NotifyProductRowCommandStates();
 }
+
 

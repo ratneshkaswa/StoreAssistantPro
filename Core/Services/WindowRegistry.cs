@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace StoreAssistantPro.Core.Services;
 
@@ -15,7 +16,8 @@ namespace StoreAssistantPro.Core.Services;
 /// </summary>
 public class WindowRegistry(
     IServiceProvider serviceProvider,
-    IWindowSizingService sizingService) : IWindowRegistry
+    IWindowSizingService sizingService,
+    ILogger<WindowRegistry> logger) : IWindowRegistry
 {
     private readonly Dictionary<string, Type> _dialogMap = [];
 
@@ -35,19 +37,37 @@ public class WindowRegistry(
 
     public bool? ShowDialog(string dialogKey)
     {
-        if (!_dialogMap.TryGetValue(dialogKey, out var windowType))
-            throw new InvalidOperationException($"No dialog registered for key '{dialogKey}'.");
+        try
+        {
+            if (!_dialogMap.TryGetValue(dialogKey, out var windowType))
+                throw new InvalidOperationException($"No dialog registered for key '{dialogKey}'.");
 
-        var window = (Window)serviceProvider.GetRequiredService(windowType);
-        ApplySizingIfNeeded(window);
-        return window.ShowDialog();
+            var window = (Window)serviceProvider.GetRequiredService(windowType);
+            ApplySizingIfNeeded(window);
+            return window.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to open dialog {DialogKey}", dialogKey);
+            ShowFallbackOpenError(dialogKey);
+            return false;
+        }
     }
 
     public bool? ShowDialog<TWindow>() where TWindow : Window
     {
-        var window = serviceProvider.GetRequiredService<TWindow>();
-        ApplySizingIfNeeded(window);
-        return window.ShowDialog();
+        try
+        {
+            var window = serviceProvider.GetRequiredService<TWindow>();
+            ApplySizingIfNeeded(window);
+            return window.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to open dialog {DialogType}", typeof(TWindow).Name);
+            ShowFallbackOpenError(typeof(TWindow).Name);
+            return false;
+        }
     }
 
     private void ApplySizingIfNeeded(Window window)
@@ -56,5 +76,12 @@ public class WindowRegistry(
             return;
 
         sizingService.ConfigureDialogWindow(window, window.Width, window.Height);
+    }
+
+    private static void ShowFallbackOpenError(string dialogKey)
+    {
+        AppDialogPresenter.ShowError(
+            "Unable to Open Window",
+            $"The requested window could not be opened.\n\n{dialogKey}\n\nThe error has been logged.");
     }
 }

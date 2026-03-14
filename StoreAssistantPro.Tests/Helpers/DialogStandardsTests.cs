@@ -1,4 +1,4 @@
-using Xunit;
+﻿using Xunit;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
@@ -45,7 +45,9 @@ public sealed class DialogStandardsTests
 
         Assert.Contains("<ScrollViewer VerticalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
         Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-        Assert.Contains("<controls:ViewportConstrainedPanel", content, StringComparison.Ordinal);
+        Assert.Contains("MinWidth=\"{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}\"", content, StringComparison.Ordinal);
+        Assert.Contains("MinHeight=\"{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("<controls:ViewportConstrainedPanel", content, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -171,3 +173,4 @@ public sealed class DialogStandardsTests
             "Could not find solution root from " + AppContext.BaseDirectory);
     }
 }
+

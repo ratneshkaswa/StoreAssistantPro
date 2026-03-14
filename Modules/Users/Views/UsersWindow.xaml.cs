@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,22 +40,23 @@ public partial class UsersWindow : BaseDialogWindow
         };
     }
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is UsersViewModel vm)
+    private void OnLoaded(object sender, RoutedEventArgs e) =>
+        RunDeferredInitialLoad(async () =>
         {
-            try
+            if (DataContext is UsersViewModel vm)
             {
-                await vm.LoadUsersCommand.ExecuteAsync(null);
+                try
+                {
+                    await vm.LoadUsersCommand.ExecuteAsync(null);
+                }
+                catch (Exception)
+                {
+                    // RunLoadAsync inside the VM already captures and logs
+                    // exceptions. This guard is defensive against edge cases
+                    // where the command infrastructure itself throws.
+                }
             }
-            catch (Exception)
-            {
-                // RunLoadAsync inside the VM already captures and logs
-                // exceptions. This guard is defensive against edge cases
-                // where the command infrastructure itself throws.
-            }
-        }
-    }
+        });
 
     private void OnNewPinChanged(object sender, RoutedEventArgs e)
     {

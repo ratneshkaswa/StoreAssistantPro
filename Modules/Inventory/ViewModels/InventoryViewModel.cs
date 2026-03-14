@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -15,9 +15,9 @@ public partial class InventoryViewModel(
     IRegionalSettingsService regional,
     IAppStateService appState) : BaseViewModel
 {
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Tab Navigation
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTabAdjust))]
@@ -36,9 +36,9 @@ public partial class InventoryViewModel(
         ClearMessages();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 0 — Stock Adjustment
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 0 â€” Stock Adjustment
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<Product> Products { get; set; } = [];
@@ -98,25 +98,26 @@ public partial class InventoryViewModel(
             userId);
 
         await inventoryService.AdjustStockAsync(dto, ct);
-        SuccessMessage = $"Stock adjusted: {SelectedProduct.Name} → {NewQuantity}.";
+        SuccessMessage = $"Stock adjusted: {SelectedProduct.Name} â†’ {NewQuantity}.";
 
-        await ReloadProductsAsync(ct);
-        await ReloadLogAsync(ct);
-        await ReloadAlertsAsync(ct);
+        await Task.WhenAll(
+            ReloadProductsAsync(ct),
+            ReloadLogAsync(ct),
+            ReloadAlertsAsync(ct));
         SelectedProduct = Products.FirstOrDefault(product => product.Id == selectedProductId);
         AdjustmentNotes = string.Empty;
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 1 — Adjustment Log
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 1 â€” Adjustment Log
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<StockAdjustment> AdjustmentLog { get; set; } = [];
 
-    // ═══════════════════════════════════════════════════════════════
-    //  Tab 2 — Alerts
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  Tab 2 â€” Alerts
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [ObservableProperty]
     public partial ObservableCollection<Product> LowStockProducts { get; set; } = [];
@@ -127,16 +128,17 @@ public partial class InventoryViewModel(
     [ObservableProperty]
     public partial string TotalStockValue { get; set; } = string.Empty;
 
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Load
-    // ═══════════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        await ReloadProductsAsync(ct);
-        await ReloadLogAsync(ct);
-        await ReloadAlertsAsync(ct);
+        await Task.WhenAll(
+            ReloadProductsAsync(ct),
+            ReloadLogAsync(ct),
+            ReloadAlertsAsync(ct));
     });
 
     private async Task ReloadProductsAsync(CancellationToken ct)
@@ -153,14 +155,15 @@ public partial class InventoryViewModel(
 
     private async Task ReloadAlertsAsync(CancellationToken ct)
     {
-        var low = await inventoryService.GetLowStockProductsAsync(ct);
-        LowStockProducts = new ObservableCollection<Product>(low);
+        var lowTask = inventoryService.GetLowStockProductsAsync(ct);
+        var oosTask = inventoryService.GetOutOfStockProductsAsync(ct);
+        var valueTask = inventoryService.GetTotalStockValueAsync(ct);
 
-        var oos = await inventoryService.GetOutOfStockProductsAsync(ct);
-        OutOfStockProducts = new ObservableCollection<Product>(oos);
+        await Task.WhenAll(lowTask, oosTask, valueTask);
 
-        var value = await inventoryService.GetTotalStockValueAsync(ct);
-        TotalStockValue = regional.FormatCurrency(value);
+        LowStockProducts = new ObservableCollection<Product>(lowTask.Result);
+        OutOfStockProducts = new ObservableCollection<Product>(oosTask.Result);
+        TotalStockValue = regional.FormatCurrency(valueTask.Result);
     }
 
     private void ClearMessages()
@@ -171,3 +174,5 @@ public partial class InventoryViewModel(
 
     private bool CanAdjust() => SelectedProduct is not null;
 }
+
+
