@@ -1,4 +1,4 @@
-﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inward.Views.InwardEntryWindow"
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Inward.Views.InwardEntryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -197,10 +197,10 @@
             <!-- Step 3: Parcels with products -->
             <ScrollViewer Visibility="{Binding IsStep3, Converter={StaticResource BoolToVisibility}}"
                           AutomationProperties.Name="Parcel entry list"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
                           Focusable="False"
-                          h:SmoothScroll.IsEnabled="True"
-                          PanningMode="VerticalOnly"
-                          VerticalScrollBarVisibility="Auto">
+                          PanningMode="Both">
                 <ItemsControl ItemsSource="{Binding Parcels}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>

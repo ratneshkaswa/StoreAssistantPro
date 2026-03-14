@@ -10,6 +10,9 @@ public partial class ProductManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 900;
     protected override double DialogHeight => 780;
+    protected override double DialogMinWidth => 820;
+    protected override double DialogMinHeight => 680;
+    protected override bool AllowResize => true;
 
     private readonly IServiceProvider _sp;
 

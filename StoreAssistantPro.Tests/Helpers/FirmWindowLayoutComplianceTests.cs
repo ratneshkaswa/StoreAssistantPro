@@ -38,11 +38,13 @@ public sealed class FirmWindowLayoutComplianceTests
     }
 
     [Fact]
-    public void FirmWindow_Should_Avoid_LogicalScrolling_With_SmoothScroll()
+    public void FirmWindow_Should_Allow_Horizontal_Overflow_Recovery()
     {
         var content = ReadFirmWindow();
 
-        Assert.Contains("h:SmoothScroll.IsEnabled=\"True\"", content, StringComparison.Ordinal);
+        Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
+        Assert.Contains("PanningMode=\"Both\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("h:SmoothScroll.IsEnabled=\"True\"", content, StringComparison.Ordinal);
         Assert.DoesNotContain("CanContentScroll=\"True\"", content, StringComparison.Ordinal);
     }
 

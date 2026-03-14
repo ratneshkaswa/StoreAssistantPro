@@ -50,14 +50,14 @@
                                FontWeight="SemiBold"
                                Foreground="{StaticResource FluentTextPrimary}"
                                Margin="0"
-                               TextWrapping="Wrap"/>
+                               TextWrapping="WrapWithOverflow"/>
                     <TextBlock x:Name="MessageText"
                                Margin="0,6,0,0"
                                VerticalAlignment="Center"
                                Foreground="{StaticResource FluentTextSecondary}"
                                FontSize="{StaticResource FontSizeBody}"
                                LineHeight="18"
-                               TextWrapping="Wrap"/>
+                               TextWrapping="WrapWithOverflow"/>
                 </StackPanel>
             </Grid>
         </Border>

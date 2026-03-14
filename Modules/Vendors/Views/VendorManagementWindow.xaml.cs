@@ -9,6 +9,9 @@ public partial class VendorManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 820;
     protected override double DialogHeight => 650;
+    protected override double DialogMinWidth => 760;
+    protected override double DialogMinHeight => 620;
+    protected override bool AllowResize => true;
 
     public VendorManagementWindow(
         IWindowSizingService sizingService,

@@ -9,6 +9,9 @@ public partial class CategoryManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 900;
     protected override double DialogHeight => 720;
+    protected override double DialogMinWidth => 780;
+    protected override double DialogMinHeight => 620;
+    protected override bool AllowResize => true;
 
     public CategoryManagementWindow(
         IWindowSizingService sizingService,

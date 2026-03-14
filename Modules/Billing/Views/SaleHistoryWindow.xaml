@@ -99,9 +99,10 @@
 
                 <!-- Receipt preview -->
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto"
                               Focusable="False"
-                              PanningMode="VerticalOnly"
-                              h:SmoothScroll.IsEnabled="True">
+                              PanningMode="Both"
+                             >
                     <TextBlock Text="{Binding ReceiptPreview}"
                                FontFamily="{StaticResource FluentFontMono}" FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextPrimary}"

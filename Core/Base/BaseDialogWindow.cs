@@ -1,5 +1,8 @@
-﻿using System.Windows;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
+using StoreAssistantPro.Core.Controls;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 
@@ -7,58 +10,13 @@ namespace StoreAssistantPro.Core;
 
 /// <summary>
 /// Base class for all modal dialog windows.  Provides the complete
-/// enterprise dialog standard out of the box:
-/// <list type="bullet">
-///   <item><b>Preferred size</b> — set via <see cref="DialogWidth"/> / <see cref="DialogHeight"/>.</item>
-///   <item><b>Fixed by default</b> — dialogs stay non-resizable unless a derived window opts in.</item>
-///   <item><b>Centered over owner</b> — via <see cref="IWindowSizingService"/>.</item>
-///   <item><b>Modal</b> — always shown with <c>ShowDialog()</c>.</item>
-///   <item><b>Enter = confirm</b> — bind <see cref="ConfirmCommand"/> in XAML.</item>
-///   <item><b>ESC = cancel</b> — auto-wired to close with <c>DialogResult = false</c>.</item>
-///   <item><b>Auto-focus</b> — first input receives focus on load (global style).</item>
-/// </list>
-///
-/// <para>
-/// <b>Architecture rule:</b> Every dialog window in every module must
-/// inherit from <see cref="BaseDialogWindow"/>.  Sizing attributes
-/// (<c>Height</c>, <c>Width</c>, <c>ResizeMode</c>,
-/// <c>WindowStartupLocation</c>) must not be set in XAML — the
-/// base class handles them.
-/// </para>
-///
-/// <para><b>XAML usage:</b></para>
-/// <code>
-/// &lt;core:BaseDialogWindow x:Class="…"
-///         ConfirmCommand="{Binding SaveCommand}"
-///         Title="Edit Item"&gt;
-///     &lt;!-- dialog content --&gt;
-/// &lt;/core:BaseDialogWindow&gt;
-/// </code>
-///
-/// <para><b>Code-behind:</b></para>
-/// <code>
-/// public partial class FirmWindow : BaseDialogWindow
-/// {
-///     protected override double DialogWidth  =&gt; 450;
-///     protected override double DialogHeight =&gt; 350;
-///
-///     public FirmWindow(IWindowSizingService sizing, FirmViewModel vm)
-///         : base(sizing)
-///     {
-///         InitializeComponent();
-///         DataContext = vm;
-///     }
-/// }
-/// </code>
+/// enterprise dialog standard out of the box.
 /// </summary>
 public abstract class BaseDialogWindow : Window
 {
-    // ── Size ─────────────────────────────────────────────────────────
+    private bool _overflowHostApplied;
 
-    /// <summary>Preferred width for this dialog.</summary>
     protected abstract double DialogWidth { get; }
-
-    /// <summary>Preferred height for this dialog.</summary>
     protected abstract double DialogHeight { get; }
 
     /// <summary>
@@ -79,19 +37,12 @@ public abstract class BaseDialogWindow : Window
     /// </summary>
     protected virtual bool AllowResize => false;
 
-    // ── Enter = confirm ──────────────────────────────────────────────
-
     /// <summary>
-    /// Primary-action command executed when Enter is pressed on any input
-    /// control inside the dialog.  Bind to the same <c>ICommand</c> used
-    /// on the primary action button (Save, Submit, etc.) so that
-    /// <c>CanExecute</c> guards both the button and the Enter key.
-    /// <para>
-    /// Internally wires <see cref="KeyboardNav.DefaultCommandProperty"/>
-    /// on this window — no manual <c>h:KeyboardNav.DefaultCommand</c>
-    /// attribute is needed.
-    /// </para>
+    /// Wraps dialog content in a shared scroll host so inline InfoBars and
+    /// validation surfaces never push the shell off-screen.
     /// </summary>
+    protected virtual bool EnableOverflowScrollHost => true;
+
     public static readonly DependencyProperty ConfirmCommandProperty =
         DependencyProperty.Register(
             nameof(ConfirmCommand),
@@ -99,9 +50,6 @@ public abstract class BaseDialogWindow : Window
             typeof(BaseDialogWindow),
             new PropertyMetadata(null, OnConfirmCommandChanged));
 
-    /// <summary>
-    /// Optional parameter passed to <see cref="ConfirmCommand"/>.
-    /// </summary>
     public static readonly DependencyProperty ConfirmCommandParameterProperty =
         DependencyProperty.Register(
             nameof(ConfirmCommandParameter),
@@ -121,29 +69,7 @@ public abstract class BaseDialogWindow : Window
         set => SetValue(ConfirmCommandParameterProperty, value);
     }
 
-    private static void OnConfirmCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is BaseDialogWindow window)
-            KeyboardNav.SetDefaultCommand(window, (ICommand?)e.NewValue);
-    }
-
-    private static void OnConfirmCommandParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is BaseDialogWindow window)
-            KeyboardNav.SetDefaultCommandParameter(window, e.NewValue);
-    }
-
-    // ── ESC = cancel ─────────────────────────────────────────────────
-
-    /// <summary>
-    /// When <c>true</c> (default), pressing ESC closes the dialog with
-    /// <c>DialogResult = false</c>.  Override and return <c>false</c> to
-    /// disable, letting ESC fall through to <c>IsCancel</c> buttons or
-    /// the focus-clear fallback instead.
-    /// </summary>
     protected virtual bool CloseOnEscape => true;
-
-    // ── Constructor ──────────────────────────────────────────────────
 
     public BaseDialogWindow(IWindowSizingService sizingService)
     {
@@ -162,65 +88,73 @@ public abstract class BaseDialogWindow : Window
             Height);
         ResizeMode = AllowResize ? ResizeMode.CanResizeWithGrip : ResizeMode.NoResize;
 
-        // Set app icon (gracefully skips if asset not found)
-        TrySetAppIcon();
+        WindowIconHelper.Apply(this);
 
-        // Win11 rounded corners for all dialogs (no Mica)
-        SourceInitialized += (_, _) => Helpers.Win11Backdrop.ApplyDialog(this);
+        SourceInitialized += (_, _) => Win11Backdrop.ApplyDialog(this);
+        Loaded += (_, _) => EnsureOverflowScrollHost();
 
         if (CloseOnEscape)
             KeyboardNav.SetEscapeCommand(this, new CloseDialogCommand(this));
     }
 
-    /// <summary>
-    /// Cached app icon — loaded once, shared by all dialog instances.
-    /// </summary>
-    private static System.Windows.Media.Imaging.BitmapFrame? _cachedIcon;
-    private static bool _iconLoaded;
-
-    private void TrySetAppIcon()
+    private static void OnConfirmCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (!_iconLoaded)
-        {
-            _iconLoaded = true;
-            try
-            {
-                var uri = new Uri("pack://application:,,,/Assets/app.ico", UriKind.Absolute);
-                var info = System.Windows.Application.GetResourceStream(uri);
-                if (info is not null)
-                {
-                    using var stream = info.Stream;
-                    _cachedIcon = System.Windows.Media.Imaging.BitmapFrame.Create(
-                        stream,
-                        System.Windows.Media.Imaging.BitmapCreateOptions.None,
-                        System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
-                }
-            }
-            catch
-            {
-                // Asset not found or unreadable — dialogs will have no icon.
-            }
-        }
-
-        if (_cachedIcon is not null)
-            Icon = _cachedIcon;
+        if (d is BaseDialogWindow window)
+            KeyboardNav.SetDefaultCommand(window, (ICommand?)e.NewValue);
     }
 
-    // ── Close command ────────────────────────────────────────────────
+    private static void OnConfirmCommandParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is BaseDialogWindow window)
+            KeyboardNav.SetDefaultCommandParameter(window, e.NewValue);
+    }
 
-    /// <summary>
-    /// Lightweight <see cref="ICommand"/> that closes its owning dialog
-    /// with <c>DialogResult = false</c>.
-    /// </summary>
+    private void EnsureOverflowScrollHost()
+    {
+        if (_overflowHostApplied
+            || !EnableOverflowScrollHost
+            || Content is not UIElement content
+            || Content is ScrollViewer)
+        {
+            return;
+        }
+
+        _overflowHostApplied = true;
+        Content = CreateOverflowHost(content);
+    }
+
+    private static ScrollViewer CreateOverflowHost(UIElement content)
+    {
+        var scrollViewer = new ScrollViewer
+        {
+            Focusable = false,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            CanContentScroll = false,
+            PanningMode = PanningMode.Both
+        };
+
+        var viewportHost = new ViewportConstrainedPanel();
+        BindingOperations.SetBinding(
+            viewportHost,
+            ViewportConstrainedPanel.ViewportWidthProperty,
+            new Binding(nameof(ScrollViewer.ViewportWidth)) { Source = scrollViewer });
+        BindingOperations.SetBinding(
+            viewportHost,
+            ViewportConstrainedPanel.ViewportHeightProperty,
+            new Binding(nameof(ScrollViewer.ViewportHeight)) { Source = scrollViewer });
+
+        viewportHost.Children.Add(content);
+        scrollViewer.Content = viewportHost;
+        return scrollViewer;
+    }
+
     private sealed class CloseDialogCommand(Window dialog) : ICommand
     {
         public bool CanExecute(object? parameter) => dialog.IsLoaded;
 
         public void Execute(object? parameter)
         {
-            // Setting DialogResult on a modal window also calls Close().
-            // Guard against non-modal usage (ConfigureDialogWindow always
-            // uses ShowDialog, but be defensive).
             try
             {
                 dialog.DialogResult ??= false;

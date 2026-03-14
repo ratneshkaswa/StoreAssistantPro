@@ -9,6 +9,9 @@ public partial class FinancialYearWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 550;
     protected override double DialogHeight => 550;
+    protected override double DialogMinWidth => 520;
+    protected override double DialogMinHeight => 500;
+    protected override bool AllowResize => true;
 
     public FinancialYearWindow(
         IWindowSizingService sizingService,

@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Windows;
 using System.Windows.Threading;
@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Modules.Authentication.Views;
 using StoreAssistantPro.Modules.Billing.Views;
 using StoreAssistantPro.Modules.Brands.Views;
 using StoreAssistantPro.Modules.Categories.Views;
@@ -14,6 +15,7 @@ using StoreAssistantPro.Modules.FinancialYears.Views;
 using StoreAssistantPro.Modules.Firm.Views;
 using StoreAssistantPro.Modules.Inventory.Views;
 using StoreAssistantPro.Modules.Inward.Views;
+using StoreAssistantPro.Modules.MainShell.Views;
 using StoreAssistantPro.Modules.Products.Views;
 using StoreAssistantPro.Modules.PurchaseOrders.Views;
 using StoreAssistantPro.Modules.Settings.Views;
@@ -26,8 +28,11 @@ namespace StoreAssistantPro.Tests.Helpers;
 [Collection("WpfUi")]
 public class MainMenuDialogResolutionTests
 {
-    private static readonly Type[] QuickAccessWindowTypes =
+    private static readonly Type[] ApplicationWindowTypes =
     [
+        typeof(MainWindow),
+        typeof(LoginWindow),
+        typeof(SetupWindow),
         typeof(FirmWindow),
         typeof(UsersWindow),
         typeof(TaxManagementWindow),
@@ -46,7 +51,7 @@ public class MainMenuDialogResolutionTests
     ];
 
     [Fact]
-    public void QuickAccessWindows_ShouldResolve_WithoutConstructorOrXamlFailures()
+    public void ApplicationWindows_ShouldResolve_WithoutConstructorOrXamlFailures()
     {
         var failures = RunOnStaThread(() =>
         {
@@ -55,7 +60,7 @@ public class MainMenuDialogResolutionTests
             using var host = BuildHost();
             var failures = new List<string>();
 
-            foreach (var windowType in QuickAccessWindowTypes)
+            foreach (var windowType in ApplicationWindowTypes)
             {
                 var exception = Record.Exception(() =>
                 {
@@ -63,6 +68,12 @@ public class MainMenuDialogResolutionTests
                     window.ApplyTemplate();
                     _ = window.Content;
                     _ = window.DataContext;
+
+                    if (window is MainWindow)
+                    {
+                        window.Show();
+                        window.Hide();
+                    }
                 });
 
                 if (exception is not null)
@@ -74,7 +85,7 @@ public class MainMenuDialogResolutionTests
 
         Assert.True(
             failures.Count == 0,
-            $"Quick-access windows failed to resolve:{Environment.NewLine}{string.Join(Environment.NewLine, failures)}");
+            $"Application windows failed to resolve:{Environment.NewLine}{string.Join(Environment.NewLine, failures)}");
     }
 
     private static IHost BuildHost()

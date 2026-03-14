@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Services;
@@ -75,13 +75,8 @@ public class DialogService(
 
     private static void ShowFallbackOpenError(string dialogKey)
     {
-        if (Application.Current is null)
-            return;
-
-        MessageBox.Show(
-            $"The requested window could not be opened.\n\n{dialogKey}\n\nThe error has been logged.",
-            "Store Assistant Pro — Unable to Open Window",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
+        AppDialogPresenter.ShowError(
+            "Unable to Open Window",
+            $"The requested window could not be opened.\n\n{dialogKey}\n\nThe error has been logged.");
     }
 }

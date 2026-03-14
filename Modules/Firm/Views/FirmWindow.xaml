@@ -31,9 +31,9 @@
 
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
                       Focusable="False"
-                      PanningMode="VerticalOnly"
-                      h:SmoothScroll.IsEnabled="True">
+                      PanningMode="Both">
             <StackPanel Margin="{StaticResource ItemSpacing}"
                         Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                         MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"

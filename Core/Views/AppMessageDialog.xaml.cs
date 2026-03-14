@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using StoreAssistantPro.Core.Services;
@@ -8,7 +8,8 @@ namespace StoreAssistantPro.Core.Views;
 public enum AppMessageDialogKind
 {
     Question,
-    Information
+    Information,
+    Error
 }
 
 public partial class AppMessageDialog : BaseDialogWindow
@@ -81,10 +82,22 @@ public partial class AppMessageDialog : BaseDialogWindow
         .Where(text => !string.IsNullOrWhiteSpace(text))
         .MaxBy(text => text!.Length);
 
-        var messageLength = MessageText.Text?.Length ?? 0;
-        var hasLongContent = messageLength > 90 || (longestButtonText?.Length ?? 0) > 10;
+        var contentLength = Math.Max(
+            MessageText.Text?.Length ?? 0,
+            DialogTitleText.Text?.Length ?? 0);
+        var buttonLength = longestButtonText?.Length ?? 0;
 
-        Width = hasLongContent ? 460 : 420;
+        Width = contentLength switch
+        {
+            > 220 => 560,
+            > 120 => 500,
+            > 70 => 460,
+            _ => 420
+        };
+
+        if (buttonLength > 14)
+            Width = Math.Max(Width, 500);
+
         MinWidth = 360;
     }
 
@@ -100,6 +113,11 @@ public partial class AppMessageDialog : BaseDialogWindow
                 glyph = "i";
                 badgeBackground = (Brush)FindResource("FluentInfoBackground");
                 glyphForeground = (Brush)FindResource("FluentInfo");
+                break;
+            case AppMessageDialogKind.Error:
+                glyph = "!";
+                badgeBackground = (Brush)FindResource("FluentErrorBackground");
+                glyphForeground = (Brush)FindResource("FluentError");
                 break;
             default:
                 glyph = "?";

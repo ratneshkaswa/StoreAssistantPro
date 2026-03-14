@@ -1,4 +1,4 @@
-﻿ <Window x:Class="StoreAssistantPro.Modules.MainShell.Views.MainWindow"
+ <Window x:Class="StoreAssistantPro.Modules.MainShell.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +7,6 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
-        Icon="pack://application:,,,/Assets/app.ico"
         Background="{StaticResource AppBackgroundBrush}"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
@@ -148,11 +147,16 @@
                         </Button>
 
                         <!-- Notification popup â€” anchored below bell, auto-closes on outside click -->
-                        <Popup PlacementTarget="{Binding ElementName=NotificationBellButton}"
-                               Placement="Bottom" HorizontalOffset="{StaticResource NotificationPopupOffset}"
-                               StaysOpen="False" AllowsTransparency="True"
-                               IsOpen="{Binding IsNotificationsPanelVisible, Mode=TwoWay}">
-                            <Border Width="{StaticResource NotificationPanelWidth}" MaxHeight="{StaticResource NotificationPanelMaxHeight}"
+                        <Popup x:Name="NotificationsPopup"
+                               PlacementTarget="{Binding ElementName=NotificationBellButton}"
+                               Placement="Bottom"
+                               StaysOpen="False"
+                               AllowsTransparency="True"
+                               IsOpen="{Binding IsNotificationsPanelVisible, Mode=TwoWay}"
+                               Opened="OnNotificationsPopupOpened">
+                            <Border x:Name="NotificationsPanel"
+                                    Width="{StaticResource NotificationPanelWidth}"
+                                    MaxHeight="{StaticResource NotificationPanelMaxHeight}"
                                     Background="{StaticResource FluentSurface}"
                                     BorderBrush="{StaticResource FluentSurfaceStroke}"
                                     BorderThickness="1"
@@ -190,12 +194,13 @@
                                                   VirtualizingStackPanel.IsVirtualizing="True"
                                                   VirtualizingStackPanel.VirtualizationMode="Recycling"
                                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                                   ScrollViewer.CanContentScroll="True">
                                         <ItemsControl.Template>
                                             <ControlTemplate TargetType="ItemsControl">
                                                 <ScrollViewer Focusable="False"
                                                               CanContentScroll="True"
+                                                              HorizontalScrollBarVisibility="Auto"
                                                               Padding="0">
                                                     <ItemsPresenter/>
                                                 </ScrollViewer>
@@ -281,7 +286,7 @@
                                                             <TextBlock Grid.Column="1" Grid.Row="1"
                                                                        Text="{Binding Message}"
                                                                        Foreground="{StaticResource FluentTextSecondary}" FontSize="{StaticResource FontSizeCaption}"
-                                                                       TextWrapping="Wrap"
+                                                                       TextWrapping="WrapWithOverflow"
                                                                        TextTrimming="CharacterEllipsis"
                                                                        MaxHeight="{StaticResource NotificationMessageMaxHeight}" Margin="{StaticResource HintTextSpacing}"/>
                                                         </Grid>

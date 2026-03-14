@@ -10,6 +10,9 @@ public partial class VariantManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 1100;
     protected override double DialogHeight => 800;
+    protected override double DialogMinWidth => 920;
+    protected override double DialogMinHeight => 680;
+    protected override bool AllowResize => true;
 
     private readonly VariantManagementViewModel _vm;
 

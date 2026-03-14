@@ -16,7 +16,7 @@
         <TextBlock Grid.Row="0"
                    x:Name="PromptText"
                    Style="{StaticResource FieldLabelStyle}"
-                   TextWrapping="Wrap"
+                   TextWrapping="WrapWithOverflow"
                    Margin="{StaticResource FieldGroupSpacing}"/>
 
         <!-- Row 1: PIN entry -->

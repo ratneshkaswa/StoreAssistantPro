@@ -9,6 +9,9 @@ public partial class SaleHistoryWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 1100;
     protected override double DialogHeight => 750;
+    protected override double DialogMinWidth => 900;
+    protected override double DialogMinHeight => 640;
+    protected override bool AllowResize => true;
 
     public SaleHistoryWindow(
         IWindowSizingService sizingService,

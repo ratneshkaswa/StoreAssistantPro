@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +13,9 @@ public partial class UsersWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 500;
     protected override double DialogHeight => 480;
+    protected override double DialogMinWidth => 460;
+    protected override double DialogMinHeight => 440;
+    protected override bool AllowResize => true;
 
     public UsersWindow(
         IWindowSizingService sizingService,

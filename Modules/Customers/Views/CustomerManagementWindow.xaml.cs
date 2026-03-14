@@ -9,6 +9,9 @@ public partial class CustomerManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 950;
     protected override double DialogHeight => 800;
+    protected override double DialogMinWidth => 820;
+    protected override double DialogMinHeight => 680;
+    protected override bool AllowResize => true;
 
     public CustomerManagementWindow(
         IWindowSizingService sizingService,

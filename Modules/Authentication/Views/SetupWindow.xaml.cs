@@ -41,6 +41,7 @@ public partial class SetupWindow : Window
     public SetupWindow(IWindowSizingService sizingService, IDialogService dialogService, SetupViewModel vm)
     {
         InitializeComponent();
+        WindowIconHelper.Apply(this);
 
         DataContext = _vm = vm;
         _dialogService = dialogService;

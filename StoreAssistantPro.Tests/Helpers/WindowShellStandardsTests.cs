@@ -54,6 +54,47 @@ public sealed class WindowShellStandardsTests
     }
 
     [Fact]
+    public void MainWindowNotificationsPopup_Should_Avoid_Hardcoded_Offsets()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+        var codeBehind = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
+
+        Assert.DoesNotContain("NotificationPopupOffset", content, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"NotificationsPopup\"", content, StringComparison.Ordinal);
+        Assert.Contains("Opened=\"OnNotificationsPopupOpened\"", content, StringComparison.Ordinal);
+        Assert.Contains("UpdateNotificationsPopupLayout();", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("NotificationsPopup.HorizontalOffset", codeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainWindowNotificationsPopup_Should_Allow_LongMessages_To_Stay_Reachable()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+
+        Assert.Contains("ScrollViewer.HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("ScrollViewer.HorizontalScrollBarVisibility=\"Disabled\"", content, StringComparison.Ordinal);
+        Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
+        Assert.Contains("TextWrapping=\"WrapWithOverflow\"", content, StringComparison.Ordinal);
+    }
+    [Fact]
+    public void TopLevelWindows_Should_Use_Shared_WindowSizingService()
+    {
+        var mainWindowCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
+        var loginWindowCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginWindow.xaml.cs"));
+        var setupWindowCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml.cs"));
+
+        Assert.Contains("sizingService.ConfigureMainWindow(this);", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("sizing.ConfigureStartupWindow(this,", loginWindowCode, StringComparison.Ordinal);
+        Assert.Contains("sizingService.ConfigureStartupWindow(this,", setupWindowCode, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AppMessageDialog_Should_Use_Standard_DialogLayout()
     {
         var content = File.ReadAllText(
@@ -72,6 +113,14 @@ public sealed class WindowShellStandardsTests
         Assert.Contains("SizeToContent = SizeToContent.Height;", codeBehind, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void AppMessageDialog_Should_Wrap_Long_Unbroken_Messages()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml"));
+
+        Assert.Contains("TextWrapping=\"WrapWithOverflow\"", content, StringComparison.Ordinal);
+    }
     [Fact]
     public void FormRowLabelStyle_Should_Be_LeftAligned()
     {

@@ -1,4 +1,4 @@
-﻿<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Vendors.Views.VendorManagementWindow"
+<core:BaseDialogWindow x:Class="StoreAssistantPro.Modules.Vendors.Views.VendorManagementWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:StoreAssistantPro.Core"
@@ -57,10 +57,10 @@
 
             <!-- Vendor form -->
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
                           Focusable="False"
-                          PanningMode="VerticalOnly"
-                          Margin="{StaticResource ItemSpacing}"
-                          h:SmoothScroll.IsEnabled="True">
+                          PanningMode="Both"
+                          Margin="{StaticResource ItemSpacing}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>

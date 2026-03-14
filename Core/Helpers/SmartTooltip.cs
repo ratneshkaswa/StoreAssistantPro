@@ -627,7 +627,7 @@ public static class SmartTooltip
             {
                 Text = header,
                 FontWeight = FontWeights.SemiBold,
-                TextWrapping = TextWrapping.Wrap,
+                TextWrapping = TextWrapping.WrapWithOverflow,
             };
 
             if (fe.TryFindResource("FontSizeBody") is double bodySize)
@@ -648,7 +648,7 @@ public static class SmartTooltip
             var textBlock = new TextBlock
             {
                 Text = text,
-                TextWrapping = TextWrapping.Wrap,
+                TextWrapping = TextWrapping.WrapWithOverflow,
             };
 
             if (fe.TryFindResource("TooltipMaxWidth") is double maxW)
@@ -694,7 +694,7 @@ public static class SmartTooltip
             var tipBlock = new TextBlock
             {
                 Text = usageTip,
-                TextWrapping = TextWrapping.Wrap,
+                TextWrapping = TextWrapping.WrapWithOverflow,
                 FontStyle = FontStyles.Italic,
             };
 
@@ -739,3 +739,4 @@ public static class SmartTooltip
     private static double ResolveMs(FrameworkElement fe, string key, double fallback) =>
         fe.TryFindResource(key) is double v ? v : fallback;
 }
+

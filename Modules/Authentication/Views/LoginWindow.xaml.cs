@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +17,7 @@ public partial class LoginWindow : Window
     public LoginWindow(IWindowSizingService sizing, LoginViewModel vm)
     {
         InitializeComponent();
+        WindowIconHelper.Apply(this);
         DataContext = _vm = vm;
         vm.RequestClose = result => DialogResult = result;
         vm.Initialize();
@@ -85,7 +86,7 @@ public partial class LoginWindow : Window
             return;
         }
 
-        // Keyboard safety — skip PIN pad routing when focus is inside editable fields
+        // Keyboard safety â€” skip PIN pad routing when focus is inside editable fields
         var focusInEditable = Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox;
 
         // Layered ESC: clear PIN first, then deselect role

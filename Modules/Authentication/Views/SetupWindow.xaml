@@ -5,7 +5,6 @@
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:setupPages="clr-namespace:StoreAssistantPro.Modules.Authentication.Views.SetupPages"
         Title="Store Assistant Pro - Setup"
-        Icon="pack://application:,,,/Assets/app.ico"
         FontFamily="{StaticResource FluentFontFamily}"
         Closing="OnWindowClosing"
         UseLayoutRounding="True"
@@ -65,10 +64,10 @@
                 BorderThickness="0">
             <Grid>
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
+                              HorizontalScrollBarVisibility="Auto"
                               Focusable="False"
                               CanContentScroll="False"
-                              PanningMode="VerticalOnly">
+                              PanningMode="Both">
                     <StackPanel Margin="{StaticResource SetupScrollContentMargin}"
                                 HorizontalAlignment="Center"
                                 MaxWidth="920">

@@ -9,6 +9,9 @@ public partial class BrandManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 800;
     protected override double DialogHeight => 640;
+    protected override double DialogMinWidth => 700;
+    protected override double DialogMinHeight => 580;
+    protected override bool AllowResize => true;
 
     public BrandManagementWindow(
         IWindowSizingService sizingService,

@@ -9,6 +9,9 @@ public partial class InwardEntryWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 900;
     protected override double DialogHeight => 680;
+    protected override double DialogMinWidth => 820;
+    protected override double DialogMinHeight => 620;
+    protected override bool AllowResize => true;
 
     public InwardEntryWindow(
         IWindowSizingService sizingService,

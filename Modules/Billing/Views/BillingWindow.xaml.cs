@@ -12,6 +12,9 @@ public partial class BillingWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 1200;
     protected override double DialogHeight => 850;
+    protected override double DialogMinWidth => 960;
+    protected override double DialogMinHeight => 720;
+    protected override bool AllowResize => true;
 
     public BillingWindow(
         IWindowSizingService sizingService,

@@ -1,11 +1,10 @@
-﻿<Window x:Class="StoreAssistantPro.Modules.Authentication.Views.LoginWindow"
+<Window x:Class="StoreAssistantPro.Modules.Authentication.Views.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
         xmlns:models="clr-namespace:StoreAssistantPro.Models"
         xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
         Title="Login"
-        Icon="pack://application:,,,/Assets/app.ico"
         Closing="OnWindowClosing"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
@@ -85,7 +84,15 @@
                 CornerRadius="{StaticResource FluentCornerXLarge}"
                 Padding="{StaticResource CardPadding}"
                 Effect="{StaticResource FluentShadowMedium}">
-            <Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          Focusable="False"
+                          CanContentScroll="False"
+                          PanningMode="Both">
+                <controls:ViewportConstrainedPanel
+                    ViewportWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                    ViewportHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                    <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
                     <RowDefinition Height="Auto"/>  <!-- 1: Role buttons -->
@@ -334,7 +341,9 @@
                     <Run Text="v"/><Run Text="{Binding AppVersion, Mode=OneWay}"/><Run Text=" &#x00B7; Developed By "/><Run Text="Ratnesh Kaswa" FontWeight="Bold" Foreground="{StaticResource FluentAccentDefault}"/>
                 </TextBlock>
                 </StackPanel>
-            </Grid>
+                    </Grid>
+                </controls:ViewportConstrainedPanel>
+            </ScrollViewer>
         </Border>
     </Grid>
 </Window>

@@ -9,6 +9,9 @@ public partial class TaxManagementWindow : BaseDialogWindow
 {
     protected override double DialogWidth => 1050;
     protected override double DialogHeight => 780;
+    protected override double DialogMinWidth => 880;
+    protected override double DialogMinHeight => 680;
+    protected override bool AllowResize => true;
 
     public TaxManagementWindow(
         IWindowSizingService sizingService,

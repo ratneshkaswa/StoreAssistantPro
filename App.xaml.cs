@@ -133,11 +133,9 @@ public partial class App : Application
 
         if (workflowManager.Context.Has("Error"))
         {
-            MessageBox.Show(
-                $"Cannot connect to the database.\n\nPlease check appsettings.json connection string.\n\n{workflowManager.Context.Get<string>("Error")}",
+            AppDialogPresenter.ShowError(
                 "Database Connection Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+                $"Cannot connect to the database.\n\nPlease check appsettings.json connection string.\n\n{workflowManager.Context.Get<string>("Error")}");
 
             Shutdown();
             return;
@@ -221,22 +219,18 @@ public partial class App : Application
     {
         var (title, userMessage) = CategorizeException(ex);
 
-        MessageBox.Show(
-            $"{userMessage}\n\nError Reference: {errorId}\n\nThe error has been logged. Please contact support if this persists.",
-            $"Store Assistant Pro — {title}",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
+        AppDialogPresenter.ShowError(
+            title,
+            $"{userMessage}\n\nError Reference: {errorId}\n\nThe error has been logged. Please contact support if this persists.");
     }
 
     private static void ShowFatalErrorDialog(Exception ex)
     {
         var (title, userMessage) = CategorizeException(ex);
 
-        MessageBox.Show(
-            $"The application failed to start.\n\n{title}: {userMessage}\n\nPlease check your configuration and try again.",
-            "Store Assistant Pro — Fatal Error",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
+        AppDialogPresenter.ShowError(
+            "Fatal Error",
+            $"The application failed to start.\n\n{title}: {userMessage}\n\nPlease check your configuration and try again.");
     }
 
     private static (string Title, string Message) CategorizeException(Exception ex) => ex switch
