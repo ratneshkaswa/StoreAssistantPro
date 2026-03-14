@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System.Linq;
+using System.Threading;
 using System.Windows;
 using StoreAssistantPro.Core.Views;
 
@@ -26,7 +27,25 @@ public static class AppDialogPresenter
         string? secondaryButtonText,
         Window? preferredOwner)
     {
-        if (Application.Current is null)
+        if (Application.Current is not Application app)
+            return null;
+
+        var dispatcher = app.Dispatcher;
+        if (dispatcher is null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+            return null;
+
+        if (!dispatcher.CheckAccess())
+        {
+            return dispatcher.Invoke(() => ShowMessage(
+                title,
+                message,
+                kind,
+                primaryButtonText,
+                secondaryButtonText,
+                preferredOwner));
+        }
+
+        if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
             return null;
 
         var dialog = new AppMessageDialog(

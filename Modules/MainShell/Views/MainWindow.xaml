@@ -427,5 +427,13 @@
                         Style="{StaticResource ToolbarLinkButtonStyle}"/>
             </Grid>
         </Border>
+
+        <controls:ToastHost Grid.Row="0"
+                            Grid.RowSpan="4"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="{StaticResource OverlayHostMargin}"
+                            Panel.ZIndex="100"
+                            Toasts="{Binding ToastService.Toasts}"/>
     </Grid>
 </Window>

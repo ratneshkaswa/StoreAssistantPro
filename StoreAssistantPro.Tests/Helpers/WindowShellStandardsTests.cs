@@ -54,6 +54,20 @@ public sealed class WindowShellStandardsTests
     }
 
     [Fact]
+    public void MainWindow_Should_Host_ToastOverlay()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+        var viewModel = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "ViewModels", "MainViewModel.cs"));
+
+        Assert.Contains("<controls:ToastHost", content, StringComparison.Ordinal);
+        Assert.Contains("Toasts=\"{Binding ToastService.Toasts}\"", content, StringComparison.Ordinal);
+        Assert.Contains("public IToastService ToastService { get; }", viewModel, StringComparison.Ordinal);
+        Assert.Contains("ToastService = toastService;", viewModel, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MainWindowNotificationsPopup_Should_Avoid_Hardcoded_Offsets()
     {
         var content = File.ReadAllText(

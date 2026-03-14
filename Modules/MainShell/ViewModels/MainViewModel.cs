@@ -64,6 +64,7 @@ public partial class MainViewModel : BaseViewModel
     // ── Status bar ──
 
     public IStatusBarService StatusBar { get; }
+    public IToastService ToastService { get; }
 
     /// <summary>
     /// Self-contained ViewModel for the status bar summary strip.
@@ -138,6 +139,7 @@ public partial class MainViewModel : BaseViewModel
         IShortcutService shortcutService,
         IDashboardService dashboardService,
         INotificationService notificationService,
+        IToastService toastService,
         IRegionalSettingsService regionalSettings,
         IEnumerable<IQuickActionContributor> contributors)
     {
@@ -155,6 +157,7 @@ public partial class MainViewModel : BaseViewModel
         _regionalSettings = regionalSettings;
         AppState = appState;
         StatusBar = statusBar;
+        ToastService = toastService;
         DashboardSummary = new DashboardViewModel(appState, eventBus, dashboardService);
 
         ((ObservableObject)_navigationService).PropertyChanged += OnNavigationPropertyChanged;

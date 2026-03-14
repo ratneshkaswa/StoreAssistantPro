@@ -49,6 +49,7 @@ public class MainViewModelFlowStateTests
             Substitute.For<IShortcutService>(),
             _dashboardService,
             Substitute.For<INotificationService>(),
+            Substitute.For<IToastService>(),
             Substitute.For<IRegionalSettingsService>(),
             []);
     }

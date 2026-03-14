@@ -273,6 +273,8 @@
         <Setter Property="Margin" Value="{StaticResource SetupSectionSpacing}"/>
         <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect BlurRadius="10"
@@ -310,6 +312,8 @@
         <Setter Property="Padding" Value="{StaticResource SetupSidebarNavPadding}"/>
         <Setter Property="Margin" Value="{StaticResource SetupSidebarNavMargin}"/>
         <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
@@ -319,6 +323,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           VerticalAlignment="Center"/>
@@ -642,19 +647,23 @@
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridColumnHeader">
-                    <Grid>
+                    <Grid UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
                         <Border x:Name="HeaderBd"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{StaticResource FluentSurfaceStroke}"
                                 BorderThickness="0,0,0,1"
                                 Padding="12,12"
+                                UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
-                            <Grid>
+                            <Grid UseLayoutRounding="True"
+                                  SnapsToDevicePixels="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -718,11 +727,14 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridRow">
-                    <Grid x:Name="RowRoot" SnapsToDevicePixels="True">
+                    <Grid x:Name="RowRoot"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
                         <Border x:Name="RowBg"
                                 Background="{TemplateBinding Background}"
                                 BorderThickness="0"/>
@@ -733,7 +745,8 @@
                                 Margin="1,4,0,4"
                                 Background="{StaticResource FluentAccentDefault}"
                                 Opacity="0"/>
-                        <SelectiveScrollingGrid>
+                        <SelectiveScrollingGrid UseLayoutRounding="True"
+                                                SnapsToDevicePixels="True">
                             <SelectiveScrollingGrid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -789,6 +802,8 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
@@ -796,6 +811,7 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
                         <ContentPresenter VerticalAlignment="Center"/>
                     </Border>
@@ -889,6 +905,7 @@
         <Setter Property="FontSize"         Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="MaxWidth"         Value="{StaticResource TooltipMaxWidth}"/>
         <Setter Property="HasDropShadow"    Value="False"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -900,6 +917,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource TooltipCornerRadius}"
                             Effect="{StaticResource TooltipShadow}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
                             Opacity="0"
                             RenderTransformOrigin="0.5,0">
@@ -911,6 +929,8 @@
                         <Border CornerRadius="{StaticResource TooltipCornerRadius}"
                                 BorderBrush="{StaticResource TooltipInnerHighlight}"
                                 BorderThickness="1"
+                                UseLayoutRounding="True"
+                                SnapsToDevicePixels="True"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -1005,6 +1025,8 @@
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="MinHeight" Value="36"/>
         <Setter Property="Margin" Value="{StaticResource FieldGroupSpacing}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:InlineTipBanner">
@@ -1014,9 +1036,11 @@
                             BorderThickness="1"
                             CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="0"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
                             h:Motion.SlideFadeIn="True">
-                        <Grid>
+                        <Grid UseLayoutRounding="True"
+                              SnapsToDevicePixels="True">
                             <Grid.ColumnDefinitions>
                                 <!-- Left accent bar -->
                                 <ColumnDefinition Width="Auto"/>
@@ -1130,10 +1154,14 @@
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="IsHitTestVisible" Value="True"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:EmptyStateOverlay">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                UseLayoutRounding="True"
+                                SnapsToDevicePixels="True"
                                 Margin="{StaticResource EmptyStatePadding}">
                         <TextBlock Text="{TemplateBinding Icon}"
                                    FontSize="{StaticResource FontSizeIconLarge}" HorizontalAlignment="Center"
@@ -1161,10 +1189,14 @@
     <!-- AppBranding -->
     <Style TargetType="controls:AppBranding">
         <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:AppBranding">
-                    <StackPanel HorizontalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Center"
+                                UseLayoutRounding="True"
+                                SnapsToDevicePixels="True">
                         <Image x:Name="PART_Logo" Source="pack://application:,,,/Assets/logo-256.png"
                                Width="{TemplateBinding LogoSize}" Height="{TemplateBinding LogoSize}"
                                HorizontalAlignment="Center"

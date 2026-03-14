@@ -67,6 +67,8 @@
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -76,6 +78,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
                             Effect="{StaticResource FluentShadowSmall}">
                         <ContentPresenter HorizontalAlignment="Center"
@@ -123,6 +126,8 @@
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -132,6 +137,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
@@ -182,6 +188,7 @@
         <Setter Property="Padding" Value="14,6"/>
         <Setter Property="Margin" Value="2,0"/>
         <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <!-- SmartTooltip — auto-wired from QuickAction DataContext -->
         <Setter Property="h:SmartTooltip.Header"     Value="{Binding Title}"/>
@@ -190,7 +197,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid RenderTransformOrigin="0.5,0.5">
+                    <Grid RenderTransformOrigin="0.5,0.5"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
                         <Grid.RenderTransform>
                             <ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1"/>
                         </Grid.RenderTransform>
@@ -200,6 +209,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="{StaticResource FluentCornerMedium}"
                                 Padding="{TemplateBinding Padding}"
+                                UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
                             <StackPanel HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
@@ -335,6 +345,7 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -345,6 +356,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
                             RenderTransformOrigin="0.5,0.5">
                         <Border.RenderTransform>
@@ -470,6 +482,7 @@
         <Setter Property="CornerRadius" Value="{StaticResource FluentCornerSmall}"/>
         <Setter Property="Padding" Value="10,3"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
@@ -487,6 +500,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Padding" Value="6,2"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -495,6 +509,7 @@
                             Background="{TemplateBinding Background}"
                             CornerRadius="{StaticResource FluentCornerSmall}"
                             Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
                             RenderTransformOrigin="0.5,0.5">
                         <Border.RenderTransform>
@@ -597,12 +612,16 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="Bd" Background="{TemplateBinding Background}"
                             CornerRadius="{StaticResource FluentCornerSmall}"
-                            Padding="{TemplateBinding Padding}">
+                            Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
+                            SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -647,15 +666,18 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Padding" Value="16,10"/>
         <Setter Property="Margin" Value="0,0,4,0"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid SnapsToDevicePixels="True">
+                    <Grid UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="{StaticResource FluentCornerMedium}"
                                 Padding="{TemplateBinding Padding}"
+                                UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>

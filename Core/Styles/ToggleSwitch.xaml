@@ -8,22 +8,29 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
-                    <Grid Width="40" Height="20">
+                    <Grid Width="40"
+                          Height="20"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
                         <Border x:Name="FocusRing"
                                 Margin="-3"
                                 CornerRadius="12"
                                 BorderBrush="{StaticResource FluentAccentDefault}"
                                 BorderThickness="0"
-                                Opacity="0"/>
+                                Opacity="0"
+                                SnapsToDevicePixels="True"/>
                         <Border x:Name="Track"
                                 CornerRadius="10"
                                 Background="{StaticResource FluentControlFillTertiary}"
                                 BorderBrush="{StaticResource FluentStrokeDefault}"
-                                BorderThickness="1"/>
+                                BorderThickness="1"
+                                SnapsToDevicePixels="True"/>
                         <Border x:Name="Thumb"
                                 Width="14"
                                 Height="14"
@@ -31,7 +38,8 @@
                                 Background="{StaticResource FluentTextSecondary}"
                                 HorizontalAlignment="Left"
                                 Margin="3,0,0,0"
-                                VerticalAlignment="Center">
+                                VerticalAlignment="Center"
+                                SnapsToDevicePixels="True">
                             <Border.RenderTransform>
                                 <TranslateTransform x:Name="ThumbTranslate" X="0"/>
                             </Border.RenderTransform>
