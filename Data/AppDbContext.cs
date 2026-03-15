@@ -46,6 +46,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<TaxSlab> TaxSlabs => Set<TaxSlab>();
     public DbSet<HSNCode> HSNCodes => Set<HSNCode>();
     public DbSet<ProductTaxMapping> ProductTaxMappings => Set<ProductTaxMapping>();
+    public DbSet<TaskItem> TaskItems => Set<TaskItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
