@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using System.Windows.Threading;
 using StoreAssistantPro.Core.Services;
 
@@ -590,7 +591,12 @@ public static class SmartTooltip
             && shortcut is null && usageTip is null)
             return null;
 
-        var tooltip = new ToolTip();
+        var tooltip = new ToolTip
+        {
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true
+        };
+        ApplyCrispTextRendering(tooltip);
 
         // Try to apply the Fluent style from the resource tree
         if (fe.TryFindResource("SmartTooltipStyle") is Style tooltipStyle)
@@ -617,7 +623,12 @@ public static class SmartTooltip
         FrameworkElement fe, string? header, string? text,
         string? shortcut, string? usageTip)
     {
-        var panel = new StackPanel();
+        var panel = new StackPanel
+        {
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true
+        };
+        ApplyCrispTextRendering(panel);
         var hasBody = text is not null || shortcut is not null || usageTip is not null;
 
         // ── Title (bold) ────────────────────────────────────────
@@ -628,7 +639,10 @@ public static class SmartTooltip
                 Text = header,
                 FontWeight = FontWeights.SemiBold,
                 TextWrapping = TextWrapping.WrapWithOverflow,
+                UseLayoutRounding = true,
+                SnapsToDevicePixels = true,
             };
+            ApplyCrispTextRendering(headerBlock);
 
             if (fe.TryFindResource("FontSizeBody") is double bodySize)
                 headerBlock.FontSize = bodySize;
@@ -649,7 +663,10 @@ public static class SmartTooltip
             {
                 Text = text,
                 TextWrapping = TextWrapping.WrapWithOverflow,
+                UseLayoutRounding = true,
+                SnapsToDevicePixels = true,
             };
+            ApplyCrispTextRendering(textBlock);
 
             if (fe.TryFindResource("TooltipMaxWidth") is double maxW)
                 textBlock.MaxWidth = maxW - 24; // account for padding
@@ -675,7 +692,10 @@ public static class SmartTooltip
             {
                 Text = shortcut,
                 TextWrapping = TextWrapping.NoWrap,
+                UseLayoutRounding = true,
+                SnapsToDevicePixels = true,
             };
+            ApplyCrispTextRendering(shortcutBlock);
 
             if (fe.TryFindResource("FontSizeLabel") is double scLabelSize)
                 shortcutBlock.FontSize = scLabelSize;
@@ -696,7 +716,10 @@ public static class SmartTooltip
                 Text = usageTip,
                 TextWrapping = TextWrapping.WrapWithOverflow,
                 FontStyle = FontStyles.Italic,
+                UseLayoutRounding = true,
+                SnapsToDevicePixels = true,
             };
+            ApplyCrispTextRendering(tipBlock);
 
             if (fe.TryFindResource("FontSizeCaption") is double captionSize)
                 tipBlock.FontSize = captionSize;
@@ -738,5 +761,11 @@ public static class SmartTooltip
     /// </summary>
     private static double ResolveMs(FrameworkElement fe, string key, double fallback) =>
         fe.TryFindResource(key) is double v ? v : fallback;
+
+    private static void ApplyCrispTextRendering(DependencyObject element)
+    {
+        TextOptions.SetTextFormattingMode(element, TextFormattingMode.Display);
+        TextOptions.SetTextRenderingMode(element, TextRenderingMode.ClearType);
+    }
 }
 

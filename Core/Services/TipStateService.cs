@@ -31,8 +31,11 @@ public sealed class TipStateService : ITipStateService
     private readonly string _filePath;
     private readonly ILogger<TipStateService> _logger;
     private readonly Lock _lock = new();
+    private readonly Action? _beforeWrite;
 
     private HashSet<string>? _dismissed;
+    private string[]? _pendingSnapshot;
+    private int _flushWorkerActive;
 
     private static readonly JsonSerializerOptions WriteOptions = new()
     {
@@ -50,9 +53,15 @@ public sealed class TipStateService : ITipStateService
     /// Test-friendly constructor that accepts an explicit file path.
     /// </summary>
     public TipStateService(string filePath, ILogger<TipStateService> logger)
+        : this(filePath, logger, beforeWrite: null)
+    {
+    }
+
+    internal TipStateService(string filePath, ILogger<TipStateService> logger, Action? beforeWrite)
     {
         _filePath = filePath;
         _logger = logger;
+        _beforeWrite = beforeWrite;
 
         // Register as the global resolver so TipBannerAutoState can call
         // back into this service at load time without a DI reference.
@@ -169,28 +178,69 @@ public sealed class TipStateService : ITipStateService
     private void FlushAsync()
     {
         // Snapshot the current state under the lock, then write on
-        // a background thread so DismissTip() never blocks the UI.
-        string[] snapshot;
+        // a background worker so DismissTip() never blocks the UI.
         lock (_lock)
         {
-            snapshot = [.. _dismissed!.Order()];
+            _pendingSnapshot = [.. _dismissed!.Order()];
         }
 
-        _ = Task.Run(() =>
+        EnsureFlushWorker();
+    }
+
+    private void EnsureFlushWorker()
+    {
+        if (Interlocked.CompareExchange(ref _flushWorkerActive, 1, 0) != 0)
+            return;
+
+        _ = Task.Factory.StartNew(
+            ProcessPendingFlushes,
+            CancellationToken.None,
+            TaskCreationOptions.LongRunning,
+            TaskScheduler.Default).ContinueWith(task =>
         {
-            try
+            if (task.Exception is not null)
             {
-                WriteFile(snapshot);
+                _logger.LogWarning(
+                    task.Exception.Flatten().InnerException ?? task.Exception,
+                    "Failed to flush dismissed tips to disk");
             }
-            catch (Exception ex)
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+    }
+
+    private void ProcessPendingFlushes()
+    {
+        while (true)
+        {
+            string[]? snapshot;
+            lock (_lock)
             {
-                _logger.LogWarning(ex, "Failed to flush dismissed tips to disk");
+                snapshot = _pendingSnapshot;
+                _pendingSnapshot = null;
             }
-        });
+
+            if (snapshot is null)
+            {
+                Interlocked.Exchange(ref _flushWorkerActive, 0);
+
+                lock (_lock)
+                {
+                    if (_pendingSnapshot is null
+                        || Interlocked.CompareExchange(ref _flushWorkerActive, 1, 0) != 0)
+                    {
+                        return;
+                    }
+                }
+
+                continue;
+            }
+
+            WriteFile(snapshot);
+        }
     }
 
     private void WriteFile(string[] keys)
     {
+        _beforeWrite?.Invoke();
         AtomicFileWriter.Write(_filePath, keys, WriteOptions, _logger, "dismissed tips");
     }
 

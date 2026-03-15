@@ -152,8 +152,12 @@ public static class NotificationBadgeBehavior
             FontWeight = FontWeights.Bold,
             Foreground = GetBadgeForeground(panel),
             HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = VerticalAlignment.Center,
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true
         };
+        TextOptions.SetTextFormattingMode(textBlock, TextFormattingMode.Display);
+        TextOptions.SetTextRenderingMode(textBlock, TextRenderingMode.ClearType);
 
         var badge = new Border
         {
@@ -168,8 +172,12 @@ public static class NotificationBadgeBehavior
             IsHitTestVisible = false,
             Child = textBlock,
             RenderTransformOrigin = new Point(0.5, 0.5),
-            RenderTransform = new ScaleTransform(1, 1)
+            RenderTransform = new ScaleTransform(1, 1),
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true
         };
+        TextOptions.SetTextFormattingMode(badge, TextFormattingMode.Display);
+        TextOptions.SetTextRenderingMode(badge, TextRenderingMode.ClearType);
 
         panel.Children.Add(badge);
         panel.SetValue(BadgeElementProperty, badge);

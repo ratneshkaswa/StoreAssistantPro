@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using System.Runtime.ExceptionServices;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -381,6 +383,45 @@ public class InteractionTrackerTests : IDisposable
         Assert.True(raised);
     }
 
+    [Fact]
+    public void Tick_FromBackgroundThread_Should_MarshalSnapshotUpdateToDispatcher()
+    {
+        RunOnStaThread(() =>
+        {
+            var sut = new InteractionTracker(
+                _regional,
+                _eventBus,
+                NullLogger<InteractionTracker>.Instance,
+                Dispatcher.CurrentDispatcher);
+
+            try
+            {
+                var dispatcherThreadId = Thread.CurrentThread.ManagedThreadId;
+                var raisedThreadId = -1;
+
+                sut.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(InteractionTracker.CurrentSnapshot))
+                        raisedThreadId = Thread.CurrentThread.ManagedThreadId;
+                };
+
+                for (var i = 0; i < 20; i++)
+                    sut.RecordKeyPress();
+
+                var worker = new Thread(sut.Tick);
+                worker.Start();
+                WaitForThread(worker);
+
+                Assert.True(sut.CurrentSnapshot.KeyboardFrequency > 0);
+                Assert.Equal(dispatcherThreadId, raisedThreadId);
+            }
+            finally
+            {
+                sut.Dispose();
+            }
+        });
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // Concurrency safety
     // ═══════════════════════════════════════════════════════════════
@@ -446,5 +487,59 @@ public class InteractionTrackerTests : IDisposable
     {
         var snap = new InteractionSnapshot(0, 0, idleSec, 0, DateTime.UtcNow);
         Assert.Equal(expected, snap.IsIdle);
+    }
+
+    private static void RunOnStaThread(Action action)
+    {
+        Exception? failure = null;
+        using var completed = new ManualResetEventSlim(false);
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+            finally
+            {
+                Dispatcher.CurrentDispatcher.InvokeShutdown();
+                completed.Set();
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+
+        Assert.True(completed.Wait(TimeSpan.FromSeconds(10)), "STA test thread timed out.");
+
+        if (failure is not null)
+            ExceptionDispatchInfo.Capture(failure).Throw();
+    }
+
+    private static void WaitForThread(Thread thread)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (thread.IsAlive && DateTime.UtcNow < deadline)
+            DrainDispatcher();
+
+        Assert.False(thread.IsAlive, "Worker thread timed out.");
+    }
+
+    private static void DrainDispatcher()
+    {
+        var frame = new DispatcherFrame();
+        Dispatcher.CurrentDispatcher.BeginInvoke(
+            DispatcherPriority.Background,
+            new DispatcherOperationCallback(_ =>
+            {
+                frame.Continue = false;
+                return null;
+            }),
+            null);
+        Dispatcher.PushFrame(frame);
     }
 }

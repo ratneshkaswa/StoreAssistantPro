@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -8,12 +10,32 @@ using StoreAssistantPro.Modules.Billing.Services;
 
 namespace StoreAssistantPro.Modules.Billing.ViewModels;
 
-public partial class BillingViewModel(
-    IBillingService billingService,
-    IAppStateService appState,
-    IDialogService dialogService,
-    IRegionalSettingsService regional) : BaseViewModel
+public partial class BillingViewModel : BaseViewModel
 {
+    private readonly IBillingService _billingService;
+    private readonly IAppStateService _appState;
+    private readonly IDialogService _dialogService;
+    private readonly IRegionalSettingsService _regional;
+    private readonly HashSet<CartLineViewModel> _trackedCartLines = [];
+    private ObservableCollection<CartLineViewModel>? _trackedCartItems;
+    private BillingSessionState? _sessionState;
+
+    public BillingViewModel(
+        IBillingService billingService,
+        IAppStateService appState,
+        IDialogService dialogService,
+        IRegionalSettingsService regional)
+    {
+        _billingService = billingService;
+        _appState = appState;
+        _dialogService = dialogService;
+        _regional = regional;
+
+        AttachCartCollection(CartItems);
+        _trackedCartItems = CartItems;
+        TransitionBillingSession(BillingSessionState.None);
+    }
+
     // ═══════════════════════════════════════════════════════════════
     //  Cart
     // ═══════════════════════════════════════════════════════════════
@@ -23,6 +45,31 @@ public partial class BillingViewModel(
 
     [ObservableProperty]
     public partial CartLineViewModel? SelectedCartItem { get; set; }
+
+    partial void OnCartItemsChanged(ObservableCollection<CartLineViewModel> value)
+    {
+        if (ReferenceEquals(_trackedCartItems, value))
+        {
+            return;
+        }
+
+        if (_trackedCartItems is not null)
+        {
+            DetachCartCollection(_trackedCartItems);
+        }
+
+        AttachCartCollection(value);
+        _trackedCartItems = value;
+
+        if (SelectedCartItem is not null && !value.Contains(SelectedCartItem))
+        {
+            SelectedCartItem = null;
+        }
+
+        UpdateCartCommandStates();
+        RecalculateTotals();
+        HandleCartEmptiedState();
+    }
 
     partial void OnSelectedCartItemChanged(CartLineViewModel? value) => UpdateCartCommandStates();
 
@@ -136,7 +183,7 @@ public partial class BillingViewModel(
         }
 
         SelectedSearchResult = null;
-        var results = await billingService.SearchProductsAsync(SearchText.Trim(), ct);
+        var results = await _billingService.SearchProductsAsync(SearchText.Trim(), ct);
         SearchResults = new ObservableCollection<Product>(results);
     });
 
@@ -146,7 +193,7 @@ public partial class BillingViewModel(
         ClearMessages();
         if (string.IsNullOrWhiteSpace(BarcodeInput)) return;
 
-        var result = await billingService.LookupByBarcodeAsync(BarcodeInput, ct);
+        var result = await _billingService.LookupByBarcodeAsync(BarcodeInput, ct);
         if (result is null)
         {
             ErrorMessage = $"Barcode '{BarcodeInput}' not found.";
@@ -198,10 +245,10 @@ public partial class BillingViewModel(
                 UnitPrice = price,
                 Quantity = 1
             };
-            line.PropertyChanged += (_, _) => RecalculateTotals();
             CartItems.Add(line);
         }
 
+        TransitionBillingSession(BillingSessionState.Active);
         UpdateCartCommandStates();
         RecalculateTotals();
         ClearMessages();
@@ -221,10 +268,11 @@ public partial class BillingViewModel(
     private void ClearCart()
     {
         if (CartItems.Count == 0) return;
-        if (!dialogService.Confirm("Clear the entire cart?", "Cancel Bill"))
+        if (!_dialogService.Confirm("Clear the entire cart?", "Cancel Bill"))
             return;
 
         CartItems.Clear();
+        TransitionBillingSession(BillingSessionState.Cancelled);
         SelectedCartItem = null;
         ResetPayment();
         UpdateCartCommandStates();
@@ -286,12 +334,13 @@ public partial class BillingViewModel(
             discountValue,
             string.IsNullOrWhiteSpace(DiscountReason) ? null : DiscountReason.Trim(),
             cashTendered,
-            appState.CurrentUserType.ToString(),
+            _appState.CurrentUserType.ToString(),
             Guid.NewGuid());
 
-        var sale = await billingService.CompleteSaleAsync(dto, ct);
-        SuccessMessage = $"Sale {sale.InvoiceNumber} completed - {regional.FormatCurrency(sale.TotalAmount)}";
+        var sale = await _billingService.CompleteSaleAsync(dto, ct);
+        SuccessMessage = $"Sale {sale.InvoiceNumber} completed - {_regional.FormatCurrency(sale.TotalAmount)}";
 
+        TransitionBillingSession(BillingSessionState.Completed);
         CartItems.Clear();
         SelectedCartItem = null;
         ResetPayment();
@@ -386,6 +435,141 @@ public partial class BillingViewModel(
         }
 
         return true;
+    }
+
+    public override void Dispose()
+    {
+        TransitionBillingSession(BillingSessionState.None);
+
+        if (_trackedCartItems is not null)
+        {
+            DetachCartCollection(_trackedCartItems);
+            _trackedCartItems = null;
+        }
+
+        base.Dispose();
+    }
+
+    private void AttachCartCollection(ObservableCollection<CartLineViewModel> items)
+    {
+        items.CollectionChanged -= OnCartItemsCollectionChanged;
+        items.CollectionChanged += OnCartItemsCollectionChanged;
+
+        foreach (var line in items)
+        {
+            AttachCartLine(line);
+        }
+    }
+
+    private void DetachCartCollection(ObservableCollection<CartLineViewModel> items)
+    {
+        items.CollectionChanged -= OnCartItemsCollectionChanged;
+
+        foreach (var line in items)
+        {
+            DetachCartLine(line);
+        }
+    }
+
+    private void AttachCartLine(CartLineViewModel line)
+    {
+        if (!_trackedCartLines.Add(line))
+        {
+            return;
+        }
+
+        line.PropertyChanged += OnCartLinePropertyChanged;
+    }
+
+    private void DetachCartLine(CartLineViewModel line)
+    {
+        if (!_trackedCartLines.Remove(line))
+        {
+            return;
+        }
+
+        line.PropertyChanged -= OnCartLinePropertyChanged;
+    }
+
+    private void OnCartItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            SyncCartLineSubscriptions();
+        }
+        else
+        {
+            if (e.OldItems is not null)
+            {
+                foreach (CartLineViewModel line in e.OldItems)
+                {
+                    DetachCartLine(line);
+                }
+            }
+
+            if (e.NewItems is not null)
+            {
+                foreach (CartLineViewModel line in e.NewItems)
+                {
+                    AttachCartLine(line);
+                }
+            }
+        }
+
+        if (SelectedCartItem is not null && !CartItems.Contains(SelectedCartItem))
+        {
+            SelectedCartItem = null;
+        }
+
+        UpdateCartCommandStates();
+        RecalculateTotals();
+        HandleCartEmptiedState();
+    }
+
+    private void SyncCartLineSubscriptions()
+    {
+        foreach (var line in _trackedCartLines.ToArray())
+        {
+            if (!CartItems.Contains(line))
+            {
+                DetachCartLine(line);
+            }
+        }
+
+        foreach (var line in CartItems)
+        {
+            AttachCartLine(line);
+        }
+    }
+
+    private void OnCartLinePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.PropertyName)
+            || e.PropertyName == nameof(CartLineViewModel.UnitPrice)
+            || e.PropertyName == nameof(CartLineViewModel.Quantity)
+            || e.PropertyName == nameof(CartLineViewModel.ItemDiscountRate)
+            || e.PropertyName == nameof(CartLineViewModel.LineTotal))
+        {
+            RecalculateTotals();
+        }
+    }
+
+    private void HandleCartEmptiedState()
+    {
+        if (CartItems.Count != 0 || _sessionState != BillingSessionState.Active)
+            return;
+
+        TransitionBillingSession(BillingSessionState.Cancelled);
+        ResetPayment();
+    }
+
+    private void TransitionBillingSession(BillingSessionState state)
+    {
+        if (_sessionState == state)
+            return;
+
+        _sessionState = state;
+        _appState.SetBillingSession(state);
     }
 }
 

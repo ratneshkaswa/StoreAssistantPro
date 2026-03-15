@@ -207,4 +207,37 @@ public class LoginViewModelTests
         Assert.Equal("Please enter your PIN.", sut.ErrorMessage);
         await _commandBus.DidNotReceive().SendAsync(Arg.Any<LoginUserCommand>());
     }
+
+    [Fact]
+    public async Task Initialize_WhenCalledTwice_DoesNotDuplicateAutoLogin()
+    {
+        _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
+            .Returns(CommandResult.Success());
+
+        var sut = new LoginViewModel(_commandBus, _appState, _regional, _connectivity);
+        sut.Initialize();
+        sut.Initialize();
+        sut.SelectUserCommand.Execute(UserType.Admin);
+
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+        sut.PinPad.AddDigitCommand.Execute("4");
+
+        await Task.Delay(50);
+
+        await _commandBus.Received(1).SendAsync(
+            Arg.Is<LoginUserCommand>(c => c.UserType == UserType.Admin && c.Pin == "1234"));
+    }
+
+    [Fact]
+    public void Dispose_ClearsRequestClose()
+    {
+        var sut = CreateSut();
+        sut.RequestClose = _ => { };
+
+        sut.Dispose();
+
+        Assert.Null(sut.RequestClose);
+    }
 }

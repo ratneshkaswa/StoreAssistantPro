@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Models;
@@ -28,6 +30,7 @@ public sealed partial class InteractionTracker : ObservableObject, IInteractionT
     private readonly IRegionalSettingsService _regional;
     private readonly IEventBus _eventBus;
     private readonly ILogger<InteractionTracker> _logger;
+    private readonly Dispatcher? _dispatcher;
     private readonly Timer _timer;
     private readonly Lock _tickLock = new();
 
@@ -72,11 +75,13 @@ public sealed partial class InteractionTracker : ObservableObject, IInteractionT
     public InteractionTracker(
         IRegionalSettingsService regional,
         IEventBus eventBus,
-        ILogger<InteractionTracker> logger)
+        ILogger<InteractionTracker> logger,
+        Dispatcher? dispatcher = null)
     {
         _regional = regional;
         _eventBus = eventBus;
         _logger = logger;
+        _dispatcher = dispatcher ?? Application.Current?.Dispatcher;
 
         _lastActivityTick = Environment.TickCount64;
         CurrentSnapshot = InteractionSnapshot.Idle(_regional.Now);
@@ -153,9 +158,11 @@ public sealed partial class InteractionTracker : ObservableObject, IInteractionT
             if (!IsSignificantChange(previous, snapshot))
                 return;
 
-            CurrentSnapshot = snapshot;
-
-            _ = _eventBus.PublishAsync(new InteractionSnapshotChangedEvent(snapshot));
+            RunOnDispatcher(() =>
+            {
+                CurrentSnapshot = snapshot;
+                _ = _eventBus.PublishAsync(new InteractionSnapshotChangedEvent(snapshot));
+            });
 
             // Auto-disable timer during extended idle
             if (idleSec >= MaxIdleSeconds && _timerActive)
@@ -255,4 +262,23 @@ public sealed partial class InteractionTracker : ObservableObject, IInteractionT
 
     /// <summary>Timer callback — delegates to <see cref="Tick"/>.</summary>
     private void OnTimerTick(object? state) => Tick();
+
+    private void RunOnDispatcher(Action action)
+    {
+        if (_dispatcher is null
+            || _dispatcher.HasShutdownStarted
+            || _dispatcher.HasShutdownFinished)
+        {
+            action();
+            return;
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        _dispatcher.Invoke(action);
+    }
 }

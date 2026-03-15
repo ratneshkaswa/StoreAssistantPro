@@ -10,6 +10,7 @@ public partial class MainWindow : Window
 {
     private const double NotificationPanelEdgeMargin = 16;
     private const double NotificationPanelVerticalMargin = 24;
+    private MainViewModel? _boundViewModel;
 
     public MainWindow(IWindowSizingService sizingService)
     {
@@ -23,15 +24,8 @@ public partial class MainWindow : Window
         LocationChanged += (_, _) => UpdateNotificationsPopupLayout();
         NotificationBellButton.SizeChanged += (_, _) => UpdateNotificationsPopupLayout();
 
-        DataContextChanged += (_, _) =>
-        {
-            if (DataContext is MainViewModel vm)
-            {
-                vm.RequestClose = Close;
-                vm.ApplyShortcuts(this);
-            }
-        };
-        Closed += (_, _) => (DataContext as IDisposable)?.Dispose();
+        DataContextChanged += OnDataContextChanged;
+        Closed += OnClosed;
     }
 
     private void OnNotificationsPopupOpened(object sender, EventArgs e) =>
@@ -90,4 +84,33 @@ public partial class MainWindow : Window
 
     private double GetResourceDouble(string key, double fallback) =>
         TryFindResource(key) is double value ? value : fallback;
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.OldValue is MainViewModel oldVm)
+            oldVm.RequestClose = null;
+
+        if (e.NewValue is MainViewModel newVm)
+        {
+            _boundViewModel = newVm;
+            newVm.RequestClose = Close;
+            newVm.ApplyShortcuts(this);
+        }
+        else
+        {
+            _boundViewModel = null;
+            InputBindings.Clear();
+        }
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        if (_boundViewModel is not null)
+        {
+            _boundViewModel.RequestClose = null;
+            _boundViewModel = null;
+        }
+
+        (DataContext as IDisposable)?.Dispose();
+    }
 }

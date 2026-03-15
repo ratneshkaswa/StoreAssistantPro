@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core.Helpers;
@@ -22,14 +23,18 @@ namespace StoreAssistantPro.Core.Services;
 /// </list>
 /// </para>
 /// </summary>
-public partial class AppStateService : ObservableObject, IAppStateService
+public partial class AppStateService : ObservableObject, IAppStateService, IDisposable
 {
     private readonly DispatcherTimer _clockTimer;
+    private readonly Dispatcher? _dispatcher;
     private readonly IRegionalSettingsService _regional;
+    private readonly HashSet<AppNotification> _trackedNotifications = [];
     private int _unreadCount;
+    private bool _disposed;
 
-    public AppStateService(IRegionalSettingsService regional)
+    public AppStateService(IRegionalSettingsService regional, Dispatcher? dispatcher = null)
     {
+        _dispatcher = dispatcher ?? Application.Current?.Dispatcher;
         _regional = regional;
 
         SmartTooltipsEnabled = false;
@@ -38,23 +43,83 @@ public partial class AppStateService : ObservableObject, IAppStateService
         Notifications = [];
         Notifications.CollectionChanged += OnNotificationsChanged;
 
-        _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _clockTimer.Tick += (_, _) => CurrentTime = _regional.FormatTime(_regional.Now);
+        _clockTimer = _dispatcher is not null
+            ? new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
+            : new DispatcherTimer();
+        _clockTimer.Interval = TimeSpan.FromSeconds(1);
+        _clockTimer.Tick += OnClockTimerTick;
     }
+
+    private void OnClockTimerTick(object? sender, EventArgs e) =>
+        CurrentTime = _regional.FormatTime(_regional.Now);
 
     private void OnNotificationsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        // Adjust cached counter incrementally instead of scanning the full list.
         switch (e.Action)
         {
             case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-                if (e.NewItems is not null)
-                    _unreadCount += e.NewItems.Cast<AppNotification>().Count(n => !n.IsRead);
+                TrackNotifications(e.NewItems);
+                break;
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                UntrackNotifications(e.OldItems);
+                break;
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                UntrackNotifications(e.OldItems);
+                TrackNotifications(e.NewItems);
                 break;
             case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
-                _unreadCount = 0;
+                UntrackAllNotifications();
                 break;
         }
+
+        UpdateUnreadNotificationCount();
+    }
+
+    private void TrackNotifications(System.Collections.IList? notifications)
+    {
+        if (notifications is null)
+            return;
+
+        foreach (var notification in notifications.OfType<AppNotification>())
+        {
+            if (_trackedNotifications.Add(notification))
+                notification.PropertyChanged += OnNotificationPropertyChanged;
+        }
+    }
+
+    private void UntrackNotifications(System.Collections.IList? notifications)
+    {
+        if (notifications is null)
+            return;
+
+        foreach (var notification in notifications.OfType<AppNotification>())
+        {
+            if (_trackedNotifications.Remove(notification))
+                notification.PropertyChanged -= OnNotificationPropertyChanged;
+        }
+    }
+
+    private void UntrackAllNotifications()
+    {
+        foreach (var notification in _trackedNotifications)
+            notification.PropertyChanged -= OnNotificationPropertyChanged;
+
+        _trackedNotifications.Clear();
+    }
+
+    private void OnNotificationPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AppNotification.IsRead))
+            UpdateUnreadNotificationCount();
+    }
+
+    private void UpdateUnreadNotificationCount()
+    {
+        var unreadCount = Notifications.Count(notification => !notification.IsRead);
+        if (_unreadCount == unreadCount)
+            return;
+
+        _unreadCount = unreadCount;
         OnPropertyChanged(nameof(UnreadNotificationCount));
     }
 
@@ -97,75 +162,126 @@ public partial class AppStateService : ObservableObject, IAppStateService
     // ── State mutations ──
 
     public void SetFirmInfo(string firmName) =>
-        FirmName = firmName;
+        RunOnDispatcher(() => FirmName = firmName);
 
     public void SetCurrentUser(UserType userType)
     {
-        CurrentUserType = userType;
-        LastLoggedInUserType = userType;
+        RunOnDispatcher(() =>
+        {
+            CurrentUserType = userType;
+            LastLoggedInUserType = userType;
+        });
     }
 
     public void SetLoggedIn(bool isLoggedIn)
     {
-        IsLoggedIn = isLoggedIn;
+        RunOnDispatcher(() =>
+        {
+            IsLoggedIn = isLoggedIn;
 
-        // Start the clock on first login; stop when logged out.
-        if (isLoggedIn && !_clockTimer.IsEnabled)
-        {
-            CurrentTime = _regional.FormatTime(_regional.Now);
-            _clockTimer.Start();
-        }
-        else if (!isLoggedIn && _clockTimer.IsEnabled)
-        {
-            _clockTimer.Stop();
-        }
+            // Start the clock on first login; stop when logged out.
+            if (isLoggedIn && !_clockTimer.IsEnabled)
+            {
+                CurrentTime = _regional.FormatTime(_regional.Now);
+                _clockTimer.Start();
+            }
+            else if (!isLoggedIn && _clockTimer.IsEnabled)
+            {
+                _clockTimer.Stop();
+            }
+        });
     }
 
     public void SetBillingSession(BillingSessionState session) =>
-        CurrentBillingSession = session;
+        RunOnDispatcher(() => CurrentBillingSession = session);
 
     public void SetMode(OperationalMode mode) =>
-        CurrentMode = mode;
+        RunOnDispatcher(() => CurrentMode = mode);
 
     public void SetConnectivity(bool isOffline, DateTime checkTime)
     {
-        IsOfflineMode = isOffline;
-        LastConnectionCheck = checkTime;
+        RunOnDispatcher(() =>
+        {
+            IsOfflineMode = isOffline;
+            LastConnectionCheck = checkTime;
+        });
     }
 
     public void SetSmartTooltipsEnabled(bool enabled)
     {
-        SmartTooltipsEnabled = enabled;
-        SmartTooltip.GlobalEnabled = enabled;
+        RunOnDispatcher(() =>
+        {
+            SmartTooltipsEnabled = enabled;
+            SmartTooltip.GlobalEnabled = enabled;
+        });
     }
 
     public void AddNotification(AppNotification notification) =>
-        Notifications.Add(notification);
+        RunOnDispatcher(() => Notifications.Add(notification));
 
     public void MarkNotificationRead(AppNotification notification)
     {
-        if (!notification.IsRead)
+        RunOnDispatcher(() =>
         {
-            notification.IsRead = true;
-            _unreadCount = Math.Max(0, _unreadCount - 1);
-            OnPropertyChanged(nameof(UnreadNotificationCount));
-        }
+            if (!notification.IsRead)
+                notification.IsRead = true;
+        });
     }
 
     public void ClearNotifications() =>
-        Notifications.Clear();
+        RunOnDispatcher(() => Notifications.Clear());
 
     public void Reset()
     {
-        FirmName = string.Empty;
-        CurrentUserType = default;
-        IsLoggedIn = false;
-        CurrentMode = OperationalMode.Management;
-        CurrentBillingSession = BillingSessionState.None;
-        IsOfflineMode = false;
-        LastConnectionCheck = null;
-        SmartTooltipsEnabled = false;
-        SmartTooltip.GlobalEnabled = false;
-        Notifications.Clear();
+        RunOnDispatcher(() =>
+        {
+            FirmName = string.Empty;
+            CurrentUserType = default;
+            IsLoggedIn = false;
+            CurrentMode = OperationalMode.Management;
+            CurrentBillingSession = BillingSessionState.None;
+            IsOfflineMode = false;
+            LastConnectionCheck = null;
+            SmartTooltipsEnabled = false;
+            SmartTooltip.GlobalEnabled = false;
+            Notifications.Clear();
+        });
+    }
+
+    private void RunOnDispatcher(Action action)
+    {
+        if (_dispatcher is null
+            || _dispatcher.HasShutdownStarted
+            || _dispatcher.HasShutdownFinished)
+        {
+            action();
+            return;
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        _dispatcher.Invoke(action);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+
+        RunOnDispatcher(() =>
+        {
+            _clockTimer.Stop();
+            _clockTimer.Tick -= OnClockTimerTick;
+            Notifications.CollectionChanged -= OnNotificationsChanged;
+            UntrackAllNotifications();
+        });
+
+        GC.SuppressFinalize(this);
     }
 }

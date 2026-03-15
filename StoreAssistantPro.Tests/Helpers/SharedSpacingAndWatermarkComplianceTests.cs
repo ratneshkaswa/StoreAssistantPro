@@ -67,7 +67,22 @@ public class SharedSpacingAndWatermarkComplianceTests
         Assert.Contains("FormattedText", helper, StringComparison.Ordinal);
         Assert.Contains("drawingContext.DrawText", helper, StringComparison.Ordinal);
         Assert.Contains("UseLayoutRounding = true", helper, StringComparison.Ordinal);
+        Assert.Contains("TextOptions.SetTextFormattingMode(this, TextFormattingMode.Display);", helper, StringComparison.Ordinal);
+        Assert.Contains("TextOptions.SetTextRenderingMode(this, TextRenderingMode.ClearType);", helper, StringComparison.Ordinal);
         Assert.DoesNotContain("control.HorizontalContentAlignment switch", helper, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void WatermarkHelper_Should_Rehook_ComboBox_And_DatePicker_ValueTracking_After_Reload()
+    {
+        var helper = File.ReadAllText(Path.Combine(SolutionRoot, "Core", "Helpers", "Watermark.cs"));
+
+        Assert.Contains("HookComboBoxValueChanges(comboBox);", helper, StringComparison.Ordinal);
+        Assert.Contains("HookDatePickerValueChanges(datePicker);", helper, StringComparison.Ordinal);
+        Assert.Contains("UnhookComboBoxValueChanges(comboBox);", helper, StringComparison.Ordinal);
+        Assert.Contains("UnhookDatePickerValueChanges(datePicker);", helper, StringComparison.Ordinal);
+        Assert.Contains("case ComboBox comboBox:", helper, StringComparison.Ordinal);
+        Assert.Contains("case DatePicker datePicker:", helper, StringComparison.Ordinal);
     }
 
     [Fact]

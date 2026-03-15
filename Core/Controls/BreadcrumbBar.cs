@@ -66,6 +66,8 @@ public class BreadcrumbBar : ItemsControl
 
 public class BreadcrumbBarItem : ContentControl
 {
+    private Button? _button;
+
     static BreadcrumbBarItem()
     {
         DefaultStyleKeyProperty.OverrideMetadata(
@@ -87,7 +89,16 @@ public class BreadcrumbBarItem : ContentControl
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        if (GetTemplateChild("PART_Button") is Button btn)
-            btn.Click += (_, _) => ParentBar?.RaiseItemClicked(Content ?? DataContext);
+
+        if (_button is not null)
+            _button.Click -= OnPartButtonClick;
+
+        _button = GetTemplateChild("PART_Button") as Button;
+
+        if (_button is not null)
+            _button.Click += OnPartButtonClick;
     }
+
+    private void OnPartButtonClick(object sender, RoutedEventArgs e) =>
+        ParentBar?.RaiseItemClicked(Content ?? DataContext);
 }

@@ -1,5 +1,8 @@
 ﻿using NSubstitute;
 using StoreAssistantPro.Core.Events;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -17,14 +20,21 @@ public class PredictiveFocusServiceTests
     // Use a real FocusRuleEngine with an empty registry for backward-compat
     private readonly FocusMapRegistry _focusMapRegistry = new();
 
-    private PredictiveFocusService CreateSut()
+    private PredictiveFocusService CreateSut(Lazy<IFlowStateEngine>? flowStateEngine = null, Dispatcher? dispatcher = null)
     {
         _appState.CurrentMode.Returns(OperationalMode.Management);
         _focusLock.IsFocusLocked.Returns(false);
         _navigation.CurrentPageKey.Returns(string.Empty);
         _flowStateEngine.CurrentState.Returns(FlowState.Calm);
         var ruleEngine = new FocusRuleEngine(_focusMapRegistry);
-        return new PredictiveFocusService(_focusLock, _appState, _navigation, ruleEngine, new Lazy<IFlowStateEngine>(_flowStateEngine), _eventBus);
+        return new PredictiveFocusService(
+            _focusLock,
+            _appState,
+            _navigation,
+            ruleEngine,
+            flowStateEngine ?? new Lazy<IFlowStateEngine>(_flowStateEngine),
+            _eventBus,
+            dispatcher);
     }
 
     // ── Initial state ──────────────────────────────────────────────
@@ -316,6 +326,63 @@ public class PredictiveFocusServiceTests
         Assert.True(raised);
     }
 
+    [Fact]
+    public void RequestFirstInput_FromBackgroundThread_Should_MarshalHintUpdateToDispatcher()
+    {
+        RunOnStaThread(() =>
+        {
+            var sut = CreateSut(dispatcher: Dispatcher.CurrentDispatcher);
+            var dispatcherThreadId = Thread.CurrentThread.ManagedThreadId;
+            var raisedThreadId = -1;
+
+            sut.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(IPredictiveFocusService.CurrentHint))
+                    raisedThreadId = Thread.CurrentThread.ManagedThreadId;
+            };
+
+            var worker = new Thread(() => sut.RequestFirstInput("Background"));
+            worker.Start();
+            WaitForThread(worker);
+
+            Assert.NotNull(sut.CurrentHint);
+            Assert.Equal(dispatcherThreadId, raisedThreadId);
+        });
+    }
+
+    [Fact]
+    public void IdleTimerElapsed_FromBackgroundThread_Should_MarshalInputResetToDispatcher()
+    {
+        RunOnStaThread(() =>
+        {
+            var sut = CreateSut(dispatcher: Dispatcher.CurrentDispatcher);
+            sut.SignalUserInput();
+            Assert.True(sut.IsUserInputActive);
+
+            var dispatcherThreadId = Thread.CurrentThread.ManagedThreadId;
+            var raisedThreadId = -1;
+
+            sut.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(IPredictiveFocusService.IsUserInputActive))
+                    raisedThreadId = Thread.CurrentThread.ManagedThreadId;
+            };
+
+            var idleCallback = typeof(PredictiveFocusService).GetMethod(
+                "OnIdleTimerElapsed",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Assert.NotNull(idleCallback);
+
+            var worker = new Thread(() => idleCallback!.Invoke(sut, [null, null!]));
+            worker.Start();
+            WaitForThread(worker);
+
+            Assert.False(sut.IsUserInputActive);
+            Assert.Equal(dispatcherThreadId, raisedThreadId);
+        });
+    }
+
     // ── FocusHint model tests ──────────────────────────────────────
 
     [Fact]
@@ -520,5 +587,125 @@ public class PredictiveFocusServiceTests
 
         _eventBus.Received(1).PublishAsync(
             Arg.Is<FocusHintChangedEvent>(e => e.Hint.Priority == 15)); // 5 + 10
+    }
+
+    [Fact]
+    public async Task Dispose_BeforeLazyFlowEngineResolves_DoesNotAttachLateSubscription()
+    {
+        using var resolutionStarted = new ManualResetEventSlim(false);
+        using var releaseResolution = new ManualResetEventSlim(false);
+        var blockingEngine = new TestFlowStateEngine();
+        var lazyEngine = new Lazy<IFlowStateEngine>(() =>
+        {
+            resolutionStarted.Set();
+            releaseResolution.Wait(TimeSpan.FromSeconds(5));
+            return blockingEngine;
+        });
+
+        var sut = CreateSut(lazyEngine);
+        var pendingRequest = Task.Run(() => sut.RequestFirstInput("test"));
+
+        Assert.True(resolutionStarted.Wait(TimeSpan.FromSeconds(5)));
+
+        sut.Dispose();
+        releaseResolution.Set();
+
+        await pendingRequest.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.Equal(0, blockingEngine.SubscribeCount);
+        Assert.Equal(0, blockingEngine.UnsubscribeCount);
+    }
+
+    private static void RunOnStaThread(Action action)
+    {
+        Exception? failure = null;
+        using var completed = new ManualResetEventSlim(false);
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+            finally
+            {
+                Dispatcher.CurrentDispatcher.InvokeShutdown();
+                completed.Set();
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+
+        Assert.True(completed.Wait(TimeSpan.FromSeconds(10)), "STA test thread timed out.");
+
+        if (failure is not null)
+            ExceptionDispatchInfo.Capture(failure).Throw();
+    }
+
+    private static void WaitForThread(Thread thread)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (thread.IsAlive && DateTime.UtcNow < deadline)
+            DrainDispatcher();
+
+        Assert.False(thread.IsAlive, "Worker thread timed out.");
+    }
+
+    private static void DrainDispatcher()
+    {
+        var frame = new DispatcherFrame();
+        Dispatcher.CurrentDispatcher.BeginInvoke(
+            DispatcherPriority.Background,
+            new DispatcherOperationCallback(_ =>
+            {
+                frame.Continue = false;
+                return null;
+            }),
+            null);
+        Dispatcher.PushFrame(frame);
+    }
+
+    private sealed class TestFlowStateEngine : IFlowStateEngine
+    {
+        private System.ComponentModel.PropertyChangedEventHandler? _propertyChanged;
+
+        public int SubscribeCount { get; private set; }
+
+        public int UnsubscribeCount { get; private set; }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged
+        {
+            add
+            {
+                SubscribeCount++;
+                _propertyChanged += value;
+            }
+            remove
+            {
+                UnsubscribeCount++;
+                _propertyChanged -= value;
+            }
+        }
+
+        public FlowState CurrentState => FlowState.Calm;
+
+        public string TransitionReason => string.Empty;
+
+        public DateTime LastTransitionTime => DateTime.UtcNow;
+
+        public bool IsInFlow => false;
+
+        public void Dispose()
+        {
+        }
+
+        public void Recompute()
+        {
+        }
     }
 }

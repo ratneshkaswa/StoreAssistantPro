@@ -1,22 +1,28 @@
-﻿using System.Windows.Threading;
+using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoreAssistantPro.Core.Services;
 
 /// <summary>
 /// <see cref="IStatusBarService"/> implementation that uses a
-/// <see cref="DispatcherTimer"/> for auto-clear.  Runs on the UI
-/// thread — safe for direct property-change notifications.
+/// <see cref="DispatcherTimer"/> for auto-clear. Runs on the UI
+/// thread and marshals background updates back to the app dispatcher.
 /// </summary>
-public partial class StatusBarService : ObservableObject, IStatusBarService
+public partial class StatusBarService : ObservableObject, IStatusBarService, IDisposable
 {
     private static readonly TimeSpan DefaultDuration = TimeSpan.FromSeconds(4);
 
+    private readonly Dispatcher? _dispatcher;
     private readonly DispatcherTimer _clearTimer;
+    private bool _disposed;
 
-    public StatusBarService()
+    public StatusBarService(Dispatcher? dispatcher = null)
     {
-        _clearTimer = new DispatcherTimer();
+        _dispatcher = dispatcher ?? Application.Current?.Dispatcher;
+        _clearTimer = _dispatcher is not null
+            ? new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
+            : new DispatcherTimer();
         _clearTimer.Tick += OnClearTimerTick;
 
         DefaultMessage = "Ready";
@@ -35,24 +41,33 @@ public partial class StatusBarService : ObservableObject, IStatusBarService
 
     public void Post(string message, TimeSpan duration)
     {
-        _clearTimer.Stop();
-        Message = message;
-        _clearTimer.Interval = duration;
-        _clearTimer.Start();
+        RunOnDispatcher(() =>
+        {
+            _clearTimer.Stop();
+            Message = message;
+            _clearTimer.Interval = duration;
+            _clearTimer.Start();
+        });
     }
 
     public void Post(string message) => Post(message, DefaultDuration);
 
     public void SetPersistent(string message)
     {
-        _clearTimer.Stop();
-        Message = message;
+        RunOnDispatcher(() =>
+        {
+            _clearTimer.Stop();
+            Message = message;
+        });
     }
 
     public void Clear()
     {
-        _clearTimer.Stop();
-        Message = DefaultMessage;
+        RunOnDispatcher(() =>
+        {
+            _clearTimer.Stop();
+            Message = DefaultMessage;
+        });
     }
 
     // ── Timer callback ───────────────────────────────────────────────
@@ -61,5 +76,40 @@ public partial class StatusBarService : ObservableObject, IStatusBarService
     {
         _clearTimer.Stop();
         Message = DefaultMessage;
+    }
+
+    private void RunOnDispatcher(Action action)
+    {
+        if (_dispatcher is null
+            || _dispatcher.HasShutdownStarted
+            || _dispatcher.HasShutdownFinished)
+        {
+            action();
+            return;
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        _dispatcher.Invoke(action);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+
+        RunOnDispatcher(() =>
+        {
+            _clearTimer.Stop();
+            _clearTimer.Tick -= OnClearTimerTick;
+        });
+
+        GC.SuppressFinalize(this);
     }
 }

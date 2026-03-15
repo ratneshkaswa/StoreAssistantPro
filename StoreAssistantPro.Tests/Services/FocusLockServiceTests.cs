@@ -1,5 +1,7 @@
 ﻿using NSubstitute;
 using StoreAssistantPro.Core.Events;
+using System.Runtime.ExceptionServices;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 
@@ -11,12 +13,12 @@ public class FocusLockServiceTests
 
     private Func<OperationalModeChangedEvent, Task>? _modeHandler;
 
-    private FocusLockService CreateSut()
+    private FocusLockService CreateSut(Dispatcher? dispatcher = null)
     {
         _eventBus.When(e => e.Subscribe(Arg.Any<Func<OperationalModeChangedEvent, Task>>()))
             .Do(ci => _modeHandler = ci.Arg<Func<OperationalModeChangedEvent, Task>>());
 
-        return new FocusLockService(_eventBus);
+        return new FocusLockService(_eventBus, dispatcher);
     }
 
     // ── Initial state ──────────────────────────────────────────────
@@ -186,6 +188,39 @@ public class FocusLockServiceTests
         Assert.Contains(nameof(IFocusLockService.IsFocusLocked), changed);
     }
 
+    [Fact]
+    public void ModeChangedFromBackgroundThread_Should_MarshalPropertyChangesToDispatcher()
+    {
+        RunOnStaThread(() =>
+        {
+            var sut = CreateSut(Dispatcher.CurrentDispatcher);
+            var dispatcherThreadId = Thread.CurrentThread.ManagedThreadId;
+            var raisedThreadIds = new List<int>();
+
+            sut.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName is nameof(IFocusLockService.ActiveModule)
+                    or nameof(IFocusLockService.IsFocusLocked))
+                {
+                    raisedThreadIds.Add(Thread.CurrentThread.ManagedThreadId);
+                }
+            };
+
+            var worker = new Thread(() =>
+                _modeHandler!(new OperationalModeChangedEvent(
+                    OperationalMode.Management,
+                    OperationalMode.Billing)).GetAwaiter().GetResult());
+
+            worker.Start();
+            WaitForThread(worker);
+
+            Assert.True(sut.IsFocusLocked);
+            Assert.Equal("Billing", sut.ActiveModule);
+            Assert.NotEmpty(raisedThreadIds);
+            Assert.All(raisedThreadIds, id => Assert.Equal(dispatcherThreadId, id));
+        });
+    }
+
     // ── Release hold ─────────────────────────────────────────────
 
     [Fact]
@@ -337,5 +372,59 @@ public class FocusLockServiceTests
 
         _eventBus.Received(1).Subscribe(
             Arg.Any<Func<OperationalModeChangedEvent, Task>>());
+    }
+
+    private static void RunOnStaThread(Action action)
+    {
+        Exception? failure = null;
+        using var completed = new ManualResetEventSlim(false);
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+            finally
+            {
+                Dispatcher.CurrentDispatcher.InvokeShutdown();
+                completed.Set();
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+
+        Assert.True(completed.Wait(TimeSpan.FromSeconds(10)), "STA test thread timed out.");
+
+        if (failure is not null)
+            ExceptionDispatchInfo.Capture(failure).Throw();
+    }
+
+    private static void WaitForThread(Thread thread)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (thread.IsAlive && DateTime.UtcNow < deadline)
+            DrainDispatcher();
+
+        Assert.False(thread.IsAlive, "Worker thread timed out.");
+    }
+
+    private static void DrainDispatcher()
+    {
+        var frame = new DispatcherFrame();
+        Dispatcher.CurrentDispatcher.BeginInvoke(
+            DispatcherPriority.Background,
+            new DispatcherOperationCallback(_ =>
+            {
+                frame.Continue = false;
+                return null;
+            }),
+            null);
+        Dispatcher.PushFrame(frame);
     }
 }

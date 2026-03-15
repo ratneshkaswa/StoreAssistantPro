@@ -153,6 +153,31 @@ public class NotificationBadgeBehaviorTests
     }
 
     [Fact]
+    public void Badge_RuntimeVisuals_Should_Enable_CrispLayout_And_TextRendering()
+    {
+        RunOnSta(() =>
+        {
+            var panel = new Grid();
+            NotificationBadgeBehavior.SetCount(panel, 1);
+
+            var badge = FindBadge(panel);
+            Assert.NotNull(badge);
+            var tb = badge.Child as TextBlock;
+            Assert.NotNull(tb);
+
+            Assert.True(badge.UseLayoutRounding);
+            Assert.True(badge.SnapsToDevicePixels);
+            Assert.Equal(TextFormattingMode.Display, TextOptions.GetTextFormattingMode(badge));
+            Assert.Equal(TextRenderingMode.ClearType, TextOptions.GetTextRenderingMode(badge));
+
+            Assert.True(tb.UseLayoutRounding);
+            Assert.True(tb.SnapsToDevicePixels);
+            Assert.Equal(TextFormattingMode.Display, TextOptions.GetTextFormattingMode(tb));
+            Assert.Equal(TextRenderingMode.ClearType, TextOptions.GetTextRenderingMode(tb));
+        });
+    }
+
+    [Fact]
     public void Badge_IsNotHitTestVisible()
     {
         RunOnSta(() =>

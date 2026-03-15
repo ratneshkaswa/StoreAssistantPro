@@ -193,10 +193,16 @@ public abstract class BaseDialogWindow : Window
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             CanContentScroll = false,
-            PanningMode = PanningMode.Both
+            PanningMode = PanningMode.Both,
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true
         };
 
-        var viewportHost = new ViewportConstrainedPanel();
+        var viewportHost = new ViewportConstrainedPanel
+        {
+            UseLayoutRounding = true,
+            SnapsToDevicePixels = true
+        };
         BindingOperations.SetBinding(
             viewportHost,
             ViewportConstrainedPanel.ViewportWidthProperty,

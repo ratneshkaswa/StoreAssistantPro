@@ -44,6 +44,20 @@ public sealed class SharedPopupStandardsTests
     }
 
     [Fact]
+    public void SmartTooltip_RuntimeContent_Should_Enable_CrispLayout_And_TextRendering()
+    {
+        var smartTooltip = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "SmartTooltip.cs"));
+
+        Assert.Contains("UseLayoutRounding = true", smartTooltip, StringComparison.Ordinal);
+        Assert.Contains("SnapsToDevicePixels = true", smartTooltip, StringComparison.Ordinal);
+        Assert.Contains("TextOptions.SetTextFormattingMode", smartTooltip, StringComparison.Ordinal);
+        Assert.Contains("TextFormattingMode.Display", smartTooltip, StringComparison.Ordinal);
+        Assert.Contains("TextOptions.SetTextRenderingMode", smartTooltip, StringComparison.Ordinal);
+        Assert.Contains("TextRenderingMode.ClearType", smartTooltip, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MasterPinDialog_Should_Grow_For_LongPromptText()
     {
         var xaml = File.ReadAllText(

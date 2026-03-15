@@ -37,22 +37,12 @@ public partial class LoginWindow : Window
         }
 
         // Auto-focus first keypad button after role selection
-        vm.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(LoginViewModel.SelectedUserType) && vm.IsUserSelected && !vm.IsForgotPinMode)
-                Dispatcher.BeginInvoke(() => Digit1Button.Focus(),
-                    System.Windows.Threading.DispatcherPriority.Input);
-
-            // Auto-focus master PIN box when entering forgot PIN mode
-            if (e.PropertyName == nameof(LoginViewModel.IsForgotPinMode) && vm.IsForgotPinMode)
-                Dispatcher.BeginInvoke(() => ResetMasterBox.Focus(),
-                    System.Windows.Threading.DispatcherPriority.Input);
-        };
+        vm.PropertyChanged += OnViewModelPropertyChanged;
 
         // Clear PasswordBoxes after successful PIN reset
-        vm.ResetCompleted += ClearResetFields;
+        vm.ResetCompleted += OnResetCompleted;
 
-        Closed += (_, _) => vm.Dispose();
+        Closed += OnClosed;
     }
 
     /// <summary>
@@ -176,6 +166,37 @@ public partial class LoginWindow : Window
         ResetMasterBox.Password = string.Empty;
         ResetNewPinBox.Password = string.Empty;
         ResetConfirmPinBox.Password = string.Empty;
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not LoginViewModel vm)
+            return;
+
+        if (e.PropertyName == nameof(LoginViewModel.SelectedUserType) && vm.IsUserSelected && !vm.IsForgotPinMode)
+        {
+            Dispatcher.BeginInvoke(() => Digit1Button.Focus(),
+                System.Windows.Threading.DispatcherPriority.Input);
+        }
+
+        if (e.PropertyName == nameof(LoginViewModel.IsForgotPinMode) && vm.IsForgotPinMode)
+        {
+            Dispatcher.BeginInvoke(() => ResetMasterBox.Focus(),
+                System.Windows.Threading.DispatcherPriority.Input);
+        }
+    }
+
+    private void OnResetCompleted() => ClearResetFields();
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        if (_vm is null)
+            return;
+
+        _vm.PropertyChanged -= OnViewModelPropertyChanged;
+        _vm.ResetCompleted -= OnResetCompleted;
+        _vm.Dispose();
+        _vm = null;
     }
 
     private static void OnPreviewNumericOnly(object sender, TextCompositionEventArgs e)

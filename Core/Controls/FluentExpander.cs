@@ -16,6 +16,8 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class FluentExpander : HeaderedContentControl
 {
+    private Button? _toggleButton;
+
     static FluentExpander()
     {
         DefaultStyleKeyProperty.OverrideMetadata(
@@ -46,7 +48,15 @@ public class FluentExpander : HeaderedContentControl
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        if (GetTemplateChild("PART_ToggleButton") is Button toggleBtn)
-            toggleBtn.Click += (_, _) => IsExpanded = !IsExpanded;
+
+        if (_toggleButton is not null)
+            _toggleButton.Click -= OnToggleButtonClick;
+
+        _toggleButton = GetTemplateChild("PART_ToggleButton") as Button;
+
+        if (_toggleButton is not null)
+            _toggleButton.Click += OnToggleButtonClick;
     }
+
+    private void OnToggleButtonClick(object sender, RoutedEventArgs e) => IsExpanded = !IsExpanded;
 }

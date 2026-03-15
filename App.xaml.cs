@@ -21,6 +21,8 @@ namespace StoreAssistantPro;
 
 public partial class App : Application
 {
+    private static readonly object CultureSyncRoot = new();
+    private static bool _languageMetadataConfigured;
     private IHost _host = null!;
     private ILogger<App>? _logger;
 
@@ -268,9 +270,17 @@ public partial class App : Application
         CultureInfo.DefaultThreadCurrentUICulture = culture;
 
         // WPF XAML bindings (StringFormat, converters, etc.)
-        FrameworkElement.LanguageProperty.OverrideMetadata(
-            typeof(FrameworkElement),
-            new FrameworkPropertyMetadata(
-                XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+        lock (CultureSyncRoot)
+        {
+            if (_languageMetadataConfigured)
+                return;
+
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(
+                    XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+
+            _languageMetadataConfigured = true;
+        }
     }
 }

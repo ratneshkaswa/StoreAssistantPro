@@ -20,6 +20,8 @@ namespace StoreAssistantPro.Core.Controls;
 public class NumberBox : Control
 {
     private TextBox? _textBox;
+    private Button? _upButton;
+    private Button? _downButton;
 
     static NumberBox()
     {
@@ -103,6 +105,20 @@ public class NumberBox : Control
     {
         base.OnApplyTemplate();
 
+        if (_textBox is not null)
+        {
+            _textBox.PreviewTextInput -= OnPreviewTextInput;
+            _textBox.LostFocus -= OnTextBoxLostFocus;
+            _textBox.PreviewKeyDown -= OnTextBoxPreviewKeyDown;
+            DataObject.RemovePastingHandler(_textBox, OnPaste);
+        }
+
+        if (_upButton is not null)
+            _upButton.Click -= OnUpButtonClick;
+
+        if (_downButton is not null)
+            _downButton.Click -= OnDownButtonClick;
+
         _textBox = GetTemplateChild("PART_TextBox") as TextBox;
         if (_textBox is not null)
         {
@@ -113,15 +129,20 @@ public class NumberBox : Control
             SyncTextFromValue();
         }
 
-        if (GetTemplateChild("PART_UpButton") is Button upBtn)
-            upBtn.Click += (_, _) => Increment();
+        _upButton = GetTemplateChild("PART_UpButton") as Button;
+        if (_upButton is not null)
+            _upButton.Click += OnUpButtonClick;
 
-        if (GetTemplateChild("PART_DownButton") is Button downBtn)
-            downBtn.Click += (_, _) => Decrement();
+        _downButton = GetTemplateChild("PART_DownButton") as Button;
+        if (_downButton is not null)
+            _downButton.Click += OnDownButtonClick;
     }
 
     private void Increment() => Value += SmallChange;
     private void Decrement() => Value -= SmallChange;
+
+    private void OnUpButtonClick(object sender, RoutedEventArgs e) => Increment();
+    private void OnDownButtonClick(object sender, RoutedEventArgs e) => Decrement();
 
     private void OnPreviewTextInput(object sender, TextCompositionEventArgs e)
     {

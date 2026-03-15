@@ -212,11 +212,23 @@ public static class TipBannerAutoState
 
         banner.Loaded -= OnContextBannerLoaded;
         banner.Unloaded -= OnContextBannerUnloaded;
+        UnregisterLiveBanner(banner);
 
         if (e.NewValue is string key && key.Length > 0)
         {
             banner.Loaded += OnContextBannerLoaded;
             banner.Unloaded += OnContextBannerUnloaded;
+
+            if (banner.IsLoaded)
+            {
+                CaptureOriginalsIfNeeded(banner);
+                ResolveAndApplyContext(banner);
+                RegisterLiveBanner(banner);
+            }
+        }
+        else if ((bool)banner.GetValue(OriginalsCapturedProperty))
+        {
+            RestoreOriginals(banner);
         }
     }
 
@@ -242,13 +254,7 @@ public static class TipBannerAutoState
         if (sender is not InlineTipBanner banner)
             return;
 
-        // Capture original XAML-authored values on first load
-        if (!(bool)banner.GetValue(OriginalsCapturedProperty))
-        {
-            banner.SetValue(OriginalTitleProperty, banner.Title);
-            banner.SetValue(OriginalTipTextProperty, banner.TipText);
-            banner.SetValue(OriginalsCapturedProperty, true);
-        }
+        CaptureOriginalsIfNeeded(banner);
 
         ResolveAndApplyContext(banner);
         RegisterLiveBanner(banner);
@@ -293,26 +299,45 @@ public static class TipBannerAutoState
             return;
 
         var result = ContextResolver?.Invoke(contextKey);
+        var originalTitle = (string?)banner.GetValue(OriginalTitleProperty);
+        var originalText = (string?)banner.GetValue(OriginalTipTextProperty);
 
         if (result is not null)
         {
-            if (result.EffectiveDescription is not null)
-                banner.TipText = result.EffectiveDescription;
+            if (originalTitle is not null)
+                banner.Title = originalTitle;
 
-            if (result.UsageTip is not null)
-                banner.TipText = $"{banner.TipText} {result.UsageTip}";
+            var tipText = result.EffectiveDescription ?? originalText ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(result.UsageTip))
+                tipText = string.IsNullOrWhiteSpace(tipText)
+                    ? result.UsageTip
+                    : $"{tipText} {result.UsageTip}";
+
+            banner.TipText = tipText;
         }
         else
         {
-            // Restore XAML-authored defaults
-            var originalTitle = (string?)banner.GetValue(OriginalTitleProperty);
-            var originalText = (string?)banner.GetValue(OriginalTipTextProperty);
-
-            if (originalTitle is not null)
-                banner.Title = originalTitle;
-            if (originalText is not null)
-                banner.TipText = originalText;
+            RestoreOriginals(banner);
         }
+    }
+
+    private static void CaptureOriginalsIfNeeded(InlineTipBanner banner)
+    {
+        if ((bool)banner.GetValue(OriginalsCapturedProperty))
+            return;
+
+        banner.SetValue(OriginalTitleProperty, banner.Title);
+        banner.SetValue(OriginalTipTextProperty, banner.TipText);
+        banner.SetValue(OriginalsCapturedProperty, true);
+    }
+
+    private static void RestoreOriginals(InlineTipBanner banner)
+    {
+        if (banner.GetValue(OriginalTitleProperty) is string originalTitle)
+            banner.Title = originalTitle;
+
+        if (banner.GetValue(OriginalTipTextProperty) is string originalText)
+            banner.TipText = originalText;
     }
 
     // ── Context changed: re-resolve all live banners ────────────────

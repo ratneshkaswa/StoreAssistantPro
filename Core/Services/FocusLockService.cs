@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using StoreAssistantPro.Core.Events;
+using System.Windows;
+using System.Windows.Threading;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Core.Services;
@@ -37,14 +39,16 @@ public partial class FocusLockService : ObservableObject, IFocusLockService, IDi
     private const string BillingModule = "Billing";
 
     private readonly IEventBus _eventBus;
+    private readonly Dispatcher? _dispatcher;
     private readonly object _lock = new();
 
     private bool _isReleaseHeld;
     private string? _deferredReleaseModule;
 
-    public FocusLockService(IEventBus eventBus)
+    public FocusLockService(IEventBus eventBus, Dispatcher? dispatcher = null)
     {
         _eventBus = eventBus;
+        _dispatcher = dispatcher ?? Application.Current?.Dispatcher;
         _eventBus.Subscribe<OperationalModeChangedEvent>(OnModeChangedAsync);
     }
 
@@ -67,50 +71,56 @@ public partial class FocusLockService : ObservableObject, IFocusLockService, IDi
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
 
-        lock (_lock)
+        RunOnDispatcher(() =>
         {
-            // Acquiring clears any pending deferred release — the caller
-            // is explicitly re-establishing the lock.
-            _deferredReleaseModule = null;
+            lock (_lock)
+            {
+                // Acquiring clears any pending deferred release — the caller
+                // is explicitly re-establishing the lock.
+                _deferredReleaseModule = null;
 
-            // Idempotent for the same module
-            if (IsFocusLocked && ActiveModule == moduleKey)
-                return;
+                // Idempotent for the same module
+                if (IsFocusLocked && ActiveModule == moduleKey)
+                    return;
 
-            if (IsFocusLocked)
-                throw new InvalidOperationException(
-                    $"Focus lock is already held by '{ActiveModule}'. " +
-                    $"Cannot acquire for '{moduleKey}'.");
+                if (IsFocusLocked)
+                    throw new InvalidOperationException(
+                        $"Focus lock is already held by '{ActiveModule}'. " +
+                        $"Cannot acquire for '{moduleKey}'.");
 
-            ActiveModule = moduleKey;
-            IsFocusLocked = true;
-        }
+                ActiveModule = moduleKey;
+                IsFocusLocked = true;
+            }
+        });
     }
 
     public void Release(string moduleKey)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moduleKey);
 
-        lock (_lock)
+        RunOnDispatcher(() =>
         {
-            if (!IsFocusLocked)
-                return;
-
-            if (ActiveModule != moduleKey)
-                throw new InvalidOperationException(
-                    $"Focus lock is held by '{ActiveModule}'. " +
-                    $"Cannot release for '{moduleKey}'.");
-
-            // Defer if a hold is active (e.g., payment processing)
-            if (_isReleaseHeld)
+            lock (_lock)
             {
-                _deferredReleaseModule = moduleKey;
-                return;
-            }
+                if (!IsFocusLocked)
+                    return;
 
-            ActiveModule = string.Empty;
-            IsFocusLocked = false;
-        }
+                if (ActiveModule != moduleKey)
+                    throw new InvalidOperationException(
+                        $"Focus lock is held by '{ActiveModule}'. " +
+                        $"Cannot release for '{moduleKey}'.");
+
+                // Defer if a hold is active (e.g., payment processing)
+                if (_isReleaseHeld)
+                {
+                    _deferredReleaseModule = moduleKey;
+                    return;
+                }
+
+                ActiveModule = string.Empty;
+                IsFocusLocked = false;
+            }
+        });
     }
 
     // ── Release hold (payment safety) ──
@@ -158,6 +168,25 @@ public partial class FocusLockService : ObservableObject, IFocusLockService, IDi
             Release(BillingModule);
 
         return Task.CompletedTask;
+    }
+
+    private void RunOnDispatcher(Action action)
+    {
+        if (_dispatcher is null
+            || _dispatcher.HasShutdownStarted
+            || _dispatcher.HasShutdownFinished)
+        {
+            action();
+            return;
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        _dispatcher.Invoke(action);
     }
 
     // ── Cleanup ──

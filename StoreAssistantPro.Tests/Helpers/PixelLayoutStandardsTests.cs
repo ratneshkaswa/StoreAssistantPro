@@ -166,6 +166,11 @@ public sealed class PixelLayoutStandardsTests
             "<Setter Property=\"SnapsToDevicePixels\" Value=\"True\"/>",
             "UseLayoutRounding=\"True\"");
 
+        Assert.Contains("<Style TargetType=\"{x:Type controls:ToastHost}\">", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("ItemsSource=\"{TemplateBinding Toasts}\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"UseLayoutRounding\" Value=\"True\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"SnapsToDevicePixels\" Value=\"True\"/>", fluentTheme, StringComparison.Ordinal);
+
         AssertStyleBlockContains(
             fluentTheme,
             "<Style TargetType=\"{x:Type controls:BreadcrumbBar}\">",

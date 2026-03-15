@@ -33,13 +33,14 @@ namespace StoreAssistantPro.Core.Services;
 ///   providing maximum noise reduction during peak concentration.
 /// </code>
 /// </summary>
-public sealed partial class CalmUIService : ObservableObject, ICalmUIService
+public sealed partial class CalmUIService : ObservableObject, ICalmUIService, IDisposable
 {
     private readonly IAppStateService _appState;
     private readonly IFocusLockService _focusLock;
     private readonly IFlowStateEngine _flowStateEngine;
     private readonly IEventBus _eventBus;
     private bool? _manualOverride;
+    private bool _disposed;
 
     public CalmUIService(
         IAppStateService appState,
@@ -162,5 +163,19 @@ public sealed partial class CalmUIService : ObservableObject, ICalmUIService
             _ = _eventBus.PublishAsync(new CalmStateChangedEvent(
                 ActiveZone, CalmModeEnabled, CurrentFlowState));
         }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _appState.PropertyChanged -= OnSourceStateChanged;
+        _focusLock.PropertyChanged -= OnSourceStateChanged;
+        _flowStateEngine.PropertyChanged -= OnFlowStateChanged;
+        GC.SuppressFinalize(this);
     }
 }

@@ -680,6 +680,45 @@ public class CalmUIServiceTests
         Assert.Equal(EmphasisLevel.Muted, sut.GetEmphasis(WorkspaceZone.MenuBar));
     }
 
+    [Fact]
+    public void Dispose_UnsubscribesFromStateSources()
+    {
+        _appState.CurrentMode.Returns(OperationalMode.Billing);
+        _focusLock.IsFocusLocked.Returns(false);
+        _flowStateEngine.CurrentState.Returns(FlowState.Calm);
+
+        var sut = CreateSut();
+        _eventBus.ClearReceivedCalls();
+
+        sut.Dispose();
+
+        _appState.CurrentMode.Returns(OperationalMode.Management);
+        _appState.PropertyChanged += Raise.Event<System.ComponentModel.PropertyChangedEventHandler>(
+            _appState,
+            new System.ComponentModel.PropertyChangedEventArgs(nameof(IAppStateService.CurrentMode)));
+
+        _focusLock.IsFocusLocked.Returns(true);
+        _focusLock.PropertyChanged += Raise.Event<System.ComponentModel.PropertyChangedEventHandler>(
+            _focusLock,
+            new System.ComponentModel.PropertyChangedEventArgs(nameof(IFocusLockService.IsFocusLocked)));
+
+        _flowStateEngine.CurrentState.Returns(FlowState.Flow);
+        _flowStateEngine.PropertyChanged += Raise.Event<System.ComponentModel.PropertyChangedEventHandler>(
+            _flowStateEngine,
+            new System.ComponentModel.PropertyChangedEventArgs(nameof(IFlowStateEngine.CurrentState)));
+
+        _eventBus.DidNotReceive().PublishAsync(Arg.Any<CalmStateChangedEvent>());
+    }
+
+    [Fact]
+    public void Dispose_CanBeCalledTwice()
+    {
+        var sut = CreateSut();
+
+        sut.Dispose();
+        sut.Dispose();
+    }
+
     // ── Manual override vs Flow state ────────────────────────────────
 
     [Fact]

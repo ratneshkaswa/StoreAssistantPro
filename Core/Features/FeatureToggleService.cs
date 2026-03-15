@@ -29,16 +29,18 @@ namespace StoreAssistantPro.Core.Features;
 /// </list>
 /// </para>
 /// </summary>
-public partial class FeatureToggleService : ObservableObject, IFeatureToggleService
+public partial class FeatureToggleService : ObservableObject, IFeatureToggleService, IDisposable
 {
     private readonly IFocusLockService _focusLock;
     private readonly IAppStateService _appState;
     private Dictionary<string, bool> _flags = [];
+    private bool _disposed;
 
     public FeatureToggleService(IFocusLockService focusLock, IAppStateService appState)
     {
         _focusLock = focusLock;
         _appState = appState;
+        CurrentMode = _appState.CurrentMode;
         _focusLock.PropertyChanged += OnFocusLockPropertyChanged;
         _appState.PropertyChanged += OnAppStatePropertyChanged;
     }
@@ -59,7 +61,6 @@ public partial class FeatureToggleService : ObservableObject, IFeatureToggleServ
     /// </summary>
     private static readonly HashSet<string> BillingOnlyFeatures = new(StringComparer.OrdinalIgnoreCase)
     {
-        FeatureFlags.Billing,
         FeatureFlags.AdvancedBilling
     };
 
@@ -130,8 +131,13 @@ public partial class FeatureToggleService : ObservableObject, IFeatureToggleServ
         if (CurrentMode == mode)
             return;
 
-        CurrentMode = mode;
-        // Notify all bound properties so UI refreshes
+        _appState.SetMode(mode);
+
+        if (CurrentMode != mode)
+            CurrentMode = mode;
+
+        // Notify all bound properties so UI refreshes even when the
+        // app-state implementation is substituted in tests.
         OnPropertyChanged(string.Empty);
     }
 
@@ -146,10 +152,30 @@ public partial class FeatureToggleService : ObservableObject, IFeatureToggleServ
 
     private void OnAppStatePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(IAppStateService.CurrentMode))
+        {
+            if (CurrentMode != _appState.CurrentMode)
+                CurrentMode = _appState.CurrentMode;
+
+            OnPropertyChanged(string.Empty);
+            return;
+        }
+
         if (e.PropertyName == nameof(IAppStateService.IsOfflineMode))
         {
             // Re-evaluate all feature flags when offline mode changes
             OnPropertyChanged(string.Empty);
         }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+        _focusLock.PropertyChanged -= OnFocusLockPropertyChanged;
+        _appState.PropertyChanged -= OnAppStatePropertyChanged;
+        GC.SuppressFinalize(this);
     }
 }

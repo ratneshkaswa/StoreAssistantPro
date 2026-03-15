@@ -25,7 +25,13 @@ public class WindowSizingService : IWindowSizingService
         AttachVisibilityGuard(window);
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;
-        window.Closed += (_, _) => SystemParameters.StaticPropertyChanged -= OnDisplayChanged;
+        window.Closed += (_, _) =>
+        {
+            SystemParameters.StaticPropertyChanged -= OnDisplayChanged;
+
+            if (ReferenceEquals(_mainWindow, window))
+                _mainWindow = null;
+        };
     }
 
     public void ConfigureDialogWindow(Window dialog, double width, double height)

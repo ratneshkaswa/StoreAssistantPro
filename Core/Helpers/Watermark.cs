@@ -202,10 +202,12 @@ public static class Watermark
         switch (sender)
         {
             case ComboBox comboBox:
+                HookComboBoxValueChanges(comboBox);
                 HookHostedTextBox(comboBox, "PART_EditableTextBox");
                 RefreshAdorner(comboBox);
                 break;
             case DatePicker datePicker:
+                HookDatePickerValueChanges(datePicker);
                 HookHostedTextBox(datePicker, "PART_TextBox");
                 RefreshAdorner(datePicker);
                 break;
@@ -712,6 +714,8 @@ public static class Watermark
             IsHitTestVisible = false;
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
+            TextOptions.SetTextFormattingMode(this, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(this, TextRenderingMode.ClearType);
 
             _text = text;
             _textAlignment = GetTextAlignment(adornedElement);

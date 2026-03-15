@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Windows;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Navigation;
@@ -41,9 +43,14 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
     private readonly IFocusRuleEngine _ruleEngine;
     private readonly Lazy<IFlowStateEngine> _flowStateEngine;
     private readonly IEventBus _eventBus;
+    private readonly Dispatcher? _dispatcher;
+    private readonly Lock _flowStateLock = new();
 
     /// <summary>Timer that resets <see cref="IsUserInputActive"/> after idle.</summary>
     private readonly System.Timers.Timer _idleTimer;
+    private IFlowStateEngine? _resolvedFlowStateEngine;
+    private bool _flowStateSubscribed;
+    private bool _disposed;
 
     public PredictiveFocusService(
         IFocusLockService focusLock,
@@ -51,7 +58,8 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
         INavigationService navigation,
         IFocusRuleEngine ruleEngine,
         Lazy<IFlowStateEngine> flowStateEngine,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        Dispatcher? dispatcher = null)
     {
         _focusLock = focusLock;
         _appState = appState;
@@ -59,6 +67,7 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
         _ruleEngine = ruleEngine;
         _flowStateEngine = flowStateEngine;
         _eventBus = eventBus;
+        _dispatcher = dispatcher ?? Application.Current?.Dispatcher;
 
         // Use Calm default for the initial timer — the lazy engine may
         // not be resolved yet (circular-dependency avoidance).
@@ -71,24 +80,6 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
         _focusLock.PropertyChanged += OnFocusLockChanged;
         _appState.PropertyChanged += OnAppStateChanged;
         _navigation.PropertyChanged += OnNavigationChanged;
-
-        // Defer FlowStateEngine subscription until first access to
-        // avoid triggering the circular resolution at construction.
-        _ = Task.Run(() =>
-        {
-            try
-            {
-                var engine = _flowStateEngine.Value;
-                engine.PropertyChanged += OnFlowStateChanged;
-                // Sync idle timer now that the engine is available
-                _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(engine.CurrentState);
-            }
-            catch (Exception)
-            {
-                // FlowStateEngine resolution failed — focus hints will
-                // work without flow-state adaptation.
-            }
-        });
     }
 
     // ── Observable properties ────────────────────────────────────────
@@ -103,10 +94,13 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
 
     public void SignalUserInput()
     {
-        IsUserInputActive = true;
-        _idleTimer.Stop();
-        _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(_flowStateEngine.Value.CurrentState);
-        _idleTimer.Start();
+        RunOnDispatcher(() =>
+        {
+            IsUserInputActive = true;
+            _idleTimer.Stop();
+            _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(GetCurrentFlowState());
+            _idleTimer.Start();
+        });
     }
 
     public void RequestFocus(string elementName, string reason)
@@ -191,22 +185,23 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
             return;
 
         // Update the idle timer interval to match the new flow state
-        _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(_flowStateEngine.Value.CurrentState);
+        _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(GetCurrentFlowState());
     }
 
     // ── Hint emission ────────────────────────────────────────────────
 
     private void EmitHint(FocusHint hint)
     {
-        // Apply flow-state priority boost
-        var boost = FlowFocusAdapter.GetPriorityBoost(_flowStateEngine.Value.CurrentState);
-        if (boost > 0)
+        RunOnDispatcher(() =>
         {
-            hint = hint with { Priority = hint.Priority + boost };
-        }
+            // Apply flow-state priority boost
+            var boost = FlowFocusAdapter.GetPriorityBoost(GetCurrentFlowState());
+            if (boost > 0)
+                hint = hint with { Priority = hint.Priority + boost };
 
-        CurrentHint = hint;
-        _ = _eventBus.PublishAsync(new FocusHintChangedEvent(hint));
+            CurrentHint = hint;
+            _ = _eventBus.PublishAsync(new FocusHintChangedEvent(hint));
+        });
     }
 
     // ── Helpers ──────────────────────────────────────────────────────
@@ -223,30 +218,98 @@ public sealed partial class PredictiveFocusService : ObservableObject, IPredicti
 
         // Flow state bypasses the input guard — the operator is in
         // rapid-fire mode and focus should chase them aggressively.
-        return !FlowFocusAdapter.ShouldBypassInputGuard(_flowStateEngine.Value.CurrentState);
+        return !FlowFocusAdapter.ShouldBypassInputGuard(GetCurrentFlowState());
     }
 
     private string CurrentPageKey() =>
         _navigation.CurrentPageKey ?? string.Empty;
 
+    private FlowState GetCurrentFlowState()
+    {
+        EnsureFlowStateEngineSubscribed();
+        return _resolvedFlowStateEngine?.CurrentState ?? FlowState.Calm;
+    }
+
+    private void EnsureFlowStateEngineSubscribed()
+    {
+        lock (_flowStateLock)
+        {
+            if (_disposed || _flowStateSubscribed)
+                return;
+        }
+
+        IFlowStateEngine engine;
+        try
+        {
+            engine = _flowStateEngine.Value;
+        }
+        catch (Exception)
+        {
+            // FlowStateEngine resolution failed — focus hints will
+            // work without flow-state adaptation.
+            return;
+        }
+
+        lock (_flowStateLock)
+        {
+            if (_disposed || _flowStateSubscribed)
+                return;
+
+            engine.PropertyChanged += OnFlowStateChanged;
+            _resolvedFlowStateEngine = engine;
+            _flowStateSubscribed = true;
+            _idleTimer.Interval = FlowFocusAdapter.GetIdleTimeoutMs(engine.CurrentState);
+        }
+    }
+
     // ── Idle timer ───────────────────────────────────────────────────
 
     private void OnIdleTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        IsUserInputActive = false;
+        RunOnDispatcher(() => IsUserInputActive = false);
+    }
+
+    private void RunOnDispatcher(Action action)
+    {
+        if (_dispatcher is null
+            || _dispatcher.HasShutdownStarted
+            || _dispatcher.HasShutdownFinished)
+        {
+            action();
+            return;
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        _dispatcher.Invoke(action);
     }
 
     // ── Cleanup ──────────────────────────────────────────────────────
 
     public void Dispose()
     {
+        lock (_flowStateLock)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+
+            if (_flowStateSubscribed && _resolvedFlowStateEngine is not null)
+                _resolvedFlowStateEngine.PropertyChanged -= OnFlowStateChanged;
+
+            _flowStateSubscribed = false;
+            _resolvedFlowStateEngine = null;
+        }
+
         _idleTimer.Elapsed -= OnIdleTimerElapsed;
         _idleTimer.Dispose();
         _focusLock.PropertyChanged -= OnFocusLockChanged;
         _appState.PropertyChanged -= OnAppStateChanged;
         _navigation.PropertyChanged -= OnNavigationChanged;
-
-        if (_flowStateEngine.IsValueCreated)
-            _flowStateEngine.Value.PropertyChanged -= OnFlowStateChanged;
     }
 }

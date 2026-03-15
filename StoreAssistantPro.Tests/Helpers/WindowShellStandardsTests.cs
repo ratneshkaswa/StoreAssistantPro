@@ -60,11 +60,15 @@ public sealed class WindowShellStandardsTests
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
         var viewModel = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "ViewModels", "MainViewModel.cs"));
+        var fluentTheme = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
 
         Assert.Contains("<controls:ToastHost", content, StringComparison.Ordinal);
         Assert.Contains("Toasts=\"{Binding ToastService.Toasts}\"", content, StringComparison.Ordinal);
         Assert.Contains("public IToastService ToastService { get; }", viewModel, StringComparison.Ordinal);
         Assert.Contains("ToastService = toastService;", viewModel, StringComparison.Ordinal);
+        Assert.Contains("<Style TargetType=\"{x:Type controls:ToastHost}\">", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("ItemsSource=\"{TemplateBinding Toasts}\"", fluentTheme, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -106,6 +110,23 @@ public sealed class WindowShellStandardsTests
         Assert.Contains("sizingService.ConfigureMainWindow(this);", mainWindowCode, StringComparison.Ordinal);
         Assert.Contains("sizing.ConfigureStartupWindow(this,", loginWindowCode, StringComparison.Ordinal);
         Assert.Contains("sizingService.ConfigureStartupWindow(this,", setupWindowCode, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainWindow_Should_Clear_RequestClose_On_DataContext_Swap_And_Close()
+    {
+        var mainWindowCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
+        var mainViewModelCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "ViewModels", "MainViewModel.cs"));
+
+        Assert.Contains("DataContextChanged += OnDataContextChanged;", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("Closed += OnClosed;", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("if (e.OldValue is MainViewModel oldVm)", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("oldVm.RequestClose = null;", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("_boundViewModel.RequestClose = null;", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("InputBindings.Clear();", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("RequestClose = null;", mainViewModelCode, StringComparison.Ordinal);
     }
 
     [Fact]

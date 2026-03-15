@@ -10,6 +10,8 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class InfoBar : ContentControl
 {
+    private Button? _closeButton;
+
     static InfoBar()
     {
         DefaultStyleKeyProperty.OverrideMetadata(
@@ -69,9 +71,17 @@ public class InfoBar : ContentControl
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        if (GetTemplateChild("PART_CloseButton") is Button closeBtn)
-            closeBtn.Click += (_, _) => IsOpen = false;
+
+        if (_closeButton is not null)
+            _closeButton.Click -= OnCloseButtonClick;
+
+        _closeButton = GetTemplateChild("PART_CloseButton") as Button;
+
+        if (_closeButton is not null)
+            _closeButton.Click += OnCloseButtonClick;
     }
+
+    private void OnCloseButtonClick(object sender, RoutedEventArgs e) => IsOpen = false;
 }
 
 public enum InfoBarSeverity

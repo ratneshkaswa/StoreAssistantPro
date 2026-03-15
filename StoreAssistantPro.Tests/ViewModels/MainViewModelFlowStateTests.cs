@@ -73,6 +73,17 @@ public class MainViewModelFlowStateTests
         _statusBar.DidNotReceive().Post("Vendor management closed");
     }
 
+    [Fact]
+    public void Dispose_ClearsRequestClose()
+    {
+        var sut = CreateSut();
+        sut.RequestClose = () => { };
+
+        sut.Dispose();
+
+        Assert.Null(sut.RequestClose);
+    }
+
     // ── Stub for INavigationService (must be ObservableObject) ───
 
     private sealed class StubNavigationService : ObservableObject, INavigationService

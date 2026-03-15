@@ -51,9 +51,7 @@ public partial class FirmProfilePage : UserControl
 
     private void OnPhoneTextChanged(object sender, TextChangedEventArgs e)
     {
-        var digitsOnly = NonDigitsRegex().Replace(PhoneBox.Text, string.Empty);
-        if (digitsOnly.Length > 10)
-            digitsOnly = digitsOnly[..10];
+        var digitsOnly = NormalizePhoneDigits(PhoneBox.Text);
 
         if (!string.Equals(PhoneBox.Text, digitsOnly, StringComparison.Ordinal))
         {
@@ -61,6 +59,14 @@ public partial class FirmProfilePage : UserControl
             PhoneBox.Text = digitsOnly;
             PhoneBox.CaretIndex = caret;
         }
+    }
+
+    internal static string NormalizePhoneDigits(string? text)
+    {
+        var digitsOnly = NonDigitsRegex().Replace(text ?? string.Empty, string.Empty);
+        return digitsOnly.Length > 10
+            ? digitsOnly[..10]
+            : digitsOnly;
     }
 
     private void OnToggleOptionalFieldsClick(object sender, RoutedEventArgs e)

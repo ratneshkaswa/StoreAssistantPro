@@ -46,10 +46,13 @@ public sealed class OnboardingJourneyService : IOnboardingJourneyService
     private readonly ILogger<OnboardingJourneyService> _logger;
     private readonly string _filePath;
     private readonly Lock _lock = new();
+    private readonly Action? _beforeWrite;
 
     private JourneyState _state;
     private UserExperienceProfile _profile;
     private bool _loaded;
+    private JourneyStateDto? _pendingSnapshot;
+    private int _flushWorkerActive;
 
     private static readonly JsonSerializerOptions WriteOptions = new()
     {
@@ -88,11 +91,22 @@ public sealed class OnboardingJourneyService : IOnboardingJourneyService
         IEventBus eventBus,
         ILogger<OnboardingJourneyService> logger,
         string filePath)
+        : this(appState, eventBus, logger, filePath, beforeWrite: null)
+    {
+    }
+
+    internal OnboardingJourneyService(
+        IAppStateService appState,
+        IEventBus eventBus,
+        ILogger<OnboardingJourneyService> logger,
+        string filePath,
+        Action? beforeWrite)
     {
         _appState = appState;
         _eventBus = eventBus;
         _logger = logger;
         _filePath = filePath;
+        _beforeWrite = beforeWrite;
 
         _state = new JourneyState();
         _profile = UserExperienceProfile.Default;
@@ -377,10 +391,9 @@ public sealed class OnboardingJourneyService : IOnboardingJourneyService
 
     private void FlushAsync()
     {
-        JourneyStateDto snapshot;
         lock (_lock)
         {
-            snapshot = new JourneyStateDto
+            _pendingSnapshot = new JourneyStateDto
             {
                 Level = _state.Level,
                 Sessions = _state.Sessions,
@@ -390,21 +403,63 @@ public sealed class OnboardingJourneyService : IOnboardingJourneyService
             };
         }
 
-        _ = Task.Run(() =>
+        EnsureFlushWorker();
+    }
+
+    private void EnsureFlushWorker()
+    {
+        if (Interlocked.CompareExchange(ref _flushWorkerActive, 1, 0) != 0)
+            return;
+
+        _ = Task.Factory.StartNew(
+            ProcessPendingFlushes,
+            CancellationToken.None,
+            TaskCreationOptions.LongRunning,
+            TaskScheduler.Default).ContinueWith(task =>
         {
-            try
+            if (task.Exception is not null)
             {
-                WriteFile(snapshot);
+                _logger.LogWarning(
+                    task.Exception.Flatten().InnerException ?? task.Exception,
+                    "Failed to flush onboarding journey state to disk");
             }
-            catch (Exception ex)
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+    }
+
+    private void ProcessPendingFlushes()
+    {
+        while (true)
+        {
+            JourneyStateDto? snapshot;
+            lock (_lock)
             {
-                _logger.LogWarning(ex, "Failed to flush onboarding journey state to disk");
+                snapshot = _pendingSnapshot;
+                _pendingSnapshot = null;
             }
-        });
+
+            if (snapshot is null)
+            {
+                Interlocked.Exchange(ref _flushWorkerActive, 0);
+
+                lock (_lock)
+                {
+                    if (_pendingSnapshot is null
+                        || Interlocked.CompareExchange(ref _flushWorkerActive, 1, 0) != 0)
+                    {
+                        return;
+                    }
+                }
+
+                continue;
+            }
+
+            WriteFile(snapshot);
+        }
     }
 
     private void WriteFile(JourneyStateDto dto)
     {
+        _beforeWrite?.Invoke();
         AtomicFileWriter.Write(_filePath, dto, WriteOptions, _logger, "onboarding journey");
     }
 

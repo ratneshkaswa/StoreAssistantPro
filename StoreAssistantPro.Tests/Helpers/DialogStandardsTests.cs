@@ -33,6 +33,8 @@ public sealed class DialogStandardsTests
         Assert.Contains("ViewportConstrainedPanel", content, StringComparison.Ordinal);
         Assert.Contains("HorizontalScrollBarVisibility = ScrollBarVisibility.Auto", content, StringComparison.Ordinal);
         Assert.Contains("VerticalScrollBarVisibility = ScrollBarVisibility.Auto", content, StringComparison.Ordinal);
+        Assert.Contains("UseLayoutRounding = true", content, StringComparison.Ordinal);
+        Assert.Contains("SnapsToDevicePixels = true", content, StringComparison.Ordinal);
         Assert.Contains("EnableOverflowScrollHost", content, StringComparison.Ordinal);
         Assert.Contains("Loaded += (_, _) => EnsureOverflowScrollHost();", content, StringComparison.Ordinal);
     }
@@ -153,6 +155,20 @@ public sealed class DialogStandardsTests
         Assert.Contains("WindowIconHelper.Apply(this);", mainWindowCode, StringComparison.Ordinal);
         Assert.Contains("WindowIconHelper.Apply(this);", loginWindowCode, StringComparison.Ordinal);
         Assert.Contains("WindowIconHelper.Apply(this);", setupWindowCode, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LoginWindow_Should_Unsubscribe_ViewModel_Handlers_On_Close()
+    {
+        var loginWindowCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginWindow.xaml.cs"));
+
+        Assert.Contains("vm.PropertyChanged += OnViewModelPropertyChanged;", loginWindowCode, StringComparison.Ordinal);
+        Assert.Contains("vm.ResetCompleted += OnResetCompleted;", loginWindowCode, StringComparison.Ordinal);
+        Assert.Contains("Closed += OnClosed;", loginWindowCode, StringComparison.Ordinal);
+        Assert.Contains("_vm.PropertyChanged -= OnViewModelPropertyChanged;", loginWindowCode, StringComparison.Ordinal);
+        Assert.Contains("_vm.ResetCompleted -= OnResetCompleted;", loginWindowCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("vm.PropertyChanged += (_, e) =>", loginWindowCode, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

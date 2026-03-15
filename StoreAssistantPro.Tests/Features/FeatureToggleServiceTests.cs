@@ -121,17 +121,24 @@ public class FeatureToggleServiceTests
         Assert.True(sut.IsEnabled(feature));
     }
 
-    // ── Management mode: billing features disabled ─────────────────
+    // ── Management mode: billing entry stays visible, advanced POS stays hidden ──
 
-    [Theory]
-    [InlineData(FeatureFlags.Billing)]
-    [InlineData(FeatureFlags.AdvancedBilling)]
-    public void ManagementMode_DisablesBillingFeatures(string feature)
+    [Fact]
+    public void ManagementMode_DisablesAdvancedBillingFeature()
     {
         var sut = CreateSut();
         sut.SetMode(OperationalMode.Management);
 
-        Assert.False(sut.IsEnabled(feature));
+        Assert.False(sut.IsEnabled(FeatureFlags.AdvancedBilling));
+    }
+
+    [Fact]
+    public void ManagementMode_KeepsBillingEntryEnabled()
+    {
+        var sut = CreateSut();
+        sut.SetMode(OperationalMode.Management);
+
+        Assert.True(sut.IsEnabled(FeatureFlags.Billing));
     }
 
     [Theory]
@@ -195,6 +202,16 @@ public class FeatureToggleServiceTests
         var sut = CreateSut();
 
         Assert.Equal(OperationalMode.Management, sut.CurrentMode);
+    }
+
+    [Fact]
+    public void SetMode_UpdatesAppState()
+    {
+        var sut = CreateSut();
+
+        sut.SetMode(OperationalMode.Billing);
+
+        _appState.Received(1).SetMode(OperationalMode.Billing);
     }
 
     // ── Focus lock: non-billing features disabled ──────────────────
@@ -377,5 +394,57 @@ public class FeatureToggleServiceTests
 
         Assert.True(sut.IsEnabled(FeatureFlags.Sales));
         Assert.True(sut.IsEnabled(FeatureFlags.Billing));
+    }
+
+    [Fact]
+    public void CurrentModeChanged_FromAppState_SyncsServiceMode_AndRaisesPropertyChanged()
+    {
+        var sut = CreateSut();
+        var raised = false;
+        sut.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(FeatureToggleService.CurrentMode) || string.IsNullOrEmpty(e.PropertyName))
+                raised = true;
+        };
+
+        _appState.CurrentMode.Returns(OperationalMode.Billing);
+        _appState.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(
+            _appState,
+            new PropertyChangedEventArgs(nameof(IAppStateService.CurrentMode)));
+
+        Assert.Equal(OperationalMode.Billing, sut.CurrentMode);
+        Assert.True(raised);
+    }
+
+    [Fact]
+    public void Dispose_UnsubscribesFromPropertySources()
+    {
+        var sut = CreateSut();
+        var raised = false;
+        sut.PropertyChanged += (_, _) => raised = true;
+
+        sut.Dispose();
+
+        _focusLock.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(
+            _focusLock,
+            new PropertyChangedEventArgs(nameof(IFocusLockService.IsFocusLocked)));
+        _appState.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(
+            _appState,
+            new PropertyChangedEventArgs(nameof(IAppStateService.IsOfflineMode)));
+
+        Assert.False(raised);
+    }
+
+    [Fact]
+    public void Dispose_CanBeCalledTwice()
+    {
+        var sut = CreateSut();
+
+        sut.Dispose();
+        sut.Dispose();
+
+        _focusLock.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(
+            _focusLock,
+            new PropertyChangedEventArgs(nameof(IFocusLockService.IsFocusLocked)));
     }
 }

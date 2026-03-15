@@ -601,6 +601,7 @@ public partial class MainViewModel : BaseViewModel
         AppState.PropertyChanged -= OnAppStatePropertyChanged;
         _features.PropertyChanged -= OnFeaturesPropertyChanged;
         _eventBus.Unsubscribe<FirmUpdatedEvent>(OnFirmUpdatedAsync);
+        RequestClose = null;
         DashboardSummary.Dispose();
         base.Dispose();
     }

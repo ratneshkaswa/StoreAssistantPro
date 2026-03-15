@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using NSubstitute;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -20,6 +21,19 @@ public class BillingViewModelTests
             .Returns(call => $"Rs. {call.Arg<decimal>():0.00}");
 
         return new BillingViewModel(_billingService, _appState, _dialogService, _regional);
+    }
+
+    [Fact]
+    public void AddProductToCart_StartsBillingSession()
+    {
+        var sut = CreateSut();
+
+        sut.AddProductToCartCommand.Execute(new Product { Id = 1, Name = "Shirt", SalePrice = 999m });
+
+        Received.InOrder(() =>
+        {
+            _appState.SetBillingSession(BillingSessionState.Active);
+        });
     }
 
     [Fact]
@@ -85,6 +99,31 @@ public class BillingViewModelTests
     }
 
     [Fact]
+    public void RemovingLastCartLine_CancelsSession_AndResetsPaymentState()
+    {
+        var sut = CreateSut();
+        sut.PaymentMethod = "UPI";
+        sut.PaymentReference = "UPI-123";
+        sut.CashTendered = "450";
+        sut.SelectedDiscountType = DiscountType.Amount;
+        sut.DiscountInput = "25";
+        sut.DiscountReason = "carryover";
+        sut.AddProductToCartCommand.Execute(new Product { Id = 1, Name = "Shirt", SalePrice = 999m });
+
+        sut.SelectedCartItem = sut.CartItems.Single();
+        sut.RemoveCartItemCommand.Execute(null);
+
+        Assert.Empty(sut.CartItems);
+        Assert.Equal("Cash", sut.PaymentMethod);
+        Assert.Equal(string.Empty, sut.PaymentReference);
+        Assert.Equal("0", sut.CashTendered);
+        Assert.Equal(DiscountType.None, sut.SelectedDiscountType);
+        Assert.Equal("0", sut.DiscountInput);
+        Assert.Equal(string.Empty, sut.DiscountReason);
+        _appState.Received().SetBillingSession(BillingSessionState.Cancelled);
+    }
+
+    [Fact]
     public async Task CompleteSale_InvalidDiscountPercentage_BlocksSubmission()
     {
         var sut = CreateSut();
@@ -127,5 +166,92 @@ public class BillingViewModelTests
 
         Assert.Equal("Fix cart lines with invalid quantity, price, or discount.", sut.ErrorMessage);
         await _billingService.DidNotReceive().CompleteSaleAsync(Arg.Any<CompleteSaleDto>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CompleteSale_SetsSessionCompleted_AndClearsCart()
+    {
+        var sut = CreateSut();
+        _billingService.CompleteSaleAsync(Arg.Any<CompleteSaleDto>(), Arg.Any<CancellationToken>())
+            .Returns(new Sale
+            {
+                InvoiceNumber = "INV-001",
+                TotalAmount = 999m
+            });
+
+        sut.AddProductToCartCommand.Execute(new Product { Id = 1, Name = "Shirt", SalePrice = 999m });
+        sut.PaymentMethod = "Cash";
+        sut.CashTendered = "1000";
+
+        await sut.CompleteSaleCommand.ExecuteAsync(null);
+
+        Assert.Empty(sut.CartItems);
+        Assert.Equal("Sale INV-001 completed - Rs. 999.00", sut.SuccessMessage);
+        _appState.Received().SetBillingSession(BillingSessionState.Completed);
+    }
+
+    [Fact]
+    public void Dispose_ResetsBillingSessionToNone()
+    {
+        var sut = CreateSut();
+        sut.AddProductToCartCommand.Execute(new Product { Id = 1, Name = "Shirt", SalePrice = 999m });
+
+        sut.Dispose();
+
+        _appState.Received().SetBillingSession(BillingSessionState.None);
+    }
+
+    [Fact]
+    public void RemovedCartLine_Should_Not_Keep_BillingViewModel_Alive()
+    {
+        var (vmRef, removedLine) = CreateRemovedCartLineScenario();
+
+        ForceGarbageCollection();
+
+        Assert.False(vmRef.TryGetTarget(out _));
+        GC.KeepAlive(removedLine);
+    }
+
+    [Fact]
+    public void Dispose_Should_Detach_TrackedCartLines()
+    {
+        var (vmRef, trackedLine) = CreateDisposedCartTrackingScenario();
+
+        ForceGarbageCollection();
+
+        Assert.False(vmRef.TryGetTarget(out _));
+        GC.KeepAlive(trackedLine);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private (WeakReference<BillingViewModel> VmRef, CartLineViewModel Line) CreateRemovedCartLineScenario()
+    {
+        var sut = CreateSut();
+        sut.AddProductToCartCommand.Execute(new Product { Id = 1, Name = "Shirt", SalePrice = 999m });
+
+        var removedLine = sut.CartItems.Single();
+        sut.SelectedCartItem = removedLine;
+        sut.RemoveCartItemCommand.Execute(null);
+
+        return (new WeakReference<BillingViewModel>(sut), removedLine);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private (WeakReference<BillingViewModel> VmRef, CartLineViewModel Line) CreateDisposedCartTrackingScenario()
+    {
+        var sut = CreateSut();
+        sut.AddProductToCartCommand.Execute(new Product { Id = 1, Name = "Shirt", SalePrice = 999m });
+
+        var trackedLine = sut.CartItems.Single();
+        sut.Dispose();
+
+        return (new WeakReference<BillingViewModel>(sut), trackedLine);
+    }
+
+    private static void ForceGarbageCollection()
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
     }
 }

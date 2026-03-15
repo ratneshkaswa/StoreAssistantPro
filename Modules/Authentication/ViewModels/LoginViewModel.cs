@@ -33,6 +33,9 @@ public partial class LoginViewModel : BaseViewModel
     private readonly IRegionalSettingsService _regional;
     private readonly IConnectivityMonitorService _connectivity;
     private readonly DispatcherTimer _clockTimer;
+    private Action? _resetCompleted;
+    private bool _isInitialized;
+    private bool _isDisposed;
 
     /// <summary>Reusable PIN pad — bind keypad buttons to <c>PinPad.AddDigitCommand</c> etc.</summary>
     public PinPadViewModel PinPad { get; } = new(maxLength: 4);
@@ -70,7 +73,11 @@ public partial class LoginViewModel : BaseViewModel
     public Action<bool?>? RequestClose { get; set; }
 
     /// <summary>Raised after a successful PIN reset so the view can clear PasswordBoxes.</summary>
-    public event Action? ResetCompleted;
+    public event Action? ResetCompleted
+    {
+        add => _resetCompleted += value;
+        remove => _resetCompleted -= value;
+    }
 
     public LoginViewModel(
         ICommandBus commandBus,
@@ -97,6 +104,10 @@ public partial class LoginViewModel : BaseViewModel
 
     public void Initialize()
     {
+        if (_isInitialized || _isDisposed)
+            return;
+
+        _isInitialized = true;
         PinPad.PinCompleted += OnPinCompleted;
         PinPad.PropertyChanged += OnPinPadPropertyChanged;
         _clockTimer.Start();
@@ -252,7 +263,7 @@ public partial class LoginViewModel : BaseViewModel
                 MasterPassword = string.Empty;
                 NewPin = string.Empty;
                 NewPinConfirm = string.Empty;
-                ResetCompleted?.Invoke();
+                _resetCompleted?.Invoke();
             }
             else
             {
@@ -269,9 +280,20 @@ public partial class LoginViewModel : BaseViewModel
 
     public override void Dispose()
     {
+        if (_isDisposed)
+            return;
+
+        _isDisposed = true;
         _clockTimer.Stop();
-        PinPad.PinCompleted -= OnPinCompleted;
-        PinPad.PropertyChanged -= OnPinPadPropertyChanged;
+        if (_isInitialized)
+        {
+            PinPad.PinCompleted -= OnPinCompleted;
+            PinPad.PropertyChanged -= OnPinPadPropertyChanged;
+            _isInitialized = false;
+        }
+
+        RequestClose = null;
+        _resetCompleted = null;
         base.Dispose();
     }
 }
