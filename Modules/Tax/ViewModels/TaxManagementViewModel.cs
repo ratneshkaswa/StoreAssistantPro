@@ -57,7 +57,12 @@ public partial class TaxManagementViewModel(
     {
         DeleteRateCommand.NotifyCanExecuteChanged();
 
-        if (value is null) return;
+        if (value is null)
+        {
+            ResetRateForm(clearMessages: false);
+            return;
+        }
+
         TaxName = value.TaxName;
         SlabPercent = value.SlabPercent.ToString("G");
         IsEditing = true;
@@ -68,10 +73,7 @@ public partial class TaxManagementViewModel(
     private void ClearForm()
     {
         SelectedTax = null;
-        TaxName = string.Empty;
-        SlabPercent = string.Empty;
-        IsEditing = false;
-        ClearMessages();
+        ResetRateForm(clearMessages: true);
     }
 
     [RelayCommand]
@@ -86,20 +88,23 @@ public partial class TaxManagementViewModel(
             return;
 
         var dto = new TaxDto(TaxName.Trim(), decimal.Parse(SlabPercent));
+        var successMessage = IsEditing && SelectedTax is not null
+            ? "Tax rate updated."
+            : "Tax rate created.";
 
         if (IsEditing && SelectedTax is not null)
         {
             await taxService.UpdateAsync(SelectedTax.Id, dto, ct);
-            SuccessMessage = "Tax rate updated.";
         }
         else
         {
             await taxService.CreateAsync(dto, ct);
-            SuccessMessage = "Tax rate created.";
         }
 
         await ReloadRatesAsync(ct);
-        ClearForm();
+        SelectedTax = null;
+        ResetRateForm(clearMessages: false);
+        SuccessMessage = successMessage;
     });
 
     [RelayCommand(CanExecute = nameof(CanDeleteRate))]
@@ -107,9 +112,10 @@ public partial class TaxManagementViewModel(
     {
         if (SelectedTax is null) return;
         await taxService.DeleteAsync(SelectedTax.Id, ct);
-        SuccessMessage = "Tax rate deleted.";
         await ReloadRatesAsync(ct);
-        ClearForm();
+        SelectedTax = null;
+        ResetRateForm(clearMessages: false);
+        SuccessMessage = "Tax rate deleted.";
     });
 
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -126,6 +132,7 @@ public partial class TaxManagementViewModel(
     public partial ObservableCollection<TaxSlab> GroupSlabs { get; set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SlabActionText))]
     public partial TaxSlab? SelectedSlab { get; set; }
 
     // Group form fields
@@ -147,32 +154,47 @@ public partial class TaxManagementViewModel(
 
     partial void OnSelectedGroupChanged(TaxGroup? value)
     {
-        ClearMessages();
-        ClearSlabForm();
         AddSlabCommand.NotifyCanExecuteChanged();
 
         if (value is null)
         {
-            GroupSlabs = [];
+            ResetGroupForm(clearMessages: false);
             return;
         }
 
         GroupName = value.Name;
         GroupDescription = value.Description ?? string.Empty;
-        GroupSlabs = new ObservableCollection<TaxSlab>(value.Slabs);
+        GroupSlabs = new ObservableCollection<TaxSlab>(value.Slabs.OrderBy(s => s.PriceFrom));
+        SelectedSlab = null;
+        ResetSlabForm(clearMessages: false);
+        ClearMessages();
     }
 
-    partial void OnSelectedSlabChanged(TaxSlab? value) => DeleteSlabCommand.NotifyCanExecuteChanged();
+    partial void OnSelectedSlabChanged(TaxSlab? value)
+    {
+        DeleteSlabCommand.NotifyCanExecuteChanged();
+
+        if (value is null)
+        {
+            ResetSlabForm(clearMessages: false);
+            return;
+        }
+
+        SlabGST = value.GSTPercent.ToString("G");
+        SlabPriceFrom = value.PriceFrom.ToString("G");
+        SlabPriceTo = value.PriceTo >= TaxSlab.MaxPrice
+            ? string.Empty
+            : value.PriceTo.ToString("G");
+        ClearMessages();
+    }
+
+    public string SlabActionText => SelectedSlab is null ? "Add Slab" : "Update Slab";
 
     [RelayCommand]
     private void ClearGroupForm()
     {
         SelectedGroup = null;
-        GroupName = string.Empty;
-        GroupDescription = string.Empty;
-        GroupSlabs = [];
-        ClearSlabForm();
-        ClearMessages();
+        ResetGroupForm(clearMessages: true);
     }
 
     [RelayCommand]
@@ -185,39 +207,43 @@ public partial class TaxManagementViewModel(
 
         var dto = new TaxGroupDto(GroupName.Trim(),
             string.IsNullOrWhiteSpace(GroupDescription) ? null : GroupDescription.Trim());
+        var successMessage = SelectedGroup is not null
+            ? "Tax group updated."
+            : "Tax group created.";
 
         if (SelectedGroup is not null)
         {
             await taxGroupService.UpdateGroupAsync(SelectedGroup.Id, dto, ct);
-            SuccessMessage = "Tax group updated.";
         }
         else
         {
             await taxGroupService.CreateGroupAsync(dto, ct);
-            SuccessMessage = "Tax group created.";
         }
 
         await ReloadGroupsAsync(ct);
-        ClearGroupForm();
+        SelectedGroup = null;
+        ResetGroupForm(clearMessages: false);
+        SuccessMessage = successMessage;
     });
 
     [RelayCommand]
     private Task ToggleGroupActiveAsync(TaxGroup? group) => RunAsync(async ct =>
     {
         if (group is null) return;
+        var selectedGroupId = SelectedGroup?.Id == group.Id ? group.Id : SelectedGroup?.Id;
+        var statusMessage = $"Group '{group.Name}' {(group.IsActive ? "deactivated" : "activated")}.";
         await taxGroupService.ToggleGroupActiveAsync(group.Id, ct);
-        SuccessMessage = $"Group '{group.Name}' {(group.IsActive ? "deactivated" : "activated")}.";
-        await ReloadGroupsAsync(ct);
+        await ReloadGroupsAsync(ct, selectedGroupId ?? group.Id);
+        SuccessMessage = statusMessage;
     });
 
     // â”€â”€ Slab management â”€â”€
 
+    [RelayCommand]
     private void ClearSlabForm()
     {
         SelectedSlab = null;
-        SlabGST = string.Empty;
-        SlabPriceFrom = string.Empty;
-        SlabPriceTo = string.Empty;
+        ResetSlabForm(clearMessages: true);
     }
 
     [RelayCommand(CanExecute = nameof(CanAddSlab))]
@@ -247,26 +273,34 @@ public partial class TaxManagementViewModel(
             decimal.Parse(SlabPriceFrom),
             priceTo,
             regional.Now, null);
+        var successMessage = SelectedSlab is not null ? "Slab updated." : "Slab added.";
+        var selectedGroupId = SelectedGroup.Id;
 
-        await taxGroupService.CreateSlabAsync(dto, ct);
-        SuccessMessage = "Slab added.";
+        if (SelectedSlab is not null)
+        {
+            await taxGroupService.UpdateSlabAsync(SelectedSlab.Id, dto, ct);
+        }
+        else
+        {
+            await taxGroupService.CreateSlabAsync(dto, ct);
+        }
 
-        // Reload group to pick up new slab
-        await ReloadGroupsAsync(ct);
-        ReselectGroup(SelectedGroup.Id);
-        ClearSlabForm();
+        await ReloadGroupsAsync(ct, selectedGroupId);
+        SelectedSlab = null;
+        ResetSlabForm(clearMessages: false);
+        SuccessMessage = successMessage;
     });
 
     [RelayCommand(CanExecute = nameof(CanDeleteSlab))]
     private Task DeleteSlabAsync() => RunAsync(async ct =>
     {
         if (SelectedSlab is null) return;
+        var selectedGroupId = SelectedGroup?.Id ?? SelectedSlab.TaxGroupId;
         await taxGroupService.DeleteSlabAsync(SelectedSlab.Id, ct);
+        await ReloadGroupsAsync(ct, selectedGroupId);
+        SelectedSlab = null;
+        ResetSlabForm(clearMessages: false);
         SuccessMessage = "Slab deleted.";
-        await ReloadGroupsAsync(ct);
-        if (SelectedGroup is not null)
-            ReselectGroup(SelectedGroup.Id);
-        ClearSlabForm();
     });
 
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -293,21 +327,30 @@ public partial class TaxManagementViewModel(
 
     partial void OnSelectedHSNChanged(HSNCode? value)
     {
-        ClearMessages();
-        if (value is null) return;
+        if (value is null)
+        {
+            ResetHSNForm(clearMessages: false);
+            return;
+        }
+
         HSNCodeValue = value.Code;
         HSNDescription = value.Description;
         HSNCategory = value.Category;
+        ClearMessages();
+    }
+
+    partial void OnHSNCodeValueChanged(string value)
+    {
+        var normalizedValue = NormalizeHsnCode(value);
+        if (!string.Equals(value, normalizedValue, StringComparison.Ordinal))
+            HSNCodeValue = normalizedValue;
     }
 
     [RelayCommand]
     private void ClearHSNForm()
     {
         SelectedHSN = null;
-        HSNCodeValue = string.Empty;
-        HSNDescription = string.Empty;
-        HSNCategory = HSNCategory.Garments;
-        ClearMessages();
+        ResetHSNForm(clearMessages: true);
     }
 
     [RelayCommand]
@@ -315,36 +358,44 @@ public partial class TaxManagementViewModel(
     {
         ClearMessages();
 
+        var normalizedCode = NormalizeHsnCode(HSNCodeValue);
+
         if (!Validate(v => v
-            .Rule(!string.IsNullOrWhiteSpace(HSNCodeValue), "HSN code is required.")
-            .Rule(HSNCodeValue.Trim().Length is >= 4 and <= 8, "HSN code must be 4â€“8 digits.")
+            .Rule(!string.IsNullOrWhiteSpace(normalizedCode), "HSN code is required.")
+            .Rule(normalizedCode.Length is >= 4 and <= 8, "HSN code must be 4-8 digits.")
             .Rule(!string.IsNullOrWhiteSpace(HSNDescription), "Description is required.")))
             return;
 
-        var dto = new HSNCodeDto(HSNCodeValue.Trim(), HSNDescription.Trim(), HSNCategory);
+        HSNCodeValue = normalizedCode;
+        var dto = new HSNCodeDto(normalizedCode, HSNDescription.Trim(), HSNCategory);
+        var successMessage = SelectedHSN is not null
+            ? "HSN code updated."
+            : "HSN code created.";
 
         if (SelectedHSN is not null)
         {
             await taxGroupService.UpdateHSNCodeAsync(SelectedHSN.Id, dto, ct);
-            SuccessMessage = "HSN code updated.";
         }
         else
         {
             await taxGroupService.CreateHSNCodeAsync(dto, ct);
-            SuccessMessage = "HSN code created.";
         }
 
         await ReloadHSNAsync(ct);
-        ClearHSNForm();
+        SelectedHSN = null;
+        ResetHSNForm(clearMessages: false);
+        SuccessMessage = successMessage;
     });
 
     [RelayCommand]
     private Task ToggleHSNActiveAsync(HSNCode? hsnCode) => RunAsync(async ct =>
     {
         if (hsnCode is null) return;
+        var selectedHsnId = SelectedHSN?.Id == hsnCode.Id ? hsnCode.Id : SelectedHSN?.Id;
+        var statusMessage = $"HSN '{hsnCode.Code}' {(hsnCode.IsActive ? "deactivated" : "activated")}.";
         await taxGroupService.ToggleHSNActiveAsync(hsnCode.Id, ct);
-        SuccessMessage = $"HSN '{hsnCode.Code}' {(hsnCode.IsActive ? "deactivated" : "activated")}.";
-        await ReloadHSNAsync(ct);
+        await ReloadHSNAsync(ct, selectedHsnId ?? hsnCode.Id);
+        SuccessMessage = statusMessage;
     });
 
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -364,28 +415,31 @@ public partial class TaxManagementViewModel(
     //  Reload helpers
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    private async Task ReloadRatesAsync(CancellationToken ct)
+    private async Task ReloadRatesAsync(CancellationToken ct, int? selectedTaxId = null)
     {
         var taxes = await taxService.GetAllAsync(ct);
         Taxes = new ObservableCollection<TaxMaster>(taxes);
+        SelectedTax = selectedTaxId.HasValue
+            ? Taxes.FirstOrDefault(t => t.Id == selectedTaxId.Value)
+            : null;
     }
 
-    private async Task ReloadGroupsAsync(CancellationToken ct)
+    private async Task ReloadGroupsAsync(CancellationToken ct, int? selectedGroupId = null)
     {
         var groups = await taxGroupService.GetAllGroupsAsync(ct);
         TaxGroups = new ObservableCollection<TaxGroup>(groups);
+        SelectedGroup = selectedGroupId.HasValue
+            ? TaxGroups.FirstOrDefault(g => g.Id == selectedGroupId.Value)
+            : null;
     }
 
-    private async Task ReloadHSNAsync(CancellationToken ct)
+    private async Task ReloadHSNAsync(CancellationToken ct, int? selectedHsnId = null)
     {
         var codes = await taxGroupService.GetAllHSNCodesAsync(ct);
         HSNCodes = new ObservableCollection<HSNCode>(codes);
-    }
-
-    private void ReselectGroup(int groupId)
-    {
-        var group = TaxGroups.FirstOrDefault(g => g.Id == groupId);
-        SelectedGroup = group;
+        SelectedHSN = selectedHsnId.HasValue
+            ? HSNCodes.FirstOrDefault(code => code.Id == selectedHsnId.Value)
+            : null;
     }
 
     private void ClearMessages()
@@ -393,6 +447,54 @@ public partial class TaxManagementViewModel(
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
     }
+
+    private void ResetRateForm(bool clearMessages)
+    {
+        TaxName = string.Empty;
+        SlabPercent = string.Empty;
+        IsEditing = false;
+
+        if (clearMessages)
+            ClearMessages();
+    }
+
+    private void ResetGroupForm(bool clearMessages)
+    {
+        GroupName = string.Empty;
+        GroupDescription = string.Empty;
+        GroupSlabs = [];
+        SelectedSlab = null;
+        ResetSlabForm(clearMessages: false);
+
+        if (clearMessages)
+            ClearMessages();
+    }
+
+    private void ResetSlabForm(bool clearMessages)
+    {
+        SlabGST = string.Empty;
+        SlabPriceFrom = string.Empty;
+        SlabPriceTo = string.Empty;
+
+        if (clearMessages)
+            ClearMessages();
+    }
+
+    private void ResetHSNForm(bool clearMessages)
+    {
+        HSNCodeValue = string.Empty;
+        HSNDescription = string.Empty;
+        HSNCategory = HSNCategory.Garments;
+
+        if (clearMessages)
+            ClearMessages();
+    }
+
+    private static string NormalizeHsnCode(string? value) =>
+        new string((value ?? string.Empty)
+            .Where(char.IsDigit)
+            .Take(8)
+            .ToArray());
 
     private bool CanDeleteRate() => SelectedTax is not null;
 

@@ -10,8 +10,6 @@ public class TaxGroupService(
     IRegionalSettingsService regional,
     IPerformanceMonitor perf) : ITaxGroupService
 {
-    // ── Tax Groups ───────────────────────────────────────────────────
-
     public async Task<IReadOnlyList<TaxGroup>> GetAllGroupsAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.GetAllGroupsAsync");
@@ -63,14 +61,14 @@ public class TaxGroupService(
         {
             Name = dto.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim(),
-                IsActive = true,
-                    CreatedDate = regional.Now
-                });
+            IsActive = true,
+            CreatedDate = regional.Now
+        });
 
-                await context.SaveChangesAsync(ct).ConfigureAwait(false);
-            }
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
 
-            public async Task UpdateGroupAsync(int id, TaxGroupDto dto, CancellationToken ct = default)
+    public async Task UpdateGroupAsync(int id, TaxGroupDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));
@@ -101,8 +99,6 @@ public class TaxGroupService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    // ── Tax Slabs ────────────────────────────────────────────────────
-
     public async Task<IReadOnlyList<TaxSlab>> GetSlabsByGroupAsync(int taxGroupId, CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.GetSlabsByGroupAsync");
@@ -126,8 +122,9 @@ public class TaxGroupService(
         if (!await context.TaxGroups.AnyAsync(g => g.Id == dto.TaxGroupId, ct).ConfigureAwait(false))
             throw new InvalidOperationException($"Tax group Id {dto.TaxGroupId} not found.");
 
-        var slab = BuildSlab(dto);
-        context.TaxSlabs.Add(slab);
+        await EnsureSlabDoesNotOverlapAsync(context, dto, existingSlabId: null, ct).ConfigureAwait(false);
+
+        context.TaxSlabs.Add(BuildSlab(dto));
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
@@ -142,6 +139,12 @@ public class TaxGroupService(
         var entity = await context.TaxSlabs.FirstOrDefaultAsync(s => s.Id == id, ct).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Tax slab Id {id} not found.");
 
+        if (!await context.TaxGroups.AnyAsync(g => g.Id == dto.TaxGroupId, ct).ConfigureAwait(false))
+            throw new InvalidOperationException($"Tax group Id {dto.TaxGroupId} not found.");
+
+        await EnsureSlabDoesNotOverlapAsync(context, dto, id, ct).ConfigureAwait(false);
+
+        entity.TaxGroupId = dto.TaxGroupId;
         entity.GSTPercent = dto.GSTPercent;
         entity.CGSTPercent = dto.GSTPercent / 2m;
         entity.SGSTPercent = dto.GSTPercent / 2m;
@@ -165,8 +168,6 @@ public class TaxGroupService(
         context.TaxSlabs.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
-
-    // ── HSN Codes ────────────────────────────────────────────────────
 
     public async Task<IReadOnlyList<HSNCode>> GetAllHSNCodesAsync(CancellationToken ct = default)
     {
@@ -246,8 +247,6 @@ public class TaxGroupService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
-    // ── Product Tax Mapping ──────────────────────────────────────────
-
     public async Task<ProductTaxMapping?> GetMappingByProductAsync(int productId, CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.GetMappingByProductAsync");
@@ -315,8 +314,6 @@ public class TaxGroupService(
         }
     }
 
-    // ── Tax Resolution ───────────────────────────────────────────────
-
     public async Task<TaxSlab?> ResolveSlabAsync(int productId, decimal unitPrice, DateTime date, CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.ResolveSlabAsync");
@@ -335,8 +332,12 @@ public class TaxGroupService(
     }
 
     public async Task<TaxResult> CalculateForProductAsync(
-        int productId, decimal unitPrice, decimal quantity,
-        bool isIntraState, bool isTaxInclusive, DateTime date,
+        int productId,
+        decimal unitPrice,
+        decimal quantity,
+        bool isIntraState,
+        bool isTaxInclusive,
+        DateTime date,
         CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.CalculateForProductAsync");
@@ -369,15 +370,19 @@ public class TaxGroupService(
 
         if (isTaxInclusive)
         {
-            // Back-calculate: base = total / (1 + rate/100)
-            baseAmount = decimal.Round(lineTotal / (1m + slab.GSTPercent / 100m), 2, MidpointRounding.AwayFromZero);
+            baseAmount = decimal.Round(
+                lineTotal / (1m + slab.GSTPercent / 100m),
+                2,
+                MidpointRounding.AwayFromZero);
         }
         else
         {
             baseAmount = decimal.Round(lineTotal, 2, MidpointRounding.AwayFromZero);
         }
 
-        decimal cgst, sgst, igst;
+        decimal cgst;
+        decimal sgst;
+        decimal igst;
 
         if (isIntraState)
         {
@@ -396,40 +401,47 @@ public class TaxGroupService(
         var totalAmount = baseAmount + totalTax;
 
         return new TaxResult(
-            baseAmount, slab.GSTPercent,
-            cgst, sgst, igst, totalTax, totalAmount,
-            mapping.HSNCode?.Code, mapping.TaxGroup?.Name);
+            baseAmount,
+            slab.GSTPercent,
+            cgst,
+            sgst,
+            igst,
+            totalTax,
+            totalAmount,
+            mapping.HSNCode?.Code,
+            mapping.TaxGroup?.Name);
     }
 
-    /// <summary>Finds the most recently effective active slab matching price and date.</summary>
     private static async Task<TaxSlab?> FindEffectiveSlabAsync(
-        AppDbContext context, int taxGroupId, decimal unitPrice, DateTime date, CancellationToken ct)
+        AppDbContext context,
+        int taxGroupId,
+        decimal unitPrice,
+        DateTime date,
+        CancellationToken ct)
     {
         return await context.TaxSlabs
             .AsNoTracking()
             .Where(s => s.TaxGroupId == taxGroupId
-                     && s.IsActive
-                     && s.PriceFrom <= unitPrice
-                     && s.PriceTo >= unitPrice
-                     && s.EffectiveFrom <= date
-                     && (s.EffectiveTo == null || s.EffectiveTo >= date))
+                && s.IsActive
+                && s.PriceFrom <= unitPrice
+                && s.PriceTo >= unitPrice
+                && s.EffectiveFrom <= date
+                && (s.EffectiveTo == null || s.EffectiveTo >= date))
             .OrderByDescending(s => s.EffectiveFrom)
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
     }
 
-    // ── Validation ───────────────────────────────────────────────────
-
     private static void ValidateSlabDto(TaxSlabDto dto)
     {
         if (dto.GSTPercent < 0 || dto.GSTPercent > 100)
-            throw new ArgumentOutOfRangeException(nameof(dto.GSTPercent), "GST percent must be 0–100.");
+            throw new ArgumentOutOfRangeException(nameof(dto.GSTPercent), "GST percent must be between 0 and 100.");
         if (dto.PriceFrom < 0)
             throw new ArgumentOutOfRangeException(nameof(dto.PriceFrom), "PriceFrom cannot be negative.");
         if (dto.PriceTo < dto.PriceFrom)
-            throw new ArgumentException("PriceTo must be ≥ PriceFrom.");
+            throw new ArgumentException("PriceTo must be greater than or equal to PriceFrom.");
         if (dto.EffectiveTo.HasValue && dto.EffectiveTo < dto.EffectiveFrom)
-            throw new ArgumentException("EffectiveTo must be ≥ EffectiveFrom.");
+            throw new ArgumentException("EffectiveTo must be greater than or equal to EffectiveFrom.");
     }
 
     private static void ValidateHSNDto(HSNCodeDto dto)
@@ -438,8 +450,36 @@ public class TaxGroupService(
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Description, nameof(dto.Description));
 
         var code = dto.Code.Trim();
-        if (code.Length < 4 || code.Length > 8)
-            throw new ArgumentException("HSN code must be 4–8 characters.", nameof(dto.Code));
+        if (code.Length < 4 || code.Length > 8 || code.Any(ch => !char.IsDigit(ch)))
+            throw new ArgumentException("HSN code must be 4-8 digits.", nameof(dto.Code));
+    }
+
+    private static async Task EnsureSlabDoesNotOverlapAsync(
+        AppDbContext context,
+        TaxSlabDto dto,
+        int? existingSlabId,
+        CancellationToken ct)
+    {
+        var effectiveTo = dto.EffectiveTo ?? DateTime.MaxValue;
+
+        var overlapsExistingSlab = await context.TaxSlabs
+            .AsNoTracking()
+            .Where(s => s.TaxGroupId == dto.TaxGroupId
+                && (!existingSlabId.HasValue || s.Id != existingSlabId.Value)
+                && s.IsActive)
+            .AnyAsync(s =>
+                s.PriceFrom <= dto.PriceTo
+                && s.PriceTo >= dto.PriceFrom
+                && s.EffectiveFrom <= effectiveTo
+                && (s.EffectiveTo ?? DateTime.MaxValue) >= dto.EffectiveFrom,
+                ct)
+            .ConfigureAwait(false);
+
+        if (overlapsExistingSlab)
+        {
+            throw new InvalidOperationException(
+                "This slab overlaps an existing slab for the selected group and effective period.");
+        }
     }
 
     private TaxSlab BuildSlab(TaxSlabDto dto) => new()

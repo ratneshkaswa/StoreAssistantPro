@@ -251,11 +251,14 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="1" Content="Delete Slab" Command="{Binding DeleteSlabCommand}"
+                    <Button Grid.Column="1" Content="Clear" Command="{Binding ClearSlabFormCommand}"
                             Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Grid.Column="2" Content="Add Slab" Command="{Binding AddSlabCommand}"
+                    <Button Grid.Column="2" Content="Delete Slab" Command="{Binding DeleteSlabCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Grid.Column="3" Content="{Binding SlabActionText}" Command="{Binding AddSlabCommand}"
                             Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 </Grid>
             </Grid>
