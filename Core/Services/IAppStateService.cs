@@ -37,6 +37,12 @@ public interface IAppStateService : INotifyPropertyChanged
     bool SmartTooltipsEnabled { get; }
 
     /// <summary>
+    /// <c>true</c> when the admin PIN is still the factory default ("1234").
+    /// Used to show a warning banner until the admin changes the PIN.
+    /// </summary>
+    bool IsDefaultAdminPin { get; }
+
+    /// <summary>
     /// Timestamp of the most recent connectivity health check.
     /// </summary>
     DateTime? LastConnectionCheck { get; }
@@ -56,6 +62,7 @@ public interface IAppStateService : INotifyPropertyChanged
     /// </summary>
     void SetConnectivity(bool isOffline, DateTime checkTime);
     void SetSmartTooltipsEnabled(bool enabled);
+    void SetDefaultPinFlag(bool isDefault);
 
     void AddNotification(AppNotification notification);
     void MarkNotificationRead(AppNotification notification);

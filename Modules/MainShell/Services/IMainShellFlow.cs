@@ -2,15 +2,13 @@
 
 /// <summary>
 /// Encapsulates the MainShell module's window lifecycle.
-/// Consumers call <see cref="ShowMainWindow"/> without knowing
-/// about <c>MainWindow</c> or <c>MainViewModel</c> types.
+/// Creates and shows the main application window (non-modal, single instance).
 /// </summary>
 public interface IMainShellFlow
 {
     /// <summary>
-    /// Shows the main application window (blocks until closed).
-    /// Returns <c>true</c> if the user chose to log out,
-    /// <c>false</c> if the window was closed normally.
+    /// Creates and shows the main application window.
+    /// The window remains open for the lifetime of the application.
     /// </summary>
-    bool ShowMainWindow();
+    void ShowMainWindow();
 }

@@ -1,4 +1,5 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
@@ -15,7 +16,9 @@ public sealed class QuickAccessActionStateTests
     {
         var productService = Substitute.For<IProductService>();
         var taxGroupService = Substitute.For<ITaxGroupService>();
-        var viewModel = new ProductManagementViewModel(productService, taxGroupService);
+        var viewModel = new ProductManagementViewModel(
+            productService, taxGroupService,
+            Substitute.For<INavigationService>(), new ProductContextHolder());
 
         Assert.False(viewModel.ManageVariantsCommand.CanExecute(null));
 
@@ -33,7 +36,9 @@ public sealed class QuickAccessActionStateTests
     {
         var variantService = Substitute.For<IProductVariantService>();
         var productService = Substitute.For<IProductService>();
-        var viewModel = new VariantManagementViewModel(variantService, productService);
+        var viewModel = new VariantManagementViewModel(
+            variantService, productService,
+            new ProductContextHolder(), Substitute.For<INavigationService>());
 
         Assert.False(viewModel.DeleteCommand.CanExecute(null));
 

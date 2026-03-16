@@ -1,21 +1,23 @@
 using Microsoft.Extensions.DependencyInjection;
-using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Vendors.Services;
 using StoreAssistantPro.Modules.Vendors.ViewModels;
-using StoreAssistantPro.Modules.Vendors.Views;
 
 namespace StoreAssistantPro.Modules.Vendors;
 
 public static class VendorsModule
 {
-    public const string VendorManagementDialog = "VendorManagement";
+    public const string VendorManagementPage = "VendorManagement";
 
-    public static IServiceCollection AddVendorsModule(this IServiceCollection services)
+    public static IServiceCollection AddVendorsModule(
+        this IServiceCollection services,
+        NavigationPageRegistry pageRegistry)
     {
+        pageRegistry.Map<VendorManagementViewModel>(VendorManagementPage)
+            .RequireFeature(VendorManagementPage, FeatureFlags.VendorManagement);
         services.AddTransient<IVendorService, VendorService>();
         services.AddTransient<VendorManagementViewModel>();
-        services.AddTransient<VendorManagementWindow>();
-        services.AddDialogRegistration<VendorManagementWindow>(VendorManagementDialog);
         return services;
     }
 }

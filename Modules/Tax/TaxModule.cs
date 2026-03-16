@@ -1,22 +1,24 @@
 using Microsoft.Extensions.DependencyInjection;
-using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Tax.Services;
 using StoreAssistantPro.Modules.Tax.ViewModels;
-using StoreAssistantPro.Modules.Tax.Views;
 
 namespace StoreAssistantPro.Modules.Tax;
 
 public static class TaxModule
 {
-    public const string TaxManagementDialog = "TaxManagement";
+    public const string TaxManagementPage = "TaxManagement";
 
-    public static IServiceCollection AddTaxModule(this IServiceCollection services)
+    public static IServiceCollection AddTaxModule(
+        this IServiceCollection services,
+        NavigationPageRegistry pageRegistry)
     {
+        pageRegistry.Map<TaxManagementViewModel>(TaxManagementPage)
+            .RequireFeature(TaxManagementPage, FeatureFlags.TaxManagement);
         services.AddTransient<ITaxService, TaxService>();
         services.AddTransient<ITaxGroupService, TaxGroupService>();
         services.AddTransient<TaxManagementViewModel>();
-        services.AddTransient<TaxManagementWindow>();
-        services.AddDialogRegistration<TaxManagementWindow>(TaxManagementDialog);
         return services;
     }
 }

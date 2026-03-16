@@ -62,15 +62,13 @@ public class MainViewModelFlowStateTests
     }
 
     [Fact]
-    public void OpenVendorManagement_WhenDialogFails_PostsOpenFailureInsteadOfClosedStatus()
+    public void OpenVendorManagement_NavigatesToVendorPage()
     {
-        _dialogService.ShowDialog("VendorManagement").Returns(false);
         var sut = CreateSut();
 
         sut.OpenVendorManagementCommand.Execute(null);
 
-        _statusBar.Received(1).Post("Unable to open Vendor management");
-        _statusBar.DidNotReceive().Post("Vendor management closed");
+        _statusBar.Received(1).SetPersistent("Vendor management");
     }
 
     [Fact]

@@ -22,4 +22,15 @@ public static class FeatureFlags
     public const string Inventory = "Inventory";
     public const string Customers = "Customers";
     public const string PurchaseOrders = "PurchaseOrders";
+    public const string Expenses = "Expenses";
+    public const string Debtors = "Debtors";
+    public const string Orders = "Orders";
+    public const string Ironing = "Ironing";
+    public const string Salaries = "Salaries";
+    public const string Branch = "Branch";
+    public const string SalesPurchase = "SalesPurchase";
+    public const string Payments = "Payments";
+    public const string Categories = "Categories";
+    public const string Brands = "Brands";
+    public const string SaleHistory = "SaleHistory";
 }

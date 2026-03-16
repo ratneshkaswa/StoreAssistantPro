@@ -1,21 +1,23 @@
 using Microsoft.Extensions.DependencyInjection;
-using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Settings.Services;
 using StoreAssistantPro.Modules.Settings.ViewModels;
-using StoreAssistantPro.Modules.Settings.Views;
 
 namespace StoreAssistantPro.Modules.Settings;
 
 public static class SettingsModule
 {
-    public const string SystemSettingsDialog = "SystemSettings";
+    public const string SystemSettingsPage = "SystemSettings";
 
-    public static IServiceCollection AddSettingsModule(this IServiceCollection services)
+    public static IServiceCollection AddSettingsModule(
+        this IServiceCollection services,
+        NavigationPageRegistry pageRegistry)
     {
+        pageRegistry.Map<SystemSettingsViewModel>(SystemSettingsPage)
+            .RequireFeature(SystemSettingsPage, FeatureFlags.SystemSettings);
         services.AddTransient<ISystemSettingsService, SystemSettingsService>();
         services.AddTransient<SystemSettingsViewModel>();
-        services.AddTransient<SystemSettingsWindow>();
-        services.AddDialogRegistration<SystemSettingsWindow>(SystemSettingsDialog);
         return services;
     }
 }

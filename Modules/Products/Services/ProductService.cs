@@ -80,6 +80,10 @@ public class ProductService(
             SupportsPattern = dto.SupportsPattern,
             SupportsSize = dto.SupportsSize,
             SupportsType = dto.SupportsType,
+            SalePrice = dto.SalePrice,
+            CostPrice = dto.CostPrice,
+            Barcode = dto.Barcode?.Trim(),
+            IsTaxInclusive = dto.IsTaxInclusive,
             IsActive = true
         };
 
@@ -113,6 +117,10 @@ public class ProductService(
         entity.SupportsPattern = dto.SupportsPattern;
         entity.SupportsSize = dto.SupportsSize;
         entity.SupportsType = dto.SupportsType;
+        entity.SalePrice = dto.SalePrice;
+        entity.CostPrice = dto.CostPrice;
+        entity.Barcode = dto.Barcode?.Trim();
+        entity.IsTaxInclusive = dto.IsTaxInclusive;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }

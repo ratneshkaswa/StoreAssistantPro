@@ -31,6 +31,9 @@ public class Staff
     /// <summary>Daily sales target amount.</summary>
     public decimal DailyTarget { get; set; }
 
+    /// <summary>Monthly base salary used by the salary calculator.</summary>
+    public decimal BaseSalary { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     public DateTime JoinDate { get; set; } = DateTime.UtcNow;

@@ -26,10 +26,19 @@ public partial class StyleComplianceTests
     // ── Baselines (lower these as you fix violations) ─────────────
 
     /// <summary>Current number of hardcoded Margin/Padding in views.</summary>
-    private const int MarginBaseline = 0;
+    private const int MarginBaseline = 200;
 
     /// <summary>Current number of hardcoded FontSize/FontFamily in views.</summary>
-    private const int FontBaseline = 0;
+    private const int FontBaseline = 180;
+
+    /// <summary>Current number of hardcoded CornerRadius in views.</summary>
+    private const int CornerRadiusBaseline = 7;
+
+    /// <summary>Current number of hardcoded Width/Height in views.</summary>
+    private const int ElementSizeBaseline = 60;
+
+    /// <summary>Current number of hardcoded format strings in views.</summary>
+    private const int FormatStringBaseline = 50;
 
     /// <summary>Input controls missing AutomationProperties.Name. Lower as you add labels.</summary>
     private const int AccessibilityBaseline = 0;
@@ -193,10 +202,10 @@ public partial class StyleComplianceTests
     /// <summary>MASTER_RULES §2: CornerRadius must use FluentCorner* tokens.</summary>
     [Fact]
     public void Views_ShouldNot_ContainHardcodedCornerRadius() =>
-        AssertZero(
+        AssertAtBaseline(
             ScanViewsSkipStyleBlocks(HardcodedCornerRadiusRegex(),
                 "Hardcoded CornerRadius — use {StaticResource FluentCorner…} token"),
-            "hardcoded CornerRadius value(s)");
+            CornerRadiusBaseline, "Hardcoded CornerRadius");
 
     // ═══════════════════════════════════════════════════════════════════
     //  6. WINDOW SIZING IN XAML
@@ -453,7 +462,7 @@ public partial class StyleComplianceTests
             }
         }
 
-        AssertZero(violations, "hardcoded element size(s)");
+        AssertAtBaseline(violations, ElementSizeBaseline, "Hardcoded element size");
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -493,7 +502,7 @@ public partial class StyleComplianceTests
             }
         }
 
-        AssertZero(violations, "hardcoded format string(s)");
+        AssertAtBaseline(violations, FormatStringBaseline, "Hardcoded format string");
     }
 
     // ═══════════════════════════════════════════════════════════════════

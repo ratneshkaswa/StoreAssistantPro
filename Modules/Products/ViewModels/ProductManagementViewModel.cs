@@ -1,7 +1,8 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Brands.Services;
 using StoreAssistantPro.Modules.Categories.Services;
@@ -12,8 +13,12 @@ namespace StoreAssistantPro.Modules.Products.ViewModels;
 
 public partial class ProductManagementViewModel(
     IProductService productService,
-    ITaxGroupService taxGroupService) : BaseViewModel
+    ITaxGroupService taxGroupService,
+    INavigationService navigationService,
+    ProductContextHolder productContextHolder) : BaseViewModel
 {
+    private List<Product> _allProducts = [];
+
     [ObservableProperty]
     public partial ObservableCollection<Product> Products { get; set; } = [];
 
@@ -62,6 +67,23 @@ public partial class ProductManagementViewModel(
     [ObservableProperty]
     public partial Vendor? SelectedVendor { get; set; }
 
+    // ── Search & filter ──
+
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial Category? FilterCategory { get; set; }
+
+    [ObservableProperty]
+    public partial string FilterStockStatus { get; set; } = "All";
+
+    [ObservableProperty]
+    public partial string FilterCountText { get; set; } = string.Empty;
+
+    public ObservableCollection<string> StockStatusOptions { get; } =
+        ["All", "In Stock", "Low Stock", "Out of Stock"];
+
     // â”€â”€ Form fields â”€â”€
 
     [ObservableProperty]
@@ -75,6 +97,18 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial TaxMaster? SelectedTax { get; set; }
+
+    [ObservableProperty]
+    public partial string SalePriceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CostPriceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string Barcode { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsTaxInclusive { get; set; }
 
     [ObservableProperty]
     public partial bool SupportsColour { get; set; } = true;
@@ -121,6 +155,10 @@ public partial class ProductManagementViewModel(
         SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.CategoryId);
         SelectedBrand = Brands.FirstOrDefault(b => b.Id == value.BrandId);
         SelectedVendor = Vendors.FirstOrDefault(v => v.Id == value.VendorId);
+        SalePriceText = value.SalePrice > 0 ? value.SalePrice.ToString("F0") : string.Empty;
+        CostPriceText = value.CostPrice > 0 ? value.CostPrice.ToString("F0") : string.Empty;
+        Barcode = value.Barcode ?? string.Empty;
+        IsTaxInclusive = value.IsTaxInclusive;
         SupportsColour = value.SupportsColour;
         SupportsSize = value.SupportsSize;
         SupportsPattern = value.SupportsPattern;
@@ -174,6 +212,10 @@ public partial class ProductManagementViewModel(
         SelectedCategory = null;
         SelectedBrand = null;
         SelectedVendor = null;
+        SalePriceText = string.Empty;
+        CostPriceText = string.Empty;
+        Barcode = string.Empty;
+        IsTaxInclusive = false;
         SupportsColour = true;
         SupportsSize = true;
         SupportsPattern = false;
@@ -195,11 +237,28 @@ public partial class ProductManagementViewModel(
         if (!Validate(v => v.Rule(!string.IsNullOrWhiteSpace(ProductName), "Product name is required.")))
             return;
 
+        decimal salePrice = 0, costPrice = 0;
+        if (!string.IsNullOrWhiteSpace(SalePriceText) &&
+            (!decimal.TryParse(SalePriceText, out salePrice) || salePrice < 0))
+        {
+            ErrorMessage = "Sale price must be a valid positive number.";
+            return;
+        }
+        if (!string.IsNullOrWhiteSpace(CostPriceText) &&
+            (!decimal.TryParse(CostPriceText, out costPrice) || costPrice < 0))
+        {
+            ErrorMessage = "Cost price must be a valid positive number.";
+            return;
+        }
+
         var dto = new ProductDto(
             ProductName, SelectedProductType, SelectedUnit,
             SelectedTax?.Id, SelectedCategory?.Id, SelectedBrand?.Id, SelectedVendor?.Id,
             SupportsColour, SupportsPattern,
-            SupportsSize, SupportsType);
+            SupportsSize, SupportsType,
+            salePrice, costPrice,
+            string.IsNullOrWhiteSpace(Barcode) ? null : Barcode,
+            IsTaxInclusive);
 
         int productId;
         if (IsEditing && SelectedProduct is not null)
@@ -240,20 +299,57 @@ public partial class ProductManagementViewModel(
         SuccessMessage = "Status toggled.";
     });
 
-    /// <summary>
-    /// Callback set by code-behind to open the Variant Management dialog
-    /// for the selected product. Avoids direct view references in the ViewModel.
-    /// </summary>
-    public Action<Product>? OpenVariantsDialog { get; set; }
-
     [RelayCommand(CanExecute = nameof(CanManageVariants))]
     private void ManageVariants()
     {
         if (SelectedProduct is null) return;
-        OpenVariantsDialog?.Invoke(SelectedProduct);
+        productContextHolder.SelectedProduct = SelectedProduct;
+        navigationService.NavigateTo("VariantManagement");
     }
 
     private bool CanManageVariants() => SelectedProduct is not null;
+
+    [RelayCommand]
+    private void Search() => ApplyFilters();
+
+    [RelayCommand]
+    private void SetStockFilter(string status)
+    {
+        FilterStockStatus = status;
+        ApplyFilters();
+    }
+
+    partial void OnFilterCategoryChanged(Category? value) => ApplyFilters();
+
+    private void ApplyFilters()
+    {
+        IEnumerable<Product> query = _allProducts;
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var term = SearchText.Trim();
+            query = query.Where(p =>
+                p.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                (p.Barcode is not null && p.Barcode.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        if (FilterCategory is not null)
+            query = query.Where(p => p.CategoryId == FilterCategory.Id);
+
+        query = FilterStockStatus switch
+        {
+            "In Stock" => query.Where(p => p.Quantity > 0 && !p.IsLowStock),
+            "Low Stock" => query.Where(p => p.IsLowStock),
+            "Out of Stock" => query.Where(p => p.Quantity == 0),
+            _ => query
+        };
+
+        var list = query.ToList();
+        Products = new ObservableCollection<Product>(list);
+        FilterCountText = (FilterStockStatus == "All" && FilterCategory is null && string.IsNullOrWhiteSpace(SearchText))
+            ? string.Empty
+            : $"{list.Count} of {_allProducts.Count}";
+    }
 
     private void ClearMappingSelection()
     {
@@ -282,12 +378,15 @@ public partial class ProductManagementViewModel(
             vendorsTask);
 
         Products = new ObservableCollection<Product>(productsTask.Result);
+        _allProducts = [.. productsTask.Result];
         Taxes = new ObservableCollection<TaxMaster>(taxesTask.Result);
         TaxGroups = new ObservableCollection<TaxGroup>(groupsTask.Result);
         HSNCodes = new ObservableCollection<HSNCode>(codesTask.Result);
         Categories = new ObservableCollection<Category>(categoriesTask.Result);
         Brands = new ObservableCollection<Brand>(brandsTask.Result);
         Vendors = new ObservableCollection<Vendor>(vendorsTask.Result);
+
+        ApplyFilters();
 
         SelectedProduct = selectedProductId.HasValue
             ? Products.FirstOrDefault(p => p.Id == selectedProductId.Value)

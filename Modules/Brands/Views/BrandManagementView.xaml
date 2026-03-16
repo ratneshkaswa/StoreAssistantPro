@@ -1,0 +1,99 @@
+<UserControl x:Class="StoreAssistantPro.Modules.Brands.Views.BrandManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="OnLoaded">
+    <Grid Margin="{StaticResource PagePadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8EC;"/><Run Text=" Brand Management"/></TextBlock>
+
+        <!-- Search -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox AutomationProperties.Name="Brand search"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="e.g. Raymond"/>
+            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- DataGrid -->
+        <DataGrid AutomationProperties.Name="Brands list" Grid.Row="2"
+                  ItemsSource="{Binding Brands}"
+                  SelectedItem="{Binding SelectedBrand}"
+                  Style="{StaticResource EnterpriseDataGridStyle}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column" CanUserAddRows="False"
+                  Margin="{StaticResource ItemSpacing}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Brand" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Products" Binding="{Binding ProductCount}" Width="{StaticResource ColumnWidthQty}"/>
+                <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Form -->
+        <Grid Grid.Row="3" Margin="{StaticResource StepContentTopSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                <Run Text="Brand Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+            </TextBlock>
+            <TextBox Grid.Column="1"
+                     AutomationProperties.Name="Brand name"
+                     Text="{Binding BrandName, UpdateSourceTrigger=PropertyChanged}"
+                     Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                     MaxLength="100" h:Watermark.Text="e.g. Raymond"/>
+        </Grid>
+
+        <!-- Buttons -->
+        <Grid Grid.Row="4" Margin="{StaticResource FormActionBarSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Content="Clear" Command="{Binding ClearFormCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="2" Content="Save" Command="{Binding SaveCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- Messages -->
+        <Grid Grid.Row="5" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasErrorMessage}"/>
+            <controls:InfoBar Message="{Binding SuccessMessage}"
+                              Severity="Success"
+                              IsOpen="{Binding HasSuccessMessage}"/>
+        </Grid>
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Saving brand changes..."/>
+    </Grid>
+</UserControl>

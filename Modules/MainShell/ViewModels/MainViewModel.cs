@@ -12,6 +12,7 @@ using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Modules.Authentication.Commands;
+using StoreAssistantPro.Modules.Authentication.ViewModels;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
@@ -35,23 +36,33 @@ public partial class MainViewModel : BaseViewModel
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
+    private const string LoginPage = "Login";
     private const string MainWorkspacePage = "MainWorkspace";
 
-    private const string FirmManagementDialog = "FirmManagement";
-    private const string UserManagementDialog = "UserManagement";
-    private const string TaxManagementDialog = "TaxManagement";
-    private const string VendorManagementDialog = "VendorManagement";
-    private const string ProductManagementDialog = "ProductManagement";
-    private const string CategoryManagementDialog = "CategoryManagement";
-    private const string BrandManagementDialog = "BrandManagement";
-    private const string InventoryDialog = "Inventory";
-    private const string BillingDialog = "Billing";
-    private const string SaleHistoryDialog = "SaleHistory";
-    private const string CustomerManagementDialog = "CustomerManagement";
-    private const string PurchaseOrdersDialog = "PurchaseOrders";
-    private const string FinancialYearDialog = "FinancialYear";
-    private const string SystemSettingsDialog = "SystemSettings";
-    private const string InwardEntryDialog = "InwardEntry";
+    private const string FirmManagementPage = "FirmManagement";
+    private const string UserManagementPage = "UserManagement";
+    private const string TaxManagementPage = "TaxManagement";
+    private const string VendorManagementPage = "VendorManagement";
+    private const string ProductManagementPage = "ProductManagement";
+    private const string CategoryManagementPage = "CategoryManagement";
+    private const string BrandManagementPage = "BrandManagement";
+    private const string InventoryPage = "Inventory";
+    private const string BillingPage = "Billing";
+    private const string SaleHistoryPage = "SaleHistory";
+    private const string CustomerManagementPage = "CustomerManagement";
+    private const string PurchaseOrdersPage = "PurchaseOrders";
+    private const string FinancialYearPage = "FinancialYear";
+    private const string SystemSettingsPage = "SystemSettings";
+    private const string InwardEntryPage = "InwardEntry";
+    private const string ExpenseManagementPage = "ExpenseManagement";
+    private const string DebtorManagementPage = "DebtorManagement";
+    private const string OrderManagementPage = "OrderManagement";
+    private const string IroningManagementPage = "IroningManagement";
+    private const string SalaryManagementPage = "SalaryManagement";
+    private const string BranchManagementPage = "BranchManagement";
+    private const string SalesPurchasePage = "SalesPurchase";
+    private const string PaymentManagementPage = "PaymentManagement";
+    private const string ReportsPage = "Reports";
 
     // ── Application state (single source of truth) ──
 
@@ -108,18 +119,22 @@ public partial class MainViewModel : BaseViewModel
     public bool IsSaleHistoryVisible => _features.IsEnabled(FeatureFlags.Sales);
     public bool IsCustomerManagementVisible => _features.IsEnabled(FeatureFlags.Customers);
     public bool IsPurchaseOrdersVisible => _features.IsEnabled(FeatureFlags.PurchaseOrders);
+    public bool IsExpenseManagementVisible => _features.IsEnabled(FeatureFlags.Expenses);
+    public bool IsDebtorManagementVisible => _features.IsEnabled(FeatureFlags.Debtors);
+    public bool IsOrderManagementVisible => _features.IsEnabled(FeatureFlags.Orders);
+    public bool IsIroningManagementVisible => _features.IsEnabled(FeatureFlags.Ironing);
+    public bool IsSalaryManagementVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Salaries);
+    public bool IsBranchManagementVisible => _features.IsEnabled(FeatureFlags.Branch);
+    public bool IsSalesPurchaseVisible => _features.IsEnabled(FeatureFlags.SalesPurchase);
+    public bool IsPaymentManagementVisible => _features.IsEnabled(FeatureFlags.Payments);
+    public bool IsReportsVisible => _features.IsEnabled(FeatureFlags.Reports);
 
     // ── Navigation ──
 
     /// <summary>Tracks the current page key for mode-change fallback logic.</summary>
-    private string _currentPage = MainWorkspacePage;
+    private string _currentPage = LoginPage;
 
     public ObservableObject CurrentView => _navigationService.CurrentView;
-
-    // ── Logout ──
-
-    [ObservableProperty]
-    public partial bool IsLoggingOut { get; set; }
 
     public Action? RequestClose { get; set; }
 
@@ -171,8 +186,46 @@ public partial class MainViewModel : BaseViewModel
             contributor.Contribute(_quickActionService);
         RefreshQuickActions();
 
+        // Auto-login as User — skip login page entirely to avoid flash
+        _ = AutoLoginAsUserAsync();
+    }
+
+    /// <summary>
+    /// Logs in as User directly through the command bus without ever
+    /// showing the login page. Eliminates the startup flash.
+    /// </summary>
+    private async Task AutoLoginAsUserAsync()
+    {
+        var result = await _commandBus.SendAsync(
+            new LoginUserCommand(UserType.User, string.Empty));
+
+        if (result.Succeeded)
+            await OnLoginSucceededAsync(UserType.User);
+    }
+
+    /// <summary>
+    /// When the current view is a <see cref="LoginViewModel"/>,
+    /// subscribe to its <see cref="LoginViewModel.LoginSucceeded"/> callback
+    /// so we can transition to the workspace after authentication.
+    /// </summary>
+    private void WireLoginCallback()
+    {
+        if (_navigationService.CurrentView is LoginViewModel loginVm)
+        {
+            loginVm.LoginSucceeded = OnLoginSucceededAsync;
+            loginVm.Initialize();
+        }
+    }
+
+    private async Task OnLoginSucceededAsync(UserType userType)
+    {
+        await _sessionService.LoginAsync(userType);
+
         _navigationService.NavigateTo(MainWorkspacePage);
+        _currentPage = MainWorkspacePage;
         _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
+
+        RefreshQuickActions();
     }
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -248,6 +301,15 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsSaleHistoryVisible));
         OnPropertyChanged(nameof(IsCustomerManagementVisible));
         OnPropertyChanged(nameof(IsPurchaseOrdersVisible));
+        OnPropertyChanged(nameof(IsExpenseManagementVisible));
+        OnPropertyChanged(nameof(IsDebtorManagementVisible));
+        OnPropertyChanged(nameof(IsOrderManagementVisible));
+        OnPropertyChanged(nameof(IsIroningManagementVisible));
+        OnPropertyChanged(nameof(IsSalaryManagementVisible));
+        OnPropertyChanged(nameof(IsBranchManagementVisible));
+        OnPropertyChanged(nameof(IsSalesPurchaseVisible));
+        OnPropertyChanged(nameof(IsPaymentManagementVisible));
+        OnPropertyChanged(nameof(IsReportsVisible));
     }
 
     // ── Navigation commands ──
@@ -282,102 +344,190 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenFirmManagement()
     {
-        OpenDialog(FirmManagementDialog, "Firm management");
+        NavigateToPage(FirmManagementPage, "Firm management");
     }
 
     [RelayCommand]
     private void OpenUserManagement()
     {
-        OpenDialog(UserManagementDialog, "User management", "User management closed");
+        NavigateToPage(UserManagementPage, "User management");
     }
 
     [RelayCommand]
     private void OpenTaxManagement()
     {
-        OpenDialog(TaxManagementDialog, "Tax management", "Tax management closed");
+        NavigateToPage(TaxManagementPage, "Tax management");
     }
 
     [RelayCommand]
     private void OpenVendorManagement()
     {
-        OpenDialog(VendorManagementDialog, "Vendor management", "Vendor management closed");
+        NavigateToPage(VendorManagementPage, "Vendor management");
     }
 
     [RelayCommand]
     private void OpenProductManagement()
     {
-        OpenDialog(ProductManagementDialog, "Product management", "Product management closed");
+        NavigateToPage(ProductManagementPage, "Product management");
     }
 
     [RelayCommand]
     private void OpenCategoryManagement()
     {
-        OpenDialog(CategoryManagementDialog, "Category management", "Category management closed");
+        NavigateToPage(CategoryManagementPage, "Category management");
     }
 
     [RelayCommand]
     private void OpenBrandManagement()
     {
-        OpenDialog(BrandManagementDialog, "Brand management", "Brand management closed");
+        NavigateToPage(BrandManagementPage, "Brand management");
     }
 
     [RelayCommand]
     private void OpenFinancialYear()
     {
-        OpenDialog(FinancialYearDialog, "Financial year", "Financial year dialog closed");
+        NavigateToPage(FinancialYearPage, "Financial year");
     }
 
     [RelayCommand]
     private void OpenSystemSettings()
     {
-        OpenDialog(SystemSettingsDialog, "System settings", "System settings closed");
+        NavigateToPage(SystemSettingsPage, "System settings");
     }
 
     [RelayCommand]
     private void OpenInwardEntry()
     {
-        OpenDialog(InwardEntryDialog, "Inward entry", "Inward entry closed");
+        NavigateToPage(InwardEntryPage, "Inward entry");
     }
 
     [RelayCommand]
     private void OpenInventory()
     {
-        OpenDialog(InventoryDialog, "Inventory management", "Inventory management closed");
+        NavigateToPage(InventoryPage, "Inventory management");
     }
 
     [RelayCommand]
     private void OpenBilling()
     {
-        OpenDialog(BillingDialog, "Billing", "Billing closed");
+        NavigateToPage(BillingPage, "Billing");
     }
 
     [RelayCommand]
     private void OpenSaleHistory()
     {
-        OpenDialog(SaleHistoryDialog, "Sale history", "Sale history closed");
+        NavigateToPage(SaleHistoryPage, "Sale history");
     }
 
     [RelayCommand]
     private void OpenCustomerManagement()
     {
-        OpenDialog(CustomerManagementDialog, "Customer management", "Customer management closed");
+        NavigateToPage(CustomerManagementPage, "Customer management");
     }
 
     [RelayCommand]
     private void OpenPurchaseOrders()
     {
-        OpenDialog(PurchaseOrdersDialog, "Purchase orders", "Purchase orders closed");
+        NavigateToPage(PurchaseOrdersPage, "Purchase orders");
     }
 
-    // ── Logout ──
+    [RelayCommand]
+    private void OpenExpenseManagement()
+    {
+        NavigateToPage(ExpenseManagementPage, "Expense management");
+    }
+
+    [RelayCommand]
+    private void OpenDebtorManagement()
+    {
+        NavigateToPage(DebtorManagementPage, "Debtor management");
+    }
+
+    [RelayCommand]
+    private void OpenOrderManagement()
+    {
+        NavigateToPage(OrderManagementPage, "Order management");
+    }
+
+    [RelayCommand]
+    private void OpenIroningManagement()
+    {
+        NavigateToPage(IroningManagementPage, "Ironing management");
+    }
+
+    [RelayCommand]
+    private void OpenSalaryManagement()
+    {
+        NavigateToPage(SalaryManagementPage, "Salary management");
+    }
+
+    [RelayCommand]
+    private void OpenBranchManagement()
+    {
+        NavigateToPage(BranchManagementPage, "Branch management");
+    }
+
+    [RelayCommand]
+    private void OpenSalesPurchase()
+    {
+        NavigateToPage(SalesPurchasePage, "Sales/Purchase register");
+    }
+
+    [RelayCommand]
+    private void OpenPaymentManagement()
+    {
+        NavigateToPage(PaymentManagementPage, "Payment management");
+    }
+
+    [RelayCommand]
+    private void OpenReports()
+    {
+        NavigateToPage(ReportsPage, "Reports");
+    }
+
+    // ── Switch User / Logout ──
+
+    [RelayCommand]
+    private async Task SwitchUserAsync()
+    {
+        var currentRole = AppState.CurrentUserType;
+        await _commandBus.SendAsync(new LogoutCommand(currentRole));
+
+        if (currentRole == UserType.Admin)
+        {
+            // Admin → switch directly to User (no login page)
+            await AutoLoginAsUserAsync();
+        }
+        else
+        {
+            // User → show login with only Admin option
+            _navigationService.NavigateTo(LoginPage);
+            _currentPage = LoginPage;
+            _statusBar.SetPersistent(string.Empty);
+
+            if (_navigationService.CurrentView is LoginViewModel loginVm)
+            {
+                loginVm.LoginSucceeded = OnLoginSucceededAsync;
+                loginVm.IsUserRoleVisible = false;
+                loginVm.Initialize();
+
+                // Auto-select Admin so PIN pad shows immediately
+                _ = loginVm.SelectUserCommand.ExecuteAsync(UserType.Admin);
+            }
+        }
+    }
 
     [RelayCommand]
     private async Task LogoutAsync()
     {
         var userType = AppState.CurrentUserType;
         await _commandBus.SendAsync(new LogoutCommand(userType));
-        IsLoggingOut = true;
-        RequestClose?.Invoke();
+
+        // Navigate back to login page
+        _navigationService.NavigateTo(LoginPage);
+        _currentPage = LoginPage;
+        _statusBar.SetPersistent(string.Empty);
+        WireLoginCallback();
     }
 
     // ── Event handlers ──
@@ -542,9 +692,91 @@ public partial class MainViewModel : BaseViewModel
             Description = "Backup, restore, and system defaults",
             HelpKey = "Settings",
             Command = OpenSystemSettingsCommand,
-            SortOrder = 80,
+            SortOrder = 90,
             RequiredRoles = [UserType.Admin],
             RequiredFeature = FeatureFlags.SystemSettings
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Expenses", Icon = "💸",
+            Description = "Track petty cash and daily expenses",
+            HelpKey = "Expenses",
+            Command = OpenExpenseManagementCommand,
+            SortOrder = 78,
+            RequiredFeature = FeatureFlags.Expenses
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Debtors", Icon = "📒",
+            Description = "Manage debtor accounts and balances",
+            HelpKey = "Debtors",
+            Command = OpenDebtorManagementCommand,
+            SortOrder = 79,
+            RequiredFeature = FeatureFlags.Debtors
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Orders", Icon = "📝",
+            Description = "Create and track customer orders",
+            HelpKey = "Orders",
+            Command = OpenOrderManagementCommand,
+            SortOrder = 80,
+            RequiredFeature = FeatureFlags.Orders
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Ironing", Icon = "👔",
+            Description = "Manage ironing batches and entries",
+            HelpKey = "Ironing",
+            Command = OpenIroningManagementCommand,
+            SortOrder = 81,
+            RequiredFeature = FeatureFlags.Ironing
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Salaries", Icon = "💰",
+            Description = "Record and manage staff salaries",
+            HelpKey = "Salaries",
+            Command = OpenSalaryManagementCommand,
+            SortOrder = 82,
+            RequiredRoles = [UserType.Admin],
+            RequiredFeature = FeatureFlags.Salaries
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Branch", Icon = "🏬",
+            Description = "Track branch bills sent and received",
+            HelpKey = "Branch",
+            Command = OpenBranchManagementCommand,
+            SortOrder = 83,
+            RequiredFeature = FeatureFlags.Branch
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Sales/Purchase", Icon = "📊",
+            Description = "Sales and purchase register entries",
+            HelpKey = "SalesPurchase",
+            Command = OpenSalesPurchaseCommand,
+            SortOrder = 84,
+            RequiredFeature = FeatureFlags.SalesPurchase
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Payments", Icon = "💳",
+            Description = "Record customer payments",
+            HelpKey = "Payments",
+            Command = OpenPaymentManagementCommand,
+            SortOrder = 85,
+            RequiredFeature = FeatureFlags.Payments
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Reports", Icon = "📈",
+            Description = "View expense, order, and financial reports",
+            HelpKey = "Reports",
+            Command = OpenReportsCommand,
+            SortOrder = 86,
+            RequiredFeature = FeatureFlags.Reports
         });
         _quickActionService.Register(new QuickAction
         {
@@ -581,6 +813,13 @@ public partial class MainViewModel : BaseViewModel
 
         if (!string.IsNullOrWhiteSpace(closedStatus))
             _statusBar.Post(closedStatus);
+    }
+
+    private void NavigateToPage(string pageKey, string displayName)
+    {
+        _navigationService.NavigateTo(pageKey);
+        _currentPage = pageKey;
+        _statusBar.SetPersistent(displayName);
     }
 
     /// <summary>

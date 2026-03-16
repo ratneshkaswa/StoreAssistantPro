@@ -1,4 +1,5 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Brands.Services;
@@ -95,8 +96,12 @@ public sealed class QuickAccessToggleCommandTests
         productService.GetColoursAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyList<Colour>>(new List<Colour>()));
 
-        var productViewModel = new ProductManagementViewModel(productService, taxGroupService);
-        var variantViewModel = new VariantManagementViewModel(variantService, productService)
+        var productViewModel = new ProductManagementViewModel(
+            productService, taxGroupService,
+            Substitute.For<INavigationService>(), new ProductContextHolder());
+        var variantViewModel = new VariantManagementViewModel(
+            variantService, productService,
+            new ProductContextHolder(), Substitute.For<INavigationService>())
         {
             Product = product
         };

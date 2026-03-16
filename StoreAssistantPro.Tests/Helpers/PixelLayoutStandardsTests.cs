@@ -17,12 +17,9 @@ public sealed class PixelLayoutStandardsTests
     }
 
     [Theory]
-    [InlineData("Modules\\Authentication\\Views\\LoginWindow.xaml")]
-    [InlineData("Modules\\Authentication\\Views\\SetupWindow.xaml")]
+    [InlineData("Modules\\Authentication\\Views\\LoginView.xaml")]
     [InlineData("Modules\\MainShell\\Views\\MainWindow.xaml")]
     [InlineData("Modules\\MainShell\\Views\\WorkspaceView.xaml")]
-    [InlineData("Modules\\Authentication\\Views\\SetupPages\\FirmProfilePage.xaml")]
-    [InlineData("Modules\\Authentication\\Views\\SetupPages\\SecuritySettingsPage.xaml")]
     public void ShellRoots_Should_OptInto_Rounding_And_PixelSnapping(string relativePath)
     {
         var content = File.ReadAllText(Path.Combine(SolutionRoot, relativePath));

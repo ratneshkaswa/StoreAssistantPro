@@ -52,4 +52,8 @@ public record ProductDto(
     bool SupportsColour,
     bool SupportsPattern,
     bool SupportsSize,
-    bool SupportsType);
+    bool SupportsType,
+    decimal SalePrice = 0,
+    decimal CostPrice = 0,
+    string? Barcode = null,
+    bool IsTaxInclusive = false);

@@ -1,21 +1,23 @@
 using Microsoft.Extensions.DependencyInjection;
-using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Inward.Services;
 using StoreAssistantPro.Modules.Inward.ViewModels;
-using StoreAssistantPro.Modules.Inward.Views;
 
 namespace StoreAssistantPro.Modules.Inward;
 
 public static class InwardModule
 {
-    public const string InwardEntryDialog = "InwardEntry";
+    public const string InwardEntryPage = "InwardEntry";
 
-    public static IServiceCollection AddInwardModule(this IServiceCollection services)
+    public static IServiceCollection AddInwardModule(
+        this IServiceCollection services,
+        NavigationPageRegistry pageRegistry)
     {
+        pageRegistry.Map<InwardEntryViewModel>(InwardEntryPage)
+            .RequireFeature(InwardEntryPage, FeatureFlags.InwardEntry);
         services.AddTransient<IInwardService, InwardService>();
         services.AddTransient<InwardEntryViewModel>();
-        services.AddTransient<InwardEntryWindow>();
-        services.AddDialogRegistration<InwardEntryWindow>(InwardEntryDialog);
         return services;
     }
 }

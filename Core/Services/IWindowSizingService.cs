@@ -5,7 +5,7 @@ namespace StoreAssistantPro.Core.Services;
 /// <summary>
 /// Standardizes window sizing rules across the application.
 /// <para>
-/// <b>Main window:</b> 90% of screen working area, centered, no resize.
+/// <b>Main window:</b> Maximized to full screen, no resize.
 /// </para>
 /// <para>
 /// <b>Dialog windows:</b> Preferred size relative to the work area,
@@ -19,7 +19,7 @@ public interface IWindowSizingService
 {
     /// <summary>
     /// Configure the main application shell window.
-    /// Sets size to 90% of screen, centers, disables resize.
+    /// Maximizes to full screen, disables resize.
     /// </summary>
     void ConfigureMainWindow(Window window);
 

@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Tasks.Services;
 
@@ -244,6 +244,14 @@ public partial class TaskManagementViewModel(ITaskService taskService) : BaseVie
 
     [RelayCommand]
     private void ClearForm() => ResetForm();
+
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (Tasks.Count == 0) return;
+        if (CsvExporter.Export(Tasks, "Tasks.csv"))
+            SuccessMessage = "Exported to CSV.";
+    }
 
     private void ResetForm()
     {

@@ -54,7 +54,7 @@ public sealed class FirmWindowLayoutComplianceTests
             "Modules",
             "Firm",
             "Views",
-            "FirmWindow.xaml"));
+            "FirmManagementView.xaml"));
 
     private static string FindSolutionRoot()
     {

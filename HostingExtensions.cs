@@ -32,8 +32,18 @@ using StoreAssistantPro.Modules.PurchaseOrders;
 using StoreAssistantPro.Modules.Settings;
 using StoreAssistantPro.Modules.Startup;
 using StoreAssistantPro.Modules.Tax;
+using StoreAssistantPro.Modules.Tasks;
 using StoreAssistantPro.Modules.Users;
+using StoreAssistantPro.Modules.Branch;
+using StoreAssistantPro.Modules.Debtors;
+using StoreAssistantPro.Modules.Expenses;
+using StoreAssistantPro.Modules.Ironing;
+using StoreAssistantPro.Modules.Orders;
+using StoreAssistantPro.Modules.Payments;
+using StoreAssistantPro.Modules.Salaries;
+using StoreAssistantPro.Modules.SalesPurchase;
 using StoreAssistantPro.Modules.Vendors;
+using StoreAssistantPro.Modules.Reports;
 
 namespace StoreAssistantPro;
 
@@ -135,22 +145,32 @@ internal static class HostingExtensions
 
         services
             .AddStartupModule()
-            .AddAuthenticationModule()
+            .AddAuthenticationModule(pageRegistry)
             .AddMainShellModule(pageRegistry)
-            .AddFirmModule()
-            .AddUsersModule()
-            .AddTaxModule()
-            .AddCategoriesModule()
-            .AddBrandsModule()
-            .AddVendorsModule()
-            .AddProductsModule()
-            .AddInventoryModule()
-            .AddBillingModule()
-            .AddCustomersModule()
-            .AddPurchaseOrdersModule()
-            .AddFinancialYearsModule()
-            .AddSettingsModule()
-            .AddInwardModule();
+            .AddFirmModule(pageRegistry)
+            .AddUsersModule(pageRegistry)
+            .AddTasksModule()
+            .AddTaxModule(pageRegistry)
+            .AddCategoriesModule(pageRegistry)
+            .AddBrandsModule(pageRegistry)
+            .AddVendorsModule(pageRegistry)
+            .AddProductsModule(pageRegistry)
+            .AddInventoryModule(pageRegistry)
+            .AddBillingModule(pageRegistry)
+            .AddCustomersModule(pageRegistry)
+            .AddPurchaseOrdersModule(pageRegistry)
+            .AddFinancialYearsModule(pageRegistry)
+            .AddSettingsModule(pageRegistry)
+            .AddInwardModule(pageRegistry)
+            .AddExpensesModule(pageRegistry)
+            .AddDebtorsModule(pageRegistry)
+            .AddOrdersModule(pageRegistry)
+            .AddIroningModule(pageRegistry)
+            .AddSalariesModule(pageRegistry)
+            .AddBranchModule(pageRegistry)
+            .AddSalesPurchaseModule(pageRegistry)
+            .AddPaymentsModule(pageRegistry)
+            .AddReportsModule(pageRegistry);
 
         return services;
     }

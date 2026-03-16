@@ -23,23 +23,8 @@ using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Views;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
-using StoreAssistantPro.Modules.Authentication.Views;
-using StoreAssistantPro.Modules.Billing.Views;
-using StoreAssistantPro.Modules.Brands.Views;
-using StoreAssistantPro.Modules.Categories.Views;
-using StoreAssistantPro.Modules.Customers.Views;
-using StoreAssistantPro.Modules.FinancialYears.Views;
-using StoreAssistantPro.Modules.Firm.Views;
-using StoreAssistantPro.Modules.Inventory.Views;
-using StoreAssistantPro.Modules.Inward.Views;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
 using StoreAssistantPro.Modules.MainShell.Views;
-using StoreAssistantPro.Modules.Products.Views;
-using StoreAssistantPro.Modules.PurchaseOrders.Views;
-using StoreAssistantPro.Modules.Settings.Views;
-using StoreAssistantPro.Modules.Tax.Views;
-using StoreAssistantPro.Modules.Users.Views;
-using StoreAssistantPro.Modules.Vendors.Views;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
@@ -48,27 +33,10 @@ public sealed class RuntimeUiSurfaceTests
 {
     private static readonly Type[] StartupWindowTypes =
     [
-        typeof(LoginWindow),
-        typeof(SetupWindow)
     ];
 
     private static readonly Type[] DialogWindowTypes =
     [
-        typeof(FirmWindow),
-        typeof(UsersWindow),
-        typeof(TaxManagementWindow),
-        typeof(VendorManagementWindow),
-        typeof(ProductManagementWindow),
-        typeof(CategoryManagementWindow),
-        typeof(BrandManagementWindow),
-        typeof(FinancialYearWindow),
-        typeof(SystemSettingsWindow),
-        typeof(InwardEntryWindow),
-        typeof(InventoryWindow),
-        typeof(BillingWindow),
-        typeof(SaleHistoryWindow),
-        typeof(CustomerManagementWindow),
-        typeof(PurchaseOrderWindow)
     ];
 
     [Fact(Skip = "Exploratory runtime-render audit; run individually when validating full-window visual surfaces.")]
@@ -668,7 +636,7 @@ public sealed class RuntimeUiSurfaceTests
         if (diagnostic.Contains("ScrollViewer at depth", StringComparison.Ordinal)
             && diagnostic.Contains("wraps only form controls", StringComparison.Ordinal))
         {
-            return windowType == typeof(LoginWindow) || windowType == typeof(SetupWindow);
+            return false;
         }
 
         if (diagnostic.Contains("Window.Content is a ScrollViewer", StringComparison.Ordinal))
@@ -995,9 +963,6 @@ public sealed class RuntimeUiSurfaceTests
     {
         switch (window.DataContext)
         {
-            case SetupViewModel setupViewModel:
-                setupViewModel.IsSetupComplete = true;
-                break;
             case LoginViewModel loginViewModel:
                 loginViewModel.IsVerifying = false;
                 loginViewModel.IsBusy = false;

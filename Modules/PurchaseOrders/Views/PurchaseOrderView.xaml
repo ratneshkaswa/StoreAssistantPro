@@ -1,0 +1,186 @@
+<UserControl x:Class="StoreAssistantPro.Modules.PurchaseOrders.Views.PurchaseOrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             x:Name="Root"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="OnLoaded">
+    <Grid Margin="{StaticResource PagePadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Purchase Orders"/></TextBlock>
+
+        <!-- Filters -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox AutomationProperties.Name="Purchase order search"
+                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="e.g. PO-1024 or Sonali Suppliers"/>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding StatusOptions}"
+                      AutomationProperties.Name="Purchase order status filter"
+                      SelectedItem="{Binding FilterStatus}"
+                      Width="{StaticResource FieldWidthStandard}"
+                      Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="2" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- PO list + detail -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- PO list -->
+            <DataGrid AutomationProperties.Name="Purchase orders" ItemsSource="{Binding Orders}"
+                      SelectedItem="{Binding SelectedOrder}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="PO#" Binding="{Binding OrderNumber}" Width="*"/>
+                    <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Date" Binding="{Binding OrderDate, StringFormat=d}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Right: New PO form -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="{StaticResource ItemSpacing}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Supplier"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox Grid.Row="0" Grid.Column="1"
+                              AutomationProperties.Name="Purchase order supplier"
+                              ItemsSource="{Binding Suppliers}"
+                              SelectedItem="{Binding SelectedSupplier}"
+                              DisplayMemberPath="Name"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Expected"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <DatePicker Grid.Row="2" Grid.Column="1"
+                                AutomationProperties.Name="Expected delivery date"
+                                SelectedDate="{Binding ExpectedDate}"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes"
+                               Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1"
+                             AutomationProperties.Name="Purchase order notes"
+                             Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="500" h:Watermark.Text="e.g. Urgent replenishment"/>
+                </Grid>
+
+                <!-- PO line items -->
+                <DataGrid AutomationProperties.Name="Order line items" Grid.Row="1"
+                          ItemsSource="{Binding LineItems}"
+                          SelectedItem="{Binding SelectedLineItem}"
+                          AutoGenerateColumns="False"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False"
+                          MaxHeight="{StaticResource EditableGridMaxHeight}"
+                          Margin="{StaticResource ItemSpacing}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Product" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding DataContext.Products, ElementName=Root}"
+                                              AutomationProperties.Name="Purchase order line product"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id"
+                                              SelectedValue="{Binding ProductId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Qty"
+                                            Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Cost"
+                                            Binding="{Binding UnitCost, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="{StaticResource ColumnWidthPrice}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="2" Margin="{StaticResource ItemSpacing}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="1" Content="Add Line" Command="{Binding AddLineItemCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Grid.Column="2" Content="Remove Line" Command="{Binding RemoveLineItemCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Grid.Column="3" Content="Create PO" Command="{Binding CreateOrderCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Messages -->
+        <Grid Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasErrorMessage}"/>
+            <controls:InfoBar Message="{Binding SuccessMessage}"
+                              Severity="Success"
+                              IsOpen="{Binding HasSuccessMessage}"/>
+        </Grid>
+
+        <!-- Action buttons -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="{StaticResource FormActionBarSpacing}">
+            <Button Content="Mark Ordered" Command="{Binding MarkOrderedCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Receive All" Command="{Binding ReceiveAllCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="Cancel PO" Command="{Binding CancelOrderCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </StackPanel>
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Processing purchase order..."/>
+    </Grid>
+</UserControl>

@@ -11,9 +11,7 @@ public sealed class WindowShellStandardsTests
     {
         var exceptions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "MainWindow.xaml",
-            "LoginWindow.xaml",
-            "SetupWindow.xaml"
+            "MainWindow.xaml"
         };
 
         var violations = Directory
@@ -31,9 +29,8 @@ public sealed class WindowShellStandardsTests
     }
 
     [Theory]
-    [InlineData("Modules\\Authentication\\Views\\LoginWindow.xaml")]
-    [InlineData("Modules\\Authentication\\Views\\SetupWindow.xaml")]
-    public void StartupWindows_Should_Use_AppBackground_And_SurfaceCard(string relativePath)
+    [InlineData("Modules\\Authentication\\Views\\LoginView.xaml")]
+    public void StartupViews_Should_Use_AppBackground_And_SurfaceCard(string relativePath)
     {
         var content = File.ReadAllText(Path.Combine(SolutionRoot, relativePath));
 
@@ -102,14 +99,8 @@ public sealed class WindowShellStandardsTests
     {
         var mainWindowCode = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
-        var loginWindowCode = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginWindow.xaml.cs"));
-        var setupWindowCode = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml.cs"));
 
         Assert.Contains("sizingService.ConfigureMainWindow(this);", mainWindowCode, StringComparison.Ordinal);
-        Assert.Contains("sizing.ConfigureStartupWindow(this,", loginWindowCode, StringComparison.Ordinal);
-        Assert.Contains("sizingService.ConfigureStartupWindow(this,", setupWindowCode, StringComparison.Ordinal);
     }
 
     [Fact]

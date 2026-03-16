@@ -46,6 +46,8 @@
   <ItemGroup>
     <Folder Include="Core\Data\" />
     <Folder Include="Core\Hosting\" />
+    <Folder Include="Modules\Authentication\Views\SetupPages\" />
+    <Folder Include="Modules\Authentication\Workflows\" />
     <Folder Include="Modules\Billing\Commands\" />
     <Folder Include="Modules\Billing\Events\" />
     <Folder Include="Modules\Billing\Models\" />
@@ -58,9 +60,6 @@
     <Folder Include="Modules\Promotions\ViewModels\" />
     <Folder Include="Modules\Promotions\Views\" />
     <Folder Include="Modules\Reports\Models\" />
-    <Folder Include="Modules\Reports\Services\" />
-    <Folder Include="Modules\Reports\ViewModels\" />
-    <Folder Include="Modules\Reports\Views\" />
     <Folder Include="Modules\Sales\Commands\" />
     <Folder Include="Modules\Sales\Events\" />
     <Folder Include="Modules\Sales\Models\" />

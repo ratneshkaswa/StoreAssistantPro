@@ -1,0 +1,315 @@
+<UserControl x:Class="StoreAssistantPro.Modules.Salaries.Views.SalaryManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             mc:Ignorable="d"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             d:DesignHeight="750" d:DesignWidth="960"
+             Loaded="OnLoaded">
+    <Grid Margin="{StaticResource PagePadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Style="{StaticResource PageTitleStyle}">
+            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7EE;"/>
+            <Run Text=" Salary Management"/>
+        </TextBlock>
+
+        <!-- Stat Cards -->
+        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="TOTAL PAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TotalPaid, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentSuccess}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TotalPending, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentWarning}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="UNPAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding UnpaidCount}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentError}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+                <StackPanel>
+                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TotalCount}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </WrapPanel>
+
+        <!-- Add/Edit Form -->
+        <Border Grid.Row="2" Style="{StaticResource FormCardStyle}" Margin="{StaticResource ItemSpacing}">
+            <StackPanel>
+                <TextBlock Text="Add salary record" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Employee" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding EmployeeName, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Employee name" MaxLength="200"
+                                 AutomationProperties.Name="Employee name"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Month" Style="{StaticResource FieldLabelStyle}"/>
+                        <ComboBox SelectedIndex="{Binding SelectedMonthIndex}"
+                                  AutomationProperties.Name="Month">
+                            <ComboBoxItem Content="January"/>
+                            <ComboBoxItem Content="February"/>
+                            <ComboBoxItem Content="March"/>
+                            <ComboBoxItem Content="April"/>
+                            <ComboBoxItem Content="May"/>
+                            <ComboBoxItem Content="June"/>
+                            <ComboBoxItem Content="July"/>
+                            <ComboBoxItem Content="August"/>
+                            <ComboBoxItem Content="September"/>
+                            <ComboBoxItem Content="October"/>
+                            <ComboBoxItem Content="November"/>
+                            <ComboBoxItem Content="December"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Year" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding YearText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Year" MaxLength="4"
+                                 AutomationProperties.Name="Year"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="6">
+                        <TextBlock Text="Base Salary ₹" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding BaseSalaryText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Base salary" MaxLength="10"
+                                 AutomationProperties.Name="Base salary"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="8">
+                        <TextBlock Text="Advance ₹" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding AdvanceText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Advance" MaxLength="10"
+                                 AutomationProperties.Name="Advance"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Present" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding PresentDaysText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Days" MaxLength="3"
+                                 AutomationProperties.Name="Present days"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Absent" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding AbsentDaysText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Days" MaxLength="3"
+                                 AutomationProperties.Name="Absent days"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="OT Hours" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding HoursWorkedText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Hours" MaxLength="6"
+                                 AutomationProperties.Name="Hours worked"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="6">
+                        <TextBlock Text="Incentive ₹" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding IncentiveText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Incentive" MaxLength="10"
+                                 AutomationProperties.Name="Incentive"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="8" Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <Button Content="Clear" Command="{Binding ClearFormCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Search -->
+        <Grid Grid.Row="3" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="Search by employee name or month"
+                     AutomationProperties.Name="Search salaries"/>
+            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- Filter Chips -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+            <Button Content="All" Command="{Binding SetPaidFilterCommand}" CommandParameter="All"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,4,0" AutomationProperties.Name="Filter all"/>
+            <Button Content="Paid" Command="{Binding SetPaidFilterCommand}" CommandParameter="Paid"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,4,0" AutomationProperties.Name="Filter paid"/>
+            <Button Content="Unpaid" Command="{Binding SetPaidFilterCommand}" CommandParameter="Unpaid"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,8,0" AutomationProperties.Name="Filter unpaid"/>
+            <TextBlock Text="{Binding FilterCountText}" FontSize="11"
+                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- DataGrid -->
+        <DataGrid Grid.Row="5" AutomationProperties.Name="Salary records"
+                  ItemsSource="{Binding Salaries}" SelectedItem="{Binding SelectedSalary}"
+                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit" Command="{Binding EditCommand}" CommandParameter="{Binding SelectedSalary}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE70F;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding SelectedSalary}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE74D;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Mark Paid" Command="{Binding MarkPaidCommand}" CommandParameter="{Binding SelectedSalary}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="EMPLOYEE" Binding="{Binding EmployeeName}"
+                                    SortMemberPath="EmployeeName" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="MONTH" Binding="{Binding Month}"
+                                    SortMemberPath="Month" Width="90"/>
+                <DataGridTextColumn Header="YEAR" Binding="{Binding Year}"
+                                    SortMemberPath="Year" Width="60"/>
+                <DataGridTextColumn Header="BASE" Binding="{Binding BaseSalary, StringFormat='₹{0:N0}'}"
+                                    SortMemberPath="BaseSalary" Width="90"/>
+                <DataGridTextColumn Header="NET PAY" Binding="{Binding NetPay, StringFormat='₹{0:N0}'}"
+                                    SortMemberPath="NetPay" Width="100">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="ABSENT" Binding="{Binding AbsentDays}"
+                                    SortMemberPath="AbsentDays" Width="70"/>
+                <DataGridTemplateColumn Header="STATUS" Width="80" SortMemberPath="IsPaid">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource FluentWarningBackground}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Unpaid"/>
+                                            <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPaid}" Value="True">
+                                                    <Setter Property="Text" Value="Paid"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource FluentSubtleButtonStyle}" ToolTip="Edit"
+                                        AutomationProperties.Name="Edit" Margin="0,0,2,0" Padding="4">
+                                    <TextBlock Text="&#xE70F;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                                </Button>
+                                <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource FluentSubtleButtonStyle}" ToolTip="Delete"
+                                        AutomationProperties.Name="Delete" Padding="4">
+                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Messages -->
+        <Grid Grid.Row="6" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasError}"/>
+            <controls:InfoBar Message="{Binding SuccessMessage}"
+                              Severity="Success"
+                              IsOpen="{Binding HasSuccess}"/>
+        </Grid>
+
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Processing salary..."/>
+    </Grid>
+</UserControl>

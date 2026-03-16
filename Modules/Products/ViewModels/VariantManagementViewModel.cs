@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 
@@ -13,7 +14,9 @@ namespace StoreAssistantPro.Modules.Products.ViewModels;
 /// </summary>
 public partial class VariantManagementViewModel(
     IProductVariantService variantService,
-    IProductService productService) : BaseViewModel
+    IProductService productService,
+    ProductContextHolder productContextHolder,
+    INavigationService navigationService) : BaseViewModel, INavigationAware
 {
     // ── Product context ──
 
@@ -80,12 +83,24 @@ public partial class VariantManagementViewModel(
         ClearMessages();
     }
 
-    // ── Load ──
+    // ── Navigation ──
 
-    public async Task InitializeAsync(Product product, CancellationToken ct = default)
+    public async Task OnNavigatedTo(CancellationToken ct = default)
     {
-        Product = product;
-        await LoadDataAsync(ct);
+        Product = productContextHolder.SelectedProduct;
+        if (Product is not null)
+            await LoadDataAsync(ct);
+    }
+
+    public void OnNavigatedFrom()
+    {
+        productContextHolder.SelectedProduct = null;
+    }
+
+    [RelayCommand]
+    private void BackToProducts()
+    {
+        navigationService.NavigateTo("ProductManagement");
     }
 
     [RelayCommand]

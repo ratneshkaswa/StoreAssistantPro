@@ -1,21 +1,23 @@
 using Microsoft.Extensions.DependencyInjection;
-using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Core.Features;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Customers.Services;
 using StoreAssistantPro.Modules.Customers.ViewModels;
-using StoreAssistantPro.Modules.Customers.Views;
 
 namespace StoreAssistantPro.Modules.Customers;
 
 public static class CustomersModule
 {
-    public const string CustomerManagementDialog = "CustomerManagement";
+    public const string CustomerManagementPage = "CustomerManagement";
 
-    public static IServiceCollection AddCustomersModule(this IServiceCollection services)
+    public static IServiceCollection AddCustomersModule(
+        this IServiceCollection services,
+        NavigationPageRegistry pageRegistry)
     {
+        pageRegistry.Map<CustomerManagementViewModel>(CustomerManagementPage)
+            .RequireFeature(CustomerManagementPage, FeatureFlags.Customers);
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<CustomerManagementViewModel>();
-        services.AddTransient<CustomerManagementWindow>();
-        services.AddDialogRegistration<CustomerManagementWindow>(CustomerManagementDialog);
         return services;
     }
 }

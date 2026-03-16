@@ -42,7 +42,7 @@ public class LoginViewModelTests
     {
         var sut = CreateSut();
         sut.PinPad.AddDigitCommand.Execute("1");
-        sut.SelectUserCommand.Execute(UserType.User);
+        sut.SelectUserCommand.Execute(UserType.Admin);
 
         Assert.Empty(sut.PinPad.Pin);
         Assert.Empty(sut.ErrorMessage);
@@ -119,7 +119,7 @@ public class LoginViewModelTests
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();
-        sut.RequestClose = result => closeResult = result;
+        sut.LoginSucceeded = _ => { closeResult = true; return Task.CompletedTask; };
         sut.SelectUserCommand.Execute(UserType.Admin);
 
         sut.PinPad.AddDigitCommand.Execute("1");
@@ -144,8 +144,8 @@ public class LoginViewModelTests
             .Returns(CommandResult.Success());
 
         var sut = CreateSut();
-        sut.RequestClose = result => closeResult = result;
-        sut.SelectUserCommand.Execute(UserType.User);
+        sut.LoginSucceeded = _ => { closeResult = true; return Task.CompletedTask; };
+        sut.SelectUserCommand.Execute(UserType.Admin);
         sut.PinPad.AddDigitCommand.Execute("1");
         sut.PinPad.AddDigitCommand.Execute("2");
         sut.PinPad.AddDigitCommand.Execute("3");
@@ -153,7 +153,7 @@ public class LoginViewModelTests
         await Task.Delay(50);
 
         Assert.True(closeResult);
-        Assert.Equal(UserType.User, sut.SelectedUserType);
+        Assert.Equal(UserType.Admin, sut.SelectedUserType);
     }
 
     // ── Login failure ────────────────────────────────────────────────
@@ -165,7 +165,7 @@ public class LoginViewModelTests
             .Returns(CommandResult.Failure("Invalid PIN. Try again."));
 
         var sut = CreateSut();
-        sut.SelectUserCommand.Execute(UserType.User);
+        sut.SelectUserCommand.Execute(UserType.Admin);
         sut.PinPad.AddDigitCommand.Execute("0");
         sut.PinPad.AddDigitCommand.Execute("0");
         sut.PinPad.AddDigitCommand.Execute("0");
@@ -175,7 +175,7 @@ public class LoginViewModelTests
 
         Assert.Equal("Invalid PIN. Try again.", sut.ErrorMessage);
         Assert.Empty(sut.PinPad.Pin);
-        Assert.Equal(UserType.User, sut.SelectedUserType);
+        Assert.Equal(UserType.Admin, sut.SelectedUserType);
     }
 
     // ── Login without user selected ──────────────────────────────────
@@ -231,13 +231,13 @@ public class LoginViewModelTests
     }
 
     [Fact]
-    public void Dispose_ClearsRequestClose()
+    public void Dispose_ClearsLoginSucceeded()
     {
         var sut = CreateSut();
-        sut.RequestClose = _ => { };
+        sut.LoginSucceeded = _ => Task.CompletedTask;
 
         sut.Dispose();
 
-        Assert.Null(sut.RequestClose);
+        Assert.Null(sut.LoginSucceeded);
     }
 }

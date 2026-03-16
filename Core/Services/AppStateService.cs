@@ -153,6 +153,9 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
     public partial bool SmartTooltipsEnabled { get; set; }
 
     [ObservableProperty]
+    public partial bool IsDefaultAdminPin { get; set; }
+
+    [ObservableProperty]
     public partial DateTime? LastConnectionCheck { get; set; }
 
     public ObservableCollection<AppNotification> Notifications { get; }
@@ -216,6 +219,11 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
         });
     }
 
+    public void SetDefaultPinFlag(bool isDefault)
+    {
+        RunOnDispatcher(() => IsDefaultAdminPin = isDefault);
+    }
+
     public void AddNotification(AppNotification notification) =>
         RunOnDispatcher(() => Notifications.Add(notification));
 
@@ -244,6 +252,7 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
             LastConnectionCheck = null;
             SmartTooltipsEnabled = false;
             SmartTooltip.GlobalEnabled = false;
+            IsDefaultAdminPin = false;
             Notifications.Clear();
         });
     }

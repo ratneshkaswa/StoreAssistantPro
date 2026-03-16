@@ -7,6 +7,52 @@
              xmlns:shellViews="clr-namespace:StoreAssistantPro.Modules.MainShell.Views"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              xmlns:core="clr-namespace:StoreAssistantPro.Core"
+             xmlns:expVm="clr-namespace:StoreAssistantPro.Modules.Expenses.ViewModels"
+             xmlns:expViews="clr-namespace:StoreAssistantPro.Modules.Expenses.Views"
+             xmlns:debtVm="clr-namespace:StoreAssistantPro.Modules.Debtors.ViewModels"
+             xmlns:debtViews="clr-namespace:StoreAssistantPro.Modules.Debtors.Views"
+             xmlns:ordVm="clr-namespace:StoreAssistantPro.Modules.Orders.ViewModels"
+             xmlns:ordViews="clr-namespace:StoreAssistantPro.Modules.Orders.Views"
+             xmlns:ironVm="clr-namespace:StoreAssistantPro.Modules.Ironing.ViewModels"
+             xmlns:ironViews="clr-namespace:StoreAssistantPro.Modules.Ironing.Views"
+             xmlns:salVm="clr-namespace:StoreAssistantPro.Modules.Salaries.ViewModels"
+             xmlns:salViews="clr-namespace:StoreAssistantPro.Modules.Salaries.Views"
+             xmlns:brVm="clr-namespace:StoreAssistantPro.Modules.Branch.ViewModels"
+             xmlns:brViews="clr-namespace:StoreAssistantPro.Modules.Branch.Views"
+             xmlns:spVm="clr-namespace:StoreAssistantPro.Modules.SalesPurchase.ViewModels"
+             xmlns:spViews="clr-namespace:StoreAssistantPro.Modules.SalesPurchase.Views"
+             xmlns:payVm="clr-namespace:StoreAssistantPro.Modules.Payments.ViewModels"
+             xmlns:payViews="clr-namespace:StoreAssistantPro.Modules.Payments.Views"
+             xmlns:taxVm="clr-namespace:StoreAssistantPro.Modules.Tax.ViewModels"
+             xmlns:taxViews="clr-namespace:StoreAssistantPro.Modules.Tax.Views"
+             xmlns:venVm="clr-namespace:StoreAssistantPro.Modules.Vendors.ViewModels"
+             xmlns:venViews="clr-namespace:StoreAssistantPro.Modules.Vendors.Views"
+             xmlns:prodVm="clr-namespace:StoreAssistantPro.Modules.Products.ViewModels"
+             xmlns:prodViews="clr-namespace:StoreAssistantPro.Modules.Products.Views"
+             xmlns:catVm="clr-namespace:StoreAssistantPro.Modules.Categories.ViewModels"
+             xmlns:catViews="clr-namespace:StoreAssistantPro.Modules.Categories.Views"
+             xmlns:brandVm="clr-namespace:StoreAssistantPro.Modules.Brands.ViewModels"
+             xmlns:brandViews="clr-namespace:StoreAssistantPro.Modules.Brands.Views"
+             xmlns:invVm="clr-namespace:StoreAssistantPro.Modules.Inventory.ViewModels"
+             xmlns:invViews="clr-namespace:StoreAssistantPro.Modules.Inventory.Views"
+             xmlns:billVm="clr-namespace:StoreAssistantPro.Modules.Billing.ViewModels"
+             xmlns:billViews="clr-namespace:StoreAssistantPro.Modules.Billing.Views"
+             xmlns:custVm="clr-namespace:StoreAssistantPro.Modules.Customers.ViewModels"
+             xmlns:custViews="clr-namespace:StoreAssistantPro.Modules.Customers.Views"
+             xmlns:poVm="clr-namespace:StoreAssistantPro.Modules.PurchaseOrders.ViewModels"
+             xmlns:poViews="clr-namespace:StoreAssistantPro.Modules.PurchaseOrders.Views"
+             xmlns:fyVm="clr-namespace:StoreAssistantPro.Modules.FinancialYears.ViewModels"
+             xmlns:fyViews="clr-namespace:StoreAssistantPro.Modules.FinancialYears.Views"
+             xmlns:setVm="clr-namespace:StoreAssistantPro.Modules.Settings.ViewModels"
+             xmlns:setViews="clr-namespace:StoreAssistantPro.Modules.Settings.Views"
+             xmlns:inwVm="clr-namespace:StoreAssistantPro.Modules.Inward.ViewModels"
+             xmlns:inwViews="clr-namespace:StoreAssistantPro.Modules.Inward.Views"
+             xmlns:firmVm="clr-namespace:StoreAssistantPro.Modules.Firm.ViewModels"
+             xmlns:firmViews="clr-namespace:StoreAssistantPro.Modules.Firm.Views"
+             xmlns:usrVm="clr-namespace:StoreAssistantPro.Modules.Users.ViewModels"
+             xmlns:usrViews="clr-namespace:StoreAssistantPro.Modules.Users.Views"
+             xmlns:authVm="clr-namespace:StoreAssistantPro.Modules.Authentication.ViewModels"
+             xmlns:authViews="clr-namespace:StoreAssistantPro.Modules.Authentication.Views"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
@@ -39,6 +85,83 @@
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">
             <shellViews:WorkspaceView/>
+        </DataTemplate>
+
+        <!-- ViewModel → View DataTemplates (Page modules) -->
+        <DataTemplate DataType="{x:Type expVm:ExpenseManagementViewModel}">
+            <expViews:ExpenseManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type debtVm:DebtorManagementViewModel}">
+            <debtViews:DebtorManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type ordVm:OrderManagementViewModel}">
+            <ordViews:OrderManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type ironVm:IroningManagementViewModel}">
+            <ironViews:IroningManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type salVm:SalaryManagementViewModel}">
+            <salViews:SalaryManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type brVm:BranchManagementViewModel}">
+            <brViews:BranchManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type spVm:SalesPurchaseViewModel}">
+            <spViews:SalesPurchaseView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type payVm:PaymentManagementViewModel}">
+            <payViews:PaymentManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type taxVm:TaxManagementViewModel}">
+            <taxViews:TaxManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type venVm:VendorManagementViewModel}">
+            <venViews:VendorManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type prodVm:ProductManagementViewModel}">
+            <prodViews:ProductManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type catVm:CategoryManagementViewModel}">
+            <catViews:CategoryManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type brandVm:BrandManagementViewModel}">
+            <brandViews:BrandManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type invVm:InventoryViewModel}">
+            <invViews:InventoryManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type billVm:BillingViewModel}">
+            <billViews:BillingView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type billVm:SaleHistoryViewModel}">
+            <billViews:SaleHistoryView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type custVm:CustomerManagementViewModel}">
+            <custViews:CustomerManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type poVm:PurchaseOrderViewModel}">
+            <poViews:PurchaseOrderView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type fyVm:FinancialYearViewModel}">
+            <fyViews:FinancialYearView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type setVm:SystemSettingsViewModel}">
+            <setViews:SystemSettingsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type inwVm:InwardEntryViewModel}">
+            <inwViews:InwardEntryView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type firmVm:FirmViewModel}">
+            <firmViews:FirmManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type usrVm:UsersViewModel}">
+            <usrViews:UserManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type prodVm:VariantManagementViewModel}">
+            <prodViews:VariantManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type authVm:LoginViewModel}">
+            <authViews:LoginView/>
         </DataTemplate>
 
         <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + slide-fade transition -->

@@ -27,6 +27,12 @@ public class AppConfig
 
     public bool IsInitialized { get; set; }
 
+    /// <summary>
+    /// True when the admin PIN is still the factory default ("1234").
+    /// Cleared when the admin changes their PIN via User Management.
+    /// </summary>
+    public bool IsDefaultAdminPin { get; set; }
+
     [Required]
     public string MasterPinHash { get; set; } = string.Empty;
 

@@ -1,4 +1,5 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Products.ViewModels;
@@ -41,7 +42,11 @@ public sealed class ProductManagementViewModelTests
         _taxGroupService.RemoveProductMappingAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
-        return new ProductManagementViewModel(_productService, _taxGroupService);
+        return new ProductManagementViewModel(
+            _productService,
+            _taxGroupService,
+            Substitute.For<INavigationService>(),
+            new ProductContextHolder());
     }
 
     [Fact]

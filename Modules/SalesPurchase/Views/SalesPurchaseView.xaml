@@ -1,0 +1,277 @@
+<UserControl x:Class="StoreAssistantPro.Modules.SalesPurchase.Views.SalesPurchaseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             mc:Ignorable="d"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             d:DesignHeight="700" d:DesignWidth="960"
+             Loaded="OnLoaded">
+    <Grid Margin="{StaticResource PagePadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Style="{StaticResource PageTitleStyle}">
+            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/>
+            <Run Text=" Sales &amp; Purchase Tracking"/>
+        </TextBlock>
+
+        <!-- Stat Cards -->
+        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="TOTAL SALES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TotalSales, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentSuccess}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="TOTAL PURCHASE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TotalPurchases, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentError}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="NET BALANCE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding NetBalance, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentAccentDefault}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+                <StackPanel>
+                    <TextBlock Text="ENTRIES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding EntryCount}" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </WrapPanel>
+
+        <!-- Add/Edit Form -->
+        <Border Grid.Row="2" Style="{StaticResource FormCardStyle}" Margin="{StaticResource ItemSpacing}">
+            <StackPanel>
+                <TextBlock Text="Add entry" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Note / Bill No" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Note or bill number" MaxLength="200"
+                                 AutomationProperties.Name="Note"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Amount" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:Watermark.Text="Amount" MaxLength="12"
+                                 AutomationProperties.Name="Amount"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Date" Style="{StaticResource FieldLabelStyle}"/>
+                        <DatePicker SelectedDate="{Binding EntryDate}"
+                                    AutomationProperties.Name="Entry date"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="6">
+                        <TextBlock Text="Type" Style="{StaticResource FieldLabelStyle}"/>
+                        <ComboBox SelectedIndex="{Binding SelectedTypeIndex}"
+                                  AutomationProperties.Name="Entry type">
+                            <ComboBoxItem Content="Sales"/>
+                            <ComboBoxItem Content="Purchase"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button Content="Clear" Command="{Binding ClearFormCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Search -->
+        <Grid Grid.Row="3" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     h:Watermark.Text="Search entries by note or type"
+                     AutomationProperties.Name="Search entries"/>
+            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- Filter Chips -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+            <Button Content="All" Command="{Binding SetDateFilterCommand}" CommandParameter="All"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,4,0" AutomationProperties.Name="Filter all"/>
+            <Button Content="Today" Command="{Binding SetDateFilterCommand}" CommandParameter="Today"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,4,0" AutomationProperties.Name="Filter today"/>
+            <Button Content="This Week" Command="{Binding SetDateFilterCommand}" CommandParameter="Week"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,4,0" AutomationProperties.Name="Filter this week"/>
+            <Button Content="This Month" Command="{Binding SetDateFilterCommand}" CommandParameter="Month"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,8,0" AutomationProperties.Name="Filter this month"/>
+            <Rectangle Width="1" Fill="{StaticResource FluentStrokeDefault}" Margin="4,4"/>
+            <Button Content="Sales" Command="{Binding SetTypeFilterCommand}" CommandParameter="Sales"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="8,0,4,0" AutomationProperties.Name="Filter sales"/>
+            <Button Content="Purchase" Command="{Binding SetTypeFilterCommand}" CommandParameter="Purchase"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,4,0" AutomationProperties.Name="Filter purchase"/>
+            <Button Content="All Types" Command="{Binding SetTypeFilterCommand}" CommandParameter="All"
+                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
+                    Margin="0,0,8,0" AutomationProperties.Name="Filter all types"/>
+            <TextBlock Text="{Binding FilterCountText}" FontSize="11"
+                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- DataGrid -->
+        <DataGrid Grid.Row="5" AutomationProperties.Name="Sales and purchase entries"
+                  ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}"
+                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit" Command="{Binding EditCommand}" CommandParameter="{Binding SelectedEntry}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE70F;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding SelectedEntry}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE74D;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="DATE" Binding="{Binding Date, StringFormat=dd-MMM-yyyy}"
+                                    SortMemberPath="Date" Width="100"/>
+                <DataGridTextColumn Header="NOTE" Binding="{Binding Note}"
+                                    SortMemberPath="Note" Width="*"/>
+                <DataGridTemplateColumn Header="TYPE" Width="90" SortMemberPath="Type">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource FluentControlFillTertiary}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Type}" Value="Sales">
+                                                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Purchase">
+                                                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding Type}" FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="Sales">
+                                                    <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="Purchase">
+                                                    <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="AMOUNT" Binding="{Binding DisplayAmount}"
+                                    SortMemberPath="Amount" Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Type}" Value="Sales">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Type}" Value="Purchase">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="ENTRY" Binding="{Binding CreatedAt, StringFormat='dd-MMM  hh:mm tt'}"
+                                    SortMemberPath="CreatedAt" Width="140">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+                            <Setter Property="FontSize" Value="11"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTemplateColumn Header="" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource FluentSubtleButtonStyle}" ToolTip="Edit"
+                                        AutomationProperties.Name="Edit" Margin="0,0,2,0" Padding="4">
+                                    <TextBlock Text="&#xE70F;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                                </Button>
+                                <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource FluentSubtleButtonStyle}" ToolTip="Delete"
+                                        AutomationProperties.Name="Delete" Padding="4">
+                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource FluentIconFont}" FontSize="14"/>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Messages -->
+        <Grid Grid.Row="6" MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasError}"/>
+            <controls:InfoBar Message="{Binding SuccessMessage}"
+                              Severity="Success"
+                              IsOpen="{Binding HasSuccess}"/>
+        </Grid>
+
+        <controls:LoadingOverlay IsActive="{Binding IsBusy}"
+                                 Message="Processing entry..."/>
+    </Grid>
+</UserControl>

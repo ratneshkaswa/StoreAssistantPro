@@ -10,15 +10,14 @@ public class MainShellFlow(
     IServiceProvider serviceProvider,
     ILogger<MainShellFlow> logger) : IMainShellFlow
 {
-    public bool ShowMainWindow()
+    public void ShowMainWindow()
     {
         try
         {
             var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
             var mainVm = serviceProvider.GetRequiredService<MainViewModel>();
             mainWindow.DataContext = mainVm;
-            mainWindow.ShowDialog();
-            return mainVm.IsLoggingOut;
+            mainWindow.Show();
         }
         catch (Exception ex)
         {
@@ -26,7 +25,6 @@ public class MainShellFlow(
             AppDialogPresenter.ShowError(
                 "Unable to Open Window",
                 "The main window could not be opened.\n\nThe error has been logged.");
-            return false;
         }
     }
 }

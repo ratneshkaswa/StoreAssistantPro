@@ -15,9 +15,8 @@ namespace StoreAssistantPro.Modules.Authentication.ViewModels;
 /// <summary>
 /// Combined user-selection + PIN-entry ViewModel for the POS login screen.
 /// <para>
-/// Composes <see cref="PinPadViewModel"/> for reusable PIN pad logic.
-/// When the PIN reaches 4 digits and a user is selected, login executes
-/// automatically (POS auto-login). Error is cleared on next digit input.
+/// Admin requires a 4-digit PIN (entered via <see cref="PinPadViewModel"/>).
+/// User logs in immediately without a PIN.
 /// </para>
 /// <para>
 /// <b>State integrity:</b> All UI messages (<see cref="BaseViewModel.ErrorMessage"/>,
@@ -43,19 +42,36 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUserSelected))]
     [NotifyPropertyChangedFor(nameof(RoleHintText))]
+    [NotifyPropertyChangedFor(nameof(IsPinRequired))]
     public partial UserType? SelectedUserType { get; set; }
 
     public bool IsUserSelected => SelectedUserType is not null;
 
-    public string RoleHintText => SelectedUserType is { } role
-        ? $"Enter {role} PIN"
-        : "Select a role above";
+    /// <summary>PIN pad is only shown for Admin role.</summary>
+    public bool IsPinRequired => SelectedUserType == UserType.Admin;
+
+    /// <summary>
+    /// Controls whether the User role button is visible on the login screen.
+    /// Set to false when switching from User mode so only Admin is offered.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsUserRoleVisible { get; set; } = true;
+
+    public string RoleHintText => SelectedUserType switch
+    {
+        UserType.Admin => "Enter Admin PIN",
+        UserType.User => "Logging in...",
+        _ => "Select a role above"
+    };
 
     [ObservableProperty]
     public partial bool IsVerifying { get; set; }
 
     // ── L1: Firm name ──
     public string FirmName => _appState.FirmName;
+
+    /// <summary>True when admin PIN is still the factory default.</summary>
+    public bool IsDefaultAdminPin => _appState.IsDefaultAdminPin;
 
     // ── L15: Connection status ──
     [ObservableProperty]
@@ -70,7 +86,11 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     public partial string CurrentTime { get; set; }
 
-    public Action<bool?>? RequestClose { get; set; }
+    /// <summary>
+    /// Raised after successful login with the authenticated user type.
+    /// MainViewModel subscribes to transition from login to workspace.
+    /// </summary>
+    public Func<UserType, Task>? LoginSucceeded { get; set; }
 
     /// <summary>Raised after a successful PIN reset so the view can clear PasswordBoxes.</summary>
     public event Action? ResetCompleted
@@ -116,6 +136,7 @@ public partial class LoginViewModel : BaseViewModel
         if (_appState.LastLoggedInUserType is { } lastUser)
         {
             SelectedUserType = lastUser;
+            // Don't auto-login on pre-select — user must click or press F1/F2
         }
     }
 
@@ -143,11 +164,17 @@ public partial class LoginViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectUser(UserType userType)
+    private async Task SelectUserAsync(UserType userType)
     {
         SelectedUserType = userType;
         PinPad.Reset();
         ClearMessages();
+
+        // User role logs in immediately without PIN
+        if (userType == UserType.User)
+        {
+            await LoginUserDirectAsync();
+        }
     }
 
     /// <summary>Clears selected role (layered ESC).</summary>
@@ -158,12 +185,46 @@ public partial class LoginViewModel : BaseViewModel
         ClearMessages();
     }
 
+    /// <summary>Direct login for User role (no PIN required).</summary>
+    private async Task LoginUserDirectAsync()
+    {
+        ClearMessages();
+        IsVerifying = true;
+        try
+        {
+            var result = await _commandBus.SendAsync(
+                new LoginUserCommand(UserType.User, string.Empty));
+
+            if (result.Succeeded)
+            {
+                _clockTimer.Stop();
+                if (LoginSucceeded is not null)
+                    await LoginSucceeded(UserType.User);
+            }
+            else
+            {
+                ErrorMessage = result.ErrorMessage ?? "Login failed.";
+            }
+        }
+        finally
+        {
+            IsVerifying = false;
+        }
+    }
+
     [RelayCommand]
     private async Task LoginAsync()
     {
         if (SelectedUserType is null)
         {
             ErrorMessage = "Please select a user.";
+            return;
+        }
+
+        // User role uses direct login (no PIN)
+        if (SelectedUserType == UserType.User)
+        {
+            await LoginUserDirectAsync();
             return;
         }
 
@@ -182,7 +243,8 @@ public partial class LoginViewModel : BaseViewModel
             if (result.Succeeded)
             {
                 _clockTimer.Stop();
-                RequestClose?.Invoke(true);
+                if (LoginSucceeded is not null)
+                    await LoginSucceeded(SelectedUserType.Value);
             }
             else
             {
@@ -292,7 +354,7 @@ public partial class LoginViewModel : BaseViewModel
             _isInitialized = false;
         }
 
-        RequestClose = null;
+        LoginSucceeded = null;
         _resetCompleted = null;
         base.Dispose();
     }

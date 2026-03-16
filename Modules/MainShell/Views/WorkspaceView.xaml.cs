@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using StoreAssistantPro.Modules.MainShell.ViewModels;
 
 namespace StoreAssistantPro.Modules.MainShell.Views;
 
@@ -11,13 +12,19 @@ public partial class WorkspaceView : UserControl
         InitializeComponent();
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (StartBillingButton.Visibility != Visibility.Visible)
-            return;
+        if (DataContext is WorkspaceViewModel vm)
+        {
+            try { await vm.LoadCommand.ExecuteAsync(null); }
+            catch { /* RunLoadAsync handles logging */ }
+        }
 
-        Dispatcher.BeginInvoke(
-            () => StartBillingButton.Focus(),
-            DispatcherPriority.Input);
+        if (StartBillingButton.Visibility == Visibility.Visible)
+        {
+            Dispatcher.BeginInvoke(
+                () => StartBillingButton.Focus(),
+                DispatcherPriority.Input);
+        }
     }
 }

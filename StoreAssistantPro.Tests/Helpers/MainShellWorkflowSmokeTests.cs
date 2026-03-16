@@ -11,23 +11,8 @@ using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
-using StoreAssistantPro.Modules.Authentication.Views;
-using StoreAssistantPro.Modules.Billing.Views;
-using StoreAssistantPro.Modules.Brands.Views;
-using StoreAssistantPro.Modules.Categories.Views;
-using StoreAssistantPro.Modules.Customers.Views;
-using StoreAssistantPro.Modules.FinancialYears.Views;
-using StoreAssistantPro.Modules.Firm.Views;
-using StoreAssistantPro.Modules.Inventory.Views;
-using StoreAssistantPro.Modules.Inward.Views;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
 using StoreAssistantPro.Modules.MainShell.Views;
-using StoreAssistantPro.Modules.Products.Views;
-using StoreAssistantPro.Modules.PurchaseOrders.Views;
-using StoreAssistantPro.Modules.Settings.Views;
-using StoreAssistantPro.Modules.Tax.Views;
-using StoreAssistantPro.Modules.Users.Views;
-using StoreAssistantPro.Modules.Vendors.Views;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
@@ -36,21 +21,6 @@ public sealed class MainShellWorkflowSmokeTests
 {
     private static readonly (string CommandProperty, Type WindowType)[] DialogCommands =
     [
-        ("OpenFirmManagementCommand", typeof(FirmWindow)),
-        ("OpenUserManagementCommand", typeof(UsersWindow)),
-        ("OpenTaxManagementCommand", typeof(TaxManagementWindow)),
-        ("OpenVendorManagementCommand", typeof(VendorManagementWindow)),
-        ("OpenProductManagementCommand", typeof(ProductManagementWindow)),
-        ("OpenCategoryManagementCommand", typeof(CategoryManagementWindow)),
-        ("OpenBrandManagementCommand", typeof(BrandManagementWindow)),
-        ("OpenFinancialYearCommand", typeof(FinancialYearWindow)),
-        ("OpenSystemSettingsCommand", typeof(SystemSettingsWindow)),
-        ("OpenInwardEntryCommand", typeof(InwardEntryWindow)),
-        ("OpenInventoryCommand", typeof(InventoryWindow)),
-        ("OpenBillingCommand", typeof(BillingWindow)),
-        ("OpenSaleHistoryCommand", typeof(SaleHistoryWindow)),
-        ("OpenCustomerManagementCommand", typeof(CustomerManagementWindow)),
-        ("OpenPurchaseOrdersCommand", typeof(PurchaseOrderWindow))
     ];
 
     [Fact(Skip = "Run this real shell workflow smoke test individually; it is not stable after the full xUnit run.")]
@@ -282,9 +252,6 @@ public sealed class MainShellWorkflowSmokeTests
     {
         switch (window.DataContext)
         {
-            case SetupViewModel setupViewModel:
-                setupViewModel.IsSetupComplete = true;
-                break;
             case LoginViewModel loginViewModel:
                 loginViewModel.IsVerifying = false;
                 loginViewModel.IsBusy = false;

@@ -17,10 +17,9 @@ public class WindowSizingService : IWindowSizingService
     {
         _mainWindow = window;
 
-        ApplyMainWindowSizing();
-
-        window.WindowStartupLocation = WindowStartupLocation.Manual;
-        window.WindowState = WindowState.Normal;
+        window.ShowActivated = true;
+        window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        window.WindowState = WindowState.Maximized;
         window.ResizeMode = ResizeMode.NoResize;
         AttachVisibilityGuard(window);
 
@@ -81,12 +80,7 @@ public class WindowSizingService : IWindowSizingService
         if (_mainWindow is null)
             return;
 
-        var workArea = SystemParameters.WorkArea;
-
-        _mainWindow.Width = workArea.Width * MainWindowFillRatio;
-        _mainWindow.Height = workArea.Height * MainWindowFillRatio;
-        _mainWindow.Left = workArea.Left + (workArea.Width - _mainWindow.Width) / 2;
-        _mainWindow.Top = workArea.Top + (workArea.Height - _mainWindow.Height) / 2;
+        _mainWindow.WindowState = WindowState.Maximized;
     }
 
     public void ConfigurePrimaryWindow(Window window)

@@ -9,12 +9,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
-using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Core.Workflows;
 using StoreAssistantPro.Data;
-using StoreAssistantPro.Modules.Authentication.Workflows;
 using StoreAssistantPro.Modules.MainShell.Services;
-using StoreAssistantPro.Modules.Startup.Services;
 using StoreAssistantPro.Modules.Startup.Workflows;
 
 namespace StoreAssistantPro;
@@ -126,9 +123,8 @@ public partial class App : Application
         var startupElapsed = Stopwatch.GetElapsedTime(startupTimestamp);
         _logger.LogInformation("Application ready in {ElapsedMs:F0} ms", startupElapsed.TotalMilliseconds);
 
-        // ── Phase 4: Startup workflow (migrate, setup, load) ─────────
+        // ── Phase 4: Startup workflow (migrate, auto-init, load) ────
         var workflowManager = _host.Services.GetRequiredService<IWorkflowManager>();
-        var session = _host.Services.GetRequiredService<ISessionService>();
         var shellFlow = _host.Services.GetRequiredService<IMainShellFlow>();
 
         await workflowManager.StartWorkflowAsync(StartupWorkflow.WorkflowName);
@@ -143,34 +139,9 @@ public partial class App : Application
             return;
         }
 
-        // If setup was cancelled (user closed first-run setup),
-        // shut down the application and do not proceed to login.
-        if (!workflowManager.Context.Get<bool>("IsInitialized"))
-        {
-            Shutdown();
-            return;
-        }
-
-        // Main app loop — login → main window → logout
-        while (true)
-        {
-            await workflowManager.StartWorkflowAsync(LoginWorkflow.WorkflowName);
-
-            if (!session.IsLoggedIn)
-            {
-                Shutdown();
-                return;
-            }
-
-            // Show main window (blocks until closed)
-            if (!shellFlow.ShowMainWindow())
-            {
-                Shutdown();
-                return;
-            }
-
-            // LogoutCommand already cleared session + AppState before window closed
-        }
+        // Single-window architecture: show MainWindow once.
+        // MainViewModel starts on the login page; shell chrome is hidden until login.
+        shellFlow.ShowMainWindow();
     }
 
     protected override async void OnExit(ExitEventArgs e)

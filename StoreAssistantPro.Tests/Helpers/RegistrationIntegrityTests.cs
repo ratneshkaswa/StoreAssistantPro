@@ -5,17 +5,25 @@ using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Billing;
+using StoreAssistantPro.Modules.Branch;
 using StoreAssistantPro.Modules.Brands;
 using StoreAssistantPro.Modules.Categories;
 using StoreAssistantPro.Modules.Customers;
+using StoreAssistantPro.Modules.Debtors;
+using StoreAssistantPro.Modules.Expenses;
 using StoreAssistantPro.Modules.FinancialYears;
 using StoreAssistantPro.Modules.Firm;
 using StoreAssistantPro.Modules.Inward;
 using StoreAssistantPro.Modules.Inventory;
+using StoreAssistantPro.Modules.Ironing;
 using StoreAssistantPro.Modules.MainShell;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
+using StoreAssistantPro.Modules.Orders;
+using StoreAssistantPro.Modules.Payments;
 using StoreAssistantPro.Modules.Products;
 using StoreAssistantPro.Modules.PurchaseOrders;
+using StoreAssistantPro.Modules.Salaries;
+using StoreAssistantPro.Modules.SalesPurchase;
 using StoreAssistantPro.Modules.Settings;
 using StoreAssistantPro.Modules.Tax;
 using StoreAssistantPro.Modules.Users;
@@ -28,16 +36,24 @@ public class RegistrationIntegrityTests
     private static readonly Type[] ModuleTypes =
     [
         typeof(BillingModule),
+        typeof(BranchModule),
         typeof(BrandsModule),
         typeof(CategoriesModule),
         typeof(CustomersModule),
+        typeof(DebtorsModule),
+        typeof(ExpensesModule),
         typeof(FinancialYearsModule),
         typeof(FirmModule),
         typeof(InwardModule),
         typeof(InventoryModule),
+        typeof(IroningModule),
         typeof(MainShellModule),
+        typeof(OrdersModule),
+        typeof(PaymentsModule),
         typeof(ProductsModule),
         typeof(PurchaseOrdersModule),
+        typeof(SalariesModule),
+        typeof(SalesPurchaseModule),
         typeof(SettingsModule),
         typeof(TaxModule),
         typeof(UsersModule),

@@ -47,6 +47,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<HSNCode> HSNCodes => Set<HSNCode>();
     public DbSet<ProductTaxMapping> ProductTaxMappings => Set<ProductTaxMapping>();
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
+    public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<PettyCashDeposit> PettyCashDeposits => Set<PettyCashDeposit>();
+    public DbSet<Debtor> Debtors => Set<Debtor>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<IroningEntry> IroningEntries => Set<IroningEntry>();
+    public DbSet<IroningBatch> IroningBatches => Set<IroningBatch>();
+    public DbSet<IroningBatchItem> IroningBatchItems => Set<IroningBatchItem>();
+    public DbSet<Cloth> Cloths => Set<Cloth>();
+    public DbSet<Salary> Salaries => Set<Salary>();
+    public DbSet<BranchBill> BranchBills => Set<BranchBill>();
+    public DbSet<SalesPurchaseEntry> SalesPurchaseEntries => Set<SalesPurchaseEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -503,6 +515,117 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(l => l.ProductId);
             entity.HasIndex(l => l.AdjustedAt);
+        });
+
+        // ── Expense ────────────────────────────────────────────────
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(e => e.Date);
+            entity.HasIndex(e => e.Category);
+        });
+
+        // ── PettyCashDeposit ───────────────────────────────────────
+        modelBuilder.Entity<PettyCashDeposit>(entity =>
+        {
+            entity.Property(d => d.Amount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(d => d.Date);
+        });
+
+        // ── Debtor ─────────────────────────────────────────────────
+        modelBuilder.Entity<Debtor>(entity =>
+        {
+            entity.Property(d => d.TotalAmount).HasColumnType("decimal(18,2)");
+            entity.Property(d => d.PaidAmount).HasColumnType("decimal(18,2)");
+            entity.Ignore(d => d.Balance);
+            entity.Ignore(d => d.DaysAgo);
+            entity.HasIndex(d => d.Date);
+        });
+
+        // ── Order ──────────────────────────────────────────────────
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.Property(o => o.Rate).HasColumnType("decimal(18,2)");
+            entity.Property(o => o.Amount).HasColumnType("decimal(18,2)");
+            entity.Ignore(o => o.IsOverdue);
+            entity.Ignore(o => o.EntryTimestamp);
+            entity.HasIndex(o => o.Date);
+            entity.HasIndex(o => o.Status);
+        });
+
+        // ── Payment ────────────────────────────────────────────────
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.Property(p => p.Amount).HasColumnType("decimal(18,2)");
+            entity.HasOne(p => p.Customer)
+                  .WithMany()
+                  .HasForeignKey(p => p.CustomerId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(p => p.PaymentDate);
+        });
+
+        // ── IroningEntry ───────────────────────────────────────────
+        modelBuilder.Entity<IroningEntry>(entity =>
+        {
+            entity.Property(e => e.Rate).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(e => e.Date);
+            entity.HasIndex(e => e.IsPaid);
+        });
+
+        // ── IroningBatch ───────────────────────────────────────────
+        modelBuilder.Entity<IroningBatch>(entity =>
+        {
+            entity.Property(b => b.PaidAmount).HasColumnType("decimal(18,2)");
+            entity.HasMany(b => b.Items)
+                  .WithOne(i => i.Batch)
+                  .HasForeignKey(i => i.IroningBatchId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(b => b.Date);
+            entity.HasIndex(b => b.Status);
+        });
+
+        // ── IroningBatchItem ───────────────────────────────────────
+        modelBuilder.Entity<IroningBatchItem>(entity =>
+        {
+            entity.Property(i => i.Rate).HasColumnType("decimal(18,2)");
+            entity.Property(i => i.Amount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(i => i.IroningBatchId);
+        });
+
+        // ── Cloth ──────────────────────────────────────────────────
+        modelBuilder.Entity<Cloth>(entity =>
+        {
+            entity.Property(c => c.Price).HasColumnType("decimal(18,2)");
+        });
+
+        // ── Salary ─────────────────────────────────────────────────
+        modelBuilder.Entity<Salary>(entity =>
+        {
+            entity.Property(s => s.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.BaseSalary).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.Advance).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.HoursWorked).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.Incentive).HasColumnType("decimal(18,2)");
+            entity.HasIndex(s => s.EmployeeName);
+            entity.HasIndex(s => s.IsPaid);
+        });
+
+        // ── BranchBill ─────────────────────────────────────────────
+        modelBuilder.Entity<BranchBill>(entity =>
+        {
+            entity.Property(b => b.Amount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(b => b.Type);
+            entity.HasIndex(b => b.Date);
+        });
+
+        // ── SalesPurchaseEntry ─────────────────────────────────────
+        modelBuilder.Entity<SalesPurchaseEntry>(entity =>
+        {
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.Ignore(e => e.DisplayAmount);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.Date);
         });
     }
 }

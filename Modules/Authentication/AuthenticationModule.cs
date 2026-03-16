@@ -1,38 +1,32 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
-using StoreAssistantPro.Core.Workflows;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
-using StoreAssistantPro.Modules.Authentication.Views;
-using StoreAssistantPro.Modules.Authentication.Workflows;
 
 namespace StoreAssistantPro.Modules.Authentication;
 
 public static class AuthenticationModule
 {
-    public static IServiceCollection AddAuthenticationModule(this IServiceCollection services)
-    {
-        // Services
-        services.AddTransient<ISetupService, SetupService>();
-        services.AddTransient<ILoginService, LoginService>();
-        services.AddSingleton<IAuthenticationFlow, AuthenticationFlow>();
+    public const string LoginPage = "Login";
 
-        // Workflows
-        services.AddSingleton<IWorkflow, LoginWorkflow>();
+    public static IServiceCollection AddAuthenticationModule(
+        this IServiceCollection services,
+        NavigationPageRegistry pageRegistry)
+    {
+        // Page registration
+        pageRegistry.Map<LoginViewModel>(LoginPage);
+
+        // Services
+        services.AddTransient<ILoginService, LoginService>();
 
         // Command handlers
-        services.AddTransient<ICommandRequestHandler<CompleteFirstSetupCommand, Unit>, CompleteFirstSetupHandler>();
         services.AddTransient<ICommandRequestHandler<LoginUserCommand, Unit>, LoginUserHandler>();
         services.AddTransient<ICommandRequestHandler<LogoutCommand, Unit>, LogoutHandler>();
 
         // ViewModels
-        services.AddTransient<SetupViewModel>();
         services.AddTransient<LoginViewModel>();
-
-        // Views
-        services.AddTransient<SetupWindow>();
-        services.AddTransient<LoginWindow>();
 
         return services;
     }

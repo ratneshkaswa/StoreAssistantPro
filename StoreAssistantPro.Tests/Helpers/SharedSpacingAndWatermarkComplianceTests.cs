@@ -107,9 +107,9 @@ public class SharedSpacingAndWatermarkComplianceTests
     [Fact]
     public void SearchInputs_Should_Use_Explicit_Example_Watermarks()
     {
-        var billing = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Billing", "Views", "BillingWindow.xaml"));
-        var customers = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Customers", "Views", "CustomerManagementWindow.xaml"));
-        var vendors = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Vendors", "Views", "VendorManagementWindow.xaml"));
+        var billing = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Billing", "Views", "BillingView.xaml"));
+        var customers = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Customers", "Views", "CustomerManagementView.xaml"));
+        var vendors = File.ReadAllText(Path.Combine(SolutionRoot, "Modules", "Vendors", "Views", "VendorManagementView.xaml"));
 
         Assert.Contains("h:Watermark.Text=\"e.g. Black T-shirt\"", billing, StringComparison.Ordinal);
         Assert.Contains("h:Watermark.Text=\"e.g. 8901234567890\"", billing, StringComparison.Ordinal);

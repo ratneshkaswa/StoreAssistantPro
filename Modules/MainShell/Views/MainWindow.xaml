@@ -13,7 +13,7 @@
 
     <!-- InputBindings are generated at runtime by ShortcutService -->
 
-    <Grid Margin="{StaticResource PagePadding}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,6 +23,7 @@
 
         <!-- TOP MENU BAR -->
         <Menu Grid.Row="0"
+              Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}"
               Margin="{StaticResource ItemSpacing}"
               Style="{StaticResource FluentMenuBarStyle}"
               ItemContainerStyle="{StaticResource FluentMenuBarItemStyle}">
@@ -44,6 +45,7 @@
             </MenuItem>
 
             <MenuItem Header="_Tools">
+                <!-- Administration -->
                 <MenuItem Header="Firm Management" Command="{Binding OpenFirmManagementCommand}"
                           h:SmartTooltip.ContextKey="Firm"
                           Visibility="{Binding IsFirmManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
@@ -51,41 +53,86 @@
                           h:SmartTooltip.ContextKey="Users"
                           Visibility="{Binding IsUserManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
-                <MenuItem Header="Tax Management" Command="{Binding OpenTaxManagementCommand}"
-                          h:SmartTooltip.ContextKey="Tax"
-                          Visibility="{Binding IsTaxManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Vendor Management" Command="{Binding OpenVendorManagementCommand}"
-                          h:SmartTooltip.ContextKey="Vendors"
-                          Visibility="{Binding IsVendorManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Product Management" Command="{Binding OpenProductManagementCommand}"
-                          h:SmartTooltip.ContextKey="Products"
-                          Visibility="{Binding IsProductManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Category Management" Command="{Binding OpenCategoryManagementCommand}"
-                          h:SmartTooltip.ContextKey="Categories"
-                          Visibility="{Binding IsCategoryManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Brand Management" Command="{Binding OpenBrandManagementCommand}"
-                          h:SmartTooltip.ContextKey="Brands"
-                          Visibility="{Binding IsBrandManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+
+                <!-- Products & Stock -->
+                <MenuItem Header="Products and Stock">
+                    <MenuItem Header="Tax Management" Command="{Binding OpenTaxManagementCommand}"
+                              h:SmartTooltip.ContextKey="Tax"
+                              Visibility="{Binding IsTaxManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Vendor Management" Command="{Binding OpenVendorManagementCommand}"
+                              h:SmartTooltip.ContextKey="Vendors"
+                              Visibility="{Binding IsVendorManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Product Management" Command="{Binding OpenProductManagementCommand}"
+                              h:SmartTooltip.ContextKey="Products"
+                              Visibility="{Binding IsProductManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Category Management" Command="{Binding OpenCategoryManagementCommand}"
+                              h:SmartTooltip.ContextKey="Categories"
+                              Visibility="{Binding IsCategoryManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Brand Management" Command="{Binding OpenBrandManagementCommand}"
+                              h:SmartTooltip.ContextKey="Brands"
+                              Visibility="{Binding IsBrandManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                    <MenuItem Header="Inventory" Command="{Binding OpenInventoryCommand}"
+                              h:SmartTooltip.ContextKey="Inventory"
+                              Visibility="{Binding IsInventoryVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Inward Entry" Command="{Binding OpenInwardEntryCommand}"
+                              h:SmartTooltip.ContextKey="Inward"
+                              Visibility="{Binding IsInwardEntryVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Purchase Orders" Command="{Binding OpenPurchaseOrdersCommand}"
+                              h:SmartTooltip.ContextKey="PurchaseOrders"
+                              Visibility="{Binding IsPurchaseOrdersVisible, Converter={StaticResource BoolToVisibility}}"/>
+                </MenuItem>
+
+                <!-- Sales & Customers -->
+                <MenuItem Header="Sales and Customers">
+                    <MenuItem Header="Billing" Command="{Binding OpenBillingCommand}"
+                              h:SmartTooltip.ContextKey="Billing"
+                              Visibility="{Binding IsBillingVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Sale History" Command="{Binding OpenSaleHistoryCommand}"
+                              h:SmartTooltip.ContextKey="SaleHistory"
+                              Visibility="{Binding IsSaleHistoryVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Customer Management" Command="{Binding OpenCustomerManagementCommand}"
+                              h:SmartTooltip.ContextKey="Customers"
+                              Visibility="{Binding IsCustomerManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                    <MenuItem Header="Orders" Command="{Binding OpenOrderManagementCommand}"
+                              h:SmartTooltip.ContextKey="Orders"
+                              Visibility="{Binding IsOrderManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Payments" Command="{Binding OpenPaymentManagementCommand}"
+                              h:SmartTooltip.ContextKey="Payments"
+                              Visibility="{Binding IsPaymentManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Debtors" Command="{Binding OpenDebtorManagementCommand}"
+                              h:SmartTooltip.ContextKey="Debtors"
+                              Visibility="{Binding IsDebtorManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                </MenuItem>
+
+                <!-- Accounting & Operations -->
+                <MenuItem Header="Accounting and Operations">
+                    <MenuItem Header="Expenses" Command="{Binding OpenExpenseManagementCommand}"
+                              h:SmartTooltip.ContextKey="Expenses"
+                              Visibility="{Binding IsExpenseManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Salaries" Command="{Binding OpenSalaryManagementCommand}"
+                              h:SmartTooltip.ContextKey="Salaries"
+                              Visibility="{Binding IsSalaryManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Branch Bills" Command="{Binding OpenBranchManagementCommand}"
+                              h:SmartTooltip.ContextKey="Branch"
+                              Visibility="{Binding IsBranchManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Sales/Purchase Register" Command="{Binding OpenSalesPurchaseCommand}"
+                              h:SmartTooltip.ContextKey="SalesPurchase"
+                              Visibility="{Binding IsSalesPurchaseVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                    <MenuItem Header="Ironing" Command="{Binding OpenIroningManagementCommand}"
+                              h:SmartTooltip.ContextKey="Ironing"
+                              Visibility="{Binding IsIroningManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                </MenuItem>
+
+                <!-- Reports -->
+                <MenuItem Header="Reports" Command="{Binding OpenReportsCommand}"
+                          h:SmartTooltip.ContextKey="Reports"
+                          Visibility="{Binding IsReportsVisible, Converter={StaticResource BoolToVisibility}}"/>
+
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
-                <MenuItem Header="Inventory" Command="{Binding OpenInventoryCommand}"
-                          h:SmartTooltip.ContextKey="Inventory"
-                          Visibility="{Binding IsInventoryVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Inward Entry" Command="{Binding OpenInwardEntryCommand}"
-                          h:SmartTooltip.ContextKey="Inward"
-                          Visibility="{Binding IsInwardEntryVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Billing" Command="{Binding OpenBillingCommand}"
-                          h:SmartTooltip.ContextKey="Billing"
-                          Visibility="{Binding IsBillingVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Sale History" Command="{Binding OpenSaleHistoryCommand}"
-                          h:SmartTooltip.ContextKey="SaleHistory"
-                          Visibility="{Binding IsSaleHistoryVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Customer Management" Command="{Binding OpenCustomerManagementCommand}"
-                          h:SmartTooltip.ContextKey="Customers"
-                          Visibility="{Binding IsCustomerManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <MenuItem Header="Purchase Orders" Command="{Binding OpenPurchaseOrdersCommand}"
-                          h:SmartTooltip.ContextKey="PurchaseOrders"
-                          Visibility="{Binding IsPurchaseOrdersVisible, Converter={StaticResource BoolToVisibility}}"/>
-                <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                <!-- System -->
                 <MenuItem Header="Financial Year" Command="{Binding OpenFinancialYearCommand}"
                           h:SmartTooltip.ContextKey="FinancialYear"
                           Visibility="{Binding IsFinancialYearVisible, Converter={StaticResource BoolToVisibility}}"/>
@@ -106,7 +153,8 @@
         <!-- QUICK ACTION BAR -->
         <Border Grid.Row="1"
                 Style="{StaticResource FluentToolbarStyle}"
-                Margin="{StaticResource ItemSpacing}">
+                Margin="{StaticResource ItemSpacing}"
+                Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
             <DockPanel>
                 <!-- Notification bell + indicators (right-docked) -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
@@ -348,17 +396,30 @@
             </DockPanel>
         </Border>
 
-        <!-- BODY: WORKSPACE -->
-        <Border Grid.Row="2"
-                Margin="{StaticResource ItemSpacing}"
-                Background="{StaticResource FluentSurface}"
-                BorderBrush="{StaticResource FluentSurfaceStroke}"
-                BorderThickness="1"
-                CornerRadius="{StaticResource FluentCornerXLarge}">
+        <!-- BODY: WORKSPACE / LOGIN -->
+        <Border Grid.Row="2">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Margin" Value="{StaticResource ItemSpacing}"/>
+                    <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="CornerRadius" Value="{StaticResource FluentCornerXLarge}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AppState.IsLoggedIn}" Value="False">
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="CornerRadius" Value="0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <controls:ResponsiveContentControl Content="{Binding CurrentView}"/>
         </Border>
         <!-- BOTTOM STATUS BAR -->
         <Border Grid.Row="3"
+                Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}"
                 Margin="{StaticResource ItemSpacing}"
                 Background="{StaticResource FluentSurface}"
                 BorderBrush="{StaticResource FluentSurfaceStroke}"
@@ -422,8 +483,8 @@
                            FontWeight="SemiBold"/>
 
                 <Button Grid.Column="4"
-                        Content="Logout"
-                        Command="{Binding LogoutCommand}"
+                        Content="Switch User"
+                        Command="{Binding SwitchUserCommand}"
                         Style="{StaticResource ToolbarLinkButtonStyle}"/>
             </Grid>
         </Border>

@@ -6,21 +6,21 @@ public sealed class QuickAccessWindowStandardsTests
 
     private static readonly string[] QuickAccessWindows =
     [
-        "Modules\\Firm\\Views\\FirmWindow.xaml",
-        "Modules\\Users\\Views\\UsersWindow.xaml",
-        "Modules\\Tax\\Views\\TaxManagementWindow.xaml",
-        "Modules\\Vendors\\Views\\VendorManagementWindow.xaml",
-        "Modules\\Products\\Views\\ProductManagementWindow.xaml",
-        "Modules\\Categories\\Views\\CategoryManagementWindow.xaml",
-        "Modules\\Brands\\Views\\BrandManagementWindow.xaml",
-        "Modules\\FinancialYears\\Views\\FinancialYearWindow.xaml",
-        "Modules\\Settings\\Views\\SystemSettingsWindow.xaml",
-        "Modules\\Inward\\Views\\InwardEntryWindow.xaml",
-        "Modules\\Inventory\\Views\\InventoryWindow.xaml",
-        "Modules\\Billing\\Views\\BillingWindow.xaml",
-        "Modules\\Billing\\Views\\SaleHistoryWindow.xaml",
-        "Modules\\Customers\\Views\\CustomerManagementWindow.xaml",
-        "Modules\\PurchaseOrders\\Views\\PurchaseOrderWindow.xaml"
+        "Modules\\Firm\\Views\\FirmManagementView.xaml",
+        "Modules\\Users\\Views\\UserManagementView.xaml",
+        "Modules\\Tax\\Views\\TaxManagementView.xaml",
+        "Modules\\Vendors\\Views\\VendorManagementView.xaml",
+        "Modules\\Products\\Views\\ProductManagementView.xaml",
+        "Modules\\Categories\\Views\\CategoryManagementView.xaml",
+        "Modules\\Brands\\Views\\BrandManagementView.xaml",
+        "Modules\\FinancialYears\\Views\\FinancialYearView.xaml",
+        "Modules\\Settings\\Views\\SystemSettingsView.xaml",
+        "Modules\\Inward\\Views\\InwardEntryView.xaml",
+        "Modules\\Inventory\\Views\\InventoryManagementView.xaml",
+        "Modules\\Billing\\Views\\BillingView.xaml",
+        "Modules\\Billing\\Views\\SaleHistoryView.xaml",
+        "Modules\\Customers\\Views\\CustomerManagementView.xaml",
+        "Modules\\PurchaseOrders\\Views\\PurchaseOrderView.xaml"
     ];
 
     [Fact]
@@ -71,9 +71,9 @@ public sealed class QuickAccessWindowStandardsTests
     {
         var segmentedWindows = new[]
         {
-            "Modules\\Tax\\Views\\TaxManagementWindow.xaml",
-            "Modules\\Categories\\Views\\CategoryManagementWindow.xaml",
-            "Modules\\Inventory\\Views\\InventoryWindow.xaml"
+            "Modules\\Tax\\Views\\TaxManagementView.xaml",
+            "Modules\\Categories\\Views\\CategoryManagementView.xaml",
+            "Modules\\Inventory\\Views\\InventoryManagementView.xaml"
         };
 
         var violations = segmentedWindows
@@ -100,17 +100,17 @@ public sealed class QuickAccessWindowStandardsTests
     {
         var gridWindows = new[]
         {
-            "Modules\\Brands\\Views\\BrandManagementWindow.xaml",
-            "Modules\\Categories\\Views\\CategoryManagementWindow.xaml",
-            "Modules\\Customers\\Views\\CustomerManagementWindow.xaml",
-            "Modules\\FinancialYears\\Views\\FinancialYearWindow.xaml",
-            "Modules\\Inventory\\Views\\InventoryWindow.xaml",
-            "Modules\\Products\\Views\\ProductManagementWindow.xaml",
-            "Modules\\PurchaseOrders\\Views\\PurchaseOrderWindow.xaml",
-            "Modules\\Tax\\Views\\TaxManagementWindow.xaml",
-            "Modules\\Users\\Views\\UsersWindow.xaml",
-            "Modules\\Vendors\\Views\\VendorManagementWindow.xaml",
-            "Modules\\Billing\\Views\\SaleHistoryWindow.xaml"
+            "Modules\\Brands\\Views\\BrandManagementView.xaml",
+            "Modules\\Categories\\Views\\CategoryManagementView.xaml",
+            "Modules\\Customers\\Views\\CustomerManagementView.xaml",
+            "Modules\\FinancialYears\\Views\\FinancialYearView.xaml",
+            "Modules\\Inventory\\Views\\InventoryManagementView.xaml",
+            "Modules\\Products\\Views\\ProductManagementView.xaml",
+            "Modules\\PurchaseOrders\\Views\\PurchaseOrderView.xaml",
+            "Modules\\Tax\\Views\\TaxManagementView.xaml",
+            "Modules\\Users\\Views\\UserManagementView.xaml",
+            "Modules\\Vendors\\Views\\VendorManagementView.xaml",
+            "Modules\\Billing\\Views\\SaleHistoryView.xaml"
         };
 
         var violations = gridWindows
@@ -136,9 +136,9 @@ public sealed class QuickAccessWindowStandardsTests
         var sharedToggleTemplate = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "ToggleSwitch.xaml"));
         var categoryWindow = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Categories", "Views", "CategoryManagementWindow.xaml"));
+            Path.Combine(SolutionRoot, "Modules", "Categories", "Views", "CategoryManagementView.xaml"));
         var taxWindow = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Tax", "Views", "TaxManagementWindow.xaml"));
+            Path.Combine(SolutionRoot, "Modules", "Tax", "Views", "TaxManagementView.xaml"));
 
         Assert.Contains("CommandParameter=\"{Binding}\"", sharedToggleTemplate, StringComparison.Ordinal);
         Assert.Contains("CommandParameter=\"{Binding}\"", categoryWindow, StringComparison.Ordinal);

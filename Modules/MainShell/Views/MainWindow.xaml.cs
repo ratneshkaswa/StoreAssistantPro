@@ -112,5 +112,8 @@ public partial class MainWindow : Window
         }
 
         (DataContext as IDisposable)?.Dispose();
+
+        // Single-window architecture: closing the main window shuts down the app
+        Application.Current?.Shutdown();
     }
 }

@@ -140,7 +140,7 @@ These eight systems are frozen. Extend through existing interfaces only:
 ### Window sizing
 
 - Never set `Width`, `Height`, `ResizeMode`, or `WindowStartupLocation` in XAML.
-- MainWindow: `WindowSizingService.ConfigureMainWindow` (90% of work area).
+- MainWindow: `WindowSizingService.ConfigureMainWindow` (maximized full screen, no resize).
 - Dialogs: override `DialogWidth`/`DialogHeight` in code-behind.
 - Startup windows: `WindowSizingService.ConfigureStartupWindow`.
 
@@ -165,8 +165,9 @@ These eight systems are frozen. Extend through existing interfaces only:
 
 - **Deep clean completed**: All Phase 1–3 module code was stripped. Only core infrastructure + 5 shell modules remain.
 - **Active Modules**: Authentication, Firm, MainShell, Startup, Users.
-- **Features Built**: Infrastructure + shell features only. Module features will be rebuilt from Phase 1.
-- **Skipped Features**: 2 (MRP, SKU).
+- **Features Built**: 171 features out of 948 catalogued.
+- **Pending Features**: 292 features pending (🔨).
+- **Skipped Features**: 10 features skipped.
 - **Current Phase**: Restarting from Phase 1 — Product Foundation.
 - **Next Features**: Phase 1 Sprint 1 (Products module rebuild).
 - **Cleanup Log**: `MASTER_RULES.md §9` — full audit of what was stripped and why.
@@ -198,6 +199,36 @@ These eight systems are frozen. Extend through existing interfaces only:
   - G21: Budgeting (6)
   - G22: Reporting (9)
 
+### Key Pending Areas
+
+- **Phase 1**: Category hierarchy, paging, bulk operations, stock take, supplier enhancements.
+- **Phase 2**: Cart tax display, split payment, credit notes, customer-sale linking, discount engine.
+- **Phase 3**: Entire Expense, Cash Register, P&L modules.
+- **Phase 4**: Audit log, permissions, backup/restore.
+- **Phase 5**: Quotation, GRN, barcode operations, dashboard analytics.
+- **Phase 6**: Print templates, accessibility, system settings.
+
 ### UI Preferences
 
 - Remove visible Ctrl+Enter-style shortcut hints from UI everywhere.
+
+### Feature Gaps
+
+- Compare StoreAssistantPro UI against typical Shop Management apps to identify key gaps:
+  - Cash Register/Day End
+  - Quotation/Estimate
+  - GRN
+  - Barcode Label Printing
+  - Customer-Sale linking
+  - Split Payment
+  - Credit Note/Exchange
+  - A4 Tax Invoice
+  - GSTR export
+  - Audit Log
+  - Backup/Restore
+  - Dashboard Analytics
+  - P&L Reports
+  - Discount Engine
+  - Print Templates
+
+- The app has 27 modules, with approximately 171 features built out of 948 catalogued.

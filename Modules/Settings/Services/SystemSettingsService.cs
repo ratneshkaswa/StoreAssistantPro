@@ -112,4 +112,12 @@ public class SystemSettingsService(
         logger.LogInformation("Database restored from {Path}", backupPath);
     }
 
+    public async Task FactoryResetAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("SystemSettingsService.FactoryResetAsync", TimeSpan.FromSeconds(30));
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        await context.Database.EnsureDeletedAsync(ct).ConfigureAwait(false);
+        await context.Database.MigrateAsync(ct).ConfigureAwait(false);
+        logger.LogWarning("Factory reset completed — database recreated");
+    }
 }

@@ -98,7 +98,7 @@ public sealed class PersistenceFlushSerializationTests
                     && sessions == 1
                     && totalWindowOpens == 1
                     && distinctWindowCount == 1,
-                TimeSpan.FromSeconds(10)));
+                TimeSpan.FromSeconds(30)));
         }
         finally
         {

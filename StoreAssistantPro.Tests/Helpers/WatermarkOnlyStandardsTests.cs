@@ -31,39 +31,19 @@ public sealed class WatermarkOnlyStandardsTests
     }
 
     [Fact]
-    public void Login_And_Setup_Shells_Should_Not_Show_HelperTooltips()
+    public void Login_Shell_Should_Not_Show_HelperTooltips()
     {
         var loginContent = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginWindow.xaml"));
-        var setupContent = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupWindow.xaml"));
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginView.xaml"));
 
         Assert.DoesNotContain("ToolTip=", loginContent, StringComparison.Ordinal);
-        Assert.Contains("Visibility=\"Collapsed\" Text=\"{Binding RoleHintText}\"", loginContent, StringComparison.Ordinal);
-        Assert.DoesNotContain("ToolTip=\"{Binding SaveReadinessMessage}\"", setupContent, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void SetupPages_Should_Use_Watermarks_Without_Live_HelperText()
-    {
-        var firmProfile = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages", "FirmProfilePage.xaml"));
-        var securityPage = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "SetupPages", "SecuritySettingsPage.xaml"));
-
-        Assert.DoesNotContain("EmailValidationHint", firmProfile, StringComparison.Ordinal);
-        Assert.DoesNotContain("StateValidationHint", firmProfile, StringComparison.Ordinal);
-        Assert.DoesNotContain("PhoneValidationHint", firmProfile, StringComparison.Ordinal);
-        Assert.DoesNotContain("PincodeValidationHint", firmProfile, StringComparison.Ordinal);
-        Assert.Contains("<Style x:Key=\"SetupPinFeedbackTextStyle\"", securityPage, StringComparison.Ordinal);
-        Assert.Contains("<Setter Property=\"Visibility\" Value=\"Collapsed\"/>", securityPage, StringComparison.Ordinal);
     }
 
     [Fact]
     public void SystemSettings_Should_Not_Show_RestoreCaution_Instructions()
     {
         var content = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "Settings", "Views", "SystemSettingsWindow.xaml"));
+            Path.Combine(SolutionRoot, "Modules", "Settings", "Views", "SystemSettingsView.xaml"));
 
         Assert.DoesNotContain("Restore caution", content, StringComparison.Ordinal);
     }

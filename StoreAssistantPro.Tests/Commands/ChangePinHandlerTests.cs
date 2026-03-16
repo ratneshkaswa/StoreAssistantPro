@@ -1,5 +1,8 @@
-﻿using NSubstitute;
+﻿using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Users.Commands;
@@ -12,9 +15,23 @@ public class ChangePinHandlerTests
 {
     private readonly IUserService _userService = Substitute.For<IUserService>();
     private readonly ILoginService _loginService = Substitute.For<ILoginService>();
+    private readonly DbContextOptions<AppDbContext> _dbOptions;
+    private readonly IDbContextFactory<AppDbContext> _contextFactory;
+    private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
-    private ChangePinHandler CreateSut() => new(_userService, _loginService, _eventBus);
+    public ChangePinHandlerTests()
+    {
+        _dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        _contextFactory = Substitute.For<IDbContextFactory<AppDbContext>>();
+        _contextFactory.CreateDbContextAsync(Arg.Any<CancellationToken>())
+            .Returns(_ => Task.FromResult(new AppDbContext(_dbOptions)));
+    }
+
+    private ChangePinHandler CreateSut() => new(_userService, _loginService, _contextFactory, _appState, _eventBus);
 
     [Fact]
     public async Task HandleAsync_UserPin_SucceedsWithoutMasterPin()
