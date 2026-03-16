@@ -13,6 +13,7 @@ public interface IExpenseService
     Task CreateDepositAsync(PettyCashDepositDto dto, CancellationToken ct = default);
     Task DeleteDepositAsync(int id, CancellationToken ct = default);
     Task<ExpenseStats> GetStatsAsync(CancellationToken ct = default);
+    Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default);
 }
 
 public record ExpenseDto(DateTime Date, string Category, decimal Amount);

@@ -12,6 +12,7 @@ public interface ICustomerService
     Task CreateAsync(CustomerDto dto, CancellationToken ct = default);
     Task UpdateAsync(int id, CustomerDto dto, CancellationToken ct = default);
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
+    Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default);
 }
 
 public record CustomerDto(

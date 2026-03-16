@@ -158,6 +158,19 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
             SuccessMessage = "Exported to CSV.";
     }
 
+    [RelayCommand]
+    private Task ImportCsvAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var rows = CsvImporter.Import();
+        if (rows is null) return;
+        if (rows.Count == 0) { ErrorMessage = "CSV file is empty."; return; }
+
+        var imported = await expenseService.ImportBulkAsync(rows, ct);
+        SuccessMessage = $"Imported {imported} expense(s).";
+        await ReloadAsync(ct);
+    });
+
     private void ResetForm()
     {
         _editingId = null;

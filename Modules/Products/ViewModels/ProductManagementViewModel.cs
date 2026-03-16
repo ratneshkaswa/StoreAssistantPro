@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Brands.Services;
@@ -311,6 +312,14 @@ public partial class ProductManagementViewModel(
 
     [RelayCommand]
     private void Search() => ApplyFilters();
+
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (Products.Count == 0) return;
+        if (CsvExporter.Export(Products, "Products.csv"))
+            SuccessMessage = "Exported to CSV.";
+    }
 
     [RelayCommand]
     private void SetStockFilter(string status)

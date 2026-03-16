@@ -199,4 +199,33 @@ public class CategoryService(
             .CountAsync(p => p.CategoryId == categoryId, ct)
             .ConfigureAwait(false);
     }
+
+    public async Task<int> ImportBulkAsync(IReadOnlyList<string> names, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CategoryService.ImportBulkAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var existing = await context.Categories
+            .Select(c => c.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var existingSet = new HashSet<string>(existing, StringComparer.OrdinalIgnoreCase);
+        int imported = 0;
+
+        foreach (var name in names)
+        {
+            var trimmed = name.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) || !existingSet.Add(trimmed))
+                continue;
+
+            context.Categories.Add(new Category { Name = trimmed, IsActive = true });
+            imported++;
+        }
+
+        if (imported > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return imported;
+    }
 }

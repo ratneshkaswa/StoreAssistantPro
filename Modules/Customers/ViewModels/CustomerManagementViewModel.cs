@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Customers.Services;
 
@@ -90,6 +91,9 @@ public partial class CustomerManagementViewModel(
             .Rule(!string.IsNullOrWhiteSpace(CustomerName), "Customer name is required.")))
             return;
 
+        var gstinError = GstinValidator.Validate(GSTIN);
+        if (gstinError is not null) { ErrorMessage = gstinError; return; }
+
         var dto = new CustomerDto(
             CustomerName,
             string.IsNullOrWhiteSpace(Phone) ? null : Phone,
@@ -121,5 +125,28 @@ public partial class CustomerManagementViewModel(
         var list = await customerService.GetAllAsync(ct);
         Customers = new ObservableCollection<Customer>(list);
         SuccessMessage = "Active status toggled.";
+    });
+
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (Customers.Count == 0) return;
+        if (CsvExporter.Export(Customers, "Customers.csv"))
+            SuccessMessage = "Exported to CSV.";
+    }
+
+    [RelayCommand]
+    private Task ImportCsvAsync() => RunAsync(async ct =>
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        var rows = CsvImporter.Import();
+        if (rows is null) return;
+        if (rows.Count == 0) { ErrorMessage = "CSV file is empty."; return; }
+
+        var imported = await customerService.ImportBulkAsync(rows, ct);
+        SuccessMessage = $"Imported {imported} customer(s).";
+        var list = await customerService.GetAllAsync(ct);
+        Customers = new ObservableCollection<Customer>(list);
     });
 }

@@ -141,4 +141,39 @@ public class ExpenseService(
         return new ExpenseStats(totalExpenses, totalDeposits, totalDeposits - totalExpenses,
             expenses.Count, todaySpent, thisMonthSpent, lastMonthSpent);
     }
+
+    public async Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.ImportBulkAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var now = regional.Now;
+        var count = 0;
+
+        foreach (var row in rows)
+        {
+            var category = (row.GetValueOrDefault("Category") ?? "").Trim();
+            var amountStr = (row.GetValueOrDefault("Amount") ?? "").Trim();
+            var dateStr = (row.GetValueOrDefault("Date") ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(category) || !decimal.TryParse(amountStr, out var amount) || amount <= 0)
+                continue;
+
+            var date = DateTime.TryParse(dateStr, out var d) ? d : now.Date;
+
+            context.Expenses.Add(new Expense
+            {
+                Date = date,
+                Category = category,
+                Amount = amount,
+                CreatedAt = now
+            });
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
+    }
 }

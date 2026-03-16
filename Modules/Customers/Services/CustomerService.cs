@@ -143,4 +143,48 @@ public class CustomerService(
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
+
+    public async Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CustomerService.ImportBulkAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var existing = await context.Customers
+            .AsNoTracking()
+            .Select(c => c.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var existingNames = new HashSet<string>(existing, StringComparer.OrdinalIgnoreCase);
+        var now = regional.Now;
+        var count = 0;
+
+        foreach (var row in rows)
+        {
+            var name = (row.GetValueOrDefault("Name") ?? row.GetValueOrDefault("Customer") ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(name) || !existingNames.Add(name))
+                continue;
+
+            context.Customers.Add(new Customer
+            {
+                Name = name,
+                Phone = NullIfEmpty(row.GetValueOrDefault("Phone")),
+                Email = NullIfEmpty(row.GetValueOrDefault("Email")),
+                Address = NullIfEmpty(row.GetValueOrDefault("Address")),
+                GSTIN = NullIfEmpty(row.GetValueOrDefault("GSTIN")),
+                Notes = NullIfEmpty(row.GetValueOrDefault("Notes")),
+                IsActive = true,
+                CreatedDate = now
+            });
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
+    }
+
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

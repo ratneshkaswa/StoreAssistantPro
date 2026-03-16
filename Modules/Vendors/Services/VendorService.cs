@@ -152,6 +152,53 @@ public class VendorService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
+    public async Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("VendorService.ImportBulkAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var existing = await context.Vendors
+            .AsNoTracking()
+            .Select(v => v.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var existingNames = new HashSet<string>(existing, StringComparer.OrdinalIgnoreCase);
+        var now = regional.Now;
+        var count = 0;
+
+        foreach (var row in rows)
+        {
+            var name = (row.GetValueOrDefault("Name") ?? row.GetValueOrDefault("Vendor") ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(name) || !existingNames.Add(name))
+                continue;
+
+            context.Vendors.Add(new Vendor
+            {
+                Name = name,
+                ContactPerson = NullIfEmpty(row.GetValueOrDefault("ContactPerson")),
+                Phone = NullIfEmpty(row.GetValueOrDefault("Phone")),
+                Email = NullIfEmpty(row.GetValueOrDefault("Email")),
+                Address = NullIfEmpty(row.GetValueOrDefault("Address")),
+                AddressLine2 = NullIfEmpty(row.GetValueOrDefault("AddressLine2")),
+                City = NullIfEmpty(row.GetValueOrDefault("City")),
+                State = NullIfEmpty(row.GetValueOrDefault("State")),
+                PinCode = NullIfEmpty(row.GetValueOrDefault("PinCode")),
+                GSTIN = NullIfEmpty(row.GetValueOrDefault("GSTIN")),
+                PAN = NullIfEmpty(row.GetValueOrDefault("PAN"))?.ToUpperInvariant(),
+                TransportPreference = NullIfEmpty(row.GetValueOrDefault("TransportPreference")),
+                IsActive = true,
+                CreatedDate = now
+            });
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
+    }
+
     private static void ValidateDto(VendorDto dto)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));

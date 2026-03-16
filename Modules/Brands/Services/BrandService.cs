@@ -121,4 +121,33 @@ public class BrandService(
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
+
+    public async Task<int> ImportBulkAsync(IReadOnlyList<string> names, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("BrandService.ImportBulkAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var existing = await context.Brands
+            .Select(b => b.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var existingSet = new HashSet<string>(existing, StringComparer.OrdinalIgnoreCase);
+        int imported = 0;
+
+        foreach (var name in names)
+        {
+            var trimmed = name.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) || !existingSet.Add(trimmed))
+                continue;
+
+            context.Brands.Add(new Brand { Name = trimmed, IsActive = true });
+            imported++;
+        }
+
+        if (imported > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return imported;
+    }
 }

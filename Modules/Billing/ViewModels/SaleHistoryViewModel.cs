@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Billing.Services;
@@ -86,4 +87,12 @@ public partial class SaleHistoryViewModel(
         var receipt = await receiptService.GenerateThermalReceiptAsync(SelectedSale.Id, ct);
         ReceiptPreview = receipt;
     });
+
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (Sales.Count == 0) return;
+        if (CsvExporter.Export(Sales, "SaleHistory.csv"))
+            SuccessMessage = "Exported to CSV.";
+    }
 }

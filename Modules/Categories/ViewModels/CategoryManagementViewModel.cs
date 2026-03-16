@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Categories.Services;
 
@@ -179,6 +180,42 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         var results = await categoryService.SearchAsync(CategorySearchText, ct);
         Categories = new ObservableCollection<Category>(results);
     });
+
+    [RelayCommand]
+    private void ExportCategoriesCsv()
+    {
+        if (Categories.Count == 0) return;
+        if (CsvExporter.Export(Categories, "Categories.csv"))
+            SuccessMessage = "Categories exported to CSV.";
+    }
+
+    [RelayCommand]
+    private Task ImportCategoriesCsvAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var rows = CsvImporter.Import();
+        if (rows is null) return;
+        if (rows.Count == 0) { ErrorMessage = "CSV file is empty."; return; }
+
+        var names = rows
+            .Select(r => r.GetValueOrDefault("Name") ?? r.GetValueOrDefault("Category") ?? "")
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToList();
+
+        if (names.Count == 0) { ErrorMessage = "No valid category names found in CSV. Expected column: Name."; return; }
+
+        var imported = await categoryService.ImportBulkAsync(names, ct);
+        SuccessMessage = $"Imported {imported} category(ies). {names.Count - imported} skipped (duplicates).";
+        await ReloadCategoriesAsync(ct);
+    });
+
+    [RelayCommand]
+    private void ExportTypesCsv()
+    {
+        if (CategoryTypes.Count == 0) return;
+        if (CsvExporter.Export(CategoryTypes, "CategoryTypes.csv"))
+            SuccessMessage = "Category types exported to CSV.";
+    }
 
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Load

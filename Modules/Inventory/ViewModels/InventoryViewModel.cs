@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Inventory.Services;
@@ -164,6 +165,22 @@ public partial class InventoryViewModel(
         LowStockProducts = new ObservableCollection<Product>(lowTask.Result);
         OutOfStockProducts = new ObservableCollection<Product>(oosTask.Result);
         TotalStockValue = regional.FormatCurrency(valueTask.Result);
+    }
+
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (Products.Count == 0) return;
+        if (CsvExporter.Export(Products, "Inventory.csv"))
+            SuccessMessage = "Exported to CSV.";
+    }
+
+    [RelayCommand]
+    private void ExportLogCsv()
+    {
+        if (AdjustmentLog.Count == 0) return;
+        if (CsvExporter.Export(AdjustmentLog, "AdjustmentLog.csv"))
+            SuccessMessage = "Exported to CSV.";
     }
 
     private void ClearMessages()

@@ -89,6 +89,9 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsNotificationsPanelVisible { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsReady { get; set; }
+
     // ── Role-based visibility ──
 
     public bool IsAdmin => AppState.CurrentUserType == UserType.Admin;
@@ -201,6 +204,8 @@ public partial class MainViewModel : BaseViewModel
 
         if (result.Succeeded)
             await OnLoginSucceededAsync(UserType.User);
+
+        IsReady = true;
     }
 
     /// <summary>
@@ -491,16 +496,17 @@ public partial class MainViewModel : BaseViewModel
     private async Task SwitchUserAsync()
     {
         var currentRole = AppState.CurrentUserType;
-        await _commandBus.SendAsync(new LogoutCommand(currentRole));
 
         if (currentRole == UserType.Admin)
         {
-            // Admin → switch directly to User (no login page)
+            // Admin → User: instant switch — no logout flash
             await AutoLoginAsUserAsync();
         }
         else
         {
-            // User → show login with only Admin option
+            // User → Admin: logout first, then show PIN login
+            await _commandBus.SendAsync(new LogoutCommand(currentRole));
+
             _navigationService.NavigateTo(LoginPage);
             _currentPage = LoginPage;
             _statusBar.SetPersistent(string.Empty);

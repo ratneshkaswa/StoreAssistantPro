@@ -14,6 +14,25 @@
     <!-- InputBindings are generated at runtime by ShortcutService -->
 
     <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Opacity" Value="0"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsReady}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     To="1"
+                                                     Duration="{StaticResource FluentDurationPageFade}"
+                                                     EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>

@@ -22,6 +22,9 @@ public interface ICategoryService
 
     // ── Product counts ──
     Task<int> GetProductCountAsync(int categoryId, CancellationToken ct = default);
+
+    // ── Bulk operations ──
+    Task<int> ImportBulkAsync(IReadOnlyList<string> names, CancellationToken ct = default);
 }
 
 public record CategoryDto(string Name, int? CategoryTypeId);

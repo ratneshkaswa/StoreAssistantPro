@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.MainShell.Views.WorkspaceView"
+ <UserControl x:Class="StoreAssistantPro.Modules.MainShell.Views.WorkspaceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,7 +13,6 @@
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -123,18 +122,19 @@
             </Border>
         </WrapPanel>
 
-        <!-- ═══ LOADING INDICATOR ═══ -->
-        <TextBlock Grid.Row="2" Text="Loading dashboard…" FontStyle="Italic"
-                   Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource DashboardListItemSpacing}"
-                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
-
         <!-- ═══ DETAIL PANELS ═══ -->
-        <Grid Grid.Row="3" Margin="{StaticResource KpiValueSpacing}">
+        <Grid Grid.Row="2" Margin="{StaticResource KpiValueSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="320"/>
             </Grid.ColumnDefinitions>
+
+            <!-- Loading overlay — does not affect layout -->
+            <TextBlock Grid.ColumnSpan="3" Text="Loading dashboard…" FontStyle="Italic"
+                       Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource DashboardListItemSpacing}"
+                       VerticalAlignment="Top" HorizontalAlignment="Left"
+                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
 
             <!-- Recent Sales -->
             <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardPadding}">

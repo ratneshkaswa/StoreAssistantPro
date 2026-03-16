@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Brands.Services;
 
@@ -90,6 +91,34 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
         }
         var results = await brandService.SearchAsync(SearchText, ct);
         Brands = new ObservableCollection<Brand>(results);
+    });
+
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (Brands.Count == 0) return;
+        if (CsvExporter.Export(Brands, "Brands.csv"))
+            SuccessMessage = "Exported to CSV.";
+    }
+
+    [RelayCommand]
+    private Task ImportCsvAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var rows = CsvImporter.Import();
+        if (rows is null) return;
+        if (rows.Count == 0) { ErrorMessage = "CSV file is empty."; return; }
+
+        var names = rows
+            .Select(r => r.GetValueOrDefault("Name") ?? r.GetValueOrDefault("Brand") ?? "")
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToList();
+
+        if (names.Count == 0) { ErrorMessage = "No valid brand names found in CSV. Expected column: Name."; return; }
+
+        var imported = await brandService.ImportBulkAsync(names, ct);
+        SuccessMessage = $"Imported {imported} brand(s). {names.Count - imported} skipped (duplicates).";
+        await ReloadAsync(ct);
     });
 
     private async Task ReloadAsync(CancellationToken ct)

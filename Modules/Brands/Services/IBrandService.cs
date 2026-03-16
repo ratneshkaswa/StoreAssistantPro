@@ -10,4 +10,5 @@ public interface IBrandService
     Task CreateAsync(string name, CancellationToken ct = default);
     Task UpdateAsync(int id, string name, CancellationToken ct = default);
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
+    Task<int> ImportBulkAsync(IReadOnlyList<string> names, CancellationToken ct = default);
 }

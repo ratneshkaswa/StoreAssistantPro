@@ -11,6 +11,7 @@ public interface IVendorService
     Task CreateAsync(VendorDto dto, CancellationToken ct = default);
     Task UpdateAsync(int id, VendorDto dto, CancellationToken ct = default);
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
+    Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default);
 }
 
 public record VendorDto(
