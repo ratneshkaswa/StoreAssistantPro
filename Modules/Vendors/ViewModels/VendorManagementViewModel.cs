@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Vendors.Services;
 
@@ -18,6 +19,29 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
+
+    // ── Paging ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    public partial string PagingInfo { get; set; } = string.Empty;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    private const int PageSize = 25;
 
     // ── Form fields ──
 
@@ -118,8 +142,15 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
 
     private async Task ReloadVendorsAsync(CancellationToken ct, int? selectedVendorId = null)
     {
-        var vendors = await vendorService.GetAllAsync(ct);
-        Vendors = new ObservableCollection<Vendor>(vendors);
+        var search = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText;
+        var result = await vendorService.GetPagedAsync(new PagedQuery(CurrentPage, PageSize), search, ct);
+        Vendors = new ObservableCollection<Vendor>(result.Items);
+        TotalCount = result.TotalCount;
+        TotalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        PagingInfo = TotalCount > 0
+            ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
+            : string.Empty;
         SelectedVendor = selectedVendorId.HasValue
             ? Vendors.FirstOrDefault(v => v.Id == selectedVendorId.Value)
             : null;
@@ -128,14 +159,8 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            await ReloadVendorsAsync(ct);
-            return;
-        }
-        var results = await vendorService.SearchAsync(SearchText, ct);
-        Vendors = new ObservableCollection<Vendor>(results);
-        SelectedVendor = null;
+        CurrentPage = 1;
+        await ReloadVendorsAsync(ct);
     });
 
     [RelayCommand]
@@ -208,6 +233,22 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
 
         var imported = await vendorService.ImportBulkAsync(rows, ct);
         SuccessMessage = $"Imported {imported} vendor(s).";
+        await ReloadVendorsAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task PreviousPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        await ReloadVendorsAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task NextPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
         await ReloadVendorsAsync(ct);
     });
 

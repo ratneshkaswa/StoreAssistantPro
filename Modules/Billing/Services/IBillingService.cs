@@ -26,14 +26,20 @@ public record CompleteSaleDto(
     string? DiscountReason,
     decimal CashTendered,
     string CashierRole,
-    Guid IdempotencyKey);
+    Guid IdempotencyKey,
+    int? CustomerId,
+    string? DiscountApprovalPin = null);
 
 public record CartItemDto(
     int ProductId,
     int? ProductVariantId,
     int Quantity,
     decimal UnitPrice,
-    decimal ItemDiscountRate);
+    decimal ItemDiscountRate,
+    decimal ItemDiscountAmount,
+    decimal TaxRate,
+    bool IsTaxInclusive,
+    decimal TaxAmount);
 
 /// <summary>Result of barcode lookup — could be product-level or variant-level.</summary>
 public record ProductLookupResult(

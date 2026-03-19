@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Vendors.Services;
@@ -5,6 +6,7 @@ namespace StoreAssistantPro.Modules.Vendors.Services;
 public interface IVendorService
 {
     Task<IReadOnlyList<Vendor>> GetAllAsync(CancellationToken ct = default);
+    Task<PagedResult<Vendor>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default);
     Task<IReadOnlyList<Vendor>> GetActiveAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Vendor>> SearchAsync(string query, CancellationToken ct = default);
     Task<Vendor?> GetByIdAsync(int id, CancellationToken ct = default);

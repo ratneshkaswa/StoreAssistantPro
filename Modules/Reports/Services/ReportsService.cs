@@ -110,4 +110,202 @@ public class ReportsService(
 
         return new DebtorReport(pending.Count, pending.Sum(d => d.Balance), topDebtors);
     }
+
+    // ── Sales & Tax Reports ──────────────────────────────────────
+
+    public async Task<DailySalesSummary> GetDailySalesSummaryAsync(DateTime date, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetDailySalesSummaryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var dayStart = date.Date;
+        var dayEnd = dayStart.AddDays(1);
+
+        var sales = await context.Sales
+            .AsNoTracking()
+            .Where(s => s.SaleDate >= dayStart && s.SaleDate < dayEnd)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var returns = await context.SaleReturns
+            .AsNoTracking()
+            .Where(r => r.ReturnDate >= dayStart && r.ReturnDate < dayEnd)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var totalSales = sales.Sum(s => s.TotalAmount);
+        var totalReturns = returns.Sum(r => r.RefundAmount);
+        var totalDiscount = sales.Sum(s => s.DiscountAmount);
+
+        // Sum tax from sale items
+        var saleIds = sales.Select(s => s.Id).ToList();
+        var totalTax = saleIds.Count > 0
+            ? await context.SaleItems
+                .Where(si => saleIds.Contains(si.SaleId))
+                .SumAsync(si => si.TaxAmount, ct)
+                .ConfigureAwait(false)
+            : 0;
+
+        return new DailySalesSummary(date, sales.Count, totalSales, totalReturns,
+            totalSales - totalReturns, totalTax, totalDiscount);
+    }
+
+    public async Task<MonthlySalesSummary> GetMonthlySalesSummaryAsync(int year, int month, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetMonthlySalesSummaryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var monthStart = new DateTime(year, month, 1);
+        var monthEnd = monthStart.AddMonths(1);
+
+        var sales = await context.Sales
+            .AsNoTracking()
+            .Where(s => s.SaleDate >= monthStart && s.SaleDate < monthEnd)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var saleIds = sales.Select(s => s.Id).ToList();
+        var saleItems = saleIds.Count > 0
+            ? await context.SaleItems
+                .AsNoTracking()
+                .Include(si => si.Product)
+                .Where(si => saleIds.Contains(si.SaleId))
+                .ToListAsync(ct)
+                .ConfigureAwait(false)
+            : [];
+
+        var revenue = sales.Sum(s => s.TotalAmount);
+        var cogs = saleItems.Sum(si => si.Quantity * (si.Product?.CostPrice ?? 0));
+        var totalTax = saleItems.Sum(si => si.TaxAmount);
+        var totalDiscount = sales.Sum(s => s.DiscountAmount);
+
+        return new MonthlySalesSummary(year, month, sales.Count, revenue, cogs,
+            revenue - cogs, totalTax, totalDiscount);
+    }
+
+    public async Task<IReadOnlyList<HsnTaxSummaryLine>> GetHsnTaxSummaryAsync(DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetHsnTaxSummaryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var items = await context.SaleItems
+            .AsNoTracking()
+            .Include(si => si.Product)
+            .Include(si => si.Sale)
+            .Where(si => si.Sale!.SaleDate >= from && si.Sale!.SaleDate <= to)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return items
+            .GroupBy(si => si.Product?.HSNCode ?? "N/A")
+            .Select(g => new HsnTaxSummaryLine(
+                g.Key,
+                g.Sum(si => si.Subtotal),
+                g.Sum(si => si.CgstAmount),
+                g.Sum(si => si.SgstAmount),
+                0, // IGST — inter-state not tracked yet
+                g.Sum(si => si.TaxAmount),
+                g.First().CgstRate,
+                g.First().SgstRate))
+            .OrderBy(h => h.HsnCode)
+            .ToList();
+    }
+
+    public async Task<TaxReport> GetTaxReportAsync(int year, int month, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetTaxReportAsync");
+        var from = new DateTime(year, month, 1);
+        var to = from.AddMonths(1).AddTicks(-1);
+
+        var hsnLines = await GetHsnTaxSummaryAsync(from, to, ct);
+
+        return new TaxReport(
+            year, month,
+            hsnLines.Sum(h => h.TotalTax),
+            hsnLines.Sum(h => h.CgstAmount),
+            hsnLines.Sum(h => h.SgstAmount),
+            0, // IGST
+            hsnLines);
+    }
+
+    public async Task<DailyDiscountReport> GetDailyDiscountReportAsync(DateTime date, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetDailyDiscountReportAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var dayStart = date.Date;
+        var dayEnd = dayStart.AddDays(1);
+
+        var discountedSales = await context.Sales
+            .AsNoTracking()
+            .Where(s => s.SaleDate >= dayStart && s.SaleDate < dayEnd && s.DiscountAmount > 0)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var totalDiscount = discountedSales.Sum(s => s.DiscountAmount);
+        var totalBefore = discountedSales.Sum(s => s.TotalAmount + s.DiscountAmount);
+        var avgPct = totalBefore > 0 ? totalDiscount / totalBefore * 100 : 0;
+
+        return new DailyDiscountReport(date, discountedSales.Count, totalDiscount, avgPct);
+    }
+
+    public async Task<IReadOnlyList<DiscountHistoryEntry>> GetDiscountHistoryAsync(DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetDiscountHistoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var sales = await context.Sales
+            .AsNoTracking()
+            .Where(s => s.SaleDate >= from && s.SaleDate <= to && s.DiscountAmount > 0)
+            .OrderByDescending(s => s.SaleDate)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return sales.Select(s => new DiscountHistoryEntry(
+            s.Id,
+            s.InvoiceNumber,
+            s.SaleDate,
+            s.DiscountType.ToString(),
+            s.DiscountValue,
+            s.DiscountAmount,
+            s.DiscountReason,
+            s.CashierRole)).ToList();
+    }
+
+    public async Task<IReadOnlyList<ProductSalesSummary>> GetProductSalesReportAsync(
+        DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetProductSalesReportAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var items = await context.SaleItems
+            .AsNoTracking()
+            .Include(si => si.Product)
+            .Include(si => si.Sale)
+            .Where(si => si.Sale!.SaleDate >= from && si.Sale!.SaleDate <= to)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return items
+            .GroupBy(si => si.ProductId)
+            .Select(g =>
+            {
+                var first = g.First();
+                var totalQty = g.Sum(si => si.Quantity);
+                var totalRevenue = g.Sum(si => si.Subtotal);
+                var totalTax = g.Sum(si => si.TaxAmount);
+                var totalDiscount = g.Sum(si => si.ItemDiscountAmount * si.Quantity + si.ItemFlatDiscount * si.Quantity);
+                return new ProductSalesSummary(
+                    first.ProductId,
+                    first.Product?.Name ?? $"#{first.ProductId}",
+                    first.Product?.HSNCode,
+                    totalQty,
+                    totalRevenue,
+                    totalTax,
+                    totalDiscount,
+                    totalQty > 0 ? totalRevenue / totalQty : 0);
+            })
+            .OrderByDescending(p => p.TotalRevenue)
+            .ToList();
+    }
 }

@@ -2,11 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Authentication.Services;
 
 namespace StoreAssistantPro.Modules.Billing.Services;
 
 public class BillingService(
     IDbContextFactory<AppDbContext> contextFactory,
+    ILoginService loginService,
     IPerformanceMonitor perf,
     IRegionalSettingsService regional) : IBillingService
 {
@@ -33,6 +35,30 @@ public class BillingService(
 
         using var _ = perf.BeginScope("BillingService.CompleteSaleAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        // Max discount limit (#179) + approval PIN (#178)
+        var subtotalForValidation = dto.Items.Sum(i =>
+            i.Quantity * i.UnitPrice * (1 - i.ItemDiscountRate / 100m));
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        if (config is not null && config.MaxDiscountPercent > 0
+            && dto.DiscountType != DiscountType.None && dto.DiscountValue > 0)
+        {
+            var effectivePct = dto.DiscountType == DiscountType.Percentage
+                ? dto.DiscountValue
+                : subtotalForValidation > 0 ? dto.DiscountValue / subtotalForValidation * 100m : 0;
+
+            if (effectivePct > config.MaxDiscountPercent)
+            {
+                if (string.IsNullOrWhiteSpace(dto.DiscountApprovalPin))
+                    throw new InvalidOperationException(
+                        $"Discount exceeds {config.MaxDiscountPercent}%. Manager PIN required.");
+
+                var pinValid = await loginService.ValidateMasterPinAsync(dto.DiscountApprovalPin, ct);
+                if (!pinValid)
+                    throw new InvalidOperationException("Invalid discount approval PIN.");
+            }
+        }
+
         await using var tx = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
         try
@@ -59,7 +85,11 @@ public class BillingService(
                     ProductVariantId = ci.ProductVariantId,
                     Quantity = ci.Quantity,
                     UnitPrice = ci.UnitPrice,
-                    ItemDiscountRate = ci.ItemDiscountRate
+                    ItemDiscountRate = ci.ItemDiscountRate,
+                    ItemFlatDiscount = ci.ItemDiscountAmount,
+                    TaxRate = ci.TaxRate,
+                    IsTaxInclusive = ci.IsTaxInclusive,
+                    TaxAmount = ci.TaxAmount
                 });
 
                 // Deduct stock
@@ -109,6 +139,7 @@ public class BillingService(
                 DiscountReason = dto.DiscountReason,
                 CashierRole = dto.CashierRole,
                 IdempotencyKey = dto.IdempotencyKey,
+                CustomerId = dto.CustomerId,
                 Items = items
             };
 
@@ -145,6 +176,7 @@ public class BillingService(
         var variant = await context.ProductVariants
             .AsNoTracking()
             .Include(v => v.Product)
+                .ThenInclude(p => p.Tax)
             .Include(v => v.Size)
             .Include(v => v.Colour)
             .FirstOrDefaultAsync(v => v.Barcode == trimmed && v.IsActive, ct)

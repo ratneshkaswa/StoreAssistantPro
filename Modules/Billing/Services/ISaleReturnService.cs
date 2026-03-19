@@ -12,6 +12,9 @@ public interface ISaleReturnService
 
     /// <summary>Get recent returns across all sales.</summary>
     Task<IReadOnlyList<SaleReturn>> GetRecentReturnsAsync(int count = 100, CancellationToken ct = default);
+
+    /// <summary>Process an exchange: return item(s) from original sale, apply credit to new sale (#147).</summary>
+    Task<ExchangeResult> ExchangeAsync(ExchangeDto dto, CancellationToken ct = default);
 }
 
 public record SaleReturnDto(
@@ -19,4 +22,14 @@ public record SaleReturnDto(
     int SaleItemId,
     int QuantityReturned,
     string Reason,
-    string? Notes);
+    string? Notes,
+    string? ApproverPin);
+
+public record ExchangeDto(
+    SaleReturnDto Return,
+    CompleteSaleDto NewSale);
+
+public record ExchangeResult(
+    SaleReturn Return,
+    Sale NewSale,
+    decimal CreditApplied);

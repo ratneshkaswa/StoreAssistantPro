@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Categories.Services;
 
@@ -116,6 +117,29 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
     [ObservableProperty]
     public partial bool IsEditingCategory { get; set; }
 
+    // ── Paging ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    public partial string PagingInfo { get; set; } = string.Empty;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    private const int PageSize = 25;
+
     partial void OnSelectedCategoryChanged(Category? value)
     {
         if (value is null) return;
@@ -172,13 +196,24 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
     [RelayCommand]
     private Task SearchCategoriesAsync() => RunAsync(async ct =>
     {
-        if (string.IsNullOrWhiteSpace(CategorySearchText))
-        {
-            await ReloadCategoriesAsync(ct);
-            return;
-        }
-        var results = await categoryService.SearchAsync(CategorySearchText, ct);
-        Categories = new ObservableCollection<Category>(results);
+        CurrentPage = 1;
+        await ReloadCategoriesAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task PreviousPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        await ReloadCategoriesAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task NextPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
+        await ReloadCategoriesAsync(ct);
     });
 
     [RelayCommand]
@@ -237,8 +272,15 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
 
     private async Task ReloadCategoriesAsync(CancellationToken ct)
     {
-        var categories = await categoryService.GetAllAsync(ct);
-        Categories = new ObservableCollection<Category>(categories);
+        var search = string.IsNullOrWhiteSpace(CategorySearchText) ? null : CategorySearchText;
+        var result = await categoryService.GetPagedAsync(new PagedQuery(CurrentPage, PageSize), search, ct);
+        Categories = new ObservableCollection<Category>(result.Items);
+        TotalCount = result.TotalCount;
+        TotalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        PagingInfo = TotalCount > 0
+            ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
+            : string.Empty;
     }
 
     private void ClearMessages()

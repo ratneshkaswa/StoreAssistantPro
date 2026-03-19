@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
@@ -31,6 +32,42 @@ public class BrandService(
             brand.ProductCount = productCounts.GetValueOrDefault(brand.Id);
 
         return brands;
+    }
+
+    public async Task<PagedResult<Brand>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("BrandService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.Brands.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+            q = q.Where(b => b.Name.Contains(search.Trim()));
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var brands = await q
+            .OrderBy(b => b.Name)
+            .Skip(query.Skip)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        if (brands.Count > 0)
+        {
+            var brandIds = brands.Select(b => b.Id).ToList();
+            var productCounts = await context.Products
+                .Where(p => p.BrandId.HasValue && brandIds.Contains(p.BrandId.Value))
+                .GroupBy(p => p.BrandId!.Value)
+                .Select(g => new { BrandId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.BrandId, g => g.Count, ct)
+                .ConfigureAwait(false);
+
+            foreach (var brand in brands)
+                brand.ProductCount = productCounts.GetValueOrDefault(brand.Id);
+        }
+
+        return new PagedResult<Brand>(brands, totalCount, query.Page, query.PageSize);
     }
 
     public async Task<IReadOnlyList<Brand>> GetActiveAsync(CancellationToken ct = default)

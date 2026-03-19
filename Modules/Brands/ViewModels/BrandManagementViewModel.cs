@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Brands.Services;
 
@@ -24,6 +25,29 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
 
     [ObservableProperty]
     public partial bool IsEditing { get; set; }
+
+    // ── Paging ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    public partial string PagingInfo { get; set; } = string.Empty;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    private const int PageSize = 25;
 
     partial void OnSelectedBrandChanged(Brand? value)
     {
@@ -84,13 +108,24 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            await ReloadAsync(ct);
-            return;
-        }
-        var results = await brandService.SearchAsync(SearchText, ct);
-        Brands = new ObservableCollection<Brand>(results);
+        CurrentPage = 1;
+        await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task PreviousPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task NextPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
+        await ReloadAsync(ct);
     });
 
     [RelayCommand]
@@ -123,8 +158,15 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
 
     private async Task ReloadAsync(CancellationToken ct)
     {
-        var brands = await brandService.GetAllAsync(ct);
-        Brands = new ObservableCollection<Brand>(brands);
+        var search = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText;
+        var result = await brandService.GetPagedAsync(new PagedQuery(CurrentPage, PageSize), search, ct);
+        Brands = new ObservableCollection<Brand>(result.Items);
+        TotalCount = result.TotalCount;
+        TotalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        PagingInfo = TotalCount > 0
+            ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
+            : string.Empty;
     }
 
     private void ClearMessages()

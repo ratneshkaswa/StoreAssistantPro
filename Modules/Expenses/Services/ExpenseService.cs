@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
@@ -20,6 +21,44 @@ public class ExpenseService(
             .ThenByDescending(e => e.CreatedAt)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+    }
+
+    public async Task<PagedResult<Expense>> GetPagedAsync(PagedQuery query, string? search = null, string? dateFilter = null, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.Expenses.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            q = q.Where(e => e.Category.Contains(term));
+        }
+
+        var today = regional.Now.Date;
+        if (!string.IsNullOrWhiteSpace(dateFilter) && dateFilter != "All")
+        {
+            q = dateFilter switch
+            {
+                "Today" => q.Where(e => e.Date.Date == today),
+                "Week" => q.Where(e => e.Date.Date >= today.AddDays(-(int)today.DayOfWeek)),
+                "Month" => q.Where(e => e.Date.Year == today.Year && e.Date.Month == today.Month),
+                _ => q
+            };
+        }
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var items = await q
+            .OrderByDescending(e => e.Date)
+            .ThenByDescending(e => e.CreatedAt)
+            .Skip(query.Skip)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return new PagedResult<Expense>(items, totalCount, query.Page, query.PageSize);
     }
 
     public async Task<Expense?> GetByIdAsync(int id, CancellationToken ct = default)

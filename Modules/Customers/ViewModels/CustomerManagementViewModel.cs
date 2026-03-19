@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Customers.Services;
 
@@ -19,6 +20,29 @@ public partial class CustomerManagementViewModel(
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
+
+    // ── Paging ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    public partial string PagingInfo { get; set; } = string.Empty;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    private const int PageSize = 25;
 
     // ── Form fields ──
 
@@ -40,31 +64,53 @@ public partial class CustomerManagementViewModel(
     [ObservableProperty]
     public partial string Notes { get; set; } = string.Empty;
 
+    // ── Purchase History (#159) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<CustomerPurchaseSummary> PurchaseHistory { get; set; } = [];
+
+    [ObservableProperty]
+    public partial bool HasPurchaseHistory { get; set; }
+
     partial void OnSelectedCustomerChanged(Customer? value)
     {
-        if (value is null) return;
+        if (value is null)
+        {
+            PurchaseHistory = [];
+            HasPurchaseHistory = false;
+            return;
+        }
+
         CustomerName = value.Name;
         Phone = value.Phone ?? string.Empty;
         Email = value.Email ?? string.Empty;
         Address = value.Address ?? string.Empty;
         GSTIN = value.GSTIN ?? string.Empty;
         Notes = value.Notes ?? string.Empty;
+
+        LoadPurchaseHistoryCommand.Execute(value);
     }
+
+    [RelayCommand]
+    private Task LoadPurchaseHistoryAsync(Customer? customer) => RunAsync(async ct =>
+    {
+        if (customer is null) return;
+        var history = await customerService.GetPurchaseHistoryAsync(customer.Id, ct);
+        PurchaseHistory = new ObservableCollection<CustomerPurchaseSummary>(history);
+        HasPurchaseHistory = history.Count > 0;
+    });
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        var list = await customerService.GetAllAsync(ct);
-        Customers = new ObservableCollection<Customer>(list);
+        await ReloadAsync(ct);
     });
 
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
     {
-        var results = string.IsNullOrWhiteSpace(SearchQuery)
-            ? await customerService.GetAllAsync(ct)
-            : await customerService.SearchAsync(SearchQuery, ct);
-        Customers = new ObservableCollection<Customer>(results);
+        CurrentPage = 1;
+        await ReloadAsync(ct);
     });
 
     [RelayCommand]
@@ -113,8 +159,7 @@ public partial class CustomerManagementViewModel(
             SuccessMessage = $"Customer '{CustomerName}' updated.";
         }
 
-        var list = await customerService.GetAllAsync(ct);
-        Customers = new ObservableCollection<Customer>(list);
+        await ReloadAsync(ct);
     });
 
     [RelayCommand]
@@ -122,8 +167,7 @@ public partial class CustomerManagementViewModel(
     {
         if (customer is null) return;
         await customerService.ToggleActiveAsync(customer.Id, ct);
-        var list = await customerService.GetAllAsync(ct);
-        Customers = new ObservableCollection<Customer>(list);
+        await ReloadAsync(ct);
         SuccessMessage = "Active status toggled.";
     });
 
@@ -146,7 +190,35 @@ public partial class CustomerManagementViewModel(
 
         var imported = await customerService.ImportBulkAsync(rows, ct);
         SuccessMessage = $"Imported {imported} customer(s).";
-        var list = await customerService.GetAllAsync(ct);
-        Customers = new ObservableCollection<Customer>(list);
+        await ReloadAsync(ct);
     });
+
+    [RelayCommand]
+    private Task PreviousPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task NextPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
+        await ReloadAsync(ct);
+    });
+
+    private async Task ReloadAsync(CancellationToken ct)
+    {
+        var search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery;
+        var result = await customerService.GetPagedAsync(new PagedQuery(CurrentPage, PageSize), search, ct);
+        Customers = new ObservableCollection<Customer>(result.Items);
+        TotalCount = result.TotalCount;
+        TotalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        PagingInfo = TotalCount > 0
+            ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
+            : string.Empty;
+    }
 }

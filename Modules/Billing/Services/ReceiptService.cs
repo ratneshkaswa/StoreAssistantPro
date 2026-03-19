@@ -105,7 +105,229 @@ public class ReceiptService(
         return sb.ToString();
     }
 
+    public async Task<string> GenerateReturnReceiptAsync(int returnId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReceiptService.GenerateReturnReceiptAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var ret = await context.SaleReturns
+            .AsNoTracking()
+            .Include(r => r.Sale)
+            .Include(r => r.SaleItem).ThenInclude(si => si!.Product)
+            .FirstOrDefaultAsync(r => r.Id == returnId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"SaleReturn Id {returnId} not found.");
+
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        var firmName = config?.FirmName ?? "Store";
+        var firmAddress = config?.Address ?? "";
+        var firmPhone = config?.Phone ?? "";
+        var firmGSTIN = config?.GSTNumber ?? "";
+
+        var sb = new StringBuilder();
+
+        // Header
+        sb.AppendLine(Center(firmName));
+        if (!string.IsNullOrWhiteSpace(firmAddress))
+            sb.AppendLine(Center(firmAddress));
+        if (!string.IsNullOrWhiteSpace(firmPhone))
+            sb.AppendLine(Center($"Ph: {firmPhone}"));
+        if (!string.IsNullOrWhiteSpace(firmGSTIN))
+            sb.AppendLine(Center($"GSTIN: {firmGSTIN}"));
+        sb.AppendLine(Divider());
+        sb.AppendLine(Center("** CREDIT NOTE **"));
+        sb.AppendLine(Divider());
+
+        // Credit note info
+        sb.AppendLine($"Credit Note: {ret.CreditNoteNumber}");
+        sb.AppendLine($"Return Ref: {ret.ReturnNumber}");
+        sb.AppendLine($"Orig Invoice: {ret.Sale?.InvoiceNumber ?? "N/A"}");
+        sb.AppendLine($"Date: {regional.FormatDate(ret.ReturnDate)} {regional.FormatTime(ret.ReturnDate)}");
+        sb.AppendLine(Divider());
+
+        // Returned item
+        sb.AppendLine(FormatLine("Item", "Qty", "Rate", "Refund"));
+        sb.AppendLine(Divider());
+
+        var productName = Truncate(ret.SaleItem?.Product?.Name ?? $"#{ret.SaleItem?.ProductId}", 18);
+        var unitPrice = ret.SaleItem?.DiscountedUnitPrice ?? 0;
+        sb.AppendLine(FormatLine(productName, ret.Quantity.ToString(), regional.FormatNumber(unitPrice), regional.FormatCurrency(ret.RefundAmount)));
+        sb.AppendLine(Divider());
+
+        // Totals
+        sb.AppendLine(TotalLine("REFUND AMOUNT", ret.RefundAmount));
+        sb.AppendLine(Divider());
+
+        // Reason
+        sb.AppendLine($"Reason: {ret.Reason}");
+        sb.AppendLine(Divider());
+        sb.AppendLine(Center("Thank you!"));
+
+        return sb.ToString();
+    }
+
     // ── Formatting helpers ───────────────────────────────────────
+
+    private const int A4Width = 80; // character width for A4 text invoice
+
+    public async Task<string> GenerateA4InvoiceAsync(int saleId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReceiptService.GenerateA4InvoiceAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var sale = await context.Sales
+            .AsNoTracking()
+            .Include(s => s.Items).ThenInclude(i => i.Product)
+            .Include(s => s.Customer)
+            .FirstOrDefaultAsync(s => s.Id == saleId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Sale Id {saleId} not found.");
+
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        var firmName = config?.FirmName ?? "Store";
+        var firmAddress = config?.Address ?? "";
+        var firmPhone = config?.Phone ?? "";
+        var firmGSTIN = config?.GSTNumber ?? "";
+        var firmState = config?.State ?? "";
+
+        var sb = new StringBuilder();
+
+        // ── Header: TAX INVOICE ──
+        sb.AppendLine(A4Center("TAX INVOICE"));
+        sb.AppendLine(A4Divider('='));
+
+        // ── Seller details (left) ──
+        sb.AppendLine(firmName);
+        if (!string.IsNullOrWhiteSpace(firmAddress))
+            sb.AppendLine(firmAddress);
+        if (!string.IsNullOrWhiteSpace(firmState))
+            sb.AppendLine($"State: {firmState}");
+        if (!string.IsNullOrWhiteSpace(firmGSTIN))
+            sb.AppendLine($"GSTIN: {firmGSTIN}");
+        if (!string.IsNullOrWhiteSpace(firmPhone))
+            sb.AppendLine($"Phone: {firmPhone}");
+        sb.AppendLine(A4Divider('-'));
+
+        // ── Buyer details (#134) ──
+        if (sale.Customer is not null)
+        {
+            sb.AppendLine("Bill To:");
+            sb.AppendLine($"  Name: {sale.Customer.Name}");
+            if (!string.IsNullOrWhiteSpace(sale.Customer.Address))
+                sb.AppendLine($"  Address: {sale.Customer.Address}");
+            if (!string.IsNullOrWhiteSpace(sale.Customer.Phone))
+                sb.AppendLine($"  Phone: {sale.Customer.Phone}");
+            if (!string.IsNullOrWhiteSpace(sale.Customer.GSTIN))
+                sb.AppendLine($"  GSTIN: {sale.Customer.GSTIN}");
+        }
+        else
+        {
+            sb.AppendLine("Bill To: Walk-in Customer");
+        }
+        sb.AppendLine(A4Divider('-'));
+
+        // ── Invoice metadata ──
+        sb.AppendLine($"Invoice No: {sale.InvoiceNumber,-40} Date: {regional.FormatDate(sale.SaleDate)}");
+        sb.AppendLine($"Payment: {sale.PaymentMethod,-40} Time: {regional.FormatTime(sale.SaleDate)}");
+        if (!string.IsNullOrWhiteSpace(sale.PaymentReference))
+            sb.AppendLine($"Ref: {sale.PaymentReference}");
+        sb.AppendLine(A4Divider('='));
+
+        // ── Item table header ──
+        sb.AppendLine(A4ItemHeader());
+        sb.AppendLine(A4Divider('-'));
+
+        // ── Line items ──
+        var sn = 1;
+        foreach (var item in sale.Items)
+        {
+            var name = item.Product?.Name ?? $"#{item.ProductId}";
+            var hsn = item.Product?.HSNCode ?? "";
+            var qty = item.Quantity;
+            var rate = item.UnitPrice;
+            var taxable = item.Subtotal;
+            var cgst = item.CgstAmount;
+            var sgst = item.SgstAmount;
+            var total = taxable + item.TaxAmount;
+
+            sb.AppendLine(A4ItemLine(sn++, name, hsn, qty, rate, item.TaxRate, taxable, cgst, sgst, total));
+        }
+        sb.AppendLine(A4Divider('-'));
+
+        // ── Totals ──
+        var subtotal = sale.Items.Sum(i => i.Subtotal);
+        var totalCgst = sale.Items.Sum(i => i.CgstAmount);
+        var totalSgst = sale.Items.Sum(i => i.SgstAmount);
+        var totalTax = sale.Items.Sum(i => i.TaxAmount);
+
+        sb.AppendLine(A4TotalLine("Subtotal", subtotal));
+        sb.AppendLine(A4TotalLine("CGST", totalCgst));
+        sb.AppendLine(A4TotalLine("SGST", totalSgst));
+
+        if (sale.DiscountAmount > 0)
+        {
+            var discLabel = sale.DiscountType == DiscountType.Percentage
+                ? $"Discount ({sale.DiscountValue}%)"
+                : "Discount";
+            sb.AppendLine(A4TotalLine(discLabel, -sale.DiscountAmount));
+        }
+
+        sb.AppendLine(A4Divider('='));
+        sb.AppendLine(A4TotalLine("GRAND TOTAL", sale.TotalAmount));
+        sb.AppendLine(A4Divider('='));
+
+        // ── Tax summary table (HSN-wise) ──
+        sb.AppendLine();
+        sb.AppendLine("HSN Summary:");
+        sb.AppendLine($"{"HSN",-10} {"Taxable",12} {"CGST%",6} {"CGST",10} {"SGST%",6} {"SGST",10} {"Total Tax",12}");
+        sb.AppendLine(A4Divider('-'));
+
+        var hsnGroups = sale.Items
+            .GroupBy(i => i.Product?.HSNCode ?? "N/A")
+            .OrderBy(g => g.Key);
+
+        foreach (var g in hsnGroups)
+        {
+            var first = g.First();
+            sb.AppendLine($"{g.Key,-10} {g.Sum(i => i.Subtotal),12:N2} {first.CgstRate,5:N1}% {g.Sum(i => i.CgstAmount),10:N2} {first.SgstRate,5:N1}% {g.Sum(i => i.SgstAmount),10:N2} {g.Sum(i => i.TaxAmount),12:N2}");
+        }
+        sb.AppendLine(A4Divider('-'));
+
+        // ── Footer ──
+        sb.AppendLine();
+        sb.AppendLine("Terms & Conditions:");
+        sb.AppendLine("  1. Goods once sold will not be taken back.");
+        sb.AppendLine("  2. Subject to local jurisdiction.");
+        sb.AppendLine();
+        sb.AppendLine(A4Center("This is a computer generated invoice."));
+
+        return sb.ToString();
+    }
+
+    private static string A4Center(string text)
+    {
+        if (text.Length >= A4Width) return text;
+        var pad = (A4Width - text.Length) / 2;
+        return text.PadLeft(pad + text.Length);
+    }
+
+    private static string A4Divider(char c) => new(c, A4Width);
+
+    private static string A4ItemHeader() =>
+        $"{"#",-3} {"Item",-20} {"HSN",-8} {"Qty",4} {"Rate",8} {"GST%",5} {"Taxable",10} {"CGST",8} {"SGST",8} {"Total",10}";
+
+    private static string A4ItemLine(int sn, string name, string hsn, int qty, decimal rate,
+        decimal gstRate, decimal taxable, decimal cgst, decimal sgst, decimal total)
+    {
+        var truncName = name.Length > 20 ? name[..19] + "…" : name;
+        var truncHsn = hsn.Length > 8 ? hsn[..7] + "…" : hsn;
+        return $"{sn,-3} {truncName,-20} {truncHsn,-8} {qty,4} {rate,8:N2} {gstRate,4:N1}% {taxable,10:N2} {cgst,8:N2} {sgst,8:N2} {total,10:N2}";
+    }
+
+    private string A4TotalLine(string label, decimal amount) =>
+        $"{label,-60} {regional.FormatCurrency(amount),19}";
+
+    // ── 80mm formatting helpers ──────────────────────────────────
 
     private static string Center(string text)
     {

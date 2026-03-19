@@ -67,13 +67,17 @@ public class ProductService(
         if (await context.Products.AnyAsync(p => p.Name == dto.Name.Trim(), ct).ConfigureAwait(false))
             throw new InvalidOperationException($"Product '{dto.Name}' already exists.");
 
+        var categoryId = dto.CategoryId;
+        if (!categoryId.HasValue)
+            categoryId = await GetOrCreateDefaultCategoryIdAsync(ct).ConfigureAwait(false);
+
         var entity = new Product
         {
             Name = dto.Name.Trim(),
             ProductType = dto.ProductType,
             Unit = dto.Unit,
             TaxId = dto.TaxId,
-            CategoryId = dto.CategoryId,
+            CategoryId = categoryId,
             BrandId = dto.BrandId,
             VendorId = dto.VendorId,
             SupportsColour = dto.SupportsColour,
@@ -315,5 +319,68 @@ public class ProductService(
 
         context.ProductVariantTypes.Add(new ProductVariantType { Name = trimmed });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    // ── Bulk operations ──────────────────────────────────────────────
+
+    public async Task<int> BulkAssignCategoryAsync(IReadOnlyList<int> productIds, int categoryId, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(productIds);
+        if (productIds.Count == 0) return 0;
+
+        using var _ = perf.BeginScope("ProductService.BulkAssignCategoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var products = await context.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        foreach (var product in products)
+            product.CategoryId = categoryId;
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return products.Count;
+    }
+
+    public async Task<int> BulkAssignBrandAsync(IReadOnlyList<int> productIds, int brandId, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(productIds);
+        if (productIds.Count == 0) return 0;
+
+        using var _ = perf.BeginScope("ProductService.BulkAssignBrandAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var products = await context.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        foreach (var product in products)
+            product.BrandId = brandId;
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return products.Count;
+    }
+
+    // ── Default category ─────────────────────────────────────────────
+
+    public async Task<int> GetOrCreateDefaultCategoryIdAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetOrCreateDefaultCategoryIdAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        const string defaultName = "General";
+        var existing = await context.Categories
+            .FirstOrDefaultAsync(c => c.Name == defaultName, ct)
+            .ConfigureAwait(false);
+
+        if (existing is not null)
+            return existing.Id;
+
+        var category = new Category { Name = defaultName, IsActive = true };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return category.Id;
     }
 }

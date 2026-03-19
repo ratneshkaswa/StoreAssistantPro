@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Categories.Services;
@@ -13,6 +14,7 @@ public interface ICategoryService
 
     // ── Categories ──
     Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken ct = default);
+    Task<PagedResult<Category>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default);
     Task<IReadOnlyList<Category>> GetActiveAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Category>> GetByTypeAsync(int categoryTypeId, CancellationToken ct = default);
     Task<IReadOnlyList<Category>> SearchAsync(string query, CancellationToken ct = default);

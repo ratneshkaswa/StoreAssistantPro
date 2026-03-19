@@ -70,4 +70,7 @@ public class AppConfig
 
     [MaxLength(20)]
     public string NumberFormat { get; set; } = "Indian";
+
+    /// <summary>Maximum allowed discount percentage (0 = unlimited). (#179)</summary>
+    public decimal MaxDiscountPercent { get; set; }
 }

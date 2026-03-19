@@ -77,6 +77,12 @@ public class Vendor
     public RowHighlightLevel HighlightLevel =>
         IsActive ? RowHighlightLevel.None : RowHighlightLevel.Inactive;
 
+    /// <summary>
+    /// Precomputed count of products linked to this vendor. Populated by service queries.
+    /// </summary>
+    [NotMapped]
+    public int ProductCount { get; set; }
+
     [MaxLength(500)]
     public string? Notes { get; set; }
 

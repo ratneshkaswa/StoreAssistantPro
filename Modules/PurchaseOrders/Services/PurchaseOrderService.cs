@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
@@ -22,6 +23,41 @@ public class PurchaseOrderService(
             .Take(500)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+    }
+
+    public async Task<PagedResult<PurchaseOrder>> GetPagedAsync(
+        PagedQuery query, string? search = null, PurchaseOrderStatus? status = null,
+        DateTime? from = null, DateTime? to = null, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("PurchaseOrderService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.Supplier)
+            .Include(po => po.Items).ThenInclude(i => i.Product)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            q = q.Where(po => po.OrderNumber.Contains(term) ||
+                         (po.Supplier != null && po.Supplier.Name.Contains(term)));
+        }
+        if (status.HasValue) q = q.Where(po => po.Status == status.Value);
+        if (from.HasValue) q = q.Where(po => po.OrderDate >= from.Value);
+        if (to.HasValue) q = q.Where(po => po.OrderDate <= to.Value.Date.AddDays(1));
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var items = await q
+            .OrderByDescending(po => po.OrderDate)
+            .Skip(query.Skip)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return new PagedResult<PurchaseOrder>(items, totalCount, query.Page, query.PageSize);
     }
 
     public async Task<IReadOnlyList<PurchaseOrder>> SearchAsync(

@@ -20,6 +20,7 @@ public static class BillingModule
         pageRegistry.Map<SaleHistoryViewModel>(SaleHistoryPage)
             .RequireFeature(SaleHistoryPage, FeatureFlags.SaleHistory);
         services.AddTransient<IBillingService, BillingService>();
+        services.AddTransient<Func<IBillingService>>(sp => () => sp.GetRequiredService<IBillingService>());
         services.AddTransient<IReceiptService, ReceiptService>();
         services.AddTransient<ISaleHistoryService, SaleHistoryService>();
         services.AddTransient<ISaleReturnService, SaleReturnService>();

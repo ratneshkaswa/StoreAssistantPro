@@ -39,6 +39,13 @@ public interface IProductService
     // ── Variant Types (manual entry) ──
     Task<IReadOnlyList<ProductVariantType>> GetVariantTypesAsync(CancellationToken ct = default);
     Task CreateVariantTypeAsync(string name, CancellationToken ct = default);
+
+    // ── Bulk operations ──
+    Task<int> BulkAssignCategoryAsync(IReadOnlyList<int> productIds, int categoryId, CancellationToken ct = default);
+    Task<int> BulkAssignBrandAsync(IReadOnlyList<int> productIds, int brandId, CancellationToken ct = default);
+
+    // ── Default category ──
+    Task<int> GetOrCreateDefaultCategoryIdAsync(CancellationToken ct = default);
 }
 
 public record ProductDto(

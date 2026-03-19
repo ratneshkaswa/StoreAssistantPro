@@ -2,17 +2,28 @@ using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Authentication.Services;
 
 namespace StoreAssistantPro.Modules.Billing.Services;
 
 public class SaleReturnService(
     IDbContextFactory<AppDbContext> contextFactory,
+    ILoginService loginService,
+    Func<IBillingService> _billingServiceFactory,
     IPerformanceMonitor perf,
     IRegionalSettingsService regional) : ISaleReturnService
 {
     public async Task<SaleReturn> ProcessReturnAsync(SaleReturnDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
+
+        // Manager/admin PIN approval required (#148)
+        if (string.IsNullOrWhiteSpace(dto.ApproverPin))
+            throw new InvalidOperationException("Manager PIN is required to approve returns.");
+
+        var pinValid = await loginService.ValidateMasterPinAsync(dto.ApproverPin, ct);
+        if (!pinValid)
+            throw new InvalidOperationException("Invalid approval PIN.");
 
         using var _ = perf.BeginScope("SaleReturnService.ProcessReturnAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
@@ -41,18 +52,21 @@ public class SaleReturnService(
             var refundPerUnit = saleItem.DiscountedUnitPrice;
             var refundAmount = dto.QuantityReturned * refundPerUnit;
 
-            // Generate return number
+            // Generate return number and credit note number
             var returnNumber = await GenerateReturnNumberAsync(context, ct);
+            var creditNoteNumber = await GenerateCreditNoteNumberAsync(context, ct);
 
             var saleReturn = new SaleReturn
             {
                 ReturnNumber = returnNumber,
+                CreditNoteNumber = creditNoteNumber,
                 SaleId = dto.SaleId,
                 SaleItemId = dto.SaleItemId,
                 Quantity = dto.QuantityReturned,
                 RefundAmount = refundAmount,
                 Reason = dto.Reason,
-                ReturnDate = regional.Now
+                ReturnDate = regional.Now,
+                ApprovedByRole = "Master"
             };
 
             context.SaleReturns.Add(saleReturn);
@@ -119,6 +133,29 @@ public class SaleReturnService(
             .ConfigureAwait(false);
     }
 
+    public async Task<ExchangeResult> ExchangeAsync(ExchangeDto dto, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        using var _ = perf.BeginScope("SaleReturnService.ExchangeAsync");
+
+        // 1. Process the return (validates PIN, restores stock, creates credit note)
+        var saleReturn = await ProcessReturnAsync(dto.Return, ct);
+
+        // 2. Complete the new sale (stock deduction, invoice creation)
+        // The calling VM can adjust CashTendered to account for the credit
+        var billingService = GetBillingService();
+        var newSale = await billingService.CompleteSaleAsync(dto.NewSale, ct);
+
+        return new ExchangeResult(saleReturn, newSale, saleReturn.RefundAmount);
+    }
+
+    private IBillingService GetBillingService()
+    {
+        // Resolved lazily to avoid circular DI
+        return _billingServiceFactory();
+    }
+
     private async Task<string> GenerateReturnNumberAsync(AppDbContext context, CancellationToken ct)
     {
         var today = regional.Now.Date;
@@ -128,6 +165,28 @@ public class SaleReturnService(
             .Where(r => r.ReturnNumber.StartsWith(prefix))
             .OrderByDescending(r => r.ReturnNumber)
             .Select(r => r.ReturnNumber)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+
+        var next = 1;
+        if (last is not null)
+        {
+            var seqPart = last[prefix.Length..];
+            if (int.TryParse(seqPart, out var seq))
+                next = seq + 1;
+        }
+        return $"{prefix}{next:D4}";
+    }
+
+    private async Task<string> GenerateCreditNoteNumberAsync(AppDbContext context, CancellationToken ct)
+    {
+        var today = regional.Now.Date;
+        var prefix = $"CN-{today:yyyyMMdd}-";
+
+        var last = await context.SaleReturns
+            .Where(r => r.CreditNoteNumber.StartsWith(prefix))
+            .OrderByDescending(r => r.CreditNoteNumber)
+            .Select(r => r.CreditNoteNumber)
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
 

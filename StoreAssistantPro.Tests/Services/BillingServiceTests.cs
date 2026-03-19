@@ -4,6 +4,7 @@ using NSubstitute;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Billing.Services;
 
 namespace StoreAssistantPro.Tests.Services;
@@ -18,6 +19,7 @@ public sealed class BillingServiceTests : IDisposable
         new PerformanceMonitor(NullLogger<PerformanceMonitor>.Instance);
 
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
+    private readonly ILoginService _loginService = Substitute.For<ILoginService>();
 
     private BillingService CreateSut()
     {
@@ -27,7 +29,7 @@ public sealed class BillingServiceTests : IDisposable
 
         _regional.Now.Returns(new DateTime(2026, 3, 13, 10, 30, 0));
 
-        return new BillingService(factory, _perf, _regional);
+        return new BillingService(factory, _loginService, _perf, _regional);
     }
 
     [Fact]
@@ -37,7 +39,7 @@ public sealed class BillingServiceTests : IDisposable
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => sut.CompleteSaleAsync(
             new CompleteSaleDto(
-                Items: [new CartItemDto(11, null, 1, 999m, 0)],
+                Items: [new CartItemDto(11, null, 1, 999m, 0, 0, 0, false, 0)],
                 PaymentMethod: "UPI",
                 PaymentReference: null,
                 DiscountType: DiscountType.None,
@@ -45,7 +47,8 @@ public sealed class BillingServiceTests : IDisposable
                 DiscountReason: null,
                 CashTendered: 0,
                 CashierRole: "Admin",
-                IdempotencyKey: Guid.NewGuid())));
+                IdempotencyKey: Guid.NewGuid(),
+                CustomerId: null)));
 
         Assert.Equal("Payment reference is required for non-cash sales.", ex.Message);
     }
@@ -57,7 +60,7 @@ public sealed class BillingServiceTests : IDisposable
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => sut.CompleteSaleAsync(
             new CompleteSaleDto(
-                Items: [new CartItemDto(11, null, 1, 999m, 120)],
+                Items: [new CartItemDto(11, null, 1, 999m, 120, 0, 0, false, 0)],
                 PaymentMethod: "Cash",
                 PaymentReference: null,
                 DiscountType: DiscountType.None,
@@ -65,7 +68,8 @@ public sealed class BillingServiceTests : IDisposable
                 DiscountReason: null,
                 CashTendered: 1000,
                 CashierRole: "Admin",
-                IdempotencyKey: Guid.NewGuid())));
+                IdempotencyKey: Guid.NewGuid(),
+                CustomerId: null)));
 
         Assert.Equal("Cart item discount must be between 0 and 100.", ex.Message);
     }

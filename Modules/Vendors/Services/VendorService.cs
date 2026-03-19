@@ -1,5 +1,6 @@
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
@@ -15,11 +16,66 @@ public class VendorService(
     {
         using var _ = perf.BeginScope("VendorService.GetAllAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Vendors
+
+        var productCounts = await context.Products
+            .Where(p => p.VendorId.HasValue)
+            .GroupBy(p => p.VendorId!.Value)
+            .Select(g => new { VendorId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.VendorId, g => g.Count, ct)
+            .ConfigureAwait(false);
+
+        var vendors = await context.Vendors
             .AsNoTracking()
             .OrderBy(v => v.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+
+        foreach (var vendor in vendors)
+            vendor.ProductCount = productCounts.GetValueOrDefault(vendor.Id);
+
+        return vendors;
+    }
+
+    public async Task<PagedResult<Vendor>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("VendorService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.Vendors.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            q = q.Where(v => v.Name.Contains(term)
+                         || (v.ContactPerson != null && v.ContactPerson.Contains(term))
+                         || (v.GSTIN != null && v.GSTIN.Contains(term))
+                         || (v.City != null && v.City.Contains(term)));
+        }
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var vendors = await q
+            .OrderBy(v => v.Name)
+            .Skip(query.Skip)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        if (vendors.Count > 0)
+        {
+            var vendorIds = vendors.Select(v => v.Id).ToList();
+            var productCounts = await context.Products
+                .Where(p => p.VendorId.HasValue && vendorIds.Contains(p.VendorId.Value))
+                .GroupBy(p => p.VendorId!.Value)
+                .Select(g => new { VendorId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.VendorId, g => g.Count, ct)
+                .ConfigureAwait(false);
+
+            foreach (var vendor in vendors)
+                vendor.ProductCount = productCounts.GetValueOrDefault(vendor.Id);
+        }
+
+        return new PagedResult<Vendor>(vendors, totalCount, query.Page, query.PageSize);
     }
 
     public async Task<IReadOnlyList<Vendor>> GetActiveAsync(CancellationToken ct = default)
@@ -42,7 +98,7 @@ public class VendorService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var trimmed = query.Trim();
-        return await context.Vendors
+        var vendors = await context.Vendors
             .AsNoTracking()
             .Where(v => v.Name.Contains(trimmed)
                      || (v.ContactPerson != null && v.ContactPerson.Contains(trimmed))
@@ -51,6 +107,19 @@ public class VendorService(
             .OrderBy(v => v.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+
+        var vendorIds = vendors.Select(v => v.Id).ToList();
+        var productCounts = await context.Products
+            .Where(p => p.VendorId.HasValue && vendorIds.Contains(p.VendorId.Value))
+            .GroupBy(p => p.VendorId!.Value)
+            .Select(g => new { VendorId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.VendorId, g => g.Count, ct)
+            .ConfigureAwait(false);
+
+        foreach (var vendor in vendors)
+            vendor.ProductCount = productCounts.GetValueOrDefault(vendor.Id);
+
+        return vendors;
     }
 
     public async Task<Vendor?> GetByIdAsync(int id, CancellationToken ct = default)
@@ -203,16 +272,15 @@ public class VendorService(
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));
 
-        if (!string.IsNullOrWhiteSpace(dto.GSTIN) && !GstinPattern.IsMatch(dto.GSTIN.Trim()))
-            throw new ArgumentException("Invalid GSTIN format (expected 15-char alphanumeric).", nameof(dto.GSTIN));
+        var gstinError = GstinValidator.Validate(dto.GSTIN);
+        if (gstinError is not null)
+            throw new ArgumentException(gstinError, nameof(dto.GSTIN));
 
-        if (!string.IsNullOrWhiteSpace(dto.PAN) && !PanPattern.IsMatch(dto.PAN.Trim()))
-            throw new ArgumentException("Invalid PAN format (expected ABCDE1234F).", nameof(dto.PAN));
+        var panError = GstinValidator.ValidatePan(dto.PAN);
+        if (panError is not null)
+            throw new ArgumentException(panError, nameof(dto.PAN));
     }
 
     private static string? NullIfEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-    private static readonly Regex GstinPattern = new(@"^\d{2}[A-Z]{5}\d{4}[A-Z]\d[Z][A-Z\d]$", RegexOptions.Compiled);
-    private static readonly Regex PanPattern = new(@"^[A-Z]{5}\d{4}[A-Z]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 }

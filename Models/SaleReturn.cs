@@ -29,12 +29,20 @@ public class SaleReturn
     /// <summary>Refund amount for this return line.</summary>
     public decimal RefundAmount { get; set; }
 
+    /// <summary>Credit note number for this return (e.g., CN-20250101-0001).</summary>
+    [MaxLength(30)]
+    public string CreditNoteNumber { get; set; } = string.Empty;
+
     [Required, MaxLength(200)]
     public string Reason { get; set; } = string.Empty;
 
     /// <summary>Who processed the return.</summary>
     [MaxLength(20)]
     public string? ProcessedByRole { get; set; }
+
+    /// <summary>Role of the approver (manager/admin) who authorized this return.</summary>
+    [MaxLength(20)]
+    public string? ApprovedByRole { get; set; }
 
     public DateTime ReturnDate { get; set; } = DateTime.UtcNow;
 

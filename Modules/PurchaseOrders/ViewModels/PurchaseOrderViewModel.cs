@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.PurchaseOrders.Services;
@@ -43,6 +44,29 @@ public partial class PurchaseOrderViewModel(
         PurchaseOrderStatus.Cancelled
     ];
 
+    // ── Paging ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    public partial string PagingInfo { get; set; } = string.Empty;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    private const int PageSize = 25;
+
     [ObservableProperty]
     public partial Supplier? SelectedSupplier { get; set; }
 
@@ -77,25 +101,56 @@ public partial class PurchaseOrderViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        var ordersTask = poService.GetAllAsync(ct);
         var suppliersTask = poService.GetActiveSuppliersAsync(ct);
         var productsTask = productService.GetActiveAsync(ct);
 
-        await Task.WhenAll(ordersTask, suppliersTask, productsTask);
+        await Task.WhenAll(suppliersTask, productsTask);
 
-        Orders = new ObservableCollection<PurchaseOrder>(ordersTask.Result);
         Suppliers = new ObservableCollection<Supplier>(suppliersTask.Result);
         Products = new ObservableCollection<Product>(productsTask.Result);
 
+        await ReloadOrdersAsync(ct);
         EnsureSeedLine();
     });
 
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
     {
-        var results = await poService.SearchAsync(SearchQuery, FilterStatus, null, null, ct);
-        Orders = new ObservableCollection<PurchaseOrder>(results);
+        CurrentPage = 1;
+        await ReloadOrdersAsync(ct);
     });
+
+    [RelayCommand]
+    private Task PreviousPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        await ReloadOrdersAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task NextPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
+        await ReloadOrdersAsync(ct);
+    });
+
+    private async Task ReloadOrdersAsync(CancellationToken ct, int? selectedOrderId = null)
+    {
+        var search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery;
+        var result = await poService.GetPagedAsync(new PagedQuery(CurrentPage, PageSize), search, FilterStatus, null, null, ct);
+        Orders = new ObservableCollection<PurchaseOrder>(result.Items);
+        TotalCount = result.TotalCount;
+        TotalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        PagingInfo = TotalCount > 0
+            ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
+            : string.Empty;
+        SelectedOrder = selectedOrderId.HasValue
+            ? Orders.FirstOrDefault(o => o.Id == selectedOrderId.Value)
+            : null;
+    }
 
     [RelayCommand]
     private Task CreateOrderAsync() => RunAsync(async ct =>
@@ -139,8 +194,7 @@ public partial class PurchaseOrderViewModel(
         LineItems.Clear();
         EnsureSeedLine();
 
-        var orders = await poService.GetAllAsync(ct);
-        Orders = new ObservableCollection<PurchaseOrder>(orders);
+        await ReloadOrdersAsync(ct);
     });
 
     [RelayCommand]
@@ -189,9 +243,7 @@ public partial class PurchaseOrderViewModel(
         await poService.UpdateStatusAsync(orderId, PurchaseOrderStatus.Ordered, ct);
         SuccessMessage = $"PO {orderNumber} marked as Ordered.";
 
-        var orders = await poService.GetAllAsync(ct);
-        Orders = new ObservableCollection<PurchaseOrder>(orders);
-        SelectedOrder = Orders.FirstOrDefault(po => po.Id == orderId);
+        await ReloadOrdersAsync(ct, orderId);
     });
 
     [RelayCommand(CanExecute = nameof(CanCancelOrder))]
@@ -208,9 +260,7 @@ public partial class PurchaseOrderViewModel(
         await poService.UpdateStatusAsync(orderId, PurchaseOrderStatus.Cancelled, ct);
         SuccessMessage = $"PO {orderNumber} cancelled.";
 
-        var orders = await poService.GetAllAsync(ct);
-        Orders = new ObservableCollection<PurchaseOrder>(orders);
-        SelectedOrder = Orders.FirstOrDefault(po => po.Id == orderId);
+        await ReloadOrdersAsync(ct, orderId);
     });
 
     [RelayCommand(CanExecute = nameof(CanReceiveAll))]
@@ -239,9 +289,7 @@ public partial class PurchaseOrderViewModel(
         await poService.ReceiveItemsAsync(orderId, lines, ct);
         SuccessMessage = $"PO {orderNumber} - all items received. Stock updated.";
 
-        var orders = await poService.GetAllAsync(ct);
-        Orders = new ObservableCollection<PurchaseOrder>(orders);
-        SelectedOrder = Orders.FirstOrDefault(po => po.Id == orderId);
+        await ReloadOrdersAsync(ct, orderId);
     });
 
     private void EnsureSeedLine()

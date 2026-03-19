@@ -13,6 +13,38 @@ public class SaleItem
     [Range(0, 100)]
     public decimal ItemDiscountRate { get; set; }
 
+    /// <summary>Flat item-level discount amount (₹).</summary>
+    public decimal ItemFlatDiscount { get; set; }
+
+    /// <summary>Tax rate applied at time of sale (GST %).</summary>
+    public decimal TaxRate { get; set; }
+
+    /// <summary>Whether the sale price was tax-inclusive at time of sale.</summary>
+    public bool IsTaxInclusive { get; set; }
+
+    /// <summary>Computed tax amount for this line.</summary>
+    public decimal TaxAmount { get; set; }
+
+    /// <summary>CGST component (intra-state = TaxAmount / 2).</summary>
+    [NotMapped]
+    public decimal CgstAmount => TaxAmount / 2m;
+
+    /// <summary>SGST component (intra-state = TaxAmount / 2).</summary>
+    [NotMapped]
+    public decimal SgstAmount => TaxAmount / 2m;
+
+    /// <summary>IGST component (inter-state = TaxAmount). Used when buyer state differs from seller state.</summary>
+    [NotMapped]
+    public decimal IgstAmount => TaxAmount;
+
+    /// <summary>CGST rate (half of GST rate for intra-state).</summary>
+    [NotMapped]
+    public decimal CgstRate => TaxRate / 2m;
+
+    /// <summary>SGST rate (half of GST rate for intra-state).</summary>
+    [NotMapped]
+    public decimal SgstRate => TaxRate / 2m;
+
     /// <summary>Computed discount amount per unit.</summary>
     [NotMapped]
     public decimal ItemDiscountAmount => UnitPrice * ItemDiscountRate / 100m;

@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Expenses.Services;
@@ -5,6 +6,7 @@ namespace StoreAssistantPro.Modules.Expenses.Services;
 public interface IExpenseService
 {
     Task<IReadOnlyList<Expense>> GetAllAsync(CancellationToken ct = default);
+    Task<PagedResult<Expense>> GetPagedAsync(PagedQuery query, string? search = null, string? dateFilter = null, CancellationToken ct = default);
     Task<Expense?> GetByIdAsync(int id, CancellationToken ct = default);
     Task CreateAsync(ExpenseDto dto, CancellationToken ct = default);
     Task UpdateAsync(int id, ExpenseDto dto, CancellationToken ct = default);

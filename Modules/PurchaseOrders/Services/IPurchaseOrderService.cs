@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.PurchaseOrders.Services;
@@ -5,6 +6,7 @@ namespace StoreAssistantPro.Modules.PurchaseOrders.Services;
 public interface IPurchaseOrderService
 {
     Task<IReadOnlyList<PurchaseOrder>> GetAllAsync(CancellationToken ct = default);
+    Task<PagedResult<PurchaseOrder>> GetPagedAsync(PagedQuery query, string? search = null, PurchaseOrderStatus? status = null, DateTime? from = null, DateTime? to = null, CancellationToken ct = default);
     Task<IReadOnlyList<PurchaseOrder>> SearchAsync(string? query, PurchaseOrderStatus? status, DateTime? from, DateTime? to, CancellationToken ct = default);
     Task<PurchaseOrder?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<PurchaseOrder> CreateAsync(CreatePurchaseOrderDto dto, CancellationToken ct = default);

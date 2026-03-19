@@ -57,6 +57,56 @@ public class InventoryService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
+    // ── Batch stock adjustment ─────────────────────────────────────────
+
+    public async Task<int> BatchAdjustStockAsync(IReadOnlyList<StockAdjustmentDto> dtos, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dtos);
+        if (dtos.Count == 0) return 0;
+
+        using var _ = perf.BeginScope("InventoryService.BatchAdjustStockAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var productIds = dtos.Select(d => d.ProductId).Distinct().ToList();
+        var products = await context.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, ct)
+            .ConfigureAwait(false);
+
+        var now = regional.Now;
+        var count = 0;
+
+        foreach (var dto in dtos)
+        {
+            if (!products.TryGetValue(dto.ProductId, out var product))
+                continue;
+
+            var oldQty = product.Quantity;
+            if (oldQty == dto.NewQuantity)
+                continue;
+
+            product.Quantity = dto.NewQuantity;
+
+            context.StockAdjustments.Add(new StockAdjustment
+            {
+                ProductId = dto.ProductId,
+                ProductVariantId = dto.ProductVariantId,
+                OldQuantity = oldQty,
+                NewQuantity = dto.NewQuantity,
+                Reason = dto.Reason,
+                Notes = string.IsNullOrWhiteSpace(dto.Notes) ? null : dto.Notes.Trim(),
+                UserId = dto.UserId,
+                Timestamp = now
+            });
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
+    }
+
     // ── Adjustment log ───────────────────────────────────────────────
 
     public async Task<IReadOnlyList<StockAdjustment>> GetAdjustmentLogAsync(int productId, CancellationToken ct = default)
@@ -117,6 +167,23 @@ public class InventoryService(
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<ProductVariant>> GetLowStockVariantsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("InventoryService.GetLowStockVariantsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.ProductVariants
+            .AsNoTracking()
+            .Include(v => v.Product)
+            .Include(v => v.Size)
+            .Include(v => v.Colour)
+            .Where(v => v.IsActive && v.Product!.IsActive
+                     && v.Product.MinStockLevel > 0
+                     && v.Quantity <= v.Product.MinStockLevel)
+            .OrderBy(v => v.Quantity)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
     // ── Stock value ──────────────────────────────────────────────────
 
     public async Task<decimal> GetTotalStockValueAsync(CancellationToken ct = default)
@@ -127,5 +194,133 @@ public class InventoryService(
             .Where(p => p.IsActive)
             .SumAsync(p => p.Quantity * p.CostPrice, ct)
             .ConfigureAwait(false);
+    }
+
+    // ── Stock movement history ───────────────────────────────────────
+
+    public async Task<IReadOnlyList<StockMovementEntry>> GetStockMovementHistoryAsync(int productId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("InventoryService.GetStockMovementHistoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var adjustmentData = await context.StockAdjustments
+            .AsNoTracking()
+            .Where(a => a.ProductId == productId)
+            .Select(a => new { a.Timestamp, a.Reason, a.Notes, a.OldQuantity, a.NewQuantity })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var adjustments = adjustmentData.Select(a => new StockMovementEntry(
+            a.Timestamp,
+            "Adjustment",
+            a.Reason.ToString() + (a.Notes != null ? $" — {a.Notes}" : ""),
+            a.NewQuantity - a.OldQuantity,
+            null));
+
+        var saleData = await context.SaleItems
+            .AsNoTracking()
+            .Where(si => si.ProductId == productId)
+            .Select(si => new { si.Sale!.SaleDate, si.Quantity, si.Sale.InvoiceNumber })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var sales = saleData.Select(si => new StockMovementEntry(
+            si.SaleDate,
+            "Sale",
+            $"Invoice {si.InvoiceNumber}",
+            -si.Quantity,
+            si.InvoiceNumber));
+
+        var purchaseData = await context.PurchaseOrderItems
+            .AsNoTracking()
+            .Where(poi => poi.ProductId == productId && poi.QuantityReceived > 0)
+            .Select(poi => new { poi.PurchaseOrder!.OrderDate, poi.QuantityReceived, poi.PurchaseOrder.OrderNumber })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var purchases = purchaseData.Select(poi => new StockMovementEntry(
+            poi.OrderDate,
+            "Purchase",
+            $"PO {poi.OrderNumber}",
+            poi.QuantityReceived,
+            poi.OrderNumber));
+
+        return [.. adjustments.Concat(sales).Concat(purchases).OrderByDescending(e => e.Date)];
+    }
+
+    // ── Dead stock ───────────────────────────────────────────────────
+
+    public async Task<IReadOnlyList<Product>> GetDeadStockAsync(int days = 90, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("InventoryService.GetDeadStockAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var cutoff = regional.Now.AddDays(-days);
+
+        var recentlySoldProductIds = await context.SaleItems
+            .AsNoTracking()
+            .Where(si => si.Sale!.SaleDate >= cutoff)
+            .Select(si => si.ProductId)
+            .Distinct()
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return await context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.IsActive && p.Quantity > 0 && !recentlySoldProductIds.Contains(p.Id))
+            .OrderBy(p => p.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Bulk import ──────────────────────────────────────────────────
+
+    public async Task<int> ImportStockAsync(IReadOnlyList<Dictionary<string, string>> rows, int userId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("InventoryService.ImportStockAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var products = await context.Products
+            .ToDictionaryAsync(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase, ct)
+            .ConfigureAwait(false);
+
+        var now = regional.Now;
+        var count = 0;
+
+        foreach (var row in rows)
+        {
+            var name = (row.GetValueOrDefault("Name") ?? row.GetValueOrDefault("Product") ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(name) || !products.TryGetValue(name, out var product))
+                continue;
+
+            var qtyStr = row.GetValueOrDefault("Quantity") ?? row.GetValueOrDefault("Qty") ?? "";
+            if (!int.TryParse(qtyStr.Trim(), out var newQty) || newQty < 0)
+                continue;
+
+            var oldQty = product.Quantity;
+            if (oldQty == newQty)
+                continue;
+
+            product.Quantity = newQty;
+
+            context.StockAdjustments.Add(new StockAdjustment
+            {
+                ProductId = product.Id,
+                OldQuantity = oldQty,
+                NewQuantity = newQty,
+                Reason = AdjustmentReason.Correction,
+                Notes = "CSV import",
+                UserId = userId,
+                Timestamp = now
+            });
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
     }
 }

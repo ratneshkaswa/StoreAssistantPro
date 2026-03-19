@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
@@ -189,6 +190,31 @@ public class CategoryService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<PagedResult<Category>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CategoryService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.Categories
+            .AsNoTracking()
+            .Include(c => c.CategoryType)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+            q = q.Where(c => c.Name.Contains(search.Trim()));
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var items = await q
+            .OrderBy(c => c.Name)
+            .Skip(query.Skip)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return new PagedResult<Category>(items, totalCount, query.Page, query.PageSize);
     }
 
     public async Task<int> GetProductCountAsync(int categoryId, CancellationToken ct = default)

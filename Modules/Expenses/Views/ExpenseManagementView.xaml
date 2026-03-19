@@ -204,14 +204,33 @@
         </DataGrid>
 
         <!-- Messages -->
-        <Grid Grid.Row="6" MinHeight="{StaticResource MessageAreaMinHeight}"
-              Margin="{StaticResource FieldLabelSpacing}">
-            <controls:InfoBar Message="{Binding ErrorMessage}"
-                              Severity="Error"
-                              IsOpen="{Binding HasError}"/>
-            <controls:InfoBar Message="{Binding SuccessMessage}"
-                              Severity="Success"
-                              IsOpen="{Binding HasSuccess}"/>
+        <Grid Grid.Row="6" Margin="{StaticResource FieldLabelSpacing}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Paging -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,4"
+                        Visibility="{Binding PagingInfo, Converter={StaticResource NonEmptyStringToVisibility}}">
+                <Button Content="◀" Command="{Binding PreviousPageCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" Margin="0,0,4,0"
+                        IsEnabled="{Binding HasPreviousPage}" AutomationProperties.Name="Previous page"/>
+                <TextBlock Text="{Binding PagingInfo}" VerticalAlignment="Center"
+                           FontSize="11" Foreground="{StaticResource FluentTextSecondary}" Margin="4,0"/>
+                <Button Content="▶" Command="{Binding NextPageCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" Margin="4,0,0,0"
+                        IsEnabled="{Binding HasNextPage}" AutomationProperties.Name="Next page"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1" MinHeight="{StaticResource MessageAreaMinHeight}">
+                <controls:InfoBar Message="{Binding ErrorMessage}"
+                                  Severity="Error"
+                                  IsOpen="{Binding HasError}"/>
+                <controls:InfoBar Message="{Binding SuccessMessage}"
+                                  Severity="Success"
+                                  IsOpen="{Binding HasSuccess}"/>
+            </Grid>
         </Grid>
 
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"

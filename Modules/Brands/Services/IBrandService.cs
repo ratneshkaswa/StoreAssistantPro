@@ -1,3 +1,4 @@
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 
 namespace StoreAssistantPro.Modules.Brands.Services;
@@ -5,6 +6,7 @@ namespace StoreAssistantPro.Modules.Brands.Services;
 public interface IBrandService
 {
     Task<IReadOnlyList<Brand>> GetAllAsync(CancellationToken ct = default);
+    Task<PagedResult<Brand>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default);
     Task<IReadOnlyList<Brand>> GetActiveAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Brand>> SearchAsync(string query, CancellationToken ct = default);
     Task CreateAsync(string name, CancellationToken ct = default);

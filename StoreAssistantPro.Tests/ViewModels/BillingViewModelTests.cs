@@ -4,12 +4,14 @@ using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Billing.Services;
 using StoreAssistantPro.Modules.Billing.ViewModels;
+using StoreAssistantPro.Modules.Customers.Services;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
 public class BillingViewModelTests
 {
     private readonly IBillingService _billingService = Substitute.For<IBillingService>();
+    private readonly ICustomerService _customerService = Substitute.For<ICustomerService>();
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
@@ -20,7 +22,7 @@ public class BillingViewModelTests
         _regional.FormatCurrency(Arg.Any<decimal>())
             .Returns(call => $"Rs. {call.Arg<decimal>():0.00}");
 
-        return new BillingViewModel(_billingService, _appState, _dialogService, _regional);
+        return new BillingViewModel(_billingService, _customerService, _appState, _dialogService, _regional);
     }
 
     [Fact]

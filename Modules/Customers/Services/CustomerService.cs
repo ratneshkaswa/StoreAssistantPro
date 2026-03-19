@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
@@ -19,6 +21,31 @@ public class CustomerService(
             .OrderBy(c => c.Name)
             .ToListAsync(ct)
             .ConfigureAwait(false);
+    }
+
+    public async Task<PagedResult<Customer>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CustomerService.GetPagedAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.Customers.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            q = q.Where(c => c.Name.Contains(term) || (c.Phone != null && c.Phone.Contains(term)));
+        }
+
+        var totalCount = await q.CountAsync(ct).ConfigureAwait(false);
+
+        var items = await q
+            .OrderBy(c => c.Name)
+            .Skip(query.Skip)
+            .Take(query.PageSize)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return new PagedResult<Customer>(items, totalCount, query.Page, query.PageSize);
     }
 
     public async Task<IReadOnlyList<Customer>> GetActiveAsync(CancellationToken ct = default)
@@ -73,6 +100,11 @@ public class CustomerService(
     public async Task CreateAsync(CustomerDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
+
+        var gstinError = GstinValidator.Validate(dto.GSTIN);
+        if (gstinError is not null)
+            throw new ArgumentException(gstinError, nameof(dto.GSTIN));
+
         using var _ = perf.BeginScope("CustomerService.CreateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
@@ -103,6 +135,11 @@ public class CustomerService(
     public async Task UpdateAsync(int id, CustomerDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
+
+        var gstinError = GstinValidator.Validate(dto.GSTIN);
+        if (gstinError is not null)
+            throw new ArgumentException(gstinError, nameof(dto.GSTIN));
+
         using var _ = perf.BeginScope("CustomerService.UpdateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
@@ -183,6 +220,26 @@ public class CustomerService(
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return count;
+    }
+
+    public async Task<IReadOnlyList<CustomerPurchaseSummary>> GetPurchaseHistoryAsync(int customerId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CustomerService.GetPurchaseHistoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        return await context.Sales
+            .AsNoTracking()
+            .Where(s => s.CustomerId == customerId)
+            .OrderByDescending(s => s.SaleDate)
+            .Select(s => new CustomerPurchaseSummary(
+                s.Id,
+                s.InvoiceNumber,
+                s.SaleDate,
+                s.TotalAmount,
+                s.PaymentMethod,
+                s.Items.Count))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 
     private static string? NullIfEmpty(string? value) =>

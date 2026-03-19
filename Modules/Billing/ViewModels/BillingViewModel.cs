@@ -7,12 +7,14 @@ using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Billing.Services;
+using StoreAssistantPro.Modules.Customers.Services;
 
 namespace StoreAssistantPro.Modules.Billing.ViewModels;
 
 public partial class BillingViewModel : BaseViewModel
 {
     private readonly IBillingService _billingService;
+    private readonly ICustomerService _customerService;
     private readonly IAppStateService _appState;
     private readonly IDialogService _dialogService;
     private readonly IRegionalSettingsService _regional;
@@ -22,11 +24,13 @@ public partial class BillingViewModel : BaseViewModel
 
     public BillingViewModel(
         IBillingService billingService,
+        ICustomerService customerService,
         IAppStateService appState,
         IDialogService dialogService,
         IRegionalSettingsService regional)
     {
         _billingService = billingService;
+        _customerService = customerService;
         _appState = appState;
         _dialogService = dialogService;
         _regional = regional;
@@ -79,6 +83,15 @@ public partial class BillingViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial decimal Subtotal { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TotalTax { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TotalCgst { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TotalSgst { get; set; }
 
     [ObservableProperty]
     public partial decimal DiscountAmount { get; set; }
@@ -148,6 +161,55 @@ public partial class BillingViewModel : BaseViewModel
     }
 
     partial void OnCashTenderedChanged(string value) => RecalculateChange();
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Customer Selection (#157 / #158)
+    // ═══════════════════════════════════════════════════════════════
+
+    [ObservableProperty]
+    public partial string CustomerSearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCustomerSearchResults))]
+    public partial ObservableCollection<Customer> CustomerSearchResults { get; set; } = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedCustomer))]
+    [NotifyPropertyChangedFor(nameof(CustomerDisplayName))]
+    public partial Customer? SelectedCustomer { get; set; }
+
+    public bool HasCustomerSearchResults => CustomerSearchResults.Count > 0;
+    public bool HasSelectedCustomer => SelectedCustomer is not null;
+    public string CustomerDisplayName => SelectedCustomer?.Name ?? "Walk-in";
+
+    [RelayCommand]
+    private Task SearchCustomersAsync() => RunAsync(async ct =>
+    {
+        if (string.IsNullOrWhiteSpace(CustomerSearchText))
+        {
+            CustomerSearchResults = [];
+            return;
+        }
+
+        var results = await _customerService.SearchAsync(CustomerSearchText.Trim(), ct);
+        CustomerSearchResults = new ObservableCollection<Customer>(results);
+    });
+
+    [RelayCommand]
+    private void SelectCustomer(Customer? customer)
+    {
+        SelectedCustomer = customer;
+        CustomerSearchText = string.Empty;
+        CustomerSearchResults = [];
+    }
+
+    [RelayCommand]
+    private void ClearCustomer()
+    {
+        SelectedCustomer = null;
+        CustomerSearchText = string.Empty;
+        CustomerSearchResults = [];
+    }
 
     // ═══════════════════════════════════════════════════════════════
     //  Search / Barcode
@@ -243,7 +305,9 @@ public partial class BillingViewModel : BaseViewModel
                     ? $"{product.Name} ({variant.Size?.Name}/{variant.Colour?.Name})"
                     : product.Name,
                 UnitPrice = price,
-                Quantity = 1
+                Quantity = 1,
+                TaxRate = product.Tax?.SlabPercent ?? 0,
+                IsTaxInclusive = product.IsTaxInclusive
             };
             CartItems.Add(line);
         }
@@ -324,7 +388,11 @@ public partial class BillingViewModel : BaseViewModel
             c.ProductVariantId,
             c.Quantity,
             c.UnitPrice,
-            c.ItemDiscountRate)).ToList();
+            c.ItemDiscountRate,
+            c.ItemDiscountAmount,
+            c.TaxRate,
+            c.IsTaxInclusive,
+            c.LineTaxAmount)).ToList();
 
         var dto = new CompleteSaleDto(
             items,
@@ -335,7 +403,8 @@ public partial class BillingViewModel : BaseViewModel
             string.IsNullOrWhiteSpace(DiscountReason) ? null : DiscountReason.Trim(),
             cashTendered,
             _appState.CurrentUserType.ToString(),
-            Guid.NewGuid());
+            Guid.NewGuid(),
+            SelectedCustomer?.Id);
 
         var sale = await _billingService.CompleteSaleAsync(dto, ct);
         SuccessMessage = $"Sale {sale.InvoiceNumber} completed - {_regional.FormatCurrency(sale.TotalAmount)}";
@@ -343,6 +412,7 @@ public partial class BillingViewModel : BaseViewModel
         TransitionBillingSession(BillingSessionState.Completed);
         CartItems.Clear();
         SelectedCartItem = null;
+        SelectedCustomer = null;
         ResetPayment();
         UpdateCartCommandStates();
         RecalculateTotals();
@@ -354,7 +424,10 @@ public partial class BillingViewModel : BaseViewModel
 
     private void RecalculateTotals()
     {
-        Subtotal = CartItems.Sum(c => c.LineTotal);
+        Subtotal = CartItems.Sum(c => c.TaxableAmount);
+        TotalTax = CartItems.Sum(c => c.LineTaxAmount);
+        TotalCgst = CartItems.Sum(c => c.CgstAmount);
+        TotalSgst = CartItems.Sum(c => c.SgstAmount);
 
         _ = decimal.TryParse(DiscountInput, out var discVal);
         DiscountAmount = SelectedDiscountType switch
@@ -364,7 +437,7 @@ public partial class BillingViewModel : BaseViewModel
             _ => 0
         };
 
-        GrandTotal = Math.Max(0, Subtotal - DiscountAmount);
+        GrandTotal = Math.Max(0, Subtotal + TotalTax - DiscountAmount);
         RecalculateChange();
     }
 
@@ -412,7 +485,8 @@ public partial class BillingViewModel : BaseViewModel
         CartItems.All(item =>
             item.Quantity > 0
             && item.UnitPrice >= 0
-            && item.ItemDiscountRate is >= 0 and <= 100);
+            && item.ItemDiscountRate is >= 0 and <= 100
+            && item.ItemDiscountAmount >= 0);
 
     private bool TryParseDiscountValue(out decimal discountValue, out string? errorMessage)
     {
@@ -586,16 +660,67 @@ public partial class CartLineViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LineTotal))]
+    [NotifyPropertyChangedFor(nameof(LineTaxAmount))]
+    [NotifyPropertyChangedFor(nameof(TaxableAmount))]
     public partial decimal UnitPrice { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LineTotal))]
+    [NotifyPropertyChangedFor(nameof(LineTaxAmount))]
+    [NotifyPropertyChangedFor(nameof(TaxableAmount))]
     public partial int Quantity { get; set; } = 1;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LineTotal))]
+    [NotifyPropertyChangedFor(nameof(LineTaxAmount))]
+    [NotifyPropertyChangedFor(nameof(TaxableAmount))]
     public partial decimal ItemDiscountRate { get; set; }
 
-    public decimal LineTotal => Quantity * UnitPrice * (1 - ItemDiscountRate / 100m);
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LineTotal))]
+    [NotifyPropertyChangedFor(nameof(LineTaxAmount))]
+    [NotifyPropertyChangedFor(nameof(TaxableAmount))]
+    public partial decimal ItemDiscountAmount { get; set; }
+
+    public decimal TaxRate { get; set; }
+
+    public bool IsTaxInclusive { get; set; }
+
+    public decimal TaxableAmount
+    {
+        get
+        {
+            var subtotal = Quantity * UnitPrice;
+            var percentDisc = subtotal * ItemDiscountRate / 100m;
+            return Math.Max(0, subtotal - percentDisc - ItemDiscountAmount);
+        }
+    }
+
+    public decimal LineTaxAmount
+    {
+        get
+        {
+            if (TaxRate <= 0) return 0;
+            return IsTaxInclusive
+                ? TaxableAmount - TaxableAmount / (1 + TaxRate / 100m)
+                : TaxableAmount * TaxRate / 100m;
+        }
+    }
+
+    /// <summary>CGST component (intra-state = LineTaxAmount / 2).</summary>
+    public decimal CgstAmount => LineTaxAmount / 2m;
+
+    /// <summary>SGST component (intra-state = LineTaxAmount / 2).</summary>
+    public decimal SgstAmount => LineTaxAmount / 2m;
+
+    /// <summary>CGST rate (half of GST rate).</summary>
+    public decimal CgstRate => TaxRate / 2m;
+
+    /// <summary>SGST rate (half of GST rate).</summary>
+    public decimal SgstRate => TaxRate / 2m;
+
+    public decimal LineTotal => IsTaxInclusive
+        ? TaxableAmount
+        : TaxableAmount + LineTaxAmount;
 }
 

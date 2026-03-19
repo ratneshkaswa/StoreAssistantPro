@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Expenses.Services;
 
@@ -10,8 +11,6 @@ namespace StoreAssistantPro.Modules.Expenses.ViewModels;
 
 public partial class ExpenseManagementViewModel(IExpenseService expenseService) : BaseViewModel
 {
-    private List<Expense> _allItems = [];
-
     [ObservableProperty]
     public partial ObservableCollection<Expense> Expenses { get; set; } = [];
 
@@ -77,6 +76,29 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
     [ObservableProperty]
     public partial bool HasItems { get; set; } = true;
 
+    // ── Paging ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    [ObservableProperty]
+    public partial string PagingInfo { get; set; } = string.Empty;
+
+    public bool HasPreviousPage => CurrentPage > 1;
+    public bool HasNextPage => CurrentPage < TotalPages;
+
+    private const int PageSize = 25;
+
     private int? _editingId;
 
     [RelayCommand]
@@ -141,14 +163,35 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
     private void ClearForm() => ResetForm();
 
     [RelayCommand]
-    private void Search() => ApplyFilters();
+    private Task SearchAsync() => RunAsync(async ct =>
+    {
+        CurrentPage = 1;
+        await ReloadAsync(ct);
+    });
 
     [RelayCommand]
-    private void SetDateFilter(string filter)
+    private Task SetDateFilterAsync(string filter) => RunAsync(async ct =>
     {
         ActiveDateFilter = filter;
-        ApplyFilters();
-    }
+        CurrentPage = 1;
+        await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task PreviousPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasPreviousPage) return;
+        CurrentPage--;
+        await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private Task NextPageAsync() => RunAsync(async ct =>
+    {
+        if (!HasNextPage) return;
+        CurrentPage++;
+        await ReloadAsync(ct);
+    });
 
     [RelayCommand]
     private void ExportCsv()
@@ -181,38 +224,18 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
         SaveButtonText = "Save";
     }
 
-    private void ApplyFilters()
-    {
-        var today = DateTime.Today;
-        IEnumerable<Expense> query = _allItems;
-
-        if (!string.IsNullOrWhiteSpace(SearchText))
-        {
-            var term = SearchText.Trim();
-            query = query.Where(e =>
-                e.Category.Contains(term, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (ActiveDateFilter != "All")
-        {
-            query = ActiveDateFilter switch
-            {
-                "Today" => query.Where(e => e.Date.Date == today),
-                "Week" => query.Where(e => e.Date.Date >= today.AddDays(-(int)today.DayOfWeek)),
-                "Month" => query.Where(e => e.Date.Year == today.Year && e.Date.Month == today.Month),
-                _ => query
-            };
-        }
-
-        var list = query.ToList();
-        Expenses = new ObservableCollection<Expense>(list);
-        HasItems = list.Count > 0;
-        FilterCountText = ActiveDateFilter == "All" && string.IsNullOrWhiteSpace(SearchText) ? "" : $"{list.Count} entries";
-    }
-
     private async Task ReloadAsync(CancellationToken ct)
     {
-        var stats = await expenseService.GetStatsAsync(ct);
+        var search = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText;
+        var dateFilter = ActiveDateFilter;
+
+        var statsTask = expenseService.GetStatsAsync(ct);
+        var pageTask = expenseService.GetPagedAsync(new PagedQuery(CurrentPage, PageSize), search, dateFilter, ct);
+        var depositsTask = expenseService.GetDepositsAsync(ct);
+
+        await Task.WhenAll(statsTask, pageTask, depositsTask);
+
+        var stats = statsTask.Result;
         TotalExpenses = stats.TotalExpenses;
         TotalDeposits = stats.TotalDeposits;
         Balance = stats.Balance;
@@ -233,12 +256,20 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
             MonthlyComparisonText = string.Empty;
         }
 
-        var items = await expenseService.GetAllAsync(ct);
-        _allItems = [.. items];
-        ApplyFilters();
+        var result = pageTask.Result;
+        Expenses = new ObservableCollection<Expense>(result.Items);
+        TotalCount = result.TotalCount;
+        TotalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        HasItems = result.TotalCount > 0;
+        FilterCountText = (dateFilter != "All" || search is not null)
+            ? $"{result.TotalCount} entries"
+            : string.Empty;
+        PagingInfo = TotalCount > 0
+            ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
+            : string.Empty;
 
-        var deposits = await expenseService.GetDepositsAsync(ct);
-        Deposits = new ObservableCollection<PettyCashDeposit>(deposits);
+        Deposits = new ObservableCollection<PettyCashDeposit>(depositsTask.Result);
     }
 
     private void ClearMessages()

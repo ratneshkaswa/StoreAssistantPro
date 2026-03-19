@@ -127,7 +127,16 @@ public partial class InventoryViewModel(
     public partial ObservableCollection<Product> OutOfStockProducts { get; set; } = [];
 
     [ObservableProperty]
+    public partial ObservableCollection<ProductVariant> LowStockVariants { get; set; } = [];
+
+    [ObservableProperty]
     public partial string TotalStockValue { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial ObservableCollection<Product> DeadStockProducts { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<StockMovementEntry> StockMovementHistory { get; set; } = [];
 
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Load
@@ -158,13 +167,17 @@ public partial class InventoryViewModel(
     {
         var lowTask = inventoryService.GetLowStockProductsAsync(ct);
         var oosTask = inventoryService.GetOutOfStockProductsAsync(ct);
+        var variantTask = inventoryService.GetLowStockVariantsAsync(ct);
         var valueTask = inventoryService.GetTotalStockValueAsync(ct);
+        var deadTask = inventoryService.GetDeadStockAsync(90, ct);
 
-        await Task.WhenAll(lowTask, oosTask, valueTask);
+        await Task.WhenAll(lowTask, oosTask, variantTask, valueTask, deadTask);
 
         LowStockProducts = new ObservableCollection<Product>(lowTask.Result);
         OutOfStockProducts = new ObservableCollection<Product>(oosTask.Result);
+        LowStockVariants = new ObservableCollection<ProductVariant>(variantTask.Result);
         TotalStockValue = regional.FormatCurrency(valueTask.Result);
+        DeadStockProducts = new ObservableCollection<Product>(deadTask.Result);
     }
 
     [RelayCommand]
@@ -182,6 +195,32 @@ public partial class InventoryViewModel(
         if (CsvExporter.Export(AdjustmentLog, "AdjustmentLog.csv"))
             SuccessMessage = "Exported to CSV.";
     }
+
+    [RelayCommand]
+    private Task ImportCsvAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var rows = CsvImporter.Import();
+        if (rows is null) return;
+        if (rows.Count == 0) { ErrorMessage = "CSV file is empty."; return; }
+
+        var userId = (int)appState.CurrentUserType;
+        var imported = await inventoryService.ImportStockAsync(rows, userId, ct);
+        SuccessMessage = $"Updated stock for {imported} product(s).";
+
+        await Task.WhenAll(
+            ReloadProductsAsync(ct),
+            ReloadLogAsync(ct),
+            ReloadAlertsAsync(ct));
+    });
+
+    [RelayCommand]
+    private Task LoadMovementHistoryAsync(Product? product) => RunAsync(async ct =>
+    {
+        if (product is null) return;
+        var history = await inventoryService.GetStockMovementHistoryAsync(product.Id, ct);
+        StockMovementHistory = new ObservableCollection<StockMovementEntry>(history);
+    });
 
     private void ClearMessages()
     {
