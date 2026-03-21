@@ -1,0 +1,182 @@
+<UserControl x:Class="StoreAssistantPro.Modules.Quotations.Views.QuotationManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="OnLoaded">
+    <Grid Margin="{StaticResource PagePadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A5;"/><Run Text=" Quotation Management"/></TextBlock>
+
+        <!-- Search bar -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
+                     AutomationProperties.Name="Search quotations"
+                     h:Watermark.Text="Quote number or customer name"/>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding StatusOptions}"
+                      SelectedItem="{Binding FilterStatus}"
+                      Style="{StaticResource FluentComboBoxStyle}"
+                      Width="{StaticResource FieldWidthStandard}"
+                      Margin="{StaticResource InlineControlSpacing}"
+                      AutomationProperties.Name="Filter by status">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="2" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- Two-column layout -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Quotation list (#358 history) -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid AutomationProperties.Name="Quotations list"
+                          ItemsSource="{Binding Quotations}"
+                          SelectedItem="{Binding SelectedQuotation}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridEmptyState.Icon="📋"
+                          h:DataGridEmptyState.Title="No quotations found"
+                          h:DataGridEmptyState.Description="Create a quotation to estimate pricing for customers."
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Quote #" Binding="{Binding QuoteNumber}" Width="{StaticResource ColumnWidthId}"/>
+                        <DataGridTextColumn Header="Customer" Binding="{Binding Customer.Name}" Width="*"/>
+                        <DataGridTextColumn Header="Date" Binding="{Binding QuoteDate, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Valid Until" Binding="{Binding ValidUntil, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=₹{0:N2}}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthQty}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Paging -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                            Margin="{StaticResource ItemSpacing}" Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
+                    <Button Content="◀ Prev" Command="{Binding PreviousPageCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding PagingInfo}" VerticalAlignment="Center"
+                               Style="{StaticResource CaptionStyle}"/>
+                    <Button Content="Next ▶" Command="{Binding NextPageCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Create form -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Focusable="False" Margin="{StaticResource ItemSpacing}">
+                <StackPanel>
+                    <TextBlock Text="New Quotation" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8"/>
+
+                    <!-- Customer -->
+                    <TextBlock Text="Customer (optional)" Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}"
+                              DisplayMemberPath="Name" Style="{StaticResource FluentComboBoxStyle}"
+                              AutomationProperties.Name="Customer" Margin="0,0,0,8"/>
+
+                    <!-- Valid Until -->
+                    <TextBlock Text="Valid Until" Style="{StaticResource FormRowLabelStyle}"/>
+                    <DatePicker SelectedDate="{Binding ValidUntilDate}" Style="{StaticResource FluentDatePickerStyle}"
+                                AutomationProperties.Name="Valid until date" Margin="0,0,0,8"/>
+
+                    <!-- Notes -->
+                    <TextBlock Text="Notes" Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FluentTextBoxStyle}" MaxLength="500"
+                             AutomationProperties.Name="Notes" Margin="0,0,0,8"/>
+
+                    <!-- Line items -->
+                    <TextBlock Text="Items" Style="{StaticResource FormRowLabelStyle}" Margin="0,8,0,4"/>
+                    <ItemsControl ItemsSource="{Binding LineItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox ItemsSource="{Binding DataContext.Products, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              SelectedValue="{Binding ProductId}" SelectedValuePath="Id"
+                                              DisplayMemberPath="Name" Style="{StaticResource FluentComboBoxStyle}"
+                                              AutomationProperties.Name="Product"/>
+                                    <TextBox Grid.Column="1" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource FluentTextBoxStyle}" Margin="4,0,0,0"
+                                             AutomationProperties.Name="Quantity"/>
+                                    <TextBox Grid.Column="2" Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource FluentTextBoxStyle}" Margin="4,0,0,0"
+                                             AutomationProperties.Name="Unit price"/>
+                                    <Button Grid.Column="3" Content="✕" Command="{Binding DataContext.RemoveLineCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" Style="{StaticResource SecondaryButtonStyle}"
+                                            Margin="4,0,0,0" Padding="6,2"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="+ Add Line" Command="{Binding AddLineCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
+
+                    <!-- Create -->
+                    <Button Content="Create Quotation" Command="{Binding CreateQuotationCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" Margin="0,12,0,0"
+                            HorizontalAlignment="Stretch"/>
+
+                    <!-- Status actions -->
+                    <TextBlock Text="Actions" Style="{StaticResource SectionHeaderStyle}" Margin="0,16,0,8"/>
+                    <WrapPanel>
+                        <Button Content="Mark Sent" Command="{Binding MarkSentCommand}"
+                                IsEnabled="{Binding CanMarkSent}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,4"/>
+                        <Button Content="Accept" Command="{Binding AcceptQuotationCommand}"
+                                IsEnabled="{Binding CanAccept}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,4"/>
+                        <Button Content="Reject" Command="{Binding RejectQuotationCommand}"
+                                IsEnabled="{Binding CanReject}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,4"/>
+                        <Button Content="Convert to Sale" Command="{Binding ConvertToSaleCommand}"
+                                IsEnabled="{Binding CanConvert}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,4"/>
+                    </WrapPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Messages -->
+        <TextBlock Grid.Row="3" Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                   Visibility="{Binding SuccessMessage, Converter={StaticResource StringToVisibility}}"/>
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibility}}"/>
+    </Grid>
+</UserControl>

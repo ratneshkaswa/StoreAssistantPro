@@ -83,6 +83,9 @@ public class ExpenseService(
             Date = dto.Date,
             Category = dto.Category.Trim(),
             Amount = dto.Amount,
+            PaymentMethod = string.IsNullOrWhiteSpace(dto.PaymentMethod) ? "Cash" : dto.PaymentMethod.Trim(),
+            Description = dto.Description?.Trim(),
+            CreatedBy = dto.CreatedBy?.Trim(),
             CreatedAt = regional.Now
         };
 
@@ -103,6 +106,8 @@ public class ExpenseService(
         entity.Date = dto.Date;
         entity.Category = dto.Category.Trim();
         entity.Amount = dto.Amount;
+        entity.PaymentMethod = string.IsNullOrWhiteSpace(dto.PaymentMethod) ? "Cash" : dto.PaymentMethod.Trim();
+        entity.Description = dto.Description?.Trim();
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
@@ -214,5 +219,109 @@ public class ExpenseService(
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return count;
+    }
+
+    // ── Expense Categories (#227/#228) ────────────────────────────
+
+    public async Task<IReadOnlyList<ExpenseCategory>> GetCategoriesAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.GetCategoriesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.ExpenseCategories
+            .AsNoTracking()
+            .Where(ec => ec.IsActive)
+            .OrderBy(ec => ec.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task CreateCategoryAsync(string name, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        using var _ = perf.BeginScope("ExpenseService.CreateCategoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var exists = await context.ExpenseCategories
+            .AnyAsync(ec => ec.Name == name.Trim(), ct)
+            .ConfigureAwait(false);
+        if (exists) throw new InvalidOperationException($"Expense category '{name}' already exists.");
+
+        context.ExpenseCategories.Add(new ExpenseCategory { Name = name.Trim() });
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task UpdateCategoryAsync(int id, string name, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        using var _ = perf.BeginScope("ExpenseService.UpdateCategoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var entity = await context.ExpenseCategories.FirstOrDefaultAsync(ec => ec.Id == id, ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"ExpenseCategory with Id {id} not found.");
+
+        if (entity.IsSystem)
+            throw new InvalidOperationException("System categories cannot be renamed.");
+
+        entity.Name = name.Trim();
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteCategoryAsync(int id, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.DeleteCategoryAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var entity = await context.ExpenseCategories.FirstOrDefaultAsync(ec => ec.Id == id, ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"ExpenseCategory with Id {id} not found.");
+
+        if (entity.IsSystem)
+            throw new InvalidOperationException("System categories cannot be deleted.");
+
+        entity.IsActive = false;
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task SeedDefaultCategoriesAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.SeedDefaultCategoriesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var existing = await context.ExpenseCategories.AnyAsync(ct).ConfigureAwait(false);
+        if (existing) return;
+
+        string[] defaults = ["Rent", "Utilities", "Salary", "Transport", "Packaging", "Marketing", "Maintenance", "Misc"];
+        foreach (var name in defaults)
+        {
+            context.ExpenseCategories.Add(new ExpenseCategory { Name = name, IsSystem = true });
+        }
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    // ── Monthly Expense Report (#232) ─────────────────────────────
+
+    public async Task<MonthlyExpenseReport> GetMonthlyExpenseReportAsync(int year, int month, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.GetMonthlyExpenseReportAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var monthStart = new DateTime(year, month, 1);
+        var monthEnd = monthStart.AddMonths(1);
+
+        var expenses = await context.Expenses
+            .AsNoTracking()
+            .Where(e => e.Date >= monthStart && e.Date < monthEnd)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var byCategory = expenses
+            .GroupBy(e => e.Category)
+            .Select(g => new CategoryExpenseBreakdown(g.Key, g.Sum(e => e.Amount), g.Count()))
+            .OrderByDescending(c => c.Amount)
+            .ToList();
+
+        return new MonthlyExpenseReport(year, month, expenses.Sum(e => e.Amount), expenses.Count, byCategory);
     }
 }

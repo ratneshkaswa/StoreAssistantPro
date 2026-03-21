@@ -21,6 +21,86 @@ public partial class ReportsViewModel(IReportsService reportsService) : BaseView
     [ObservableProperty]
     public partial string ActivePreset { get; set; } = "This Month";
 
+    // ── Daily sales summary (#255) ──
+
+    [ObservableProperty]
+    public partial int TodaySaleCount { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TodayTotalSales { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TodayTotalReturns { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TodayNetSales { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TodayTotalTax { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TodayTotalDiscount { get; set; }
+
+    // ── Gross profit (#261) ──
+
+    [ObservableProperty]
+    public partial decimal GrossRevenue { get; set; }
+
+    [ObservableProperty]
+    public partial decimal GrossCogs { get; set; }
+
+    [ObservableProperty]
+    public partial decimal GrossProfit { get; set; }
+
+    [ObservableProperty]
+    public partial decimal GrossMarginPercent { get; set; }
+
+    [ObservableProperty]
+    public partial int PeriodSaleCount { get; set; }
+
+    [ObservableProperty]
+    public partial int PeriodItemsSold { get; set; }
+
+    // ── Net profit (#262) ──
+
+    [ObservableProperty]
+    public partial decimal NetProfit { get; set; }
+
+    [ObservableProperty]
+    public partial decimal NetMarginPercent { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TotalExpensesForProfit { get; set; }
+
+    // ── Tax summary (#205) ──
+
+    [ObservableProperty]
+    public partial decimal TotalTaxCollected { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TotalCgst { get; set; }
+
+    [ObservableProperty]
+    public partial decimal TotalSgst { get; set; }
+
+    // ── Best / slow selling products (#263/#264) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<ProductSalesSummary> BestSellingProducts { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<ProductSalesSummary> SlowMovingProducts { get; set; } = [];
+
+    // ── Sales by payment method (#266) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<PaymentMethodSummary> SalesByPaymentMethod { get; set; } = [];
+
+    // ── Sales by user (#265) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<UserSalesSummary> SalesByUser { get; set; } = [];
+
     // ── Expense report ──
 
     [ObservableProperty]
@@ -161,11 +241,150 @@ public partial class ReportsViewModel(IReportsService reportsService) : BaseView
             SuccessMessage = "Inward report exported.";
     }
 
+    // ── On-demand report exports (#270) ──
+
+    [RelayCommand]
+    private Task ExportProductSalesCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetProductSalesReportAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"ProductSales_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Product sales report exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportCategorySalesCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetCategorySalesReportAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"CategorySales_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Category sales report exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportBrandSalesCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetBrandSalesReportAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"BrandSales_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Brand sales report exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportDiscountHistoryCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetDiscountHistoryAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"DiscountHistory_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Discount history exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportHsnTaxCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetHsnTaxSummaryAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"HsnTaxSummary_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "HSN tax summary exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportProductMarginCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetProductMarginReportAsync(ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"ProductMargins_{DateTime.Today:yyyyMMdd}.csv"))
+            SuccessMessage = "Product margin report exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportSalesByUserCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetSalesByUserReportAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"SalesByUser_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Sales by user report exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportSalesByPaymentMethodCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetSalesByPaymentMethodAsync(DateFrom, DateTo, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"SalesByPayment_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Sales by payment method exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportBestSellingCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetBestSellingProductsAsync(DateFrom, DateTo, 50, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"BestSelling_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Best selling products exported.";
+    });
+
+    [RelayCommand]
+    private Task ExportSlowMovingCsvAsync() => RunAsync(async ct =>
+    {
+        var data = await reportsService.GetSlowMovingProductsAsync(DateFrom, DateTo, 50, ct);
+        if (data.Count == 0) { ErrorMessage = "No data to export."; return; }
+        if (CsvExporter.Export(data, $"SlowMoving_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "Slow moving products exported.";
+    });
+
     private async Task RefreshAllAsync(CancellationToken ct)
     {
         var from = DateFrom;
         var to = DateTo.Date.AddDays(1).AddTicks(-1);
 
+        // ── Daily sales summary (today) ──
+        var daily = await reportsService.GetDailySalesSummaryAsync(DateTime.Today, ct);
+        TodaySaleCount = daily.SaleCount;
+        TodayTotalSales = daily.TotalSales;
+        TodayTotalReturns = daily.TotalReturns;
+        TodayNetSales = daily.NetSales;
+        TodayTotalTax = daily.TotalTax;
+        TodayTotalDiscount = daily.TotalDiscount;
+
+        // ── Gross profit (selected period) ──
+        var gross = await reportsService.GetGrossProfitReportAsync(from, to, ct);
+        GrossRevenue = gross.TotalRevenue;
+        GrossCogs = gross.TotalCostOfGoodsSold;
+        GrossProfit = gross.GrossProfit;
+        GrossMarginPercent = gross.GrossMarginPercent;
+        PeriodSaleCount = gross.SaleCount;
+        PeriodItemsSold = gross.ItemsSold;
+
+        // ── Net profit (selected period) ──
+        var net = await reportsService.GetNetProfitReportAsync(from, to, ct);
+        NetProfit = net.NetProfit;
+        NetMarginPercent = net.NetMarginPercent;
+        TotalExpensesForProfit = net.TotalExpenses;
+
+        // ── Tax summary (current month) ──
+        var today = DateTime.Today;
+        var tax = await reportsService.GetTaxReportAsync(today.Year, today.Month, ct);
+        TotalTaxCollected = tax.TotalTaxCollected;
+        TotalCgst = tax.TotalCgst;
+        TotalSgst = tax.TotalSgst;
+
+        // ── Best / slow selling products ──
+        var best = await reportsService.GetBestSellingProductsAsync(from, to, 10, ct);
+        BestSellingProducts = new ObservableCollection<ProductSalesSummary>(best);
+
+        var slow = await reportsService.GetSlowMovingProductsAsync(from, to, 10, ct);
+        SlowMovingProducts = new ObservableCollection<ProductSalesSummary>(slow);
+
+        // ── Sales by payment method ──
+        var byPayment = await reportsService.GetSalesByPaymentMethodAsync(from, to, ct);
+        SalesByPaymentMethod = new ObservableCollection<PaymentMethodSummary>(byPayment);
+
+        // ── Sales by user ──
+        var byUser = await reportsService.GetSalesByUserReportAsync(from, to, ct);
+        SalesByUser = new ObservableCollection<UserSalesSummary>(byUser);
+
+        // ── Expense report ──
         var expense = await reportsService.GetExpenseReportAsync(from, to, ct);
         ExpenseCount = expense.Count;
         ExpenseTotal = expense.Total;
@@ -173,6 +392,7 @@ public partial class ReportsViewModel(IReportsService reportsService) : BaseView
         ExpenseMonthlyTrend = new ObservableCollection<MonthlyTotal>(expense.MonthlyTrend);
         ExpenseRecent = new ObservableCollection<Expense>(expense.RecentEntries);
 
+        // ── Ironing report ──
         var ironing = await reportsService.GetIroningReportAsync(from, to, ct);
         IroningCount = ironing.Count;
         IroningTotal = ironing.Total;
@@ -180,6 +400,7 @@ public partial class ReportsViewModel(IReportsService reportsService) : BaseView
         IroningUnpaid = ironing.UnpaidTotal;
         IroningRecent = new ObservableCollection<IroningEntry>(ironing.RecentEntries);
 
+        // ── Order report ──
         var order = await reportsService.GetOrderReportAsync(from, to, ct);
         OrderCount = order.Count;
         OrderTotal = order.Total;
@@ -187,11 +408,13 @@ public partial class ReportsViewModel(IReportsService reportsService) : BaseView
         OrderPending = order.Pending;
         OrderRecent = new ObservableCollection<Order>(order.RecentEntries);
 
+        // ── Inward report ──
         var inward = await reportsService.GetInwardReportAsync(from, to, ct);
         InwardCount = inward.Count;
         InwardTotal = inward.Total;
         InwardRecent = new ObservableCollection<InwardEntry>(inward.RecentEntries);
 
+        // ── Debtor report ──
         var debtor = await reportsService.GetDebtorReportAsync(ct);
         DebtorCount = debtor.Count;
         DebtorOutstanding = debtor.TotalOutstanding;

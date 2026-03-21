@@ -132,34 +132,71 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      h:Watermark.Text="Search orders by customer or item"
                      AutomationProperties.Name="Search orders"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Filter Chips -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
-            <Button Content="All" Command="{Binding SetStatusFilterCommand}" CommandParameter="All"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,4,0" AutomationProperties.Name="Filter all"/>
-            <Button Content="Pending" Command="{Binding SetStatusFilterCommand}" CommandParameter="Pending"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,4,0" AutomationProperties.Name="Filter pending"/>
-            <Button Content="Active" Command="{Binding SetStatusFilterCommand}" CommandParameter="Active"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,4,0" AutomationProperties.Name="Filter active"/>
-            <Button Content="Delivered" Command="{Binding SetStatusFilterCommand}" CommandParameter="Delivered"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,8,0" AutomationProperties.Name="Filter delivered"/>
+            <Border Style="{StaticResource SegmentedFilterHostStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="All" Command="{Binding SetStatusFilterCommand}" CommandParameter="All"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Margin="0,0,4,0" AutomationProperties.Name="Filter all">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveStatusFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="Pending" Command="{Binding SetStatusFilterCommand}" CommandParameter="Pending"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Margin="0,0,4,0" AutomationProperties.Name="Filter pending">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveStatusFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="Active" Command="{Binding SetStatusFilterCommand}" CommandParameter="Active"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Margin="0,0,4,0" AutomationProperties.Name="Filter active">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveStatusFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="Delivered" Command="{Binding SetStatusFilterCommand}" CommandParameter="Delivered"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            AutomationProperties.Name="Filter delivered">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveStatusFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                </StackPanel>
+            </Border>
             <TextBlock Text="{Binding FilterCountText}" FontSize="11"
+                       Margin="12,0,0,0"
                        Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
         </StackPanel>
 
         <!-- DataGrid -->
         <DataGrid Grid.Row="5" AutomationProperties.Name="Order list"
                   ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}"
-                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column">
+                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridEmptyState.Icon="📦"
+                  h:DataGridEmptyState.Title="No orders found"
+                  h:DataGridEmptyState.Description="Create an order or change the active filters to bring matching work back into view.">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit" Command="{Binding EditCommand}" CommandParameter="{Binding SelectedOrder}">
@@ -203,41 +240,12 @@
                 <DataGridTemplateColumn Header="STATUS" Width="100" SortMemberPath="Status">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="{StaticResource FluentControlFillTertiary}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                <Setter Property="Background" Value="{StaticResource FluentWarningBackground}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}" Value="Active">
-                                                <Setter Property="Background" Value="{StaticResource FluentInfoBackground}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}" Value="Delivered">
-                                                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                    <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="Active">
-                                                    <Setter Property="Foreground" Value="{StaticResource FluentInfo}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="Delivered">
-                                                    <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                            <Border Style="{StaticResource SemanticStatusPillStyle}"
+                                    Tag="{Binding Status}"
+                                    HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding Status}"
+                                           Style="{StaticResource SemanticStatusPillTextStyle}"
+                                           Tag="{Binding Status}"/>
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -254,7 +262,7 @@
                 <DataGridTemplateColumn Header="" Width="80">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Style="{StaticResource DataGridRowActionPanelStyle}">
                                 <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Style="{StaticResource FluentSubtleButtonStyle}" ToolTip="Edit"

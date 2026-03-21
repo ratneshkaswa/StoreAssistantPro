@@ -1,13 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Linq;
 
 namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
 /// Lightweight attached behaviors that apply Fluent 2 motion to any
 /// <see cref="FrameworkElement"/>.  Each behavior is a single boolean
-/// attached property — no code-behind, no custom controls.
+/// attached property, no code-behind and no custom controls.
 /// <para>
 /// All animations consume tokens from <c>DesignSystem.xaml</c>
 /// (durations, easing curves, scale factors, slide offsets) so that
@@ -33,7 +34,7 @@ namespace StoreAssistantPro.Core.Helpers;
 ///   </item>
 ///   <item>
 ///     <term><see cref="SlideFadeInProperty"/></term>
-///     <description>Slide-up 12 px + fade from 0 → 1 on <c>Loaded</c>
+///     <description>Slide-up 16 px + fade from 0 → 1 on <c>Loaded</c>
 ///     (FluentDurationSlow, Decelerate).</description>
 ///   </item>
 /// </list>
@@ -169,7 +170,8 @@ public static class Motion
         {
             var el = (FrameworkElement)sender;
             var from = TryFindDouble(el, "MotionScaleHoverFrom", 0.985);
-            if (el.RenderTransform is ScaleTransform st)
+            var st = TryGetScaleTransform(el);
+            if (st is not null)
             {
                 st.ScaleX = from;
                 st.ScaleY = from;
@@ -179,7 +181,8 @@ public static class Motion
 
     private static void AnimateScale(FrameworkElement el, double to)
     {
-        if (el.RenderTransform is not ScaleTransform st)
+        var st = TryGetScaleTransform(el);
+        if (st is null)
             return;
 
         var duration = GetDuration(el, "FluentDurationFast", TimeSpan.FromMilliseconds(83));
@@ -227,7 +230,7 @@ public static class Motion
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
-            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 12);
+            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
 
             // Opacity
             var fadeAnim = new DoubleAnimation(0, 1, new Duration(duration))
@@ -238,7 +241,8 @@ public static class Motion
             el.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
 
             // TranslateY
-            if (el.RenderTransform is TranslateTransform tt)
+            var tt = TryGetTranslateTransform(el);
+            if (tt is not null)
             {
                 tt.Y = offset;
                 var slideAnim = new DoubleAnimation(offset, 0, new Duration(duration))
@@ -252,17 +256,13 @@ public static class Motion
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  PAGE FADE IN  —  Loaded → Opacity 0 → 1 (150 ms, no movement)
+    //  PAGE FADE IN  —  Loaded → TranslateY 16→0 + Opacity 0→1
     //
     //  Designed for the implicit UserControl style so every page view
     //  automatically fades in when navigated to.  Uses the dedicated
-    //  FluentDurationPageFade token (150 ms) for a quick, subtle
-    //  entrance that layers with the container-level workspace
-    //  transition without competing visually.
-    //
-    //  No slide / translate is applied — if the device or scenario is
-    //  performance-constrained, the fade-only approach has zero layout
-    //  cost (Opacity is GPU-composited).
+    //  FluentDurationPageFade token (250 ms) for the Win11-style page
+    //  entrance: a short upward drift with a fade, using composition-
+    //  friendly translate + opacity only.
     // ═══════════════════════════════════════════════════════════════════
 
     public static readonly DependencyProperty PageFadeInProperty =
@@ -284,20 +284,34 @@ public static class Motion
         if (IsMotionDisabled(fe))
             return;
 
+        EnsureTranslateTransform(fe);
         fe.Opacity = 0;
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var duration = GetDuration(el, "FluentDurationPageFade", TimeSpan.FromMilliseconds(150));
+            var duration = GetDuration(el, "FluentDurationPageFade", TimeSpan.FromMilliseconds(250));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
+            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
 
-            var anim = new DoubleAnimation(0, 1, new Duration(duration))
+            var fadeAnim = new DoubleAnimation(0, 1, new Duration(duration))
             {
                 EasingFunction = ease
             };
-            anim.Freeze();
-            el.BeginAnimation(UIElement.OpacityProperty, anim);
+            fadeAnim.Freeze();
+            el.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
+
+            var tt = TryGetTranslateTransform(el);
+            if (tt is not null)
+            {
+                tt.Y = offset;
+                var slideAnim = new DoubleAnimation(offset, 0, new Duration(duration))
+                {
+                    EasingFunction = ease
+                };
+                slideAnim.Freeze();
+                tt.BeginAnimation(TranslateTransform.YProperty, slideAnim);
+            }
         };
     }
 
@@ -393,7 +407,7 @@ public static class Motion
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
             if (duration == TimeSpan.Zero) return;
             var ease = TryFindEase(el, "FluentEaseDecelerate");
-            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 12);
+            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
 
             el.Opacity = 0;
             var fadeAnim = new DoubleAnimation(0, 1, new Duration(duration))
@@ -403,7 +417,8 @@ public static class Motion
             fadeAnim.Freeze();
             el.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
 
-            if (el.RenderTransform is TranslateTransform tt)
+            var tt = TryGetTranslateTransform(el);
+            if (tt is not null)
             {
                 tt.Y = offset;
                 var slideAnim = new DoubleAnimation(offset, 0, new Duration(duration))
@@ -417,7 +432,7 @@ public static class Motion
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  STAGGER INDEX  —  Loaded → delay = index × 50 ms, then fade in
+    //  STAGGER INDEX  —  Loaded → delay = index × 30 ms, then fade in
     //
     //  Set on repeated items (stat cards, task items) to create a
     //  sequential cascade entrance.
@@ -462,11 +477,11 @@ public static class Motion
         {
             var el = (FrameworkElement)sender;
             var idx = GetStaggerIndex(el);
-            var delay = TimeSpan.FromMilliseconds(idx * 50);
+            var delay = TimeSpan.FromMilliseconds(idx * 30);
             var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
-            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 12);
+            var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
 
             var fadeAnim = new DoubleAnimation(0, 1, new Duration(duration))
             {
@@ -475,7 +490,8 @@ public static class Motion
             };
             el.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
 
-            if (el.RenderTransform is TranslateTransform tt)
+            var tt = TryGetTranslateTransform(el);
+            if (tt is not null)
             {
                 tt.Y = offset;
                 var slideAnim = new DoubleAnimation(offset, 0, new Duration(duration))
@@ -519,7 +535,8 @@ public static class Motion
 
         EnsureTranslateTransform(fe);
 
-        if (fe.RenderTransform is TranslateTransform tt)
+        var tt = TryGetTranslateTransform(fe);
+        if (tt is not null)
         {
             var anim = new DoubleAnimationUsingKeyFrames
             {
@@ -628,4 +645,20 @@ public static class Motion
     /// </summary>
     private static bool IsIdentityOrNull(Transform? transform) =>
         transform is null || (transform is MatrixTransform mt && mt.Matrix.IsIdentity);
+
+    private static ScaleTransform? TryGetScaleTransform(FrameworkElement fe) =>
+        fe.RenderTransform switch
+        {
+            ScaleTransform st => st,
+            TransformGroup group => group.Children.OfType<ScaleTransform>().FirstOrDefault(),
+            _ => null
+        };
+
+    private static TranslateTransform? TryGetTranslateTransform(FrameworkElement fe) =>
+        fe.RenderTransform switch
+        {
+            TranslateTransform tt => tt,
+            TransformGroup group => group.Children.OfType<TranslateTransform>().FirstOrDefault(),
+            _ => null
+        };
 }

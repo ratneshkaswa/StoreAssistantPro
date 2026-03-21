@@ -9,6 +9,8 @@ namespace StoreAssistantPro.Modules.Billing.Services;
 public class SaleReturnService(
     IDbContextFactory<AppDbContext> contextFactory,
     ILoginService loginService,
+    IAuditService auditService,
+    ICashRegisterService cashRegisterService,
     Func<IBillingService> _billingServiceFactory,
     IPerformanceMonitor perf,
     IRegionalSettingsService regional) : ISaleReturnService
@@ -25,7 +27,11 @@ public class SaleReturnService(
         if (!pinValid)
             throw new InvalidOperationException("Invalid approval PIN.");
 
-        using var _ = perf.BeginScope("SaleReturnService.ProcessReturnAsync");
+        // Day close lockdown (#246): block returns after register is closed for the day
+        if (await cashRegisterService.IsDayClosedAsync(regional.Now, ct).ConfigureAwait(false))
+            throw new InvalidOperationException("Business day is closed. No more returns allowed today.");
+
+        using var scope = perf.BeginScope("SaleReturnService.ProcessReturnAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         await using var tx = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
@@ -96,6 +102,9 @@ public class SaleReturnService(
 
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             await tx.CommitAsync(ct).ConfigureAwait(false);
+
+            // Audit: return processed (#296)
+            _ = auditService.LogReturnAsync(saleReturn, "Master", ct);
 
             return saleReturn;
         }

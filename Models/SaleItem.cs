@@ -25,6 +25,12 @@ public class SaleItem
     /// <summary>Computed tax amount for this line.</summary>
     public decimal TaxAmount { get; set; }
 
+    /// <summary>Cess rate applied at time of sale (%). (#197)</summary>
+    public decimal CessRate { get; set; }
+
+    /// <summary>Computed cess amount for this line. (#197)</summary>
+    public decimal CessAmount { get; set; }
+
     /// <summary>CGST component (intra-state = TaxAmount / 2).</summary>
     [NotMapped]
     public decimal CgstAmount => TaxAmount / 2m;

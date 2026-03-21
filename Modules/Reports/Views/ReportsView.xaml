@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
@@ -33,18 +34,55 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal">
-                <Button Content="This Month" Style="{StaticResource ToolbarButtonStyle}"
-                        Command="{Binding SetPresetCommand}" CommandParameter="This Month" Margin="0,0,4,0"/>
-                <Button Content="Last Month" Style="{StaticResource ToolbarButtonStyle}"
-                        Command="{Binding SetPresetCommand}" CommandParameter="Last Month" Margin="0,0,4,0"/>
-                <Button Content="This Quarter" Style="{StaticResource ToolbarButtonStyle}"
-                        Command="{Binding SetPresetCommand}" CommandParameter="This Quarter" Margin="0,0,4,0"/>
-                <Button Content="This Year" Style="{StaticResource ToolbarButtonStyle}"
-                        Command="{Binding SetPresetCommand}" CommandParameter="This Year" Margin="0,0,4,0"/>
-                <Button Content="All Time" Style="{StaticResource ToolbarButtonStyle}"
-                        Command="{Binding SetPresetCommand}" CommandParameter="All Time"/>
-            </StackPanel>
+            <Border Style="{StaticResource SegmentedFilterHostStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="This Month" Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Command="{Binding SetPresetCommand}" CommandParameter="This Month" Margin="0,0,4,0">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActivePreset"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="Last Month" Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Command="{Binding SetPresetCommand}" CommandParameter="Last Month" Margin="0,0,4,0">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActivePreset"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="This Quarter" Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Command="{Binding SetPresetCommand}" CommandParameter="This Quarter" Margin="0,0,4,0">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActivePreset"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="This Year" Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Command="{Binding SetPresetCommand}" CommandParameter="This Year" Margin="0,0,4,0">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActivePreset"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="All Time" Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Command="{Binding SetPresetCommand}" CommandParameter="All Time">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActivePreset"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                </StackPanel>
+            </Border>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
                 <TextBlock Text="From" VerticalAlignment="Center" Margin="0,0,6,0"
@@ -57,13 +95,309 @@
                             AutomationProperties.Name="Report end date"/>
             </StackPanel>
 
-            <Button Grid.Column="4" Content="Refresh" Style="{StaticResource PrimaryButtonStyle}"
+            <Button Grid.Column="4" Content="Refresh" Style="{StaticResource RefreshButtonStyle}"
                     Command="{Binding RefreshCommand}"/>
         </Grid>
 
         <!-- Report Sections -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
+
+                <!-- ═══ TODAY'S SALES SUMMARY ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Today's Sales" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="SALES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TodaySaleCount}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="REVENUE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TodayTotalSales, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="RETURNS" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TodayTotalReturns, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentError}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="NET SALES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TodayNetSales, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentSuccess}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="TAX" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TodayTotalTax, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="DISCOUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TodayTotalDiscount, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentWarning}"/>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ PROFIT SUMMARY ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Profit Summary" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <TextBlock Grid.Column="1" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{StaticResource FluentTextTertiary}">
+                                <Run Text="Selected period •"/>
+                                <Run Text="{Binding PeriodSaleCount, Mode=OneWay}"/>
+                                <Run Text="sales •"/>
+                                <Run Text="{Binding PeriodItemsSold, Mode=OneWay}"/>
+                                <Run Text="items"/>
+                            </TextBlock>
+                        </Grid>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="REVENUE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding GrossRevenue, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="COGS" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding GrossCogs, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="GROSS PROFIT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding GrossProfit, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentSuccess}"/>
+                                    <TextBlock FontSize="10" Foreground="{StaticResource FluentTextTertiary}">
+                                        <Run Text="Margin:"/>
+                                        <Run Text="{Binding GrossMarginPercent, StringFormat='{}{0:N1}%', Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="EXPENSES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TotalExpensesForProfit, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentError}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="NET PROFIT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding NetProfit, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentSuccess}"/>
+                                    <TextBlock FontSize="10" Foreground="{StaticResource FluentTextTertiary}">
+                                        <Run Text="Margin:"/>
+                                        <Run Text="{Binding NetMarginPercent, StringFormat='{}{0:N1}%', Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ TAX SUMMARY ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Tax Summary (Current Month)" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <Button Grid.Column="1" Content="Export HSN CSV" Style="{StaticResource ToolbarButtonStyle}"
+                                    Command="{Binding ExportHsnTaxCsvCommand}"/>
+                        </Grid>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="TOTAL TAX" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TotalTaxCollected, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="CGST" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TotalCgst, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                                <StackPanel>
+                                    <TextBlock Text="SGST" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding TotalSgst, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ BEST SELLING PRODUCTS ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Best Selling Products" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                                    Command="{Binding ExportBestSellingCsvCommand}"/>
+                        </Grid>
+                        <DataGrid ItemsSource="{Binding BestSellingProducts}" AutoGenerateColumns="False"
+                                  IsReadOnly="True" MaxHeight="300" Margin="0,8,0,0"
+                                  h:DataGridEmptyState.Icon="📦"
+                                  h:DataGridEmptyState.Title="No best sellers yet"
+                                  h:DataGridEmptyState.Description="This section will fill in once the selected date range has enough completed sales data."
+                                  Style="{StaticResource {x:Type DataGrid}}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding ProductId}" Width="{StaticResource ColumnWidthId}"/>
+                                <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                                <DataGridTextColumn Header="HSN" Binding="{Binding HsnCode}" Width="80"/>
+                                <DataGridTextColumn Header="Qty Sold" Binding="{Binding TotalQuantitySold}" Width="{StaticResource ColumnWidthQty}"/>
+                                <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat='₹{0:N0}'}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Avg Price" Binding="{Binding AverageSellingPrice, StringFormat='₹{0:N0}'}" Width="{StaticResource ColumnWidthPrice}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ SLOW MOVING PRODUCTS ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Slow Moving Products" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                                    Command="{Binding ExportSlowMovingCsvCommand}"/>
+                        </Grid>
+                        <DataGrid ItemsSource="{Binding SlowMovingProducts}" AutoGenerateColumns="False"
+                                  IsReadOnly="True" MaxHeight="300" Margin="0,8,0,0"
+                                  h:DataGridEmptyState.Icon="🐢"
+                                  h:DataGridEmptyState.Title="No slow movers detected"
+                                  h:DataGridEmptyState.Description="Products with weak movement will appear here when the selected period has comparison data."
+                                  Style="{StaticResource {x:Type DataGrid}}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding ProductId}" Width="{StaticResource ColumnWidthId}"/>
+                                <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                                <DataGridTextColumn Header="Qty Sold" Binding="{Binding TotalQuantitySold}" Width="{StaticResource ColumnWidthQty}"/>
+                                <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat='₹{0:N0}'}" Width="{StaticResource ColumnWidthPrice}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ SALES BY PAYMENT METHOD ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Sales by Payment Method" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                                    Command="{Binding ExportSalesByPaymentMethodCsvCommand}"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding SalesByPaymentMethod}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="60"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding PaymentMethod}" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding SaleCount}" FontSize="13"
+                                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}" FontSize="13"
+                                                   FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                        <TextBlock Grid.Column="3" FontSize="12" HorizontalAlignment="Right"
+                                                   Foreground="{StaticResource FluentTextTertiary}">
+                                            <Run Text="{Binding Percentage, StringFormat='{}{0:N1}%', Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ SALES BY CASHIER ═══ -->
+                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Sales by Cashier" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                                    Command="{Binding ExportSalesByUserCsvCommand}"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding SalesByUser}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="100"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding CashierRole}" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Grid.Column="1" FontSize="13"
+                                                   Foreground="{StaticResource FluentTextSecondary}">
+                                            <Run Text="{Binding SaleCount, Mode=OneWay}"/>
+                                            <Run Text="sales"/>
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="2" Text="{Binding TotalRevenue, StringFormat='₹{0:N0}'}" FontSize="13"
+                                                   FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                        <TextBlock Grid.Column="3" FontSize="12" HorizontalAlignment="Right"
+                                                   Foreground="{StaticResource FluentTextTertiary}">
+                                            <Run Text="avg ₹"/>
+                                            <Run Text="{Binding AverageSaleValue, StringFormat='{}{0:N0}', Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
 
                 <!-- ═══ EXPENSES SECTION ═══ -->
                 <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
@@ -127,6 +461,9 @@
                                    Foreground="{StaticResource FluentTextSecondary}"/>
                         <DataGrid ItemsSource="{Binding ExpenseRecent}" AutoGenerateColumns="False"
                                   IsReadOnly="True" MaxHeight="200"
+                                  h:DataGridEmptyState.Icon="🧾"
+                                  h:DataGridEmptyState.Title="No recent expenses"
+                                  h:DataGridEmptyState.Description="Expense entries will appear here after spending activity is recorded for the chosen date range."
                                   Style="{StaticResource {x:Type DataGrid}}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
@@ -180,6 +517,9 @@
                         </WrapPanel>
                         <DataGrid ItemsSource="{Binding IroningRecent}" AutoGenerateColumns="False"
                                   IsReadOnly="True" MaxHeight="200"
+                                  h:DataGridEmptyState.Icon="🧺"
+                                  h:DataGridEmptyState.Title="No ironing entries"
+                                  h:DataGridEmptyState.Description="Ironing jobs will appear here once activity exists in the selected reporting period."
                                   Style="{StaticResource {x:Type DataGrid}}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
@@ -234,12 +574,27 @@
                         </WrapPanel>
                         <DataGrid ItemsSource="{Binding OrderRecent}" AutoGenerateColumns="False"
                                   IsReadOnly="True" MaxHeight="200"
+                                  h:DataGridEmptyState.Icon="📦"
+                                  h:DataGridEmptyState.Title="No recent orders"
+                                  h:DataGridEmptyState.Description="Order activity will show up here after new orders are created in the selected period."
                                   Style="{StaticResource {x:Type DataGrid}}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
                                 <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*"/>
                                 <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='₹{0:N0}'}" Width="100"/>
-                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90"/>
+                                <DataGridTemplateColumn Header="Status" SortMemberPath="Status" Width="90">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource SemanticStatusPillStyle}"
+                                                    Tag="{Binding Status}"
+                                                    HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Status}"
+                                                           Style="{StaticResource SemanticStatusPillTextStyle}"
+                                                           Tag="{Binding Status}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -274,6 +629,9 @@
                         </WrapPanel>
                         <DataGrid ItemsSource="{Binding InwardRecent}" AutoGenerateColumns="False"
                                   IsReadOnly="True" MaxHeight="200"
+                                  h:DataGridEmptyState.Icon="🚚"
+                                  h:DataGridEmptyState.Title="No inward entries"
+                                  h:DataGridEmptyState.Description="Incoming stock receipts will appear here once inward processing starts for the selected dates."
                                   Style="{StaticResource {x:Type DataGrid}}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding InwardDate, StringFormat=d}" Width="100"/>

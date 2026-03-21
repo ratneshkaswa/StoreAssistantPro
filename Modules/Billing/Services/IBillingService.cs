@@ -15,6 +15,9 @@ public interface IBillingService
 
     /// <summary>Search products by name for type-ahead.</summary>
     Task<IReadOnlyList<Product>> SearchProductsAsync(string query, CancellationToken ct = default);
+
+    /// <summary>Read the configured maximum discount percentage (0 = unlimited). (#179)</summary>
+    Task<decimal> GetMaxDiscountPercentAsync(CancellationToken ct = default);
 }
 
 public record CompleteSaleDto(
@@ -28,7 +31,17 @@ public record CompleteSaleDto(
     string CashierRole,
     Guid IdempotencyKey,
     int? CustomerId,
-    string? DiscountApprovalPin = null);
+    string? DiscountApprovalPin = null,
+    IReadOnlyList<PaymentLegDto>? SplitPayments = null);
+
+/// <summary>
+/// Single leg of a split payment (#118). When <see cref="CompleteSaleDto.SplitPayments"/>
+/// is non-null/non-empty, the legacy <c>PaymentMethod</c> field becomes "Split".
+/// </summary>
+public record PaymentLegDto(
+    string Method,
+    decimal Amount,
+    string? Reference);
 
 public record CartItemDto(
     int ProductId,
@@ -39,7 +52,8 @@ public record CartItemDto(
     decimal ItemDiscountAmount,
     decimal TaxRate,
     bool IsTaxInclusive,
-    decimal TaxAmount);
+    decimal TaxAmount,
+    decimal CessRate = 0);
 
 /// <summary>Result of barcode lookup — could be product-level or variant-level.</summary>
 public record ProductLookupResult(

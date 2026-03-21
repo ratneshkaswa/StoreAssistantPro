@@ -1,8 +1,11 @@
- <UserControl x:Class="StoreAssistantPro.Modules.MainShell.Views.WorkspaceView"
+<UserControl x:Class="StoreAssistantPro.Modules.MainShell.Views.WorkspaceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
@@ -15,200 +18,640 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ═══ TITLE BAR ═══ -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Style="{StaticResource PageTitleStyle}">
-                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE80F;"/>
-                <Run Text=" Dashboard"/>
-            </TextBlock>
+            <StackPanel>
+                <controls:BreadcrumbBar ItemsSource="{Binding BreadcrumbItems}"
+                                        Margin="0,0,0,8"/>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Refresh" Style="{StaticResource ToolbarButtonStyle}"
-                        Command="{Binding RefreshCommand}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button x:Name="StartBillingButton"
-                        Content="Start Billing"
-                        Command="{Binding DataContext.OpenBillingCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        MinWidth="140"
-                        AutomationProperties.Name="Start billing"
-                        Visibility="{Binding DataContext.IsBillingVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
+                <TextBlock Text="{Binding DataContext.DashboardSummary.Greeting, RelativeSource={RelativeSource AncestorType=Window}}"
+                           Style="{StaticResource PageTitleStyle}"/>
+
+                <TextBlock Text="{Binding HeaderSubtitle}"
+                           Margin="0,4,0,0"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource FluentTextSecondary}"/>
+
+                <TextBlock Text="{Binding LastUpdatedText}"
+                           Margin="0,8,0,0"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           Foreground="{StaticResource FluentTextTertiary}"/>
             </StackPanel>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Background="{StaticResource LayerFillColorSecondary}"
+                        BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        Padding="12,10">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="40"
+                                Height="40"
+                                CornerRadius="20"
+                                Background="{StaticResource FluentAccentLight2}">
+                            <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUserInitials, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentAccentDark2}"/>
+                        </Border>
+
+                        <StackPanel Margin="12,0,0,0">
+                            <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUserLabel, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DataContext.DashboardSummary.IsOfflineMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                                    <Setter Property="Fill" Value="{StaticResource FluentError}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+
+                                <TextBlock Text="{Binding DataContext.DashboardSummary.ConnectionStatusText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                           Margin="8,0,0,0"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           Foreground="{StaticResource FluentTextSecondary}"/>
+
+                                <TextBlock Text="  "
+                                           FontSize="{StaticResource FontSizeCaption}"/>
+
+                                <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentTime, RelativeSource={RelativeSource AncestorType=Window}}"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,12,0,0">
+
+                    <!-- #410 Dashboard date selector -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                Margin="{StaticResource InlineControlSpacing}">
+                        <TextBlock Text="Date:" VerticalAlignment="Center"
+                                   Foreground="{StaticResource FluentTextSecondary}"
+                                   FontSize="{StaticResource FontSizeLabel}"
+                                   Margin="0,0,8,0"/>
+                        <DatePicker SelectedDate="{Binding SelectedDate, Mode=TwoWay}"
+                                    DisplayDateEnd="{Binding Source={x:Static System:DateTime.Today}}"
+                                    Width="{StaticResource FieldWidthStandard}"
+                                    VerticalAlignment="Center"/>
+                        <Button Content="Today" Style="{StaticResource ToolbarLinkButtonStyle}"
+                                Command="{Binding ResetToTodayCommand}"
+                                Visibility="{Binding IsViewingPastDate, Converter={StaticResource BoolToVisibility}}"
+                                Margin="8,0,0,0"/>
+                    </StackPanel>
+
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Command="{Binding RefreshCommand}"
+                            Margin="{StaticResource InlineControlSpacing}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FluentIconFont}"
+                                       Text="&#xE72C;"
+                                       Margin="0,0,8,0"/>
+                            <TextBlock Text="Refresh"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="StartBillingButton"
+                            Command="{Binding DataContext.OpenBillingCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            MinWidth="148"
+                            AutomationProperties.Name="Start billing"
+                            Visibility="{Binding DataContext.IsBillingVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource FluentIconFont}"
+                                       Text="&#xE710;"
+                                       Margin="0,0,8,0"/>
+                            <TextBlock Text="Start Billing"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
 
-        <!-- ═══ KPI STAT CARDS ═══ -->
-        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <!-- Today Sales -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardContentPadding}" Margin="{StaticResource StatCardGap}" MinWidth="160">
-                <StackPanel>
-                    <TextBlock Text="TODAY'S SALES" FontSize="{StaticResource FontSizeStatusBar}" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TodaySalesFormatted}" FontSize="{StaticResource FontSizeHeadline}" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="{StaticResource KpiValueSpacing}"/>
-                    <TextBlock Margin="{StaticResource HintTextSpacing}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}">
-                        <Run Text="{Binding TodayTransactions, Mode=OneWay}"/>
-                        <Run Text="transactions"/>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
+        <controls:InfoBar Grid.Row="1"
+                          Title="{Binding AlertTitle}"
+                          Message="{Binding AlertMessage}"
+                          Severity="{Binding AlertSeverity}"
+                          IsOpen="{Binding HasAlertBanner}"
+                          Visibility="{Binding HasAlertBanner, Converter={StaticResource BoolToVisibility}}"
+                          Margin="0,16,0,0"/>
 
-            <!-- This Month Sales -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardContentPadding}" Margin="{StaticResource StatCardGap}" MinWidth="160">
+        <WrapPanel Grid.Row="2" Margin="0,16,0,0">
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="168"
+                    h:Motion.StaggerIndex="0">
                 <StackPanel>
-                    <TextBlock Text="THIS MONTH" FontSize="{StaticResource FontSizeStatusBar}" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding ThisMonthSalesFormatted}" FontSize="{StaticResource FontSizeHeadline}" FontWeight="Bold"
-                               Foreground="{StaticResource FluentSuccess}" Margin="{StaticResource KpiValueSpacing}"/>
-                    <TextBlock Margin="{StaticResource HintTextSpacing}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}">
-                        <Run Text="{Binding ThisMonthTransactions, Mode=OneWay}"/>
-                        <Run Text="bills"/>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
-
-            <!-- Products -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardContentPadding}" Margin="{StaticResource StatCardGap}" MinWidth="140">
-                <StackPanel>
-                    <TextBlock Text="PRODUCTS" FontSize="{StaticResource FontSizeStatusBar}" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalProducts}" FontSize="{StaticResource FontSizeHeadline}" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="{StaticResource KpiValueSpacing}"/>
-                    <TextBlock Margin="{StaticResource HintTextSpacing}" FontSize="{StaticResource FontSizeCaption}" Foreground="{StaticResource FluentTextSecondary}">
-                        <Run Text="{Binding OutOfStockCount, Mode=OneWay}"/>
-                        <Run Text="out of stock"/>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
-
-            <!-- Low Stock Alert -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardContentPadding}" Margin="{StaticResource StatCardGap}" MinWidth="140">
-                <StackPanel>
-                    <TextBlock Text="LOW STOCK" FontSize="{StaticResource FontSizeStatusBar}" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding LowStockCount}" FontSize="{StaticResource FontSizeHeadline}" FontWeight="Bold"
-                               Foreground="{StaticResource FluentWarning}" Margin="{StaticResource KpiValueSpacing}"/>
-                    <TextBlock Text="items need reorder" Margin="{StaticResource HintTextSpacing}" FontSize="{StaticResource FontSizeCaption}"
+                    <TextBlock Text="TODAY"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding TodaySalesCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentAccentDefault}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding TodayTransactionsLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextSecondary}"/>
                 </StackPanel>
             </Border>
 
-            <!-- Pending Orders -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardContentPadding}" Margin="{StaticResource StatCardGap}" MinWidth="140">
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="168"
+                    h:Motion.StaggerIndex="1">
                 <StackPanel>
-                    <TextBlock Text="PENDING ORDERS" FontSize="{StaticResource FontSizeStatusBar}" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding PendingOrdersCount}" FontSize="{StaticResource FontSizeHeadline}" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="{StaticResource KpiValueSpacing}"/>
-                    <TextBlock Margin="{StaticResource HintTextSpacing}" FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentError}"
-                               Visibility="{Binding HasOverdueOrders, Converter={StaticResource BoolToVisibility}}">
-                        <Run Text="{Binding OverdueOrdersCount, Mode=OneWay}"/>
-                        <Run Text="overdue"/>
-                    </TextBlock>
+                    <TextBlock Text="THIS MONTH"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding ThisMonthSalesCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentSuccess}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding ThisMonthTransactionsLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
                 </StackPanel>
             </Border>
 
-            <!-- Outstanding Receivables -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardContentPadding}" Margin="{StaticResource CompactItemSpacing}" MinWidth="160">
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="156"
+                    h:Motion.StaggerIndex="2">
                 <StackPanel>
-                    <TextBlock Text="RECEIVABLES" FontSize="{StaticResource FontSizeStatusBar}" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding ReceivablesFormatted}" FontSize="{StaticResource FontSizeHeadline}" FontWeight="Bold"
-                               Foreground="{StaticResource FluentError}" Margin="{StaticResource KpiValueSpacing}"/>
-                    <TextBlock Text="outstanding" Margin="{StaticResource HintTextSpacing}" FontSize="{StaticResource FontSizeCaption}"
+                    <TextBlock Text="PRODUCTS"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding TotalProductsCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentAccentDark1}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding ProductStatusLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="156"
+                    h:Motion.StaggerIndex="3">
+                <StackPanel>
+                    <TextBlock Text="LOW STOCK"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding LowStockCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentWarning}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding LowStockLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="150"
+                    h:Motion.StaggerIndex="4">
+                <StackPanel>
+                    <TextBlock Text="RETURNS"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding TodayReturnsCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentError}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding TodayReturnsLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="150"
+                    h:Motion.StaggerIndex="5">
+                <StackPanel>
+                    <TextBlock Text="NET SALES"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding TodayNetSalesCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentAccentDefault}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding TodayNetSalesLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="150"
+                    h:Motion.StaggerIndex="6">
+                <StackPanel>
+                    <TextBlock Text="AVG BILL"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding AverageBillCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentAccentDark1}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding AverageBillLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="156"
+                    h:Motion.StaggerIndex="7">
+                <StackPanel>
+                    <TextBlock Text="ORDERS"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding PendingOrdersCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentAccentDefault}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding PendingOrdersLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="168"
+                    h:Motion.StaggerIndex="8">
+                <StackPanel>
+                    <TextBlock Text="RECEIVABLES"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding ReceivablesCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentError}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding ReceivablesLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextSecondary}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardContentPadding}"
+                    Margin="{StaticResource StatCardGap}"
+                    MinWidth="168"
+                    h:Motion.StaggerIndex="9">
+                <StackPanel>
+                    <TextBlock Text="PENDING PAYMENTS"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource FluentTextTertiary}"/>
+                    <TextBlock Text="{Binding PendingPaymentsCompact}"
+                               FontSize="{StaticResource FontSizeHeadline}"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FluentWarning}"
+                               Margin="{StaticResource KpiValueSpacing}"/>
+                    <TextBlock Text="{Binding PendingPaymentsLabel}"
+                               Margin="{StaticResource HintTextSpacing}"
+                               FontSize="{StaticResource FontSizeCaption}"
                                Foreground="{StaticResource FluentTextSecondary}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
 
-        <!-- ═══ DETAIL PANELS ═══ -->
-        <Grid Grid.Row="2" Margin="{StaticResource KpiValueSpacing}">
+        <Grid Grid.Row="3" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="16"/>
                 <ColumnDefinition Width="320"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Loading overlay — does not affect layout -->
-            <TextBlock Grid.ColumnSpan="3" Text="Loading dashboard…" FontStyle="Italic"
-                       Foreground="{StaticResource FluentTextSecondary}" Margin="{StaticResource DashboardListItemSpacing}"
-                       VerticalAlignment="Top" HorizontalAlignment="Left"
-                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
-
-            <!-- Recent Sales -->
-            <Border Style="{StaticResource CardStyle}" Padding="{StaticResource CardPadding}">
+            <Border Style="{StaticResource CardStyle}"
+                    Padding="{StaticResource CardPadding}"
+                    h:Motion.StaggerIndex="10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="Recent Sales" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentTextPrimary}" Margin="{StaticResource CompactItemSpacing}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding RecentSales}"
-                              Style="{StaticResource EnterpriseDataGridStyle}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              HeadersVisibility="Column"
-                              CanUserAddRows="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Invoice" Binding="{Binding InvoiceNumber}" Width="140"/>
-                            <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat='{}{0:dd-MMM hh:mm tt}'}" Width="150"/>
-                            <DataGridTextColumn Header="Amount" Binding="{Binding TotalAmount, StringFormat='{}{0:N0}'}" Width="100"/>
-                            <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="90"/>
-                            <DataGridTextColumn Header="Items" Binding="{Binding ItemCount}" Width="*"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                        <StackPanel>
+                            <TextBlock Text="Recent Sales"
+                                       FontSize="{StaticResource FontSizeBody}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                            <TextBlock Text="Latest completed invoices and payment methods."
+                                       Margin="0,4,0,0"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
+                                Style="{StaticResource StatusBadgePillStyle}"
+                                Background="{StaticResource LayerFillColorSecondary}">
+                            <TextBlock Text="{Binding RecentSalesDisplay.Count}"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       FontWeight="SemiBold"/>
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,12,0,0">
+                        <DataGrid ItemsSource="{Binding RecentSalesDisplay}"
+                                  Style="{StaticResource EnterpriseDataGridStyle}"
+                                  h:DataGridEmptyState.IsEnabled="False"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="INVOICE"
+                                                    Binding="{Binding InvoiceNumber}"
+                                                    Width="150"/>
+
+                                <DataGridTemplateColumn Header="DATE"
+                                                        Width="140">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding RelativeDate}"
+                                                       ToolTip="{Binding DateToolTip}"
+                                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="AMOUNT"
+                                                    Binding="{Binding Amount}"
+                                                    Width="120"/>
+
+                                <DataGridTextColumn Header="PAYMENT"
+                                                    Binding="{Binding PaymentMethod}"
+                                                    Width="120"/>
+
+                                <DataGridTextColumn Header="ITEMS"
+                                                    Binding="{Binding ItemCountLabel}"
+                                                    Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <controls:EmptyStateOverlay Icon="📄"
+                                                    Title="No recent sales yet"
+                                                    Description="Completed bills will appear here as soon as the counter starts moving."
+                                                    ItemCount="{Binding RecentSalesDisplay.Count}"/>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- Right Panel: Top Products -->
-            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="{StaticResource CardPadding}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    <TextBlock Text="Top Products (This Month)" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentTextPrimary}" Margin="{StaticResource CompactItemSpacing}"/>
+                <!-- Today's Bestsellers (#394) -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="{StaticResource CardPadding}"
+                        h:Motion.StaggerIndex="11">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding TopProducts}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{StaticResource FluentStrokeDefault}" BorderThickness="0,0,0,1"
-                                        Padding="{StaticResource DashboardListItemSpacing}" Margin="0">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                                        <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource FluentTextPrimary}"
-                                                   TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Grid.Column="1" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource FluentAccentDefault}"
-                                                   Text="{Binding Revenue, StringFormat='{}{0:N0}'}"/>
+                            <StackPanel>
+                                <TextBlock Text="Today's Bestsellers"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextPrimary}"/>
+                                <TextBlock Text="Top products sold today."
+                                           Margin="0,4,0,0"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                            </StackPanel>
 
-                                        <TextBlock Grid.Row="1" Foreground="{StaticResource FluentTextSecondary}" FontSize="{StaticResource FontSizeCaption}">
-                                            <Run Text="{Binding QuantitySold, Mode=OneWay}"/>
-                                            <Run Text="sold"/>
-                                        </TextBlock>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
-            </Border>
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource StatusBadgePillStyle}"
+                                    Background="{StaticResource LayerFillColorSecondary}">
+                                <TextBlock Text="{Binding TopProductsTodayDisplay.Count}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           FontWeight="SemiBold"/>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding TopProductsTodayDisplay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                                    BorderThickness="0,0,0,1"
+                                                    Padding="{StaticResource DashboardListItemSpacing}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <TextBlock Text="{Binding ProductName}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource FluentTextPrimary}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               ToolTip="{Binding ProductName}"/>
+
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding RevenueCompact}"
+                                                               ToolTip="{Binding RevenueToolTip}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource FluentAccentDefault}"/>
+
+                                                    <TextBlock Grid.Row="1"
+                                                               Text="{Binding QuantitySoldLabel}"
+                                                               Margin="0,4,0,0"
+                                                               FontSize="{StaticResource FontSizeCaption}"
+                                                               Foreground="{StaticResource FluentTextSecondary}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <controls:EmptyStateOverlay Icon="🔥"
+                                                        Title="No sales today yet"
+                                                        Description="Today's best-selling products will appear here."
+                                                        ItemCount="{Binding TopProductsTodayDisplay.Count}"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Top Products This Month -->
+                <Border Grid.Row="2"
+                        Style="{StaticResource CardStyle}"
+                        Padding="{StaticResource CardPadding}"
+                        h:Motion.StaggerIndex="12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="Top Products"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextPrimary}"/>
+                                <TextBlock Text="Best revenue contributors this month."
+                                           Margin="0,4,0,0"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                            </StackPanel>
+
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource StatusBadgePillStyle}"
+                                    Background="{StaticResource LayerFillColorSecondary}">
+                                <TextBlock Text="{Binding TopProductsDisplay.Count}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           FontWeight="SemiBold"/>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding TopProductsDisplay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                                    BorderThickness="0,0,0,1"
+                                                    Padding="{StaticResource DashboardListItemSpacing}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <TextBlock Text="{Binding ProductName}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource FluentTextPrimary}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               ToolTip="{Binding ProductName}"/>
+
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding RevenueCompact}"
+                                                               ToolTip="{Binding RevenueToolTip}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource FluentAccentDefault}"/>
+
+                                                    <TextBlock Grid.Row="1"
+                                                               Text="{Binding QuantitySoldLabel}"
+                                                               Margin="0,4,0,0"
+                                                               FontSize="{StaticResource FontSizeCaption}"
+                                                               Foreground="{StaticResource FluentTextSecondary}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <controls:EmptyStateOverlay Icon="📦"
+                                                        Title="No product trends yet"
+                                                        Description="Top-selling products will show up here once this month's sales data is available."
+                                                        ItemCount="{Binding TopProductsDisplay.Count}"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <controls:LoadingOverlay Grid.ColumnSpan="3"
+                                     IsActive="{Binding IsLoading}"
+                                     Message="Refreshing dashboard"/>
         </Grid>
     </Grid>
 </UserControl>

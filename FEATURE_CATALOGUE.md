@@ -31,8 +31,8 @@
 | 18 | Duplicate / Clone product | P1 | ✅ | Prefills Add form with all fields from selected product. Clears barcode (unique), sets Qty=0, appends "(Copy)". |
 | 19 | Search by Barcode | P0 | ✅ | Extends product search to match against Barcode field in addition to Name. Enables scanner-based lookup. |
 | 20 | Search by SKU | P0 | ⏭ | Extends product search to match against SKU field. Skipped because SKU field (#10) was skipped. |
-| 21 | Filter by Category | P1 | ⏭ | Dropdown in toolbar filters products by category. Deferred until Category model (#28-30) is built. |
-| 22 | Filter by Brand | P1 | ⏭ | Dropdown in toolbar filters products by brand. Deferred until Brand model (#32-34) is built. |
+| 21 | Filter by Category | P1 | ✅ | Dropdown in toolbar filters products by category. Deferred until Category model (#28-30) is built. |
+| 22 | Filter by Brand | P1 | ✅ | Dropdown in toolbar filters products by brand. Deferred until Brand model (#32-34) is built. |
 | 23 | Filter by Stock Status | P1 | ✅ | Toolbar ComboBox: All/InStock/LowStock/OutOfStock. Server-side filter comparing Qty vs MinStockLevel. |
 | 24 | Filter by Active/Inactive | P1 | ✅ | Toolbar ComboBox: All/ActiveOnly/InactiveOnly. Server-side filter on IsActive boolean. |
 | 25 | Sale Price ≤ MRP enforcement | P1 | ⏭ | Validation rule preventing sale price from exceeding MRP. Skipped because MRP field (#9) was skipped. |
@@ -51,18 +51,18 @@
 | 33 | Brand CRUD | P1 | ✅ | Full add/edit/delete with inline forms. Name required, unique. |
 | 34 | Product → Brand FK | P1 | ✅ | Add BrandId (nullable FK) to Product. Products optionally belong to one brand. |
 | 35 | Category search | P1 | ✅ | Text search by category name in the category list view. |
-| 36 | Category paging | P1 | 🔨 | Server-side paging using PagedQuery/PagedResult pattern. |
+| 36 | Category paging | P1 | ✅ | Server-side paging using PagedQuery/PagedResult pattern. |
 | 37 | Brand search | P1 | ✅ | Text search by brand name in the brand list view. |
-| 38 | Brand paging | P1 | 🔨 | Server-side paging using PagedQuery/PagedResult pattern. |
-| 39 | Default category | P2 | 🔨 | Auto-assign new products to "General" or "Uncategorized" category if none selected. |
+| 38 | Brand paging | P1 | ✅ | Server-side paging using PagedQuery/PagedResult pattern. |
+| 39 | Default category | P2 | ✅ | Auto-assign new products to "General" or "Uncategorized" category if none selected. |
 | 40 | Category product count | P2 | ✅ | Display count of products per category in the category list (e.g., "Shirts (42)"). |
 | 41 | Brand product count | P2 | ✅ | Display count of products per brand in the brand list. |
 | 42 | Bulk assign category | P2 | 🔨 | Multi-select products in DataGrid → assign to chosen category in one operation. |
 | 43 | Bulk assign brand | P2 | 🔨 | Multi-select products in DataGrid → assign to chosen brand in one operation. |
-| 44 | Category import (CSV) | P2 | 🔨 | Bulk import categories from CSV file. |
-| 45 | Category export (CSV) | P2 | 🔨 | Export all categories to CSV. |
-| 46 | Brand import (CSV) | P2 | 🔨 | Bulk import brands from CSV file. |
-| 47 | Brand export (CSV) | P2 | 🔨 | Export all brands to CSV. |
+| 44 | Category import (CSV) | P2 | ✅ | Bulk import categories from CSV file. |
+| 45 | Category export (CSV) | P2 | ✅ | Export all categories to CSV. |
+| 46 | Brand import (CSV) | P2 | ✅ | Bulk import brands from CSV file. |
+| 47 | Brand export (CSV) | P2 | ✅ | Export all brands to CSV. |
 
 ### Sprint 3: Product Variants & Sizes — ProductsView enrichment (18 features)
 
@@ -78,9 +78,9 @@
 | 55 | Size master CRUD | P1 | ✅ | Manage the master list of available sizes. Add custom sizes (28, 30, 32 for trousers). |
 | 56 | Color master CRUD | P1 | ✅ | Manage the master list of available colors with hex codes for UI display. |
 | 57 | Size group templates | P2 | 🔨 | Predefined groups: "Shirt sizes" (S-XXL), "Trouser sizes" (28-40), "Free size". Quick-fill variants. |
-| 58 | Variant grid view | P1 | 🔨 | Matrix view: rows=sizes, columns=colors, cells=quantity. Visual stock overview per product. |
+| 58 | Variant grid view | P1 | ✅ | Matrix view: rows=sizes, columns=colors, cells=quantity. Visual stock overview per product. |
 | 59 | Variant search in billing | P0 | ✅ | Scan variant barcode → auto-add to cart with correct size/color/price. |
-| 60 | Variant low stock alert | P1 | 🔨 | Per-variant minimum stock check. Alert when any variant falls below threshold. |
+| 60 | Variant low stock alert | P1 | ✅ | Per-variant minimum stock check. Alert when any variant falls below threshold. |
 | 61 | Bulk variant creation | P1 | ✅ | Select multiple sizes + multiple colors → auto-create all combinations (e.g., 5 sizes × 4 colors = 20 variants). |
 | 62 | Variant import (CSV) | P2 | 🔨 | Bulk import variants with columns: ProductName, Size, Color, Barcode, Qty, PriceOffset. |
 | 63 | Variant export (CSV) | P2 | 🔨 | Export all variants to CSV for backup/analysis. |
@@ -94,17 +94,17 @@
 | 66 | Stock adjustment (manual +/-) | P0 | ✅ | Increase or decrease product quantity with a reason. Positive = stock in, negative = stock out. |
 | 67 | Adjustment reason codes | P0 | ✅ | Predefined reasons: Damage, Theft, Correction, Return, Transfer, Opening Stock, Other. |
 | 68 | Stock adjustment log | P0 | ✅ | Immutable audit trail: ProductId, OldQty, NewQty, Reason, UserId, Timestamp. |
-| 69 | Stock take / physical count | P1 | 🔨 | Enter physical count per product. System auto-calculates difference and creates adjustment. |
+| 69 | Stock take / physical count | P1 | ✅ | Enter physical count per product. System auto-calculates difference and creates adjustment. |
 | 70 | Low stock alert dashboard | P0 | ✅ | Dedicated view listing all products where Quantity ≤ MinStockLevel. Sorted by urgency. |
 | 71 | Out of stock alert | P0 | ✅ | Separate section/badge for products where Quantity = 0. Highlighted in red. |
 | 72 | Stock value report | P1 | ✅ | Total inventory value calculated as Σ(Quantity × CostPrice) across all products. |
-| 73 | Stock movement history | P1 | 🔨 | Timeline per product showing all quantity changes: sales, returns, adjustments, purchases. |
-| 74 | Opening stock entry | P1 | 🔨 | Bulk set initial stock quantities when first onboarding the system. |
+| 73 | Stock movement history | P1 | ✅ | Timeline per product showing all quantity changes: sales, returns, adjustments, purchases. |
+| 74 | Opening stock entry | P1 | ✅ | Bulk set initial stock quantities when first onboarding the system. |
 | 75 | Stock freeze (period lock) | P2 | 🔨 | Lock all stock edits during physical audit period. Only admin can freeze/unfreeze. |
-| 76 | Batch stock adjustment | P1 | 🔨 | Adjust multiple products in one screen. DataGrid with Product/CurrentQty/NewQty/Reason. |
+| 76 | Batch stock adjustment | P1 | ✅ | Adjust multiple products in one screen. DataGrid with Product/CurrentQty/NewQty/Reason. |
 | 77 | Stock adjustment approval | P2 | 🔨 | Adjustments above configurable threshold require manager PIN approval. |
-| 78 | Inventory export (CSV) | P1 | 🔨 | Export current stock snapshot: Product, Qty, CostPrice, Value, MinStock, Status. |
-| 79 | Inventory import (CSV) | P1 | 🔨 | Bulk update stock quantities from CSV file. Creates adjustment log entries. |
+| 78 | Inventory export (CSV) | P1 | ✅ | Export current stock snapshot: Product, Qty, CostPrice, Value, MinStock, Status. |
+| 79 | Inventory import (CSV) | P1 | ✅ | Bulk update stock quantities from CSV file. Creates adjustment log entries. |
 | 80 | Dead stock report | P2 | 🔨 | Products with zero sales in configurable N days. Helps identify unsold inventory. |
 
 ### Sprint 5: Supplier / Vendor Management — SuppliersView (15 features)
@@ -116,11 +116,11 @@
 | 83 | Product → Supplier FK | P1 | ✅ | Add SupplierId (nullable FK) to Product. Links product to primary supplier. |
 | 84 | Supplier active/inactive | P1 | ✅ | Deactivate suppliers without deleting. Inactive suppliers hidden from dropdowns. |
 | 85 | Supplier search | P1 | ✅ | Search by name, phone number, or GSTIN. |
-| 86 | Supplier GSTIN validation | P1 | 🔨 | Validate 15-character Indian GSTIN format: 2-digit state + 10-char PAN + 1Z + checksum. |
-| 87 | Supplier ledger | P2 | 🔨 | Running balance per supplier: total purchases − total payments = outstanding. |
-| 88 | Supplier import (CSV) | P2 | 🔨 | Bulk import suppliers from CSV. |
-| 89 | Supplier export (CSV) | P2 | 🔨 | Export all suppliers to CSV. |
-| 90 | Supplier payment tracking | P2 | 🔨 | Record payments made to supplier with date, amount, payment method, reference. |
+| 86 | Supplier GSTIN validation | P1 | ✅ | Validate 15-character Indian GSTIN format: 2-digit state + 10-char PAN + 1Z + checksum. |
+| 87 | Supplier ledger | P2 | ✅ | Running balance per supplier: total purchases − total payments = outstanding. |
+| 88 | Supplier import (CSV) | P2 | ✅ | Bulk import suppliers from CSV. |
+| 89 | Supplier export (CSV) | P2 | ✅ | Export all suppliers to CSV. |
+| 90 | Supplier payment tracking | P2 | ✅ | Record payments made to supplier with date, amount, payment method, reference. |
 | 91 | Supplier due alerts | P2 | 🔨 | Dashboard alert when supplier payment is overdue beyond agreed credit period. |
 | 92 | Multiple suppliers per product | P2 | 🔨 | Many-to-many: ProductSupplier join table. Multiple vendors can supply same product. |
 | 93 | Supplier price list | P2 | 🔨 | Cost price varies per supplier per product. Pick best price when creating PO. |
@@ -141,11 +141,11 @@
 | 99 | Cart line: remove item | P0 | ✅ | Delete button per line item. Removes product from cart entirely. |
 | 100 | Cart line: price override | P1 | ✅ | Change sale price for this transaction only. Requires manager PIN if discount > threshold. |
 | 101 | Cart subtotal display | P0 | ✅ | Live sum of all line totals (before tax and discount). Updates on every cart change. |
-| 102 | Cart tax display | P0 | 🔨 | Total tax amount. Shows CGST + SGST (or IGST) calculated per line based on tax profile. |
+| 102 | Cart tax display | P0 | ✅ | Total tax amount. Shows CGST + SGST (or IGST) calculated per line based on tax profile. |
 | 103 | Cart grand total | P0 | ✅ | Final amount: Subtotal + Tax − Discount. Large, prominent display. |
 | 104 | Bill-level discount (₹) | P0 | ✅ | Flat rupee discount applied to entire bill. Distributed proportionally across line items for GST. |
 | 105 | Bill-level discount (%) | P0 | ✅ | Percentage discount on bill total. Converted to ₹ amount then distributed. |
-| 106 | Line-level discount (₹) | P1 | 🔨 | Flat rupee discount on a specific line item. Reduces that item's taxable value. |
+| 106 | Line-level discount (₹) | P1 | ✅ | Flat rupee discount on a specific line item. Reduces that item's taxable value. |
 | 107 | Line-level discount (%) | P1 | ✅ | Percentage discount on a specific line item. |
 | 108 | Payment: Cash | P0 | ✅ | Select Cash payment method. Enter amount tendered. |
 | 109 | Cash change calculation | P0 | ✅ | If cash tendered > grand total, display change due = tendered − total. |
@@ -154,7 +154,7 @@
 | 112 | Sale timestamp (IST) | P0 | ✅ | Record sale date/time using IRegionalSettingsService.Now (Indian Standard Time). |
 | 113 | Sale → User tracking | P0 | ✅ | Record which user (cashier) completed the sale. FK to UserCredential. |
 | 114 | Cart clear / cancel bill | P0 | ✅ | Discard entire cart. Confirmation dialog required. No stock changes on cancel. |
-| 115 | Billing keyboard shortcuts | P0 | 🔨 | F2=New bill, F5=Pay, F8=Hold, Esc=Cancel, +/- for qty, Tab through fields. |
+| 115 | Billing keyboard shortcuts | P0 | ✅ | F2=New bill, F5=Pay, F8=Hold, Esc=Cancel, +/- for qty, Tab through fields. |
 
 ### Sprint 7: Payment Methods & Receipts — SalesView + ReceiptView (20 features)
 
@@ -162,8 +162,8 @@
 |---|---------|---|--------|-------------|
 | 116 | Payment: UPI | P0 | ✅ | Record UPI transaction reference number. No gateway integration (manual entry). |
 | 117 | Payment: Card | P0 | ✅ | Record card type (credit/debit) and last 4 digits. Manual entry, no POS terminal integration. |
-| 118 | Payment: Split payment | P1 | 🔨 | Part cash + part UPI/card. Multiple payment entries summing to grand total. |
-| 119 | Payment: Credit (on account) | P1 | 🔨 | Sale on customer credit. Creates receivable balance against customer. |
+| 118 | Payment: Split payment | P1 | ✅ | Part cash + part UPI/card. Multiple payment entries summing to grand total. |
+| 119 | Payment: Credit (on account) | P1 | ✅ | Sale on customer credit. Creates receivable balance against customer. |
 | 120 | Receipt: thermal 80mm | P0 | ✅ | Format receipt for standard 80mm thermal printer. Fixed-width text layout. |
 | 121 | Receipt: firm details | P0 | ✅ | Print store name, address, phone on receipt header. |
 | 122 | Receipt: GSTIN | P0 | ✅ | Print store's GST identification number on receipt. |
@@ -175,10 +175,10 @@
 | 128 | Receipt reprint | P1 | ✅ | Reprint receipt for any past sale from sale history. |
 | 129 | Receipt: QR code | P2 | 🔨 | QR code containing sale ID or UPI payment link. |
 | 130 | Receipt: invoice barcode | P2 | 🔨 | Barcode of invoice number for easy scanning/lookup. |
-| 131 | A4 tax invoice format | P1 | 🔨 | Full-page GST tax invoice for B2B customers with all required fields. |
-| 132 | Invoice: HSN-wise tax summary | P0 | 🔨 | GST-compliant table grouping tax by HSN code (mandatory for invoices > ₹50K). |
-| 133 | Invoice: CGST/SGST/IGST split | P0 | 🔨 | Show tax components separately: CGST=9%, SGST=9% (intra-state) or IGST=18% (inter-state). |
-| 134 | Invoice: customer details | P1 | 🔨 | Print buyer name, address, GSTIN, state code on B2B invoice. |
+| 131 | A4 tax invoice format | P1 | ✅ | Full-page GST tax invoice for B2B customers with all required fields. |
+| 132 | Invoice: HSN-wise tax summary | P0 | ✅ | GST-compliant table grouping tax by HSN code (mandatory for invoices > ₹50K). |
+| 133 | Invoice: CGST/SGST/IGST split | P0 | ✅ | Show tax components separately: CGST=9%, SGST=9% (intra-state) or IGST=18% (inter-state). |
+| 134 | Invoice: customer details | P1 | ✅ | Print buyer name, address, GSTIN, state code on B2B invoice. |
 | 135 | Email invoice (PDF) | P2 | 🔨 | Generate PDF invoice and send as email attachment to customer. |
 
 ### Sprint 8: Sale History & Returns — SalesView + ReturnsView (18 features)
@@ -189,18 +189,18 @@
 | 137 | Sale history: date filter | P0 | ✅ | DatePicker range filter to view sales within specific period. |
 | 138 | Sale history: invoice search | P0 | ✅ | Search by invoice number for quick lookup. |
 | 139 | Sale detail view | P0 | ✅ | Click sale → expand/dialog showing all line items, taxes, payment details. |
-| 140 | Sale history export (CSV) | P1 | 🔨 | Export filtered sales data to CSV file. |
+| 140 | Sale history export (CSV) | P1 | ✅ | Export filtered sales data to CSV file. |
 | 141 | Sale return (full) | P0 | ✅ | Return entire sale: reverse all line items, restore stock, calculate refund. |
 | 142 | Sale return (partial) | P0 | ✅ | Select specific items/quantities to return from a sale. |
 | 143 | Return reason code | P1 | ✅ | Mandatory reason: Defective, Wrong Size, Customer Changed Mind, Duplicate, Other. |
 | 144 | Return → stock restoration | P0 | ✅ | Automatically add returned quantities back to product stock. |
 | 145 | Return → refund calculation | P0 | ✅ | Calculate refund amount based on original prices of returned items including tax. |
-| 146 | Credit note generation | P1 | 🔨 | Issue credit note document for returns. Links back to original invoice. |
-| 147 | Exchange (return + new sale) | P1 | 🔨 | Combined flow: return items from old sale + bill new items. Net amount = new − returned. |
-| 148 | Return approval (Manager PIN) | P1 | 🔨 | Returns require manager authorization via PIN entry. |
+| 146 | Credit note generation | P1 | ✅ | Issue credit note document for returns. Links back to original invoice. |
+| 147 | Exchange (return + new sale) | P1 | ✅ | Combined flow: return items from old sale + bill new items. Net amount = new − returned. |
+| 148 | Return approval (Manager PIN) | P1 | ✅ | Returns require manager authorization via PIN entry. |
 | 149 | Return history list | P1 | ✅ | Paged list of all processed returns with details. |
-| 150 | Return receipt print | P1 | 🔨 | Print return/credit note receipt for customer. |
-| 151 | Daily return summary | P2 | 🔨 | Aggregate return count and value per day. |
+| 150 | Return receipt print | P1 | ✅ | Print return/credit note receipt for customer. |
+| 151 | Daily return summary | P2 | ✅ | Aggregate return count and value per day. |
 | 152 | Return against original invoice | P0 | ✅ | Every return must reference original sale ID. Prevents duplicate returns. |
 | 153 | No-bill return (manager only) | P2 | 🔨 | Accept return without original invoice. Admin-only, logged in audit trail. |
 
@@ -211,21 +211,21 @@
 | 154 | Customer model | P0 | ✅ | Entity: Id, Name, Phone, Email, Address, GSTIN, CreatedDate, IsActive, Notes. |
 | 155 | Customer CRUD | P0 | ✅ | Full add/edit/delete with inline forms, search, paging. |
 | 156 | Customer search by phone | P0 | ✅ | Quick lookup by 10-digit mobile number. Most common customer identifier in India. |
-| 157 | Customer → Sale linking | P0 | 🔨 | Attach customer to a sale at billing time. Enables purchase history and credit tracking. |
-| 158 | Walk-in customer (default) | P0 | 🔨 | Sales without a named customer use implicit "Walk-in" customer. No data collected. |
-| 159 | Customer purchase history | P1 | 🔨 | View all past purchases by a customer with dates and amounts. |
-| 160 | Customer outstanding balance | P1 | 🔨 | Total unpaid credit: Σ(credit sales) − Σ(payments received). |
-| 161 | Customer payment collection | P1 | 🔨 | Record payment received against outstanding balance. Date, amount, method, reference. |
+| 157 | Customer → Sale linking | P0 | ✅ | Attach customer to a sale at billing time. Enables purchase history and credit tracking. |
+| 158 | Walk-in customer (default) | P0 | ✅ | Sales without a named customer use implicit "Walk-in" customer. No data collected. |
+| 159 | Customer purchase history | P1 | ✅ | View all past purchases by a customer with dates and amounts. |
+| 160 | Customer outstanding balance | P1 | ✅ | Total unpaid credit: Σ(credit sales) − Σ(payments received). |
+| 161 | Customer payment collection | P1 | ✅ | Record payment received against outstanding balance. Date, amount, method, reference. |
 | 162 | Customer loyalty points | P2 | 🔨 | Earn points per ₹ spent (configurable ratio). Accumulate and redeem on future purchases. |
 | 163 | Customer tier | P2 | 🔨 | Auto-tier based on total spend: Regular → Silver (₹10K+) → Gold (₹50K+). Tier-specific discounts. |
 | 164 | Customer birthday | P2 | 🔨 | Date field. Enables birthday discount campaigns and SMS/WhatsApp greetings. |
 | 165 | Customer anniversary | P2 | 🔨 | Date field. Enables anniversary promotions. |
 | 166 | Customer notes | P2 | ✅ | Free-text notes: preferences, special instructions, relationship notes. |
-| 167 | Customer import (CSV) | P2 | 🔨 | Bulk import customer list from CSV file. |
-| 168 | Customer export (CSV) | P2 | 🔨 | Export all customers to CSV. |
+| 167 | Customer import (CSV) | P2 | ✅ | Bulk import customer list from CSV file. |
+| 168 | Customer export (CSV) | P2 | ✅ | Export all customers to CSV. |
 | 169 | Customer duplicate detection | P1 | ✅ | Warn when adding customer with phone number that already exists. |
 | 170 | Customer active/inactive | P1 | ✅ | Deactivate customers without deleting. Preserves history. |
-| 171 | Customer GSTIN validation | P1 | 🔨 | Validate 15-char GSTIN format for B2B customers. |
+| 171 | Customer GSTIN validation | P1 | ✅ | Validate 15-char GSTIN format for B2B customers. |
 | 172 | Customer group/tag | P2 | 🔨 | Tag customers: "Wholesale", "Regular", "VIP". Filter and target by group. |
 | 173 | Customer credit limit | P2 | 🔨 | Maximum outstanding balance allowed. Block credit sales beyond limit. |
 
@@ -235,10 +235,10 @@
 |---|---------|---|--------|-------------|
 | 174 | Flat discount on bill | P0 | ✅ | Enter ₹ amount off total bill. Distributed across items for GST calculation. |
 | 175 | Percentage discount on bill | P0 | ✅ | Enter % off total bill. Converted to ₹ then distributed. |
-| 176 | Line-item flat discount | P0 | 🔨 | ₹ off a specific line item in the cart. |
+| 176 | Line-item flat discount | P0 | ✅ | ₹ off a specific line item in the cart. |
 | 177 | Line-item % discount | P0 | ✅ | % off a specific line item. |
-| 178 | Discount approval (PIN) | P1 | 🔨 | Manager PIN required for discounts exceeding configurable threshold (e.g., >20%). |
-| 179 | Maximum discount limit | P1 | 🔨 | System-wide cap on maximum discount percentage allowed. Prevents excessive discounts. |
+| 178 | Discount approval (PIN) | P1 | ✅ | Manager PIN required for discounts exceeding configurable threshold (e.g., >20%). |
+| 179 | Maximum discount limit | P1 | ✅ | System-wide cap on maximum discount percentage allowed. Prevents excessive discounts. |
 | 180 | Buy X Get Y free | P2 | 🔨 | Promotional rule: "Buy 2 shirts, get 1 free". Auto-applies when cart matches criteria. |
 | 181 | Combo / bundle pricing | P2 | 🔨 | Special price when specific products bought together: "Shirt + Trouser = ₹1999". |
 | 182 | Seasonal sale discount | P2 | 🔨 | Time-bound discount: start date → end date. Auto-applies during active period. |
@@ -246,8 +246,8 @@
 | 184 | Brand-wide discount | P2 | 🔨 | Apply % discount to all products of a brand. |
 | 185 | Customer-specific discount | P2 | 🔨 | Special pricing for specific customers (wholesale rates, loyalty discounts). |
 | 186 | Coupon code support | P2 | 🔨 | Enter alphanumeric code at billing → validate → apply associated discount. |
-| 187 | Discount history log | P1 | 🔨 | Audit trail of every discount given: who, when, how much, on which sale. |
-| 188 | Discount report (daily) | P1 | 🔨 | Total discount value given per day. Helps monitor discount leakage. |
+| 187 | Discount history log | P1 | ✅ | Audit trail of every discount given: who, when, how much, on which sale. |
+| 188 | Discount report (daily) | P1 | ✅ | Total discount value given per day. Helps monitor discount leakage. |
 | 189 | Minimum bill for discount | P2 | 🔨 | Discount only applies if bill total exceeds threshold (e.g., "10% off on bills > ₹2000"). |
 | 190 | Discount stacking rules | P2 | 🔨 | Control whether multiple discounts can combine (e.g., coupon + seasonal). |
 
@@ -264,17 +264,17 @@
 | 193 | IGST for inter-state | P0 | ✅ | Inter-state: full rate as IGST. 18% → IGST 18%. |
 | 194 | Tax-inclusive back-calculation | P0 | ✅ | Extract base price from inclusive price: Base = Price / (1 + Rate). |
 | 195 | Tax-exclusive add-on | P0 | ✅ | Add tax on top: Total = Base × (1 + Rate). |
-| 196 | HSN-wise tax summary | P0 | 🔨 | Group tax amounts by HSN code on invoice. Required for GST compliance. |
-| 197 | Cess support | P1 | 🔨 | Additional cess percentage on top of GST for specific goods (luxury items). |
-| 198 | Tax exemption flag | P1 | 🔨 | Mark specific products as tax-exempt (0% GST). |
+| 196 | HSN-wise tax summary | P0 | ✅ | Group tax amounts by HSN code on invoice. Required for GST compliance. |
+| 197 | Cess support | P1 | ✅ | Additional cess percentage on top of GST for specific goods (luxury items). |
+| 198 | Tax exemption flag | P1 | ✅ | Mark specific products as tax-exempt (0% GST). |
 | 199 | Composition scheme | P2 | 🔨 | Flat tax rate for small businesses (< ₹1.5 Cr turnover). Different invoice format. |
 | 200 | Reverse charge mechanism | P2 | 🔨 | Buyer pays tax directly to government instead of seller collecting it. |
 | 201 | Tax profile active/inactive | P1 | ✅ | Deactivate obsolete tax rates. Inactive profiles hidden from product assignment. |
 | 202 | Default tax profile | P1 | ✅ | One profile marked as default. Auto-assigned to new products. |
-| 203 | Tax rate change audit | P1 | 🔨 | Log when tax rates are modified: old rate, new rate, who changed, when. |
+| 203 | Tax rate change audit | P1 | ✅ | Log when tax rates are modified: old rate, new rate, who changed, when. |
 | 204 | Multi-tax per product | P2 | 🔨 | Different tax rates for different states (inter-state vs intra-state). |
-| 205 | Tax report (monthly) | P1 | 🔨 | Total tax collected per month: CGST + SGST + IGST breakdown. |
-| 206 | Tax report by HSN | P1 | 🔨 | Tax grouped by HSN code for GST return filing. |
+| 205 | Tax report (monthly) | P1 | ✅ | Total tax collected per month: CGST + SGST + IGST breakdown. |
+| 206 | Tax report by HSN | P1 | ✅ | Tax grouped by HSN code for GST return filing. |
 | 207 | GSTR-1 data export | P2 | 🔨 | Export sales data in GSTR-1 format for monthly GST return. |
 | 208 | GSTR-3B summary | P2 | 🔨 | Generate summary matching GSTR-3B format for monthly GST payment. |
 
@@ -291,7 +291,7 @@
 | 215 | PO partial receipt | P1 | ✅ | Receive some items now, rest later. QtyReceived updated incrementally. |
 | 216 | PO cost price update | P1 | ✅ | Update product cost price from PO unit cost on receipt. |
 | 217 | PO search / filter | P1 | ✅ | Search by PO number, supplier name, date range, status. |
-| 218 | PO paging | P1 | 🔨 | Server-side paging for PO list. |
+| 218 | PO paging | P1 | ✅ | Server-side paging for PO list. |
 | 219 | PO print | P2 | 🔨 | Print formatted purchase order to send to supplier. |
 | 220 | PO history | P1 | ✅ | View all past purchase orders with status and amounts. |
 | 221 | PO duplicate / reorder | P2 | 🔨 | Clone a previous PO to quickly reorder same products from same supplier. |
@@ -303,62 +303,62 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 225 | Expense model | P1 | 🔨 | Entity: Id, Date, CategoryId, Amount, PaymentMethod, Description, CreatedBy, ReceiptPath. |
-| 226 | Expense CRUD | P1 | 🔨 | Add/edit/delete daily expenses with amount, category, and notes. |
-| 227 | Expense categories | P1 | 🔨 | Predefined: Rent, Utilities, Salary, Transport, Packaging, Marketing, Maintenance, Misc. |
-| 228 | Expense category CRUD | P1 | 🔨 | Add/edit/delete custom expense categories. |
-| 229 | Expense search by date | P1 | 🔨 | Filter expenses by date range. |
-| 230 | Expense search by category | P1 | 🔨 | Filter expenses by category dropdown. |
-| 231 | Daily expense summary | P1 | 🔨 | Total expenses for today, grouped by category. |
-| 232 | Monthly expense report | P1 | 🔨 | Monthly aggregate by category with totals. |
+| 225 | Expense model | P1 | ✅ | Entity: Id, Date, CategoryId, Amount, PaymentMethod, Description, CreatedBy, ReceiptPath. |
+| 226 | Expense CRUD | P1 | ✅ | Add/edit/delete daily expenses with amount, category, and notes. |
+| 227 | Expense categories | P1 | ✅ | Predefined: Rent, Utilities, Salary, Transport, Packaging, Marketing, Maintenance, Misc. |
+| 228 | Expense category CRUD | P1 | ✅ | Add/edit/delete custom expense categories. |
+| 229 | Expense search by date | P1 | ✅ | Filter expenses by date range. |
+| 230 | Expense search by category | P1 | ✅ | Filter expenses by category dropdown. |
+| 231 | Daily expense summary | P1 | ✅ | Total expenses for today, grouped by category. |
+| 232 | Monthly expense report | P1 | ✅ | Monthly aggregate by category with totals. |
 | 233 | Expense receipt photo | P2 | 🔨 | Attach photo/scan of physical receipt to expense record. |
 | 234 | Recurring expense | P2 | 🔨 | Auto-create monthly expenses like rent. Template with amount and due date. |
 | 235 | Expense approval | P2 | 🔨 | Expenses above threshold require manager approval. |
-| 236 | Expense paging | P1 | 🔨 | Server-side paging for expense list. |
-| 237 | Expense import (CSV) | P2 | 🔨 | Bulk import historical expenses from CSV. |
-| 238 | Expense export (CSV) | P2 | 🔨 | Export expenses to CSV for accounting software import. |
+| 236 | Expense paging | P1 | ✅ | Server-side paging for expense list. |
+| 237 | Expense import (CSV) | P2 | ✅ | Bulk import historical expenses from CSV. |
+| 238 | Expense export (CSV) | P2 | ✅ | Export expenses to CSV for accounting software import. |
 
 ### Sprint 14: Cash Register / Day End — CashRegisterView (16 features)
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 239 | Opening cash balance | P0 | 🔨 | Record cash physically present in drawer at start of business day. |
-| 240 | Cash in / cash out entries | P0 | 🔨 | Record non-sale cash movements: petty cash out for supplies, cash deposits from owner. |
-| 241 | Cash in/out reason | P0 | 🔨 | Mandatory reason for each cash movement: Petty Cash, Bank Deposit, Change Fund, Other. |
-| 242 | Expected cash balance | P0 | 🔨 | Calculated: Opening + Cash Sales − Cash Returns − Cash Out + Cash In. |
-| 243 | Actual cash count | P0 | 🔨 | User enters physical cash count at end of day. |
-| 244 | Cash variance | P0 | 🔨 | Difference: Actual Count − Expected Balance. Positive = excess, negative = shortage. |
-| 245 | Day end report | P0 | 🔨 | Summary: total sales, returns, payments by method, expenses, opening/closing cash. |
-| 246 | Day close / lockdown | P1 | 🔨 | Close the business day. No more transactions for that date after close. |
-| 247 | Day-wise cash history | P1 | 🔨 | View past day summaries: opening, closing, variance per day. |
-| 248 | Payment method breakdown | P1 | 🔨 | Day end shows: Cash ₹X, UPI ₹Y, Card ₹Z, Credit ₹W. |
+| 239 | Opening cash balance | P0 | ✅ | Record cash physically present in drawer at start of business day. |
+| 240 | Cash in / cash out entries | P0 | ✅ | Record non-sale cash movements: petty cash out for supplies, cash deposits from owner. |
+| 241 | Cash in/out reason | P0 | ✅ | Mandatory reason for each cash movement: Petty Cash, Bank Deposit, Change Fund, Other. |
+| 242 | Expected cash balance | P0 | ✅ | Calculated: Opening + Cash Sales − Cash Returns − Cash Out + Cash In. |
+| 243 | Actual cash count | P0 | ✅ | User enters physical cash count at end of day. |
+| 244 | Cash variance | P0 | ✅ | Difference: Actual Count − Expected Balance. Positive = excess, negative = shortage. |
+| 245 | Day end report | P0 | ✅ | Summary: total sales, returns, payments by method, expenses, opening/closing cash. |
+| 246 | Day close / lockdown | P1 | ✅ | Close the business day. No more transactions for that date after close. |
+| 247 | Day-wise cash history | P1 | ✅ | View past day summaries: opening, closing, variance per day. |
+| 248 | Payment method breakdown | P1 | ✅ | Day end shows: Cash ₹X, UPI ₹Y, Card ₹Z, Credit ₹W. |
 | 249 | Denomination entry | P2 | 🔨 | Count by denomination: ₹2000×__, ₹500×__, ₹200×__, ₹100×__, ₹50×__, coins. Auto-sum. |
 | 250 | Shift support | P2 | 🔨 | Multiple shifts per day. Each cashier has own open/close with handover amount. |
 | 251 | Cash register export | P2 | 🔨 | Export day summary to CSV/PDF. |
-| 252 | Cash variance alert | P1 | 🔨 | Warning notification if variance exceeds configurable threshold (e.g., ₹100). |
+| 252 | Cash variance alert | P1 | ✅ | Warning notification if variance exceeds configurable threshold (e.g., ₹100). |
 | 253 | Cash register approval | P2 | 🔨 | Manager must sign off on day close. Verify variance is acceptable. |
-| 254 | Cash register audit log | P1 | 🔨 | Immutable log of every cash movement: type, amount, reason, user, timestamp. |
+| 254 | Cash register audit log | P1 | ✅ | Immutable log of every cash movement: type, amount, reason, user, timestamp. |
 
 ### Sprint 15: Profit & Loss — ReportsView (16 features)
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 255 | Daily sales summary | P0 | 🔨 | Total sales, total returns, net sales, transaction count for today. |
-| 256 | Monthly sales summary | P0 | 🔨 | Aggregate sales by month. Revenue, COGS, gross profit. |
-| 257 | Product-wise sales report | P0 | 🔨 | Per product: qty sold, revenue, cost, profit, margin %. |
-| 258 | Category-wise sales report | P1 | 🔨 | Revenue, qty, profit grouped by product category. |
-| 259 | Brand-wise sales report | P1 | 🔨 | Revenue, qty, profit grouped by product brand. |
-| 260 | Profit margin per product | P1 | 🔨 | (SalePrice − CostPrice) / SalePrice × 100 per product. |
-| 261 | Gross profit report | P1 | 🔨 | Total Revenue − Total COGS for selected period. |
-| 262 | Net profit | P1 | 🔨 | Gross Profit − Total Expenses for selected period. |
-| 263 | Best selling products | P1 | 🔨 | Top N products by quantity sold or revenue in period. |
-| 264 | Slow moving products | P1 | 🔨 | Bottom N products by sales velocity. Helps plan markdowns. |
-| 265 | Sales by user report | P1 | 🔨 | Revenue and transaction count per salesperson/cashier. |
-| 266 | Sales by payment method | P1 | 🔨 | Breakdown: Cash vs UPI vs Card vs Credit per period. |
-| 267 | Sales by hour | P2 | 🔨 | Hourly sales distribution. Identifies peak shopping hours. |
-| 268 | Customer-wise sales report | P2 | 🔨 | Revenue per customer, sorted by total spend. |
-| 269 | Report date range picker | P0 | 🔨 | DatePicker UI for custom date range on all reports. Presets: Today, Week, Month, Quarter, Year. |
-| 270 | Report export (CSV) | P1 | 🔨 | Export any report to CSV file for further analysis. |
+| 255 | Daily sales summary | P0 | ✅ | Total sales, total returns, net sales, transaction count for today. |
+| 256 | Monthly sales summary | P0 | ✅ | Aggregate sales by month. Revenue, COGS, gross profit. |
+| 257 | Product-wise sales report | P0 | ✅ | Per product: qty sold, revenue, cost, profit, margin %. |
+| 258 | Category-wise sales report | P1 | ✅ | Revenue, qty, profit grouped by product category. |
+| 259 | Brand-wise sales report | P1 | ✅ | Revenue, qty, profit grouped by product brand. |
+| 260 | Profit margin per product | P1 | ✅ | (SalePrice − CostPrice) / SalePrice × 100 per product. |
+| 261 | Gross profit report | P1 | ✅ | Total Revenue − Total COGS for selected period. |
+| 262 | Net profit | P1 | ✅ | Gross Profit − Total Expenses for selected period. |
+| 263 | Best selling products | P1 | ✅ | Top N products by quantity sold or revenue in period. |
+| 264 | Slow moving products | P1 | ✅ | Bottom N products by sales velocity. Helps plan markdowns. |
+| 265 | Sales by user report | P1 | ✅ | Revenue and transaction count per salesperson/cashier. |
+| 266 | Sales by payment method | P1 | ✅ | Breakdown: Cash vs UPI vs Card vs Credit per period. |
+| 267 | Sales by hour | P2 | ✅ | Hourly sales distribution. Identifies peak shopping hours. |
+| 268 | Customer-wise sales report | P2 | ✅ | Revenue per customer, sorted by total spend. |
+| 269 | Report date range picker | P0 | ✅ | DatePicker UI for custom date range on all reports. Presets: Today, Week, Month, Quarter, Year. |
+| 270 | Report export (CSV) | P1 | ✅ | Export any report to CSV file for further analysis. |
 
 ---
 
@@ -375,9 +375,9 @@
 | 275 | Role-based button visibility | P0 | ✅ | Action buttons (Delete, Edit) visible only to authorized roles. |
 | 276 | PIN change (self) | P0 | ✅ | User can change their own 4-digit PIN. Must enter current PIN first. |
 | 277 | PIN reset (admin) | P0 | ✅ | Admin resets another user's PIN without knowing old PIN. |
-| 278 | User activity log | P1 | 🔨 | Record login/logout times per user session. |
-| 279 | User session tracking | P1 | 🔨 | Show currently logged-in user on status bar. Track session duration. |
-| 280 | User sales performance | P1 | 🔨 | Sales totals per user for performance evaluation. |
+| 278 | User activity log | P1 | ✅ | Record login/logout times per user session. |
+| 279 | User session tracking | P1 | ✅ | Show currently logged-in user on status bar. Track session duration. |
+| 280 | User sales performance | P1 | ✅ | Sales totals per user for performance evaluation. |
 | 281 | User profile | P2 | 🔨 | Display name, optional photo, contact info. |
 | 282 | Multiple users per role | P0 | ✅ | Multiple cashiers, multiple managers supported. |
 | 283 | User active/inactive | P1 | ✅ | Deactivate users (prevent login) without deleting records. |
@@ -393,20 +393,20 @@
 |---|---------|---|--------|-------------|
 | 289 | Permission matrix | P1 | 🔨 | Configurable grid: Role × Feature = Allow/Deny. Fine-grained access control. |
 | 290 | Master PIN for destructive ops | P0 | ✅ | 6-digit master PIN required for: delete product, delete user, factory reset. |
-| 291 | Audit log model | P1 | 🔨 | Entity: Id, Action, EntityType, EntityId, OldValue, NewValue, UserId, Timestamp. |
-| 292 | Audit: product changes | P1 | 🔨 | Log every product create/update/delete with before/after values. |
-| 293 | Audit: sale completion | P0 | 🔨 | Log every completed sale: invoice#, total, user, timestamp. |
-| 294 | Audit: price override | P0 | 🔨 | Log when cashier changes price during billing: product, old price, new price, reason. |
-| 295 | Audit: discount given | P0 | 🔨 | Log every discount: type, amount, percentage, approved by. |
-| 296 | Audit: return processed | P1 | 🔨 | Log returns: original invoice, returned items, refund amount, reason. |
-| 297 | Audit: login/logout | P1 | 🔨 | Track user sessions: login time, logout time, duration. |
-| 298 | Audit: settings changed | P1 | 🔨 | Log when firm details, tax rates, or system settings are modified. |
-| 299 | Audit log viewer | P1 | 🔨 | Searchable, paged DataGrid with filters by action type, user, date range. |
+| 291 | Audit log model | P1 | ✅ | Entity: Id, Action, EntityType, EntityId, OldValue, NewValue, UserId, Timestamp. |
+| 292 | Audit: product changes | P1 | ✅ | Log every product create/update/delete with before/after values. |
+| 293 | Audit: sale completion | P0 | ✅ | Log every completed sale: invoice#, total, user, timestamp. |
+| 294 | Audit: price override | P0 | ✅ | Log when cashier changes price during billing: product, old price, new price, reason. |
+| 295 | Audit: discount given | P0 | ✅ | Log every discount: type, amount, percentage, approved by. |
+| 296 | Audit: return processed | P1 | ✅ | Log returns: original invoice, returned items, refund amount, reason. |
+| 297 | Audit: login/logout | P1 | ✅ | Track user sessions: login time, logout time, duration. |
+| 298 | Audit: settings changed | P1 | ✅ | Log when firm details, tax rates, or system settings are modified. |
+| 299 | Audit log viewer | P1 | ✅ | Searchable, paged DataGrid with filters by action type, user, date range. |
 | 300 | Audit log export | P2 | 🔨 | Export filtered audit log to CSV. |
-| 301 | Failed login tracking | P1 | 🔨 | Count consecutive failed PIN attempts per user. |
-| 302 | Account lockout | P2 | 🔨 | Lock user after N consecutive failed attempts. Require admin unlock. |
-| 303 | Session timeout | P2 | 🔨 | Auto-logout after configurable inactivity period (e.g., 15 minutes). |
-| 304 | PIN complexity rules | P2 | 🔨 | Reject weak PINs: 1234, 0000, 1111, same digit repeated. Already partially built. |
+| 301 | Failed login tracking | P1 | ✅ | Count consecutive failed PIN attempts per user. |
+| 302 | Account lockout | P2 | ✅ | Lock user after N consecutive failed attempts. Require admin unlock. |
+| 303 | Session timeout | P2 | ✅ | Auto-logout after configurable inactivity period (e.g., 15 minutes). |
+| 304 | PIN complexity rules | P2 | ✅ | Reject weak PINs: 1234, 0000, 1111, same digit repeated. Already partially built. |
 
 ### Sprint 18: Firm / Store Settings — FirmManagementWindow (16 features)
 
@@ -416,16 +416,16 @@
 | 306 | Firm address | P0 | ✅ | Full postal address for invoices and receipts. |
 | 307 | Firm phone | P0 | ✅ | Contact phone number on receipts. |
 | 308 | Firm GSTIN | P0 | ✅ | GST Identification Number. Printed on all tax invoices. |
-| 309 | Firm PAN | P1 | 🔨 | Permanent Account Number for income tax compliance. |
+| 309 | Firm PAN | P1 | ✅ | Permanent Account Number for income tax compliance. |
 | 310 | Firm email | P1 | ✅ | Contact email for customer communication. |
 | 311 | Firm logo | P1 | 🔨 | Image file used on receipts, invoices, and A4 letterhead. |
 | 312 | Firm bank details | P2 | 🔨 | Bank name, account number, IFSC code for payment receipts. |
-| 313 | Invoice prefix config | P1 | 🔨 | Custom prefix for invoice numbers (e.g., "SA-", "INV-2025-"). |
+| 313 | Invoice prefix config | P1 | ✅ | Custom prefix for invoice numbers (e.g., "SA-", "INV-2025-"). |
 | 314 | Invoice numbering reset | P2 | 🔨 | Reset sequence counter annually (April 1) or monthly. |
-| 315 | Receipt footer text | P1 | 🔨 | Configurable text printed at bottom of every receipt. |
+| 315 | Receipt footer text | P1 | ✅ | Configurable text printed at bottom of every receipt. |
 | 316 | Receipt header text | P2 | 🔨 | Additional text above store name on receipt. |
-| 317 | Currency symbol | P1 | 🔨 | Default ₹ (Indian Rupee). Configurable for other currencies. |
-| 318 | Financial year start | P1 | 🔨 | April 1 default (Indian FY). Affects report period boundaries. |
+| 317 | Currency symbol | P1 | ✅ | Default ₹ (Indian Rupee). Configurable for other currencies. |
+| 318 | Financial year start | P1 | ✅ | April 1 default (Indian FY). Affects report period boundaries. |
 | 319 | Decimal places | P2 | 🔨 | Round to 0 or 2 decimal places in billing/display. |
 | 320 | Store hours | P2 | 🔨 | Opening/closing time. Display on receipts, enable time-based features. |
 
@@ -433,18 +433,18 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 321 | Manual database backup | P0 | 🔨 | One-click button copies SQLite DB file to chosen location with timestamp in filename. |
-| 322 | Auto backup on day close | P0 | 🔨 | Automatically create backup when day-end process completes. |
-| 323 | Backup location config | P0 | 🔨 | FolderBrowserDialog to choose backup destination folder. |
-| 324 | Backup history list | P1 | 🔨 | DataGrid showing past backups: date, size, location, status. |
-| 325 | Restore from backup | P0 | 🔨 | Select backup file → confirm → replace current DB. Requires master PIN. |
+| 321 | Manual database backup | P0 | ✅ | One-click button copies SQLite DB file to chosen location with timestamp in filename. |
+| 322 | Auto backup on day close | P0 | ✅ | Automatically create backup when day-end process completes. |
+| 323 | Backup location config | P0 | ✅ | FolderBrowserDialog to choose backup destination folder. |
+| 324 | Backup history list | P1 | ✅ | DataGrid showing past backups: date, size, location, status. |
+| 325 | Restore from backup | P0 | ✅ | Select backup file → confirm → replace current DB. Requires master PIN. |
 | 326 | Backup to USB | P1 | 🔨 | Detect USB drives, one-click backup to removable media. |
 | 327 | Scheduled backup | P2 | 🔨 | Background timer creates backup every N hours automatically. |
 | 328 | Backup encryption | P2 | 🔨 | Password-protect backup files using AES encryption. |
 | 329 | Cloud backup | P2 | 🔨 | Upload backup to OneDrive/Google Drive via API. |
 | 330 | Backup size tracking | P2 | 🔨 | Show file sizes. Warn if backup folder exceeds threshold. |
 | 331 | Old backup cleanup | P2 | 🔨 | Auto-delete backups older than configurable N days. |
-| 332 | Backup reminder | P1 | 🔨 | Dashboard notification if no backup exists in last 24 hours. |
+| 332 | Backup reminder | P1 | ✅ | Dashboard notification if no backup exists in last 24 hours. |
 | 333 | Full data export (JSON/CSV) | P2 | 🔨 | Export all tables to structured files for migration/audit. |
 | 334 | Data import (migration) | P2 | 🔨 | Import data from another StoreAssistantPro instance. |
 | 335 | Database integrity check | P2 | 🔨 | Run SQLite PRAGMA integrity_check. Report any corruption. |
@@ -462,10 +462,10 @@
 | 338 | Multiple held bills | P0 | ✅ | Hold up to configurable N bills simultaneously (default 5). |
 | 339 | Held bill timeout | P2 | 🔨 | Auto-discard held bills after configurable period (e.g., 2 hours). |
 | 340 | Held bill indicator | P1 | ✅ | Badge/counter showing number of currently held bills. |
-| 341 | Held bill customer tag | P1 | 🔨 | Attach customer name to held bill for identification (e.g., "Rahul's bill"). |
+| 341 | Held bill customer tag | P1 | ✅ | Attach customer name to held bill for identification (e.g., "Rahul's bill"). |
 | 342 | Held bill notes | P2 | 🔨 | Add text note to parked bill for context. |
 | 343 | Held bill history | P2 | 🔨 | Log of all hold/recall actions for audit. |
-| 344 | Quick switch held bills | P1 | 🔨 | Keyboard shortcut (F8/F9) to cycle through held bills. |
+| 344 | Quick switch held bills | P1 | ✅ | Keyboard shortcut (F8/F9) to cycle through held bills. |
 | 345 | Held bill auto-save | P0 | ✅ | Persist held bills to database. Survives app restart. |
 | 346 | Held bill stale cleanup | P1 | ✅ | On startup, detect and archive abandoned held bills from previous sessions. |
 | 347 | Held bill limit per user | P2 | 🔨 | Configurable maximum held bills per cashier. |
@@ -474,17 +474,17 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 348 | Quotation model | P1 | 🔨 | Entity: Id, QuoteNumber, CustomerId, Date, ValidUntil, Status, Items, Total, Notes. |
-| 349 | Quotation creation | P1 | 🔨 | Create estimate with customer, line items, prices, taxes. |
-| 350 | Quotation print | P1 | 🔨 | Print formatted quotation document for customer. |
-| 351 | Quotation → Sale conversion | P1 | 🔨 | One-click: convert accepted quotation into a billing cart and complete sale. |
-| 352 | Quotation status workflow | P1 | 🔨 | Draft → Sent → Accepted → Expired → Rejected. Auto-expire after validity date. |
-| 353 | Quotation search | P1 | 🔨 | Search by quote number, customer name, date range. |
-| 354 | Quotation paging | P1 | 🔨 | Server-side paging for quotation list. |
-| 355 | Quotation validity period | P1 | 🔨 | ValidUntil date. System marks expired quotes automatically. |
+| 348 | Quotation model | P1 | ✅ | Entity: Id, QuoteNumber, CustomerId, Date, ValidUntil, Status, Items, Total, Notes. |
+| 349 | Quotation creation | P1 | ✅ | Create estimate with customer, line items, prices, taxes. |
+| 350 | Quotation print | P1 | ✅ | Print formatted quotation document for customer. |
+| 351 | Quotation → Sale conversion | P1 | ✅ | One-click: convert accepted quotation into a billing cart and complete sale. |
+| 352 | Quotation status workflow | P1 | ✅ | Draft → Sent → Accepted → Expired → Rejected. Auto-expire after validity date. |
+| 353 | Quotation search | P1 | ✅ | Search by quote number, customer name, date range. |
+| 354 | Quotation paging | P1 | ✅ | Server-side paging for quotation list. |
+| 355 | Quotation validity period | P1 | ✅ | ValidUntil date. System marks expired quotes automatically. |
 | 356 | Quotation revision | P2 | 🔨 | Create revised version with changes. Link revisions together. |
 | 357 | Quotation duplicate | P2 | 🔨 | Clone existing quotation as starting point for new one. |
-| 358 | Quotation history | P1 | 🔨 | View all past quotations with status and outcomes. |
+| 358 | Quotation history | P1 | ✅ | View all past quotations with status and outcomes. |
 | 359 | Quotation export (CSV) | P2 | 🔨 | Export quotation data to CSV. |
 | 360 | Quotation email | P2 | 🔨 | Email quotation as PDF attachment to customer. |
 | 361 | Quotation T&C | P2 | 🔨 | Configurable terms & conditions text printed on quotation document. |
@@ -493,17 +493,17 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 362 | GRN model | P1 | 🔨 | Entity: Id, GRNNumber, POId (nullable), SupplierId, Date, Items, Status, Notes. |
-| 363 | GRN from PO | P1 | 🔨 | Create GRN linked to purchase order. Pre-fills expected items from PO. |
+| 362 | GRN model | P1 | ✅ | Entity: Id, GRNNumber, POId (nullable), SupplierId, Date, Items, Status, Notes. |
+| 363 | GRN from PO | P1 | ✅ | Create GRN linked to purchase order. Pre-fills expected items from PO. |
 | 364 | GRN without PO | P2 | 🔨 | Direct goods receipt for walk-in purchases without prior PO. |
-| 365 | GRN line items | P1 | 🔨 | GRNItem: ProductId, QtyExpected, QtyReceived, QtyRejected, UnitCost. |
-| 366 | GRN → stock update | P1 | 🔨 | On GRN confirmation, auto-increase product stock by received quantity. |
-| 367 | GRN → cost update | P1 | 🔨 | Update product cost price from GRN unit cost (weighted average or latest). |
+| 365 | GRN line items | P1 | ✅ | GRNItem: ProductId, QtyExpected, QtyReceived, QtyRejected, UnitCost. |
+| 366 | GRN → stock update | P1 | ✅ | On GRN confirmation, auto-increase product stock by received quantity. |
+| 367 | GRN → cost update | P1 | ✅ | Update product cost price from GRN unit cost (weighted average or latest). |
 | 368 | GRN quality check | P2 | 🔨 | Mark items as Accepted/Rejected during receipt inspection. |
-| 369 | GRN search | P1 | 🔨 | Search by GRN number, PO number, supplier name, date. |
-| 370 | GRN paging | P1 | 🔨 | Server-side paging for GRN list. |
+| 369 | GRN search | P1 | ✅ | Search by GRN number, PO number, supplier name, date. |
+| 370 | GRN paging | P1 | ✅ | Server-side paging for GRN list. |
 | 371 | GRN print | P2 | 🔨 | Print GRN document as internal goods receipt record. |
-| 372 | GRN history | P1 | 🔨 | View all past goods received notes. |
+| 372 | GRN history | P1 | ✅ | View all past goods received notes. |
 | 373 | GRN export (CSV) | P2 | 🔨 | Export GRN data to CSV. |
 | 374 | Purchase return to supplier | P2 | 🔨 | Return defective/excess goods back to supplier with documentation. |
 | 375 | Debit note generation | P2 | 🔨 | Generate debit note document for supplier returns (reduces payable). |
@@ -519,7 +519,7 @@
 | 380 | Label: MRP | P1 | 🔨 | Print MRP on label (Indian legal requirement for packaged goods). |
 | 381 | Label: size/color | P2 | 🔨 | Print variant info (Size: L, Color: Black) on label. |
 | 382 | Batch barcode printing | P1 | 🔨 | Select multiple products → print N labels each on label sheet. |
-| 383 | Barcode scanner input handling | P0 | 🔨 | Detect barcode scanner input (fast keystroke sequence) vs manual typing. |
+| 383 | Barcode scanner input handling | P0 | ✅ | Detect barcode scanner input (fast keystroke sequence) vs manual typing. |
 | 384 | Barcode auto-generate | P2 | 🔨 | Auto-generate EAN-13 barcode if product has none assigned. |
 | 385 | Barcode format selection | P2 | 🔨 | Choose barcode symbology: EAN-13, Code128, Code39, QR. |
 | 386 | Barcode label paper size | P2 | 🔨 | Configure for label sheet: 65-up A4, continuous roll, custom dimensions. |
@@ -530,15 +530,15 @@
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
 | 388 | Today's sales total | P0 | ✅ | Real-time aggregate of today's completed sales. |
-| 389 | Today's return total | P0 | 🔨 | Aggregate of today's returns. |
-| 390 | Today's net sales | P0 | 🔨 | Sales − Returns for today. |
-| 391 | Today's profit | P1 | 🔨 | Net sales revenue − cost of goods sold for today. |
+| 389 | Today's return total | P0 | ✅ | Aggregate of today's returns. |
+| 390 | Today's net sales | P0 | ✅ | Sales − Returns for today. |
+| 391 | Today's profit | P1 | ✅ | Net sales revenue − cost of goods sold for today. |
 | 392 | Today's transaction count | P0 | ✅ | Number of completed bills today. |
-| 393 | Average bill value | P1 | 🔨 | Total sales / transaction count. Key retail metric. |
-| 394 | Top 5 products today | P1 | 🔨 | Best-selling products by quantity today. |
+| 393 | Average bill value | P1 | ✅ | Total sales / transaction count. Key retail metric. |
+| 394 | Top 5 products today | P1 | ✅ | Best-selling products by quantity today. |
 | 395 | Low stock alerts count | P0 | ✅ | Badge showing count of products below min stock level. |
-| 396 | Out of stock count | P0 | 🔨 | Badge showing count of products with zero stock. |
-| 397 | Pending payments count | P1 | 🔨 | Count of customers with outstanding credit balances. |
+| 396 | Out of stock count | P0 | ✅ | Badge showing count of products with zero stock. |
+| 397 | Pending payments count | P1 | ✅ | Count of customers with outstanding credit balances. |
 | 398 | Monthly sales trend | P1 | 🔨 | Bar/line chart showing daily sales for last 30 days. |
 | 399 | Monthly expense trend | P2 | 🔨 | Bar chart showing daily expenses for last 30 days. |
 | 400 | Category sales pie chart | P2 | 🔨 | Pie chart breaking down revenue by product category. |
@@ -546,12 +546,12 @@
 | 402 | Year-over-year comparison | P2 | 🔨 | Compare this month vs same month last year. |
 | 403 | Sales target vs actual | P2 | 🔨 | Set monthly target. Dashboard shows progress bar. |
 | 404 | Quick action tiles | P0 | ✅ | Clickable tiles: New Sale, Add Product, View Reports, Day End. |
-| 405 | Recent sales list | P1 | 🔨 | Last 10 transactions: invoice#, time, amount. |
+| 405 | Recent sales list | P1 | ✅ | Last 10 transactions: invoice#, time, amount. |
 | 406 | Upcoming tasks | P2 | 🔨 | Pending POs, overdue payments, backup reminders. |
-| 407 | Dashboard auto-refresh | P1 | 🔨 | Timer refreshes dashboard data every 60 seconds. |
+| 407 | Dashboard auto-refresh | P1 | ✅ | Timer refreshes dashboard data every 60 seconds. |
 | 408 | Dashboard widget layout | P2 | 🔨 | Drag-and-drop widget positioning. |
 | 409 | Dashboard print | P2 | 🔨 | Print daily summary from dashboard. |
-| 410 | Dashboard date selector | P1 | 🔨 | View dashboard metrics for any past date, not just today. |
+| 410 | Dashboard date selector | P1 | ✅ | View dashboard metrics for any past date, not just today. |
 
 ---
 
@@ -564,13 +564,13 @@
 | 411 | Full keyboard nav in billing | P0 | ✅ | Tab through: search → qty → discount → payment → complete. No mouse needed. |
 | 412 | F-key shortcuts | P0 | ✅ | F1=Help, F2=New Sale, F3=Search, F5=Pay, F8=Hold, F9=Recall. |
 | 413 | Ctrl+key shortcuts | P0 | ✅ | Ctrl+N=New, Ctrl+S=Save, Ctrl+P=Print, Ctrl+E=Edit, Ctrl+D=Duplicate. |
-| 414 | Shortcut cheat sheet | P1 | 🔨 | F1 or ? key opens overlay listing all keyboard shortcuts. |
+| 414 | Shortcut cheat sheet | P1 | ✅ | F1 or ? key opens overlay listing all keyboard shortcuts. |
 | 415 | Focus visible indicator | P0 | ✅ | Clear focus ring on active element. Styled in DesignSystem.xaml. |
 | 416 | Tab order optimization | P0 | ✅ | Logical tab sequence matching left-to-right, top-to-bottom reading order. |
 | 417 | Escape to cancel | P0 | ✅ | Escape key on all forms triggers cancel/close action. |
 | 418 | Enter to confirm | P0 | ✅ | Enter key submits active form (KeyboardNav.DefaultCommand). |
 | 419 | Arrow keys in DataGrid | P0 | ✅ | Navigate DataGrid rows with up/down arrows. Enter to select. |
-| 420 | Quick search focus (Ctrl+F) | P1 | 🔨 | Ctrl+F focuses the search box from anywhere on the page. |
+| 420 | Quick search focus (Ctrl+F) | P1 | ✅ | Ctrl+F focuses the search box from anywhere on the page. |
 | 421 | Screen reader labels | P2 | 🔨 | AutomationProperties.Name on all interactive controls for accessibility. |
 | 422 | High contrast mode | P2 | 🔨 | Alternative high-contrast color theme for visually impaired users. |
 | 423 | Font size scaling | P2 | 🔨 | Configurable font scale factor (100%/125%/150%) for readability. |
@@ -587,8 +587,8 @@
 | 429 | Duplicate barcode prevention | P0 | ✅ | Unique index on Barcode. Friendly error on duplicate attempt. |
 | 430 | Concurrency conflict handling | P0 | ✅ | DbUpdateConcurrencyException caught → "Modified by another user" message. |
 | 431 | Network error handling | P0 | ✅ | Offline mode detection → graceful degradation with queued ops. |
-| 432 | Validation summary | P1 | 🔨 | Show all validation errors in one panel instead of one at a time. |
-| 433 | Field-level error tooltips | P1 | 🔨 | Tooltip popup on hover over invalid field showing specific error. |
+| 432 | Validation summary | P1 | ✅ | Show all validation errors in one panel instead of one at a time. |
+| 433 | Field-level error tooltips | P1 | ✅ | Tooltip popup on hover over invalid field showing specific error. |
 | 434 | Auto-retry on transient errors | P1 | ✅ | EF Core execution strategy with configurable retry count. |
 | 435 | Friendly error messages | P0 | ✅ | No stack traces shown to user. All errors formatted as user-readable text. |
 | 436 | Error logging to file | P0 | ✅ | FileLoggerProvider logs all exceptions with timestamp and context. |
@@ -600,11 +600,11 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 440 | Thermal receipt 58mm | P1 | 🔨 | Narrow 58mm thermal printer format. Condensed layout. |
-| 441 | Thermal receipt 80mm | P0 | 🔨 | Standard 80mm thermal printer format. Most common in Indian retail. |
-| 442 | A4 tax invoice | P1 | 🔨 | Full-page GST tax invoice. Company letterhead, HSN summary, terms. |
-| 443 | A5 half-page invoice | P2 | 🔨 | Compact invoice format for smaller transactions. |
-| 444 | Delivery challan | P2 | 🔨 | Goods dispatch document for deliveries (no price, only items + qty). |
+| 440 | Thermal receipt 58mm | P1 | ✅ | Narrow 58mm thermal printer format. Condensed layout. |
+| 441 | Thermal receipt 80mm | P0 | ✅ | Standard 80mm thermal printer format. Most common in Indian retail. |
+| 442 | A4 tax invoice | P1 | ✅ | Full-page GST tax invoice. Company letterhead, HSN summary, terms. |
+| 443 | A5 half-page invoice | P2 | ✅ | Compact invoice format for smaller transactions. |
+| 444 | Delivery challan | P2 | ✅ | Goods dispatch document for deliveries (no price, only items + qty). |
 | 445 | Barcode label sheet | P1 | 🔨 | Multiple barcode labels per A4 sheet (e.g., Avery 65-up). |
 | 446 | Price tag printing | P2 | 🔨 | Product name + sale price + MRP tags for shelf display. |
 | 447 | Daily sales report print | P1 | 🔨 | Printable formatted daily sales summary. |
@@ -624,16 +624,16 @@
 | 456 | App version display | P0 | ✅ | About screen: version number, build date, copyright. |
 | 457 | Theme: Light/Dark | P2 | 🔨 | Toggle between light and dark color themes. |
 | 458 | Language: English | P0 | ✅ | Default English UI. Framework for future localization. |
-| 459 | Date format config | P1 | 🔨 | dd/MM/yyyy (Indian default). Configurable via settings. |
-| 460 | Currency format config | P1 | 🔨 | ₹1,23,456.00 (Indian lakh grouping). Already set via en-IN culture. |
-| 461 | Page size config | P2 | 🔨 | User chooses 25/50/100 rows per page in DataGrids. |
-| 462 | Auto-logout timer | P2 | 🔨 | Inactivity timeout: return to login screen after N minutes. |
+| 459 | Date format config | P1 | ✅ | dd/MM/yyyy (Indian default). Configurable via settings. |
+| 460 | Currency format config | P1 | ✅ | ₹1,23,456.00 (Indian lakh grouping). Already set via en-IN culture. |
+| 461 | Page size config | P2 | ✅ | User chooses 25/50/100 rows per page in DataGrids. |
+| 462 | Auto-logout timer | P2 | ✅ | Inactivity timeout: return to login screen after N minutes. |
 | 463 | Sound effects toggle | P2 | 🔨 | Enable/disable beep on barcode scan, alert sounds. |
 | 464 | Startup mode config | P2 | 🔨 | Choose whether app starts in Billing mode or Management mode. |
 | 465 | License key / activation | P2 | 🔨 | License validation for commercial distribution. |
 | 466 | Update check | P2 | 🔨 | Check for new app versions on startup or manually. |
 | 467 | System health monitor | P2 | 🔨 | Display: DB file size, memory usage, app uptime. |
-| 468 | Factory reset | P2 | 🔨 | Delete all data and return to first-time setup. Master PIN required. |
+| 468 | Factory reset | P2 | ✅ | Delete all data and return to first-time setup. Master PIN required. |
 | 469 | Feature flags management | P1 | ✅ | Enable/disable features via FeatureToggleService and appsettings.json. |
 | 470 | Onboarding wizard | P0 | ✅ | First-time setup: firm details → PINs → confirm. 3-step wizard. |
 

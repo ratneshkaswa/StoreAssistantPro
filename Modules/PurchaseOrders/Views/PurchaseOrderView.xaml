@@ -32,6 +32,7 @@
 
             <TextBox AutomationProperties.Name="Purchase order search"
                      Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      h:Watermark.Text="e.g. PO-1024 or Sonali Suppliers"/>
             <ComboBox Grid.Column="1" ItemsSource="{Binding StatusOptions}"
                       AutomationProperties.Name="Purchase order status filter"
@@ -39,7 +40,7 @@
                       Width="{StaticResource FieldWidthStandard}"
                       Margin="{StaticResource InlineControlSpacing}"/>
             <Button Grid.Column="2" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- PO list + detail -->
@@ -54,6 +55,9 @@
             <DataGrid AutomationProperties.Name="Purchase orders" ItemsSource="{Binding Orders}"
                       SelectedItem="{Binding SelectedOrder}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="📋"
+                      h:DataGridEmptyState.Title="No purchase orders found"
+                      h:DataGridEmptyState.Description="Create a purchase order or adjust the current search and status filter to see results."
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -61,7 +65,19 @@
                     <DataGridTextColumn Header="PO#" Binding="{Binding OrderNumber}" Width="*"/>
                     <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier.Name}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Date" Binding="{Binding OrderDate, StringFormat=d}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTemplateColumn Header="Status" SortMemberPath="Status" Width="{StaticResource ColumnWidthPrice}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SemanticStatusPillStyle}"
+                                        Tag="{Binding Status, StringFormat={}{0}}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Status, Converter={StaticResource StatusDisplayTextConverter}}"
+                                               Style="{StaticResource SemanticStatusPillTextStyle}"
+                                               Tag="{Binding Status, StringFormat={}{0}}"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
                 </DataGrid.Columns>

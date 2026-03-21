@@ -9,9 +9,18 @@ namespace StoreAssistantPro.Modules.Billing.Services;
 public class BillingService(
     IDbContextFactory<AppDbContext> contextFactory,
     ILoginService loginService,
+    IAuditService auditService,
+    ICashRegisterService cashRegisterService,
     IPerformanceMonitor perf,
     IRegionalSettingsService regional) : IBillingService
 {
+    public async Task<decimal> GetMaxDiscountPercentAsync(CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        return config?.MaxDiscountPercent ?? 0;
+    }
+
     public async Task<Sale> CompleteSaleAsync(CompleteSaleDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
@@ -19,9 +28,30 @@ public class BillingService(
             throw new InvalidOperationException("Cart is empty.");
         if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
             throw new InvalidOperationException("Payment method is required.");
-        if (!string.Equals(dto.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase)
+
+        // Split payment validation (#118)
+        var isSplit = dto.SplitPayments is { Count: > 0 };
+        if (isSplit)
+        {
+            var splitTotal = dto.SplitPayments!.Sum(p => p.Amount);
+            foreach (var leg in dto.SplitPayments!)
+            {
+                if (string.IsNullOrWhiteSpace(leg.Method))
+                    throw new InvalidOperationException("Each split payment leg must have a method.");
+                if (leg.Amount <= 0)
+                    throw new InvalidOperationException("Each split payment leg amount must be positive.");
+                if (!string.Equals(leg.Method, "Cash", StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(leg.Method, "Credit", StringComparison.OrdinalIgnoreCase)
+                    && string.IsNullOrWhiteSpace(leg.Reference))
+                    throw new InvalidOperationException($"Payment reference required for {leg.Method} payment.");
+            }
+        }
+        else if (!string.Equals(dto.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(dto.PaymentMethod, "Credit", StringComparison.OrdinalIgnoreCase)
             && string.IsNullOrWhiteSpace(dto.PaymentReference))
+        {
             throw new InvalidOperationException("Payment reference is required for non-cash sales.");
+        }
         if (dto.DiscountValue < 0)
             throw new InvalidOperationException("Discount value cannot be negative.");
         if (dto.DiscountType == DiscountType.Percentage && dto.DiscountValue > 100)
@@ -33,7 +63,11 @@ public class BillingService(
         if (dto.Items.Any(item => item.ItemDiscountRate is < 0 or > 100))
             throw new InvalidOperationException("Cart item discount must be between 0 and 100.");
 
-        using var _ = perf.BeginScope("BillingService.CompleteSaleAsync");
+        // Day close lockdown (#246): block sales after register is closed for the day
+        if (await cashRegisterService.IsDayClosedAsync(regional.Now, ct).ConfigureAwait(false))
+            throw new InvalidOperationException("Business day is closed. No more sales allowed today.");
+
+        using var scope = perf.BeginScope("BillingService.CompleteSaleAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         // Max discount limit (#179) + approval PIN (#178)
@@ -73,11 +107,17 @@ public class BillingService(
             var items = new List<SaleItem>();
             decimal subtotal = 0;
 
+            var priceOverrides = new List<(int ProductId, string ProductName, decimal OldPrice, decimal NewPrice)>();
+
             foreach (var ci in dto.Items)
             {
                 var discountedPrice = ci.UnitPrice * (1 - ci.ItemDiscountRate / 100m);
                 var lineTotal = ci.Quantity * discountedPrice;
                 subtotal += lineTotal;
+
+                var cessAmount = ci.CessRate > 0
+                    ? lineTotal * ci.CessRate / 100m
+                    : 0;
 
                 items.Add(new SaleItem
                 {
@@ -89,13 +129,16 @@ public class BillingService(
                     ItemFlatDiscount = ci.ItemDiscountAmount,
                     TaxRate = ci.TaxRate,
                     IsTaxInclusive = ci.IsTaxInclusive,
-                    TaxAmount = ci.TaxAmount
+                    TaxAmount = ci.TaxAmount,
+                    CessRate = ci.CessRate,
+                    CessAmount = cessAmount
                 });
 
-                // Deduct stock
+                // Deduct stock + detect price override (#294)
                 if (ci.ProductVariantId.HasValue)
                 {
                     var variant = await context.ProductVariants
+                        .Include(v => v.Product)
                         .FirstOrDefaultAsync(v => v.Id == ci.ProductVariantId.Value, ct)
                         .ConfigureAwait(false)
                         ?? throw new InvalidOperationException($"Variant Id {ci.ProductVariantId} not found.");
@@ -103,6 +146,9 @@ public class BillingService(
                         throw new InvalidOperationException(
                             $"Insufficient stock for variant {ci.ProductVariantId}. Available: {variant.Quantity}, requested: {ci.Quantity}.");
                     variant.Quantity -= ci.Quantity;
+
+                    if (variant.Product is not null && ci.UnitPrice != variant.Product.SalePrice)
+                        priceOverrides.Add((ci.ProductId, variant.Product.Name, variant.Product.SalePrice, ci.UnitPrice));
                 }
                 else
                 {
@@ -114,6 +160,9 @@ public class BillingService(
                         throw new InvalidOperationException(
                             $"Insufficient stock for product '{product.Name}'. Available: {product.Quantity}, requested: {ci.Quantity}.");
                     product.Quantity -= ci.Quantity;
+
+                    if (ci.UnitPrice != product.SalePrice)
+                        priceOverrides.Add((ci.ProductId, product.Name, product.SalePrice, ci.UnitPrice));
                 }
             }
 
@@ -131,7 +180,7 @@ public class BillingService(
                 InvoiceNumber = invoiceNumber,
                 SaleDate = regional.Now,
                 TotalAmount = subtotal - discountAmount,
-                PaymentMethod = dto.PaymentMethod,
+                PaymentMethod = isSplit ? "Split" : dto.PaymentMethod,
                 PaymentReference = dto.PaymentReference,
                 DiscountType = dto.DiscountType,
                 DiscountValue = dto.DiscountValue,
@@ -143,9 +192,79 @@ public class BillingService(
                 Items = items
             };
 
+            // Save split payment legs (#118)
+            if (isSplit)
+            {
+                foreach (var leg in dto.SplitPayments!)
+                {
+                    sale.Payments.Add(new SalePayment
+                    {
+                        Method = leg.Method,
+                        Amount = leg.Amount,
+                        Reference = leg.Reference
+                    });
+                }
+            }
+            else
+            {
+                sale.Payments.Add(new SalePayment
+                {
+                    Method = dto.PaymentMethod,
+                    Amount = sale.TotalAmount,
+                    Reference = dto.PaymentReference
+                });
+            }
+
+            // Credit payment creates a debtor entry (#119)
+            var creditAmount = isSplit
+                ? dto.SplitPayments!
+                    .Where(p => string.Equals(p.Method, "Credit", StringComparison.OrdinalIgnoreCase))
+                    .Sum(p => p.Amount)
+                : string.Equals(dto.PaymentMethod, "Credit", StringComparison.OrdinalIgnoreCase)
+                    ? sale.TotalAmount
+                    : 0m;
+
+            if (creditAmount > 0)
+            {
+                if (!dto.CustomerId.HasValue)
+                    throw new InvalidOperationException("Credit payment requires a linked customer.");
+
+                var customer = await context.Customers
+                    .FirstOrDefaultAsync(c => c.Id == dto.CustomerId.Value, ct)
+                    .ConfigureAwait(false);
+
+                if (customer is not null)
+                {
+                    customer.TotalPurchaseAmount += sale.TotalAmount;
+                    customer.VisitCount++;
+                }
+
+                context.Debtors.Add(new Debtor
+                {
+                    Name = customer?.Name ?? "Walk-in",
+                    Phone = customer?.Phone ?? "",
+                    TotalAmount = creditAmount,
+                    PaidAmount = 0,
+                    Date = regional.Now,
+                    Note = $"Credit sale {invoiceNumber}"
+                });
+            }
+
             context.Sales.Add(sale);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             await tx.CommitAsync(ct).ConfigureAwait(false);
+
+            // Audit: sale completion (#293) + discount (#295)
+            _ = auditService.LogSaleCompletedAsync(sale, dto.CashierRole, ct);
+            if (discountAmount > 0)
+                _ = auditService.LogDiscountAsync(sale.Id, sale.InvoiceNumber,
+                    dto.DiscountType.ToString(), dto.DiscountValue, discountAmount,
+                    dto.CashierRole, ct);
+
+            // Audit: price overrides (#294)
+            foreach (var po in priceOverrides)
+                _ = auditService.LogPriceOverrideAsync(po.ProductId, po.ProductName,
+                    po.OldPrice, po.NewPrice, dto.CashierRole, ct);
 
             return sale;
         }
@@ -216,7 +335,11 @@ public class BillingService(
     private async Task<string> GenerateNextInvoiceAsync(AppDbContext context, CancellationToken ct)
     {
         var today = regional.Now.Date;
-        var prefix = $"INV-{today:yyyyMMdd}-";
+
+        // Use configurable invoice prefix (#313)
+        var config = await context.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        var prefixBase = string.IsNullOrWhiteSpace(config?.InvoicePrefix) ? "INV" : config.InvoicePrefix.Trim();
+        var prefix = $"{prefixBase}-{today:yyyyMMdd}-";
 
         var lastInvoice = await context.Sales
             .Where(s => s.InvoiceNumber.StartsWith(prefix))

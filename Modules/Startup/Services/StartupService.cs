@@ -81,6 +81,8 @@ public class StartupService(
             appConfig.FinancialYearStartMonth = 4;
             appConfig.FinancialYearEndMonth = 3;
             appConfig.GstRegistrationType = "Regular";
+            appConfig.InvoicePrefix = "INV";
+            appConfig.ReceiptFooterText = "Thank you! Visit again!";
             appConfig.MasterPinHash = PinHasher.Hash("123456");
             appConfig.IsDefaultAdminPin = true;
             appConfig.IsInitialized = true;

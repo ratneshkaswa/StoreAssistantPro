@@ -17,6 +17,7 @@ public static class VendorsModule
         pageRegistry.Map<VendorManagementViewModel>(VendorManagementPage)
             .RequireFeature(VendorManagementPage, FeatureFlags.VendorManagement);
         services.AddTransient<IVendorService, VendorService>();
+        services.AddTransient<IVendorLedgerService, VendorLedgerService>();
         services.AddTransient<VendorManagementViewModel>();
         return services;
     }

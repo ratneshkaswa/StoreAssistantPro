@@ -48,6 +48,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProductTaxMapping> ProductTaxMappings => Set<ProductTaxMapping>();
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<PettyCashDeposit> PettyCashDeposits => Set<PettyCashDeposit>();
     public DbSet<Debtor> Debtors => Set<Debtor>();
     public DbSet<Order> Orders => Set<Order>();
@@ -59,6 +60,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Salary> Salaries => Set<Salary>();
     public DbSet<BranchBill> BranchBills => Set<BranchBill>();
     public DbSet<SalesPurchaseEntry> SalesPurchaseEntries => Set<SalesPurchaseEntry>();
+    public DbSet<SalePayment> SalePayments => Set<SalePayment>();
+    public DbSet<CashRegister> CashRegisters => Set<CashRegister>();
+    public DbSet<CashMovement> CashMovements => Set<CashMovement>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<HeldBill> HeldBills => Set<HeldBill>();
+    public DbSet<HeldBillItem> HeldBillItems => Set<HeldBillItem>();
+    public DbSet<StockTake> StockTakes => Set<StockTake>();
+    public DbSet<StockTakeItem> StockTakeItems => Set<StockTakeItem>();
+    public DbSet<VendorPayment> VendorPayments => Set<VendorPayment>();
+    public DbSet<Quotation> Quotations => Set<Quotation>();
+    public DbSet<QuotationItem> QuotationItems => Set<QuotationItem>();
+    public DbSet<GoodsReceivedNote> GoodsReceivedNotes => Set<GoodsReceivedNote>();
+    public DbSet<GRNItem> GRNItems => Set<GRNItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,6 +133,33 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(s => s.StaffId)
                   .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<SalePayment>(entity =>
+        {
+            entity.Property(p => p.Amount).HasColumnType("decimal(18,2)");
+            entity.HasOne(p => p.Sale)
+                  .WithMany(s => s.Payments)
+                  .HasForeignKey(p => p.SaleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CashRegister>(entity =>
+        {
+            entity.Property(r => r.OpeningBalance).HasColumnType("decimal(18,2)");
+            entity.Property(r => r.ClosingBalance).HasColumnType("decimal(18,2)");
+            entity.Property(r => r.ExpectedBalance).HasColumnType("decimal(18,2)");
+            entity.Property(r => r.Discrepancy).HasColumnType("decimal(18,2)");
+            entity.HasIndex(r => r.OpenedAt);
+        });
+
+        modelBuilder.Entity<CashMovement>(entity =>
+        {
+            entity.Property(m => m.Amount).HasColumnType("decimal(18,2)");
+            entity.HasOne(m => m.CashRegister)
+                  .WithMany(r => r.Movements)
+                  .HasForeignKey(m => m.CashRegisterId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<TaxMaster>(entity =>
@@ -525,6 +566,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(e => e.Category);
         });
 
+        // ── ExpenseCategory (#227) ────────────────────────────────
+        modelBuilder.Entity<ExpenseCategory>(entity =>
+        {
+            entity.HasIndex(ec => ec.Name).IsUnique();
+        });
+
         // ── PettyCashDeposit ───────────────────────────────────────
         modelBuilder.Entity<PettyCashDeposit>(entity =>
         {
@@ -626,6 +673,131 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Ignore(e => e.DisplayAmount);
             entity.HasIndex(e => e.Type);
             entity.HasIndex(e => e.Date);
+        });
+
+        // ── AuditLog (#291) ───────────────────────────────────────
+        modelBuilder.Entity<AuditLog>(entity =>
+        {
+            entity.HasIndex(a => a.Action);
+            entity.HasIndex(a => a.EntityType);
+            entity.HasIndex(a => a.Timestamp);
+            entity.HasIndex(a => a.UserId);
+        });
+
+        // ── HeldBill (#336-#346) ──────────────────────────────────
+        modelBuilder.Entity<HeldBill>(entity =>
+        {
+            entity.Property(h => h.Total).HasColumnType("decimal(18,2)");
+            entity.HasIndex(h => h.IsActive);
+            entity.HasIndex(h => h.HeldAt);
+        });
+
+        modelBuilder.Entity<HeldBillItem>(entity =>
+        {
+            entity.Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
+            entity.Property(i => i.ItemDiscountRate).HasColumnType("decimal(5,2)");
+            entity.Property(i => i.ItemDiscountAmount).HasColumnType("decimal(18,2)");
+            entity.HasOne(i => i.HeldBill)
+                  .WithMany(h => h.Items)
+                  .HasForeignKey(i => i.HeldBillId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── StockTake (#69) ──────────────────────────────────────
+        modelBuilder.Entity<StockTake>(entity =>
+        {
+            entity.HasIndex(s => s.Status);
+            entity.HasIndex(s => s.StartedAt);
+        });
+
+        modelBuilder.Entity<StockTakeItem>(entity =>
+        {
+            entity.HasOne(i => i.StockTake)
+                  .WithMany(s => s.Items)
+                  .HasForeignKey(i => i.StockTakeId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(i => i.Product)
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── VendorPayment (#87 / #90) ─────────────────────────────
+        modelBuilder.Entity<VendorPayment>(entity =>
+        {
+            entity.Property(p => p.Amount).HasColumnType("decimal(18,2)");
+            entity.HasOne(p => p.Vendor)
+                  .WithMany()
+                  .HasForeignKey(p => p.VendorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(p => p.VendorId);
+            entity.HasIndex(p => p.PaymentDate);
+        });
+
+        // ── Quotation (#348-#358) ─────────────────────────────────
+        modelBuilder.Entity<Quotation>(entity =>
+        {
+            entity.Property(q => q.QuoteNumber).HasMaxLength(30);
+            entity.HasIndex(q => q.QuoteNumber).IsUnique();
+            entity.HasIndex(q => q.QuoteDate);
+            entity.HasIndex(q => q.Status);
+            entity.Property(q => q.TotalAmount).HasColumnType("decimal(18,2)");
+            entity.HasOne(q => q.Customer)
+                  .WithMany()
+                  .HasForeignKey(q => q.CustomerId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(q => q.ConvertedSale)
+                  .WithMany()
+                  .HasForeignKey(q => q.ConvertedSaleId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<QuotationItem>(entity =>
+        {
+            entity.Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
+            entity.Property(i => i.DiscountRate).HasColumnType("decimal(5,2)");
+            entity.Property(i => i.TaxAmount).HasColumnType("decimal(18,2)");
+            entity.Property(i => i.CessAmount).HasColumnType("decimal(18,2)");
+            entity.HasOne(i => i.Quotation)
+                  .WithMany(q => q.Items)
+                  .HasForeignKey(i => i.QuotationId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.Product)
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── GoodsReceivedNote (#362-#372) ─────────────────────────
+        modelBuilder.Entity<GoodsReceivedNote>(entity =>
+        {
+            entity.Property(g => g.GRNNumber).HasMaxLength(30);
+            entity.HasIndex(g => g.GRNNumber).IsUnique();
+            entity.HasIndex(g => g.ReceivedDate);
+            entity.HasIndex(g => g.Status);
+            entity.Property(g => g.TotalAmount).HasColumnType("decimal(18,2)");
+            entity.HasOne(g => g.Supplier)
+                  .WithMany()
+                  .HasForeignKey(g => g.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(g => g.PurchaseOrder)
+                  .WithMany()
+                  .HasForeignKey(g => g.PurchaseOrderId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<GRNItem>(entity =>
+        {
+            entity.Property(i => i.UnitCost).HasColumnType("decimal(18,2)");
+            entity.HasOne(i => i.GRN)
+                  .WithMany(g => g.Items)
+                  .HasForeignKey(i => i.GRNId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.Product)
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

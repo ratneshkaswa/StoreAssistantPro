@@ -33,4 +33,8 @@ public static class FeatureFlags
     public const string Categories = "Categories";
     public const string Brands = "Brands";
     public const string SaleHistory = "SaleHistory";
+    public const string CashRegister = "CashRegister";
+    public const string Backup = "Backup";
+    public const string Quotations = "Quotations";
+    public const string GRN = "GRN";
 }

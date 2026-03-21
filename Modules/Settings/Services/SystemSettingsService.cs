@@ -52,6 +52,9 @@ public class SystemSettingsService(
         settings.BackupTime = dto.BackupTime?.Trim();
         settings.RestoreOption = dto.RestoreOption?.Trim();
         settings.DefaultPrinter = dto.DefaultPrinter?.Trim();
+        settings.PrinterWidth = dto.PrinterWidth;
+        settings.DefaultPageSize = dto.DefaultPageSize;
+        settings.AutoLogoutMinutes = dto.AutoLogoutMinutes;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
         logger.LogInformation("System settings updated");

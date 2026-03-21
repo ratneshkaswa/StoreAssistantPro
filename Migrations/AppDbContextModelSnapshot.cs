@@ -78,6 +78,11 @@ namespace StoreAssistantPro.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("InvoicePrefix")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<bool>("IsDefaultAdminPin")
                         .HasColumnType("bit");
 
@@ -87,6 +92,9 @@ namespace StoreAssistantPro.Migrations
                     b.Property<string>("MasterPinHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("MaxDiscountPercent")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("NumberFormat")
                         .IsRequired()
@@ -106,6 +114,11 @@ namespace StoreAssistantPro.Migrations
                         .IsRequired()
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<string>("ReceiptFooterText")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("SingletonKey")
                         .ValueGeneratedOnAdd()
@@ -127,6 +140,58 @@ namespace StoreAssistantPro.Migrations
                         .IsUnique();
 
                     b.ToTable("AppConfigs");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.AuditLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("EntityType");
+
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.BillingSession", b =>
@@ -247,6 +312,94 @@ namespace StoreAssistantPro.Migrations
                         .IsUnique();
 
                     b.ToTable("Brands");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.CashMovement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CashRegisterId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("PerformedByRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashRegisterId");
+
+                    b.ToTable("CashMovements");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.CashRegister", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CloseNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ClosedByRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal?>("ClosingBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Discrepancy")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ExpectedBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("OpenedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OpenedByRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("OpeningBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpenedAt");
+
+                    b.ToTable("CashRegisters");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.Category", b =>
@@ -562,8 +715,21 @@ namespace StoreAssistantPro.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -577,6 +743,38 @@ namespace StoreAssistantPro.Migrations
                     b.HasIndex("Date");
 
                     b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.ExpenseCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ExpenseCategories");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.ExtraCharge", b =>
@@ -651,6 +849,94 @@ namespace StoreAssistantPro.Migrations
                     b.ToTable("FinancialYears");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.GRNItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GRNId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QtyExpected")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QtyReceived")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QtyRejected")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GRNId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("GRNItems");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.GoodsReceivedNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GRNNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("PurchaseOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReceivedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GRNNumber")
+                        .IsUnique();
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("ReceivedDate");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("GoodsReceivedNotes");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.HSNCode", b =>
                 {
                     b.Property<int>("Id")
@@ -686,6 +972,102 @@ namespace StoreAssistantPro.Migrations
                         .IsUnique();
 
                     b.ToTable("HSNCodes");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.HeldBill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CashierRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("CustomerTag")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("HeldAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeldAt");
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("HeldBills");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.HeldBillItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CessRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("HeldBillId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsTaxInclusive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("ItemDiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ItemDiscountRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeldBillId");
+
+                    b.ToTable("HeldBillItems");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.InwardEntry", b =>
@@ -1136,6 +1518,9 @@ namespace StoreAssistantPro.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CessPercent")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Color")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -1489,6 +1874,106 @@ namespace StoreAssistantPro.Migrations
                     b.ToTable("PurchaseOrderItems");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.Quotation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ConvertedSaleId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("QuoteDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("QuoteNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ValidUntil")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConvertedSaleId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("QuoteDate");
+
+                    b.HasIndex("QuoteNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Quotations");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.QuotationItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CessAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CessRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DiscountRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuotationId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("QuotationId");
+
+                    b.ToTable("QuotationItems");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Salary", b =>
                 {
                     b.Property<int>("Id")
@@ -1643,8 +2128,20 @@ namespace StoreAssistantPro.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("CessAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CessRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsTaxInclusive")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("ItemDiscountRate")
                         .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("ItemFlatDiscount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -1660,6 +2157,12 @@ namespace StoreAssistantPro.Migrations
 
                     b.Property<int?>("StaffId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
@@ -1677,6 +2180,41 @@ namespace StoreAssistantPro.Migrations
                     b.ToTable("SaleItems");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.SalePayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("SalePayments");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.SaleReturn", b =>
                 {
                     b.Property<int>("Id")
@@ -1684,6 +2222,15 @@ namespace StoreAssistantPro.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApprovedByRole")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("CreditNoteNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("ProcessedByRole")
                         .HasMaxLength(20)
@@ -1782,6 +2329,9 @@ namespace StoreAssistantPro.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BaseSalary")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("DailyTarget")
                         .HasColumnType("decimal(18,2)");
@@ -1990,6 +2540,90 @@ namespace StoreAssistantPro.Migrations
                     b.ToTable("StockAlerts");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.StockTake", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DiscrepancyCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalItems")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartedAt");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("StockTakes");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.StockTakeItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CountedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCounted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockTakeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SystemQuantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("StockTakeId");
+
+                    b.ToTable("StockTakeItems");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Supplier", b =>
                 {
                     b.Property<int>("Id")
@@ -2056,6 +2690,9 @@ namespace StoreAssistantPro.Migrations
                     b.Property<bool>("AutoBackupEnabled")
                         .HasColumnType("bit");
 
+                    b.Property<int>("AutoLogoutMinutes")
+                        .HasColumnType("int");
+
                     b.Property<string>("BackupLocation")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -2063,6 +2700,11 @@ namespace StoreAssistantPro.Migrations
                     b.Property<string>("BackupTime")
                         .HasMaxLength(5)
                         .HasColumnType("nvarchar(5)");
+
+                    b.Property<string>("DefaultPageSize")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("DefaultPrinter")
                         .HasMaxLength(200)
@@ -2080,6 +2722,9 @@ namespace StoreAssistantPro.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("PrinterWidth")
+                        .HasColumnType("int");
 
                     b.Property<string>("RestoreOption")
                         .HasMaxLength(50)
@@ -2469,6 +3114,48 @@ namespace StoreAssistantPro.Migrations
                     b.ToTable("Vendors");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.VendorPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentDate");
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("VendorPayments");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Voucher", b =>
                 {
                     b.Property<int>("Id")
@@ -2530,6 +3217,17 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.CashMovement", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.CashRegister", "CashRegister")
+                        .WithMany("Movements")
+                        .HasForeignKey("CashRegisterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashRegister");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Category", b =>
                 {
                     b.HasOne("StoreAssistantPro.Models.CategoryType", "CategoryType")
@@ -2549,6 +3247,54 @@ namespace StoreAssistantPro.Migrations
                         .IsRequired();
 
                     b.Navigation("Sale");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.GRNItem", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.GoodsReceivedNote", "GRN")
+                        .WithMany("Items")
+                        .HasForeignKey("GRNId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StoreAssistantPro.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GRN");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.GoodsReceivedNote", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.PurchaseOrder", "PurchaseOrder")
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("StoreAssistantPro.Models.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseOrder");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.HeldBillItem", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.HeldBill", "HeldBill")
+                        .WithMany("Items")
+                        .HasForeignKey("HeldBillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HeldBill");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.InwardEntry", b =>
@@ -2778,6 +3524,42 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("PurchaseOrder");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.Quotation", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.Sale", "ConvertedSale")
+                        .WithMany()
+                        .HasForeignKey("ConvertedSaleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("StoreAssistantPro.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ConvertedSale");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.QuotationItem", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StoreAssistantPro.Models.Quotation", "Quotation")
+                        .WithMany("Items")
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Quotation");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Sale", b =>
                 {
                     b.HasOne("StoreAssistantPro.Models.Customer", "Customer")
@@ -2826,6 +3608,17 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("Sale");
 
                     b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.SalePayment", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.Sale", "Sale")
+                        .WithMany("Payments")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sale");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.SaleReturn", b =>
@@ -2887,6 +3680,25 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.StockTakeItem", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StoreAssistantPro.Models.StockTake", "StockTake")
+                        .WithMany("Items")
+                        .HasForeignKey("StockTakeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("StockTake");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.TaxProfileItem", b =>
                 {
                     b.HasOne("StoreAssistantPro.Models.TaxMaster", "TaxMaster")
@@ -2917,6 +3729,17 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("TaxGroup");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.VendorPayment", b =>
+                {
+                    b.HasOne("StoreAssistantPro.Models.Vendor", "Vendor")
+                        .WithMany()
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Voucher", b =>
                 {
                     b.HasOne("StoreAssistantPro.Models.Customer", "Customer")
@@ -2932,14 +3755,29 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.CashRegister", b =>
+                {
+                    b.Navigation("Movements");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.CategoryType", b =>
                 {
                     b.Navigation("Categories");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.GoodsReceivedNote", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.HSNCode", b =>
                 {
                     b.Navigation("ProductMappings");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.HeldBill", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.InwardEntry", b =>
@@ -2962,13 +3800,25 @@ namespace StoreAssistantPro.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("StoreAssistantPro.Models.Quotation", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("StoreAssistantPro.Models.Sale", b =>
                 {
                     b.Navigation("ExtraCharges");
 
                     b.Navigation("Items");
 
+                    b.Navigation("Payments");
+
                     b.Navigation("Returns");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.StockTake", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.TaxGroup", b =>

@@ -3,11 +3,16 @@ using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Settings.Services;
 
 namespace StoreAssistantPro.Modules.Settings.ViewModels;
 
-public partial class SystemSettingsViewModel(ISystemSettingsService settingsService) : BaseViewModel
+public partial class SystemSettingsViewModel(
+    ISystemSettingsService settingsService,
+    ILoginService loginService,
+    IDialogService dialogService) : BaseViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BackupModeTitle))]
@@ -26,6 +31,23 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PrinterSummaryText))]
     public partial string DefaultPrinter { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PrinterSummaryText))]
+    public partial int PrinterWidth { get; set; }
+
+    [ObservableProperty]
+    public partial double PrinterWidthValue { get; set; }
+
+    [ObservableProperty]
+    public partial string DefaultPageSize { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AutoLogoutSummary))]
+    public partial int AutoLogoutMinutes { get; set; }
+
+    [ObservableProperty]
+    public partial double AutoLogoutMinutesValue { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RestoreStatusText))]
@@ -49,7 +71,11 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
 
     public string PrinterSummaryText => string.IsNullOrWhiteSpace(DefaultPrinter)
         ? "System default printer"
-        : DefaultPrinter.Trim();
+        : $"{DefaultPrinter.Trim()} ({(PrinterWidth > 0 ? $"{PrinterWidth}mm" : "auto")})";
+
+    public string AutoLogoutSummary => AutoLogoutMinutes > 0
+        ? $"Auto-logout after {AutoLogoutMinutes} minutes of inactivity."
+        : "Auto-logout is disabled.";
 
     public string RestoreStatusText => string.IsNullOrWhiteSpace(RestoreFilePath)
         ? "No restore file selected."
@@ -59,6 +85,48 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
         ? "No backup has been created in this session."
         : $"Last backup: {Path.GetFileName(LastBackupPath.Trim())}";
 
+    partial void OnPrinterWidthChanged(int value)
+    {
+        if (Math.Abs(PrinterWidthValue - value) > double.Epsilon)
+            PrinterWidthValue = value;
+    }
+
+    partial void OnPrinterWidthValueChanged(double value)
+    {
+        var normalizedValue = Math.Max(0d, Math.Round(value, MidpointRounding.AwayFromZero));
+        if (Math.Abs(value - normalizedValue) > double.Epsilon)
+        {
+            if (Math.Abs(PrinterWidthValue - normalizedValue) > double.Epsilon)
+                PrinterWidthValue = normalizedValue;
+            return;
+        }
+
+        var roundedValue = (int)normalizedValue;
+        if (PrinterWidth != roundedValue)
+            PrinterWidth = roundedValue;
+    }
+
+    partial void OnAutoLogoutMinutesChanged(int value)
+    {
+        if (Math.Abs(AutoLogoutMinutesValue - value) > double.Epsilon)
+            AutoLogoutMinutesValue = value;
+    }
+
+    partial void OnAutoLogoutMinutesValueChanged(double value)
+    {
+        var normalizedValue = Math.Max(0d, Math.Round(value, MidpointRounding.AwayFromZero));
+        if (Math.Abs(value - normalizedValue) > double.Epsilon)
+        {
+            if (Math.Abs(AutoLogoutMinutesValue - normalizedValue) > double.Epsilon)
+                AutoLogoutMinutesValue = normalizedValue;
+            return;
+        }
+
+        var roundedValue = (int)normalizedValue;
+        if (AutoLogoutMinutes != roundedValue)
+            AutoLogoutMinutes = roundedValue;
+    }
+
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
@@ -67,6 +135,9 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
         AutoBackupEnabled = settings.AutoBackupEnabled;
         BackupTime = settings.BackupTime ?? string.Empty;
         DefaultPrinter = settings.DefaultPrinter ?? string.Empty;
+        PrinterWidth = settings.PrinterWidth;
+        DefaultPageSize = settings.DefaultPageSize;
+        AutoLogoutMinutes = settings.AutoLogoutMinutes;
     });
 
     [RelayCommand]
@@ -86,7 +157,10 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
             AutoBackupEnabled,
             BackupTime,
             null,
-            DefaultPrinter);
+            DefaultPrinter,
+            PrinterWidth,
+            DefaultPageSize,
+            AutoLogoutMinutes);
 
         await settingsService.UpdateAsync(dto, ct).ConfigureAwait(false);
         SuccessMessage = "Settings saved.";
@@ -111,5 +185,36 @@ public partial class SystemSettingsViewModel(ISystemSettingsService settingsServ
 
         await settingsService.RestoreDatabaseAsync(RestoreFilePath, ct).ConfigureAwait(false);
         SuccessMessage = "Database restored successfully. Please restart the application.";
+    });
+
+    [RelayCommand]
+    private Task FactoryResetAsync() => RunAsync(async ct =>
+    {
+        SuccessMessage = string.Empty;
+
+        if (!dialogService.Confirm(
+            "This will permanently delete ALL data and reset the application to factory defaults.\n\nAre you sure?",
+            "Factory Reset"))
+            return;
+
+        var masterPin = dialogService.PromptPassword(
+            "Enter the Master PIN to confirm factory reset.",
+            "Master PIN Required");
+
+        if (string.IsNullOrWhiteSpace(masterPin))
+        {
+            ErrorMessage = "Factory reset cancelled.";
+            return;
+        }
+
+        var isValid = await loginService.ValidateMasterPinAsync(masterPin, ct).ConfigureAwait(false);
+        if (!isValid)
+        {
+            ErrorMessage = "Invalid Master PIN. Factory reset aborted.";
+            return;
+        }
+
+        await settingsService.FactoryResetAsync(ct).ConfigureAwait(false);
+        SuccessMessage = "Factory reset complete. Please restart the application.";
     });
 }

@@ -38,6 +38,16 @@ public class SystemSettings
     [MaxLength(200)]
     public string? DefaultPrinter { get; set; }
 
+    /// <summary>Printer paper width in mm: 58, 80, or 0 for auto-detect (#455).</summary>
+    public int PrinterWidth { get; set; }
+
+    /// <summary>Default page size for invoices/reports: A4, A5, Thermal (#461).</summary>
+    [MaxLength(10)]
+    public string DefaultPageSize { get; set; } = "A4";
+
+    /// <summary>Auto-logout after N minutes of inactivity. 0 = disabled (#462).</summary>
+    public int AutoLogoutMinutes { get; set; }
+
     /// <summary>
     /// Business rule owned by Firm Management: "Inclusive" (MRP includes
     /// GST) or "Exclusive" (GST added on top).

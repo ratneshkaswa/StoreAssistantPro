@@ -28,6 +28,12 @@
                     Style="{StaticResource SegmentedButtonStyle}"/>
             <Button Content="Alerts" Tag="2" Command="{Binding SwitchTabCommand}" CommandParameter="2"
                     Style="{StaticResource SegmentedButtonStyle}"/>
+            <Button Tag="3" Command="{Binding SwitchTabCommand}" CommandParameter="3"
+                    Style="{StaticResource SegmentedButtonStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Stock Take"/>
+                </StackPanel>
+            </Button>
         </WrapPanel>
 
         <!-- Tab 0: Stock Adjustment -->
@@ -35,6 +41,7 @@
               Visibility="{Binding IsTabAdjust, Converter={StaticResource BoolToVisibility}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -98,12 +105,57 @@
 
             <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="1" Content="Apply Adjustment" Command="{Binding AdjustCommand}"
+                <!-- #76: Batch import/export -->
+                <Button Content="Import CSV" Command="{Binding ImportCsvCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Grid.Column="1" Content="Export CSV" Command="{Binding ExportCsvCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <!-- #73: Stock movement history button -->
+                <Button Grid.Column="2" Content="View History" 
+                        Command="{Binding LoadMovementHistoryCommand}"
+                        CommandParameter="{Binding SelectedProduct}"
+                        IsEnabled="{Binding HasSelectedProduct}"
+                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <Button Grid.Column="5" Content="Apply Adjustment" Command="{Binding AdjustCommand}"
                         Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
+
+            <!-- #73: Stock Movement History panel -->
+            <Border Grid.Row="3"
+                    Visibility="{Binding HasMovementHistory, Converter={StaticResource BoolToVisibility}}"
+                    BorderBrush="{StaticResource FluentStrokeDefault}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                    Padding="{StaticResource DialogPadding}"
+                    Margin="{StaticResource ItemSpacing}">
+                <StackPanel>
+                    <TextBlock Text="Stock Movement History" FontWeight="SemiBold"
+                               FontSize="{StaticResource FontSizeSubtitle}"
+                               Margin="{StaticResource ItemSpacing}"/>
+                    <DataGrid AutomationProperties.Name="Stock movement history"
+                              ItemsSource="{Binding StockMovementHistory}"
+                              Style="{StaticResource EnterpriseDataGridStyle}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column" CanUserAddRows="False"
+                              MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=g}" Width="Auto"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="Auto"/>
+                            <DataGridTextColumn Header="Change" Binding="{Binding QuantityChange}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                            <DataGridTextColumn Header="Ref" Binding="{Binding Reference}" Width="Auto"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Tab 1: Adjustment Log -->
@@ -134,6 +186,10 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <TextBlock Margin="{StaticResource ItemSpacing}">
@@ -158,7 +214,7 @@
             </DataGrid>
 
             <TextBlock Grid.Row="3" Style="{StaticResource SectionHeaderStyle}"
-                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentWarning}" Text="&#x2022;"/><Run Text=" Low Stock"/></TextBlock>
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentWarning}" Text="&#x2022;"/><Run Text=" Low Stock Products"/></TextBlock>
             <DataGrid AutomationProperties.Name="Low stock products" Grid.Row="4"
                       ItemsSource="{Binding LowStockProducts}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
@@ -173,6 +229,166 @@
                     <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="{StaticResource ColumnWidthPrice}"/>
                 </DataGrid.Columns>
             </DataGrid>
+
+            <!-- #60: Variant Low Stock Alerts -->
+            <TextBlock Grid.Row="5" Style="{StaticResource SectionHeaderStyle}"
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentWarning}" Text="&#x2022;"/><Run Text=" Low Stock Variants"/></TextBlock>
+            <DataGrid AutomationProperties.Name="Low stock variants" Grid.Row="6"
+                      ItemsSource="{Binding LowStockVariants}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column" CanUserAddRows="False"
+                      Margin="{StaticResource ItemSpacing}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
+                    <DataGridTextColumn Header="Size" Binding="{Binding Size.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Colour" Binding="{Binding Colour.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Dead Stock -->
+            <TextBlock Grid.Row="7" Style="{StaticResource SectionHeaderStyle}"
+                       Margin="{StaticResource StepContentTopSpacing}"><Run Foreground="{StaticResource FluentTextSecondary}" Text="&#x2022;"/><Run Text=" Dead Stock (90+ days no sale)"/></TextBlock>
+            <DataGrid AutomationProperties.Name="Dead stock products" Grid.Row="8"
+                      ItemsSource="{Binding DeadStockProducts}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column" CanUserAddRows="False"
+                      Margin="{StaticResource ItemSpacing}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Tab 3: Stock Take (#69) -->
+        <Grid Grid.Row="2"
+              Visibility="{Binding IsTabStockTake, Converter={StaticResource BoolToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Start / recent stock takes -->
+            <Grid Visibility="{Binding NoActiveStockTake, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+                    <TextBox Text="{Binding StockTakeNotes, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Stock take notes"
+                             Width="{StaticResource FieldWidthWide}"
+                             h:Watermark.Text="Optional notes for this count"
+                             MaxLength="500"/>
+                    <Button Content="Start New Stock Take" Command="{Binding StartStockTakeCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="1" Text="Recent Stock Takes" Style="{StaticResource SectionHeaderStyle}"
+                           Margin="{StaticResource StepContentTopSpacing}"/>
+
+                <DataGrid Grid.Row="2" AutomationProperties.Name="Recent stock takes"
+                          ItemsSource="{Binding RecentStockTakes}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column" CanUserAddRows="False"
+                          Margin="{StaticResource ItemSpacing}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Reference" Binding="{Binding Reference}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTemplateColumn Header="Status" SortMemberPath="Status" Width="{StaticResource ColumnWidthPrice}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource SemanticStatusPillStyle}"
+                                            Tag="{Binding Status, StringFormat={}{0}}"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusDisplayTextConverter}}"
+                                                   Style="{StaticResource SemanticStatusPillTextStyle}"
+                                                   Tag="{Binding Status, StringFormat={}{0}}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Items" Binding="{Binding TotalItems}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Discrepancies" Binding="{Binding DiscrepancyCount}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Started" Binding="{Binding StartedAt, StringFormat=g}" Width="*"/>
+                        <DataGridTemplateColumn Header="Action" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="View" Command="{Binding DataContext.LoadStockTakeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="8,2" Margin="2"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <!-- Active stock take count grid -->
+            <Grid Visibility="{Binding HasActiveStockTake, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Margin="{StaticResource ItemSpacing}" FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeSubtitle}">
+                    <Run Text="Stock Take: "/>
+                    <Run Text="{Binding ActiveStockTake.Reference, Mode=OneWay}" Foreground="{StaticResource FluentAccentDefault}"/>
+                </TextBlock>
+
+                <DataGrid Grid.Row="1" AutomationProperties.Name="Stock take items"
+                          ItemsSource="{Binding StockTakeItems}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          AutoGenerateColumns="False"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column" CanUserAddRows="False"
+                          Margin="{StaticResource ItemSpacing}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="System Qty" Binding="{Binding SystemQuantity}" Width="{StaticResource ColumnWidthQty}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Counted" Binding="{Binding CountedText}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Variance" Binding="{Binding Variance}" Width="{StaticResource ColumnWidthQty}" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Save" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="✓" Command="{Binding DataContext.SaveCountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Padding="8,2" Margin="2"
+                                            ToolTip="Save this count"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <!-- Stock take action buttons -->
+            <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}"
+                  Visibility="{Binding HasActiveStockTake, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Content="Cancel Stock Take" Command="{Binding CancelStockTakeCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Grid.Column="2" Content="Complete Stock Take" Command="{Binding CompleteStockTakeCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            </Grid>
         </Grid>
 
         <!-- Messages -->

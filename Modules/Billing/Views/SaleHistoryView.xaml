@@ -44,12 +44,13 @@
                         Width="{StaticResource FieldWidthCompact}"/>
 
             <TextBox Grid.Column="4" Text="{Binding InvoiceSearch, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Invoice search"
                      Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}"
                      h:Watermark.Text="e.g. INV-1024"/>
 
             <Button Grid.Column="6" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}"/>
+                    Style="{StaticResource SearchButtonStyle}"/>
         </Grid>
 
         <!-- Content: Sale list + Detail/Receipt -->
@@ -64,6 +65,9 @@
             <DataGrid AutomationProperties.Name="Sale history" ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="🧾"
+                      h:DataGridEmptyState.Title="No completed sales yet"
+                      h:DataGridEmptyState.Description="Closed invoices will appear here once checkout activity starts."
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">

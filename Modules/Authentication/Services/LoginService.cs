@@ -12,6 +12,7 @@ namespace StoreAssistantPro.Modules.Authentication.Services;
 public class LoginService(
     IDbContextFactory<AppDbContext> contextFactory,
     IEventBus eventBus,
+    IAuditService auditService,
     IPerformanceMonitor perf,
     ILogger<LoginService> logger) : ILoginService
 {
@@ -20,7 +21,7 @@ public class LoginService(
 
     public async Task<LoginResult> ValidatePinAsync(UserType userType, string pin, CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope($"LoginService.ValidatePinAsync({userType})");
+        using var scope = perf.BeginScope($"LoginService.ValidatePinAsync({userType})");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         // Must track state — cannot use AsNoTracking
@@ -53,6 +54,10 @@ public class LoginService(
 
             logger.LogInformation("Login succeeded for {UserType}", userType);
             await eventBus.PublishAsync(new UserLoginSuccessEvent(userType, DateTime.UtcNow));
+
+            // Audit: login (#297/#278)
+            _ = auditService.LogLoginAsync(userType.ToString(), ct);
+
             return LoginResult.Success();
         }
 

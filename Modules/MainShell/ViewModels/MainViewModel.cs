@@ -49,6 +49,7 @@ public partial class MainViewModel : BaseViewModel
     private const string InventoryPage = "Inventory";
     private const string BillingPage = "Billing";
     private const string SaleHistoryPage = "SaleHistory";
+    private const string CashRegisterPage = "CashRegister";
     private const string CustomerManagementPage = "CustomerManagement";
     private const string PurchaseOrdersPage = "PurchaseOrders";
     private const string FinancialYearPage = "FinancialYear";
@@ -63,6 +64,9 @@ public partial class MainViewModel : BaseViewModel
     private const string SalesPurchasePage = "SalesPurchase";
     private const string PaymentManagementPage = "PaymentManagement";
     private const string ReportsPage = "Reports";
+    private const string BackupRestorePage = "BackupRestore";
+    private const string QuotationsPage = "Quotations";
+    private const string GRNPage = "GRN";
 
     // ── Application state (single source of truth) ──
 
@@ -92,6 +96,12 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsReady { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsShortcutCheatSheetVisible { get; set; }
+
+    /// <summary>Raised when Ctrl+F is pressed to focus the search box (#420).</summary>
+    public event EventHandler? SearchFocusRequested;
+
     // ── Role-based visibility ──
 
     public bool IsAdmin => AppState.CurrentUserType == UserType.Admin;
@@ -120,6 +130,7 @@ public partial class MainViewModel : BaseViewModel
     public bool IsInventoryVisible => _features.IsEnabled(FeatureFlags.Inventory);
     public bool IsBillingVisible => _features.IsEnabled(FeatureFlags.Billing);
     public bool IsSaleHistoryVisible => _features.IsEnabled(FeatureFlags.Sales);
+    public bool IsCashRegisterVisible => _features.IsEnabled(FeatureFlags.CashRegister);
     public bool IsCustomerManagementVisible => _features.IsEnabled(FeatureFlags.Customers);
     public bool IsPurchaseOrdersVisible => _features.IsEnabled(FeatureFlags.PurchaseOrders);
     public bool IsExpenseManagementVisible => _features.IsEnabled(FeatureFlags.Expenses);
@@ -131,6 +142,9 @@ public partial class MainViewModel : BaseViewModel
     public bool IsSalesPurchaseVisible => _features.IsEnabled(FeatureFlags.SalesPurchase);
     public bool IsPaymentManagementVisible => _features.IsEnabled(FeatureFlags.Payments);
     public bool IsReportsVisible => _features.IsEnabled(FeatureFlags.Reports);
+    public bool IsBackupRestoreVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Backup);
+    public bool IsQuotationsVisible => _features.IsEnabled(FeatureFlags.Quotations);
+    public bool IsGRNVisible => _features.IsEnabled(FeatureFlags.GRN);
 
     // ── Navigation ──
 
@@ -289,6 +303,29 @@ public partial class MainViewModel : BaseViewModel
         IsNotificationsPanelVisible = false;
     }
 
+    // ── Shortcut cheat sheet (#414) ──
+
+    [RelayCommand]
+    private void ToggleShortcutCheatSheet() =>
+        IsShortcutCheatSheetVisible = !IsShortcutCheatSheetVisible;
+
+    /// <summary>Returns all registered shortcuts for the cheat sheet overlay.</summary>
+    public IReadOnlyList<ShortcutEntry> GetShortcutEntries()
+    {
+        return _quickActionService.GetActions()
+            .Where(a => !string.IsNullOrWhiteSpace(a.Gesture))
+            .OrderBy(a => a.SortOrder)
+            .Select(a => new ShortcutEntry(a.ShortcutText, a.Title, a.Description))
+            .Append(new ShortcutEntry("F1", "Shortcuts", "Show this shortcut reference"))
+            .Append(new ShortcutEntry("Ctrl+F", "Search", "Focus the search box"))
+            .ToList();
+    }
+
+    // ── Quick search focus (#420) ──
+
+    [RelayCommand]
+    private void FocusSearch() => SearchFocusRequested?.Invoke(this, EventArgs.Empty);
+
     private void NotifyCombinedVisibility()
     {
         OnPropertyChanged(nameof(IsFirmManagementVisible));
@@ -304,6 +341,7 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsInventoryVisible));
         OnPropertyChanged(nameof(IsBillingVisible));
         OnPropertyChanged(nameof(IsSaleHistoryVisible));
+        OnPropertyChanged(nameof(IsCashRegisterVisible));
         OnPropertyChanged(nameof(IsCustomerManagementVisible));
         OnPropertyChanged(nameof(IsPurchaseOrdersVisible));
         OnPropertyChanged(nameof(IsExpenseManagementVisible));
@@ -315,6 +353,9 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsSalesPurchaseVisible));
         OnPropertyChanged(nameof(IsPaymentManagementVisible));
         OnPropertyChanged(nameof(IsReportsVisible));
+        OnPropertyChanged(nameof(IsBackupRestoreVisible));
+        OnPropertyChanged(nameof(IsQuotationsVisible));
+        OnPropertyChanged(nameof(IsGRNVisible));
     }
 
     // ── Navigation commands ──
@@ -425,6 +466,12 @@ public partial class MainViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void OpenCashRegister()
+    {
+        NavigateToPage(CashRegisterPage, "Cash register");
+    }
+
+    [RelayCommand]
     private void OpenCustomerManagement()
     {
         NavigateToPage(CustomerManagementPage, "Customer management");
@@ -488,6 +535,24 @@ public partial class MainViewModel : BaseViewModel
     private void OpenReports()
     {
         NavigateToPage(ReportsPage, "Reports");
+    }
+
+    [RelayCommand]
+    private void OpenBackupRestore()
+    {
+        NavigateToPage(BackupRestorePage, "Backup and restore");
+    }
+
+    [RelayCommand]
+    private void OpenQuotations()
+    {
+        NavigateToPage(QuotationsPage, "Quotations");
+    }
+
+    [RelayCommand]
+    private void OpenGRN()
+    {
+        NavigateToPage(GRNPage, "Goods received notes");
     }
 
     // ── Switch User / Logout ──
@@ -791,6 +856,24 @@ public partial class MainViewModel : BaseViewModel
             HelpKey = "Refresh",
             Command = RefreshCurrentViewCommand,
             ShortcutText = "F5", Gesture = "F5", SortOrder = 90
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Shortcuts", Icon = "⌨",
+            Description = "Show keyboard shortcut reference",
+            HelpKey = "Shortcuts",
+            Command = ToggleShortcutCheatSheetCommand,
+            ShortcutText = "F1", Gesture = "F1", SortOrder = 95,
+            IsVisible = false
+        });
+        _quickActionService.Register(new QuickAction
+        {
+            Title = "Search", Icon = "🔍",
+            Description = "Focus the search box",
+            HelpKey = "Search",
+            Command = FocusSearchCommand,
+            ShortcutText = "Ctrl+F", Gesture = "Ctrl+F", SortOrder = 96,
+            IsVisible = false
         });
         _quickActionService.Register(new QuickAction
         {

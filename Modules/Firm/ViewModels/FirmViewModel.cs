@@ -33,7 +33,9 @@ public partial class FirmViewModel : BaseViewModel
         nameof(SelectedTaxMode),
         nameof(SelectedRoundingMethod),
         nameof(SelectedNumberToWordsLanguage),
-        nameof(NegativeStockAllowed)
+        nameof(NegativeStockAllowed),
+        nameof(InvoicePrefix),
+        nameof(ReceiptFooterText)
     ];
 
     private static readonly string[] ValidationFieldOrder =
@@ -52,7 +54,9 @@ public partial class FirmViewModel : BaseViewModel
         nameof(SelectedNumberToWordsLanguage),
         nameof(SelectedFYStartMonth),
         nameof(SelectedDateFormat),
-        nameof(SelectedCurrencySymbol)
+        nameof(SelectedCurrencySymbol),
+        nameof(InvoicePrefix),
+        nameof(ReceiptFooterText)
     ];
 
     private readonly IFirmService _firmService;
@@ -68,6 +72,8 @@ public partial class FirmViewModel : BaseViewModel
 
         SelectedFYStartMonth = "April";
         SelectedCurrencySymbol = "\u20B9";
+        InvoicePrefix = "INV";
+        ReceiptFooterText = "Thank you! Visit again!";
         PropertyChanged += OnFirmPropertyChanged;
     }
 
@@ -258,6 +264,18 @@ public partial class FirmViewModel : BaseViewModel
 
     partial void OnNegativeStockAllowedChanged(bool value) => OnEditableFieldChanged();
 
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(20, ErrorMessage = "Invoice prefix cannot exceed 20 characters.")]
+    public partial string InvoicePrefix { get; set; }
+
+    partial void OnInvoicePrefixChanged(string value) => OnEditableFieldChanged();
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(200, ErrorMessage = "Receipt footer text cannot exceed 200 characters.")]
+    public partial string ReceiptFooterText { get; set; }
+
     public ObservableCollection<string> IndianStates { get; } = new(BusinessProfileRules.IndianStateNames);
 
     public string FinancialYearDisplay
@@ -438,6 +456,8 @@ public partial class FirmViewModel : BaseViewModel
                 ? snapshot.NumberToWordsLanguage
                 : "English";
             NegativeStockAllowed = snapshot.NegativeStockAllowed;
+            InvoicePrefix = snapshot.InvoicePrefix;
+            ReceiptFooterText = snapshot.ReceiptFooterText;
         }
         finally
         {
@@ -509,7 +529,9 @@ public partial class FirmViewModel : BaseViewModel
             DefaultTaxMode: MapDisplayTaxModeToStorage(SelectedTaxMode),
             RoundingMethod: MapDisplayRoundingToStorage(SelectedRoundingMethod),
             NegativeStockAllowed: NegativeStockAllowed,
-            NumberToWordsLanguage: SelectedNumberToWordsLanguage);
+            NumberToWordsLanguage: SelectedNumberToWordsLanguage,
+            InvoicePrefix: InvoicePrefix.Trim(),
+            ReceiptFooterText: ReceiptFooterText.Trim());
 
         await _firmService.UpdateFirmAsync(dto, ct).ConfigureAwait(false);
         await _eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName, SelectedCurrencySymbol, SelectedDateFormat)).ConfigureAwait(false);

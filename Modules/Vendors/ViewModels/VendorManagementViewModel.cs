@@ -4,12 +4,17 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Vendors.Services;
 
 namespace StoreAssistantPro.Modules.Vendors.ViewModels;
 
-public partial class VendorManagementViewModel(IVendorService vendorService) : BaseViewModel
+public partial class VendorManagementViewModel(
+    IVendorService vendorService,
+    IVendorLedgerService ledgerService,
+    IRegionalSettingsService regional,
+    IAppStateService appState) : BaseViewModel
 {
     [ObservableProperty]
     public partial ObservableCollection<Vendor> Vendors { get; set; } = [];
@@ -235,6 +240,108 @@ public partial class VendorManagementViewModel(IVendorService vendorService) : B
         SuccessMessage = $"Imported {imported} vendor(s).";
         await ReloadVendorsAsync(ct);
     });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Supplier Ledger (#87) & Payment Tracking (#90)
+    // ═══════════════════════════════════════════════════════════════
+
+    [ObservableProperty]
+    public partial bool ShowLedger { get; set; }
+
+    [ObservableProperty]
+    public partial VendorLedgerSummary? LedgerSummary { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<VendorLedgerEntry> LedgerEntries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<VendorPayment> VendorPayments { get; set; } = [];
+
+    // ── Payment form fields ──
+
+    [ObservableProperty]
+    public partial string PaymentAmount { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PaymentMethod { get; set; } = "Cash";
+
+    [ObservableProperty]
+    public partial string PaymentReference { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PaymentNotes { get; set; } = string.Empty;
+
+    public ObservableCollection<string> PaymentMethods { get; } =
+    [
+        "Cash",
+        "UPI",
+        "Bank Transfer",
+        "Cheque"
+    ];
+
+    public string FormatCurrency(decimal amount) => regional.FormatCurrency(amount);
+
+    [RelayCommand]
+    private Task LoadLedgerAsync() => RunAsync(async ct =>
+    {
+        if (SelectedVendor is null) return;
+        ClearMessages();
+
+        var summaryTask = ledgerService.GetLedgerSummaryAsync(SelectedVendor.Id, ct);
+        var entriesTask = ledgerService.GetLedgerEntriesAsync(SelectedVendor.Id, ct);
+        var paymentsTask = ledgerService.GetPaymentsAsync(SelectedVendor.Id, ct);
+
+        await Task.WhenAll(summaryTask, entriesTask, paymentsTask);
+
+        LedgerSummary = summaryTask.Result;
+        LedgerEntries = new ObservableCollection<VendorLedgerEntry>(entriesTask.Result);
+        VendorPayments = new ObservableCollection<VendorPayment>(paymentsTask.Result);
+        ShowLedger = true;
+    });
+
+    [RelayCommand]
+    private Task RecordPaymentAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+
+        if (SelectedVendor is null)
+        {
+            ErrorMessage = "Select a vendor first.";
+            return;
+        }
+
+        if (!Validate(v => v
+            .Rule(decimal.TryParse(PaymentAmount, out var amt) && amt > 0, "Enter a valid payment amount.")))
+            return;
+
+        var dto = new VendorPaymentDto(
+            SelectedVendor.Id,
+            decimal.Parse(PaymentAmount),
+            PaymentMethod,
+            string.IsNullOrWhiteSpace(PaymentReference) ? null : PaymentReference.Trim(),
+            string.IsNullOrWhiteSpace(PaymentNotes) ? null : PaymentNotes.Trim(),
+            (int)appState.CurrentUserType);
+
+        await ledgerService.RecordPaymentAsync(dto, ct);
+
+        PaymentAmount = string.Empty;
+        PaymentReference = string.Empty;
+        PaymentNotes = string.Empty;
+        PaymentMethod = "Cash";
+
+        SuccessMessage = $"Payment of {regional.FormatCurrency(dto.Amount)} recorded.";
+
+        await LoadLedgerAsync();
+    });
+
+    [RelayCommand]
+    private void CloseLedger()
+    {
+        ShowLedger = false;
+        LedgerSummary = null;
+        LedgerEntries = [];
+        VendorPayments = [];
+    }
 
     [RelayCommand]
     private Task PreviousPageAsync() => RunAsync(async ct =>

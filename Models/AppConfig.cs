@@ -73,4 +73,12 @@ public class AppConfig
 
     /// <summary>Maximum allowed discount percentage (0 = unlimited). (#179)</summary>
     public decimal MaxDiscountPercent { get; set; }
+
+    /// <summary>Custom prefix for invoice numbers, e.g. "SA-" or "INV-". (#313)</summary>
+    [MaxLength(20)]
+    public string InvoicePrefix { get; set; } = "INV";
+
+    /// <summary>Configurable text printed at the bottom of every receipt. (#315)</summary>
+    [MaxLength(200)]
+    public string ReceiptFooterText { get; set; } = "Thank you! Visit again!";
 }

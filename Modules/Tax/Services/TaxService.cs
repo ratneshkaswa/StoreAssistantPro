@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Tax.Services;
 
 public class TaxService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IAuditService auditService,
     IRegionalSettingsService regional,
     IPerformanceMonitor perf) : ITaxService
 {
@@ -38,7 +39,7 @@ public class TaxService(
         ArgumentNullException.ThrowIfNull(dto);
         ValidateDto(dto);
 
-        using var _ = perf.BeginScope("TaxService.CreateAsync");
+        using var scope = perf.BeginScope("TaxService.CreateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         if (await context.TaxMasters.AnyAsync(t => t.TaxName == dto.TaxName.Trim(), ct).ConfigureAwait(false))
@@ -53,6 +54,11 @@ public class TaxService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        // Audit: tax profile created (#203)
+        _ = auditService.LogAsync("TaxCreated", "TaxMaster", null,
+            null, $"{dto.TaxName.Trim()} @ {dto.SlabPercent}%", null,
+            $"Tax profile '{dto.TaxName.Trim()}' created with rate {dto.SlabPercent}%", ct);
     }
 
     public async Task UpdateAsync(int id, TaxDto dto, CancellationToken ct = default)
@@ -60,7 +66,7 @@ public class TaxService(
         ArgumentNullException.ThrowIfNull(dto);
         ValidateDto(dto);
 
-        using var _ = perf.BeginScope("TaxService.UpdateAsync");
+        using var scope = perf.BeginScope("TaxService.UpdateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var entity = await context.TaxMasters.FirstOrDefaultAsync(t => t.Id == id, ct).ConfigureAwait(false)
@@ -69,14 +75,24 @@ public class TaxService(
         if (await context.TaxMasters.AnyAsync(t => t.TaxName == dto.TaxName.Trim() && t.Id != id, ct).ConfigureAwait(false))
             throw new InvalidOperationException($"Tax '{dto.TaxName}' already exists.");
 
+        // Capture old values for audit (#203)
+        var oldName = entity.TaxName;
+        var oldRate = entity.SlabPercent;
+
         entity.TaxName = dto.TaxName.Trim();
         entity.SlabPercent = dto.SlabPercent;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        // Audit: tax rate change (#203)
+        if (oldRate != dto.SlabPercent || oldName != dto.TaxName.Trim())
+            _ = auditService.LogAsync("TaxUpdated", "TaxMaster", id.ToString(),
+                $"{oldName} @ {oldRate}%", $"{dto.TaxName.Trim()} @ {dto.SlabPercent}%", null,
+                $"Tax profile updated: {oldName} {oldRate}% → {dto.TaxName.Trim()} {dto.SlabPercent}%", ct);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope("TaxService.DeleteAsync");
+        using var scope = perf.BeginScope("TaxService.DeleteAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var entity = await context.TaxMasters.FirstOrDefaultAsync(t => t.Id == id, ct).ConfigureAwait(false)
@@ -86,8 +102,16 @@ public class TaxService(
         if (inUse)
             throw new InvalidOperationException("Cannot delete — this tax is assigned to one or more products. Remove the assignment first.");
 
+        var deletedName = entity.TaxName;
+        var deletedRate = entity.SlabPercent;
+
         context.TaxMasters.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        // Audit: tax profile deleted (#203)
+        _ = auditService.LogAsync("TaxDeleted", "TaxMaster", id.ToString(),
+            $"{deletedName} @ {deletedRate}%", null, null,
+            $"Tax profile '{deletedName}' ({deletedRate}%) deleted", ct);
     }
 
     private static void ValidateDto(TaxDto dto)

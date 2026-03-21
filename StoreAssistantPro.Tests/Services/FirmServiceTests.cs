@@ -17,13 +17,15 @@ public class FirmServiceTests : IDisposable
     private readonly IPerformanceMonitor _perf =
         new PerformanceMonitor(NullLogger<PerformanceMonitor>.Instance);
 
+    private readonly IAuditService _auditService = Substitute.For<IAuditService>();
+
     private IFirmService CreateSut()
     {
         var factory = Substitute.For<IDbContextFactory<AppDbContext>>();
         factory.CreateDbContextAsync(Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromResult(new AppDbContext(_dbOptions)));
 
-        return new FirmService(factory, _perf);
+        return new FirmService(factory, _auditService, _perf);
     }
 
     [Fact]
@@ -121,7 +123,9 @@ public class FirmServiceTests : IDisposable
             DefaultTaxMode: "Inclusive",
             RoundingMethod: "NearestFive",
             NegativeStockAllowed: true,
-            NumberToWordsLanguage: "Hindi"));
+            NumberToWordsLanguage: "Hindi",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!"));
 
         await using var verifyDb = new AppDbContext(_dbOptions);
         var config = await verifyDb.AppConfigs.SingleAsync();

@@ -109,34 +109,71 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      h:Watermark.Text="Search expenses by category"
                      AutomationProperties.Name="Search expenses"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Filter Chips -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
-            <Button Content="All" Command="{Binding SetDateFilterCommand}" CommandParameter="All"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,4,0" AutomationProperties.Name="Filter all"/>
-            <Button Content="Today" Command="{Binding SetDateFilterCommand}" CommandParameter="Today"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,4,0" AutomationProperties.Name="Filter today"/>
-            <Button Content="This Week" Command="{Binding SetDateFilterCommand}" CommandParameter="Week"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,4,0" AutomationProperties.Name="Filter this week"/>
-            <Button Content="This Month" Command="{Binding SetDateFilterCommand}" CommandParameter="Month"
-                    Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="12,5"
-                    Margin="0,0,8,0" AutomationProperties.Name="Filter this month"/>
+            <Border Style="{StaticResource SegmentedFilterHostStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="All" Command="{Binding SetDateFilterCommand}" CommandParameter="All"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Margin="0,0,4,0" AutomationProperties.Name="Filter all">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveDateFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="Today" Command="{Binding SetDateFilterCommand}" CommandParameter="Today"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Margin="0,0,4,0" AutomationProperties.Name="Filter today">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveDateFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="This Week" Command="{Binding SetDateFilterCommand}" CommandParameter="Week"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            Margin="0,0,4,0" AutomationProperties.Name="Filter this week">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveDateFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                    <Button Content="This Month" Command="{Binding SetDateFilterCommand}" CommandParameter="Month"
+                            Style="{StaticResource SegmentedFilterButtonStyle}"
+                            AutomationProperties.Name="Filter this month">
+                        <Button.Tag>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="CommandParameter"/>
+                                <Binding Path="ActiveDateFilter"/>
+                            </MultiBinding>
+                        </Button.Tag>
+                    </Button>
+                </StackPanel>
+            </Border>
             <TextBlock Text="{Binding FilterCountText}" FontSize="11"
+                       Margin="12,0,0,0"
                        Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
         </StackPanel>
 
         <!-- DataGrid -->
         <DataGrid Grid.Row="5" AutomationProperties.Name="Expense entries"
                   ItemsSource="{Binding Expenses}" SelectedItem="{Binding SelectedExpense}"
-                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column">
+                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridEmptyState.Icon="🧾"
+                  h:DataGridEmptyState.Title="No expenses found"
+                  h:DataGridEmptyState.Description="Record an expense or widen the current date and search filters to see entries.">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit" Command="{Binding EditCommand}" CommandParameter="{Binding SelectedExpense}">
@@ -183,7 +220,7 @@
                 <DataGridTemplateColumn Header="" Width="80">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Style="{StaticResource DataGridRowActionPanelStyle}">
                                 <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Style="{StaticResource FluentSubtleButtonStyle}" ToolTip="Edit"

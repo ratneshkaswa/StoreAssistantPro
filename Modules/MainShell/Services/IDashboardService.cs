@@ -11,4 +11,5 @@ namespace StoreAssistantPro.Modules.MainShell.Services;
 public interface IDashboardService
 {
     Task<DashboardSummary> GetSummaryAsync(CancellationToken ct = default);
+    Task<DashboardSummary> GetSummaryForDateAsync(DateTime date, CancellationToken ct = default);
 }

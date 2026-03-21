@@ -41,9 +41,13 @@ public sealed class QuickAccessToggleCommandTests
         vendorService.GetAllAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyList<Vendor>>(new List<Vendor> { vendor }));
 
+        var ledgerService = Substitute.For<IVendorLedgerService>();
+        var regionalService = Substitute.For<IRegionalSettingsService>();
+        var appStateService = Substitute.For<IAppStateService>();
+
         var brandViewModel = new BrandManagementViewModel(brandService);
         var customerViewModel = new CustomerManagementViewModel(customerService);
-        var vendorViewModel = new VendorManagementViewModel(vendorService);
+        var vendorViewModel = new VendorManagementViewModel(vendorService, ledgerService, regionalService, appStateService);
 
         await brandViewModel.ToggleActiveCommand.ExecuteAsync(brand);
         await customerViewModel.ToggleActiveCommand.ExecuteAsync(customer);

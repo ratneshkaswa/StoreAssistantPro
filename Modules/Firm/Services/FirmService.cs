@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Firm.Services;
 
 public class FirmService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IAuditService auditService,
     IPerformanceMonitor perf) : IFirmService
 {
     public async Task<FirmManagementSnapshot?> GetFirmAsync(CancellationToken ct = default)
@@ -47,14 +48,16 @@ public class FirmService(
             settings?.DefaultTaxMode ?? "Exclusive",
             settings?.RoundingMethod ?? "None",
             settings?.NegativeStockAllowed ?? false,
-            string.IsNullOrWhiteSpace(settings?.NumberToWordsLanguage) ? "English" : settings.NumberToWordsLanguage);
+            string.IsNullOrWhiteSpace(settings?.NumberToWordsLanguage) ? "English" : settings.NumberToWordsLanguage,
+            string.IsNullOrWhiteSpace(config.InvoicePrefix) ? "INV" : config.InvoicePrefix,
+            string.IsNullOrWhiteSpace(config.ReceiptFooterText) ? "Thank you! Visit again!" : config.ReceiptFooterText);
     }
 
     public async Task UpdateFirmAsync(FirmUpdateDto dto, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(dto);
 
-        using var _ = perf.BeginScope("FirmService.UpdateFirmAsync");
+        using var scope = perf.BeginScope("FirmService.UpdateFirmAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false)
@@ -66,6 +69,11 @@ public class FirmService(
             settings = new SystemSettings();
             context.SystemSettings.Add(settings);
         }
+
+        // Capture old values for audit (#298)
+        var oldFirmName = config.FirmName;
+        var oldGst = config.GSTNumber;
+        var oldTaxMode = settings.DefaultTaxMode;
 
         config.FirmName = dto.FirmName;
         config.Address = dto.Address;
@@ -89,6 +97,17 @@ public class FirmService(
         settings.NegativeStockAllowed = dto.NegativeStockAllowed;
         settings.NumberToWordsLanguage = string.IsNullOrWhiteSpace(dto.NumberToWordsLanguage) ? "English" : dto.NumberToWordsLanguage.Trim();
 
+        config.InvoicePrefix = string.IsNullOrWhiteSpace(dto.InvoicePrefix) ? "INV" : dto.InvoicePrefix.Trim();
+        config.ReceiptFooterText = string.IsNullOrWhiteSpace(dto.ReceiptFooterText) ? "Thank you! Visit again!" : dto.ReceiptFooterText.Trim();
+
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        // Audit: settings changed (#298)
+        if (oldFirmName != dto.FirmName)
+            _ = auditService.LogSettingsChangedAsync("FirmName", oldFirmName, dto.FirmName, null, ct);
+        if (oldGst != config.GSTNumber)
+            _ = auditService.LogSettingsChangedAsync("GSTNumber", oldGst, config.GSTNumber, null, ct);
+        if (oldTaxMode != settings.DefaultTaxMode)
+            _ = auditService.LogSettingsChangedAsync("DefaultTaxMode", oldTaxMode, settings.DefaultTaxMode, null, ct);
     }
 }

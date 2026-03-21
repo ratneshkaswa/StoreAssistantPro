@@ -28,8 +28,10 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      h:Watermark.Text="Search by name or barcode"
                      AutomationProperties.Name="Search products"/>
             <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}"
@@ -38,13 +40,19 @@
                       AutomationProperties.Name="Filter by category"
                       Width="{StaticResource FieldWidthStandard}"
                       Margin="{StaticResource InlineControlSpacing}"/>
-            <ComboBox Grid.Column="2" ItemsSource="{Binding StockStatusOptions}"
+            <ComboBox Grid.Column="2" ItemsSource="{Binding Brands}"
+                      SelectedItem="{Binding FilterBrand}"
+                      DisplayMemberPath="Name"
+                      AutomationProperties.Name="Filter by brand"
+                      Width="{StaticResource FieldWidthStandard}"
+                      Margin="{StaticResource InlineControlSpacing}"/>
+            <ComboBox Grid.Column="3" ItemsSource="{Binding StockStatusOptions}"
                       SelectedItem="{Binding FilterStockStatus}"
                       AutomationProperties.Name="Filter by stock"
                       Width="{StaticResource FieldWidthCompact}"
                       Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="3" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="4" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Filter count -->
@@ -65,6 +73,9 @@
                       ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="📦"
+                      h:DataGridEmptyState.Title="No products found"
+                      h:DataGridEmptyState.Description="Add a product or relax the current brand, category, and stock filters to see more items."
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False"
@@ -254,11 +265,11 @@
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
             <Button Content="New" Command="{Binding NewProductCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Variants" Command="{Binding ManageVariantsCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Save" Command="{Binding SaveCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </StackPanel>
 
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"

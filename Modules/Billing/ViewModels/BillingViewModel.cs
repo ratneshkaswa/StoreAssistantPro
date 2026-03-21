@@ -18,6 +18,7 @@ public partial class BillingViewModel : BaseViewModel
     private readonly IAppStateService _appState;
     private readonly IDialogService _dialogService;
     private readonly IRegionalSettingsService _regional;
+    private readonly IHeldBillService _heldBillService;
     private readonly HashSet<CartLineViewModel> _trackedCartLines = [];
     private ObservableCollection<CartLineViewModel>? _trackedCartItems;
     private BillingSessionState? _sessionState;
@@ -27,13 +28,15 @@ public partial class BillingViewModel : BaseViewModel
         ICustomerService customerService,
         IAppStateService appState,
         IDialogService dialogService,
-        IRegionalSettingsService regional)
+        IRegionalSettingsService regional,
+        IHeldBillService heldBillService)
     {
         _billingService = billingService;
         _customerService = customerService;
         _appState = appState;
         _dialogService = dialogService;
         _regional = regional;
+        _heldBillService = heldBillService;
 
         AttachCartCollection(CartItems);
         _trackedCartItems = CartItems;
@@ -94,6 +97,9 @@ public partial class BillingViewModel : BaseViewModel
     public partial decimal TotalSgst { get; set; }
 
     [ObservableProperty]
+    public partial decimal TotalCess { get; set; }
+
+    [ObservableProperty]
     public partial decimal DiscountAmount { get; set; }
 
     [ObservableProperty]
@@ -141,10 +147,40 @@ public partial class BillingViewModel : BaseViewModel
     public partial decimal ChangeAmount { get; set; }
 
     public bool IsCashPayment => string.Equals(PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase);
-    public bool RequiresPaymentReference => !IsCashPayment;
+    public bool IsCreditPayment => string.Equals(PaymentMethod, "Credit", StringComparison.OrdinalIgnoreCase);
+    public bool RequiresPaymentReference => !IsCashPayment && !IsCreditPayment;
 
     public ObservableCollection<string> PaymentMethods { get; } =
-        ["Cash", "UPI", "Card"];
+        ["Cash", "UPI", "Card", "Credit", "Split"];
+
+    public ObservableCollection<string> SplitPaymentMethodOptions { get; } =
+        ["Cash", "UPI", "Card", "Credit"];
+
+    // ── Split Payment (#118) ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSplitPayments))]
+    public partial ObservableCollection<SplitPaymentLine> SplitPaymentLines { get; set; } = [];
+
+    public bool IsSplitPayment => string.Equals(PaymentMethod, "Split", StringComparison.OrdinalIgnoreCase);
+    public bool HasSplitPayments => SplitPaymentLines.Count > 0;
+
+    [RelayCommand]
+    private void AddSplitLine()
+    {
+        SplitPaymentLines.Add(new SplitPaymentLine { Method = "Cash", Amount = "0" });
+        OnPropertyChanged(nameof(HasSplitPayments));
+    }
+
+    [RelayCommand]
+    private void RemoveSplitLine(SplitPaymentLine? line)
+    {
+        if (line is not null)
+        {
+            SplitPaymentLines.Remove(line);
+            OnPropertyChanged(nameof(HasSplitPayments));
+        }
+    }
 
     partial void OnPaymentMethodChanged(string value)
     {
@@ -152,11 +188,25 @@ public partial class BillingViewModel : BaseViewModel
         {
             PaymentReference = string.Empty;
         }
-        else
+        else if (!IsSplitPayment)
         {
             CashTendered = "0";
         }
 
+        if (IsSplitPayment && SplitPaymentLines.Count == 0)
+        {
+            SplitPaymentLines.Add(new SplitPaymentLine { Method = "Cash", Amount = "0" });
+            SplitPaymentLines.Add(new SplitPaymentLine { Method = "UPI", Amount = "0" });
+            OnPropertyChanged(nameof(HasSplitPayments));
+        }
+        else if (!IsSplitPayment)
+        {
+            SplitPaymentLines.Clear();
+            OnPropertyChanged(nameof(HasSplitPayments));
+        }
+
+        OnPropertyChanged(nameof(IsCreditPayment));
+        OnPropertyChanged(nameof(IsSplitPayment));
         RecalculateChange();
     }
 
@@ -210,6 +260,184 @@ public partial class BillingViewModel : BaseViewModel
         CustomerSearchText = string.Empty;
         CustomerSearchResults = [];
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Held Bills (#336-#346)
+    // ═══════════════════════════════════════════════════════════════
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasHeldBills))]
+    public partial ObservableCollection<HeldBill> HeldBills { get; set; } = [];
+
+    [ObservableProperty]
+    public partial int HeldBillCount { get; set; }
+
+    [ObservableProperty]
+    public partial bool ShowHeldBillList { get; set; }
+
+    public bool HasHeldBills => HeldBills.Count > 0;
+
+    [RelayCommand(CanExecute = nameof(CanHoldBill))]
+    private Task HoldBillAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+
+        var items = CartItems.Select(c => new HoldBillItemDto(
+            c.ProductId, c.ProductVariantId, c.ProductName,
+            c.UnitPrice, c.Quantity, c.TaxRate, c.IsTaxInclusive,
+            c.ItemDiscountRate, c.ItemDiscountAmount, c.CessRate)).ToList();
+
+        var dto = new HoldBillDto(
+            $"Bill #{HeldBillCount + 1}",
+            SelectedCustomer?.Name,
+            null,
+            _appState.CurrentUserType.ToString(),
+            GrandTotal,
+            items);
+
+        await _heldBillService.HoldAsync(dto, ct);
+
+        CartItems.Clear();
+        SelectedCartItem = null;
+        SelectedCustomer = null;
+        ResetPayment();
+        TransitionBillingSession(BillingSessionState.None);
+        UpdateCartCommandStates();
+        RecalculateTotals();
+
+        await RefreshHeldBillsAsync(ct);
+        SuccessMessage = "Bill held for later.";
+    });
+
+    [RelayCommand]
+    private Task RecallBillAsync(HeldBill? bill) => RunAsync(async ct =>
+    {
+        if (bill is null) return;
+        ClearMessages();
+
+        if (CartItems.Count > 0)
+        {
+            if (!_dialogService.Confirm("Current cart has items. Replace with held bill?", "Recall Bill"))
+                return;
+        }
+
+        var recalled = await _heldBillService.RecallAsync(bill.Id, ct);
+        if (recalled is null)
+        {
+            ErrorMessage = "Held bill not found or already recalled.";
+            await RefreshHeldBillsAsync(ct);
+            return;
+        }
+
+        CartItems.Clear();
+        SelectedCartItem = null;
+        ResetPayment();
+
+        foreach (var item in recalled.Items)
+        {
+            var line = new CartLineViewModel
+            {
+                ProductId = item.ProductId,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductName,
+                UnitPrice = item.UnitPrice,
+                Quantity = item.Quantity,
+                TaxRate = item.TaxRate,
+                IsTaxInclusive = item.IsTaxInclusive,
+                ItemDiscountRate = item.ItemDiscountRate,
+                ItemDiscountAmount = item.ItemDiscountAmount,
+                CessRate = item.CessRate
+            };
+            CartItems.Add(line);
+        }
+
+        TransitionBillingSession(BillingSessionState.Active);
+        UpdateCartCommandStates();
+        RecalculateTotals();
+        ShowHeldBillList = false;
+
+        await RefreshHeldBillsAsync(ct);
+        SuccessMessage = $"Bill \"{recalled.Label}\" recalled.";
+    });
+
+    [RelayCommand]
+    private Task DiscardHeldBillAsync(HeldBill? bill) => RunAsync(async ct =>
+    {
+        if (bill is null) return;
+
+        if (!_dialogService.Confirm($"Discard held bill \"{bill.Label}\"?", "Discard"))
+            return;
+
+        await _heldBillService.DiscardAsync(bill.Id, ct);
+        await RefreshHeldBillsAsync(ct);
+        SuccessMessage = "Held bill discarded.";
+    });
+
+    [RelayCommand]
+    private void ToggleHeldBillList() => ShowHeldBillList = !ShowHeldBillList;
+
+    // #344 Quick switch held bills (F9 / Shift+F9)
+    [RelayCommand(CanExecute = nameof(HasHeldBills))]
+    private Task NextHeldBillAsync() => CycleHeldBillAsync(forward: true);
+
+    [RelayCommand(CanExecute = nameof(HasHeldBills))]
+    private Task PreviousHeldBillAsync() => CycleHeldBillAsync(forward: false);
+
+    private Task CycleHeldBillAsync(bool forward) => RunAsync(async ct =>
+    {
+        if (HeldBills.Count == 0) return;
+
+        // If cart has items, hold current cart first
+        if (CartItems.Count > 0 && CanHoldBill())
+        {
+            ClearMessages();
+            var items = CartItems.Select(c => new HoldBillItemDto(
+                c.ProductId, c.ProductVariantId, c.ProductName,
+                c.UnitPrice, c.Quantity, c.TaxRate, c.IsTaxInclusive,
+                c.ItemDiscountRate, c.ItemDiscountAmount, c.CessRate)).ToList();
+
+            var dto = new HoldBillDto(
+                $"Bill #{HeldBillCount + 1}",
+                SelectedCustomer?.Name,
+                null,
+                _appState.CurrentUserType.ToString(),
+                GrandTotal,
+                items);
+
+            await _heldBillService.HoldAsync(dto, ct);
+            CartItems.Clear();
+            SelectedCartItem = null;
+            SelectedCustomer = null;
+            ResetPayment();
+            UpdateCartCommandStates();
+            RecalculateTotals();
+            await RefreshHeldBillsAsync(ct);
+        }
+
+        if (HeldBills.Count == 0) return;
+
+        var index = forward ? 0 : HeldBills.Count - 1;
+        var bill = HeldBills[index];
+        await RecallBillAsync(bill);
+    });
+
+    [RelayCommand]
+    private Task LoadHeldBillsAsync() => RunLoadAsync(async ct =>
+    {
+        await RefreshHeldBillsAsync(ct);
+    });
+
+    private async Task RefreshHeldBillsAsync(CancellationToken ct)
+    {
+        var bills = await _heldBillService.GetActiveAsync(ct);
+        HeldBills = new ObservableCollection<HeldBill>(bills);
+        HeldBillCount = bills.Count;
+        HoldBillCommand.NotifyCanExecuteChanged();
+        NextHeldBillCommand.NotifyCanExecuteChanged();
+        PreviousHeldBillCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanHoldBill() => CartItems.Count > 0;
 
     // ═══════════════════════════════════════════════════════════════
     //  Search / Barcode
@@ -307,7 +535,8 @@ public partial class BillingViewModel : BaseViewModel
                 UnitPrice = price,
                 Quantity = 1,
                 TaxRate = product.Tax?.SlabPercent ?? 0,
-                IsTaxInclusive = product.IsTaxInclusive
+                IsTaxInclusive = product.IsTaxInclusive,
+                CessRate = product.CessPercent
             };
             CartItems.Add(line);
         }
@@ -363,9 +592,35 @@ public partial class BillingViewModel : BaseViewModel
             .Rule(CartItems.Count > 0, "Cart is empty.")
             .Rule(!string.IsNullOrWhiteSpace(PaymentMethod), "Select a payment method.")
             .Rule(IsValidCart(), "Fix cart lines with invalid quantity, price, or discount.")
-            .Rule(!RequiresPaymentReference || !string.IsNullOrWhiteSpace(PaymentReference),
-                  "Enter a payment reference for non-cash payments.")))
+            .Rule(!RequiresPaymentReference || IsSplitPayment || !string.IsNullOrWhiteSpace(PaymentReference),
+                  "Enter a payment reference for non-cash payments.")
+            .Rule(!IsCreditPayment || HasSelectedCustomer,
+                  "Credit payment requires a linked customer.")))
             return;
+
+        // Split payment validation (#118)
+        List<PaymentLegDto>? splitLegs = null;
+        if (IsSplitPayment)
+        {
+            splitLegs = [];
+            var splitSum = 0m;
+            foreach (var line in SplitPaymentLines)
+            {
+                if (!decimal.TryParse(line.Amount, out var legAmount) || legAmount <= 0)
+                {
+                    ErrorMessage = $"Invalid amount for {line.Method} payment.";
+                    return;
+                }
+                splitLegs.Add(new PaymentLegDto(line.Method, legAmount, line.Reference));
+                splitSum += legAmount;
+            }
+
+            if (Math.Abs(splitSum - GrandTotal) > 0.01m)
+            {
+                ErrorMessage = $"Split payments total ({_regional.FormatCurrency(splitSum)}) must equal the grand total ({_regional.FormatCurrency(GrandTotal)}).";
+                return;
+            }
+        }
 
         var cashTendered = 0m;
         if (IsCashPayment)
@@ -383,6 +638,27 @@ public partial class BillingViewModel : BaseViewModel
             }
         }
 
+        // Discount approval PIN (#178) + max limit (#179)
+        string? discountApprovalPin = null;
+        var maxDiscountPct = await _billingService.GetMaxDiscountPercentAsync(ct);
+        if (SelectedDiscountType != DiscountType.None && discountValue > 0 && maxDiscountPct > 0)
+        {
+            var effectivePct = SelectedDiscountType == DiscountType.Percentage
+                ? discountValue
+                : Subtotal > 0 ? discountValue / Subtotal * 100m : 0;
+
+            if (effectivePct > maxDiscountPct)
+            {
+                discountApprovalPin = _dialogService.PromptPassword(
+                    $"Discount exceeds {maxDiscountPct}% limit. Enter manager PIN to approve.");
+                if (string.IsNullOrWhiteSpace(discountApprovalPin))
+                {
+                    ErrorMessage = $"Discount exceeds {maxDiscountPct}%. Manager approval required.";
+                    return;
+                }
+            }
+        }
+
         var items = CartItems.Select(c => new CartItemDto(
             c.ProductId,
             c.ProductVariantId,
@@ -392,7 +668,8 @@ public partial class BillingViewModel : BaseViewModel
             c.ItemDiscountAmount,
             c.TaxRate,
             c.IsTaxInclusive,
-            c.LineTaxAmount)).ToList();
+            c.LineTaxAmount,
+            c.CessRate)).ToList();
 
         var dto = new CompleteSaleDto(
             items,
@@ -404,7 +681,9 @@ public partial class BillingViewModel : BaseViewModel
             cashTendered,
             _appState.CurrentUserType.ToString(),
             Guid.NewGuid(),
-            SelectedCustomer?.Id);
+            SelectedCustomer?.Id,
+            DiscountApprovalPin: discountApprovalPin,
+            SplitPayments: splitLegs);
 
         var sale = await _billingService.CompleteSaleAsync(dto, ct);
         SuccessMessage = $"Sale {sale.InvoiceNumber} completed - {_regional.FormatCurrency(sale.TotalAmount)}";
@@ -428,6 +707,7 @@ public partial class BillingViewModel : BaseViewModel
         TotalTax = CartItems.Sum(c => c.LineTaxAmount);
         TotalCgst = CartItems.Sum(c => c.CgstAmount);
         TotalSgst = CartItems.Sum(c => c.SgstAmount);
+        TotalCess = CartItems.Sum(c => c.CessAmount);
 
         _ = decimal.TryParse(DiscountInput, out var discVal);
         DiscountAmount = SelectedDiscountType switch
@@ -437,7 +717,7 @@ public partial class BillingViewModel : BaseViewModel
             _ => 0
         };
 
-        GrandTotal = Math.Max(0, Subtotal + TotalTax - DiscountAmount);
+        GrandTotal = Math.Max(0, Subtotal + TotalTax + TotalCess - DiscountAmount);
         RecalculateChange();
     }
 
@@ -458,6 +738,8 @@ public partial class BillingViewModel : BaseViewModel
         PaymentReference = string.Empty;
         CashTendered = "0";
         ChangeAmount = 0;
+        SplitPaymentLines.Clear();
+        OnPropertyChanged(nameof(HasSplitPayments));
     }
 
     private bool CanRemoveCartItem() => SelectedCartItem is not null;
@@ -471,6 +753,7 @@ public partial class BillingViewModel : BaseViewModel
         RemoveCartItemCommand.NotifyCanExecuteChanged();
         ClearCartCommand.NotifyCanExecuteChanged();
         CompleteSaleCommand.NotifyCanExecuteChanged();
+        HoldBillCommand.NotifyCanExecuteChanged();
     }
 
     private void ClearMessages()
@@ -719,8 +1002,32 @@ public partial class CartLineViewModel : ObservableObject
     /// <summary>SGST rate (half of GST rate).</summary>
     public decimal SgstRate => TaxRate / 2m;
 
+    /// <summary>Cess rate (additional levy on top of GST). (#197)</summary>
+    public decimal CessRate { get; set; }
+
+    /// <summary>Cess amount for this line. (#197)</summary>
+    public decimal CessAmount => CessRate > 0 ? TaxableAmount * CessRate / 100m : 0;
+
     public decimal LineTotal => IsTaxInclusive
-        ? TaxableAmount
-        : TaxableAmount + LineTaxAmount;
+        ? TaxableAmount + CessAmount
+        : TaxableAmount + LineTaxAmount + CessAmount;
+}
+
+/// <summary>
+/// Single leg of a split payment in the billing UI (#118).
+/// </summary>
+public partial class SplitPaymentLine : ObservableObject
+{
+    [ObservableProperty]
+    public partial string Method { get; set; } = "Cash";
+
+    [ObservableProperty]
+    public partial string Amount { get; set; } = "0";
+
+    [ObservableProperty]
+    public partial string? Reference { get; set; }
+
+    public bool RequiresReference => !string.Equals(Method, "Cash", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(Method, "Credit", StringComparison.OrdinalIgnoreCase);
 }
 

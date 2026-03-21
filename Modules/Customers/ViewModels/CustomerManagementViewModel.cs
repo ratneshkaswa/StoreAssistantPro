@@ -72,12 +72,33 @@ public partial class CustomerManagementViewModel(
     [ObservableProperty]
     public partial bool HasPurchaseHistory { get; set; }
 
+    // ── Outstanding Balance (#160) + Payment Collection (#161) ──
+
+    [ObservableProperty]
+    public partial decimal OutstandingBalance { get; set; }
+
+    [ObservableProperty]
+    public partial string OutstandingBalanceDisplay { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PaymentAmount { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PaymentMethod { get; set; } = "Cash";
+
+    [ObservableProperty]
+    public partial string PaymentReference { get; set; } = string.Empty;
+
+    public ObservableCollection<string> PaymentMethods { get; } = ["Cash", "UPI", "Card", "Bank Transfer"];
+
     partial void OnSelectedCustomerChanged(Customer? value)
     {
         if (value is null)
         {
             PurchaseHistory = [];
             HasPurchaseHistory = false;
+            OutstandingBalance = 0;
+            OutstandingBalanceDisplay = string.Empty;
             return;
         }
 
@@ -89,6 +110,7 @@ public partial class CustomerManagementViewModel(
         Notes = value.Notes ?? string.Empty;
 
         LoadPurchaseHistoryCommand.Execute(value);
+        LoadOutstandingBalanceCommand.Execute(value);
     }
 
     [RelayCommand]
@@ -98,6 +120,48 @@ public partial class CustomerManagementViewModel(
         var history = await customerService.GetPurchaseHistoryAsync(customer.Id, ct);
         PurchaseHistory = new ObservableCollection<CustomerPurchaseSummary>(history);
         HasPurchaseHistory = history.Count > 0;
+    });
+
+    [RelayCommand]
+    private Task LoadOutstandingBalanceAsync(Customer? customer) => RunAsync(async ct =>
+    {
+        if (customer is null) return;
+        var balance = await customerService.GetOutstandingBalanceAsync(customer.Id, ct);
+        OutstandingBalance = balance;
+        OutstandingBalanceDisplay = balance > 0 ? $"₹{balance:N2}" : string.Empty;
+    });
+
+    [RelayCommand]
+    private Task CollectPaymentAsync() => RunAsync(async ct =>
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        if (SelectedCustomer is null)
+        {
+            ErrorMessage = "Select a customer first.";
+            return;
+        }
+
+        if (!decimal.TryParse(PaymentAmount, out var amount) || amount <= 0)
+        {
+            ErrorMessage = "Enter a valid payment amount.";
+            return;
+        }
+
+        if (amount > OutstandingBalance)
+        {
+            ErrorMessage = $"Amount exceeds outstanding balance of ₹{OutstandingBalance:N2}.";
+            return;
+        }
+
+        await customerService.CollectPaymentAsync(SelectedCustomer.Id, amount, PaymentMethod, string.IsNullOrWhiteSpace(PaymentReference) ? null : PaymentReference, ct);
+
+        SuccessMessage = $"Payment of ₹{amount:N2} collected from {SelectedCustomer.Name}.";
+        PaymentAmount = string.Empty;
+        PaymentReference = string.Empty;
+
+        LoadOutstandingBalanceCommand.Execute(SelectedCustomer);
     });
 
     [RelayCommand]

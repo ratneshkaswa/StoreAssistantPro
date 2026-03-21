@@ -11,6 +11,7 @@ public sealed class InventoryViewModelTests
 {
     private readonly IInventoryService _inventoryService = Substitute.For<IInventoryService>();
     private readonly IProductService _productService = Substitute.For<IProductService>();
+    private readonly IStockTakeService _stockTakeService = Substitute.For<IStockTakeService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
 
@@ -19,7 +20,7 @@ public sealed class InventoryViewModelTests
         _appState.CurrentUserType.Returns(UserType.Admin);
         _regional.FormatCurrency(Arg.Any<decimal>())
             .Returns(call => $"Rs. {call.Arg<decimal>():0.00}");
-        return new InventoryViewModel(_inventoryService, _productService, _regional, _appState);
+        return new InventoryViewModel(_inventoryService, _productService, _stockTakeService, _regional, _appState);
     }
 
     [Fact]

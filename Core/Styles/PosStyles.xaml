@@ -486,6 +486,150 @@
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
+    <Style x:Key="SemanticStatusPillStyle" TargetType="Border"
+           BasedOn="{StaticResource StatusBadgePillStyle}">
+        <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Pending">
+                <Setter Property="Background" Value="{StaticResource FluentWarningBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Unpaid">
+                <Setter Property="Background" Value="{StaticResource FluentWarningBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Active">
+                <Setter Property="Background" Value="{StaticResource FluentInfoBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Ordered">
+                <Setter Property="Background" Value="{StaticResource FluentInfoBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="PartialReceived">
+                <Setter Property="Background" Value="{StaticResource FluentInfoBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="InProgress">
+                <Setter Property="Background" Value="{StaticResource FluentInfoBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Delivered">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Paid">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Cleared">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Received">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Completed">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Connected">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Cancelled">
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Offline">
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Disconnected">
+                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="BooleanWarningSuccessPillStyle" TargetType="Border"
+           BasedOn="{StaticResource StatusBadgePillStyle}">
+        <Setter Property="Background" Value="{StaticResource FluentWarningBackground}"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SemanticStatusPillTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Pending">
+                <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Unpaid">
+                <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Active">
+                <Setter Property="Foreground" Value="{StaticResource FluentInfo}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Ordered">
+                <Setter Property="Foreground" Value="{StaticResource FluentInfo}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="PartialReceived">
+                <Setter Property="Foreground" Value="{StaticResource FluentInfo}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="InProgress">
+                <Setter Property="Foreground" Value="{StaticResource FluentInfo}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Delivered">
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Paid">
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Cleared">
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Received">
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Completed">
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Connected">
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Cancelled">
+                <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Offline">
+                <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Disconnected">
+                <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="PaidStatusPillTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource SemanticStatusPillTextStyle}">
+        <Setter Property="Text" Value="Unpaid"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Text" Value="Paid"/>
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ClearedStatusPillTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource SemanticStatusPillTextStyle}">
+        <Setter Property="Text" Value="Pending"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter Property="Text" Value="Cleared"/>
+                <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- ===============================================================
          TOOLBAR LINK BUTTON
 
@@ -723,6 +867,165 @@
                 <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
             </DataTrigger>
         </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SegmentedFilterHostStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource ChromeAltFillColorSecondary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DividerStrokeColorDefault}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <Style x:Key="SegmentedFilterButtonStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="Padding" Value="12,5"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}"
+                                RenderTransformOrigin="0.5,0.5"
+                                UseLayoutRounding="True"
+                                SnapsToDevicePixels="True">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+
+                        <Border x:Name="AccentPill"
+                                Height="3"
+                                Width="16"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Center"
+                                CornerRadius="1.5"
+                                Background="{StaticResource FluentAccentDefault}"
+                                Opacity="0"
+                                Margin="0,0,0,-1"/>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource SubtleFillColorSecondary}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource SubtleFillColorTertiary}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextPrimary}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScaleHover}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScaleHover}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScaleRest}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScaleRest}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource SubtleFillColorTertiary}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextPrimary}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScalePressed}"
+                                                         Duration="{StaticResource FluentDurationFast}"
+                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScalePressed}"
+                                                         Duration="{StaticResource FluentDurationFast}"
+                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScaleHover}"
+                                                         Duration="{StaticResource FluentDurationFast}"
+                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="BdScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScaleHover}"
+                                                         Duration="{StaticResource FluentDurationFast}"
+                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <Trigger Property="Tag" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource LayerFillColorDefault}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource DividerStrokeColorDefault}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="AccentPill" Property="Opacity" Value="1"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentTextDisabled}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

@@ -341,6 +341,52 @@
                         </Grid>
                     </StackPanel>
                 </Border>
+
+                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+                    <StackPanel>
+                        <TextBlock Text="Invoice &amp; Receipt" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" MinWidth="{StaticResource FieldWidthWide}"/>
+                                <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
+                                <ColumnDefinition Width="*" MinWidth="{StaticResource FieldWidthWide}"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}">
+                                <TextBlock x:Name="InvoicePrefixLabel"
+                                           Text="Invoice Prefix"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <TextBox x:Name="InvoicePrefixBox"
+                                         Text="{Binding InvoicePrefix, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                         AutomationProperties.Name="Invoice prefix"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=InvoicePrefixLabel}"
+                                         MaxLength="20"
+                                         Width="{StaticResource FieldWidthStandard}"
+                                         HorizontalAlignment="Left"
+                                         h:Watermark.Text="e.g. INV or SA-2025-"/>
+                                <TextBlock Text="Prefix added before invoice numbers (e.g. INV-00001)."
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}">
+                                <TextBlock x:Name="ReceiptFooterLabel"
+                                           Text="Receipt Footer Text"
+                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                <TextBox x:Name="ReceiptFooterBox"
+                                         Text="{Binding ReceiptFooterText, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                         AutomationProperties.Name="Receipt footer text"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=ReceiptFooterLabel}"
+                                         MaxLength="200"
+                                         h:Watermark.Text="e.g. Thank you! Visit again!"/>
+                                <TextBlock Text="Printed at the bottom of every receipt."
+                                           Margin="{StaticResource ValidationHintMargin}"
+                                           Style="{StaticResource HintTextStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 

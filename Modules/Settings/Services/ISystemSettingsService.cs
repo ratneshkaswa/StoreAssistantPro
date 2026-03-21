@@ -16,4 +16,7 @@ public record SystemSettingsDto(
     bool AutoBackupEnabled,
     string? BackupTime,
     string? RestoreOption,
-    string? DefaultPrinter);
+    string? DefaultPrinter,
+    int PrinterWidth,
+    string DefaultPageSize,
+    int AutoLogoutMinutes);

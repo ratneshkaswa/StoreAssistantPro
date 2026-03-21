@@ -307,6 +307,7 @@ public partial class LoginViewModel : BaseViewModel
             .Rule(InputValidator.IsValidMasterPin(MasterPassword), "Master PIN must be exactly 6 digits.")
             .Rule(InputValidator.IsRequired(NewPin), "Enter a new PIN.")
             .Rule(InputValidator.IsValidUserPin(NewPin), "PIN must be exactly 4 digits.")
+            .Rule(!InputValidator.IsWeakPin(NewPin), "PIN is too weak (e.g. 0000, 1234). Choose a stronger PIN.")
             .Rule(InputValidator.AreEqual(NewPin, NewPinConfirm), "PINs do not match.")))
             return;
 

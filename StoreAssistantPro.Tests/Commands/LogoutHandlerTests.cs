@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Session;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
@@ -12,9 +13,10 @@ public class LogoutHandlerTests
 {
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
+    private readonly IAuditService _auditService = Substitute.For<IAuditService>();
     private readonly ILogger<LogoutHandler> _logger = Substitute.For<ILogger<LogoutHandler>>();
 
-    private LogoutHandler CreateSut() => new(_sessionService, _eventBus, _logger);
+    private LogoutHandler CreateSut() => new(_sessionService, _eventBus, _auditService, _logger);
 
     [Fact]
     public async Task HandleAsync_ReturnsSuccess()

@@ -68,6 +68,9 @@ public class Sale
 
     public ICollection<SaleItem> Items { get; set; } = [];
 
+    /// <summary>Payment legs for split payment (#118).</summary>
+    public ICollection<SalePayment> Payments { get; set; } = [];
+
     /// <summary>Extra charges applied to this sale (packing, delivery, etc.).</summary>
     public ICollection<ExtraCharge> ExtraCharges { get; set; } = [];
 

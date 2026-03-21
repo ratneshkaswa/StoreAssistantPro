@@ -7,11 +7,20 @@
              SnapsToDevicePixels="True"
              Loaded="OnLoaded"
              Unloaded="OnUnloaded">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F2" Command="{Binding ClearCartCommand}"/>
+        <KeyBinding Key="F5" Command="{Binding CompleteSaleCommand}"/>
+        <KeyBinding Key="F8" Command="{Binding HoldBillCommand}"/>
+        <KeyBinding Key="F9" Command="{Binding NextHeldBillCommand}"/>
+        <KeyBinding Key="F9" Modifiers="Shift" Command="{Binding PreviousHeldBillCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding ClearCartCommand}"/>
+    </UserControl.InputBindings>
     <Grid Margin="{StaticResource PagePadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
           KeyboardNavigation.TabNavigation="Continue">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,8 +31,81 @@
         <!-- Title -->
         <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7BF;"/><Run Text=" Billing"/></TextBlock>
 
-        <!-- Search + Barcode row -->
+        <!-- Customer selection (#157 / #158) -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Customer:" Style="{StaticResource FormRowLabelStyle}"
+                       VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                       FontWeight="SemiBold" Margin="{StaticResource InlineControlSpacing}">
+                <Run Text="{Binding CustomerDisplayName, Mode=OneWay}"/>
+            </TextBlock>
+            <Button Grid.Column="2" Content="✕" ToolTip="Clear customer"
+                    Command="{Binding ClearCustomerCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Visibility="{Binding HasSelectedCustomer, Converter={StaticResource BoolToVisibility}}"
+                    Margin="{StaticResource InlineControlSpacing}" Padding="6,2"/>
+
+            <TextBox Grid.Column="4"
+                     Text="{Binding CustomerSearchText, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="Customer search"
+                     Width="{StaticResource FieldWidthStandard}"
+                     h:Watermark.Text="e.g. Ravi Kumar">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding SearchCustomersCommand}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+            <Button Grid.Column="5" Content="Find Customer"
+                    Command="{Binding SearchCustomersCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="{StaticResource InlineControlSpacing}"
+                    HorizontalAlignment="Left"/>
+        </Grid>
+
+        <!-- Customer search results dropdown -->
+        <ItemsControl Grid.Row="1" Margin="0,36,0,0"
+                      ItemsSource="{Binding CustomerSearchResults}"
+                      VerticalAlignment="Top" HorizontalAlignment="Left"
+                      Panel.ZIndex="10"
+                      Visibility="{Binding HasCustomerSearchResults, Converter={StaticResource BoolToVisibility}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource FluentSurface}"
+                            BorderBrush="{StaticResource FluentStrokeDefault}"
+                            BorderThickness="1,0,1,1" Padding="8,4" MinWidth="300">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Phone}" Foreground="{StaticResource FluentTextSecondary}"
+                                           FontSize="{StaticResource FontSizeCaption}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Select"
+                                    Command="{Binding DataContext.SelectCustomerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource SecondaryButtonStyle}" Padding="8,2"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Search + Barcode row -->
+        <Grid Grid.Row="2" Margin="{StaticResource ItemSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -34,10 +116,11 @@
             </Grid.ColumnDefinitions>
 
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search products"
                      h:Watermark.Text="e.g. Black T-shirt"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchProductsCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Grid.Column="2" Content="Add Selected"
                     Command="{Binding AddProductToCartCommand}"
                     CommandParameter="{Binding SelectedSearchResult}"
@@ -53,7 +136,7 @@
         </Grid>
 
         <!-- Main content: Cart (left) + Payment (right) -->
-        <Grid Grid.Row="2" Margin="{StaticResource ItemSpacing}">
+        <Grid Grid.Row="3" Margin="{StaticResource ItemSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="12"/>
@@ -110,6 +193,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -118,6 +202,17 @@
                     <TextBlock>
                         <Run Text="Subtotal: " FontWeight="SemiBold"/>
                         <Run Text="{Binding Subtotal, StringFormat={}{0:C}, Mode=OneWay}"/>
+                    </TextBlock>
+                    <TextBlock Foreground="{StaticResource FluentTextSecondary}"
+                               FontSize="{StaticResource FontSizeCaption}">
+                        <Run Text="CGST: "/>
+                        <Run Text="{Binding TotalCgst, StringFormat={}{0:C}, Mode=OneWay}"/>
+                        <Run Text="  SGST: "/>
+                        <Run Text="{Binding TotalSgst, StringFormat={}{0:C}, Mode=OneWay}"/>
+                        <Run Text="  Tax: "/>
+                        <Run Text="{Binding TotalTax, StringFormat={}{0:C}, Mode=OneWay}"/>
+                        <Run Text="  Cess: "/>
+                        <Run Text="{Binding TotalCess, StringFormat={}{0:C}, Mode=OneWay}"/>
                     </TextBlock>
                     <TextBlock>
                         <Run Text="Discount: " FontWeight="SemiBold"/>
@@ -212,8 +307,59 @@
                     </TextBlock>
                 </Grid>
 
+                <!-- Split payment lines (#118) -->
+                <StackPanel Grid.Row="4" Margin="{StaticResource StepContentTopSpacing}"
+                            Visibility="{Binding IsSplitPayment, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="Split Payments" FontWeight="SemiBold"
+                               Margin="{StaticResource ItemSpacing}"/>
+                    <ItemsControl ItemsSource="{Binding SplitPaymentLines}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><StackPanel/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox ItemsSource="{Binding DataContext.SplitPaymentMethodOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              SelectedItem="{Binding Method}"
+                                              Width="{StaticResource FieldWidthCompact}"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="{StaticResource FieldWidthCompact}"
+                                             Margin="{StaticResource InlineControlSpacing}"
+                                             AutomationProperties.Name="Split amount"
+                                             MaxLength="10"/>
+                                    <TextBox Grid.Column="2"
+                                             Text="{Binding Reference, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="{StaticResource FieldWidthCompact}"
+                                             Margin="{StaticResource InlineControlSpacing}"
+                                             AutomationProperties.Name="Split reference"
+                                             h:Watermark.Text="Ref #"
+                                             MaxLength="50"
+                                             Visibility="{Binding RequiresReference, Converter={StaticResource BoolToVisibility}}"/>
+                                    <Button Grid.Column="3" Content="✕" ToolTip="Remove line"
+                                            Command="{Binding DataContext.RemoveSplitLineCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Margin="{StaticResource InlineControlSpacing}"
+                                            Padding="6,2"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="+ Add Line" Command="{Binding AddSplitLineCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Left"
+                            Margin="0,4,0,0"/>
+                </StackPanel>
+
                 <!-- Reference -->
-                <Grid Grid.Row="4" Margin="{StaticResource StepContentTopSpacing}"
+                <Grid Grid.Row="5" Margin="{StaticResource StepContentTopSpacing}"
                       Visibility="{Binding RequiresPaymentReference, Converter={StaticResource BoolToVisibility}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -231,7 +377,7 @@
         </Grid>
 
         <!-- Messages -->
-        <Grid Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+        <Grid Grid.Row="4" MinHeight="{StaticResource MessageAreaMinHeight}"
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Severity="Error"
                               Title="Billing issue"
@@ -244,8 +390,10 @@
         </Grid>
 
         <!-- Action buttons -->
-        <Grid Grid.Row="4" Margin="{StaticResource FormActionBarSpacing}">
+        <Grid Grid.Row="5" Margin="{StaticResource FormActionBarSpacing}">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -255,11 +403,110 @@
             <Button Content="Cancel Bill" Command="{Binding ClearCartCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"/>
 
-            <Button Grid.Column="2" Content="Remove Item" Command="{Binding RemoveCartItemCommand}"
+            <Button Grid.Column="1" Command="{Binding HoldBillCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="{StaticResource FluentIconFont}" Text="&#xE785;" Margin="0,0,6,0"/>
+                    <TextBlock Text="Hold Bill"/>
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="2" Command="{Binding ToggleHeldBillListCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="{StaticResource FluentIconFont}" Text="&#xE7C3;" Margin="0,0,6,0"/>
+                    <TextBlock Text="Recall"/>
+                    <TextBlock Text="{Binding HeldBillCount, StringFormat=' ({0})'}"
+                               Visibility="{Binding HasHeldBills, Converter={StaticResource BoolToVisibility}}"/>
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="4" Content="Remove Item" Command="{Binding RemoveCartItemCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="3" Content="Complete Sale" Command="{Binding CompleteSaleCommand}"
+            <Button Grid.Column="5" Content="Complete Sale" Command="{Binding CompleteSaleCommand}"
                     Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
+
+        <!-- Held bill list popup -->
+        <Border Grid.Row="3" Grid.RowSpan="3"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Margin="0,0,0,48"
+                Background="{StaticResource FluentSurface}"
+                BorderBrush="{StaticResource FluentStrokeDefault}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource CornerRadiusMedium}"
+                Padding="{StaticResource DialogPadding}"
+                MinWidth="360" MaxHeight="400"
+                Visibility="{Binding ShowHeldBillList, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Held Bills" FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeSubtitle}"
+                           Margin="{StaticResource ItemSpacing}"/>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding HeldBills}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource FluentStrokeDefault}"
+                                    BorderThickness="0,0,0,1" Padding="4,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock FontWeight="SemiBold">
+                                            <Run Text="{Binding Label, Mode=OneWay}"/>
+                                            <Run Text=" · " Foreground="{StaticResource FluentTextTertiary}">
+                                                <Run.Style>
+                                                    <Style TargetType="Run">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CustomerTag}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value=""/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Run.Style>
+                                            </Run>
+                                            <Run Text="{Binding CustomerTag, Mode=OneWay}"
+                                                 Foreground="{StaticResource FluentAccentDefault}"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="{StaticResource FluentTextSecondary}">
+                                            <Run Text="{Binding ItemCount, Mode=OneWay}"/>
+                                            <Run Text="items ·"/>
+                                            <Run Text="{Binding Total, StringFormat={}{0:C}, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Recall"
+                                            Command="{Binding DataContext.RecallBillCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Margin="8,0,0,0"/>
+                                    <Button Grid.Column="2" Content="✕"
+                                            Command="{Binding DataContext.DiscardHeldBillCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Margin="4,0,0,0"
+                                            ToolTip="Discard this held bill"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
 
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Processing billing..."/>

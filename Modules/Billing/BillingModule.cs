@@ -10,6 +10,7 @@ public static class BillingModule
 {
     public const string BillingPage = "Billing";
     public const string SaleHistoryPage = "SaleHistory";
+    public const string CashRegisterPage = "CashRegister";
 
     public static IServiceCollection AddBillingModule(
         this IServiceCollection services,
@@ -19,13 +20,18 @@ public static class BillingModule
             .RequireFeature(BillingPage, FeatureFlags.Billing);
         pageRegistry.Map<SaleHistoryViewModel>(SaleHistoryPage)
             .RequireFeature(SaleHistoryPage, FeatureFlags.SaleHistory);
+        pageRegistry.Map<CashRegisterViewModel>(CashRegisterPage)
+            .RequireFeature(CashRegisterPage, FeatureFlags.CashRegister);
         services.AddTransient<IBillingService, BillingService>();
         services.AddTransient<Func<IBillingService>>(sp => () => sp.GetRequiredService<IBillingService>());
         services.AddTransient<IReceiptService, ReceiptService>();
         services.AddTransient<ISaleHistoryService, SaleHistoryService>();
         services.AddTransient<ISaleReturnService, SaleReturnService>();
+        services.AddTransient<ICashRegisterService, CashRegisterService>();
+        services.AddTransient<IHeldBillService, HeldBillService>();
         services.AddTransient<BillingViewModel>();
         services.AddTransient<SaleHistoryViewModel>();
+        services.AddTransient<CashRegisterViewModel>();
         return services;
     }
 }

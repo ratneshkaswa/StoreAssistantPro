@@ -13,6 +13,7 @@ namespace StoreAssistantPro.Modules.Inventory.ViewModels;
 public partial class InventoryViewModel(
     IInventoryService inventoryService,
     IProductService productService,
+    IStockTakeService stockTakeService,
     IRegionalSettingsService regional,
     IAppStateService appState) : BaseViewModel
 {
@@ -24,11 +25,13 @@ public partial class InventoryViewModel(
     [NotifyPropertyChangedFor(nameof(IsTabAdjust))]
     [NotifyPropertyChangedFor(nameof(IsTabLog))]
     [NotifyPropertyChangedFor(nameof(IsTabAlerts))]
+    [NotifyPropertyChangedFor(nameof(IsTabStockTake))]
     public partial int ActiveTab { get; set; }
 
     public bool IsTabAdjust => ActiveTab == 0;
     public bool IsTabLog => ActiveTab == 1;
     public bool IsTabAlerts => ActiveTab == 2;
+    public bool IsTabStockTake => ActiveTab == 3;
 
     [RelayCommand]
     private void SwitchTab(string tab)
@@ -138,6 +141,122 @@ public partial class InventoryViewModel(
     [ObservableProperty]
     public partial ObservableCollection<StockMovementEntry> StockMovementHistory { get; set; } = [];
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasMovementHistory))]
+    public partial bool ShowMovementHistory { get; set; }
+
+    public bool HasMovementHistory => ShowMovementHistory && StockMovementHistory.Count > 0;
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Tab 3 — Stock Take (#69)
+    // ═══════════════════════════════════════════════════════════════
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveStockTake))]
+    [NotifyPropertyChangedFor(nameof(NoActiveStockTake))]
+    public partial StockTake? ActiveStockTake { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<StockTakeItemVm> StockTakeItems { get; set; } = [];
+
+    [ObservableProperty]
+    public partial ObservableCollection<StockTake> RecentStockTakes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string StockTakeNotes { get; set; } = string.Empty;
+
+    public bool HasActiveStockTake => ActiveStockTake is not null;
+    public bool NoActiveStockTake => ActiveStockTake is null;
+
+    [RelayCommand]
+    private Task StartStockTakeAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var userId = (int)appState.CurrentUserType;
+        var stockTake = await stockTakeService.StartAsync(
+            string.IsNullOrWhiteSpace(StockTakeNotes) ? null : StockTakeNotes, userId, ct);
+
+        ActiveStockTake = stockTake;
+        StockTakeItems = new ObservableCollection<StockTakeItemVm>(
+            stockTake.Items.Select(i => new StockTakeItemVm(i)));
+        StockTakeNotes = string.Empty;
+
+        SuccessMessage = $"Stock take {stockTake.Reference} started with {stockTake.TotalItems} items.";
+    });
+
+    [RelayCommand]
+    private Task LoadStockTakeAsync(StockTake? st) => RunAsync(async ct =>
+    {
+        if (st is null) return;
+        ClearMessages();
+        var stockTake = await stockTakeService.GetByIdAsync(st.Id, ct);
+        if (stockTake is null) { ErrorMessage = "Stock take not found."; return; }
+
+        ActiveStockTake = stockTake;
+        StockTakeItems = new ObservableCollection<StockTakeItemVm>(
+            stockTake.Items.Select(i => new StockTakeItemVm(i)));
+    });
+
+    [RelayCommand]
+    private Task SaveCountAsync(StockTakeItemVm? item) => RunAsync(async ct =>
+    {
+        if (item is null || ActiveStockTake is null) return;
+
+        if (!int.TryParse(item.CountedText, out var counted) || counted < 0)
+        {
+            ErrorMessage = "Enter a valid non-negative count.";
+            return;
+        }
+
+        await stockTakeService.UpdateCountAsync(item.ItemId, counted, ct);
+        item.IsCounted = true;
+        item.CountedQuantity = counted;
+        ErrorMessage = string.Empty;
+    });
+
+    [RelayCommand]
+    private Task CompleteStockTakeAsync() => RunAsync(async ct =>
+    {
+        if (ActiveStockTake is null) return;
+        ClearMessages();
+
+        var uncounted = StockTakeItems.Count(i => !i.IsCounted);
+        if (uncounted > 0)
+        {
+            ErrorMessage = $"{uncounted} item(s) not yet counted. Count all items or cancel.";
+            return;
+        }
+
+        var userId = (int)appState.CurrentUserType;
+        var result = await stockTakeService.CompleteAsync(ActiveStockTake.Id, userId, ct);
+
+        ActiveStockTake = null;
+        StockTakeItems = [];
+        await ReloadStockTakesAsync(ct);
+        await Task.WhenAll(ReloadProductsAsync(ct), ReloadLogAsync(ct), ReloadAlertsAsync(ct));
+
+        SuccessMessage = $"Stock take complete: {result.TotalItems} items, {result.Discrepancies} discrepancies, {result.Adjusted} adjusted.";
+    });
+
+    [RelayCommand]
+    private Task CancelStockTakeAsync() => RunAsync(async ct =>
+    {
+        if (ActiveStockTake is null) return;
+        ClearMessages();
+
+        await stockTakeService.CancelAsync(ActiveStockTake.Id, ct);
+        ActiveStockTake = null;
+        StockTakeItems = [];
+        await ReloadStockTakesAsync(ct);
+        SuccessMessage = "Stock take cancelled.";
+    });
+
+    private async Task ReloadStockTakesAsync(CancellationToken ct)
+    {
+        var recent = await stockTakeService.GetRecentAsync(20, ct);
+        RecentStockTakes = new ObservableCollection<StockTake>(recent);
+    }
+
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Load
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -148,7 +267,8 @@ public partial class InventoryViewModel(
         await Task.WhenAll(
             ReloadProductsAsync(ct),
             ReloadLogAsync(ct),
-            ReloadAlertsAsync(ct));
+            ReloadAlertsAsync(ct),
+            ReloadStockTakesAsync(ct));
     });
 
     private async Task ReloadProductsAsync(CancellationToken ct)
@@ -220,6 +340,8 @@ public partial class InventoryViewModel(
         if (product is null) return;
         var history = await inventoryService.GetStockMovementHistoryAsync(product.Id, ct);
         StockMovementHistory = new ObservableCollection<StockMovementEntry>(history);
+        ShowMovementHistory = true;
+        OnPropertyChanged(nameof(HasMovementHistory));
     });
 
     private void ClearMessages()
@@ -230,5 +352,3 @@ public partial class InventoryViewModel(
 
     private bool CanAdjust() => SelectedProduct is not null;
 }
-
-

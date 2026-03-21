@@ -93,6 +93,19 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
 
     /// <summary>
+    /// All validation errors from the last <see cref="Validate"/> call (#432).
+    /// Views can bind an ItemsControl to this for a validation summary panel.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasValidationErrors))]
+    public partial IReadOnlyList<string> ValidationErrors { get; set; } = [];
+
+    /// <summary>
+    /// <c>true</c> when <see cref="ValidationErrors"/> contains at least one error.
+    /// </summary>
+    public bool HasValidationErrors => ValidationErrors.Count > 0;
+
+    /// <summary>
     /// Human-readable title derived from the class name by default.
     /// Override in derived ViewModels for a custom display title.
     /// </summary>
@@ -118,6 +131,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         configure(builder);
 
         var error = builder.FirstError;
+        ValidationErrors = builder.AllErrors;
 
         ErrorMessage = error ?? string.Empty;
         var nextErrorKey = builder.FirstErrorKey ?? string.Empty;
@@ -137,20 +151,23 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     /// </summary>
     protected sealed class ValidationBuilder
     {
-        internal string? FirstError { get; private set; }
+        private readonly List<string> _errors = [];
+        internal string? FirstError => _errors.Count > 0 ? _errors[0] : null;
         internal string? FirstErrorKey { get; private set; }
+        internal IReadOnlyList<string> AllErrors => _errors;
 
         /// <summary>
         /// Add a validation rule. If <paramref name="condition"/> is
-        /// <c>false</c> and no prior rule has failed, record the error
-        /// and optional field key for structured focus routing.
+        /// <c>false</c>, record the error. The first failure's optional
+        /// field key is used for structured focus routing.
         /// </summary>
         public ValidationBuilder Rule(bool condition, string errorMessage, string? fieldKey = null)
         {
-            if (FirstError is null && !condition)
+            if (!condition)
             {
-                FirstError = errorMessage;
-                FirstErrorKey = fieldKey;
+                _errors.Add(errorMessage);
+                if (_errors.Count == 1)
+                    FirstErrorKey = fieldKey;
             }
             return this;
         }

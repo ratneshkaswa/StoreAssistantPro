@@ -82,7 +82,10 @@ public class SystemSettingsServiceTests : IDisposable
             AutoBackupEnabled: true,
             BackupTime: "23:30",
             RestoreOption: "SelectFile",
-            DefaultPrinter: "Counter Printer"));
+            DefaultPrinter: "Counter Printer",
+            PrinterWidth: 0,
+            DefaultPageSize: "A4",
+            AutoLogoutMinutes: 0));
 
         await using var verifyDb = new AppDbContext(_dbOptions);
         var settings = await verifyDb.SystemSettings.SingleAsync();

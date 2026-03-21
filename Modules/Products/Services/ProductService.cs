@@ -7,6 +7,7 @@ namespace StoreAssistantPro.Modules.Products.Services;
 
 public class ProductService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IAuditService auditService,
     IPerformanceMonitor perf) : IProductService
 {
     // ── Products ─────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ public class ProductService(
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));
 
-        using var _ = perf.BeginScope("ProductService.CreateAsync");
+        using var scope = perf.BeginScope("ProductService.CreateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         if (await context.Products.AnyAsync(p => p.Name == dto.Name.Trim(), ct).ConfigureAwait(false))
@@ -93,6 +94,10 @@ public class ProductService(
 
         context.Products.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        _ = auditService.LogAsync("ProductCreated", "Product", entity.Id.ToString(),
+            null, entity.Name, null, $"Price={dto.SalePrice}, Type={dto.ProductType}", ct);
+
         return entity.Id;
     }
 
@@ -101,7 +106,7 @@ public class ProductService(
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrWhiteSpace(dto.Name, nameof(dto.Name));
 
-        using var _ = perf.BeginScope("ProductService.UpdateAsync");
+        using var scope = perf.BeginScope("ProductService.UpdateAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var entity = await context.Products.FirstOrDefaultAsync(p => p.Id == id, ct).ConfigureAwait(false)
@@ -109,6 +114,9 @@ public class ProductService(
 
         if (await context.Products.AnyAsync(p => p.Name == dto.Name.Trim() && p.Id != id, ct).ConfigureAwait(false))
             throw new InvalidOperationException($"Product '{dto.Name}' already exists.");
+
+        var oldName = entity.Name;
+        var oldPrice = entity.SalePrice;
 
         entity.Name = dto.Name.Trim();
         entity.ProductType = dto.ProductType;
@@ -127,11 +135,15 @@ public class ProductService(
         entity.IsTaxInclusive = dto.IsTaxInclusive;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        _ = auditService.LogAsync("ProductUpdated", "Product", id.ToString(),
+            oldName, dto.Name.Trim(), null,
+            oldPrice != dto.SalePrice ? $"Price: {oldPrice} → {dto.SalePrice}" : null, ct);
     }
 
     public async Task ToggleActiveAsync(int id, CancellationToken ct = default)
     {
-        using var _ = perf.BeginScope("ProductService.ToggleActiveAsync");
+        using var scope = perf.BeginScope("ProductService.ToggleActiveAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
         var entity = await context.Products.FirstOrDefaultAsync(p => p.Id == id, ct).ConfigureAwait(false)
@@ -139,6 +151,9 @@ public class ProductService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        _ = auditService.LogAsync(entity.IsActive ? "ProductActivated" : "ProductDeactivated",
+            "Product", id.ToString(), null, entity.Name, null, null, ct);
     }
 
     public async Task AttachTaxAsync(int productId, int? taxId, CancellationToken ct = default)

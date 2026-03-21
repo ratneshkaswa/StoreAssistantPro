@@ -44,6 +44,9 @@ using StoreAssistantPro.Modules.Salaries;
 using StoreAssistantPro.Modules.SalesPurchase;
 using StoreAssistantPro.Modules.Vendors;
 using StoreAssistantPro.Modules.Reports;
+using StoreAssistantPro.Modules.Backup;
+using StoreAssistantPro.Modules.Quotations;
+using StoreAssistantPro.Modules.GRN;
 
 namespace StoreAssistantPro;
 
@@ -131,6 +134,9 @@ internal static class HostingExtensions
         services.AddSingleton<IFlowStateEngine, FlowStateEngine>();
         services.AddSingleton(sp => new Lazy<IFlowStateEngine>(sp.GetRequiredService<IFlowStateEngine>));
         services.AddSingleton<IInteractionTracker, InteractionTracker>();
+        services.AddTransient<IAuditService, AuditService>();
+        services.AddSingleton<IAutoLogoutService, AutoLogoutService>();
+        services.AddTransient<ISystemHealthService, SystemHealthService>();
 
         return services;
     }
@@ -170,7 +176,10 @@ internal static class HostingExtensions
             .AddBranchModule(pageRegistry)
             .AddSalesPurchaseModule(pageRegistry)
             .AddPaymentsModule(pageRegistry)
-            .AddReportsModule(pageRegistry);
+            .AddReportsModule(pageRegistry)
+            .AddBackupModule(pageRegistry)
+            .AddQuotationsModule(pageRegistry)
+            .AddGRNModule(pageRegistry);
 
         return services;
     }

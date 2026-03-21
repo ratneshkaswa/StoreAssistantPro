@@ -28,10 +28,11 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search vendors"
                      h:Watermark.Text="e.g. Jaipur Textiles or 08ABCDE1234F1Z5"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Two-column layout: list + form -->
@@ -46,6 +47,9 @@
             <DataGrid AutomationProperties.Name="Vendors list" ItemsSource="{Binding Vendors}"
                       SelectedItem="{Binding SelectedVendor}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="🚚"
+                      h:DataGridEmptyState.Title="No vendors found"
+                      h:DataGridEmptyState.Description="Add a vendor to start tracking supplier contacts, ledgers, and purchase activity."
                       HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
@@ -188,11 +192,142 @@
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="New" Command="{Binding NewVendorCommand}"
+            <Button Content="Ledger" Command="{Binding LoadLedgerCommand}"
+                    IsEnabled="{Binding IsEditing}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Content="New" Command="{Binding NewVendorCommand}"
+                    Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Save" Command="{Binding SaveCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </StackPanel>
+
+        <!-- Ledger overlay panel -->
+        <Border Grid.Row="0" Grid.RowSpan="5"
+                Background="{StaticResource FluentSolidBackgroundFillColorBase}"
+                Visibility="{Binding ShowLedger, Converter={StaticResource BoolToVisibility}}">
+            <Grid Margin="{StaticResource PagePadding}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Ledger title -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A1;"/><Run Text=" Supplier Ledger"/></TextBlock>
+                    <Button Grid.Column="1" Content="Close" Command="{Binding CloseLedgerCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"/>
+                </Grid>
+
+                <!-- Summary cards -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+                    <Border Style="{StaticResource FluentCardStyle}" Margin="{StaticResource InlineControlSpacing}">
+                        <StackPanel Margin="{StaticResource CardPadding}">
+                            <TextBlock Text="Opening Balance" Style="{StaticResource CaptionStyle}"/>
+                            <TextBlock Text="{Binding LedgerSummary.OpeningBalance, StringFormat='₹{0:N2}'}" Style="{StaticResource SubtitleStyle}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource FluentCardStyle}" Margin="{StaticResource InlineControlSpacing}">
+                        <StackPanel Margin="{StaticResource CardPadding}">
+                            <TextBlock Text="Total Purchases" Style="{StaticResource CaptionStyle}"/>
+                            <TextBlock Text="{Binding LedgerSummary.TotalPurchases, StringFormat='₹{0:N2}'}" Style="{StaticResource SubtitleStyle}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource FluentCardStyle}" Margin="{StaticResource InlineControlSpacing}">
+                        <StackPanel Margin="{StaticResource CardPadding}">
+                            <TextBlock Text="Total Payments" Style="{StaticResource CaptionStyle}"/>
+                            <TextBlock Text="{Binding LedgerSummary.TotalPayments, StringFormat='₹{0:N2}'}" Style="{StaticResource SubtitleStyle}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource FluentCardStyle}" Margin="{StaticResource InlineControlSpacing}">
+                        <StackPanel Margin="{StaticResource CardPadding}">
+                            <TextBlock Text="Running Balance" Style="{StaticResource CaptionStyle}"/>
+                            <TextBlock Text="{Binding LedgerSummary.RunningBalance, StringFormat='₹{0:N2}'}" Style="{StaticResource SubtitleStyle}" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource FluentCardStyle}" Margin="{StaticResource InlineControlSpacing}">
+                        <StackPanel Margin="{StaticResource CardPadding}">
+                            <TextBlock Text="Credit Limit" Style="{StaticResource CaptionStyle}"/>
+                            <TextBlock Text="{Binding LedgerSummary.CreditLimit, StringFormat='₹{0:N2}'}" Style="{StaticResource SubtitleStyle}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Ledger entries grid -->
+                <DataGrid Grid.Row="2" AutomationProperties.Name="Ledger entries"
+                          ItemsSource="{Binding LedgerEntries}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          HeadersVisibility="Column"
+                          IsReadOnly="True"
+                          Margin="{StaticResource ItemSpacing}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                        <DataGridTextColumn Header="Debit (₹)" Binding="{Binding Debit, StringFormat=N2}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Credit (₹)" Binding="{Binding Credit, StringFormat=N2}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Balance (₹)" Binding="{Binding Balance, StringFormat=N2}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Reference" Binding="{Binding Reference}" Width="{StaticResource ColumnWidthPrice}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Messages -->
+                <Grid Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+                      Margin="{StaticResource FieldLabelSpacing}">
+                    <controls:InfoBar Message="{Binding ErrorMessage}"
+                                      Severity="Error"
+                                      IsOpen="{Binding HasErrorMessage}"/>
+                    <controls:InfoBar Message="{Binding SuccessMessage}"
+                                      Severity="Success"
+                                      IsOpen="{Binding HasSuccessMessage}"/>
+                </Grid>
+
+                <!-- Payment recording form -->
+                <Border Grid.Row="4" Style="{StaticResource FluentCardStyle}" Margin="{StaticResource ItemSpacing}">
+                    <Grid Margin="{StaticResource CardPadding}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="{StaticResource FieldWidthStandard}"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="{StaticResource FieldWidthStandard}"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="{StaticResource FieldWidthStandard}"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="{StaticResource FieldWidthStandard}"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Amount" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged}" MaxLength="15"
+                                 AutomationProperties.Name="Payment amount"
+                                 h:Watermark.Text="e.g. 15000"/>
+                        <TextBlock Grid.Column="2" Text="Method" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+                        <ComboBox Grid.Column="3"
+                                  ItemsSource="{Binding PaymentMethods}"
+                                  SelectedItem="{Binding PaymentMethod}"
+                                  AutomationProperties.Name="Payment method"/>
+                        <TextBlock Grid.Column="4" Text="Reference" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+                        <TextBox Grid.Column="5"
+                                 Text="{Binding PaymentReference, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                                 AutomationProperties.Name="Payment reference"
+                                 h:Watermark.Text="e.g. CHQ-12345"/>
+                        <TextBlock Grid.Column="6" Text="Notes" Style="{StaticResource FormRowLabelStyle}" VerticalAlignment="Center" Margin="{StaticResource InlineControlSpacing}"/>
+                        <TextBox Grid.Column="7"
+                                 Text="{Binding PaymentNotes, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"
+                                 AutomationProperties.Name="Payment notes"
+                                 h:Watermark.Text="Optional notes"/>
+                        <Button Grid.Column="8" Content="Record Payment" Command="{Binding RecordPaymentCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving vendor changes..."/>
     </Grid>

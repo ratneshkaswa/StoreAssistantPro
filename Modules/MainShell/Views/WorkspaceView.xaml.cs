@@ -22,7 +22,7 @@ public partial class WorkspaceView : UserControl
 
         if (StartBillingButton.Visibility == Visibility.Visible)
         {
-            Dispatcher.BeginInvoke(
+            _ = Dispatcher.BeginInvoke(
                 () => StartBillingButton.Focus(),
                 DispatcherPriority.Input);
         }

@@ -14,13 +14,14 @@ namespace StoreAssistantPro.Core.Helpers;
 ///
 /// <para><b>Global timing model:</b></para>
 /// <list type="bullet">
-///   <item><b>Cold delay</b> (1.5 s) — first hover after no tooltip
-///         activity; prevents accidental tooltip flash on mouse
-///         traversal. Configurable via <c>TooltipDelayColdMs</c>
+///   <item><b>Cold delay</b> (500 ms) — informational tips appear with
+///         a Win11-style hover delay that is quick without feeling
+///         noisy. Configurable via <c>TooltipDelayColdMs</c>
 ///         resource token.</item>
-///   <item><b>Warm delay</b> (1.2 s) — subsequent hovers within the
-///         warm window; slightly faster for quick scanning.
-///         Configurable via <c>TooltipDelayWarmMs</c> token.</item>
+///   <item><b>Warm delay</b> (500 ms) — subsequent hovers within the
+///         warm window keep the same predictable delay instead of
+///         accelerating further. Configurable via
+///         <c>TooltipDelayWarmMs</c> token.</item>
 ///   <item><b>Warm window</b> (1.5 s) — after hiding a tooltip the
 ///         system stays "warm" so the next hover opens faster.
 ///         Configurable via <c>TooltipWarmWindowMs</c> token.</item>
@@ -164,8 +165,8 @@ public static class SmartTooltip
     private static long _generation;
 
     // Compile-time fallbacks (overridden at runtime from DesignSystem tokens)
-    private const double FallbackColdDelayMs = 1500;
-    private const double FallbackWarmDelayMs = 1200;
+    private const double FallbackColdDelayMs = 500;
+    private const double FallbackWarmDelayMs = 500;
     private const double FallbackWarmWindowMs = 1500;
     private const double FallbackDisplayMs = 5000;
 

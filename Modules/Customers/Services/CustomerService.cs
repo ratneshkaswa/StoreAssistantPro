@@ -242,6 +242,62 @@ public class CustomerService(
             .ConfigureAwait(false);
     }
 
+    public async Task<decimal> GetOutstandingBalanceAsync(int customerId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CustomerService.GetOutstandingBalanceAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var customer = await context.Customers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == customerId, ct)
+            .ConfigureAwait(false);
+
+        if (customer is null || string.IsNullOrWhiteSpace(customer.Phone))
+            return 0;
+
+        return await context.Debtors
+            .AsNoTracking()
+            .Where(d => d.Phone == customer.Phone)
+            .SumAsync(d => d.TotalAmount - d.PaidAmount, ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task CollectPaymentAsync(int customerId, decimal amount, string paymentMethod, string? reference, CancellationToken ct = default)
+    {
+        if (amount <= 0)
+            throw new ArgumentException("Payment amount must be positive.", nameof(amount));
+
+        using var _ = perf.BeginScope("CustomerService.CollectPaymentAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var customer = await context.Customers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == customerId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Customer Id {customerId} not found.");
+
+        if (string.IsNullOrWhiteSpace(customer.Phone))
+            throw new InvalidOperationException("Customer has no phone number for debtor lookup.");
+
+        var debtors = await context.Debtors
+            .Where(d => d.Phone == customer.Phone && d.PaidAmount < d.TotalAmount)
+            .OrderBy(d => d.Date)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var remaining = amount;
+        foreach (var debtor in debtors)
+        {
+            if (remaining <= 0) break;
+            var owed = debtor.TotalAmount - debtor.PaidAmount;
+            var apply = Math.Min(owed, remaining);
+            debtor.PaidAmount += apply;
+            remaining -= apply;
+        }
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
     private static string? NullIfEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

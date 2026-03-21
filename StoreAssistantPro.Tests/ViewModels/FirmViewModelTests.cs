@@ -37,7 +37,9 @@ public class FirmViewModelTests
             DefaultTaxMode: "Inclusive",
             RoundingMethod: "NearestFive",
             NegativeStockAllowed: true,
-            NumberToWordsLanguage: "Hindi"));
+            NumberToWordsLanguage: "Hindi",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!"));
 
         var sut = CreateSut();
 
@@ -86,7 +88,9 @@ public class FirmViewModelTests
             DefaultTaxMode: "Exclusive",
             RoundingMethod: "None",
             NegativeStockAllowed: false,
-            NumberToWordsLanguage: "English"));
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!"));
 
         var sut = CreateSut();
 
@@ -318,7 +322,9 @@ public class FirmViewModelTests
             DefaultTaxMode: "Exclusive",
             RoundingMethod: "None",
             NegativeStockAllowed: false,
-            NumberToWordsLanguage: "English"));
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!"));
 
         await loadTask;
 
@@ -348,7 +354,9 @@ public class FirmViewModelTests
             DefaultTaxMode: "Exclusive",
             RoundingMethod: "None",
             NegativeStockAllowed: false,
-            NumberToWordsLanguage: "English"));
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!"));
         _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
         _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())

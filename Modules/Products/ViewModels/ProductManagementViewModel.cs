@@ -77,6 +77,9 @@ public partial class ProductManagementViewModel(
     public partial Category? FilterCategory { get; set; }
 
     [ObservableProperty]
+    public partial Brand? FilterBrand { get; set; }
+
+    [ObservableProperty]
     public partial string FilterStockStatus { get; set; } = "All";
 
     [ObservableProperty]
@@ -330,6 +333,8 @@ public partial class ProductManagementViewModel(
 
     partial void OnFilterCategoryChanged(Category? value) => ApplyFilters();
 
+    partial void OnFilterBrandChanged(Brand? value) => ApplyFilters();
+
     private void ApplyFilters()
     {
         IEnumerable<Product> query = _allProducts;
@@ -345,6 +350,9 @@ public partial class ProductManagementViewModel(
         if (FilterCategory is not null)
             query = query.Where(p => p.CategoryId == FilterCategory.Id);
 
+        if (FilterBrand is not null)
+            query = query.Where(p => p.BrandId == FilterBrand.Id);
+
         query = FilterStockStatus switch
         {
             "In Stock" => query.Where(p => p.Quantity > 0 && !p.IsLowStock),
@@ -355,7 +363,7 @@ public partial class ProductManagementViewModel(
 
         var list = query.ToList();
         Products = new ObservableCollection<Product>(list);
-        FilterCountText = (FilterStockStatus == "All" && FilterCategory is null && string.IsNullOrWhiteSpace(SearchText))
+        FilterCountText = (FilterStockStatus == "All" && FilterCategory is null && FilterBrand is null && string.IsNullOrWhiteSpace(SearchText))
             ? string.Empty
             : $"{list.Count} of {_allProducts.Count}";
     }

@@ -18,6 +18,9 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
     public partial ObservableCollection<PettyCashDeposit> Deposits { get; set; } = [];
 
     [ObservableProperty]
+    public partial ObservableCollection<ExpenseCategory> ExpenseCategoryList { get; set; } = [];
+
+    [ObservableProperty]
     public partial decimal TotalExpenses { get; set; }
 
     [ObservableProperty]
@@ -54,6 +57,15 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
 
     [ObservableProperty]
     public partial string AmountText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ExpensePaymentMethod { get; set; } = "Cash";
+
+    [ObservableProperty]
+    public partial string Description { get; set; } = string.Empty;
+
+    public ObservableCollection<string> ExpensePaymentMethods { get; } =
+        ["Cash", "UPI", "Card", "Bank Transfer"];
 
     [ObservableProperty]
     public partial bool IsEditing { get; set; }
@@ -104,6 +116,8 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        var categories = await expenseService.GetCategoriesAsync(ct);
+        ExpenseCategoryList = new ObservableCollection<ExpenseCategory>(categories);
         await ReloadAsync(ct);
     });
 
@@ -119,7 +133,7 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
             return;
 
         var amount = decimal.Parse(AmountText);
-        var dto = new ExpenseDto(ExpenseDate, Category, amount);
+        var dto = new ExpenseDto(ExpenseDate, Category, amount, ExpensePaymentMethod, Description);
 
         if (_editingId.HasValue)
         {
@@ -145,6 +159,8 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
         ExpenseDate = item.Date;
         Category = item.Category;
         AmountText = item.Amount.ToString("F0");
+        ExpensePaymentMethod = item.PaymentMethod;
+        Description = item.Description ?? string.Empty;
         IsEditing = true;
         SaveButtonText = "Update";
     }
@@ -220,6 +236,8 @@ public partial class ExpenseManagementViewModel(IExpenseService expenseService) 
         ExpenseDate = DateTime.Today;
         Category = string.Empty;
         AmountText = string.Empty;
+        ExpensePaymentMethod = "Cash";
+        Description = string.Empty;
         IsEditing = false;
         SaveButtonText = "Save";
     }

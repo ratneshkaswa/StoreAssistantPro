@@ -40,6 +40,9 @@
             <DataGrid AutomationProperties.Name="Category types" ItemsSource="{Binding CategoryTypes}"
                       SelectedItem="{Binding SelectedType}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="🗂"
+                      h:DataGridEmptyState.Title="No category types yet"
+                      h:DataGridEmptyState.Description="Create a category type first so products can be grouped into a clear catalogue structure."
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -86,7 +89,7 @@
                 <Button Grid.Column="1" Content="Clear" Command="{Binding ClearTypeFormCommand}"
                         Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Grid.Column="2" Content="Save" Command="{Binding SaveTypeCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
         </Grid>
 
@@ -106,16 +109,20 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBox AutomationProperties.Name="Category search"
+                         Style="{StaticResource FluentSearchTextBoxStyle}"
                          Text="{Binding CategorySearchText, UpdateSourceTrigger=PropertyChanged}"
                          h:Watermark.Text="e.g. Shirts"/>
                 <Button Grid.Column="1" Content="Search" Command="{Binding SearchCategoriesCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
 
             <DataGrid AutomationProperties.Name="Categories list" Grid.Row="1"
                       ItemsSource="{Binding Categories}"
                       SelectedItem="{Binding SelectedCategory}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="🏷"
+                      h:DataGridEmptyState.Title="No categories found"
+                      h:DataGridEmptyState.Description="Add a category or clear the current search to populate this list."
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -177,7 +184,7 @@
                 <Button Grid.Column="1" Content="Clear" Command="{Binding ClearCategoryFormCommand}"
                         Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Grid.Column="2" Content="Save" Command="{Binding SaveCategoryCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
         </Grid>
 

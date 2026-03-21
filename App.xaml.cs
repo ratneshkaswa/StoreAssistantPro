@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Core.Workflows;
@@ -82,6 +83,7 @@ public partial class App : Application
         _host.Services.GetRequiredService<OnboardingTipRegistrar>();
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
+        SystemAccentSync.Attach(this);
 
         // Wire static logger factory into BaseViewModel so all
         // RunAsync / RunLoadAsync exception catches are logged.
@@ -160,6 +162,7 @@ public partial class App : Application
         }
         finally
         {
+            SystemAccentSync.Detach();
             host?.Dispose();
             base.OnExit(e);
         }

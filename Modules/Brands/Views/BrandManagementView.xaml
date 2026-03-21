@@ -29,10 +29,11 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox AutomationProperties.Name="Brand search"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      h:Watermark.Text="e.g. Raymond"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- DataGrid -->
@@ -40,6 +41,9 @@
                   ItemsSource="{Binding Brands}"
                   SelectedItem="{Binding SelectedBrand}"
                   Style="{StaticResource EnterpriseDataGridStyle}"
+                  h:DataGridEmptyState.Icon="🏷"
+                  h:DataGridEmptyState.Title="No brands yet"
+                  h:DataGridEmptyState.Description="Add your first brand to organize products and supplier assortments."
                   AutoGenerateColumns="False" IsReadOnly="True"
                   SelectionMode="Single"
                   HeadersVisibility="Column" CanUserAddRows="False"
@@ -80,7 +84,7 @@
             <Button Grid.Column="1" Content="Clear" Command="{Binding ClearFormCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Grid.Column="2" Content="Save" Command="{Binding SaveCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Messages -->

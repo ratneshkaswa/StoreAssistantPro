@@ -15,6 +15,7 @@ public class BillingViewModelTests
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
+    private readonly IHeldBillService _heldBillService = Substitute.For<IHeldBillService>();
 
     private BillingViewModel CreateSut()
     {
@@ -22,7 +23,7 @@ public class BillingViewModelTests
         _regional.FormatCurrency(Arg.Any<decimal>())
             .Returns(call => $"Rs. {call.Arg<decimal>():0.00}");
 
-        return new BillingViewModel(_billingService, _customerService, _appState, _dialogService, _regional);
+        return new BillingViewModel(_billingService, _customerService, _appState, _dialogService, _regional, _heldBillService);
     }
 
     [Fact]

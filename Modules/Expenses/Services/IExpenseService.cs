@@ -16,9 +16,27 @@ public interface IExpenseService
     Task DeleteDepositAsync(int id, CancellationToken ct = default);
     Task<ExpenseStats> GetStatsAsync(CancellationToken ct = default);
     Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default);
+
+    // ── Expense Categories (#227/#228) ──
+
+    Task<IReadOnlyList<ExpenseCategory>> GetCategoriesAsync(CancellationToken ct = default);
+    Task CreateCategoryAsync(string name, CancellationToken ct = default);
+    Task UpdateCategoryAsync(int id, string name, CancellationToken ct = default);
+    Task DeleteCategoryAsync(int id, CancellationToken ct = default);
+    Task SeedDefaultCategoriesAsync(CancellationToken ct = default);
+
+    // ── Monthly expense report (#232) ──
+
+    Task<MonthlyExpenseReport> GetMonthlyExpenseReportAsync(int year, int month, CancellationToken ct = default);
 }
 
-public record ExpenseDto(DateTime Date, string Category, decimal Amount);
+public record ExpenseDto(
+    DateTime Date,
+    string Category,
+    decimal Amount,
+    string PaymentMethod = "Cash",
+    string? Description = null,
+    string? CreatedBy = null);
 
 public record PettyCashDepositDto(DateTime Date, decimal Amount, string? Note);
 
@@ -30,3 +48,12 @@ public record ExpenseStats(
     decimal TodaySpent,
     decimal ThisMonthSpent,
     decimal LastMonthSpent);
+
+public record MonthlyExpenseReport(
+    int Year,
+    int Month,
+    decimal TotalAmount,
+    int ExpenseCount,
+    IReadOnlyList<CategoryExpenseBreakdown> ByCategory);
+
+public record CategoryExpenseBreakdown(string Category, decimal Amount, int Count);

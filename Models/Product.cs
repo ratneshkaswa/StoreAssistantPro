@@ -57,6 +57,10 @@ public class Product
     public int? TaxId { get; set; }
     public TaxMaster? Tax { get; set; }
 
+    /// <summary>Additional cess percentage on top of GST (0 = no cess). (#197)</summary>
+    [Range(0, 100)]
+    public decimal CessPercent { get; set; }
+
     public int? BrandId { get; set; }
     public Brand? Brand { get; set; }
 

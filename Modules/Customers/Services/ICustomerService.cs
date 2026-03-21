@@ -16,6 +16,8 @@ public interface ICustomerService
     Task ToggleActiveAsync(int id, CancellationToken ct = default);
     Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default);
     Task<IReadOnlyList<CustomerPurchaseSummary>> GetPurchaseHistoryAsync(int customerId, CancellationToken ct = default);
+    Task<decimal> GetOutstandingBalanceAsync(int customerId, CancellationToken ct = default);
+    Task CollectPaymentAsync(int customerId, decimal amount, string paymentMethod, string? reference, CancellationToken ct = default);
 }
 
 public record CustomerDto(

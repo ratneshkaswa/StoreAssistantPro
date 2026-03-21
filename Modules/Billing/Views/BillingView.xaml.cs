@@ -29,6 +29,9 @@ public partial class BillingView : UserControl
         _eventBus = sp.GetRequiredService<IEventBus>();
 
         EnterBillingMode();
+
+        if (DataContext is BillingViewModel vm)
+            _ = vm.LoadHeldBillsCommand.ExecuteAsync(null);
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)

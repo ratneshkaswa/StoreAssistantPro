@@ -100,6 +100,9 @@
                     <MenuItem Header="Purchase Orders" Command="{Binding OpenPurchaseOrdersCommand}"
                               h:SmartTooltip.ContextKey="PurchaseOrders"
                               Visibility="{Binding IsPurchaseOrdersVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Goods Received Notes" Command="{Binding OpenGRNCommand}"
+                              h:SmartTooltip.ContextKey="GRN"
+                              Visibility="{Binding IsGRNVisible, Converter={StaticResource BoolToVisibility}}"/>
                 </MenuItem>
 
                 <!-- Sales & Customers -->
@@ -110,9 +113,15 @@
                     <MenuItem Header="Sale History" Command="{Binding OpenSaleHistoryCommand}"
                               h:SmartTooltip.ContextKey="SaleHistory"
                               Visibility="{Binding IsSaleHistoryVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Cash Register" Command="{Binding OpenCashRegisterCommand}"
+                              h:SmartTooltip.ContextKey="CashRegister"
+                              Visibility="{Binding IsCashRegisterVisible, Converter={StaticResource BoolToVisibility}}"/>
                     <MenuItem Header="Customer Management" Command="{Binding OpenCustomerManagementCommand}"
                               h:SmartTooltip.ContextKey="Customers"
                               Visibility="{Binding IsCustomerManagementVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <MenuItem Header="Quotations" Command="{Binding OpenQuotationsCommand}"
+                              h:SmartTooltip.ContextKey="Quotations"
+                              Visibility="{Binding IsQuotationsVisible, Converter={StaticResource BoolToVisibility}}"/>
                     <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                     <MenuItem Header="Orders" Command="{Binding OpenOrderManagementCommand}"
                               h:SmartTooltip.ContextKey="Orders"
@@ -158,6 +167,9 @@
                 <MenuItem Header="System Settings" Command="{Binding OpenSystemSettingsCommand}"
                           h:SmartTooltip.ContextKey="Settings"
                           Visibility="{Binding IsSystemSettingsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                <MenuItem Header="Backup and Restore" Command="{Binding OpenBackupRestoreCommand}"
+                          h:SmartTooltip.ContextKey="Backup"
+                          Visibility="{Binding IsBackupRestoreVisible, Converter={StaticResource BoolToVisibility}}"/>
                 <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
                 <MenuItem Header="Refresh Data" Command="{Binding RefreshCurrentViewCommand}"
                           InputGestureText="F5"
@@ -440,68 +452,81 @@
         <Border Grid.Row="3"
                 Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}"
                 Margin="{StaticResource ItemSpacing}"
-                Background="{StaticResource FluentSurface}"
-                BorderBrush="{StaticResource FluentSurfaceStroke}"
+                Background="{StaticResource ChromeAltFillColorSecondary}"
+                BorderBrush="{StaticResource DividerStrokeColorDefault}"
                 BorderThickness="1"
                 CornerRadius="{StaticResource FluentCornerLarge}"
                 Padding="{StaticResource ButtonPadding}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding AppState.FirmName}"
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           Foreground="{StaticResource FluentTextPrimary}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="32"
+                            Height="32"
+                            CornerRadius="16"
+                            Background="{StaticResource FluentAccentLight2}">
+                        <TextBlock Text="{Binding DashboardSummary.CurrentUserInitials}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentAccentDark2}"/>
+                    </Border>
 
-                <Border Grid.Column="1"
-                        Margin="{StaticResource StatusBarPillGap}">
-                    <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource StatusBadgePillStyle}">
-                            <Setter Property="Background" Value="{StaticResource FluentSuccess}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource FluentError}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <TextBlock Foreground="{StaticResource FluentTextOnAccent}"
-                               FontSize="{StaticResource FontSizeStatusBar}"
-                               FontWeight="SemiBold">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Online"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
-                                        <Setter Property="Text" Value="Offline"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </Border>
+                    <StackPanel Margin="10,0,0,0">
+                        <TextBlock Text="{Binding AppState.FirmName}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource FluentTextPrimary}"/>
 
-                <TextBlock Grid.Column="2"
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
+                                                <Setter Property="Fill" Value="{StaticResource FluentError}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+
+                            <TextBlock Text="{Binding DashboardSummary.ConnectionStatusText}"
+                                       Margin="8,0,0,0"
+                                       FontSize="{StaticResource FontSizeStatusBar}"
+                                       Foreground="{StaticResource FluentTextSecondary}"/>
+
+                            <TextBlock Text="  "
+                                       FontSize="{StaticResource FontSizeStatusBar}"/>
+
+                            <TextBlock Text="{Binding DashboardSummary.ConnectionStatusDetail}"
+                                       FontSize="{StaticResource FontSizeStatusBar}"
+                                       Foreground="{StaticResource FluentTextTertiary}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock Grid.Column="1"
                            Text="{Binding StatusBar.Message}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Foreground="{StaticResource FluentTextTertiary}"
                            FontStyle="Italic"/>
 
-                <TextBlock Grid.Column="3"
+                <TextBlock Grid.Column="2"
                            Text="{Binding DashboardSummary.CurrentTime}"
                            Margin="{StaticResource InlineControlSpacing}"
                            VerticalAlignment="Center"
                            Foreground="{StaticResource FluentTextPrimary}"
                            FontWeight="SemiBold"/>
 
-                <Button Grid.Column="4"
+                <Button Grid.Column="3"
                         Content="Switch User"
                         Command="{Binding SwitchUserCommand}"
                         Style="{StaticResource ToolbarLinkButtonStyle}"/>

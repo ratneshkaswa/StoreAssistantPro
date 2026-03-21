@@ -27,17 +27,18 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search customers"
                      h:Watermark.Text="e.g. Aarav or 9876543210"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
-        <!-- DataGrid + Form share the * row -->
+        <!-- DataGrid + Form + Details share the * row -->
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto" MaxHeight="280"/>
+                <RowDefinition Height="Auto" MaxHeight="320"/>
             </Grid.RowDefinitions>
 
             <!-- Customer grid -->
@@ -45,6 +46,9 @@
                       ItemsSource="{Binding Customers}"
                       SelectedItem="{Binding SelectedCustomer}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridEmptyState.Icon="👤"
+                      h:DataGridEmptyState.Title="No customers found"
+                      h:DataGridEmptyState.Description="Create a customer profile or broaden the current search to see matching records."
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False"
@@ -60,83 +64,170 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- Form fields (scrollable when clamped) -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto"
-                          Focusable="False"
-                          PanningMode="Both"
-                          Margin="{StaticResource ItemSpacing}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Bottom: Form (left) + Purchase History & Payment (right) -->
+            <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Form fields -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto"
+                              Focusable="False" PanningMode="Both">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                            <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        </TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="200"
+                                 AutomationProperties.Name="Customer name"
+                                 h:Watermark.Text="e.g. Amit Sharma"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Phone"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="Customer phone"
+                                 Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                                 MaxLength="15"
+                                 h:Watermark.Text="e.g. 9876543210"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <TextBox Grid.Row="4" Grid.Column="1"
+                                 Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="200"
+                                 AutomationProperties.Name="Customer email"
+                                 h:Watermark.Text="e.g. amit@example.com"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Address"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <TextBox Grid.Row="6" Grid.Column="1"
+                                 Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="500"
+                                 AutomationProperties.Name="Customer address"
+                                 h:Watermark.Text="e.g. 24 MI Road, Jaipur"/>
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Text="GSTIN"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <TextBox Grid.Row="8" Grid.Column="1"
+                                 Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="Customer GSTIN"
+                                 Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
+                                 MaxLength="15"
+                                 h:Watermark.Text="e.g. 08ABCDE1234F1Z5"/>
+
+                        <TextBlock Grid.Row="10" Grid.Column="0" Text="Notes"
+                                   Style="{StaticResource FormRowLabelStyle}"/>
+                        <TextBox Grid.Row="10" Grid.Column="1"
+                                 Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="500"
+                                 AutomationProperties.Name="Customer notes"
+                                 h:Watermark.Text="e.g. Prefers WhatsApp updates"/>
+                    </Grid>
+                </ScrollViewer>
+
+                <!-- Purchase History + Payment Collection (right column) -->
+                <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                        <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
-                    </TextBlock>
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="200"
-                             AutomationProperties.Name="Customer name"
-                             h:Watermark.Text="e.g. Amit Sharma"/>
+                    <!-- Outstanding balance banner -->
+                    <Border Background="{StaticResource LayerFillColorSecondary}"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{StaticResource CardContentPadding}"
+                            Visibility="{Binding SelectedCustomer, Converter={StaticResource NullToCollapsed}}">
+                        <DockPanel>
+                            <TextBlock Text="Outstanding" DockPanel.Dock="Left"
+                                       FontSize="{StaticResource FontSizeLabel}"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding OutstandingBalanceDisplay}"
+                                       DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                       FontWeight="SemiBold"
+                                       FontSize="{StaticResource FontSizeBody}"
+                                       Foreground="{StaticResource FluentError}"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Phone"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="2" Grid.Column="1"
-                             Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
-                             AutomationProperties.Name="Customer phone"
-                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="15"
-                             h:Watermark.Text="e.g. 9876543210"/>
+                    <!-- Purchase history grid (#159) -->
+                    <DataGrid Grid.Row="1" Margin="0,8,0,0"
+                              AutomationProperties.Name="Purchase history"
+                              ItemsSource="{Binding PurchaseHistory}"
+                              Style="{StaticResource EnterpriseDataGridStyle}"
+                              h:DataGridEmptyState.Icon="📄"
+                              h:DataGridEmptyState.Title="No purchase history"
+                              h:DataGridEmptyState.Description="Past purchases will appear when a customer is selected."
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" CanUserAddRows="False"
+                              EnableRowVirtualization="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="120"/>
+                            <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="100"/>
+                            <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat=₹\{0:N0\}}" Width="100"/>
+                            <DataGridTextColumn Header="PAYMENT" Binding="{Binding PaymentMethod}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="4" Grid.Column="1"
-                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="200"
-                             AutomationProperties.Name="Customer email"
-                             h:Watermark.Text="e.g. amit@example.com"/>
-
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Address"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="6" Grid.Column="1"
-                             Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="500"
-                             AutomationProperties.Name="Customer address"
-                             h:Watermark.Text="e.g. 24 MI Road, Jaipur"/>
-
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="GSTIN"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="8" Grid.Column="1"
-                             Text="{Binding GSTIN, UpdateSourceTrigger=PropertyChanged}"
-                             AutomationProperties.Name="Customer GSTIN"
-                             Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
-                             MaxLength="15"
-                             h:Watermark.Text="e.g. 08ABCDE1234F1Z5"/>
-
-                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Notes"
-                               Style="{StaticResource FormRowLabelStyle}"/>
-                    <TextBox Grid.Row="10" Grid.Column="1"
-                             Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="500"
-                             AutomationProperties.Name="Customer notes"
-                             h:Watermark.Text="e.g. Prefers WhatsApp updates"/>
+                    <!-- Payment collection (#161) -->
+                    <Border Grid.Row="2" Margin="0,8,0,0"
+                            Background="{StaticResource LayerFillColorSecondary}"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
+                            Padding="{StaticResource CardContentPadding}"
+                            Visibility="{Binding SelectedCustomer, Converter={StaticResource NullToCollapsed}}">
+                        <StackPanel>
+                            <TextBlock Text="Collect Payment" FontWeight="SemiBold"
+                                       FontSize="{StaticResource FontSizeLabel}"
+                                       Foreground="{StaticResource FluentTextPrimary}"
+                                       Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Payment amount"
+                                         h:Watermark.Text="₹ Amount"/>
+                                <ComboBox Grid.Column="2" ItemsSource="{Binding PaymentMethods}"
+                                          SelectedItem="{Binding PaymentMethod}"
+                                          Width="{StaticResource FieldWidthCompact}"
+                                          AutomationProperties.Name="Payment method"/>
+                                <Button Grid.Column="4" Content="Collect"
+                                        Command="{Binding CollectPaymentCommand}"
+                                        Style="{StaticResource PrimaryButtonStyle}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </Grid>
-            </ScrollViewer>
+            </Grid>
         </Grid>
 
         <!-- Messages + Buttons -->
@@ -163,9 +254,9 @@
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
                         Margin="{StaticResource FormActionBarSpacing}">
                 <Button Content="New" Command="{Binding NewCustomerCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Content="Save" Command="{Binding SaveCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </StackPanel>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
@@ -22,15 +22,14 @@ public class DashboardViewModelTests
 
     private DashboardViewModel CreateSut() => new(_appState, _eventBus, _dashboardService);
 
-    // ── CurrentUser ────────────────────────────────────────────────
-
     [Fact]
     public void CurrentUser_FormatsUserType()
     {
         _appState.CurrentUserType.Returns(UserType.Admin);
         var sut = CreateSut();
 
-        Assert.Equal("👤 Admin", sut.CurrentUser);
+        Assert.Equal("Admin", sut.CurrentUser);
+        Assert.Equal("A", sut.CurrentUserInitials);
     }
 
     [Fact]
@@ -51,8 +50,6 @@ public class DashboardViewModelTests
 
         Assert.True(raised);
     }
-
-    // ── Clock ──────────────────────────────────────────────────────
 
     [Fact]
     public void CurrentTime_DelegatesToAppState()
@@ -80,8 +77,6 @@ public class DashboardViewModelTests
         Assert.True(raised);
     }
 
-    // ── Connectivity ───────────────────────────────────────────────
-
     [Fact]
     public void IsOfflineMode_DelegatesToAppState()
     {
@@ -89,6 +84,7 @@ public class DashboardViewModelTests
         var sut = CreateSut();
 
         Assert.True(sut.IsOfflineMode);
+        Assert.Equal("Offline", sut.ConnectionStatusText);
     }
 
     [Fact]
@@ -108,15 +104,12 @@ public class DashboardViewModelTests
         Assert.True(raised);
     }
 
-    // ── Dispose ────────────────────────────────────────────────────
-
     [Fact]
     public void Dispose_UnsubscribesEvents()
     {
         var sut = CreateSut();
         sut.Dispose();
 
-        // Verify no exceptions and property changes are disconnected
         _appState.PropertyChanged += Raise.Event<PropertyChangedEventHandler>(
             _appState, new PropertyChangedEventArgs(nameof(IAppStateService.CurrentTime)));
     }

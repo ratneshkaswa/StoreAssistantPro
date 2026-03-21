@@ -26,7 +26,9 @@ public sealed record FirmManagementSnapshot(
     string DefaultTaxMode,
     string RoundingMethod,
     bool NegativeStockAllowed,
-    string NumberToWordsLanguage);
+    string NumberToWordsLanguage,
+    string InvoicePrefix,
+    string ReceiptFooterText);
 
 public record FirmUpdateDto(
     string FirmName,
@@ -48,4 +50,6 @@ public record FirmUpdateDto(
     string DefaultTaxMode,
     string RoundingMethod,
     bool NegativeStockAllowed,
-    string NumberToWordsLanguage);
+    string NumberToWordsLanguage,
+    string InvoicePrefix,
+    string ReceiptFooterText);

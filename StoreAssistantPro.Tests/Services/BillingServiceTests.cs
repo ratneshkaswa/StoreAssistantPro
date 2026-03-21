@@ -20,6 +20,8 @@ public sealed class BillingServiceTests : IDisposable
 
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
     private readonly ILoginService _loginService = Substitute.For<ILoginService>();
+    private readonly IAuditService _auditService = Substitute.For<IAuditService>();
+    private readonly ICashRegisterService _cashRegisterService = Substitute.For<ICashRegisterService>();
 
     private BillingService CreateSut()
     {
@@ -29,7 +31,7 @@ public sealed class BillingServiceTests : IDisposable
 
         _regional.Now.Returns(new DateTime(2026, 3, 13, 10, 30, 0));
 
-        return new BillingService(factory, _loginService, _perf, _regional);
+        return new BillingService(factory, _loginService, _auditService, _cashRegisterService, _perf, _regional);
     }
 
     [Fact]

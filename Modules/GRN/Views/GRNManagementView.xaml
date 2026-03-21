@@ -1,0 +1,153 @@
+<UserControl x:Class="StoreAssistantPro.Modules.GRN.Views.GRNManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="OnLoaded">
+    <Grid Margin="{StaticResource PagePadding}"
+          TextOptions.TextFormattingMode="Display"
+          TextOptions.TextRenderingMode="ClearType"
+          KeyboardNavigation.TabNavigation="Continue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Goods Received Notes"/></TextBlock>
+
+        <!-- Search bar -->
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FluentSearchTextBoxStyle}"
+                     AutomationProperties.Name="Search GRNs"
+                     h:Watermark.Text="GRN number, PO number, or supplier name"/>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding StatusOptions}"
+                      SelectedItem="{Binding FilterStatus}"
+                      Style="{StaticResource FluentComboBoxStyle}"
+                      Width="{StaticResource FieldWidthStandard}"
+                      Margin="{StaticResource InlineControlSpacing}"
+                      AutomationProperties.Name="Filter by status">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="2" Content="Search" Command="{Binding SearchCommand}"
+                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+        </Grid>
+
+        <!-- Two-column layout -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- GRN list (#372 history) -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid AutomationProperties.Name="GRN list"
+                          ItemsSource="{Binding GRNs}"
+                          SelectedItem="{Binding SelectedGRN}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridEmptyState.Icon="📦"
+                          h:DataGridEmptyState.Title="No goods received notes"
+                          h:DataGridEmptyState.Description="Create a GRN from a purchase order to track goods received."
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="GRN #" Binding="{Binding GRNNumber}" Width="{StaticResource ColumnWidthId}"/>
+                        <DataGridTextColumn Header="PO #" Binding="{Binding PurchaseOrder.OrderNumber}" Width="{StaticResource ColumnWidthId}"/>
+                        <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier.Name}" Width="*"/>
+                        <DataGridTextColumn Header="Date" Binding="{Binding ReceivedDate, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=₹{0:N2}}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthQty}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Paging -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                            Margin="{StaticResource ItemSpacing}" Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
+                    <Button Content="◀ Prev" Command="{Binding PreviousPageCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding PagingInfo}" VerticalAlignment="Center"
+                               Style="{StaticResource CaptionStyle}"/>
+                    <Button Content="Next ▶" Command="{Binding NextPageCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Right panel: Create + Actions -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Focusable="False" Margin="{StaticResource ItemSpacing}">
+                <StackPanel>
+                    <!-- Create from PO -->
+                    <TextBlock Text="Create GRN from Purchase Order" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8"/>
+
+                    <TextBlock Text="Purchase Order" Style="{StaticResource FormRowLabelStyle}"/>
+                    <ComboBox ItemsSource="{Binding PendingPOs}" SelectedItem="{Binding SelectedPO}"
+                              DisplayMemberPath="OrderNumber" Style="{StaticResource FluentComboBoxStyle}"
+                              AutomationProperties.Name="Purchase order" Margin="0,0,0,8"/>
+
+                    <TextBlock Text="Notes" Style="{StaticResource FormRowLabelStyle}"/>
+                    <TextBox Text="{Binding GRNNotes, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FluentTextBoxStyle}" MaxLength="500"
+                             AutomationProperties.Name="GRN notes" Margin="0,0,0,8"/>
+
+                    <Button Content="Create GRN" Command="{Binding CreateFromPOCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch"/>
+
+                    <!-- Selected GRN details -->
+                    <TextBlock Text="Selected GRN" Style="{StaticResource SectionHeaderStyle}" Margin="0,16,0,8"/>
+
+                    <DataGrid ItemsSource="{Binding SelectedGRN.Items}"
+                              Style="{StaticResource EnterpriseDataGridStyle}"
+                              AutomationProperties.Name="GRN items"
+                              MaxHeight="200" IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              Visibility="{Binding HasSelectedGRN, Converter={StaticResource BoolToVisibility}}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product" Binding="{Binding Product.Name}" Width="*"/>
+                            <DataGridTextColumn Header="Expected" Binding="{Binding QtyExpected}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Received" Binding="{Binding QtyReceived}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Rejected" Binding="{Binding QtyRejected}" Width="{StaticResource ColumnWidthQty}"/>
+                            <DataGridTextColumn Header="Unit Cost" Binding="{Binding UnitCost, StringFormat=₹{0:N2}}" Width="{StaticResource ColumnWidthPrice}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Actions -->
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="Confirm GRN" Command="{Binding ConfirmGRNCommand}"
+                                IsEnabled="{Binding CanConfirm}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,4"/>
+                        <Button Content="Cancel GRN" Command="{Binding CancelGRNCommand}"
+                                IsEnabled="{Binding CanCancel}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,4"/>
+                    </WrapPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Messages -->
+        <TextBlock Grid.Row="3" Text="{Binding SuccessMessage}" Style="{StaticResource SuccessMessageStyle}"
+                   Visibility="{Binding SuccessMessage, Converter={StaticResource StringToVisibility}}"/>
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorMessageStyle}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibility}}"/>
+    </Grid>
+</UserControl>

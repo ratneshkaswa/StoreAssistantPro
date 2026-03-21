@@ -53,6 +53,8 @@
              xmlns:usrViews="clr-namespace:StoreAssistantPro.Modules.Users.Views"
              xmlns:authVm="clr-namespace:StoreAssistantPro.Modules.Authentication.ViewModels"
              xmlns:authViews="clr-namespace:StoreAssistantPro.Modules.Authentication.Views"
+             xmlns:bkVm="clr-namespace:StoreAssistantPro.Modules.Backup.ViewModels"
+             xmlns:bkViews="clr-namespace:StoreAssistantPro.Modules.Backup.Views"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
@@ -81,6 +83,7 @@
             <helpers:BoolToHiddenVisibilityConverter x:Key="BoolToHiddenVisibility"/>
             <helpers:PriceToDisplayConverter x:Key="PriceToDisplayConverter"/>
             <helpers:HintForegroundConverter x:Key="HintForegroundConverter"/>
+            <helpers:StatusDisplayTextConverter x:Key="StatusDisplayTextConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">
@@ -136,6 +139,9 @@
         <DataTemplate DataType="{x:Type billVm:SaleHistoryViewModel}">
             <billViews:SaleHistoryView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type billVm:CashRegisterViewModel}">
+            <billViews:CashRegisterView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type custVm:CustomerManagementViewModel}">
             <custViews:CustomerManagementView/>
         </DataTemplate>
@@ -162,6 +168,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type authVm:LoginViewModel}">
             <authViews:LoginView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type bkVm:BackupRestoreViewModel}">
+            <bkViews:BackupRestoreView/>
         </DataTemplate>
 
         <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + slide-fade transition -->

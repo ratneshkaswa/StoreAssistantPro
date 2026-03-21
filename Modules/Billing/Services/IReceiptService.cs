@@ -15,4 +15,13 @@ public interface IReceiptService
 
     /// <summary>Generate a full A4 GST tax invoice with buyer details (#131/#134).</summary>
     Task<string> GenerateA4InvoiceAsync(int saleId, CancellationToken ct = default);
+
+    /// <summary>Generate a 58mm narrow thermal receipt (#440).</summary>
+    Task<string> Generate58mmReceiptAsync(int saleId, CancellationToken ct = default);
+
+    /// <summary>Generate an A5 half-page invoice (#443).</summary>
+    Task<string> GenerateA5InvoiceAsync(int saleId, CancellationToken ct = default);
+
+    /// <summary>Generate a delivery challan — items and quantities only, no prices (#444).</summary>
+    Task<string> GenerateDeliveryChallanAsync(int saleId, CancellationToken ct = default);
 }

@@ -24,6 +24,9 @@
                   ItemsSource="{Binding Users}"
                   SelectedItem="{Binding SelectedUser}"
                   Style="{StaticResource EnterpriseDataGridStyle}"
+                  h:DataGridEmptyState.Icon="👥"
+                  h:DataGridEmptyState.Title="No users configured"
+                  h:DataGridEmptyState.Description="Create staff accounts to manage roles, PIN changes, and access control."
                   HeadersVisibility="Column"
                   Margin="{StaticResource ItemSpacing}">
             <DataGrid.RowStyle>

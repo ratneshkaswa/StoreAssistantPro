@@ -131,7 +131,7 @@
                     <Button Grid.Column="2" Content="Delete" Command="{Binding DeleteCommand}"
                             Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Grid.Column="3" Content="Save" Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 </Grid>
             </Grid>
 

@@ -14,6 +14,32 @@ public static class InputValidator
     public static bool IsValidUserPin(string pin) =>
         IsDigitsOfLength(pin, 4);
 
+    /// <summary>
+    /// Returns <c>true</c> if the PIN is a weak/common pattern:
+    /// all same digits (0000, 1111), sequential ascending (1234),
+    /// or sequential descending (4321).
+    /// </summary>
+    public static bool IsWeakPin(string pin)
+    {
+        if (string.IsNullOrEmpty(pin) || pin.Length < 2)
+            return false;
+
+        // All same digit
+        if (pin.AsSpan().IndexOfAnyExceptInRange(pin[0], pin[0]) < 0)
+            return true;
+
+        // Sequential ascending
+        var ascending = true;
+        var descending = true;
+        for (var i = 1; i < pin.Length; i++)
+        {
+            if (pin[i] - pin[i - 1] != 1) ascending = false;
+            if (pin[i - 1] - pin[i] != 1) descending = false;
+        }
+
+        return ascending || descending;
+    }
+
     /// <summary>Validate a master PIN: exactly 6 digits.</summary>
     public static bool IsValidMasterPin(string pin) =>
         IsDigitsOfLength(pin, 6);

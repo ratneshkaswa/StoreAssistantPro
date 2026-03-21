@@ -81,6 +81,42 @@ public class NumberBox : Control
         set => SetValue(PlaceholderTextProperty, value);
     }
 
+    public static readonly DependencyProperty PrefixTextProperty =
+        DependencyProperty.Register(nameof(PrefixText), typeof(string), typeof(NumberBox),
+            new PropertyMetadata(string.Empty, OnAdornmentTextChanged));
+
+    public string PrefixText
+    {
+        get => (string)GetValue(PrefixTextProperty);
+        set => SetValue(PrefixTextProperty, value);
+    }
+
+    private static readonly DependencyPropertyKey HasPrefixTextPropertyKey =
+        DependencyProperty.RegisterReadOnly(nameof(HasPrefixText), typeof(bool), typeof(NumberBox),
+            new PropertyMetadata(false));
+
+    public static readonly DependencyProperty HasPrefixTextProperty = HasPrefixTextPropertyKey.DependencyProperty;
+
+    public bool HasPrefixText => (bool)GetValue(HasPrefixTextProperty);
+
+    public static readonly DependencyProperty SuffixTextProperty =
+        DependencyProperty.Register(nameof(SuffixText), typeof(string), typeof(NumberBox),
+            new PropertyMetadata(string.Empty, OnAdornmentTextChanged));
+
+    public string SuffixText
+    {
+        get => (string)GetValue(SuffixTextProperty);
+        set => SetValue(SuffixTextProperty, value);
+    }
+
+    private static readonly DependencyPropertyKey HasSuffixTextPropertyKey =
+        DependencyProperty.RegisterReadOnly(nameof(HasSuffixText), typeof(bool), typeof(NumberBox),
+            new PropertyMetadata(false));
+
+    public static readonly DependencyProperty HasSuffixTextProperty = HasSuffixTextPropertyKey.DependencyProperty;
+
+    public bool HasSuffixText => (bool)GetValue(HasSuffixTextProperty);
+
     public static readonly DependencyProperty SpinButtonPlacementProperty =
         DependencyProperty.Register(nameof(SpinButtonPlacement), typeof(SpinButtonPlacement), typeof(NumberBox),
             new PropertyMetadata(SpinButtonPlacement.Hidden));
@@ -214,6 +250,18 @@ public class NumberBox : Control
     {
         if (d is NumberBox nb)
             nb.SyncTextFromValue();
+    }
+
+    private static void OnAdornmentTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is NumberBox nb)
+            nb.UpdateAdornmentState();
+    }
+
+    private void UpdateAdornmentState()
+    {
+        SetValue(HasPrefixTextPropertyKey, !string.IsNullOrWhiteSpace(PrefixText));
+        SetValue(HasSuffixTextPropertyKey, !string.IsNullOrWhiteSpace(SuffixText));
     }
 }
 
