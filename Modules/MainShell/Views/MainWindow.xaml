@@ -713,6 +713,7 @@
                         <ListBox x:Name="CommandPaletteResultsList"
                                  BorderThickness="0"
                                  Background="Transparent"
+                                 h:Motion.StaggerChildren="True"
                                  ItemContainerStyle="{StaticResource CommandPaletteResultItemStyle}"
                                  ItemsSource="{Binding CommandPaletteItems}"
                                  MaxHeight="420"

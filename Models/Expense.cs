@@ -27,6 +27,10 @@ public class Expense
     [MaxLength(50)]
     public string? CreatedBy { get; set; }
 
+    /// <summary>Optional file path to an attached receipt photo/scan (#233).</summary>
+    [MaxLength(500)]
+    public string? ReceiptPath { get; set; }
+
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 }

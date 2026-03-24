@@ -610,4 +610,39 @@ public class ReceiptService(
 
         return sb.ToString();
     }
+
+    // ── QR code data (#129) ──────────────────────────────────────
+
+    public async Task<string> GenerateQrCodeDataAsync(int saleId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReceiptService.GenerateQrCodeDataAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var sale = await context.Sales
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == saleId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Sale Id {saleId} not found.");
+
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+
+        // UPI-style QR payload: GSTIN | Invoice | Date | Total
+        return string.Join("|",
+            config?.GSTNumber ?? "",
+            sale.InvoiceNumber ?? "",
+            sale.SaleDate.ToString("dd-MM-yyyy"),
+            sale.TotalAmount.ToString("F2"));
+    }
+
+    // ── Invoice barcode data (#130) ──────────────────────────────
+
+    public string GenerateBarcodeData(string invoiceNumber) => invoiceNumber;
+
+    // ── Email invoice stub (#135) ────────────────────────────────
+
+    public Task<bool> SendInvoiceEmailAsync(int saleId, string recipientEmail, CancellationToken ct = default)
+    {
+        // Stub — future SMTP / SendGrid integration.
+        return Task.FromResult(false);
+    }
 }

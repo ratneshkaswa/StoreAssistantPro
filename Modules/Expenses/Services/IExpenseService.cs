@@ -43,6 +43,11 @@ public interface IExpenseService
 
     /// <summary>Create an expense that may require approval if above threshold.</summary>
     Task CreateWithApprovalAsync(ExpenseDto dto, bool isApproved = false, CancellationToken ct = default);
+
+    // ── Expense receipt photo (#233) ──
+
+    /// <summary>Attach or update a receipt photo/scan file path for an expense.</summary>
+    Task AttachReceiptAsync(int expenseId, string receiptPath, CancellationToken ct = default);
 }
 
 public record ExpenseDto(

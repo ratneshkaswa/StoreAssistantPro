@@ -24,4 +24,16 @@ public interface IReceiptService
 
     /// <summary>Generate a delivery challan — items and quantities only, no prices (#444).</summary>
     Task<string> GenerateDeliveryChallanAsync(int saleId, CancellationToken ct = default);
+
+    /// <summary>Generate QR code payload string for a sale receipt (#129).</summary>
+    Task<string> GenerateQrCodeDataAsync(int saleId, CancellationToken ct = default);
+
+    /// <summary>Generate barcode payload string from an invoice number (#130).</summary>
+    string GenerateBarcodeData(string invoiceNumber);
+
+    /// <summary>
+    /// Send a sale invoice as a PDF email attachment to the customer (#135).
+    /// Returns true if the email was sent (currently a stub — future SMTP integration).
+    /// </summary>
+    Task<bool> SendInvoiceEmailAsync(int saleId, string recipientEmail, CancellationToken ct = default);
 }

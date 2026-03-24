@@ -49,4 +49,24 @@ public class TaxCalculationService : ITaxCalculationService
         var baseAmount = decimal.Round(unitPrice * quantity, 2, MidpointRounding.AwayFromZero);
         return Calculate(baseAmount, taxRate, isIntraState);
     }
+
+    public TaxBreakdown CalculateComposition(decimal amount, decimal compositionRate)
+    {
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException(nameof(amount), "Amount cannot be negative.");
+        if (compositionRate < 0 || compositionRate > 100)
+            throw new ArgumentOutOfRangeException(nameof(compositionRate), "Composition rate must be between 0 and 100.");
+
+        if (compositionRate == 0 || amount == 0)
+            return new TaxBreakdown(amount, 0m, 0m, 0m, 0m, amount);
+
+        var tax = decimal.Round(amount * compositionRate / 100m, 2, MidpointRounding.AwayFromZero);
+        return new TaxBreakdown(amount, 0m, 0m, 0m, tax, amount + tax);
+    }
+
+    public TaxBreakdown CalculateReverseCharge(decimal amount, decimal taxRate, bool isIntraState)
+    {
+        // Breakdown is structurally identical — the buyer is liable for payment instead of the seller.
+        return Calculate(amount, taxRate, isIntraState);
+    }
 }

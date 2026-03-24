@@ -479,4 +479,20 @@ public class ExpenseService(
             _ => new DateTime(now.Year, now.Month, Math.Min(template.DueDay, DateTime.DaysInMonth(now.Year, now.Month)))
         };
     }
+
+    // ── Expense receipt photo (#233) ─────────────────────────────
+
+    public async Task AttachReceiptAsync(int expenseId, string receiptPath, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.AttachReceiptAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var expense = await context.Expenses
+            .FirstOrDefaultAsync(e => e.Id == expenseId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Expense Id {expenseId} not found.");
+
+        expense.ReceiptPath = receiptPath;
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
 }

@@ -32,4 +32,18 @@ public interface ITaxCalculationService
     /// Calculates the tax breakdown for a line item (quantity × unit price).
     /// </summary>
     TaxBreakdown Calculate(decimal unitPrice, int quantity, decimal taxRate, bool isIntraState);
+
+    /// <summary>
+    /// Calculates tax under the GST Composition Scheme (#199).
+    /// Small businesses (&lt; ₹1.5 Cr turnover) pay a flat rate with no CGST/SGST/IGST split.
+    /// </summary>
+    /// <param name="amount">Base (pre-tax) amount.</param>
+    /// <param name="compositionRate">Flat composition rate (e.g. 1 for 1%).</param>
+    TaxBreakdown CalculateComposition(decimal amount, decimal compositionRate);
+
+    /// <summary>
+    /// Calculates tax under the Reverse Charge Mechanism (#200).
+    /// Tax liability shifts to the buyer — breakdown is identical but flagged for accounting.
+    /// </summary>
+    TaxBreakdown CalculateReverseCharge(decimal amount, decimal taxRate, bool isIntraState);
 }

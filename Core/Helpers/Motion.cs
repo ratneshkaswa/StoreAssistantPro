@@ -2,6 +2,8 @@
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Linq;
+using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -502,6 +504,62 @@ public static class Motion
                 tt.BeginAnimation(TranslateTransform.YProperty, slideAnim);
             }
         };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  STAGGER CHILDREN  —  auto-assign sequential StaggerIndex values
+    //
+    //  For ItemsControl/ListBox surfaces where containers are generated
+    //  dynamically and should inherit the standard 30 ms stagger cadence.
+    // ═══════════════════════════════════════════════════════════════════
+
+    public static readonly DependencyProperty StaggerChildrenProperty =
+        DependencyProperty.RegisterAttached(
+            "StaggerChildren", typeof(bool), typeof(Motion),
+            new PropertyMetadata(false, OnStaggerChildrenChanged));
+
+    public static bool GetStaggerChildren(DependencyObject obj) =>
+        (bool)obj.GetValue(StaggerChildrenProperty);
+
+    public static void SetStaggerChildren(DependencyObject obj, bool value) =>
+        obj.SetValue(StaggerChildrenProperty, value);
+
+    private static readonly DependencyProperty StaggerChildrenSubscribedProperty =
+        DependencyProperty.RegisterAttached(
+            "StaggerChildrenSubscribed", typeof(bool), typeof(Motion),
+            new PropertyMetadata(false));
+
+    private static void OnStaggerChildrenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not ItemsControl itemsControl || e.NewValue is not true)
+            return;
+
+        if ((bool)itemsControl.GetValue(StaggerChildrenSubscribedProperty))
+            return;
+
+        itemsControl.SetValue(StaggerChildrenSubscribedProperty, true);
+        itemsControl.Loaded += static (sender, _) => ScheduleChildStagger((ItemsControl)sender);
+        itemsControl.ItemContainerGenerator.StatusChanged += (sender, _) =>
+        {
+            ScheduleChildStagger(itemsControl);
+        };
+    }
+
+    private static void ScheduleChildStagger(ItemsControl itemsControl)
+    {
+        if (IsMotionDisabled(itemsControl))
+            return;
+
+        itemsControl.Dispatcher.BeginInvoke(
+            DispatcherPriority.Loaded,
+            new Action(() =>
+            {
+                for (var i = 0; i < itemsControl.Items.Count; i++)
+                {
+                    if (itemsControl.ItemContainerGenerator.ContainerFromIndex(i) is FrameworkElement container)
+                        SetStaggerIndex(container, i);
+                }
+            }));
     }
 
     // ═══════════════════════════════════════════════════════════════════

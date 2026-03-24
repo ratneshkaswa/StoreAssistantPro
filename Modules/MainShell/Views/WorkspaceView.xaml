@@ -701,7 +701,8 @@
                         <Grid Grid.Row="1" Margin="0,12,0,0">
                             <ScrollViewer VerticalScrollBarVisibility="Auto"
                                           HorizontalScrollBarVisibility="Disabled">
-                                <ItemsControl ItemsSource="{Binding TopProductsTodayDisplay}">
+                                <ItemsControl ItemsSource="{Binding TopProductsTodayDisplay}"
+                                              h:Motion.StaggerChildren="True">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
@@ -790,7 +791,8 @@
                         <Grid Grid.Row="1" Margin="0,12,0,0">
                             <ScrollViewer VerticalScrollBarVisibility="Auto"
                                           HorizontalScrollBarVisibility="Disabled">
-                                <ItemsControl ItemsSource="{Binding TopProductsDisplay}">
+                                <ItemsControl ItemsSource="{Binding TopProductsDisplay}"
+                                              h:Motion.StaggerChildren="True">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
@@ -881,7 +883,8 @@
                     <Grid Grid.Row="1" Margin="0,12,0,0" MaxHeight="280">
                         <ScrollViewer VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding DailySalesTrendDisplay}">
+                            <ItemsControl ItemsSource="{Binding DailySalesTrendDisplay}"
+                                          h:Motion.StaggerChildren="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="0,2" Height="20">
@@ -950,7 +953,8 @@
                     </StackPanel>
 
                     <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <ItemsControl ItemsSource="{Binding PaymentMethodDisplay}">
+                        <ItemsControl ItemsSource="{Binding PaymentMethodDisplay}"
+                                      h:Motion.StaggerChildren="True">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
