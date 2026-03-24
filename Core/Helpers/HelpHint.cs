@@ -5,7 +5,8 @@ namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
 /// Semantic help metadata attached to any <see cref="FrameworkElement"/>.
-/// Automatically bridges to <see cref="SmartTooltip"/> for display and
+/// Automatically bridges to <see cref="SmartTooltip"/> for display,
+/// opting into the shared TeachingTip-like callout chrome, and
 /// maintains a global registry for discoverability (e.g. a future help
 /// panel or keyboard shortcut overlay).
 ///
@@ -155,6 +156,7 @@ public static class HelpHint
         // Fluent-styled rendering.  We simply forward the metadata.
         SmartTooltip.SetText(fe, helpText);
         SmartTooltip.SetHeader(fe, shortcutText);
+        SmartTooltip.SetUseCalloutStyle(fe, helpText is not null);
 
         // ── Lifecycle hooks for registry ────────────────────────
         var isSubscribed = (bool)fe.GetValue(SubscribedProperty);

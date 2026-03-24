@@ -55,6 +55,12 @@
              xmlns:authViews="clr-namespace:StoreAssistantPro.Modules.Authentication.Views"
              xmlns:bkVm="clr-namespace:StoreAssistantPro.Modules.Backup.ViewModels"
              xmlns:bkViews="clr-namespace:StoreAssistantPro.Modules.Backup.Views"
+             xmlns:quotVm="clr-namespace:StoreAssistantPro.Modules.Quotations.ViewModels"
+             xmlns:quotViews="clr-namespace:StoreAssistantPro.Modules.Quotations.Views"
+             xmlns:grnVm="clr-namespace:StoreAssistantPro.Modules.GRN.ViewModels"
+             xmlns:grnViews="clr-namespace:StoreAssistantPro.Modules.GRN.Views"
+             xmlns:bclVm="clr-namespace:StoreAssistantPro.Modules.BarcodeLabels.ViewModels"
+             xmlns:bclViews="clr-namespace:StoreAssistantPro.Modules.BarcodeLabels.Views"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
@@ -172,8 +178,17 @@
         <DataTemplate DataType="{x:Type bkVm:BackupRestoreViewModel}">
             <bkViews:BackupRestoreView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type quotVm:QuotationViewModel}">
+            <quotViews:QuotationManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type grnVm:GRNViewModel}">
+            <grnViews:GRNManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type bclVm:BarcodeLabelViewModel}">
+            <bclViews:BarcodeLabelView/>
+        </DataTemplate>
 
-        <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + slide-fade transition -->
+        <!-- Responsive content host: stretch-to-fill + scroll-on-overflow + clipped page-exit transition -->
         <Style TargetType="{x:Type controls:ResponsiveContentControl}">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
@@ -184,13 +199,27 @@
                                       Focusable="False"
                                       HorizontalScrollBarVisibility="Disabled"
                                       VerticalScrollBarVisibility="Auto"
+                                      CanContentScroll="False"
+                                      PanningMode="VerticalOnly"
+                                      helpers:SmoothScroll.IsEnabled="True"
                                       Padding="0">
                             <controls:ViewportConstrainedPanel
                                 ViewportWidth="{Binding ViewportWidth, ElementName=PART_ScrollViewer}"
                                 ViewportHeight="{Binding ViewportHeight, ElementName=PART_ScrollViewer}">
-                                <ContentPresenter
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <Grid x:Name="PART_TransitionHost"
+                                      ClipToBounds="True">
+                                    <Image x:Name="PART_PreviousSnapshot"
+                                           Source="{TemplateBinding PreviousSnapshot}"
+                                           Visibility="Collapsed"
+                                           IsHitTestVisible="False"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Stretch"
+                                           Stretch="Fill"/>
+                                    <ContentPresenter x:Name="PART_CurrentPresenter"
+                                                      Content="{TemplateBinding Content}"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Grid>
                             </controls:ViewportConstrainedPanel>
                         </ScrollViewer>
                     </ControlTemplate>
@@ -238,19 +267,9 @@
                                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
 
-                                <StackPanel x:Name="PART_Loading"
-                                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                Opacity="0" Visibility="Collapsed">
-                                        <TextBlock Text="&#x23F3;"
-                                                   FontSize="{StaticResource FontSizePageTitle}"
-                                                   HorizontalAlignment="Center"
-                                                   Foreground="{StaticResource FluentTextTertiary}"/>
-                                        <TextBlock Text="Loading..."
-                                                   FontSize="{StaticResource FontSizeBody}"
-                                                   Foreground="{StaticResource FluentTextTertiary}"
-                                                   HorizontalAlignment="Center"
-                                                   Margin="{StaticResource SubtitleGap}"/>
-                                    </StackPanel>
+                                <controls:LoadingOverlay x:Name="PART_Loading"
+                                                         IsActive="{Binding IsLoading}"
+                                                         Message="Preparing page content..."/>
                             </Grid>
                         </Grid>
 
@@ -259,29 +278,6 @@
                             <Trigger Property="PageTitle" Value="">
                                 <Setter TargetName="PART_TitleBar" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
-                            <!-- Show loading overlay with fade -->
-                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                                <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard x:Name="LoadingFadeIn">
-                                        <Storyboard Storyboard.TargetName="PART_Loading">
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="{StaticResource FluentDurationNormal}"
-                                                             EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.EnterActions>
-                                <DataTrigger.ExitActions>
-                                    <StopStoryboard BeginStoryboardName="LoadingFadeIn"/>
-                                    <BeginStoryboard>
-                                        <Storyboard Storyboard.TargetName="PART_Loading">
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                             To="0" Duration="{StaticResource FluentDurationFast}"
-                                                             EasingFunction="{StaticResource FluentEaseAccelerate}"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.ExitActions>
-                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -319,19 +315,9 @@
                                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
 
-                                <StackPanel x:Name="PART_Loading"
-                                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                Opacity="0" Visibility="Collapsed">
-                                        <TextBlock Text="&#x23F3;"
-                                                   FontSize="{StaticResource FontSizePageTitle}"
-                                                   HorizontalAlignment="Center"
-                                                   Foreground="{StaticResource FluentTextTertiary}"/>
-                                        <TextBlock Text="Loading..."
-                                                   FontSize="{StaticResource FontSizeBody}"
-                                                   Foreground="{StaticResource FluentTextTertiary}"
-                                                   HorizontalAlignment="Center"
-                                                   Margin="{StaticResource SubtitleGap}"/>
-                                    </StackPanel>
+                                <controls:LoadingOverlay x:Name="PART_Loading"
+                                                         IsActive="{Binding IsLoading}"
+                                                         Message="Preparing page content..."/>
                             </Grid>
 
                             <!-- Row 3: Messages (MinHeight reserves space to prevent layout shift) -->
@@ -370,29 +356,6 @@
                             <Trigger Property="StatusBarContent" Value="{x:Null}">
                                 <Setter TargetName="PART_StatusBar" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
-                            <!-- Loading overlay with fade (bound to BaseViewModel.IsLoading) -->
-                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                                <Setter TargetName="PART_Loading" Property="Visibility" Value="Visible"/>
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard x:Name="EntLoadingFadeIn">
-                                        <Storyboard Storyboard.TargetName="PART_Loading">
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="{StaticResource FluentDurationNormal}"
-                                                             EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.EnterActions>
-                                <DataTrigger.ExitActions>
-                                    <StopStoryboard BeginStoryboardName="EntLoadingFadeIn"/>
-                                    <BeginStoryboard>
-                                        <Storyboard Storyboard.TargetName="PART_Loading">
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                             To="0" Duration="{StaticResource FluentDurationFast}"
-                                                             EasingFunction="{StaticResource FluentEaseAccelerate}"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.ExitActions>
-                            </DataTrigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Setter.Value>

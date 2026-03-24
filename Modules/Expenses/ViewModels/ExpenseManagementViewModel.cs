@@ -4,13 +4,18 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Expenses.Services;
 
 namespace StoreAssistantPro.Modules.Expenses.ViewModels;
 
-public partial class ExpenseManagementViewModel(IExpenseService expenseService) : BaseViewModel
+public partial class ExpenseManagementViewModel(
+    IExpenseService expenseService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
+    public string CurrencySymbol => regional.CurrencySymbol;
+
     [ObservableProperty]
     public partial ObservableCollection<Expense> Expenses { get; set; } = [];
 

@@ -275,6 +275,10 @@ public partial class BillingViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool ShowHeldBillList { get; set; }
 
+    /// <summary>Optional notes for held bill context (#342).</summary>
+    [ObservableProperty]
+    public partial string HoldBillNotes { get; set; } = string.Empty;
+
     public bool HasHeldBills => HeldBills.Count > 0;
 
     [RelayCommand(CanExecute = nameof(CanHoldBill))]
@@ -290,7 +294,7 @@ public partial class BillingViewModel : BaseViewModel
         var dto = new HoldBillDto(
             $"Bill #{HeldBillCount + 1}",
             SelectedCustomer?.Name,
-            null,
+            string.IsNullOrWhiteSpace(HoldBillNotes) ? null : HoldBillNotes.Trim(),
             _appState.CurrentUserType.ToString(),
             GrandTotal,
             items);
@@ -300,6 +304,7 @@ public partial class BillingViewModel : BaseViewModel
         CartItems.Clear();
         SelectedCartItem = null;
         SelectedCustomer = null;
+        HoldBillNotes = string.Empty;
         ResetPayment();
         TransitionBillingSession(BillingSessionState.None);
         UpdateCartCommandStates();
@@ -429,6 +434,7 @@ public partial class BillingViewModel : BaseViewModel
 
     private async Task RefreshHeldBillsAsync(CancellationToken ct)
     {
+        await _heldBillService.AutoCleanupStaleAsync(ct);
         var bills = await _heldBillService.GetActiveAsync(ct);
         HeldBills = new ObservableCollection<HeldBill>(bills);
         HeldBillCount = bills.Count;
@@ -438,6 +444,28 @@ public partial class BillingViewModel : BaseViewModel
     }
 
     private bool CanHoldBill() => CartItems.Count > 0;
+
+    // ── Held bill history (#343) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<HeldBill> HeldBillHistory { get; set; } = [];
+
+    [ObservableProperty]
+    public partial bool ShowHeldBillHistory { get; set; }
+
+    [RelayCommand]
+    private Task LoadHeldBillHistoryAsync() => RunAsync(async ct =>
+    {
+        var history = await _heldBillService.GetHistoryAsync(50, ct);
+        HeldBillHistory = new ObservableCollection<HeldBill>(history);
+        ShowHeldBillHistory = true;
+    });
+
+    [RelayCommand]
+    private void DismissHeldBillHistory()
+    {
+        ShowHeldBillHistory = false;
+    }
 
     // ═══════════════════════════════════════════════════════════════
     //  Search / Barcode

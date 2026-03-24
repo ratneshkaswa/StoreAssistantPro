@@ -94,6 +94,25 @@ public static class NotificationBadgeBehavior
     public static void SetBadgeForeground(DependencyObject obj, Brush value) =>
         obj.SetValue(BadgeForegroundProperty, value);
 
+    // ── DotOnly attached property ─────────────────────────────────
+
+    /// <summary>
+    /// When true, renders the badge as a compact 8px notification dot
+    /// instead of showing the numeric unread count.
+    /// </summary>
+    public static readonly DependencyProperty DotOnlyProperty =
+        DependencyProperty.RegisterAttached(
+            "DotOnly",
+            typeof(bool),
+            typeof(NotificationBadgeBehavior),
+            new PropertyMetadata(false, OnAppearanceChanged));
+
+    public static bool GetDotOnly(DependencyObject obj) =>
+        (bool)obj.GetValue(DotOnlyProperty);
+
+    public static void SetDotOnly(DependencyObject obj, bool value) =>
+        obj.SetValue(DotOnlyProperty, value);
+
     // ── Private: badge element stored on the target ───────────────
 
     private static readonly DependencyProperty BadgeElementProperty =
@@ -133,9 +152,7 @@ public static class NotificationBadgeBehavior
         if (badge is null)
             return;
 
-        badge.Background = GetBadgeBackground(panel);
-        if (badge.Child is TextBlock tb)
-            tb.Foreground = GetBadgeForeground(panel);
+        UpdateBadge(badge, GetCount(panel), panel);
     }
 
     // ── Badge creation ────────────────────────────────────────────
@@ -178,6 +195,7 @@ public static class NotificationBadgeBehavior
         };
         TextOptions.SetTextFormattingMode(badge, TextFormattingMode.Display);
         TextOptions.SetTextRenderingMode(badge, TextRenderingMode.ClearType);
+        ApplyBadgeLayout(badge, panel);
 
         panel.Children.Add(badge);
         panel.SetValue(BadgeElementProperty, badge);
@@ -189,14 +207,49 @@ public static class NotificationBadgeBehavior
 
     private static void UpdateBadge(Border badge, int count, Panel panel)
     {
+        ApplyBadgeLayout(badge, panel);
+
         if (badge.Child is TextBlock tb)
         {
-            tb.Text = count > 99 ? "99+" : count.ToString();
             tb.Foreground = GetBadgeForeground(panel);
+            if (GetDotOnly(panel))
+            {
+                tb.Text = string.Empty;
+                tb.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                tb.Text = count > 99 ? "99+" : count.ToString();
+                tb.Visibility = Visibility.Visible;
+            }
         }
 
         badge.Background = GetBadgeBackground(panel);
         badge.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private static void ApplyBadgeLayout(Border badge, Panel panel)
+    {
+        var dotOnly = GetDotOnly(panel);
+
+        if (dotOnly)
+        {
+            badge.CornerRadius = new CornerRadius(4);
+            badge.Width = 8;
+            badge.MinWidth = 8;
+            badge.Height = 8;
+            badge.Padding = new Thickness(0);
+            badge.Margin = new Thickness(0, -2, -2, 0);
+        }
+        else
+        {
+            badge.ClearValue(FrameworkElement.WidthProperty);
+            badge.CornerRadius = new CornerRadius(8);
+            badge.MinWidth = 16;
+            badge.Height = 16;
+            badge.Padding = new Thickness(4, 0, 4, 0);
+            badge.Margin = new Thickness(0, -4, -4, 0);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════

@@ -336,6 +336,56 @@ public class ProductService(
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
+    // ── Variant export (#63) ─────────────────────────────────────────
+
+    public async Task<IReadOnlyList<ProductVariant>> GetAllVariantsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetAllVariantsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.ProductVariants
+            .AsNoTracking()
+            .Include(v => v.Product)
+            .Include(v => v.Size)
+            .Include(v => v.Colour)
+            .OrderBy(v => v.Product!.Name)
+            .ThenBy(v => v.Size!.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Barcode lookup (#387) ────────────────────────────────────────
+
+    public async Task<Product?> LookupByBarcodeAsync(string barcode, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(barcode)) return null;
+
+        using var _ = perf.BeginScope("ProductService.LookupByBarcodeAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var trimmed = barcode.Trim();
+
+        // Try variant barcode first — return the parent product
+        var variant = await context.ProductVariants
+            .AsNoTracking()
+            .Include(v => v.Product).ThenInclude(p => p!.Tax)
+            .Include(v => v.Product).ThenInclude(p => p!.Category)
+            .Include(v => v.Product).ThenInclude(p => p!.Brand)
+            .FirstOrDefaultAsync(v => v.Barcode == trimmed && v.IsActive, ct)
+            .ConfigureAwait(false);
+
+        if (variant?.Product is not null)
+            return variant.Product;
+
+        // Then try product-level barcode
+        return await context.Products
+            .AsNoTracking()
+            .Include(p => p.Tax)
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .FirstOrDefaultAsync(p => p.Barcode == trimmed && p.IsActive, ct)
+            .ConfigureAwait(false);
+    }
+
     // ── Bulk operations ──────────────────────────────────────────────
 
     public async Task<int> BulkAssignCategoryAsync(IReadOnlyList<int> productIds, int categoryId, CancellationToken ct = default)
@@ -397,5 +447,215 @@ public class ProductService(
         context.Categories.Add(category);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
         return category.Id;
+    }
+
+    // ── Size group templates (#57) ───────────────────────────────────
+
+    private static readonly IReadOnlyList<SizeGroupTemplate> _sizeGroupTemplates =
+    [
+        new("Shirt Sizes", ["S", "M", "L", "XL", "XXL"]),
+        new("Trouser Sizes", ["28", "30", "32", "34", "36", "38", "40"]),
+        new("Kids Sizes", ["2Y", "4Y", "6Y", "8Y", "10Y", "12Y"]),
+        new("Free Size", ["Free Size"]),
+        new("Saree Sizes", ["Standard", "Medium", "Large"]),
+        new("Shoe Sizes", ["6", "7", "8", "9", "10", "11", "12"])
+    ];
+
+    public Task<IReadOnlyList<SizeGroupTemplate>> GetSizeGroupTemplatesAsync(CancellationToken ct = default)
+        => Task.FromResult(_sizeGroupTemplates);
+
+    public Task<IReadOnlyList<string>> GetSizesByGroupAsync(string groupName, CancellationToken ct = default)
+    {
+        var template = _sizeGroupTemplates.FirstOrDefault(t =>
+            t.GroupName.Equals(groupName, StringComparison.OrdinalIgnoreCase));
+        IReadOnlyList<string> result = template?.Sizes ?? [];
+        return Task.FromResult(result);
+    }
+
+    // ── Variant import (#62) ─────────────────────────────────────────
+
+    public async Task<int> ImportVariantsAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        if (rows.Count == 0) return 0;
+
+        using var _ = perf.BeginScope("ProductService.ImportVariantsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var products = await context.Products
+            .ToDictionaryAsync(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase, ct)
+            .ConfigureAwait(false);
+        var sizes = await context.ProductSizes
+            .ToDictionaryAsync(s => s.Name, s => s, StringComparer.OrdinalIgnoreCase, ct)
+            .ConfigureAwait(false);
+        var colours = await context.Colours
+            .ToDictionaryAsync(c => c.Name, c => c, StringComparer.OrdinalIgnoreCase, ct)
+            .ConfigureAwait(false);
+
+        var count = 0;
+        foreach (var row in rows)
+        {
+            var productName = (row.GetValueOrDefault("ProductName") ?? row.GetValueOrDefault("Product") ?? "").Trim();
+            if (!products.TryGetValue(productName, out var product)) continue;
+
+            var sizeName = (row.GetValueOrDefault("Size") ?? "").Trim();
+            var colorName = (row.GetValueOrDefault("Color") ?? row.GetValueOrDefault("Colour") ?? "").Trim();
+            var barcode = (row.GetValueOrDefault("Barcode") ?? "").Trim();
+
+            int.TryParse(row.GetValueOrDefault("Qty") ?? row.GetValueOrDefault("Quantity") ?? "0", out var qty);
+            decimal.TryParse(row.GetValueOrDefault("PriceOffset") ?? "0", out var priceOffset);
+
+            if (!sizes.TryGetValue(sizeName, out var size) || !colours.TryGetValue(colorName, out var colour))
+                continue;
+
+            context.ProductVariants.Add(new ProductVariant
+            {
+                ProductId = product.Id,
+                SizeId = size.Id,
+                ColourId = colour.Id,
+                Barcode = string.IsNullOrWhiteSpace(barcode) ? null : barcode,
+                Quantity = qty,
+                AdditionalPrice = priceOffset
+            });
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
+    }
+
+    // ── Multiple suppliers per product (#92) ─────────────────────────
+
+    public async Task<IReadOnlyList<ProductSupplier>> GetProductSuppliersAsync(int productId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetProductSuppliersAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.ProductSuppliers
+            .AsNoTracking()
+            .Include(ps => ps.Supplier)
+            .Where(ps => ps.ProductId == productId)
+            .OrderByDescending(ps => ps.IsPrimary)
+            .ThenBy(ps => ps.UnitCost)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task AddProductSupplierAsync(ProductSupplierDto dto, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        if (dto.ProductId <= 0) throw new InvalidOperationException("Product is required.");
+        if (dto.SupplierId <= 0) throw new InvalidOperationException("Supplier is required.");
+
+        using var _ = perf.BeginScope("ProductService.AddProductSupplierAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var exists = await context.ProductSuppliers
+            .AnyAsync(ps => ps.ProductId == dto.ProductId && ps.SupplierId == dto.SupplierId, ct)
+            .ConfigureAwait(false);
+        if (exists) throw new InvalidOperationException("This supplier is already linked to the product.");
+
+        if (dto.IsPrimary)
+        {
+            var currentPrimary = await context.ProductSuppliers
+                .Where(ps => ps.ProductId == dto.ProductId && ps.IsPrimary)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+            foreach (var ps in currentPrimary) ps.IsPrimary = false;
+        }
+
+        context.ProductSuppliers.Add(new ProductSupplier
+        {
+            ProductId = dto.ProductId,
+            SupplierId = dto.SupplierId,
+            UnitCost = dto.UnitCost,
+            SupplierSKU = dto.SupplierSKU?.Trim(),
+            IsPrimary = dto.IsPrimary,
+            LeadTimeDays = dto.LeadTimeDays,
+            MinOrderQty = dto.MinOrderQty
+        });
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task RemoveProductSupplierAsync(int productSupplierId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.RemoveProductSupplierAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var entity = await context.ProductSuppliers
+            .FirstOrDefaultAsync(ps => ps.Id == productSupplierId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"ProductSupplier Id {productSupplierId} not found.");
+
+        context.ProductSuppliers.Remove(entity);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<ProductSupplier?> GetBestSupplierAsync(int productId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetBestSupplierAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.ProductSuppliers
+            .AsNoTracking()
+            .Include(ps => ps.Supplier)
+            .Where(ps => ps.ProductId == productId)
+            .OrderBy(ps => ps.UnitCost)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Category hierarchy (#31) ─────────────────────────────────────
+
+    public async Task<IReadOnlyList<CategoryTreeNode>> GetCategoryTreeAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetCategoryTreeAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var categoryTypes = await context.CategoryTypes
+            .AsNoTracking()
+            .Include(ct2 => ct2.Categories)
+            .OrderBy(ct2 => ct2.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var productCounts = await context.Products
+            .AsNoTracking()
+            .Where(p => p.CategoryId != null)
+            .GroupBy(p => p.CategoryId!.Value)
+            .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.CategoryId, x => x.Count, ct)
+            .ConfigureAwait(false);
+
+        return categoryTypes.Select(ct2 => new CategoryTreeNode(
+            ct2.Id,
+            ct2.Name,
+            ct2.Categories.Select(c => new CategoryChild(
+                c.Id,
+                c.Name,
+                c.IsActive,
+                productCounts.GetValueOrDefault(c.Id, 0)
+            )).OrderBy(c => c.CategoryName).ToList()
+        )).ToList();
+    }
+
+    // ── Supplier product count (#95) ─────────────────────────────────
+
+    public async Task<IReadOnlyList<SupplierProductCount>> GetSupplierProductCountsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ProductService.GetSupplierProductCountsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        return await context.Vendors
+            .AsNoTracking()
+            .Select(v => new SupplierProductCount(
+                v.Id,
+                v.Name,
+                context.Products.Count(p => p.VendorId == v.Id)))
+            .OrderByDescending(x => x.ProductCount)
+            .ThenBy(x => x.VendorName)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 }

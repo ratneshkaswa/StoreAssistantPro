@@ -235,6 +235,7 @@
                                                         Maximum="80"
                                                         SmallChange="1"
                                                         SpinButtonPlacement="Inline"
+                                                        SuffixText="mm"
                                                         PlaceholderText="0 = auto"
                                                         AutomationProperties.Name="Printer width in millimeters"
                                                         AutomationProperties.LabeledBy="{Binding ElementName=PrinterWidthLabel}"/>
@@ -322,6 +323,7 @@
                                                         Maximum="480"
                                                         SmallChange="5"
                                                         SpinButtonPlacement="Inline"
+                                                        SuffixText="min"
                                                         PlaceholderText="0 = disabled"
                                                         AutomationProperties.Name="Auto logout after idle minutes"
                                                         AutomationProperties.LabeledBy="{Binding ElementName=AutoLogoutLabel}"/>

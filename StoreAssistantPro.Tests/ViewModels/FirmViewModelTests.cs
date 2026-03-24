@@ -39,7 +39,13 @@ public class FirmViewModelTests
             NegativeStockAllowed: true,
             NumberToWordsLanguage: "Hindi",
             InvoicePrefix: "INV",
-            ReceiptFooterText: "Thank you! Visit again!"));
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: "ICICI Bank",
+            BankAccountNumber: "1234567890",
+            BankIFSC: "ICIC0001234",
+            ReceiptHeaderText: "Welcome",
+            InvoiceResetPeriod: "Annually"));
 
         var sut = CreateSut();
 
@@ -90,7 +96,13 @@ public class FirmViewModelTests
             NegativeStockAllowed: false,
             NumberToWordsLanguage: "English",
             InvoicePrefix: "INV",
-            ReceiptFooterText: "Thank you! Visit again!"));
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: string.Empty,
+            BankAccountNumber: string.Empty,
+            BankIFSC: string.Empty,
+            ReceiptHeaderText: string.Empty,
+            InvoiceResetPeriod: "Never"));
 
         var sut = CreateSut();
 
@@ -186,6 +198,58 @@ public class FirmViewModelTests
         Assert.Equal("Business settings saved.", sut.SuccessMessage);
         Assert.Empty(sut.ErrorMessage);
         Assert.False(sut.IsDirty);
+    }
+
+    [Fact]
+    public async Task SaveFirm_AfterLoad_PreservesHiddenSettlementFields()
+    {
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: "Store",
+            Address: string.Empty,
+            State: "Rajasthan",
+            Pincode: string.Empty,
+            Phone: "9876543210",
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 0m,
+            StateCode: "08",
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: "Axis Bank",
+            BankAccountNumber: "9988776655",
+            BankIFSC: "UTIB0000012",
+            ReceiptHeaderText: "Retail Copy",
+            InvoiceResetPeriod: "Annually"));
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+
+        await sut.LoadFirmCommand.ExecuteAsync(null);
+        sut.Phone = "9123456789";
+
+        await sut.SaveFirmCommand.ExecuteAsync(null);
+
+        await _firmService.Received(1).UpdateFirmAsync(Arg.Is<FirmUpdateDto>(dto =>
+            dto.BankName == "Axis Bank"
+            && dto.BankAccountNumber == "9988776655"
+            && dto.BankIFSC == "UTIB0000012"
+            && dto.ReceiptHeaderText == "Retail Copy"
+            && dto.InvoiceResetPeriod == "Annually"), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -324,7 +388,13 @@ public class FirmViewModelTests
             NegativeStockAllowed: false,
             NumberToWordsLanguage: "English",
             InvoicePrefix: "INV",
-            ReceiptFooterText: "Thank you! Visit again!"));
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: string.Empty,
+            BankAccountNumber: string.Empty,
+            BankIFSC: string.Empty,
+            ReceiptHeaderText: string.Empty,
+            InvoiceResetPeriod: "Never"));
 
         await loadTask;
 
@@ -356,7 +426,13 @@ public class FirmViewModelTests
             NegativeStockAllowed: false,
             NumberToWordsLanguage: "English",
             InvoicePrefix: "INV",
-            ReceiptFooterText: "Thank you! Visit again!"));
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: string.Empty,
+            BankAccountNumber: string.Empty,
+            BankIFSC: string.Empty,
+            ReceiptHeaderText: string.Empty,
+            InvoiceResetPeriod: "Never"));
         _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
         _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())

@@ -22,6 +22,7 @@ public sealed partial class WorkspaceViewModel(
     private DateTime _lastRefreshedAt = regional.Now;
 
     public IReadOnlyList<string> BreadcrumbItems { get; } = ["Home", "Dashboard"];
+    public string CurrencySymbol => regional.CurrencySymbol;
     public string HeaderSubtitle => IsViewingPastDate
         ? $"Viewing metrics for {regional.FormatDate(SelectedDate)}."
         : "Monitor sales, stock, and collections from one place.";
@@ -110,6 +111,11 @@ public sealed partial class WorkspaceViewModel(
     public partial int PendingPaymentsCount { get; set; }
 
     private DateTime? _lastBackupDate;
+    private decimal _previousDaySales;
+    private decimal _previousDayReturns;
+    private decimal _previousDayNetSales;
+    private decimal _previousDayAverageBillValue;
+    private decimal _previousMonthSales;
 
     // Display collections
 
@@ -135,22 +141,27 @@ public sealed partial class WorkspaceViewModel(
     public string TodaySalesFormatted => regional.FormatCurrency(TodaySales);
     public string TodaySalesCompact => FormatCompactCurrency(TodaySales);
     public string TodayTransactionsLabel => BuildCountLabel(TodayTransactions, "transaction");
+    public KpiTrendDisplayItem TodaySalesTrend => BuildTrend(TodaySales, _previousDaySales, "yesterday");
 
     public string TodayReturnsCompact => FormatCompactCurrency(TodayReturns);
     public string TodayReturnsLabel => TodayReturns == 0 ? "No returns today" : "Returned today";
+    public KpiTrendDisplayItem TodayReturnsTrend => BuildTrend(TodayReturns, _previousDayReturns, "yesterday", higherIsBetter: false);
 
     public string TodayNetSalesCompact => FormatCompactCurrency(TodayNetSales);
     public string TodayNetSalesLabel => "Sales − Returns";
+    public KpiTrendDisplayItem TodayNetSalesTrend => BuildTrend(TodayNetSales, _previousDayNetSales, "yesterday");
 
     public string TodayProfitCompact => FormatCompactCurrency(TodayProfit);
     public string TodayProfitLabel => TodayProfit >= 0 ? "Estimated profit" : "Estimated loss";
 
     public string AverageBillCompact => FormatCompactCurrency(AverageBillValue);
     public string AverageBillLabel => TodayTransactions == 0 ? "No bills yet" : "Avg. bill value";
+    public KpiTrendDisplayItem AverageBillTrend => BuildTrend(AverageBillValue, _previousDayAverageBillValue, "yesterday");
 
     public string ThisMonthSalesFormatted => regional.FormatCurrency(ThisMonthSales);
     public string ThisMonthSalesCompact => FormatCompactCurrency(ThisMonthSales);
     public string ThisMonthTransactionsLabel => BuildCountLabel(ThisMonthTransactions, "bill");
+    public KpiTrendDisplayItem ThisMonthSalesTrend => BuildTrend(ThisMonthSales, _previousMonthSales, "last month");
 
     public string TotalProductsCompact => FormatCompactNumber(TotalProducts);
     public string ProductStatusLabel => OutOfStockCount == 0
@@ -263,6 +274,11 @@ public sealed partial class WorkspaceViewModel(
         OutstandingReceivables = summary.OutstandingReceivables;
         PendingPaymentsCount = summary.PendingPaymentsCount;
         _lastBackupDate = summary.LastBackupDate;
+        _previousDaySales = summary.PreviousDaySales;
+        _previousDayReturns = summary.PreviousDayReturns;
+        _previousDayNetSales = summary.PreviousDayNetSales;
+        _previousDayAverageBillValue = summary.PreviousDayAverageBillValue;
+        _previousMonthSales = summary.PreviousMonthSales;
 
         RecentSalesDisplay = new(summary.RecentSales.Select(BuildRecentSaleDisplay));
         TopProductsDisplay = new(summary.TopProducts.Select(BuildTopProductDisplay));
@@ -316,19 +332,24 @@ public sealed partial class WorkspaceViewModel(
         OnPropertyChanged(nameof(TodaySalesFormatted));
         OnPropertyChanged(nameof(TodaySalesCompact));
         OnPropertyChanged(nameof(TodayTransactionsLabel));
+        OnPropertyChanged(nameof(TodaySalesTrend));
 
         OnPropertyChanged(nameof(TodayReturnsCompact));
         OnPropertyChanged(nameof(TodayReturnsLabel));
+        OnPropertyChanged(nameof(TodayReturnsTrend));
         OnPropertyChanged(nameof(TodayNetSalesCompact));
         OnPropertyChanged(nameof(TodayNetSalesLabel));
+        OnPropertyChanged(nameof(TodayNetSalesTrend));
         OnPropertyChanged(nameof(TodayProfitCompact));
         OnPropertyChanged(nameof(TodayProfitLabel));
         OnPropertyChanged(nameof(AverageBillCompact));
         OnPropertyChanged(nameof(AverageBillLabel));
+        OnPropertyChanged(nameof(AverageBillTrend));
 
         OnPropertyChanged(nameof(ThisMonthSalesFormatted));
         OnPropertyChanged(nameof(ThisMonthSalesCompact));
         OnPropertyChanged(nameof(ThisMonthTransactionsLabel));
+        OnPropertyChanged(nameof(ThisMonthSalesTrend));
 
         OnPropertyChanged(nameof(TotalProductsCompact));
         OnPropertyChanged(nameof(ProductStatusLabel));
@@ -410,6 +431,24 @@ public sealed partial class WorkspaceViewModel(
     private string FormatCompactNumber(int value) =>
         FormatCompactValue(value);
 
+    private static KpiTrendDisplayItem BuildTrend(decimal current, decimal previous, string comparisonContext, bool higherIsBetter = true)
+    {
+        var delta = current - previous;
+        if (delta == 0)
+            return new KpiTrendDisplayItem("→", $"Flat vs {comparisonContext}", KpiTrendTone.Neutral);
+
+        var glyph = delta > 0 ? "↑" : "↓";
+        var tone = delta > 0
+            ? (higherIsBetter ? KpiTrendTone.Positive : KpiTrendTone.Negative)
+            : (higherIsBetter ? KpiTrendTone.Negative : KpiTrendTone.Positive);
+
+        if (previous == 0)
+            return new KpiTrendDisplayItem(glyph, $"New vs {comparisonContext}", tone);
+
+        var percentChange = Math.Abs(delta) / Math.Abs(previous) * 100m;
+        return new KpiTrendDisplayItem(glyph, $"{percentChange:0.#}% vs {comparisonContext}", tone);
+    }
+
     private static string FormatCompactValue(decimal value)
     {
         var absolute = Math.Abs(value);
@@ -440,17 +479,3 @@ public sealed partial class WorkspaceViewModel(
         return compact.ToString(format, CultureInfo.InvariantCulture) + suffix;
     }
 }
-
-public sealed record RecentSaleDisplayItem(
-    string InvoiceNumber,
-    string RelativeDate,
-    string DateToolTip,
-    string Amount,
-    string PaymentMethod,
-    string ItemCountLabel);
-
-public sealed record TopProductDisplayItem(
-    string ProductName,
-    string QuantitySoldLabel,
-    string RevenueCompact,
-    string RevenueToolTip);

@@ -19,6 +19,7 @@ public static class UsersModule
         pageRegistry.Map<UsersViewModel>(UserManagementPage)
             .RequireFeature(UserManagementPage, FeatureFlags.UserManagement);
         services.AddTransient<IUserService, UserService>();
+        services.AddTransient<IPermissionService, PermissionService>();
         services.AddTransient<ICommandRequestHandler<ChangePinCommand, Unit>, ChangePinHandler>();
         services.AddTransient<UsersViewModel>();
         return services;

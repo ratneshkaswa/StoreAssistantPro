@@ -21,12 +21,36 @@
         <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8B7;"/><Run Text=" Category Management"/></TextBlock>
 
         <!-- Tab selector -->
-        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Button Content="Category Types" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-            <Button Content="Categories" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-        </WrapPanel>
+        <Border Grid.Row="1"
+                Margin="{StaticResource ItemSpacing}"
+                Style="{StaticResource SegmentedFilterHostStyle}"
+                HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Category Types"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="0"
+                        Style="{StaticResource SegmentedFilterButtonStyle}"
+                        Margin="0,0,4,0">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="0"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+                <Button Content="Categories"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="1"
+                        Style="{StaticResource SegmentedFilterButtonStyle}">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="1"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+            </StackPanel>
+        </Border>
 
         <!-- Tab 0: Category Types -->
         <Grid Grid.Row="2"

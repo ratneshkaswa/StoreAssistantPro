@@ -75,6 +75,11 @@ namespace StoreAssistantPro.Core.Helpers;
 ///     <description>Override the default <c>Bottom</c> placement.</description>
 ///   </item>
 ///   <item>
+///     <term><see cref="UseCalloutStyleProperty"/></term>
+///     <description>Uses the shared TeachingTip-like callout chrome
+///     instead of the standard compact tooltip surface.</description>
+///   </item>
+///   <item>
 ///     <term><see cref="IsEnabledProperty"/></term>
 ///     <description>Dynamically enable/disable the tooltip.</description>
 ///   </item>
@@ -259,6 +264,21 @@ public static class SmartTooltip
 
     public static void SetPlacement(DependencyObject obj, PlacementMode value) =>
         obj.SetValue(PlacementProperty, value);
+
+    // ═════════════════════════════════════════════════════════════════
+    //  USE CALLOUT STYLE  —  TeachingTip-like chrome variant
+    // ═════════════════════════════════════════════════════════════════
+
+    public static readonly DependencyProperty UseCalloutStyleProperty =
+        DependencyProperty.RegisterAttached(
+            "UseCalloutStyle", typeof(bool), typeof(SmartTooltip),
+            new PropertyMetadata(false));
+
+    public static bool GetUseCalloutStyle(DependencyObject obj) =>
+        (bool)obj.GetValue(UseCalloutStyleProperty);
+
+    public static void SetUseCalloutStyle(DependencyObject obj, bool value) =>
+        obj.SetValue(UseCalloutStyleProperty, value);
 
     // ═════════════════════════════════════════════════════════════════
     //  IS ENABLED  —  dynamic toggle
@@ -599,9 +619,16 @@ public static class SmartTooltip
         };
         ApplyCrispTextRendering(tooltip);
 
-        // Try to apply the Fluent style from the resource tree
-        if (fe.TryFindResource("SmartTooltipStyle") is Style tooltipStyle)
-            tooltip.Style = tooltipStyle;
+        // Help surfaces can opt into a pointed TeachingTip-like chrome
+        // while ordinary hover tips stay on the compact shared style.
+        var styleKey = GetUseCalloutStyle(fe)
+            ? "TeachingTipTooltipStyle"
+            : "SmartTooltipStyle";
+
+        var resolvedStyle = fe.TryFindResource(styleKey) as Style
+            ?? fe.TryFindResource("SmartTooltipStyle") as Style;
+        if (resolvedStyle is not null)
+            tooltip.Style = resolvedStyle;
 
         if (richContent is not null)
         {

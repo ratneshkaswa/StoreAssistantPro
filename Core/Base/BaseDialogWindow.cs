@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using StoreAssistantPro.Core.Controls;
 using StoreAssistantPro.Core.Helpers;
@@ -18,6 +19,7 @@ public abstract class BaseDialogWindow : Window
     private bool _overflowHostApplied;
     private bool _deferredInitialLoadScheduled;
     private bool _deferredInitialLoadFailed;
+    private IDisposable? _ownerSmokeOverlay;
 
     protected abstract double DialogWidth { get; }
     protected abstract double DialogHeight { get; }
@@ -45,6 +47,11 @@ public abstract class BaseDialogWindow : Window
     /// validation surfaces never push the shell off-screen.
     /// </summary>
     protected virtual bool EnableOverflowScrollHost => true;
+
+    /// <summary>
+    /// Applies the Win11 modal smoke treatment to the owner window while the dialog is visible.
+    /// </summary>
+    protected virtual bool EnableOwnerSmokeOverlay => true;
 
     public static readonly DependencyProperty ConfirmCommandProperty =
         DependencyProperty.Register(
@@ -95,6 +102,8 @@ public abstract class BaseDialogWindow : Window
 
         SourceInitialized += (_, _) => Win11Backdrop.ApplyDialog(this);
         Loaded += (_, _) => EnsureOverflowScrollHost();
+        Loaded += (_, _) => ApplyOwnerSmokeOverlay();
+        Closed += (_, _) => ClearOwnerSmokeOverlay();
 
         if (CloseOnEscape)
             KeyboardNav.SetEscapeCommand(this, new CloseDialogCommand(this));
@@ -185,6 +194,25 @@ public abstract class BaseDialogWindow : Window
         Content = CreateOverflowHost(content);
     }
 
+    private void ApplyOwnerSmokeOverlay()
+    {
+        ClearOwnerSmokeOverlay();
+
+        if (!EnableOwnerSmokeOverlay || Owner is null)
+            return;
+
+        var overlayBrush = TryFindResource("DialogOwnerSmokeOverlayBrush") as Brush
+            ?? new SolidColorBrush(Color.FromArgb(102, 243, 243, 243));
+
+        _ownerSmokeOverlay = DialogOwnerSmokeOverlay.Show(Owner, overlayBrush);
+    }
+
+    private void ClearOwnerSmokeOverlay()
+    {
+        _ownerSmokeOverlay?.Dispose();
+        _ownerSmokeOverlay = null;
+    }
+
     private static ScrollViewer CreateOverflowHost(UIElement content)
     {
         var scrollViewer = new ScrollViewer
@@ -197,6 +225,7 @@ public abstract class BaseDialogWindow : Window
             UseLayoutRounding = true,
             SnapsToDevicePixels = true
         };
+        SmoothScroll.SetIsEnabled(scrollViewer, true);
 
         var viewportHost = new ViewportConstrainedPanel
         {

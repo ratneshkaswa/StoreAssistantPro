@@ -164,4 +164,69 @@ public class VendorLedgerService(
             .SumAsync(e => (decimal?)e.TransportCharges, ct)
             .ConfigureAwait(false) ?? 0m;
     }
+
+    // ── Supplier due alerts (#91) ──
+
+    public async Task<IReadOnlyList<SupplierDueAlert>> GetOverdueAlertsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("VendorLedgerService.GetOverdueAlertsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var vendors = await context.Vendors
+            .AsNoTracking()
+            .Where(v => v.IsActive && v.PaymentTerms != null)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var alerts = new List<SupplierDueAlert>();
+        var today = regional.Now.Date;
+
+        foreach (var vendor in vendors)
+        {
+            var creditDays = ParseCreditDays(vendor.PaymentTerms);
+            if (creditDays <= 0) continue;
+
+            var totalPurchases = await GetTotalPurchasesAsync(context, vendor.Id, ct).ConfigureAwait(false);
+            var totalPayments = await context.VendorPayments
+                .Where(p => p.VendorId == vendor.Id)
+                .SumAsync(p => (decimal?)p.Amount, ct)
+                .ConfigureAwait(false) ?? 0m;
+
+            var outstanding = vendor.OpeningBalance + totalPurchases - totalPayments;
+            if (outstanding <= 0) continue;
+
+            // Find the latest unpaid purchase date
+            var latestPurchaseDate = await context.InwardEntries
+                .Where(e => e.VendorId == vendor.Id)
+                .OrderByDescending(e => e.InwardDate)
+                .Select(e => (DateTime?)e.InwardDate)
+                .FirstOrDefaultAsync(ct)
+                .ConfigureAwait(false);
+
+            if (latestPurchaseDate is null) continue;
+
+            var dueDate = latestPurchaseDate.Value.AddDays(creditDays);
+            if (today <= dueDate) continue;
+
+            alerts.Add(new SupplierDueAlert(
+                vendor.Id,
+                vendor.Name,
+                outstanding,
+                vendor.PaymentTerms ?? "N/A",
+                (int)(today - dueDate).TotalDays));
+        }
+
+        return alerts.OrderByDescending(a => a.OverdueDays).ToList();
+    }
+
+    private static int ParseCreditDays(string? paymentTerms)
+    {
+        if (string.IsNullOrWhiteSpace(paymentTerms)) return 0;
+        var term = paymentTerms.Trim().ToUpperInvariant();
+        if (term == "COD" || term == "ADVANCE") return 0;
+        // Parse "Net 30", "Net 60", etc.
+        if (term.StartsWith("NET") && int.TryParse(term.Replace("NET", "").Trim(), out var days))
+            return days;
+        return 0;
+    }
 }

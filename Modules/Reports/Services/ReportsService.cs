@@ -475,6 +475,36 @@ public class ReportsService(
         return all.OrderBy(p => p.TotalQuantitySold).Take(topN).ToList();
     }
 
+    // ── Dead stock (#80) ────────────────────────────────────────────
+
+    public async Task<IReadOnlyList<DeadStockItem>> GetDeadStockReportAsync(
+        DateTime from, DateTime to, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetDeadStockReportAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var soldProductIds = await context.SaleItems
+            .Where(si => si.Sale!.SaleDate >= from && si.Sale.SaleDate <= to)
+            .Select(si => si.ProductId)
+            .Distinct()
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var deadStock = await context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Where(p => p.IsActive && p.Quantity > 0 && !soldProductIds.Contains(p.Id))
+            .OrderByDescending(p => p.Quantity * p.CostPrice)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return deadStock.Select(p => new DeadStockItem(
+            p.Id, p.Name, p.Category?.Name, p.Brand?.Name,
+            p.Quantity, p.CostPrice, p.SalePrice,
+            p.Quantity * p.CostPrice)).ToList();
+    }
+
     // ── Sales by user (#265) ─────────────────────────────────────
 
     public async Task<IReadOnlyList<UserSalesSummary>> GetSalesByUserReportAsync(
@@ -640,5 +670,54 @@ public class ReportsService(
             returns.Count,
             returns.Sum(r => r.RefundAmount),
             returns.Sum(r => r.Quantity));
+    }
+
+    public async Task<DashboardPrintData> GetDashboardPrintDataAsync(
+        DateTime date, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ReportsService.GetDashboardPrintDataAsync");
+
+        var dayStart = date.Date;
+        var dayEnd = dayStart.AddDays(1);
+        var dayEndInclusive = dayEnd.AddTicks(-1);
+
+        var dailySales = await GetDailySalesSummaryAsync(dayStart, ct).ConfigureAwait(false);
+        var dailyReturns = await GetDailyReturnSummaryAsync(dayStart, ct).ConfigureAwait(false);
+        var topProducts = await GetBestSellingProductsAsync(dayStart, dayEndInclusive, 5, ct).ConfigureAwait(false);
+        var paymentBreakdown = await GetSalesByPaymentMethodAsync(dayStart, dayEndInclusive, ct).ConfigureAwait(false);
+
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var totalExpenses = await context.Expenses
+            .AsNoTracking()
+            .Where(e => e.Date >= dayStart && e.Date < dayEnd)
+            .SumAsync(e => e.Amount, ct)
+            .ConfigureAwait(false);
+
+        var saleItems = await context.SaleItems
+            .AsNoTracking()
+            .Include(si => si.Product)
+            .Include(si => si.Sale)
+            .Where(si => si.Sale != null && si.Sale.SaleDate >= dayStart && si.Sale.SaleDate < dayEnd)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var costOfGoodsSold = saleItems.Sum(si => si.Quantity * (si.Product?.CostPrice ?? 0));
+        var grossProfit = dailySales.NetSales - costOfGoodsSold;
+        var averageBillValue = dailySales.SaleCount > 0
+            ? Math.Round(dailySales.TotalSales / dailySales.SaleCount, 2)
+            : 0;
+
+        return new DashboardPrintData(
+            dayStart,
+            dailySales.TotalSales,
+            dailyReturns.TotalRefundAmount,
+            dailySales.NetSales,
+            dailySales.SaleCount,
+            averageBillValue,
+            totalExpenses,
+            grossProfit,
+            topProducts,
+            paymentBreakdown);
     }
 }

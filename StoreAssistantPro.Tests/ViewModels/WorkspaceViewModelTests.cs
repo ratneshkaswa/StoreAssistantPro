@@ -42,8 +42,16 @@ public class WorkspaceViewModelTests
         {
             TodaySales = 5000m,
             TodayTransactions = 3,
+            TodayReturns = 100m,
+            TodayNetSales = 4900m,
+            AverageBillValue = 1700m,
             ThisMonthSales = 125000m,
             ThisMonthTransactions = 18,
+            PreviousDaySales = 4000m,
+            PreviousDayReturns = 200m,
+            PreviousDayNetSales = 3800m,
+            PreviousDayAverageBillValue = 1500m,
+            PreviousMonthSales = 100000m,
             TotalProducts = 42,
             LowStockCount = 5,
             OutOfStockCount = 2,
@@ -73,6 +81,12 @@ public class WorkspaceViewModelTests
         Assert.Equal("Updated Just now", sut.LastUpdatedText);
         Assert.True(sut.HasAlertBanner);
         Assert.Equal(InfoBarSeverity.Error, sut.AlertSeverity);
+        Assert.Equal("↑", sut.TodaySalesTrend.Glyph);
+        Assert.Equal("25% vs yesterday", sut.TodaySalesTrend.Label);
+        Assert.Equal(KpiTrendTone.Positive, sut.TodaySalesTrend.Tone);
+        Assert.Equal("↓", sut.TodayReturnsTrend.Glyph);
+        Assert.Equal(KpiTrendTone.Positive, sut.TodayReturnsTrend.Tone);
+        Assert.Equal("25% vs last month", sut.ThisMonthSalesTrend.Label);
         Assert.Single(sut.RecentSalesDisplay);
         Assert.Equal("5 min ago", sut.RecentSalesDisplay[0].RelativeDate);
         Assert.Single(sut.TopProductsDisplay);

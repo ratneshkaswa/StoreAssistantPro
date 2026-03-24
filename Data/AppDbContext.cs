@@ -73,6 +73,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<QuotationItem> QuotationItems => Set<QuotationItem>();
     public DbSet<GoodsReceivedNote> GoodsReceivedNotes => Set<GoodsReceivedNote>();
     public DbSet<GRNItem> GRNItems => Set<GRNItem>();
+    public DbSet<PermissionEntry> PermissionEntries => Set<PermissionEntry>();
+    public DbSet<PurchaseReturn> PurchaseReturns => Set<PurchaseReturn>();
+    public DbSet<PurchaseReturnItem> PurchaseReturnItems => Set<PurchaseReturnItem>();
+    public DbSet<ProductSupplier> ProductSuppliers => Set<ProductSupplier>();
+    public DbSet<DiscountRule> DiscountRules => Set<DiscountRule>();
+    public DbSet<RecurringExpense> RecurringExpenses => Set<RecurringExpense>();
+    public DbSet<CashRegisterShift> CashRegisterShifts => Set<CashRegisterShift>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -798,6 +805,89 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(i => i.ProductId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── ProductSupplier (#92/#93) ─────────────────────────────
+        modelBuilder.Entity<ProductSupplier>(entity =>
+        {
+            entity.Property(ps => ps.UnitCost).HasColumnType("decimal(18,2)");
+            entity.HasOne(ps => ps.Product)
+                  .WithMany()
+                  .HasForeignKey(ps => ps.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(ps => ps.Supplier)
+                  .WithMany()
+                  .HasForeignKey(ps => ps.SupplierId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(ps => new { ps.ProductId, ps.SupplierId }).IsUnique();
+            entity.HasIndex(ps => ps.IsPrimary);
+        });
+
+        // ── DiscountRule (#180-#190) ──────────────────────────────
+        modelBuilder.Entity<DiscountRule>(entity =>
+        {
+            entity.Property(d => d.DiscountValue).HasColumnType("decimal(18,2)");
+            entity.Property(d => d.MinBillAmount).HasColumnType("decimal(18,2)");
+            entity.Property(d => d.MaxDiscountAmount).HasColumnType("decimal(18,2)");
+            entity.Property(d => d.ComboPrice).HasColumnType("decimal(18,2)");
+            entity.HasIndex(d => d.RuleType);
+            entity.HasIndex(d => d.IsActive);
+            entity.HasIndex(d => new { d.ValidFrom, d.ValidTo });
+        });
+
+        // ── RecurringExpense (#234) ───────────────────────────────
+        modelBuilder.Entity<RecurringExpense>(entity =>
+        {
+            entity.Property(r => r.Amount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(r => r.IsActive);
+            entity.HasIndex(r => r.Frequency);
+        });
+
+        // ── CashRegisterShift (#250) ─────────────────────────────
+        modelBuilder.Entity<CashRegisterShift>(entity =>
+        {
+            entity.Property(s => s.OpeningBalance).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.ClosingBalance).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.Discrepancy).HasColumnType("decimal(18,2)");
+            entity.Property(s => s.HandoverAmount).HasColumnType("decimal(18,2)");
+            entity.Ignore(s => s.IsClosed);
+            entity.HasOne(s => s.CashRegister)
+                  .WithMany()
+                  .HasForeignKey(s => s.CashRegisterId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(s => s.CashRegisterId);
+            entity.HasIndex(s => s.OpenedAt);
+        });
+
+        // ── PurchaseReturn (#374) ────────────────────────────────
+        modelBuilder.Entity<PurchaseReturn>(entity =>
+        {
+            entity.Property(r => r.TotalAmount).HasColumnType("decimal(18,2)");
+            entity.HasIndex(r => r.ReturnNumber).IsUnique();
+            entity.HasIndex(r => r.ReturnDate);
+            entity.HasOne(r => r.Supplier)
+                  .WithMany()
+                  .HasForeignKey(r => r.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PurchaseReturnItem>(entity =>
+        {
+            entity.Property(i => i.UnitCost).HasColumnType("decimal(18,2)");
+            entity.HasOne(i => i.PurchaseReturn)
+                  .WithMany(r => r.Items)
+                  .HasForeignKey(i => i.PurchaseReturnId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.Product)
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── PermissionEntry (#289) ───────────────────────────────
+        modelBuilder.Entity<PermissionEntry>(entity =>
+        {
+            entity.HasIndex(p => p.FeatureKey).IsUnique();
         });
     }
 }

@@ -1,5 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
@@ -88,13 +91,19 @@ public partial class MainWindow : Window
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (e.OldValue is MainViewModel oldVm)
+        {
             oldVm.RequestClose = null;
+            oldVm.PropertyChanged -= OnMainViewModelPropertyChanged;
+        }
 
         if (e.NewValue is MainViewModel newVm)
         {
             _boundViewModel = newVm;
             newVm.RequestClose = Close;
+            newVm.PropertyChanged += OnMainViewModelPropertyChanged;
             newVm.ApplyShortcuts(this);
+            newVm.QuickActionBarViewportWidth = QuickActionsViewport.ActualWidth;
+            FocusCommandPaletteSearchBoxIfVisible();
         }
         else
         {
@@ -103,11 +112,92 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnMainViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainViewModel.IsCommandPaletteVisible))
+            FocusCommandPaletteSearchBoxIfVisible();
+    }
+
+    private void FocusCommandPaletteSearchBoxIfVisible()
+    {
+        if (_boundViewModel?.IsCommandPaletteVisible != true)
+            return;
+
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+        {
+            if (!CommandPaletteSearchBox.IsVisible)
+                return;
+
+            CommandPaletteSearchBox.Focus();
+            Keyboard.Focus(CommandPaletteSearchBox);
+            CommandPaletteSearchBox.SelectAll();
+        }));
+    }
+
+    private void OnCommandPalettePreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (_boundViewModel?.IsCommandPaletteVisible != true)
+            return;
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                _boundViewModel.CloseCommandPaletteCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Down:
+                _boundViewModel.SelectNextCommandPaletteItemCommand.Execute(null);
+                CommandPaletteResultsList.ScrollIntoView(_boundViewModel.SelectedCommandPaletteItem);
+                e.Handled = true;
+                break;
+            case Key.Up:
+                _boundViewModel.SelectPreviousCommandPaletteItemCommand.Execute(null);
+                CommandPaletteResultsList.ScrollIntoView(_boundViewModel.SelectedCommandPaletteItem);
+                e.Handled = true;
+                break;
+            case Key.Enter:
+                _boundViewModel.ExecuteSelectedCommandPaletteItemCommand.Execute(null);
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void OnCommandPaletteResultsMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_boundViewModel?.SelectedCommandPaletteItem is null)
+            return;
+
+        _boundViewModel.ExecuteSelectedCommandPaletteItemCommand.Execute(null);
+        e.Handled = true;
+    }
+
+    private void OnQuickActionsViewportSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_boundViewModel is null)
+            return;
+
+        _boundViewModel.QuickActionBarViewportWidth = QuickActionsViewport.ActualWidth;
+    }
+
+    private void OnQuickActionOverflowPopupClosed(object sender, EventArgs e)
+    {
+        if (_boundViewModel is null)
+            return;
+
+        _boundViewModel.IsQuickActionOverflowOpen = false;
+    }
+
+    private void OnQuickActionOverflowItemClick(object sender, RoutedEventArgs e)
+    {
+        _boundViewModel?.CloseQuickActionOverflowCommand.Execute(null);
+    }
+
     private void OnClosed(object? sender, EventArgs e)
     {
         if (_boundViewModel is not null)
         {
             _boundViewModel.RequestClose = null;
+            _boundViewModel.PropertyChanged -= OnMainViewModelPropertyChanged;
             _boundViewModel = null;
         }
 

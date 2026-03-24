@@ -3,14 +3,19 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Payments.Services;
 
 namespace StoreAssistantPro.Modules.Payments.ViewModels;
 
-public partial class PaymentManagementViewModel(IPaymentService paymentService) : BaseViewModel
+public partial class PaymentManagementViewModel(
+    IPaymentService paymentService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<Payment> _allItems = [];
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<Payment> Payments { get; set; } = [];

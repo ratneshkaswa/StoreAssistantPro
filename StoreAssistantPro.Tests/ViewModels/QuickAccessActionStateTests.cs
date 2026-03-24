@@ -16,9 +16,10 @@ public sealed class QuickAccessActionStateTests
     {
         var productService = Substitute.For<IProductService>();
         var taxGroupService = Substitute.For<ITaxGroupService>();
+        var regionalSettings = Substitute.For<IRegionalSettingsService>();
         var viewModel = new ProductManagementViewModel(
             productService, taxGroupService,
-            Substitute.For<INavigationService>(), new ProductContextHolder());
+            Substitute.For<INavigationService>(), regionalSettings, new ProductContextHolder());
 
         Assert.False(viewModel.ManageVariantsCommand.CanExecute(null));
 

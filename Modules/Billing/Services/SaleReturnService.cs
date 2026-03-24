@@ -208,4 +208,67 @@ public class SaleReturnService(
         }
         return $"{prefix}{next:D4}";
     }
+
+    // ── No-bill return (#153) ────────────────────────────────────────
+
+    public async Task<SaleReturn> NoBillReturnAsync(NoBillReturnDto dto, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        using var _ = perf.BeginScope("SaleReturnService.NoBillReturnAsync");
+
+        if (string.IsNullOrWhiteSpace(dto.ApproverPin))
+            throw new InvalidOperationException("Admin PIN is required for no-bill returns.");
+
+        var pinValid = await loginService.ValidateMasterPinAsync(dto.ApproverPin, ct);
+        if (!pinValid)
+            throw new InvalidOperationException("Invalid admin PIN.");
+
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        // Restore stock
+        if (dto.ProductVariantId.HasValue)
+        {
+            var variant = await context.ProductVariants
+                .FirstOrDefaultAsync(v => v.Id == dto.ProductVariantId.Value, ct)
+                .ConfigureAwait(false);
+            if (variant is not null)
+                variant.Quantity += dto.QuantityReturned;
+        }
+        else
+        {
+            var product = await context.Products
+                .FirstOrDefaultAsync(p => p.Id == dto.ProductId, ct)
+                .ConfigureAwait(false);
+            if (product is not null)
+                product.Quantity += dto.QuantityReturned;
+        }
+
+        var returnNumber = await GenerateReturnNumberAsync(context, ct);
+        var creditNoteNumber = await GenerateCreditNoteNumberAsync(context, ct);
+
+        var saleReturn = new SaleReturn
+        {
+            ReturnNumber = returnNumber,
+            SaleId = 0,
+            SaleItemId = 0,
+            Quantity = dto.QuantityReturned,
+            RefundAmount = dto.RefundAmount,
+            CreditNoteNumber = creditNoteNumber,
+            Reason = dto.Reason,
+            ProcessedByRole = "Admin",
+            ApprovedByRole = "Admin",
+            ReturnDate = regional.Now,
+            StockRestored = true,
+            IsNoBillReturn = true
+        };
+
+        context.SaleReturns.Add(saleReturn);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        await auditService.LogAsync("NoBillReturn", "SaleReturn", saleReturn.Id.ToString(),
+            null, null, null, $"No-bill return: Product {dto.ProductId}, Qty {dto.QuantityReturned}, Refund {dto.RefundAmount}", ct);
+
+        return saleReturn;
+    }
 }

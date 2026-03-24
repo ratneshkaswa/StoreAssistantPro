@@ -215,4 +215,210 @@ public class GRNService(
 
         return $"{prefix}{seq:D4}";
     }
+
+    // ── Quality check (#368) ─────────────────────────────────────────
+
+    public async Task QualityCheckAsync(int grnId, IReadOnlyList<GRNQualityLine> lines, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("GRNService.QualityCheckAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var grn = await context.GoodsReceivedNotes
+            .Include(g => g.Items)
+            .FirstOrDefaultAsync(g => g.Id == grnId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"GRN Id {grnId} not found.");
+
+        foreach (var line in lines)
+        {
+            var item = grn.Items.FirstOrDefault(i => i.Id == line.GRNItemId)
+                ?? throw new InvalidOperationException($"GRN Item {line.GRNItemId} not found.");
+
+            item.QtyReceived = line.QtyAccepted;
+            item.QtyRejected = line.QtyRejected;
+        }
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    // ── Purchase return to supplier (#374) ───────────────────────────
+
+    public async Task<PurchaseReturn> CreatePurchaseReturnAsync(CreatePurchaseReturnDto dto, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        if (dto.Items.Count == 0) throw new InvalidOperationException("Purchase return must have at least one item.");
+
+        using var _ = perf.BeginScope("GRNService.CreatePurchaseReturnAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        await using var tx = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+        try
+        {
+            var returnNumber = await GeneratePurchaseReturnNumberAsync(context, ct);
+            var debitNoteNumber = await GenerateDebitNoteNumberAsync(context, ct);
+
+            var purchaseReturn = new PurchaseReturn
+            {
+                ReturnNumber = returnNumber,
+                SupplierId = dto.SupplierId,
+                ReturnDate = regional.Now,
+                DebitNoteNumber = debitNoteNumber,
+                Notes = dto.Notes?.Trim(),
+                Items = dto.Items.Select(i => new PurchaseReturnItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    UnitCost = i.UnitCost,
+                    Reason = i.Reason
+                }).ToList()
+            };
+
+            purchaseReturn.TotalAmount = purchaseReturn.Items.Sum(i => i.Quantity * i.UnitCost);
+
+            // Deduct stock for returned items
+            foreach (var item in dto.Items)
+            {
+                var product = await context.Products
+                    .FirstOrDefaultAsync(p => p.Id == item.ProductId, ct)
+                    .ConfigureAwait(false);
+                if (product is not null)
+                    product.Quantity = Math.Max(0, product.Quantity - item.Quantity);
+            }
+
+            context.PurchaseReturns.Add(purchaseReturn);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await tx.CommitAsync(ct).ConfigureAwait(false);
+
+            return purchaseReturn;
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct).ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    public async Task<IReadOnlyList<PurchaseReturn>> GetPurchaseReturnsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("GRNService.GetPurchaseReturnsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.PurchaseReturns
+            .AsNoTracking()
+            .Include(pr => pr.Supplier)
+            .Include(pr => pr.Items).ThenInclude(i => i.Product)
+            .OrderByDescending(pr => pr.ReturnDate)
+            .Take(200)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    private async Task<string> GeneratePurchaseReturnNumberAsync(AppDbContext context, CancellationToken ct)
+    {
+        var today = regional.Now.Date;
+        var prefix = $"PR-{today:yyyyMMdd}-";
+        var last = await context.PurchaseReturns
+            .Where(pr => pr.ReturnNumber.StartsWith(prefix))
+            .OrderByDescending(pr => pr.ReturnNumber)
+            .Select(pr => pr.ReturnNumber)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+
+        var seq = 1;
+        if (last is not null && int.TryParse(last[prefix.Length..], out var lastSeq))
+            seq = lastSeq + 1;
+        return $"{prefix}{seq:D4}";
+    }
+
+    private async Task<string> GenerateDebitNoteNumberAsync(AppDbContext context, CancellationToken ct)
+    {
+        var today = regional.Now.Date;
+        var prefix = $"DN-{today:yyyyMMdd}-";
+        var last = await context.PurchaseReturns
+            .Where(pr => pr.DebitNoteNumber != null && pr.DebitNoteNumber.StartsWith(prefix))
+            .OrderByDescending(pr => pr.DebitNoteNumber)
+            .Select(pr => pr.DebitNoteNumber)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+
+        var seq = 1;
+        if (last is not null && int.TryParse(last[prefix.Length..], out var lastSeq))
+            seq = lastSeq + 1;
+        return $"{prefix}{seq:D4}";
+    }
+
+    // ── GRN export to CSV (#373) ─────────────────────────────────────
+
+    public async Task<IReadOnlyList<string>> ExportToCsvLinesAsync(DateTime? from, DateTime? to, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("GRNService.ExportToCsvLinesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.GoodsReceivedNotes
+            .AsNoTracking()
+            .Include(g => g.Supplier)
+            .Include(g => g.PurchaseOrder)
+            .Include(g => g.Items).ThenInclude(i => i.Product)
+            .AsQueryable();
+
+        if (from.HasValue) q = q.Where(g => g.ReceivedDate >= from.Value);
+        if (to.HasValue) q = q.Where(g => g.ReceivedDate <= to.Value.Date.AddDays(1));
+
+        var grns = await q.OrderByDescending(g => g.ReceivedDate)
+            .ToListAsync(ct).ConfigureAwait(false);
+
+        var lines = new List<string>
+        {
+            "GRNNumber,ReceivedDate,SupplierName,PONumber,Status,ProductName,QtyExpected,QtyReceived,QtyRejected,UnitCost,LineTotal"
+        };
+
+        foreach (var grn in grns)
+        {
+            foreach (var item in grn.Items)
+            {
+                var lineTotal = item.QtyReceived * item.UnitCost;
+                lines.Add($"\"{grn.GRNNumber}\",\"{grn.ReceivedDate:yyyy-MM-dd}\",\"{grn.Supplier?.Name}\",\"{grn.PurchaseOrder?.OrderNumber}\",\"{grn.Status}\",\"{item.Product?.Name}\",{item.QtyExpected},{item.QtyReceived},{item.QtyRejected},{item.UnitCost},{lineTotal}");
+            }
+        }
+
+        return lines;
+    }
+
+    // ── GRN print data (#371) ────────────────────────────────────────
+
+    public async Task<GRNPrintData?> GetPrintDataAsync(int grnId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("GRNService.GetPrintDataAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var grn = await context.GoodsReceivedNotes
+            .AsNoTracking()
+            .Include(g => g.Supplier)
+            .Include(g => g.PurchaseOrder)
+            .Include(g => g.Items).ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(g => g.Id == grnId, ct)
+            .ConfigureAwait(false);
+
+        if (grn is null) return null;
+
+        var printLines = grn.Items.Select(i => new GRNPrintLine(
+            i.Product?.Name ?? "Unknown",
+            i.Product?.HSNCode,
+            i.QtyExpected,
+            i.QtyReceived,
+            i.QtyRejected,
+            i.UnitCost,
+            i.QtyReceived * i.UnitCost)).ToList();
+
+        return new GRNPrintData(
+            grn.GRNNumber,
+            grn.ReceivedDate,
+            grn.Supplier?.Name ?? "Unknown",
+            grn.Supplier?.Phone,
+            grn.Supplier?.GSTIN,
+            grn.PurchaseOrder?.OrderNumber,
+            grn.Notes,
+            grn.Status.ToString(),
+            printLines,
+            printLines.Sum(l => l.LineTotal));
+    }
 }

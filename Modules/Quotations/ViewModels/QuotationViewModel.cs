@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -284,6 +285,47 @@ public partial class QuotationViewModel(
     {
         if (line is not null && LineItems.Count > 1)
             LineItems.Remove(line);
+    }
+
+    // ── Duplicate (#357) ──
+
+    [RelayCommand]
+    private Task DuplicateQuotationAsync() => RunAsync(async ct =>
+    {
+        if (SelectedQuotation is null) return;
+        var clone = await quotationService.DuplicateAsync(
+            SelectedQuotation.Id, DateTime.Today.AddDays(15), ct);
+        SuccessMessage = $"Quotation duplicated as {clone.QuoteNumber} (Draft).";
+        await ReloadAsync(ct);
+    });
+
+    // ── Revision (#356) ──
+
+    [RelayCommand]
+    private Task CreateRevisionAsync() => RunAsync(async ct =>
+    {
+        if (SelectedQuotation is null) return;
+        var revision = await quotationService.CreateRevisionAsync(
+            SelectedQuotation.Id, DateTime.Today.AddDays(15), ct);
+        SuccessMessage = $"Revision {revision.RevisionNumber} created as {revision.QuoteNumber}.";
+        await ReloadAsync(ct);
+    });
+
+    // ── Export (#359) ──
+
+    [RelayCommand]
+    private void ExportQuotationsCsv()
+    {
+        if (Quotations.Count == 0) return;
+        var rows = Quotations.Select(q => new
+        {
+            q.Id, q.QuoteNumber, q.QuoteDate, q.ValidUntil,
+            Status = q.Status.ToString(),
+            Customer = q.Customer?.Name,
+            q.TotalAmount, q.Notes
+        });
+        if (CsvExporter.Export(rows, "Quotations.csv"))
+            SuccessMessage = "Quotations exported.";
     }
 }
 

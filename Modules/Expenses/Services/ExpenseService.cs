@@ -324,4 +324,159 @@ public class ExpenseService(
 
         return new MonthlyExpenseReport(year, month, expenses.Sum(e => e.Amount), expenses.Count, byCategory);
     }
+
+    // ── Recurring Expenses (#234) ─────────────────────────────────
+
+    public async Task<IReadOnlyList<RecurringExpense>> GetRecurringExpensesAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.GetRecurringExpensesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.RecurringExpenses
+            .AsNoTracking()
+            .Where(r => r.IsActive)
+            .OrderBy(r => r.Category)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task CreateRecurringExpenseAsync(RecurringExpenseDto dto, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        ArgumentException.ThrowIfNullOrWhiteSpace(dto.Category);
+
+        using var _ = perf.BeginScope("ExpenseService.CreateRecurringExpenseAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        context.RecurringExpenses.Add(new RecurringExpense
+        {
+            Category = dto.Category.Trim(),
+            Description = dto.Description?.Trim(),
+            Amount = dto.Amount,
+            Frequency = dto.Frequency,
+            DueDay = Math.Clamp(dto.DueDay, 1, 28),
+            StartDate = dto.StartDate ?? regional.Now.Date,
+            EndDate = dto.EndDate,
+            CreatedDate = regional.Now
+        });
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task UpdateRecurringExpenseAsync(int id, RecurringExpenseDto dto, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        using var _ = perf.BeginScope("ExpenseService.UpdateRecurringExpenseAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var entity = await context.RecurringExpenses
+            .FirstOrDefaultAsync(r => r.Id == id, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"RecurringExpense Id {id} not found.");
+
+        entity.Category = dto.Category.Trim();
+        entity.Description = dto.Description?.Trim();
+        entity.Amount = dto.Amount;
+        entity.Frequency = dto.Frequency;
+        entity.DueDay = Math.Clamp(dto.DueDay, 1, 28);
+        entity.EndDate = dto.EndDate;
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteRecurringExpenseAsync(int id, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.DeleteRecurringExpenseAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var entity = await context.RecurringExpenses
+            .FirstOrDefaultAsync(r => r.Id == id, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"RecurringExpense Id {id} not found.");
+
+        entity.IsActive = false;
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<int> GenerateDueRecurringExpensesAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("ExpenseService.GenerateDueRecurringExpensesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var now = regional.Now;
+        var templates = await context.RecurringExpenses
+            .Where(r => r.IsActive && r.StartDate <= now && (r.EndDate == null || r.EndDate >= now))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var count = 0;
+        foreach (var template in templates)
+        {
+            var dueDate = GetNextDueDate(template, now);
+            if (dueDate > now.Date) continue;
+            if (template.LastGeneratedDate.HasValue && template.LastGeneratedDate.Value.Date >= dueDate) continue;
+
+            context.Expenses.Add(new Expense
+            {
+                Date = dueDate,
+                Category = template.Category,
+                Amount = template.Amount,
+                Description = $"[Auto] {template.Description ?? template.Category}",
+                CreatedAt = now
+            });
+
+            template.LastGeneratedDate = now;
+            count++;
+        }
+
+        if (count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        return count;
+    }
+
+    // ── Expense Approval (#235) ───────────────────────────────────
+
+    public async Task CreateWithApprovalAsync(ExpenseDto dto, bool isApproved = false, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        ArgumentException.ThrowIfNullOrWhiteSpace(dto.Category);
+
+        using var _ = perf.BeginScope("ExpenseService.CreateWithApprovalAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        var threshold = config?.ExpenseApprovalThreshold ?? 0;
+
+        if (threshold > 0 && dto.Amount > threshold && !isApproved)
+            throw new InvalidOperationException(
+                $"Expenses above {threshold:N0} require manager approval.");
+
+        var entity = new Expense
+        {
+            Date = dto.Date,
+            Category = dto.Category.Trim(),
+            Amount = dto.Amount,
+            PaymentMethod = string.IsNullOrWhiteSpace(dto.PaymentMethod) ? "Cash" : dto.PaymentMethod.Trim(),
+            Description = dto.Description?.Trim(),
+            CreatedBy = dto.CreatedBy?.Trim(),
+            CreatedAt = regional.Now
+        };
+
+        context.Expenses.Add(entity);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────
+
+    private static DateTime GetNextDueDate(RecurringExpense template, DateTime now)
+    {
+        return template.Frequency switch
+        {
+            "Weekly" => template.LastGeneratedDate?.AddDays(7).Date ?? template.StartDate.Date,
+            "Quarterly" => template.LastGeneratedDate?.AddMonths(3).Date ?? template.StartDate.Date,
+            "Annually" => template.LastGeneratedDate?.AddYears(1).Date ?? template.StartDate.Date,
+            _ => new DateTime(now.Year, now.Month, Math.Min(template.DueDay, DateTime.DaysInMonth(now.Year, now.Month)))
+        };
+    }
 }

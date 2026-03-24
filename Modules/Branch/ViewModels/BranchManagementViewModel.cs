@@ -3,14 +3,19 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Branch.Services;
 
 namespace StoreAssistantPro.Modules.Branch.ViewModels;
 
-public partial class BranchManagementViewModel(IBranchBillService branchService) : BaseViewModel
+public partial class BranchManagementViewModel(
+    IBranchBillService branchService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<BranchBill> _allItems = [];
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<BranchBill> Bills { get; set; } = [];

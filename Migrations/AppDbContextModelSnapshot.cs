@@ -35,6 +35,21 @@ namespace StoreAssistantPro.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("BankAccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("BankIFSC")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<decimal>("CompositionSchemeRate")
                         .HasColumnType("decimal(18,2)");
 
@@ -83,11 +98,21 @@ namespace StoreAssistantPro.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("InvoiceResetPeriod")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<bool>("IsDefaultAdminPin")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsInitialized")
                         .HasColumnType("bit");
+
+                    b.Property<string>("LogoPath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("MasterPinHash")
                         .IsRequired()
@@ -116,6 +141,11 @@ namespace StoreAssistantPro.Migrations
                         .HasColumnType("nvarchar(6)");
 
                     b.Property<string>("ReceiptFooterText")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ReceiptHeaderText")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -1417,6 +1447,27 @@ namespace StoreAssistantPro.Migrations
                     b.HasIndex("PaymentDate");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("StoreAssistantPro.Models.PermissionEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FeatureKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsAllowed")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PermissionEntries");
                 });
 
             modelBuilder.Entity("StoreAssistantPro.Models.PettyCashDeposit", b =>

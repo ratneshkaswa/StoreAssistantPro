@@ -208,11 +208,56 @@ public class NotificationBadgeBehaviorTests
         });
     }
 
+    [Fact]
+    public void DotOnlyMode_ShowsCompactDotWithoutCountText()
+    {
+        RunOnSta(() =>
+        {
+            var panel = new Grid();
+            NotificationBadgeBehavior.SetDotOnly(panel, true);
+            NotificationBadgeBehavior.SetCount(panel, 5);
+
+            var badge = FindBadge(panel);
+            Assert.NotNull(badge);
+            Assert.Equal(new CornerRadius(4), badge.CornerRadius);
+            Assert.Equal(8, badge.Width);
+            Assert.Equal(8, badge.Height);
+
+            var tb = badge.Child as TextBlock;
+            Assert.NotNull(tb);
+            Assert.Equal(Visibility.Collapsed, tb.Visibility);
+            Assert.Equal(string.Empty, tb.Text);
+        });
+    }
+
+    [Fact]
+    public void DotOnlyMode_CanSwitchBackToNumericBadge()
+    {
+        RunOnSta(() =>
+        {
+            var panel = new Grid();
+            NotificationBadgeBehavior.SetDotOnly(panel, true);
+            NotificationBadgeBehavior.SetCount(panel, 3);
+
+            NotificationBadgeBehavior.SetDotOnly(panel, false);
+
+            var badge = FindBadge(panel);
+            Assert.NotNull(badge);
+            Assert.Equal(new CornerRadius(8), badge.CornerRadius);
+            Assert.Equal(16, badge.Height);
+
+            var tb = badge.Child as TextBlock;
+            Assert.NotNull(tb);
+            Assert.Equal(Visibility.Visible, tb.Visibility);
+            Assert.Equal("3", tb.Text);
+        });
+    }
+
     private static Border? FindBadge(Grid panel)
     {
         foreach (UIElement child in panel.Children)
         {
-            if (child is Border border && border.CornerRadius == new CornerRadius(8))
+            if (child is Border border && border.Child is TextBlock)
                 return border;
         }
         return null;

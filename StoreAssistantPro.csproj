@@ -7,10 +7,22 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <EnableDefaultPageItems>false</EnableDefaultPageItems>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('Assets\app.ico')">Assets\app.ico</ApplicationIcon>
-    <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**;Templates\**;.codex_obj\**;**\*wpftmp*;**\*.BuildWithSkipAnalyzers</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);StoreAssistantPro.Tests\**;Templates\**;.codex_obj\**;obj*\**;bin*\**;**\*wpftmp*;**\*.BuildWithSkipAnalyzers</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="obj\**\*.g.i.cs;.codex_obj\**\*.g.i.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+    <Page Include="Core\**\*.xaml" />
+    <Page Include="Modules\**\*.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\app.ico" />

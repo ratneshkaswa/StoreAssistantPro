@@ -156,10 +156,12 @@
             <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
                 <TextBox Text="{Binding SalePriceText, UpdateSourceTrigger=PropertyChanged}"
                          h:Watermark.Text="Sale price" MaxLength="10"
+                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                          AutomationProperties.Name="Sale price"
                          Width="{StaticResource FieldWidthCompact}"/>
                 <TextBox Text="{Binding CostPriceText, UpdateSourceTrigger=PropertyChanged}"
                          h:Watermark.Text="Cost price" MaxLength="10"
+                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                          AutomationProperties.Name="Cost price"
                          Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
                 <CheckBox Content="Tax inclusive" IsChecked="{Binding IsTaxInclusive}"

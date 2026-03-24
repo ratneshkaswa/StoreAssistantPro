@@ -113,7 +113,7 @@
                     <!-- Notes -->
                     <TextBlock Text="Notes" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource FluentTextBoxStyle}" MaxLength="500"
+                             Style="{StaticResource FluentMultilineTextBoxStyle}" MaxLength="500"
                              AutomationProperties.Name="Notes" Margin="0,0,0,8"/>
 
                     <!-- Line items -->

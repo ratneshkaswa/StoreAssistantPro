@@ -24,6 +24,12 @@ public interface IHeldBillService
 
     /// <summary>Archive stale held bills from previous sessions (#346).</summary>
     Task<int> CleanupStaleAsync(DateTime cutoff, CancellationToken ct = default);
+
+    /// <summary>Auto-cleanup stale held bills using the configured timeout from AppConfig (#339).</summary>
+    Task AutoCleanupStaleAsync(CancellationToken ct = default);
+
+    /// <summary>Get history of all held bills including recalled/discarded (#343).</summary>
+    Task<IReadOnlyList<HeldBill>> GetHistoryAsync(int count = 50, CancellationToken ct = default);
 }
 
 public record HoldBillDto(

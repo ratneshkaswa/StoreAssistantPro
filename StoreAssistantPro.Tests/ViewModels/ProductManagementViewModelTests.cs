@@ -1,5 +1,6 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Navigation;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.Products.ViewModels;
@@ -11,9 +12,12 @@ public sealed class ProductManagementViewModelTests
 {
     private readonly IProductService _productService = Substitute.For<IProductService>();
     private readonly ITaxGroupService _taxGroupService = Substitute.For<ITaxGroupService>();
+    private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
     private ProductManagementViewModel CreateSut()
     {
+        _regional.CurrencySymbol.Returns("Rs.");
+
         _productService.GetAllAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyList<Product>>(Array.Empty<Product>()));
         _productService.GetActiveTaxesAsync(Arg.Any<CancellationToken>())
@@ -46,6 +50,7 @@ public sealed class ProductManagementViewModelTests
             _productService,
             _taxGroupService,
             Substitute.For<INavigationService>(),
+            _regional,
             new ProductContextHolder());
     }
 
@@ -148,5 +153,13 @@ public sealed class ProductManagementViewModelTests
         Assert.NotNull(sut.SelectedProduct);
         Assert.Equal(10, sut.SelectedProduct!.Id);
         Assert.Equal("Status toggled.", sut.SuccessMessage);
+    }
+
+    [Fact]
+    public void CurrencySymbol_UsesRegionalSettings()
+    {
+        var sut = CreateSut();
+
+        Assert.Equal("Rs.", sut.CurrencySymbol);
     }
 }

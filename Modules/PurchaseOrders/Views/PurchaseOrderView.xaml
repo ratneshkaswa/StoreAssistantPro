@@ -121,6 +121,7 @@
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="4" Grid.Column="1"
+                             Style="{StaticResource FluentMultilineTextBoxStyle}"
                              AutomationProperties.Name="Purchase order notes"
                              Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
                              MaxLength="500" h:Watermark.Text="e.g. Urgent replenishment"/>

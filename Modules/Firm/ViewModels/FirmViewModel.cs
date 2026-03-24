@@ -35,7 +35,13 @@ public partial class FirmViewModel : BaseViewModel
         nameof(SelectedNumberToWordsLanguage),
         nameof(NegativeStockAllowed),
         nameof(InvoicePrefix),
-        nameof(ReceiptFooterText)
+        nameof(ReceiptFooterText),
+        nameof(LogoPath),
+        nameof(BankName),
+        nameof(BankAccountNumber),
+        nameof(BankIFSC),
+        nameof(ReceiptHeaderText),
+        nameof(SelectedInvoiceResetPeriod)
     ];
 
     private static readonly string[] ValidationFieldOrder =
@@ -74,6 +80,12 @@ public partial class FirmViewModel : BaseViewModel
         SelectedCurrencySymbol = "\u20B9";
         InvoicePrefix = "INV";
         ReceiptFooterText = "Thank you! Visit again!";
+        LogoPath = string.Empty;
+        BankName = string.Empty;
+        BankAccountNumber = string.Empty;
+        BankIFSC = string.Empty;
+        ReceiptHeaderText = string.Empty;
+        SelectedInvoiceResetPeriod = "Never";
         PropertyChanged += OnFirmPropertyChanged;
     }
 
@@ -276,6 +288,79 @@ public partial class FirmViewModel : BaseViewModel
     [MaxLength(200, ErrorMessage = "Receipt footer text cannot exceed 200 characters.")]
     public partial string ReceiptFooterText { get; set; }
 
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(500, ErrorMessage = "Logo path cannot exceed 500 characters.")]
+    public partial string LogoPath { get; set; }
+
+    partial void OnLogoPathChanged(string value) => OnEditableFieldChanged();
+
+    [RelayCommand]
+    private void BrowseLogo()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Select Firm Logo",
+            Filter = "Image files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|All files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() == true)
+            LogoPath = dialog.FileName;
+    }
+
+    [RelayCommand]
+    private void ClearLogo() => LogoPath = string.Empty;
+
+    // ?? Bank details (#312) ??
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(100, ErrorMessage = "Bank name cannot exceed 100 characters.")]
+    public partial string BankName { get; set; }
+
+    partial void OnBankNameChanged(string value) => OnEditableFieldChanged();
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(30, ErrorMessage = "Account number cannot exceed 30 characters.")]
+    public partial string BankAccountNumber { get; set; }
+
+    partial void OnBankAccountNumberChanged(string value) => OnEditableFieldChanged();
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(11, ErrorMessage = "IFSC code cannot exceed 11 characters.")]
+    [RegularExpression(@"^$|^[A-Z]{4}0[A-Z0-9]{6}$", ErrorMessage = "IFSC format: ABCD0123456")]
+    public partial string BankIFSC { get; set; }
+
+    partial void OnBankIFSCChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value) && value != value.ToUpperInvariant())
+        {
+            BankIFSC = value.ToUpperInvariant();
+            return;
+        }
+        OnEditableFieldChanged();
+    }
+
+    // ?? Receipt header text (#316) ??
+
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [MaxLength(200, ErrorMessage = "Receipt header text cannot exceed 200 characters.")]
+    public partial string ReceiptHeaderText { get; set; }
+
+    partial void OnReceiptHeaderTextChanged(string value) => OnEditableFieldChanged();
+
+    // ?? Invoice reset period (#314) ??
+
+    [ObservableProperty]
+    public partial string SelectedInvoiceResetPeriod { get; set; }
+
+    partial void OnSelectedInvoiceResetPeriodChanged(string value) => OnEditableFieldChanged();
+
+    public ObservableCollection<string> InvoiceResetPeriods { get; } = ["Never", "Monthly", "Annually"];
+
     public ObservableCollection<string> IndianStates { get; } = new(BusinessProfileRules.IndianStateNames);
 
     public string FinancialYearDisplay
@@ -458,6 +543,14 @@ public partial class FirmViewModel : BaseViewModel
             NegativeStockAllowed = snapshot.NegativeStockAllowed;
             InvoicePrefix = snapshot.InvoicePrefix;
             ReceiptFooterText = snapshot.ReceiptFooterText;
+            LogoPath = snapshot.LogoPath;
+            BankName = snapshot.BankName;
+            BankAccountNumber = snapshot.BankAccountNumber;
+            BankIFSC = snapshot.BankIFSC;
+            ReceiptHeaderText = snapshot.ReceiptHeaderText;
+            SelectedInvoiceResetPeriod = InvoiceResetPeriods.Contains(snapshot.InvoiceResetPeriod)
+                ? snapshot.InvoiceResetPeriod
+                : "Never";
         }
         finally
         {
@@ -531,7 +624,13 @@ public partial class FirmViewModel : BaseViewModel
             NegativeStockAllowed: NegativeStockAllowed,
             NumberToWordsLanguage: SelectedNumberToWordsLanguage,
             InvoicePrefix: InvoicePrefix.Trim(),
-            ReceiptFooterText: ReceiptFooterText.Trim());
+            ReceiptFooterText: ReceiptFooterText.Trim(),
+            LogoPath: LogoPath.Trim(),
+            BankName: BankName.Trim(),
+            BankAccountNumber: BankAccountNumber.Trim(),
+            BankIFSC: string.IsNullOrWhiteSpace(BankIFSC) ? string.Empty : BankIFSC.Trim().ToUpperInvariant(),
+            ReceiptHeaderText: ReceiptHeaderText.Trim(),
+            InvoiceResetPeriod: SelectedInvoiceResetPeriod);
 
         await _firmService.UpdateFirmAsync(dto, ct).ConfigureAwait(false);
         await _eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName, SelectedCurrencySymbol, SelectedDateFormat)).ConfigureAwait(false);

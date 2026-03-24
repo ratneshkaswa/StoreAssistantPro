@@ -17,6 +17,18 @@ public class HeldBillService(
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
+        // Enforce max held bills per user (#347)
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        if (config is not null && config.MaxHeldBillsPerUser > 0)
+        {
+            var activeCount = await context.HeldBills
+                .CountAsync(h => h.IsActive && h.CashierRole == dto.CashierRole, ct)
+                .ConfigureAwait(false);
+            if (activeCount >= config.MaxHeldBillsPerUser)
+                throw new InvalidOperationException(
+                    $"Maximum held bills limit ({config.MaxHeldBillsPerUser}) reached. Recall or discard existing held bills first.");
+        }
+
         var entity = new HeldBill
         {
             Label = dto.Label,
@@ -110,5 +122,35 @@ public class HeldBillService(
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
         return stale.Count;
+    }
+
+    public async Task AutoCleanupStaleAsync(CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var config = await context.AppConfigs.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        if (config is null || config.HeldBillTimeoutMinutes <= 0) return;
+
+        var cutoff = DateTime.UtcNow.AddMinutes(-config.HeldBillTimeoutMinutes);
+        var stale = await context.HeldBills
+            .Where(h => h.IsActive && h.HeldAt < cutoff)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        foreach (var bill in stale)
+            bill.IsActive = false;
+
+        if (stale.Count > 0)
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<HeldBill>> GetHistoryAsync(int count = 50, CancellationToken ct = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.HeldBills
+            .AsNoTracking()
+            .OrderByDescending(h => h.HeldAt)
+            .Take(count)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 }

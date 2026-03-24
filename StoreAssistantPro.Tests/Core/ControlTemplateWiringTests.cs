@@ -38,6 +38,24 @@ public sealed class ControlTemplateWiringTests
     }
 
     [Fact]
+    public void FluentExpander_Should_Wire_ContentArea_And_Animate_Height()
+    {
+        var code = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "FluentExpander.cs"));
+        var style = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
+
+        Assert.Contains("_contentArea = GetTemplateChild(\"PART_ContentArea\") as Border;", code, StringComparison.Ordinal);
+        Assert.Contains("AnimateExpand();", code, StringComparison.Ordinal);
+        Assert.Contains("AnimateCollapse();", code, StringComparison.Ordinal);
+        Assert.Contains("BeginAnimation(HeightProperty", code, StringComparison.Ordinal);
+        Assert.Contains("Height = double.NaN;", code, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"PART_ContentArea\"", style, StringComparison.Ordinal);
+        Assert.Contains("Height=\"0\"", style, StringComparison.Ordinal);
+        Assert.Contains("ClipToBounds=\"True\"", style, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void NumberBox_Should_Detach_Previous_TemplatePart_Handlers_Before_Rewiring()
     {
         var content = File.ReadAllText(

@@ -16,6 +16,11 @@ public sealed record DashboardSummary
     public decimal AverageBillValue { get; init; }
     public decimal ThisMonthSales { get; init; }
     public int ThisMonthTransactions { get; init; }
+    public decimal PreviousDaySales { get; init; }
+    public decimal PreviousDayReturns { get; init; }
+    public decimal PreviousDayNetSales { get; init; }
+    public decimal PreviousDayAverageBillValue { get; init; }
+    public decimal PreviousMonthSales { get; init; }
 
     // ── Inventory KPIs ──
     public int TotalProducts { get; init; }
@@ -45,6 +50,23 @@ public sealed record DashboardSummary
 
     // ── Backup status (#332) ──
     public DateTime? LastBackupDate { get; init; }
+
+    // ── Monthly expense trend (#399) ──
+    public IReadOnlyList<DailyExpenseTrendItem> DailyExpenseTrend { get; init; } = [];
+
+    // ── Category sales breakdown (#400) ──
+    public IReadOnlyList<CategorySalesBreakdownItem> CategorySalesBreakdown { get; init; } = [];
+
+    // ── Year-over-year comparison (#402) ──
+    public decimal SameMonthLastYearSales { get; init; }
+
+    // ── Sales target (#403) ──
+    public decimal MonthlySalesTarget { get; init; }
+
+    // ── Upcoming tasks (#406) ──
+    public int PendingPurchaseOrdersCount { get; init; }
+    public int OverduePaymentsCount { get; init; }
+    public bool BackupOverdue { get; init; }
 }
 
 /// <summary>Lightweight projection of a recent sale for the dashboard grid.</summary>
@@ -72,3 +94,15 @@ public sealed record PaymentMethodBreakdownItem(
     string Method,
     decimal Amount,
     int Count);
+
+/// <summary>Daily expense total for trend chart (#399).</summary>
+public sealed record DailyExpenseTrendItem(
+    DateTime Date,
+    decimal TotalExpenses,
+    int ExpenseCount);
+
+/// <summary>Category sales breakdown for pie chart (#400).</summary>
+public sealed record CategorySalesBreakdownItem(
+    string CategoryName,
+    decimal Revenue,
+    int ItemCount);

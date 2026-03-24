@@ -50,7 +50,13 @@ public class FirmService(
             settings?.NegativeStockAllowed ?? false,
             string.IsNullOrWhiteSpace(settings?.NumberToWordsLanguage) ? "English" : settings.NumberToWordsLanguage,
             string.IsNullOrWhiteSpace(config.InvoicePrefix) ? "INV" : config.InvoicePrefix,
-            string.IsNullOrWhiteSpace(config.ReceiptFooterText) ? "Thank you! Visit again!" : config.ReceiptFooterText);
+            string.IsNullOrWhiteSpace(config.ReceiptFooterText) ? "Thank you! Visit again!" : config.ReceiptFooterText,
+            config.LogoPath ?? string.Empty,
+            config.BankName ?? string.Empty,
+            config.BankAccountNumber ?? string.Empty,
+            config.BankIFSC ?? string.Empty,
+            config.ReceiptHeaderText ?? string.Empty,
+            string.IsNullOrWhiteSpace(config.InvoiceResetPeriod) ? "Never" : config.InvoiceResetPeriod);
     }
 
     public async Task UpdateFirmAsync(FirmUpdateDto dto, CancellationToken ct = default)
@@ -99,6 +105,12 @@ public class FirmService(
 
         config.InvoicePrefix = string.IsNullOrWhiteSpace(dto.InvoicePrefix) ? "INV" : dto.InvoicePrefix.Trim();
         config.ReceiptFooterText = string.IsNullOrWhiteSpace(dto.ReceiptFooterText) ? "Thank you! Visit again!" : dto.ReceiptFooterText.Trim();
+        config.LogoPath = dto.LogoPath?.Trim() ?? string.Empty;
+        config.BankName = dto.BankName?.Trim() ?? string.Empty;
+        config.BankAccountNumber = dto.BankAccountNumber?.Trim() ?? string.Empty;
+        config.BankIFSC = string.IsNullOrWhiteSpace(dto.BankIFSC) ? string.Empty : dto.BankIFSC.Trim().ToUpperInvariant();
+        config.ReceiptHeaderText = dto.ReceiptHeaderText?.Trim() ?? string.Empty;
+        config.InvoiceResetPeriod = string.IsNullOrWhiteSpace(dto.InvoiceResetPeriod) ? "Never" : dto.InvoiceResetPeriod.Trim();
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
 

@@ -4,14 +4,20 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.SalesPurchase.Services;
 
 namespace StoreAssistantPro.Modules.SalesPurchase.ViewModels;
 
-public partial class SalesPurchaseViewModel(ISalesPurchaseService service) : BaseViewModel
+public partial class SalesPurchaseViewModel(
+    ISalesPurchaseService service,
+    IToastService toastService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<SalesPurchaseEntry> _allItems = [];
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     // ── Collections ──
 
@@ -219,6 +225,7 @@ public partial class SalesPurchaseViewModel(ISalesPurchaseService service) : Bas
     {
         if (entry is null) return;
         Clipboard.SetText($"{entry.Date:d}\t{entry.Type}\t{entry.Note}\t{entry.Amount:N0}");
+        toastService.Show("Copied to clipboard.", AppNotificationLevel.Success, TimeSpan.FromSeconds(2));
         SuccessMessage = "Copied to clipboard.";
     }
 

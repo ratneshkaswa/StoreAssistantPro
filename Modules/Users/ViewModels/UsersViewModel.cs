@@ -99,4 +99,19 @@ public partial class UsersViewModel(
 
         return SelectedUser.UserType != UserType.Admin || InputValidator.IsValidMasterPin(MasterPin);
     }
+
+    // ── Export (#288) ──
+
+    [RelayCommand]
+    private void ExportUsersCsv()
+    {
+        if (Users.Count == 0) return;
+        var rows = Users.Select(u => new
+        {
+            u.Id, UserType = u.UserType.ToString(),
+            u.FailedAttempts, u.LockoutEndTime
+        });
+        if (CsvExporter.Export(rows, "Users.csv"))
+            SuccessMessage = "User data exported.";
+    }
 }

@@ -139,10 +139,10 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="AddressBox"
                                          Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                         Style="{StaticResource FluentMultilineTextBoxStyle}"
                                          AutomationProperties.Name="Address"
                                          AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
                                          MaxLength="200"
-                                         MinHeight="{StaticResource ControlHeight}"
                                          h:Watermark.Text="Street, area, city"/>
                             </StackPanel>
                         </Grid>
@@ -187,6 +187,7 @@
                                          Width="{StaticResource FieldWidthCompact}"
                                          HorizontalAlignment="Left"
                                          MaxLength="6"
+                                         h:TextBoxAdornment.SuffixText="%"
                                          h:NumericInput.IsDecimalOnly="True"
                                          h:Watermark.Text="e.g. 1 or 1.5"/>
                                 <TextBlock Text="{Binding CompositionRateValidationHint}"

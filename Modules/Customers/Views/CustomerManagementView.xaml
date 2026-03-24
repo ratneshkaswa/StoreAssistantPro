@@ -125,6 +125,7 @@
                                    Style="{StaticResource FormRowLabelStyle}"/>
                         <TextBox Grid.Row="6" Grid.Column="1"
                                  Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FluentMultilineTextBoxStyle}"
                                  MaxLength="500"
                                  AutomationProperties.Name="Customer address"
                                  h:Watermark.Text="e.g. 24 MI Road, Jaipur"/>
@@ -142,6 +143,7 @@
                                    Style="{StaticResource FormRowLabelStyle}"/>
                         <TextBox Grid.Row="10" Grid.Column="1"
                                  Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FluentMultilineTextBoxStyle}"
                                  MaxLength="500"
                                  AutomationProperties.Name="Customer notes"
                                  h:Watermark.Text="e.g. Prefers WhatsApp updates"/>

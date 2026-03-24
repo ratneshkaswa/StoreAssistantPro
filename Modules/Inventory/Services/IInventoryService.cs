@@ -34,7 +34,8 @@ public record StockAdjustmentDto(
     int NewQuantity,
     AdjustmentReason Reason,
     string? Notes,
-    int UserId);
+    int UserId,
+    bool IsApproved = false);
 
 public record StockMovementEntry(
     DateTime Date,

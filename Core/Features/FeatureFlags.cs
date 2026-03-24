@@ -37,4 +37,5 @@ public static class FeatureFlags
     public const string Backup = "Backup";
     public const string Quotations = "Quotations";
     public const string GRN = "GRN";
+    public const string BarcodeLabels = "BarcodeLabels";
 }

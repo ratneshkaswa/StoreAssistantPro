@@ -49,6 +49,9 @@ public class SaleReturn
     /// <summary>Whether stock was restored for this return.</summary>
     public bool StockRestored { get; set; }
 
+    /// <summary>When true, this return was accepted without an original invoice (#153). Admin-only.</summary>
+    public bool IsNoBillReturn { get; set; }
+
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 }

@@ -13,6 +13,155 @@
 
     <!-- InputBindings are generated at runtime by ShortcutService -->
 
+    <Window.Resources>
+        <Style x:Key="CommandPaletteDismissButtonStyle" TargetType="Button" BasedOn="{x:Null}">
+            <Setter Property="Background" Value="{StaticResource SmokeOverlayBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CommandPaletteResultItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="h:PressStateTracker.IsEnabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource FluentCornerLarge}"
+                                Padding="14,12"
+                                SnapsToDevicePixels="True"
+                                UseLayoutRounding="True">
+                            <Grid>
+                                <Border x:Name="AccentPill"
+                                        Width="4"
+                                        Margin="0,2,12,2"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Stretch"
+                                        Background="{StaticResource FluentAccentDefault}"
+                                        CornerRadius="2"
+                                        Opacity="0"/>
+                                <ContentPresenter Margin="16,0,0,0"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="h:PressStateTracker.IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource SubtleFillColorTertiary}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+                                <Setter TargetName="AccentPill" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource FluentStrokeFocus}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="QuickActionOverflowButtonStyle" TargetType="Button" BasedOn="{x:Null}">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="OverflowButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource FluentCornerMedium}">
+                            <TextBlock Text="&#xE712;"
+                                       FontFamily="{StaticResource FluentIconFont}"
+                                       FontSize="{StaticResource FontSizeIconSmall}"
+                                       Foreground="{StaticResource FluentTextSecondary}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="OverflowButtonBorder" Property="Background" Value="{StaticResource FluentSubtleHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="OverflowButtonBorder" Property="Background" Value="{StaticResource FluentSubtlePressed}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="QuickActionOverflowItemStyle" TargetType="Button">
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="OverflowItemBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource FluentCornerLarge}">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="OverflowItemBorder" Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+                                <Setter TargetName="OverflowItemBorder" Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="OverflowItemBorder" Property="Background" Value="{StaticResource LayerFillColorDefault}"/>
+                                <Setter TargetName="OverflowItemBorder" Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="OverflowItemBorder" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.Style>
             <Style TargetType="Grid">
@@ -39,6 +188,13 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
+        <Border Grid.RowSpan="4"
+                BorderBrush="{StaticResource WindowEdgeFrameBrush}"
+                BorderThickness="1"
+                IsHitTestVisible="False"
+                UseLayoutRounding="True"
+                SnapsToDevicePixels="True"/>
 
         <!-- TOP MENU BAR -->
         <Menu Grid.Row="0"
@@ -103,6 +259,10 @@
                     <MenuItem Header="Goods Received Notes" Command="{Binding OpenGRNCommand}"
                               h:SmartTooltip.ContextKey="GRN"
                               Visibility="{Binding IsGRNVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    <Separator Style="{StaticResource FluentMenuSeparatorStyle}"/>
+                    <MenuItem Header="Barcode Labels" Command="{Binding OpenBarcodeLabelsCommand}"
+                              h:SmartTooltip.ContextKey="BarcodeLabels"
+                              Visibility="{Binding IsBarcodeLabelsVisible, Converter={StaticResource BoolToVisibility}}"/>
                 </MenuItem>
 
                 <!-- Sales & Customers -->
@@ -205,7 +365,8 @@
                                     <Border x:Name="BellBorder" Background="Transparent"
                                             CornerRadius="{StaticResource FluentCornerMedium}"
                                             Padding="{TemplateBinding Padding}">
-                                        <Grid h:NotificationBadgeBehavior.Count="{Binding AppState.UnreadNotificationCount}">
+                                        <Grid h:NotificationBadgeBehavior.Count="{Binding AppState.UnreadNotificationCount}"
+                                              h:NotificationBadgeBehavior.DotOnly="True">
                                             <TextBlock Text="&#xEA8F;" FontFamily="{StaticResource FluentIconFont}" FontSize="{StaticResource FontSizeIconMedium}"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"/>
@@ -227,21 +388,18 @@
 
                         <!-- Notification popup â€” anchored below bell, auto-closes on outside click -->
                         <Popup x:Name="NotificationsPopup"
+                               Style="{StaticResource AnchoredFlyoutPopupStyle}"
                                PlacementTarget="{Binding ElementName=NotificationBellButton}"
                                Placement="Bottom"
                                StaysOpen="False"
-                               AllowsTransparency="True"
                                IsOpen="{Binding IsNotificationsPanelVisible, Mode=TwoWay}"
                                Opened="OnNotificationsPopupOpened">
                             <Border x:Name="NotificationsPanel"
+                                    Style="{StaticResource FlyoutPopupSurfaceStyle}"
                                     Width="{StaticResource NotificationPanelWidth}"
                                     MaxHeight="{StaticResource NotificationPanelMaxHeight}"
-                                    Background="{StaticResource FluentSurface}"
-                                    BorderBrush="{StaticResource FluentSurfaceStroke}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource FluentCornerLarge}"
                                     SnapsToDevicePixels="True"
-                                    Effect="{StaticResource FluentShadowMedium}">
+                                    Padding="0">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -409,21 +567,76 @@
 
                     </StackPanel>
 
-                    <!-- Quick actions (left, fills remaining space) -->
-                <ItemsControl ItemsSource="{Binding QuickActions}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Command="{Binding Command}"
-                                    Style="{StaticResource QuickActionButtonStyle}"
-                                    Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <!-- Quick actions (left, fills remaining space) -->
+                <Grid x:Name="QuickActionsViewport"
+                      SizeChanged="OnQuickActionsViewportSizeChanged">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ItemsControl Grid.Column="0"
+                                  ItemsSource="{Binding VisibleQuickActions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding Command}"
+                                        Style="{StaticResource QuickActionButtonStyle}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Grid Grid.Column="1"
+                          Margin="6,0,0,0"
+                          VerticalAlignment="Center"
+                          Visibility="{Binding HasOverflowQuickActions, Converter={StaticResource BoolToVisibility}}">
+                        <Button x:Name="QuickActionOverflowButton"
+                                Command="{Binding ToggleQuickActionOverflowCommand}"
+                                Style="{StaticResource QuickActionOverflowButtonStyle}"
+                                AutomationProperties.Name="More actions"
+                                ToolTip="More actions"/>
+
+                        <Popup PlacementTarget="{Binding ElementName=QuickActionOverflowButton}"
+                               Style="{StaticResource AnchoredFlyoutPopupStyle}"
+                               Placement="Bottom"
+                               StaysOpen="False"
+                               IsOpen="{Binding IsQuickActionOverflowOpen, Mode=TwoWay}"
+                               Closed="OnQuickActionOverflowPopupClosed">
+                            <Border Width="260"
+                                    Style="{StaticResource FlyoutMenuSurfaceStyle}">
+                                <ItemsControl ItemsSource="{Binding OverflowQuickActions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource QuickActionOverflowItemStyle}"
+                                                    Command="{Binding Command}"
+                                                    Click="OnQuickActionOverflowItemClick">
+                                                <DockPanel LastChildFill="True">
+                                                    <TextBlock Text="{Binding ShortcutText}"
+                                                               DockPanel.Dock="Right"
+                                                               FontSize="{StaticResource FontSizeCaption}"
+                                                               Foreground="{StaticResource FluentTextTertiary}"
+                                                               Visibility="{Binding ShortcutText, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Icon}"
+                                                                   Margin="0,0,8,0"
+                                                                   VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Title}"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </Grid>
             </DockPanel>
         </Border>
 
@@ -448,6 +661,192 @@
             </Border.Style>
             <controls:ResponsiveContentControl Content="{Binding CurrentView}"/>
         </Border>
+
+        <Grid Grid.Row="0"
+              Grid.RowSpan="4"
+              Panel.ZIndex="200"
+              Visibility="{Binding IsCommandPaletteVisible, Converter={StaticResource BoolToVisibility}}"
+              PreviewKeyDown="OnCommandPalettePreviewKeyDown">
+            <Button Style="{StaticResource CommandPaletteDismissButtonStyle}"
+                    AutomationProperties.Name="Close command palette"
+                    Command="{Binding CloseCommandPaletteCommand}"/>
+
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="24,72,24,24"
+                    MinWidth="560"
+                    MaxWidth="720"
+                    Background="{StaticResource LayerFillColorSecondary}"
+                    BorderBrush="{StaticResource FluentSurfaceStroke}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource FluentCornerXLarge}"
+                    Effect="{StaticResource FluentShadowLarge}"
+                    KeyboardNavigation.TabNavigation="Cycle"
+                    SnapsToDevicePixels="True"
+                    UseLayoutRounding="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="20,20,20,12">
+                        <TextBlock Text="Command palette"
+                                   FontSize="{StaticResource FontSizeDialogTitle}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                        <TextBlock Text="Jump to pages, tools, and recent work from one place."
+                                   Margin="{StaticResource HintTextSpacing}"
+                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                    </StackPanel>
+
+                    <TextBox x:Name="CommandPaletteSearchBox"
+                             Grid.Row="1"
+                             Margin="20,0,20,0"
+                             Style="{StaticResource FluentSearchTextBoxStyle}"
+                             Text="{Binding CommandPaletteQuery, UpdateSourceTrigger=PropertyChanged}"
+                             h:Watermark.Text="Search pages, actions, or shortcuts"/>
+
+                    <Grid Grid.Row="2" Margin="12,12,12,0">
+                        <ListBox x:Name="CommandPaletteResultsList"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 ItemContainerStyle="{StaticResource CommandPaletteResultItemStyle}"
+                                 ItemsSource="{Binding CommandPaletteItems}"
+                                 MaxHeight="420"
+                                 MouseDoubleClick="OnCommandPaletteResultsMouseDoubleClick"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 SelectedItem="{Binding SelectedCommandPaletteItem, Mode=TwoWay}">
+                            <ListBox.Style>
+                                <Style TargetType="ListBox">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasCommandPaletteItems}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.Style>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Grid.Column="0"
+                                                Width="32"
+                                                Height="32"
+                                                Margin="0,0,12,0"
+                                                Background="{StaticResource ChromeAltFillColorSecondary}"
+                                                CornerRadius="16"
+                                                VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding Icon}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="{StaticResource FontSizeLabel}"/>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1">
+                                            <DockPanel LastChildFill="True">
+                                                <TextBlock Text="{Binding ShortcutText}"
+                                                           DockPanel.Dock="Right"
+                                                           FontSize="{StaticResource FontSizeCaption}"
+                                                           Foreground="{StaticResource FluentTextTertiary}"
+                                                           Visibility="{Binding HasShortcutText, Converter={StaticResource BoolToVisibility}}"/>
+
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Title}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource FluentTextPrimary}"/>
+                                                    <Border Margin="8,0,0,0"
+                                                            Padding="8,2"
+                                                            Background="{StaticResource ControlAltFillColorSecondary}"
+                                                            CornerRadius="10"
+                                                            Visibility="{Binding IsRecent, Converter={StaticResource BoolToVisibility}}">
+                                                        <TextBlock Text="Recent"
+                                                                   FontSize="{StaticResource FontSizeCaption}"
+                                                                   Foreground="{StaticResource FluentAccentDark2}"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                            <TextBlock Text="{Binding Description}"
+                                                       Margin="{StaticResource HintTextSpacing}"
+                                                       Foreground="{StaticResource FluentTextSecondary}"
+                                                       TextWrapping="Wrap"
+                                                       Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibility}}"/>
+                                        </StackPanel>
+
+                                        <Border Grid.Column="2"
+                                                Margin="12,0,0,0"
+                                                Padding="8,4"
+                                                Background="{StaticResource ControlAltFillColorSecondary}"
+                                                CornerRadius="10"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Category}"
+                                                       FontSize="{StaticResource FontSizeCaption}"
+                                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <Border Background="Transparent">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasCommandPaletteItems}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Margin="0,36,0,36">
+                                <TextBlock Text="&#xE711;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="20"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="No matching commands"
+                                           Margin="0,12,0,0"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextPrimary}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Try a page name, shortcut, or action keyword."
+                                           Margin="{StaticResource HintTextSpacing}"
+                                           Foreground="{StaticResource FluentTextSecondary}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="3"
+                            Margin="20,12,20,20"
+                            Padding="0,12,0,0"
+                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                            BorderThickness="0,1,0,0">
+                        <DockPanel LastChildFill="False">
+                            <TextBlock Text="Recent actions rise to the top when you open the palette without a query."
+                                       Foreground="{StaticResource FluentTextTertiary}"/>
+                            <TextBlock DockPanel.Dock="Right"
+                                       Text="↑↓ Navigate   Enter Run   Esc Close"
+                                       Foreground="{StaticResource FluentTextTertiary}"
+                                       FontSize="{StaticResource FontSizeCaption}"/>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
         <!-- BOTTOM STATUS BAR -->
         <Border Grid.Row="3"
                 Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}"

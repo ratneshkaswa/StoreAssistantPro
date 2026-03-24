@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Navigation;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Brands.Services;
 using StoreAssistantPro.Modules.Categories.Services;
@@ -16,9 +17,12 @@ public partial class ProductManagementViewModel(
     IProductService productService,
     ITaxGroupService taxGroupService,
     INavigationService navigationService,
+    IRegionalSettingsService regional,
     ProductContextHolder productContextHolder) : BaseViewModel
 {
     private List<Product> _allProducts = [];
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<Product> Products { get; set; } = [];
@@ -316,6 +320,39 @@ public partial class ProductManagementViewModel(
     [RelayCommand]
     private void Search() => ApplyFilters();
 
+    // #387 Barcode product lookup
+    [ObservableProperty]
+    public partial string BarcodeLookupInput { get; set; } = string.Empty;
+
+    [RelayCommand]
+    private Task BarcodeLookupAsync() => RunAsync(async ct =>
+    {
+        if (string.IsNullOrWhiteSpace(BarcodeLookupInput)) return;
+
+        var product = await productService.LookupByBarcodeAsync(BarcodeLookupInput.Trim(), ct);
+        BarcodeLookupInput = string.Empty;
+
+        if (product is null)
+        {
+            ErrorMessage = $"No product found for barcode '{BarcodeLookupInput}'.";
+            return;
+        }
+
+        SelectedProduct = Products.FirstOrDefault(p => p.Id == product.Id);
+        if (SelectedProduct is null)
+        {
+            // Product may be filtered out — clear filters and try again
+            SearchText = string.Empty;
+            FilterCategory = null;
+            FilterBrand = null;
+            FilterStockStatus = "All";
+            ApplyFilters();
+            SelectedProduct = Products.FirstOrDefault(p => p.Id == product.Id);
+        }
+
+        SuccessMessage = $"Found: {product.Name} — {(product.Category?.Name ?? "No category")}";
+    });
+
     [RelayCommand]
     private void ExportCsv()
     {
@@ -409,5 +446,22 @@ public partial class ProductManagementViewModel(
             ? Products.FirstOrDefault(p => p.Id == selectedProductId.Value)
             : null;
     }
+
+    // ── Variant export (#63) ──
+
+    [RelayCommand]
+    private Task ExportVariantsCsvAsync() => RunAsync(async ct =>
+    {
+        var variants = await productService.GetAllVariantsAsync(ct);
+        if (variants.Count == 0) { ErrorMessage = "No variants to export."; return; }
+        var rows = variants.Select(v => new
+        {
+            v.Id, v.ProductId, ProductName = v.Product?.Name,
+            Size = v.Size?.Name, Colour = v.Colour?.Name,
+            v.Barcode, v.Quantity, v.AdditionalPrice, v.IsActive
+        });
+        if (CsvExporter.Export(rows, "ProductVariants.csv"))
+            SuccessMessage = $"Exported {variants.Count} variants.";
+    });
 }
 

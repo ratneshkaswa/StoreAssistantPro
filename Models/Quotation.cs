@@ -41,6 +41,12 @@ public class Quotation
     /// <summary>Persisted total: Σ line totals.</summary>
     public decimal TotalAmount { get; set; }
 
+    /// <summary>Revision number within a quotation chain (1 = original). (#356)</summary>
+    public int RevisionNumber { get; set; } = 1;
+
+    /// <summary>FK to the original quotation this revision is based on (#356).</summary>
+    public int? OriginalQuotationId { get; set; }
+
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 

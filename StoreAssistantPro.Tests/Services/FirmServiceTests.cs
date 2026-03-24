@@ -125,7 +125,13 @@ public class FirmServiceTests : IDisposable
             NegativeStockAllowed: true,
             NumberToWordsLanguage: "Hindi",
             InvoicePrefix: "INV",
-            ReceiptFooterText: "Thank you! Visit again!"));
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: "ICICI Bank",
+            BankAccountNumber: "1234567890",
+            BankIFSC: "ICIC0001234",
+            ReceiptHeaderText: "Retail Copy",
+            InvoiceResetPeriod: "Annually"));
 
         await using var verifyDb = new AppDbContext(_dbOptions);
         var config = await verifyDb.AppConfigs.SingleAsync();
@@ -147,6 +153,11 @@ public class FirmServiceTests : IDisposable
         Assert.Equal(6, config.FinancialYearEndMonth);
         Assert.Equal("yyyy-MM-dd", config.DateFormat);
         Assert.Equal("Indian", config.NumberFormat);
+        Assert.Equal("ICICI Bank", config.BankName);
+        Assert.Equal("1234567890", config.BankAccountNumber);
+        Assert.Equal("ICIC0001234", config.BankIFSC);
+        Assert.Equal("Retail Copy", config.ReceiptHeaderText);
+        Assert.Equal("Annually", config.InvoiceResetPeriod);
 
         Assert.Equal("Inclusive", settings.DefaultTaxMode);
         Assert.Equal("NearestFive", settings.RoundingMethod);

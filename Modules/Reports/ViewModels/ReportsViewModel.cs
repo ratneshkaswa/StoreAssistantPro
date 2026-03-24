@@ -3,12 +3,18 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Printing;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Reports.Services;
 
 namespace StoreAssistantPro.Modules.Reports.ViewModels;
 
-public partial class ReportsViewModel(IReportsService reportsService) : BaseViewModel
+public partial class ReportsViewModel(
+    IReportsService reportsService,
+    IPrintReportService printReportService,
+    IPrintPreviewService printPreviewService,
+    IAuditService auditService) : BaseViewModel
 {
     // ── Date range ──
 
@@ -332,6 +338,126 @@ public partial class ReportsViewModel(IReportsService reportsService) : BaseView
         if (CsvExporter.Export(data, $"SlowMoving_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
             SuccessMessage = "Slow moving products exported.";
     });
+
+    // ── Print commands (#447-#449) ──
+
+    [RelayCommand]
+    private Task PrintDailyReportAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var text = await printReportService.GenerateDailySalesReportAsync(DateTime.Today, ct);
+        if (ReportPrintHelper.PrintReport(text, "Daily Sales Report"))
+            SuccessMessage = "Daily sales report sent to printer.";
+    });
+
+    [RelayCommand]
+    private Task PrintMonthlyReportAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var text = await printReportService.GenerateMonthlySalesReportAsync(DateFrom.Year, DateFrom.Month, ct);
+        if (ReportPrintHelper.PrintReport(text, "Monthly Sales Report"))
+            SuccessMessage = "Monthly sales report sent to printer.";
+    });
+
+    [RelayCommand]
+    private Task PrintStockReportAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var text = await printReportService.GenerateStockReportAsync(ct);
+        if (ReportPrintHelper.PrintReport(text, "Stock Report"))
+            SuccessMessage = "Stock report sent to printer.";
+    });
+
+    // ── Preview commands (#454) ──
+
+    [RelayCommand]
+    private Task PreviewDailyReportAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var text = await printReportService.GenerateDailySalesReportAsync(DateTime.Today, ct);
+        printPreviewService.ShowPreview(text, "Daily Sales Report");
+    });
+
+    [RelayCommand]
+    private Task PreviewMonthlyReportAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var text = await printReportService.GenerateMonthlySalesReportAsync(DateFrom.Year, DateFrom.Month, ct);
+        printPreviewService.ShowPreview(text, "Monthly Sales Report");
+    });
+
+    [RelayCommand]
+    private Task PreviewStockReportAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var text = await printReportService.GenerateStockReportAsync(ct);
+        printPreviewService.ShowPreview(text, "Stock Report");
+    });
+
+    // ── Audit log export (#300) ──
+
+    [RelayCommand]
+    private Task ExportAuditLogCsvAsync() => RunAsync(async ct =>
+    {
+        var logs = await auditService.GetLogsAsync(
+            from: DateFrom, to: DateTo.Date.AddDays(1).AddTicks(-1),
+            maxResults: 10000, ct: ct);
+        if (logs.Count == 0) { ErrorMessage = "No audit entries for the selected period."; return; }
+        if (CsvExporter.Export(logs, $"AuditLog_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = $"Audit log exported ({logs.Count} entries).";
+    });
+
+    // ── GSTR-1 data export (#207) ──
+
+    [RelayCommand]
+    private Task ExportGstr1CsvAsync() => RunAsync(async ct =>
+    {
+        var from = DateFrom;
+        var to = DateTo.Date.AddDays(1).AddTicks(-1);
+        var hsn = await reportsService.GetHsnTaxSummaryAsync(from, to, ct);
+        if (hsn.Count == 0) { ErrorMessage = "No HSN data for the selected period."; return; }
+        if (CsvExporter.Export(hsn, $"GSTR1_HSN_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = "GSTR-1 HSN summary exported.";
+    });
+
+    // ── GSTR-3B summary export (#208) ──
+
+    [RelayCommand]
+    private Task ExportGstr3bCsvAsync() => RunAsync(async ct =>
+    {
+        var from = DateFrom;
+        var to = DateTo.Date.AddDays(1).AddTicks(-1);
+        var tax = await reportsService.GetTaxReportAsync(from.Year, from.Month, ct);
+        var taxableValue = tax.HsnBreakdown.Sum(h => h.TaxableValue);
+        var rows = new[]
+        {
+            new Gstr3bSummaryRow("3.1(a) Outward taxable supplies", taxableValue,
+                tax.TotalIgst, tax.TotalCgst, tax.TotalSgst, 0m),
+            new Gstr3bSummaryRow("Total", taxableValue,
+                tax.TotalIgst, tax.TotalCgst, tax.TotalSgst, 0m)
+        };
+        if (CsvExporter.Export(rows, $"GSTR3B_{from:yyyyMM}.csv"))
+            SuccessMessage = "GSTR-3B summary exported.";
+    });
+
+    // ── Dead stock report (#80) ──
+
+    [RelayCommand]
+    private Task ExportDeadStockCsvAsync() => RunAsync(async ct =>
+    {
+        var from = DateFrom;
+        var to = DateTo.Date.AddDays(1).AddTicks(-1);
+        var data = await reportsService.GetDeadStockReportAsync(from, to, ct);
+        if (data.Count == 0) { ErrorMessage = "No dead stock found for the selected period."; return; }
+        if (CsvExporter.Export(data, $"DeadStock_{DateFrom:yyyyMMdd}_{DateTo:yyyyMMdd}.csv"))
+            SuccessMessage = $"Dead stock report exported ({data.Count} products).";
+    });
+
+    private void ClearMessages()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
 
     private async Task RefreshAllAsync(CancellationToken ct)
     {

@@ -51,6 +51,19 @@ public sealed class WindowShellStandardsTests
     }
 
     [Fact]
+    public void ShellBackground_Should_Use_NoiseTexture_And_Subtle_WindowFrame()
+    {
+        var designSystem = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
+        var mainWindow = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+
+        Assert.Contains("<DrawingBrush x:Key=\"AppBackgroundBrush\"", designSystem, StringComparison.Ordinal);
+        Assert.Contains("WindowEdgeFrameBrush", designSystem, StringComparison.Ordinal);
+        Assert.Contains("BorderBrush=\"{StaticResource WindowEdgeFrameBrush}\"", mainWindow, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MainWindow_Should_Host_ToastOverlay()
     {
         var content = File.ReadAllText(
@@ -78,6 +91,8 @@ public sealed class WindowShellStandardsTests
 
         Assert.DoesNotContain("NotificationPopupOffset", content, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"NotificationsPopup\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource AnchoredFlyoutPopupStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource FlyoutPopupSurfaceStyle}\"", content, StringComparison.Ordinal);
         Assert.Contains("Opened=\"OnNotificationsPopupOpened\"", content, StringComparison.Ordinal);
         Assert.Contains("UpdateNotificationsPopupLayout();", codeBehind, StringComparison.Ordinal);
         Assert.Contains("NotificationsPopup.HorizontalOffset", codeBehind, StringComparison.Ordinal);
@@ -152,10 +167,16 @@ public sealed class WindowShellStandardsTests
     {
         var content = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+        var start = content.IndexOf("<Style x:Key=\"FormRowLabelStyle\"", StringComparison.Ordinal);
+        Assert.True(start >= 0, "FormRowLabelStyle was not found.");
+        var end = content.IndexOf("</Style>", start, StringComparison.Ordinal);
+        Assert.True(end > start, "FormRowLabelStyle closing tag was not found.");
 
-        Assert.Contains("<Setter Property=\"HorizontalAlignment\" Value=\"Left\"/>", content, StringComparison.Ordinal);
-        Assert.Contains("<Setter Property=\"TextAlignment\" Value=\"Left\"/>", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("<Setter Property=\"HorizontalAlignment\" Value=\"Right\"/>", content, StringComparison.Ordinal);
+        var styleBlock = content[start..(end + "</Style>".Length)];
+
+        Assert.Contains("<Setter Property=\"HorizontalAlignment\" Value=\"Left\"/>", styleBlock, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"TextAlignment\" Value=\"Left\"/>", styleBlock, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Setter Property=\"HorizontalAlignment\" Value=\"Right\"/>", styleBlock, StringComparison.Ordinal);
     }
 
     [Fact]

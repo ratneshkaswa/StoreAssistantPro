@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
@@ -344,6 +345,56 @@ public partial class PurchaseOrderViewModel(
 
     private static bool IsLineEntered(PurchaseOrderLineInput line) =>
         line.ProductId > 0 || line.Quantity > 0 || line.UnitCost > 0;
+
+    // ── Export (#224) ──
+
+    [RelayCommand]
+    private void ExportPurchaseOrdersCsv()
+    {
+        if (Orders.Count == 0) return;
+        var rows = Orders.Select(o => new
+        {
+            o.Id, o.OrderNumber, o.OrderDate, o.ExpectedDate,
+            Supplier = o.Supplier?.Name,
+            Status = o.Status.ToString(),
+            o.TotalAmount, o.Notes
+        });
+        if (CsvExporter.Export(rows, "PurchaseOrders.csv"))
+            SuccessMessage = "Purchase orders exported.";
+    }
+
+    // ── Duplicate / Reorder (#221) ──
+
+    [RelayCommand]
+    private Task DuplicateOrderAsync() => RunAsync(async ct =>
+    {
+        if (SelectedOrder is null) return;
+        ClearMessages();
+        var clone = await poService.DuplicateAsync(SelectedOrder.Id, ct);
+        SuccessMessage = $"PO duplicated as {clone.OrderNumber} (Draft).";
+        await ReloadOrdersAsync(ct, clone.Id);
+    });
+
+    // ── Auto-generate from low stock (#222) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<LowStockPOSuggestion> LowStockSuggestions { get; set; } = [];
+
+    [RelayCommand]
+    private Task LoadLowStockSuggestionsAsync() => RunAsync(async ct =>
+    {
+        ClearMessages();
+        var suggestions = await poService.GetLowStockSuggestionsAsync(ct);
+        LowStockSuggestions = new ObservableCollection<LowStockPOSuggestion>(suggestions);
+        if (suggestions.Count == 0)
+            SuccessMessage = "No products below minimum stock level with assigned suppliers.";
+    });
+
+    private void ClearMessages()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+    }
 }
 
 public partial class PurchaseOrderLineInput : ObservableObject

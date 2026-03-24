@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
+using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Backup.Services;
 using StoreAssistantPro.Modules.MainShell.Models;
 
@@ -21,7 +22,14 @@ public class DashboardService(
         await using var db = await dbFactory.CreateDbContextAsync(ct);
 
         var today = regional.Now.Date;
+        var nextDay = today.AddDays(1);
+        var yesterday = today.AddDays(-1);
         var monthStart = new DateTime(today.Year, today.Month, 1);
+        var previousMonthStart = monthStart.AddMonths(-1);
+        var previousMonthPeriodEnd = previousMonthStart.AddDays((nextDay - monthStart).Days);
+        var previousMonthLimit = previousMonthStart.AddMonths(1);
+        if (previousMonthPeriodEnd > previousMonthLimit)
+            previousMonthPeriodEnd = previousMonthLimit;
 
         // ── Sales KPIs ──
         var todaySales = await db.Sales
@@ -34,9 +42,23 @@ public class DashboardService(
             .Select(s => new { s.TotalAmount })
             .ToListAsync(ct);
 
+        var previousDaySales = await db.Sales
+            .Where(s => s.SaleDate >= yesterday && s.SaleDate < today)
+            .Select(s => new { s.TotalAmount })
+            .ToListAsync(ct);
+
+        var previousMonthSales = await db.Sales
+            .Where(s => s.SaleDate >= previousMonthStart && s.SaleDate < previousMonthPeriodEnd)
+            .Select(s => new { s.TotalAmount })
+            .ToListAsync(ct);
+
         // ── Today's returns (#389) ──
         var todayReturns = await db.SaleReturns
             .Where(r => r.ReturnDate >= today)
+            .SumAsync(r => r.RefundAmount, ct);
+
+        var previousDayReturns = await db.SaleReturns
+            .Where(r => r.ReturnDate >= yesterday && r.ReturnDate < today)
             .SumAsync(r => r.RefundAmount, ct);
 
         // ── Today's profit (#391) — revenue minus cost ──
@@ -49,6 +71,10 @@ public class DashboardService(
         var todayTxCount = todaySales.Count;
         var todayProfit = todayNet - todayCost;
         var averageBill = todayTxCount > 0 ? todaySalesTotal / todayTxCount : 0;
+        var previousDaySalesTotal = previousDaySales.Sum(s => s.TotalAmount);
+        var previousDayNet = previousDaySalesTotal - previousDayReturns;
+        var previousDayTxCount = previousDaySales.Count;
+        var previousDayAverageBill = previousDayTxCount > 0 ? previousDaySalesTotal / previousDayTxCount : 0;
 
         // ── Inventory KPIs ──
         var productStats = await db.Products
@@ -145,6 +171,50 @@ public class DashboardService(
             .OrderByDescending(p => p.Amount)
             .ToListAsync(ct);
 
+        // ── Monthly expense trend (#399) ──
+        var expenseTrendRaw = await db.Expenses
+            .Where(e => e.Date >= thirtyDaysAgo)
+            .GroupBy(e => e.Date.Date)
+            .Select(g => new DailyExpenseTrendItem(g.Key, g.Sum(e => e.Amount), g.Count()))
+            .OrderBy(t => t.Date)
+            .ToListAsync(ct);
+
+        var expenseTrendFilled = new List<DailyExpenseTrendItem>();
+        for (var d = thirtyDaysAgo; d <= today; d = d.AddDays(1))
+        {
+            var existing = expenseTrendRaw.FirstOrDefault(t => t.Date.Date == d);
+            expenseTrendFilled.Add(existing ?? new DailyExpenseTrendItem(d, 0, 0));
+        }
+
+        // ── Category sales breakdown (#400) ──
+        var categorySales = await db.SaleItems
+            .Where(si => si.Sale!.SaleDate >= monthStart)
+            .GroupBy(si => si.Product!.Category!.Name ?? "Uncategorized")
+            .Select(g => new CategorySalesBreakdownItem(g.Key, g.Sum(si => si.UnitPrice * si.Quantity), g.Sum(si => si.Quantity)))
+            .OrderByDescending(c => c.Revenue)
+            .Take(10)
+            .ToListAsync(ct);
+
+        // ── Year-over-year comparison (#402) ──
+        var lastYearMonthStart = monthStart.AddYears(-1);
+        var lastYearMonthEnd = lastYearMonthStart.AddMonths(1);
+        var sameMonthLastYear = await db.Sales
+            .Where(s => s.SaleDate >= lastYearMonthStart && s.SaleDate < lastYearMonthEnd)
+            .SumAsync(s => s.TotalAmount, ct);
+
+        // ── Sales target (#403) ──
+        var config = await db.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
+        var salesTarget = config?.MonthlySalesTarget ?? 0;
+
+        // ── Upcoming tasks (#406) ──
+        var pendingPOs = await db.PurchaseOrders
+            .CountAsync(po => po.Status == PurchaseOrderStatus.Draft || po.Status == PurchaseOrderStatus.Ordered, ct);
+
+        var overduePayments = await db.Debtors
+            .CountAsync(d => d.TotalAmount > d.PaidAmount, ct);
+
+        var backupOverdue = lastBackupDate == null || (today - lastBackupDate.Value.Date).TotalHours > 24;
+
         return new DashboardSummary
         {
             TodaySales = todaySalesTotal,
@@ -155,6 +225,11 @@ public class DashboardService(
             AverageBillValue = averageBill,
             ThisMonthSales = monthSales.Sum(s => s.TotalAmount),
             ThisMonthTransactions = monthSales.Count,
+            PreviousDaySales = previousDaySalesTotal,
+            PreviousDayReturns = previousDayReturns,
+            PreviousDayNetSales = previousDayNet,
+            PreviousDayAverageBillValue = previousDayAverageBill,
+            PreviousMonthSales = previousMonthSales.Sum(s => s.TotalAmount),
             TotalProducts = totalProducts,
             LowStockCount = lowStock,
             OutOfStockCount = outOfStock,
@@ -168,9 +243,16 @@ public class DashboardService(
             DailySalesTrend = trendFilled,
             PaymentMethodBreakdown = paymentBreakdown,
             LastBackupDate = lastBackupDate,
+            DailyExpenseTrend = expenseTrendFilled,
+            CategorySalesBreakdown = categorySales,
+            SameMonthLastYearSales = sameMonthLastYear,
+            MonthlySalesTarget = salesTarget,
+            PendingPurchaseOrdersCount = pendingPOs,
+            OverduePaymentsCount = overduePayments,
+            BackupOverdue = backupOverdue,
         };
     }
-    public async Task<DashboardSummary> GetSummaryForDateAsync
+    public async Task<DashboardSummary> GetSummaryForDateAsync(DateTime date, CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("DashboardService.GetSummaryForDateAsync");
         await using var db = await dbFactory.CreateDbContextAsync(ct);
@@ -178,6 +260,12 @@ public class DashboardService(
         var targetDate = date.Date;
         var monthStart = new DateTime(targetDate.Year, targetDate.Month, 1);
         var nextDay = targetDate.AddDays(1);
+        var previousDayStart = targetDate.AddDays(-1);
+        var previousMonthStart = monthStart.AddMonths(-1);
+        var previousMonthPeriodEnd = previousMonthStart.AddDays((nextDay - monthStart).Days);
+        var previousMonthLimit = previousMonthStart.AddMonths(1);
+        if (previousMonthPeriodEnd > previousMonthLimit)
+            previousMonthPeriodEnd = previousMonthLimit;
 
         // ── Sales KPIs for target date ──
         var daySales = await db.Sales
@@ -190,8 +278,22 @@ public class DashboardService(
             .Select(s => new { s.TotalAmount })
             .ToListAsync(ct);
 
+        var previousDaySales = await db.Sales
+            .Where(s => s.SaleDate >= previousDayStart && s.SaleDate < targetDate)
+            .Select(s => new { s.TotalAmount })
+            .ToListAsync(ct);
+
+        var previousMonthSales = await db.Sales
+            .Where(s => s.SaleDate >= previousMonthStart && s.SaleDate < previousMonthPeriodEnd)
+            .Select(s => new { s.TotalAmount })
+            .ToListAsync(ct);
+
         var dayReturns = await db.SaleReturns
             .Where(r => r.ReturnDate >= targetDate && r.ReturnDate < nextDay)
+            .SumAsync(r => r.RefundAmount, ct);
+
+        var previousDayReturns = await db.SaleReturns
+            .Where(r => r.ReturnDate >= previousDayStart && r.ReturnDate < targetDate)
             .SumAsync(r => r.RefundAmount, ct);
 
         var dayCost = await db.SaleItems
@@ -203,6 +305,10 @@ public class DashboardService(
         var dayTxCount = daySales.Count;
         var dayProfit = dayNet - dayCost;
         var avgBill = dayTxCount > 0 ? daySalesTotal / dayTxCount : 0;
+        var previousDaySalesTotal = previousDaySales.Sum(s => s.TotalAmount);
+        var previousDayNet = previousDaySalesTotal - previousDayReturns;
+        var previousDayTxCount = previousDaySales.Count;
+        var previousDayAverageBill = previousDayTxCount > 0 ? previousDaySalesTotal / previousDayTxCount : 0;
 
         // ── Inventory KPIs (always current) ──
         var productStats = await db.Products
@@ -279,6 +385,17 @@ public class DashboardService(
             .OrderByDescending(p => p.Amount)
             .ToListAsync(ct);
 
+        // ── Same month last year (#402) ──
+        var lastYearMonthStart = monthStart.AddYears(-1);
+        var lastYearMonthEnd = lastYearMonthStart.AddMonths(1);
+        var sameMonthLastYear = await db.Sales
+            .Where(s => s.SaleDate >= lastYearMonthStart && s.SaleDate < lastYearMonthEnd)
+            .SumAsync(s => s.TotalAmount, ct);
+
+        // ── Sales target (#403) ──
+        var config = await db.AppConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
+        var salesTarget = config?.MonthlySalesTarget ?? 0;
+
         return new DashboardSummary
         {
             TodaySales = daySalesTotal,
@@ -289,6 +406,11 @@ public class DashboardService(
             AverageBillValue = avgBill,
             ThisMonthSales = monthSales.Sum(s => s.TotalAmount),
             ThisMonthTransactions = monthSales.Count,
+            PreviousDaySales = previousDaySalesTotal,
+            PreviousDayReturns = previousDayReturns,
+            PreviousDayNetSales = previousDayNet,
+            PreviousDayAverageBillValue = previousDayAverageBill,
+            PreviousMonthSales = previousMonthSales.Sum(s => s.TotalAmount),
             TotalProducts = totalProducts,
             LowStockCount = lowStock,
             OutOfStockCount = outOfStock,
@@ -302,6 +424,8 @@ public class DashboardService(
             DailySalesTrend = trendFilled,
             PaymentMethodBreakdown = paymentBreakdown,
             LastBackupDate = lastBackupDate,
+            SameMonthLastYearSales = sameMonthLastYear,
+            MonthlySalesTarget = salesTarget,
         };
     }
 }

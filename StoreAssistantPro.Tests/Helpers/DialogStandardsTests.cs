@@ -40,6 +40,67 @@ public sealed class DialogStandardsTests
     }
 
     [Fact]
+    public void BaseDialogWindow_Should_Apply_Shared_Owner_Smoke_Overlay()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Base", "BaseDialogWindow.cs"));
+        var helper = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "DialogOwnerSmokeOverlay.cs"));
+        var designSystem = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
+
+        Assert.Contains("EnableOwnerSmokeOverlay", content, StringComparison.Ordinal);
+        Assert.Contains("Loaded += (_, _) => ApplyOwnerSmokeOverlay();", content, StringComparison.Ordinal);
+        Assert.Contains("Closed += (_, _) => ClearOwnerSmokeOverlay();", content, StringComparison.Ordinal);
+        Assert.Contains("DialogOwnerSmokeOverlay.Show(Owner, overlayBrush)", content, StringComparison.Ordinal);
+        Assert.Contains("AdornerLayer.GetAdornerLayer", helper, StringComparison.Ordinal);
+        Assert.Contains("DialogOwnerSmokeOverlayBrush", designSystem, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Shared_Dialogs_Should_Use_Frosted_Header_Surface()
+    {
+        var globalStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+        var messageDialog = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml"));
+        var masterPinDialog = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "MasterPinDialog.xaml"));
+        var printPreview = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml"));
+
+        Assert.Contains("DialogHeaderBackdropStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("BlurEffect Radius=\"8\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogHeaderContentSurfaceStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogHeaderBackdropStyle", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("DialogHeaderBackdropStyle", masterPinDialog, StringComparison.Ordinal);
+        Assert.Contains("DialogHeaderBackdropStyle", printPreview, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Shared_Dialogs_Should_Hide_Caption_Text_And_Use_InContent_Headers()
+    {
+        var messageDialogXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml"));
+        var messageDialogCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml.cs"));
+        var masterPinDialogXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "MasterPinDialog.xaml"));
+        var printPreviewXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml"));
+        var printPreviewCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml.cs"));
+
+        Assert.Contains("Title=\"\"", messageDialogXaml, StringComparison.Ordinal);
+        Assert.Contains("DialogTitleText.Text = dialogTitle;", messageDialogCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("DialogTitleText.Text = Title;", messageDialogCode, StringComparison.Ordinal);
+        Assert.Contains("Title=\"\"", masterPinDialogXaml, StringComparison.Ordinal);
+        Assert.Contains("Title=\"\"", printPreviewXaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("Title = $\"Print Preview - {title}\";", printPreviewCode, StringComparison.Ordinal);
+        Assert.Contains("TitleText.Text = title;", printPreviewCode, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void LoginView_Should_Use_OverflowScrollHost_For_MessageGrowth()
     {
         var content = File.ReadAllText(

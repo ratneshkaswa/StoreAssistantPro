@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Backup.Services;
@@ -67,6 +68,52 @@ public partial class CashRegisterViewModel(
 
     [ObservableProperty]
     public partial string CloseNotes { get; set; } = string.Empty;
+
+    // ── Denomination entry (#249) ──
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count2000 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count500 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count200 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count100 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count50 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count20 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count10 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count5 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count2 { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DenominationTotal))]
+    public partial int Count1 { get; set; }
+
+    public decimal DenominationTotal =>
+        Count2000 * 2000m + Count500 * 500m + Count200 * 200m + Count100 * 100m +
+        Count50 * 50m + Count20 * 20m + Count10 * 10m + Count5 * 5m + Count2 * 2m + Count1 * 1m;
 
     // ── Movement form ──
 
@@ -233,6 +280,45 @@ public partial class CashRegisterViewModel(
     private void DismissSummary()
     {
         DayEndSummary = null;
+    }
+
+    // ── Denomination commands (#249) ──
+
+    [RelayCommand]
+    private void ApplyDenomination()
+    {
+        ClosingBalanceInput = DenominationTotal.ToString("0");
+    }
+
+    [RelayCommand]
+    private void ResetDenomination()
+    {
+        Count2000 = 0; Count500 = 0; Count200 = 0; Count100 = 0; Count50 = 0;
+        Count20 = 0; Count10 = 0; Count5 = 0; Count2 = 0; Count1 = 0;
+    }
+
+    // ── Export commands (#251) ──
+
+    [RelayCommand]
+    private void ExportDaySummaryCsv()
+    {
+        if (DayEndSummary is null) return;
+        if (CsvExporter.Export(new[] { DayEndSummary }, "DayEndSummary.csv"))
+            SuccessMessage = "Day-end summary exported.";
+    }
+
+    [RelayCommand]
+    private void ExportRegisterHistoryCsv()
+    {
+        if (RegisterHistory.Count == 0) return;
+        var rows = RegisterHistory.Select(r => new
+        {
+            r.Id, r.OpenedAt, r.ClosedAt, r.OpeningBalance,
+            r.ClosingBalance, r.ExpectedBalance, r.Discrepancy,
+            r.OpenedByRole, r.ClosedByRole, r.CloseNotes
+        });
+        if (CsvExporter.Export(rows, "RegisterHistory.csv"))
+            SuccessMessage = "Register history exported.";
     }
 
     private void ClearMessages()

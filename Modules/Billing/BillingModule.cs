@@ -29,6 +29,7 @@ public static class BillingModule
         services.AddTransient<ISaleReturnService, SaleReturnService>();
         services.AddTransient<ICashRegisterService, CashRegisterService>();
         services.AddTransient<IHeldBillService, HeldBillService>();
+        services.AddTransient<IDiscountService, DiscountService>();
         services.AddTransient<BillingViewModel>();
         services.AddTransient<SaleHistoryViewModel>();
         services.AddTransient<CashRegisterViewModel>();

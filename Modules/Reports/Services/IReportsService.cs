@@ -68,6 +68,12 @@ public interface IReportsService
 
     /// <summary>Daily return summary: aggregate return count and value per day (#151).</summary>
     Task<DailyReturnSummary> GetDailyReturnSummaryAsync(DateTime date, CancellationToken ct = default);
+
+    /// <summary>Dead stock: products with zero sales in the date range (#80).</summary>
+    Task<IReadOnlyList<DeadStockItem>> GetDeadStockReportAsync(DateTime from, DateTime to, CancellationToken ct = default);
+
+    /// <summary>Dashboard daily summary for printing (#409).</summary>
+    Task<DashboardPrintData> GetDashboardPrintDataAsync(DateTime date, CancellationToken ct = default);
 }
 
 public record ExpenseReport(
@@ -257,3 +263,21 @@ public record DailyReturnSummary(
     int ReturnCount,
     decimal TotalRefundAmount,
     int ItemsReturned);
+
+public record Gstr3bSummaryRow(
+    string Description,
+    decimal TaxableValue,
+    decimal Igst,
+    decimal Cgst,
+    decimal Sgst,
+    decimal Cess);
+
+public record DeadStockItem(
+    int ProductId,
+    string ProductName,
+    string? CategoryName,
+    string? BrandName,
+    int CurrentStock,
+    decimal CostPrice,
+    decimal SalePrice,
+    decimal StockValue);

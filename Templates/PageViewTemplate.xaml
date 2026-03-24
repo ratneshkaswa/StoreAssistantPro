@@ -164,11 +164,6 @@
              ROW 4 — Feedback messages
              ═══════════════════════════════════════════════════════════ -->
         <StackPanel Grid.Row="4">
-            <TextBlock Text="⏳ Loading…"
-                       Foreground="{StaticResource FluentTextTertiary}"
-                       HorizontalAlignment="Center"
-                       Margin="{StaticResource ItemSpacing}"
-                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
             <TextBlock Text="{Binding ErrorMessage}"
                        Style="{StaticResource ErrorMessageStyle}"/>
             <TextBlock Text="{Binding SuccessMessage}"
@@ -179,18 +174,22 @@
         <!-- ═══════════════════════════════════════════════════════════
              ROW 5 — Primary data area (star-sized, fills space)
              ═══════════════════════════════════════════════════════════ -->
-        <DataGrid Grid.Row="5"
-                  ItemsSource="{Binding Items}"
-                  SelectedItem="{Binding SelectedItem}"
-                  Style="{StaticResource EnterpriseDataGridStyle}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat=C}"
-                                    Width="{StaticResource ColumnWidthPrice}"/>
-                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}"
-                                    Width="{StaticResource ColumnWidthQty}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Row="5">
+            <DataGrid ItemsSource="{Binding Items}"
+                      SelectedItem="{Binding SelectedItem}"
+                      Style="{StaticResource EnterpriseDataGridStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Price" Binding="{Binding Price, StringFormat=C}"
+                                        Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}"
+                                        Width="{StaticResource ColumnWidthQty}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <controls:LoadingOverlay IsActive="{Binding IsLoading}"
+                                     Message="Preparing page content..."/>
+        </Grid>
 
     </Grid>
 </UserControl>

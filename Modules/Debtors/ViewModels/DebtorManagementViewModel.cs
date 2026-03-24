@@ -4,14 +4,19 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Debtors.Services;
 
 namespace StoreAssistantPro.Modules.Debtors.ViewModels;
 
-public partial class DebtorManagementViewModel(IDebtorService debtorService) : BaseViewModel
+public partial class DebtorManagementViewModel(
+    IDebtorService debtorService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<Debtor> _allItems = [];
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<Debtor> Debtors { get; set; } = [];

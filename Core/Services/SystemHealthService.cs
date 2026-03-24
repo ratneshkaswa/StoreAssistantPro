@@ -66,4 +66,29 @@ public class SystemHealthService(
             Math.Round(memoryMB, 1),
             uptime);
     }
+
+    public Task<UpdateCheckResult> CheckForUpdateAsync(CancellationToken ct = default)
+    {
+        // Stub: in production, this would check a remote API for the latest version.
+        var assembly = System.Reflection.Assembly.GetEntryAssembly();
+        var currentVersion = assembly?.GetName().Version?.ToString() ?? "1.0.0.0";
+        return Task.FromResult(new UpdateCheckResult(
+            false,
+            currentVersion,
+            null,
+            "You are running the latest version."));
+    }
+
+    public LicenseStatus ValidateLicense(string? licenseKey)
+    {
+        // Stub: in production, this would validate against a license server.
+        if (string.IsNullOrWhiteSpace(licenseKey))
+            return new LicenseStatus(true, "Community", "Community edition — no license required.");
+
+        // Basic format check: expect format like "SAPRO-XXXX-XXXX-XXXX"
+        if (licenseKey.StartsWith("SAPRO-", StringComparison.OrdinalIgnoreCase) && licenseKey.Length >= 20)
+            return new LicenseStatus(true, "Pro", "License validated successfully.");
+
+        return new LicenseStatus(false, "Invalid", "License key format is not recognized.");
+    }
 }

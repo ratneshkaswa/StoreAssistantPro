@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Navigation;
+using StoreAssistantPro.Core.Printing;
 using StoreAssistantPro.Modules.Reports.Services;
 using StoreAssistantPro.Modules.Reports.ViewModels;
 
@@ -18,6 +19,7 @@ public static class ReportsModule
             .RequireFeature(ReportsPage, FeatureFlags.Reports);
         services.AddTransient<IReportsService, ReportsService>();
         services.AddTransient<IPrintReportService, PrintReportService>();
+        services.AddTransient<IPrintPreviewService, PrintPreviewService>();
         services.AddTransient<ReportsViewModel>();
         return services;
     }

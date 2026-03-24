@@ -87,12 +87,14 @@
                     <StackPanel Grid.Column="4">
                         <TextBlock Text="Total ₹" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding TotalAmountText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                                  h:Watermark.Text="Total" MaxLength="10"
                                  AutomationProperties.Name="Total amount"/>
                     </StackPanel>
                     <StackPanel Grid.Column="6">
                         <TextBlock Text="Paid ₹" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding PaidAmountText, UpdateSourceTrigger=PropertyChanged}"
+                                 h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                                  h:Watermark.Text="Paid" MaxLength="10"
                                  AutomationProperties.Name="Paid amount"/>
                     </StackPanel>
@@ -110,6 +112,7 @@
                     <StackPanel>
                         <TextBlock Text="Note" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FluentMultilineTextBoxStyle}"
                                  h:Watermark.Text="Optional note" MaxLength="500"
                                  AutomationProperties.Name="Note"/>
                     </StackPanel>

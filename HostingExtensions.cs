@@ -47,6 +47,7 @@ using StoreAssistantPro.Modules.Reports;
 using StoreAssistantPro.Modules.Backup;
 using StoreAssistantPro.Modules.Quotations;
 using StoreAssistantPro.Modules.GRN;
+using StoreAssistantPro.Modules.BarcodeLabels;
 
 namespace StoreAssistantPro;
 
@@ -137,6 +138,7 @@ internal static class HostingExtensions
         services.AddTransient<IAuditService, AuditService>();
         services.AddSingleton<IAutoLogoutService, AutoLogoutService>();
         services.AddTransient<ISystemHealthService, SystemHealthService>();
+        services.AddSingleton<IUndoService, UndoService>();
 
         return services;
     }
@@ -179,7 +181,8 @@ internal static class HostingExtensions
             .AddReportsModule(pageRegistry)
             .AddBackupModule(pageRegistry)
             .AddQuotationsModule(pageRegistry)
-            .AddGRNModule(pageRegistry);
+            .AddGRNModule(pageRegistry)
+            .AddBarcodeLabelsModule(pageRegistry);
 
         return services;
     }

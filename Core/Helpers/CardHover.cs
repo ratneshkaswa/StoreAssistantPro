@@ -36,6 +36,7 @@ public static class CardHover
         {
             border.RenderTransformOrigin = new Point(0.5, 0.5);
             border.RenderTransform = new ScaleTransform(1, 1);
+            border.Cursor = Cursors.Hand;
             border.MouseEnter += OnMouseEnter;
             border.MouseLeave += OnMouseLeave;
             border.PreviewMouseLeftButtonDown += OnMouseDown;
@@ -43,6 +44,9 @@ public static class CardHover
         }
         else
         {
+            if (Equals(border.Cursor, Cursors.Hand))
+                border.ClearValue(FrameworkElement.CursorProperty);
+
             border.MouseEnter -= OnMouseEnter;
             border.MouseLeave -= OnMouseLeave;
             border.PreviewMouseLeftButtonDown -= OnMouseDown;

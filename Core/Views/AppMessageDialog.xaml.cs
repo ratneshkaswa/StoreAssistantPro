@@ -32,8 +32,8 @@ public partial class AppMessageDialog : BaseDialogWindow
         SizeToContent = SizeToContent.Height;
         MinHeight = 0;
 
-        Title = string.IsNullOrWhiteSpace(title) ? "Message" : title;
-        DialogTitleText.Text = Title;
+        var dialogTitle = string.IsNullOrWhiteSpace(title) ? "Message" : title;
+        DialogTitleText.Text = dialogTitle;
         MessageText.Text = message;
         MessageText.Visibility = string.IsNullOrWhiteSpace(message)
             ? Visibility.Collapsed

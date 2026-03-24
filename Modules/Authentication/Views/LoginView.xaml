@@ -72,6 +72,39 @@
     </UserControl.Resources>
 
     <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Grid IsHitTestVisible="False">
+            <Ellipse Width="760"
+                     Height="760"
+                     Margin="-220,-180,0,0"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Top"
+                     Fill="{StaticResource FluentAccentDefault}"
+                     Opacity="0.055">
+                <Ellipse.Effect>
+                    <BlurEffect Radius="120"/>
+                </Ellipse.Effect>
+            </Ellipse>
+            <Ellipse Width="540"
+                     Height="540"
+                     Margin="0,0,-120,-80"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Bottom"
+                     Fill="{StaticResource FluentAccentLight2}"
+                     Opacity="0.045">
+                <Ellipse.Effect>
+                    <BlurEffect Radius="96"/>
+                </Ellipse.Effect>
+            </Ellipse>
+            <Border Width="520"
+                    Height="520"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="0,60,0,0"
+                    BorderBrush="{StaticResource FluentSurfaceStroke}"
+                    BorderThickness="1"
+                    CornerRadius="260"
+                    Opacity="0.2"/>
+        </Grid>
         <Border MaxWidth="{StaticResource LoginCardMaxWidth}"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"

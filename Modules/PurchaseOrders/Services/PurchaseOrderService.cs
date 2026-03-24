@@ -247,6 +247,67 @@ public class PurchaseOrderService(
             .ConfigureAwait(false);
     }
 
+    public async Task<PurchaseOrder> DuplicateAsync(int purchaseOrderId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("PurchaseOrderService.DuplicateAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var source = await context.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.Items)
+            .FirstOrDefaultAsync(po => po.Id == purchaseOrderId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"PO Id {purchaseOrderId} not found.");
+
+        var orderNumber = await GenerateOrderNumberAsync(context, ct);
+
+        var clone = new PurchaseOrder
+        {
+            OrderNumber = orderNumber,
+            SupplierId = source.SupplierId,
+            OrderDate = regional.Now,
+            ExpectedDate = null,
+            Status = PurchaseOrderStatus.Draft,
+            Notes = $"Duplicated from {source.OrderNumber}",
+            Items = source.Items.Select(i => new PurchaseOrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                UnitCost = i.UnitCost,
+                QuantityReceived = 0
+            }).ToList()
+        };
+
+        context.PurchaseOrders.Add(clone);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return clone;
+    }
+
+    public async Task<IReadOnlyList<LowStockPOSuggestion>> GetLowStockSuggestionsAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("PurchaseOrderService.GetLowStockSuggestionsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var products = await context.Products
+            .AsNoTracking()
+            .Include(p => p.Vendor)
+            .Where(p => p.IsActive && p.MinStockLevel > 0 && p.Quantity <= p.MinStockLevel && p.VendorId != null)
+            .OrderBy(p => p.Vendor!.Name)
+            .ThenBy(p => p.Name)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return products.Select(p => new LowStockPOSuggestion(
+            p.VendorId!.Value,
+            p.Vendor!.Name,
+            p.Id,
+            p.Name,
+            p.Quantity,
+            p.MinStockLevel,
+            Math.Max(p.MinStockLevel * 2 - p.Quantity, 1),
+            p.CostPrice)).ToList();
+    }
+
     private async Task<string> GenerateOrderNumberAsync(AppDbContext context, CancellationToken ct)
     {
         var today = regional.Now.Date;
@@ -262,5 +323,130 @@ public class PurchaseOrderService(
         if (last is not null && int.TryParse(last[prefix.Length..], out var seq))
             next = seq + 1;
         return $"{prefix}{next:D4}";
+    }
+
+    // ── PO import from CSV (#223) ────────────────────────────────────
+
+    public async Task<PurchaseOrder> ImportFromCsvAsync(int supplierId, IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        if (rows.Count == 0) throw new InvalidOperationException("CSV contains no rows.");
+
+        using var _ = perf.BeginScope("PurchaseOrderService.ImportFromCsvAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var products = await context.Products
+            .ToDictionaryAsync(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase, ct)
+            .ConfigureAwait(false);
+
+        var items = new List<PurchaseOrderItem>();
+        foreach (var row in rows)
+        {
+            var name = (row.GetValueOrDefault("ProductName") ?? row.GetValueOrDefault("Product") ?? "").Trim();
+            if (!products.TryGetValue(name, out var product)) continue;
+
+            int.TryParse(row.GetValueOrDefault("Quantity") ?? row.GetValueOrDefault("Qty") ?? "1", out var qty);
+            decimal.TryParse(row.GetValueOrDefault("UnitCost") ?? row.GetValueOrDefault("Cost") ?? "0", out var cost);
+            if (qty <= 0) qty = 1;
+            if (cost <= 0) cost = product.CostPrice;
+
+            items.Add(new PurchaseOrderItem
+            {
+                ProductId = product.Id,
+                Quantity = qty,
+                UnitCost = cost,
+                QuantityReceived = 0
+            });
+        }
+
+        if (items.Count == 0) throw new InvalidOperationException("No valid product rows found in CSV.");
+
+        var orderNumber = await GenerateOrderNumberAsync(context, ct);
+        var po = new PurchaseOrder
+        {
+            OrderNumber = orderNumber,
+            SupplierId = supplierId,
+            OrderDate = regional.Now,
+            Status = PurchaseOrderStatus.Draft,
+            Notes = "Imported from CSV",
+            Items = items
+        };
+
+        context.PurchaseOrders.Add(po);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        return po;
+    }
+
+    // ── PO export to CSV (#224) ──────────────────────────────────────
+
+    public async Task<IReadOnlyList<string>> ExportToCsvLinesAsync(DateTime? from, DateTime? to, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("PurchaseOrderService.ExportToCsvLinesAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var q = context.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.Supplier)
+            .Include(po => po.Items).ThenInclude(i => i.Product)
+            .AsQueryable();
+
+        if (from.HasValue) q = q.Where(po => po.OrderDate >= from.Value);
+        if (to.HasValue) q = q.Where(po => po.OrderDate <= to.Value.Date.AddDays(1));
+
+        var orders = await q.OrderByDescending(po => po.OrderDate)
+            .ToListAsync(ct).ConfigureAwait(false);
+
+        var lines = new List<string>
+        {
+            "OrderNumber,OrderDate,SupplierName,Status,ProductName,Quantity,UnitCost,LineTotal"
+        };
+
+        foreach (var po in orders)
+        {
+            foreach (var item in po.Items)
+            {
+                var lineTotal = item.Quantity * item.UnitCost;
+                lines.Add($"\"{po.OrderNumber}\",\"{po.OrderDate:yyyy-MM-dd}\",\"{po.Supplier?.Name}\",\"{po.Status}\",\"{item.Product?.Name}\",{item.Quantity},{item.UnitCost},{lineTotal}");
+            }
+        }
+
+        return lines;
+    }
+
+    // ── PO print data (#219/#451) ────────────────────────────────────
+
+    public async Task<PurchaseOrderPrintData?> GetPrintDataAsync(int purchaseOrderId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("PurchaseOrderService.GetPrintDataAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var po = await context.PurchaseOrders
+            .AsNoTracking()
+            .Include(p => p.Supplier)
+            .Include(p => p.Items).ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(p => p.Id == purchaseOrderId, ct)
+            .ConfigureAwait(false);
+
+        if (po is null) return null;
+
+        var printLines = po.Items.Select(i => new PurchaseOrderPrintLine(
+            i.Product?.Name ?? "Unknown",
+            i.Product?.HSNCode,
+            i.Quantity,
+            i.UnitCost,
+            i.Quantity * i.UnitCost)).ToList();
+
+        return new PurchaseOrderPrintData(
+            po.OrderNumber,
+            po.OrderDate,
+            po.ExpectedDate,
+            po.Supplier?.Name ?? "Unknown",
+            po.Supplier?.Phone,
+            po.Supplier?.GSTIN,
+            po.Supplier?.Address,
+            po.Notes,
+            po.Status.ToString(),
+            printLines,
+            printLines.Sum(l => l.LineTotal));
     }
 }

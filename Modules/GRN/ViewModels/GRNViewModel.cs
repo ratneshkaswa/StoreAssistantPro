@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
@@ -80,6 +81,17 @@ public partial class GRNViewModel(
     [ObservableProperty]
     public partial string GRNNotes { get; set; } = string.Empty;
 
+    // ── Direct GRN form (#364) ──
+
+    [ObservableProperty]
+    public partial ObservableCollection<Supplier> Suppliers { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Supplier? SelectedSupplier { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<GRNLineInput> DirectLineItems { get; set; } = [];
+
     // ── Load ──
 
     [RelayCommand]
@@ -93,6 +105,10 @@ public partial class GRNViewModel(
         PendingPOs = new ObservableCollection<PurchaseOrder>(
             posResult.Items.Concat(partialResult.Items).OrderByDescending(p => p.OrderDate));
 
+        var suppliers = await poService.GetActiveSuppliersAsync(ct);
+        Suppliers = new ObservableCollection<Supplier>(suppliers);
+
+        EnsureDirectSeedLine();
         await ReloadAsync(ct);
     });
 
@@ -190,4 +206,83 @@ public partial class GRNViewModel(
         SuccessMessage = $"GRN {SelectedGRN.GRNNumber} cancelled.";
         await ReloadAsync(ct);
     });
+
+    // ── Export (#373) ──
+
+    [RelayCommand]
+    private void ExportGrnCsv()
+    {
+        if (GRNs.Count == 0) return;
+        var rows = GRNs.Select(g => new
+        {
+            g.Id, g.GRNNumber, g.ReceivedDate,
+            Supplier = g.Supplier?.Name,
+            Status = g.Status.ToString(),
+            g.TotalAmount, g.Notes
+        });
+        if (CsvExporter.Export(rows, "GoodsReceivedNotes.csv"))
+            SuccessMessage = "GRN data exported.";
+    }
+
+    // ── Create direct GRN without PO (#364) ──
+
+    [RelayCommand]
+    private Task CreateDirectGRNAsync() => RunAsync(async ct =>
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        var enteredItems = DirectLineItems
+            .Where(line => line.ProductId > 0 || line.QtyExpected > 0)
+            .ToList();
+
+        if (!Validate(v => v
+            .Rule(SelectedSupplier is not null, "Select a supplier.")
+            .Rule(enteredItems.Count > 0, "Add at least one item.")))
+            return;
+
+        var invalidLine = enteredItems
+            .Select((line, index) => new { line, index })
+            .FirstOrDefault(x => x.line.ProductId <= 0 || x.line.QtyExpected <= 0 || x.line.UnitCost <= 0);
+
+        if (invalidLine is not null)
+        {
+            ErrorMessage = $"Complete line {invalidLine.index + 1} with product, quantity, and unit cost.";
+            return;
+        }
+
+        var dto = new CreateGRNDto(
+            SelectedSupplier!.Id,
+            string.IsNullOrWhiteSpace(GRNNotes) ? null : GRNNotes.Trim(),
+            enteredItems.Select(l => new GRNLineDto(l.ProductId, l.QtyExpected, l.UnitCost)).ToList());
+
+        var grn = await grnService.CreateDirectAsync(dto, ct);
+        SuccessMessage = $"GRN {grn.GRNNumber} created (direct receipt).";
+
+        SelectedSupplier = null;
+        GRNNotes = string.Empty;
+        DirectLineItems.Clear();
+        EnsureDirectSeedLine();
+
+        await ReloadAsync(ct);
+    });
+
+    [RelayCommand]
+    private void AddDirectLine()
+    {
+        DirectLineItems.Add(new GRNLineInput());
+    }
+
+    [RelayCommand]
+    private void RemoveDirectLine(GRNLineInput? line)
+    {
+        if (line is not null && DirectLineItems.Count > 1)
+            DirectLineItems.Remove(line);
+    }
+
+    private void EnsureDirectSeedLine()
+    {
+        if (DirectLineItems.Count == 0)
+            DirectLineItems.Add(new GRNLineInput());
+    }
 }

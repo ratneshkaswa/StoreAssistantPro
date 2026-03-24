@@ -181,6 +181,7 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox Grid.Row="2" Grid.Column="1"
                                          Text="{Binding CloseNotes, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource FluentMultilineTextBoxStyle}"
                                          AutomationProperties.Name="Close notes"
                                          MaxLength="500"
                                          h:Watermark.Text="e.g. ₹50 note damaged"/>

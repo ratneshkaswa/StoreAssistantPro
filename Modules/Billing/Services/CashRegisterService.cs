@@ -274,4 +274,110 @@ public class CashRegisterService(
             .AnyAsync(r => r.OpenedAt >= dayStart && r.OpenedAt < dayEnd && r.ClosedAt != null, ct)
             .ConfigureAwait(false);
     }
+
+    // ── Shift support (#250) ─────────────────────────────────────
+
+    public async Task<CashRegisterShift> OpenShiftAsync(
+        int registerId, decimal openingBalance, string cashierRole, CancellationToken ct = default)
+    {
+        using var scope = perf.BeginScope("CashRegisterService.OpenShiftAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var register = await context.CashRegisters
+            .FirstOrDefaultAsync(r => r.Id == registerId && r.ClosedAt == null, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException("No open register found.");
+
+        var existingOpen = await context.CashRegisterShifts
+            .AnyAsync(s => s.CashRegisterId == registerId && s.ClosedAt == null, ct)
+            .ConfigureAwait(false);
+        if (existingOpen)
+            throw new InvalidOperationException("A shift is already open. Close it before opening a new one.");
+
+        var shift = new CashRegisterShift
+        {
+            CashRegisterId = registerId,
+            CashierRole = cashierRole,
+            OpeningBalance = openingBalance,
+            OpenedAt = regional.Now
+        };
+
+        context.CashRegisterShifts.Add(shift);
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        _ = auditService.LogAsync("ShiftOpened", "CashRegisterShift", shift.Id.ToString(),
+            null, $"Opening={openingBalance}", cashierRole, null, ct);
+
+        return shift;
+    }
+
+    public async Task<CashRegisterShift> CloseShiftAsync(
+        int shiftId, decimal closingBalance, decimal? handoverAmount, string? notes, CancellationToken ct = default)
+    {
+        using var scope = perf.BeginScope("CashRegisterService.CloseShiftAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var shift = await context.CashRegisterShifts
+            .FirstOrDefaultAsync(s => s.Id == shiftId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Shift Id {shiftId} not found.");
+
+        if (shift.IsClosed)
+            throw new InvalidOperationException("This shift is already closed.");
+
+        shift.ClosingBalance = closingBalance;
+        shift.Discrepancy = closingBalance - shift.OpeningBalance;
+        shift.HandoverAmount = handoverAmount;
+        shift.Notes = notes?.Trim();
+        shift.ClosedAt = regional.Now;
+
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        _ = auditService.LogAsync("ShiftClosed", "CashRegisterShift", shiftId.ToString(),
+            $"Opening={shift.OpeningBalance}", $"Closing={closingBalance}", shift.CashierRole,
+            $"Handover={handoverAmount}", ct);
+
+        return shift;
+    }
+
+    public async Task<IReadOnlyList<CashRegisterShift>> GetShiftsAsync(int registerId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CashRegisterService.GetShiftsAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.CashRegisterShifts
+            .AsNoTracking()
+            .Where(s => s.CashRegisterId == registerId)
+            .OrderBy(s => s.OpenedAt)
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<CashRegisterShift?> GetOpenShiftAsync(int registerId, CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("CashRegisterService.GetOpenShiftAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.CashRegisterShifts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.CashRegisterId == registerId && s.ClosedAt == null, ct)
+            .ConfigureAwait(false);
+    }
+
+    // ── Cash register approval (#253) ────────────────────────────
+
+    public async Task ApproveCloseAsync(int registerId, string approverRole, CancellationToken ct = default)
+    {
+        using var perfScope = perf.BeginScope("CashRegisterService.ApproveCloseAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var register = await context.CashRegisters
+            .FirstOrDefaultAsync(r => r.Id == registerId, ct)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Register Id {registerId} not found.");
+
+        if (!register.IsClosed)
+            throw new InvalidOperationException("Register must be closed before it can be approved.");
+
+        await auditService.LogAsync("RegisterApproved", "CashRegister", registerId.ToString(),
+            null, $"Variance={register.Discrepancy}", approverRole, "Manager sign-off", ct).ConfigureAwait(false);
+    }
 }

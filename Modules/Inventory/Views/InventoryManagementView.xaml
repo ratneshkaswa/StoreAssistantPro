@@ -21,20 +21,60 @@
         <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inventory Management"/></TextBlock>
 
         <!-- Tab selector -->
-        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Button Content="Stock Adjust" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-            <Button Content="Adjustment Log" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-            <Button Content="Alerts" Tag="2" Command="{Binding SwitchTabCommand}" CommandParameter="2"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-            <Button Tag="3" Command="{Binding SwitchTabCommand}" CommandParameter="3"
-                    Style="{StaticResource SegmentedButtonStyle}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Stock Take"/>
-                </StackPanel>
-            </Button>
-        </WrapPanel>
+        <Border Grid.Row="1"
+                Margin="{StaticResource ItemSpacing}"
+                Style="{StaticResource SegmentedFilterHostStyle}"
+                HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Stock Adjust"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="0"
+                        Style="{StaticResource SegmentedFilterButtonStyle}"
+                        Margin="0,0,4,0">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="0"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+                <Button Content="Adjustment Log"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="1"
+                        Style="{StaticResource SegmentedFilterButtonStyle}"
+                        Margin="0,0,4,0">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="1"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+                <Button Content="Alerts"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="2"
+                        Style="{StaticResource SegmentedFilterButtonStyle}"
+                        Margin="0,0,4,0">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="2"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+                <Button Content="Stock Take"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="3"
+                        Style="{StaticResource SegmentedFilterButtonStyle}">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="3"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+            </StackPanel>
+        </Border>
 
         <!-- Tab 0: Stock Adjustment -->
         <Grid Grid.Row="2"
@@ -99,6 +139,7 @@
                 <TextBox Grid.Row="4" Grid.Column="1"
                          AutomationProperties.Name="Adjustment notes"
                          Text="{Binding AdjustmentNotes, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FluentMultilineTextBoxStyle}"
                          IsEnabled="{Binding HasSelectedProduct}"
                          MaxLength="300" h:Watermark.Text="e.g. Cycle count correction"/>
             </Grid>
@@ -286,6 +327,7 @@
                 <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
                     <TextBox Text="{Binding StockTakeNotes, UpdateSourceTrigger=PropertyChanged}"
                              AutomationProperties.Name="Stock take notes"
+                             Style="{StaticResource FluentMultilineTextBoxStyle}"
                              Width="{StaticResource FieldWidthWide}"
                              h:Watermark.Text="Optional notes for this count"
                              MaxLength="500"/>

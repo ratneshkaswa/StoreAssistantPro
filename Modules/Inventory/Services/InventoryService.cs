@@ -19,6 +19,19 @@ public class InventoryService(
         using var _ = perf.BeginScope("InventoryService.AdjustStockAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
+        // Stock freeze enforcement (#75)
+        var config = await context.AppConfigs.AsNoTracking().SingleOrDefaultAsync(ct).ConfigureAwait(false);
+        if (config?.IsStockFrozen == true)
+            throw new InvalidOperationException("Stock is frozen. Adjustments are not allowed during the audit period.");
+
+        // Stock adjustment approval threshold (#77)
+        if (config?.StockAdjustmentApprovalThreshold > 0)
+        {
+            var diff = Math.Abs(dto.NewQuantity - await GetCurrentQtyAsync(context, dto, ct).ConfigureAwait(false));
+            if (diff >= config.StockAdjustmentApprovalThreshold && !dto.IsApproved)
+                throw new InvalidOperationException($"Adjustments of {diff}+ units require manager approval.");
+        }
+
         int oldQty;
 
         if (dto.ProductVariantId.HasValue)
@@ -66,6 +79,11 @@ public class InventoryService(
 
         using var _ = perf.BeginScope("InventoryService.BatchAdjustStockAsync");
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        // Stock freeze enforcement (#75)
+        var config = await context.AppConfigs.AsNoTracking().SingleOrDefaultAsync(ct).ConfigureAwait(false);
+        if (config?.IsStockFrozen == true)
+            throw new InvalidOperationException("Stock is frozen. Adjustments are not allowed during the audit period.");
 
         var productIds = dtos.Select(d => d.ProductId).Distinct().ToList();
         var products = await context.Products
@@ -322,5 +340,28 @@ public class InventoryService(
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
         return count;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────
+
+    private static async Task<int> GetCurrentQtyAsync(AppDbContext context, StockAdjustmentDto dto, CancellationToken ct)
+    {
+        if (dto.ProductVariantId.HasValue)
+        {
+            var variant = await context.ProductVariants
+                .AsNoTracking()
+                .Where(v => v.Id == dto.ProductVariantId.Value)
+                .Select(v => v.Quantity)
+                .FirstOrDefaultAsync(ct)
+                .ConfigureAwait(false);
+            return variant;
+        }
+
+        return await context.Products
+            .AsNoTracking()
+            .Where(p => p.Id == dto.ProductId)
+            .Select(p => p.Quantity)
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
     }
 }

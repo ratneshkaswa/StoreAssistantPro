@@ -30,6 +30,25 @@ public interface ICashRegisterService
 
     /// <summary>Check if the business day is closed — no transactions allowed after close (#246).</summary>
     Task<bool> IsDayClosedAsync(DateTime date, CancellationToken ct = default);
+
+    // ── Shift support (#250) ──
+
+    /// <summary>Open a new shift within the current register.</summary>
+    Task<CashRegisterShift> OpenShiftAsync(int registerId, decimal openingBalance, string cashierRole, CancellationToken ct = default);
+
+    /// <summary>Close the current shift with handover amount.</summary>
+    Task<CashRegisterShift> CloseShiftAsync(int shiftId, decimal closingBalance, decimal? handoverAmount, string? notes, CancellationToken ct = default);
+
+    /// <summary>Get shifts for a register.</summary>
+    Task<IReadOnlyList<CashRegisterShift>> GetShiftsAsync(int registerId, CancellationToken ct = default);
+
+    /// <summary>Get the currently open shift.</summary>
+    Task<CashRegisterShift?> GetOpenShiftAsync(int registerId, CancellationToken ct = default);
+
+    // ── Cash register approval (#253) ──
+
+    /// <summary>Approve a day close (manager sign-off).</summary>
+    Task ApproveCloseAsync(int registerId, string approverRole, CancellationToken ct = default);
 }
 
 public record DayEndSummary(

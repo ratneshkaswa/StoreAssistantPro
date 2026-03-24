@@ -43,11 +43,36 @@
                                 CornerRadius="{StaticResource FluentCornerMedium}"
                                 UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Focusable="False"
-                                          HorizontalScrollBarVisibility="Hidden"
-                                          VerticalScrollBarVisibility="Hidden"
-                                          Padding="{TemplateBinding Padding}"/>
+                            <Grid UseLayoutRounding="True"
+                                  SnapsToDevicePixels="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="PrefixText"
+                                           Grid.Column="0"
+                                           Margin="12,0,8,0"
+                                           Visibility="Collapsed"
+                                           VerticalAlignment="Center"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent},
+                                                          Path=(h:TextBoxAdornment.PrefixText)}"/>
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Grid.Column="1"
+                                              Focusable="False"
+                                              HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                                              VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
+                                              Padding="{TemplateBinding Padding}"/>
+                                <TextBlock x:Name="SuffixText"
+                                           Grid.Column="2"
+                                           Margin="8,0,12,0"
+                                           Visibility="Collapsed"
+                                           VerticalAlignment="Center"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent},
+                                                          Path=(h:TextBoxAdornment.SuffixText)}"/>
+                            </Grid>
                         </Border>
                         <!-- Bottom accent line (Fluent 2 focus indicator) -->
                         <Border x:Name="FocusIndicator"
@@ -57,6 +82,12 @@
                                 Opacity="0" Margin="2,0,2,0"/>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="h:TextBoxAdornment.HasPrefixText" Value="True">
+                            <Setter TargetName="PrefixText" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="h:TextBoxAdornment.HasSuffixText" Value="True">
+                            <Setter TargetName="SuffixText" Property="Visibility" Value="Visible"/>
+                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Bd" Property="BorderThickness"
                                     Value="1"/>
@@ -134,7 +165,7 @@
                                         CornerRadius="{StaticResource FluentCornerLarge}"
                                         UseLayoutRounding="True"
                                         SnapsToDevicePixels="True"
-                                        Effect="{StaticResource FluentShadowMedium}">
+                                        Effect="{StaticResource ElevationEffectFlyout}">
                                     <Grid UseLayoutRounding="True"
                                           SnapsToDevicePixels="True">
                                         <Grid.ColumnDefinitions>
@@ -301,7 +332,7 @@
                                     BorderThickness="1"
                                     CornerRadius="{StaticResource FluentCornerLarge}"
                                     Margin="0,4,0,0" Padding="4"
-                                    Effect="{StaticResource FluentShadowMedium}">
+                                    Effect="{StaticResource ElevationEffectFlyout}">
                                 <ScrollViewer SnapsToDevicePixels="True"
                                               HorizontalScrollBarVisibility="Auto"
                                               VerticalScrollBarVisibility="Auto">
@@ -1164,7 +1195,7 @@
         <Setter Property="Padding"         Value="16"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Effect"          Value="{StaticResource FluentShadowSmall}"/>
+        <Setter Property="Effect"          Value="{StaticResource ElevationEffectCard}"/>
     </Style>
 
     <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â
@@ -1178,7 +1209,7 @@
         <Setter Property="Padding"         Value="20"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Effect"          Value="{StaticResource FluentShadowMedium}"/>
+        <Setter Property="Effect"          Value="{StaticResource ElevationEffectFlyout}"/>
     </Style>
 
     <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â
@@ -1226,14 +1257,40 @@
         </Setter>
     </Style>
 
+    <Style x:Key="AnchoredFlyoutPopupStyle" TargetType="Popup">
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="PopupAnimation" Value="None"/>
+        <Setter Property="h:PopupFlyoutMotion.IsEnabled" Value="True"/>
+    </Style>
+
+    <Style x:Key="FlyoutPopupSurfaceStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerLarge}"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Effect" Value="{StaticResource ElevationEffectFlyout}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <Style x:Key="FlyoutMenuSurfaceStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource FlyoutPopupSurfaceStyle}">
+        <Setter Property="Padding" Value="4"/>
+    </Style>
+
     <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Dropdown menu item (Win11 rounded hover with shortcut) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ -->
     <Style x:Key="FluentMenuItemStyle" TargetType="MenuItem">
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"   Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="h:AutomationNameFallback.UseToolTipFallback" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
@@ -1243,7 +1300,7 @@
                                 Background="Transparent"
                                 CornerRadius="{StaticResource FluentCornerSmall}"
                                 Padding="12,8"
-                                Margin="4,1"
+                                Margin="4,0"
                                 UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
                             <Grid UseLayoutRounding="True"
@@ -1267,19 +1324,12 @@
 
                         <!-- Nested submenu popup -->
                         <Popup x:Name="PART_Popup"
+                               Style="{StaticResource AnchoredFlyoutPopupStyle}"
                                IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                                Placement="Right"
-                               Focusable="False"
-                               AllowsTransparency="True"
-                               PopupAnimation="Fade"
                                >
-                            <Border Background="{StaticResource FluentSurface}"
-                                    BorderBrush="{StaticResource FluentSurfaceStroke}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource FluentCornerMedium}"
-                                    Padding="0,4"
+                            <Border Style="{StaticResource FlyoutMenuSurfaceStyle}"
                                     Margin="4,0,4,4"
-                                    Effect="{StaticResource FluentShadowMedium}"
                                     UseLayoutRounding="True"
                                     SnapsToDevicePixels="True">
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto"
@@ -1307,6 +1357,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter Property="Opacity" Value="0.4"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1328,9 +1379,11 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"   Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="ItemContainerStyle" Value="{StaticResource FluentMenuItemStyle}"/>
+        <Setter Property="h:AutomationNameFallback.UseToolTipFallback" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
@@ -1361,20 +1414,13 @@
 
                         <!-- Submenu popup (Win11 rounded flyout with shadow) -->
                         <Popup x:Name="PART_Popup"
+                               Style="{StaticResource AnchoredFlyoutPopupStyle}"
                                IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                                Placement="Bottom"
-                               Focusable="False"
-                               AllowsTransparency="True"
-                               PopupAnimation="Fade"
                                >
                             <Border x:Name="SubMenuBorder"
-                                    Background="{StaticResource FluentSurface}"
-                                    BorderBrush="{StaticResource FluentSurfaceStroke}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource FluentCornerMedium}"
-                                    Padding="0,4"
+                                    Style="{StaticResource FlyoutMenuSurfaceStyle}"
                                     Margin="4,2,4,4"
-                                    Effect="{StaticResource FluentShadowMedium}"
                                     UseLayoutRounding="True"
                                     SnapsToDevicePixels="True">
                                 <ScrollViewer Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type FrameworkElement}, ResourceId=MenuScrollViewer}}"
@@ -1412,6 +1458,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter Property="Opacity" Value="0.4"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1541,8 +1588,8 @@
                 <ControlTemplate TargetType="Thumb">
                     <Border x:Name="ThumbBd"
                             Background="#66888888"
-                            CornerRadius="3"
-                            Margin="1,0"
+                            CornerRadius="1"
+                            Margin="0"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True"/>
                     <ControlTemplate.Triggers>
@@ -1561,8 +1608,8 @@
     <!-- Vertical ScrollBar -->
     <Style x:Key="FluentVerticalScrollBar" TargetType="ScrollBar">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="Width" Value="6"/>
-        <Setter Property="MinWidth" Value="6"/>
+        <Setter Property="Width" Value="2"/>
+        <Setter Property="MinWidth" Value="2"/>
         <Setter Property="Margin" Value="0"/>
         <Setter Property="Opacity" Value="0"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
@@ -1581,7 +1628,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Width" Value="8"/>
+                            <Setter Property="Width" Value="6"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1592,8 +1639,8 @@
     <!-- Horizontal ScrollBar -->
     <Style x:Key="FluentHorizontalScrollBar" TargetType="ScrollBar">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="Height" Value="6"/>
-        <Setter Property="MinHeight" Value="6"/>
+        <Setter Property="Height" Value="2"/>
+        <Setter Property="MinHeight" Value="2"/>
         <Setter Property="Margin" Value="0"/>
         <Setter Property="Orientation" Value="Horizontal"/>
         <Setter Property="Opacity" Value="0"/>
@@ -1612,8 +1659,8 @@
                                         <ControlTemplate TargetType="Thumb">
                                             <Border x:Name="ThumbBd"
                                                     Background="#66888888"
-                                                    CornerRadius="3"
-                                                    Margin="0,1"
+                                                    CornerRadius="1"
+                                                    Margin="0"
                                                     UseLayoutRounding="True"
                                                     SnapsToDevicePixels="True"/>
                                             <ControlTemplate.Triggers>
@@ -1632,7 +1679,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Height" Value="8"/>
+                            <Setter Property="Height" Value="6"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1724,7 +1771,7 @@
                             CornerRadius="{StaticResource FluentCornerLarge}"
                             Padding="4"
                             Margin="4"
-                            Effect="{StaticResource FluentShadowMedium}"
+                            Effect="{StaticResource ElevationEffectFlyout}"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
                         <StackPanel IsItemsHost="True"
@@ -1742,9 +1789,11 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="h:AutomationNameFallback.UseToolTipFallback" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
@@ -1752,7 +1801,7 @@
                             Background="Transparent"
                             CornerRadius="{StaticResource FluentCornerSmall}"
                             Padding="12,8"
-                            Margin="4,1"
+                            Margin="4,0"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
                         <Grid UseLayoutRounding="True"
@@ -1781,6 +1830,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextDisabled}"/>
+                            <Setter Property="Opacity" Value="0.4"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -2169,7 +2219,7 @@
                             Padding="{TemplateBinding Padding}"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
-                            Effect="{StaticResource FluentShadowMedium}">
+                            Effect="{StaticResource ElevationEffectFlyout}">
                         <Grid x:Name="PART_Root"
                               ClipToBounds="True"
                               UseLayoutRounding="True"
@@ -2470,25 +2520,381 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:LoadingOverlay}">
-                    <Border x:Name="Root" Background="{StaticResource LoadingOverlayScrim}"
-                            Visibility="Collapsed"
-                            UseLayoutRounding="True"
-                            SnapsToDevicePixels="True">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <controls:ProgressRing IsActive="{TemplateBinding IsActive}"
-                                                   Diameter="32" StrokeThickness="3"
-                                                   HorizontalAlignment="Center"/>
-                            <TextBlock Text="{TemplateBinding Message}"
-                                       FontSize="{StaticResource FontSizeLabel}"
-                                       FontFamily="{StaticResource FluentFontFamily}"
-                                       Foreground="{StaticResource FluentTextSecondary}"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,12,0,0"/>
-                        </StackPanel>
-                    </Border>
+                    <Grid x:Name="Root"
+                          Visibility="Collapsed"
+                          UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
+                        <Border Background="{StaticResource LoadingOverlayScrim}"/>
+
+                        <Border HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Margin="24"
+                                MaxWidth="820"
+                                Padding="24"
+                                Background="{StaticResource FluentSurface}"
+                                BorderBrush="{StaticResource FluentSurfaceStroke}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource FluentCornerLarge}"
+                                Effect="{StaticResource ElevationEffectFlyout}">
+                            <Grid ClipToBounds="True">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel>
+                                    <Border Width="232"
+                                            Height="18"
+                                            HorizontalAlignment="Left"
+                                            Background="{StaticResource SkeletonPlaceholderBrush}"
+                                            CornerRadius="4"/>
+                                    <Border Width="168"
+                                            Height="12"
+                                            Margin="0,12,0,0"
+                                            HorizontalAlignment="Left"
+                                            Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                            CornerRadius="4"/>
+                                </StackPanel>
+
+                                <Grid Grid.Row="1" Margin="0,24,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Height="36"
+                                            Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                            CornerRadius="6"/>
+                                    <Border Grid.Column="2"
+                                            Width="136"
+                                            Height="36"
+                                            Background="{StaticResource SkeletonPlaceholderBrush}"
+                                            CornerRadius="18"/>
+                                </Grid>
+
+                                <Grid Grid.Row="2" Margin="0,24,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Padding="16"
+                                            Background="{StaticResource FluentBackgroundSecondary}"
+                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource FluentCornerMedium}">
+                                        <StackPanel>
+                                            <Border Width="96"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Width="72"
+                                                    Height="18"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Width="120"
+                                                    Height="10"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Grid.Column="2"
+                                            Padding="16"
+                                            Background="{StaticResource FluentBackgroundSecondary}"
+                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource FluentCornerMedium}">
+                                        <StackPanel>
+                                            <Border Width="88"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Width="84"
+                                                    Height="18"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Width="104"
+                                                    Height="10"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Grid.Column="4"
+                                            Padding="16"
+                                            Background="{StaticResource FluentBackgroundSecondary}"
+                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource FluentCornerMedium}">
+                                        <StackPanel>
+                                            <Border Width="78"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Width="68"
+                                                    Height="18"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Width="132"
+                                                    Height="10"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <Border Grid.Row="3"
+                                        Margin="0,24,0,0"
+                                        Padding="16"
+                                        Background="{StaticResource FluentBackgroundSecondary}"
+                                        BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource FluentCornerMedium}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="96"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="88"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Height="10"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="2"
+                                                    Height="10"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="4"
+                                                    Height="10"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="6"
+                                                    Height="10"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                        </Grid>
+
+                                        <Border Grid.Row="1"
+                                                Margin="0,16,0,16"
+                                                Height="1"
+                                                Background="{StaticResource DividerStrokeColorDefault}"/>
+
+                                        <Grid Grid.Row="2" Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="104"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="64"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="2"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="4"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="6"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="3" Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="88"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="72"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="2"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="4"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="6"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="4" Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="96"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="84"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="76"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="2"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="4"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="6"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
+                                                    CornerRadius="4"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="112"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="92"/>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="70"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="2"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="4"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                            <Border Grid.Column="6"
+                                                    Height="12"
+                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
+                                                    CornerRadius="4"/>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel Grid.Row="4"
+                                            Margin="0,20,0,0"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center">
+                                    <controls:ProgressRing IsActive="{TemplateBinding IsActive}"
+                                                           Diameter="18"
+                                                           StrokeThickness="2"
+                                                           HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{TemplateBinding Message}"
+                                               Margin="12,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontFamily="{StaticResource FluentFontFamily}"
+                                               FontSize="{StaticResource FontSizeCaption}"
+                                               Foreground="{StaticResource FluentTextSecondary}"/>
+                                </StackPanel>
+
+                                <Rectangle Grid.RowSpan="5"
+                                           Width="220"
+                                           HorizontalAlignment="Left"
+                                           IsHitTestVisible="False"
+                                           Opacity="0.6">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,0"
+                                                             EndPoint="1,0">
+                                            <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#A0FFFFFF" Offset="0.5"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                    <Rectangle.RenderTransform>
+                                        <TranslateTransform x:Name="SkeletonSheenTransform" X="-280"/>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                            </Grid>
+                        </Border>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsActive" Value="True">
                             <Setter TargetName="Root" Property="Visibility" Value="Visible"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="LoadingOverlaySheenStoryboard">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="SkeletonSheenTransform"
+                                                         Storyboard.TargetProperty="X"
+                                                         From="-280"
+                                                         To="860"
+                                                         Duration="0:0:1.6">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="LoadingOverlaySheenStoryboard"/>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -2528,15 +2934,44 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition x:Name="SpinCol" Width="0"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="PART_TextBox" Grid.Column="0"
-                                         Background="Transparent" BorderThickness="0"
-                                         Padding="{StaticResource ControlPadding}"
-                                         VerticalContentAlignment="Center"
-                                         FontFamily="{TemplateBinding FontFamily}"
-                                         FontSize="{TemplateBinding FontSize}"
-                                         Foreground="{TemplateBinding Foreground}"
-                                         CaretBrush="{StaticResource FluentAccentDefault}"
-                                         SelectionBrush="{StaticResource FluentTextSelectionBrush}"/>
+                                <Grid Grid.Column="0"
+                                      Margin="{StaticResource ControlPadding}"
+                                      VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="PrefixTextPresenter"
+                                               Grid.Column="0"
+                                               Visibility="Collapsed"
+                                               Margin="0,0,8,0"
+                                               VerticalAlignment="Center"
+                                               FontFamily="{TemplateBinding FontFamily}"
+                                               FontSize="{TemplateBinding FontSize}"
+                                               Foreground="{StaticResource FluentTextTertiary}"
+                                               Text="{TemplateBinding PrefixText}"/>
+                                    <TextBox x:Name="PART_TextBox"
+                                             Grid.Column="1"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Padding="0"
+                                             VerticalContentAlignment="Center"
+                                             FontFamily="{TemplateBinding FontFamily}"
+                                             FontSize="{TemplateBinding FontSize}"
+                                             Foreground="{TemplateBinding Foreground}"
+                                             CaretBrush="{StaticResource FluentAccentDefault}"
+                                             SelectionBrush="{StaticResource FluentTextSelectionBrush}"/>
+                                    <TextBlock x:Name="SuffixTextPresenter"
+                                               Grid.Column="2"
+                                               Visibility="Collapsed"
+                                               Margin="8,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontFamily="{TemplateBinding FontFamily}"
+                                               FontSize="{TemplateBinding FontSize}"
+                                               Foreground="{StaticResource FluentTextTertiary}"
+                                               Text="{TemplateBinding SuffixText}"/>
+                                </Grid>
                                 <StackPanel x:Name="SpinPanel" Grid.Column="1"
                                             Orientation="Vertical" VerticalAlignment="Center"
                                             Visibility="Collapsed" Margin="0,0,2,0">
@@ -2595,6 +3030,12 @@
                         <Trigger Property="SpinButtonPlacement" Value="Inline">
                             <Setter TargetName="SpinCol" Property="Width" Value="Auto"/>
                             <Setter TargetName="SpinPanel" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="HasPrefixText" Value="True">
+                            <Setter TargetName="PrefixTextPresenter" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="HasSuffixText" Value="True">
+                            <Setter TargetName="SuffixTextPresenter" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
@@ -2677,13 +3118,15 @@
                             </Button>
 
                             <!-- Content area -->
-                            <Border x:Name="ContentArea" Grid.Row="1"
+                            <Border x:Name="PART_ContentArea" Grid.Row="1"
                                     BorderBrush="{StaticResource FluentSurfaceStroke}"
                                     BorderThickness="0,1,0,0"
                                     Padding="16,12"
                                     Visibility="Collapsed"
+                                    Height="0"
                                     UseLayoutRounding="True"
                                     SnapsToDevicePixels="True"
+                                    ClipToBounds="True"
                                     Opacity="0">
                                 <ContentPresenter/>
                             </Border>
@@ -2694,7 +3137,6 @@
                             <Setter TargetName="IconGlyph" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
                         <Trigger Property="IsExpanded" Value="True">
-                            <Setter TargetName="ContentArea" Property="Visibility" Value="Visible"/>
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
@@ -2705,9 +3147,6 @@
                                                 <CubicEase EasingMode="EaseOut"/>
                                             </DoubleAnimation.EasingFunction>
                                         </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="ContentArea"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="1" Duration="0:0:0.2"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -2721,9 +3160,6 @@
                                                 <CubicEase EasingMode="EaseOut"/>
                                             </DoubleAnimation.EasingFunction>
                                         </DoubleAnimation>
-                                        <DoubleAnimation Storyboard.TargetName="ContentArea"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="0" Duration="0:0:0.15"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
@@ -2740,6 +3176,109 @@
          Horizontal list of clickable path segments separated by
          chevron glyphs. Last item is bold (current location).
          ÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚Â -->
+    <Style TargetType="{x:Type TreeView}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style TargetType="{x:Type TreeViewItem}">
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                    <Grid UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ToggleButton x:Name="Expander"
+                                      Grid.Row="0"
+                                      Grid.Column="0"
+                                      Width="16"
+                                      Height="16"
+                                      Margin="0,2,4,0"
+                                      Focusable="False"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <TextBlock x:Name="TreeChevronGlyph"
+                                       Text="&#xE70E;"
+                                       FontFamily="{StaticResource FluentIconFont}"
+                                       FontSize="{StaticResource FontSizeCaption}"
+                                       Foreground="{StaticResource FluentTextTertiary}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </ToggleButton>
+
+                        <Border x:Name="SelectionHost"
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Padding="{TemplateBinding Padding}"
+                                Background="Transparent"
+                                CornerRadius="{StaticResource FluentCornerMedium}">
+                            <ContentPresenter x:Name="PART_Header"
+                                              ContentSource="Header"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+
+                        <Rectangle x:Name="IndentGuide"
+                                   Grid.Row="1"
+                                   Grid.Column="0"
+                                   Width="1"
+                                   HorizontalAlignment="Center"
+                                   Fill="{StaticResource DividerStrokeColorDefault}"
+                                   IsHitTestVisible="False">
+                            <Rectangle.OpacityMask>
+                                <DrawingBrush TileMode="Tile"
+                                              Viewport="0,0,1,4"
+                                              ViewportUnits="Absolute"
+                                              Viewbox="0,0,1,2"
+                                              ViewboxUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <GeometryDrawing Brush="Black"
+                                                         Geometry="M 0,0 L 1,0 1,2 0,2 Z"/>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+
+                        <ItemsPresenter x:Name="ItemsHost"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Margin="12,4,0,0"
+                                        Visibility="Collapsed"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
+                            <Setter TargetName="IndentGuide" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="TreeChevronGlyph" Property="Text" Value="&#xE70D;"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="SelectionHost" Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type controls:BreadcrumbBar}">
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="UseLayoutRounding" Value="True"/>

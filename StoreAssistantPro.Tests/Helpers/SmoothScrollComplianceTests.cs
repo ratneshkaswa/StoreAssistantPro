@@ -63,6 +63,24 @@ public sealed class SmoothScrollComplianceTests
             + string.Join("\n", violations.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(path => path)));
     }
 
+    [Fact]
+    public void Shared_Hosts_Should_Enable_SmoothScroll()
+    {
+        var appXaml = File.ReadAllText(Path.Combine(
+            SolutionRoot,
+            "App.xaml"));
+        var baseDialogWindow = File.ReadAllText(Path.Combine(
+            SolutionRoot,
+            "Core",
+            "Base",
+            "BaseDialogWindow.cs"));
+
+        Assert.Contains("helpers:SmoothScroll.IsEnabled=\"True\"", appXaml, StringComparison.Ordinal);
+        Assert.Contains("PanningMode=\"VerticalOnly\"", appXaml, StringComparison.Ordinal);
+        Assert.Contains("CanContentScroll=\"False\"", appXaml, StringComparison.Ordinal);
+        Assert.Contains("SmoothScroll.SetIsEnabled(scrollViewer, true);", baseDialogWindow, StringComparison.Ordinal);
+    }
+
     private static string FindSolutionRoot()
     {
         var dir = AppContext.BaseDirectory;

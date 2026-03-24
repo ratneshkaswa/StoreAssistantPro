@@ -275,8 +275,8 @@
 | 204 | Multi-tax per product | P2 | 🔨 | Different tax rates for different states (inter-state vs intra-state). |
 | 205 | Tax report (monthly) | P1 | ✅ | Total tax collected per month: CGST + SGST + IGST breakdown. |
 | 206 | Tax report by HSN | P1 | ✅ | Tax grouped by HSN code for GST return filing. |
-| 207 | GSTR-1 data export | P2 | 🔨 | Export sales data in GSTR-1 format for monthly GST return. |
-| 208 | GSTR-3B summary | P2 | 🔨 | Generate summary matching GSTR-3B format for monthly GST payment. |
+| 207 | GSTR-1 data export | P2 | ✅ | Export sales data in GSTR-1 format for monthly GST return. |
+| 208 | GSTR-3B summary | P2 | ✅ | Generate summary matching GSTR-3B format for monthly GST payment. |
 
 ### Sprint 12: Purchase Orders — PurchaseOrdersView (16 features)
 
@@ -332,9 +332,9 @@
 | 246 | Day close / lockdown | P1 | ✅ | Close the business day. No more transactions for that date after close. |
 | 247 | Day-wise cash history | P1 | ✅ | View past day summaries: opening, closing, variance per day. |
 | 248 | Payment method breakdown | P1 | ✅ | Day end shows: Cash ₹X, UPI ₹Y, Card ₹Z, Credit ₹W. |
-| 249 | Denomination entry | P2 | 🔨 | Count by denomination: ₹2000×__, ₹500×__, ₹200×__, ₹100×__, ₹50×__, coins. Auto-sum. |
+| 249 | Denomination entry | P2 | ✅ | Count by denomination: ₹2000×__, ₹500×__, ₹200×__, ₹100×__, ₹50×__, coins. Auto-sum. |
 | 250 | Shift support | P2 | 🔨 | Multiple shifts per day. Each cashier has own open/close with handover amount. |
-| 251 | Cash register export | P2 | 🔨 | Export day summary to CSV/PDF. |
+| 251 | Cash register export | P2 | ✅ | Export day summary to CSV/PDF. |
 | 252 | Cash variance alert | P1 | ✅ | Warning notification if variance exceeds configurable threshold (e.g., ₹100). |
 | 253 | Cash register approval | P2 | 🔨 | Manager must sign off on day close. Verify variance is acceptable. |
 | 254 | Cash register audit log | P1 | ✅ | Immutable log of every cash movement: type, amount, reason, user, timestamp. |
@@ -391,7 +391,7 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 289 | Permission matrix | P1 | 🔨 | Configurable grid: Role × Feature = Allow/Deny. Fine-grained access control. |
+| 289 | Permission matrix | P1 | ✅ | Configurable grid: Role × Feature = Allow/Deny. Fine-grained access control. |
 | 290 | Master PIN for destructive ops | P0 | ✅ | 6-digit master PIN required for: delete product, delete user, factory reset. |
 | 291 | Audit log model | P1 | ✅ | Entity: Id, Action, EntityType, EntityId, OldValue, NewValue, UserId, Timestamp. |
 | 292 | Audit: product changes | P1 | ✅ | Log every product create/update/delete with before/after values. |
@@ -402,7 +402,7 @@
 | 297 | Audit: login/logout | P1 | ✅ | Track user sessions: login time, logout time, duration. |
 | 298 | Audit: settings changed | P1 | ✅ | Log when firm details, tax rates, or system settings are modified. |
 | 299 | Audit log viewer | P1 | ✅ | Searchable, paged DataGrid with filters by action type, user, date range. |
-| 300 | Audit log export | P2 | 🔨 | Export filtered audit log to CSV. |
+| 300 | Audit log export | P2 | ✅ | Export filtered audit log to CSV. |
 | 301 | Failed login tracking | P1 | ✅ | Count consecutive failed PIN attempts per user. |
 | 302 | Account lockout | P2 | ✅ | Lock user after N consecutive failed attempts. Require admin unlock. |
 | 303 | Session timeout | P2 | ✅ | Auto-logout after configurable inactivity period (e.g., 15 minutes). |
@@ -418,12 +418,12 @@
 | 308 | Firm GSTIN | P0 | ✅ | GST Identification Number. Printed on all tax invoices. |
 | 309 | Firm PAN | P1 | ✅ | Permanent Account Number for income tax compliance. |
 | 310 | Firm email | P1 | ✅ | Contact email for customer communication. |
-| 311 | Firm logo | P1 | 🔨 | Image file used on receipts, invoices, and A4 letterhead. |
-| 312 | Firm bank details | P2 | 🔨 | Bank name, account number, IFSC code for payment receipts. |
+| 311 | Firm logo | P1 | ✅ | Image file used on receipts, invoices, and A4 letterhead. |
+| 312 | Firm bank details | P2 | ✅ | Bank name, account number, IFSC code for payment receipts. |
 | 313 | Invoice prefix config | P1 | ✅ | Custom prefix for invoice numbers (e.g., "SA-", "INV-2025-"). |
-| 314 | Invoice numbering reset | P2 | 🔨 | Reset sequence counter annually (April 1) or monthly. |
+| 314 | Invoice numbering reset | P2 | ✅ | Reset sequence counter annually (April 1) or monthly. |
 | 315 | Receipt footer text | P1 | ✅ | Configurable text printed at bottom of every receipt. |
-| 316 | Receipt header text | P2 | 🔨 | Additional text above store name on receipt. |
+| 316 | Receipt header text | P2 | ✅ | Additional text above store name on receipt. |
 | 317 | Currency symbol | P1 | ✅ | Default ₹ (Indian Rupee). Configurable for other currencies. |
 | 318 | Financial year start | P1 | ✅ | April 1 default (Indian FY). Affects report period boundaries. |
 | 319 | Decimal places | P2 | 🔨 | Round to 0 or 2 decimal places in billing/display. |
@@ -438,7 +438,7 @@
 | 323 | Backup location config | P0 | ✅ | FolderBrowserDialog to choose backup destination folder. |
 | 324 | Backup history list | P1 | ✅ | DataGrid showing past backups: date, size, location, status. |
 | 325 | Restore from backup | P0 | ✅ | Select backup file → confirm → replace current DB. Requires master PIN. |
-| 326 | Backup to USB | P1 | 🔨 | Detect USB drives, one-click backup to removable media. |
+| 326 | Backup to USB | P1 | ✅ | Detect USB drives, one-click backup to removable media. |
 | 327 | Scheduled backup | P2 | 🔨 | Background timer creates backup every N hours automatically. |
 | 328 | Backup encryption | P2 | 🔨 | Password-protect backup files using AES encryption. |
 | 329 | Cloud backup | P2 | 🔨 | Upload backup to OneDrive/Google Drive via API. |
@@ -512,18 +512,18 @@
 
 | # | Feature | P | Status | Description |
 |---|---------|---|--------|-------------|
-| 376 | Barcode label printing | P1 | 🔨 | Generate and print barcode labels for products. |
-| 377 | Barcode label template | P1 | 🔨 | Configurable layout: barcode position, text fields, label dimensions. |
-| 378 | Label: product name | P1 | 🔨 | Print product name below/above barcode on label. |
-| 379 | Label: sale price | P1 | 🔨 | Print sale price on barcode label. |
-| 380 | Label: MRP | P1 | 🔨 | Print MRP on label (Indian legal requirement for packaged goods). |
+| 376 | Barcode label printing | P1 | ✅ | Generate and print barcode labels for products. |
+| 377 | Barcode label template | P1 | ✅ | Configurable layout: barcode position, text fields, label dimensions. |
+| 378 | Label: product name | P1 | ✅ | Print product name below/above barcode on label. |
+| 379 | Label: sale price | P1 | ✅ | Print sale price on barcode label. |
+| 380 | Label: MRP | P1 | ✅ | Print MRP on label (Indian legal requirement for packaged goods). |
 | 381 | Label: size/color | P2 | 🔨 | Print variant info (Size: L, Color: Black) on label. |
-| 382 | Batch barcode printing | P1 | 🔨 | Select multiple products → print N labels each on label sheet. |
+| 382 | Batch barcode printing | P1 | ✅ | Select multiple products → print N labels each on label sheet. |
 | 383 | Barcode scanner input handling | P0 | ✅ | Detect barcode scanner input (fast keystroke sequence) vs manual typing. |
 | 384 | Barcode auto-generate | P2 | 🔨 | Auto-generate EAN-13 barcode if product has none assigned. |
 | 385 | Barcode format selection | P2 | 🔨 | Choose barcode symbology: EAN-13, Code128, Code39, QR. |
 | 386 | Barcode label paper size | P2 | 🔨 | Configure for label sheet: 65-up A4, continuous roll, custom dimensions. |
-| 387 | Barcode product lookup | P1 | 🔨 | Scan barcode → show product details popup (not billing, just info). |
+| 387 | Barcode product lookup | P1 | ✅ | Scan barcode → show product details popup (not billing, just info). |
 
 ### Sprint 24: Dashboard & Analytics — DashboardView enrichment (23 features)
 
@@ -539,10 +539,10 @@
 | 395 | Low stock alerts count | P0 | ✅ | Badge showing count of products below min stock level. |
 | 396 | Out of stock count | P0 | ✅ | Badge showing count of products with zero stock. |
 | 397 | Pending payments count | P1 | ✅ | Count of customers with outstanding credit balances. |
-| 398 | Monthly sales trend | P1 | 🔨 | Bar/line chart showing daily sales for last 30 days. |
+| 398 | Monthly sales trend | P1 | ✅ | Bar/line chart showing daily sales for last 30 days. |
 | 399 | Monthly expense trend | P2 | 🔨 | Bar chart showing daily expenses for last 30 days. |
 | 400 | Category sales pie chart | P2 | 🔨 | Pie chart breaking down revenue by product category. |
-| 401 | Payment method pie chart | P1 | 🔨 | Pie chart: Cash % / UPI % / Card % / Credit %. |
+| 401 | Payment method pie chart | P1 | ✅ | Pie chart: Cash % / UPI % / Card % / Credit %. |
 | 402 | Year-over-year comparison | P2 | 🔨 | Compare this month vs same month last year. |
 | 403 | Sales target vs actual | P2 | 🔨 | Set monthly target. Dashboard shows progress bar. |
 | 404 | Quick action tiles | P0 | ✅ | Clickable tiles: New Sale, Add Product, View Reports, Day End. |
@@ -605,17 +605,17 @@
 | 442 | A4 tax invoice | P1 | ✅ | Full-page GST tax invoice. Company letterhead, HSN summary, terms. |
 | 443 | A5 half-page invoice | P2 | ✅ | Compact invoice format for smaller transactions. |
 | 444 | Delivery challan | P2 | ✅ | Goods dispatch document for deliveries (no price, only items + qty). |
-| 445 | Barcode label sheet | P1 | 🔨 | Multiple barcode labels per A4 sheet (e.g., Avery 65-up). |
+| 445 | Barcode label sheet | P1 | ✅ | Multiple barcode labels per A4 sheet (e.g., Avery 65-up). |
 | 446 | Price tag printing | P2 | 🔨 | Product name + sale price + MRP tags for shelf display. |
-| 447 | Daily sales report print | P1 | 🔨 | Printable formatted daily sales summary. |
-| 448 | Monthly sales report print | P1 | 🔨 | Printable formatted monthly aggregate. |
-| 449 | Stock report print | P1 | 🔨 | Current inventory snapshot in printable format. |
+| 447 | Daily sales report print | P1 | ✅ | Printable formatted daily sales summary. |
+| 448 | Monthly sales report print | P1 | ✅ | Printable formatted monthly aggregate. |
+| 449 | Stock report print | P1 | ✅ | Current inventory snapshot in printable format. |
 | 450 | Customer statement print | P2 | 🔨 | Outstanding balance statement for a customer. |
 | 451 | Purchase order print | P2 | 🔨 | Formatted PO document to send to supplier. |
 | 452 | Quotation print | P2 | 🔨 | Formatted estimate/quotation for customer. |
 | 453 | Credit note print | P2 | 🔨 | Return credit note document. |
-| 454 | Print preview for all | P1 | 🔨 | On-screen preview before every print operation. |
-| 455 | Print settings | P1 | 🔨 | Configure default printer, paper size, margins. |
+| 454 | Print preview for all | P1 | ✅ | On-screen preview before every print operation. |
+| 455 | Print settings | P1 | ✅ | Configure default printer, paper size, margins. |
 
 ### Sprint 28: System Settings & Config (15 features)
 

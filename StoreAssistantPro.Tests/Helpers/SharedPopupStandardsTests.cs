@@ -26,6 +26,24 @@ public sealed class SharedPopupStandardsTests
     }
 
     [Fact]
+    public void FlyoutPopups_Should_Use_Shared_Anchored_Motion_And_Chrome()
+    {
+        var fluentTheme = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
+        var popupMotion = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "PopupFlyoutMotion.cs"));
+
+        Assert.Contains("AnchoredFlyoutPopupStyle", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("FlyoutPopupSurfaceStyle", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("FlyoutMenuSurfaceStyle", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("h:PopupFlyoutMotion.IsEnabled", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("ResolveOriginOffset", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("PlacementMode.Bottom => (0, -offset)", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("PlacementMode.Right => (-offset, 0)", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("TranslateTransform", popupMotion, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TooltipTemplates_Should_Wrap_Long_Unbroken_Text()
     {
         var fluentTheme = File.ReadAllText(
@@ -41,6 +59,22 @@ public sealed class SharedPopupStandardsTests
         Assert.DoesNotContain("TextBlock.TextWrapping=", fluentTheme, StringComparison.Ordinal);
         Assert.DoesNotContain("TextBlock.TextWrapping=", globalStyles, StringComparison.Ordinal);
         Assert.Contains("TextWrapping = TextWrapping.WrapWithOverflow", smartTooltip, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HelpHintTooltips_Should_Use_Pointed_TeachingTip_Surface()
+    {
+        var globalStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+        var smartTooltip = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "SmartTooltip.cs"));
+        var helpHint = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "HelpHint.cs"));
+
+        Assert.Contains("TeachingTipTooltipStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Polygon Points=\"9,0 18,10 0,10\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("UseCalloutStyle", smartTooltip, StringComparison.Ordinal);
+        Assert.Contains("SetUseCalloutStyle(fe, helpText is not null);", helpHint, StringComparison.Ordinal);
     }
 
     [Fact]

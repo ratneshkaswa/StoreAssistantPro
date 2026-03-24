@@ -18,6 +18,9 @@ public interface IVendorLedgerService
 
     /// <summary>Get ledger entries (purchases + payments) for a vendor in chronological order.</summary>
     Task<IReadOnlyList<VendorLedgerEntry>> GetLedgerEntriesAsync(int vendorId, CancellationToken ct = default);
+
+    /// <summary>Get vendors with outstanding balances overdue beyond their payment terms (#91).</summary>
+    Task<IReadOnlyList<SupplierDueAlert>> GetOverdueAlertsAsync(CancellationToken ct = default);
 }
 
 public record VendorPaymentDto(
@@ -43,3 +46,10 @@ public record VendorLedgerEntry(
     decimal Credit,
     decimal Balance,
     string? Reference);
+
+public record SupplierDueAlert(
+    int VendorId,
+    string VendorName,
+    decimal OutstandingAmount,
+    string PaymentTerms,
+    int OverdueDays);

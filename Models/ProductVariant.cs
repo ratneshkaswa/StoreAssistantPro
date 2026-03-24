@@ -36,6 +36,10 @@ public class ProductVariant
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>Optional image file path for this colour variant (#64).</summary>
+    [MaxLength(500)]
+    public string? ImagePath { get; set; }
+
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     [Timestamp]

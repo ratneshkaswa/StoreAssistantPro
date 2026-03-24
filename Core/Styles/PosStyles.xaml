@@ -3,6 +3,7 @@
                     xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers">
 
     <h:EqualityConverter x:Key="EqualityConverter"/>
+    <h:DoubleLessThanConverter x:Key="DoubleLessThanConverter"/>
 
     <!-- ===============================================================
          PIN DOT STYLE
@@ -315,6 +316,15 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4"/>
                         </Trigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window},
+                                                       Path=ActualWidth,
+                                                       Converter={StaticResource DoubleLessThanConverter},
+                                                       ConverterParameter=1400}"
+                                     Value="True">
+                            <Setter Property="MinWidth" Value="44"/>
+                            <Setter Property="Padding" Value="10,8"/>
+                            <Setter TargetName="TitleText" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

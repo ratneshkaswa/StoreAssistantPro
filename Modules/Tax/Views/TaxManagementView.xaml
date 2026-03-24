@@ -21,14 +21,48 @@
         <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8C7;"/><Run Text=" Tax Management"/></TextBlock>
 
         <!-- Tab selector buttons -->
-        <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Button Content="Tax Rates" Tag="0" Command="{Binding SwitchTabCommand}" CommandParameter="0"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-            <Button Content="Tax Groups" Tag="1" Command="{Binding SwitchTabCommand}" CommandParameter="1"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-            <Button Content="HSN Codes" Tag="2" Command="{Binding SwitchTabCommand}" CommandParameter="2"
-                    Style="{StaticResource SegmentedButtonStyle}"/>
-        </WrapPanel>
+        <Border Grid.Row="1"
+                Margin="{StaticResource ItemSpacing}"
+                Style="{StaticResource SegmentedFilterHostStyle}"
+                HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Tax Rates"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="0"
+                        Style="{StaticResource SegmentedFilterButtonStyle}"
+                        Margin="0,0,4,0">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="0"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+                <Button Content="Tax Groups"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="1"
+                        Style="{StaticResource SegmentedFilterButtonStyle}"
+                        Margin="0,0,4,0">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="1"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+                <Button Content="HSN Codes"
+                        Command="{Binding SwitchTabCommand}"
+                        CommandParameter="2"
+                        Style="{StaticResource SegmentedFilterButtonStyle}">
+                    <Button.Tag>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="ActiveTab"/>
+                            <Binding Source="2"/>
+                        </MultiBinding>
+                    </Button.Tag>
+                </Button>
+            </StackPanel>
+        </Border>
 
         <!-- Tab 0: Tax Rates -->
         <Grid Grid.Row="2"

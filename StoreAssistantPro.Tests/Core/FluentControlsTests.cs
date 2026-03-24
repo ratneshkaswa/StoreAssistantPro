@@ -1,6 +1,7 @@
 using StoreAssistantPro.Core.Controls;
 using System.Windows;
 using System.Windows.Controls;
+using System.Threading;
 
 namespace StoreAssistantPro.Tests.Core;
 
@@ -11,6 +12,23 @@ namespace StoreAssistantPro.Tests.Core;
 /// </summary>
 public class FluentControlsTests
 {
+    private static void RunOnSta(Action action)
+    {
+        Exception? caught = null;
+        var thread = new Thread(() =>
+        {
+            try { action(); }
+            catch (Exception ex) { caught = ex; }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (caught is not null)
+            throw new AggregateException(caught);
+    }
+
     [Theory]
     [InlineData(typeof(InfoBar))]
     [InlineData(typeof(ProgressRing))]
@@ -58,6 +76,10 @@ public class FluentControlsTests
         Assert.NotNull(NumberBox.SmallChangeProperty);
         Assert.NotNull(NumberBox.DecimalPlacesProperty);
         Assert.NotNull(NumberBox.SpinButtonPlacementProperty);
+        Assert.NotNull(NumberBox.PrefixTextProperty);
+        Assert.NotNull(NumberBox.SuffixTextProperty);
+        Assert.NotNull(NumberBox.HasPrefixTextProperty);
+        Assert.NotNull(NumberBox.HasSuffixTextProperty);
     }
 
     [Fact]
@@ -98,6 +120,30 @@ public class FluentControlsTests
         // Verify coercion metadata exists (the actual coercion runs in WPF runtime)
         var metadata = NumberBox.ValueProperty.GetMetadata(typeof(NumberBox));
         Assert.NotNull(metadata);
+    }
+
+    [Fact]
+    public void NumberBox_AdornmentFlags_TrackPrefixAndSuffixText()
+    {
+        RunOnSta(() =>
+        {
+            var numberBox = new NumberBox();
+
+            Assert.False(numberBox.HasPrefixText);
+            Assert.False(numberBox.HasSuffixText);
+
+            numberBox.PrefixText = "Rs";
+            numberBox.SuffixText = "mm";
+
+            Assert.True(numberBox.HasPrefixText);
+            Assert.True(numberBox.HasSuffixText);
+
+            numberBox.PrefixText = " ";
+            numberBox.SuffixText = string.Empty;
+
+            Assert.False(numberBox.HasPrefixText);
+            Assert.False(numberBox.HasSuffixText);
+        });
     }
 
     [Theory]

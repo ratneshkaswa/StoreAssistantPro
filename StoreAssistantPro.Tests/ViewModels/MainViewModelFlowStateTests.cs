@@ -18,6 +18,7 @@ namespace StoreAssistantPro.Tests.ViewModels;
 public class MainViewModelFlowStateTests
 {
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
+    private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
     private readonly IDashboardService _dashboardService = Substitute.For<IDashboardService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
@@ -26,10 +27,13 @@ public class MainViewModelFlowStateTests
 
     public MainViewModelFlowStateTests()
     {
+        _appState.FirmName.Returns("Contoso Fabrics");
         _appState.Notifications.Returns(new ObservableCollection<AppNotification>());
         _appState.CurrentMode.Returns(OperationalMode.Management);
         _appState.CurrentUserType.Returns(UserType.Admin);
         _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
+        _commandBus.SendAsync(Arg.Any<ICommandRequest<Unit>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(CommandResult.Success()));
     }
 
     private MainViewModel CreateSut()
@@ -41,7 +45,7 @@ public class MainViewModelFlowStateTests
             _dialogService,
             _appState,
             Substitute.For<IWorkflowManager>(),
-            Substitute.For<ICommandBus>(),
+            _commandBus,
             _eventBus,
             _features,
             _statusBar,
@@ -69,6 +73,21 @@ public class MainViewModelFlowStateTests
         sut.OpenVendorManagementCommand.Execute(null);
 
         _statusBar.Received(1).SetPersistent("Vendor management");
+        Assert.Equal(
+            "Vendor management — Contoso Fabrics — Store Assistant Pro",
+            sut.WindowTitle);
+    }
+
+    [Fact]
+    public void NavigateToMainWorkspace_UpdatesWindowTitleToHome()
+    {
+        var sut = CreateSut();
+
+        sut.NavigateToMainWorkspaceCommand.Execute(null);
+
+        Assert.Equal(
+            "Home — Contoso Fabrics — Store Assistant Pro",
+            sut.WindowTitle);
     }
 
     [Fact]
@@ -86,11 +105,27 @@ public class MainViewModelFlowStateTests
 
     private sealed class StubNavigationService : ObservableObject, INavigationService
     {
-        public ObservableObject CurrentView { get; } = new StubView();
-        public string CurrentPageKey { get; } = string.Empty;
+        private ObservableObject _currentView = new StubView();
+        private string? _currentPageKey;
+
+        public ObservableObject CurrentView
+        {
+            get => _currentView;
+            private set => SetProperty(ref _currentView, value);
+        }
+
+        public string? CurrentPageKey
+        {
+            get => _currentPageKey;
+            private set => SetProperty(ref _currentPageKey, value);
+        }
 
         public void NavigateTo<TViewModel>() where TViewModel : ObservableObject { }
-        public void NavigateTo(string pageKey) { }
+        public void NavigateTo(string pageKey)
+        {
+            CurrentPageKey = pageKey;
+            CurrentView = new StubView();
+        }
         public void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject { }
         public void MapFeature(string pageKey, string featureFlag) { }
     }

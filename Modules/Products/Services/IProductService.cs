@@ -40,12 +40,39 @@ public interface IProductService
     Task<IReadOnlyList<ProductVariantType>> GetVariantTypesAsync(CancellationToken ct = default);
     Task CreateVariantTypeAsync(string name, CancellationToken ct = default);
 
+    // ── Variant export (#63) ──
+    Task<IReadOnlyList<ProductVariant>> GetAllVariantsAsync(CancellationToken ct = default);
+
     // ── Bulk operations ──
     Task<int> BulkAssignCategoryAsync(IReadOnlyList<int> productIds, int categoryId, CancellationToken ct = default);
     Task<int> BulkAssignBrandAsync(IReadOnlyList<int> productIds, int brandId, CancellationToken ct = default);
 
+    // ── Barcode lookup (#387) ──
+    Task<Product?> LookupByBarcodeAsync(string barcode, CancellationToken ct = default);
+
     // ── Default category ──
     Task<int> GetOrCreateDefaultCategoryIdAsync(CancellationToken ct = default);
+
+    // ── Size group templates (#57) ──
+    Task<IReadOnlyList<SizeGroupTemplate>> GetSizeGroupTemplatesAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<string>> GetSizesByGroupAsync(string groupName, CancellationToken ct = default);
+
+    // ── Variant import (#62) ──
+    Task<int> ImportVariantsAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default);
+
+    // ── Multiple suppliers per product (#92) ──
+    Task<IReadOnlyList<ProductSupplier>> GetProductSuppliersAsync(int productId, CancellationToken ct = default);
+    Task AddProductSupplierAsync(ProductSupplierDto dto, CancellationToken ct = default);
+    Task RemoveProductSupplierAsync(int productSupplierId, CancellationToken ct = default);
+
+    /// <summary>Get best (lowest cost) supplier for a product (#93).</summary>
+    Task<ProductSupplier?> GetBestSupplierAsync(int productId, CancellationToken ct = default);
+
+    // ── Category hierarchy (#31) ──
+    Task<IReadOnlyList<CategoryTreeNode>> GetCategoryTreeAsync(CancellationToken ct = default);
+
+    // ── Supplier product count (#95) ──
+    Task<IReadOnlyList<SupplierProductCount>> GetSupplierProductCountsAsync(CancellationToken ct = default);
 }
 
 public record ProductDto(
@@ -64,3 +91,34 @@ public record ProductDto(
     decimal CostPrice = 0,
     string? Barcode = null,
     bool IsTaxInclusive = false);
+
+/// <summary>Predefined size group template (#57).</summary>
+public record SizeGroupTemplate(string GroupName, IReadOnlyList<string> Sizes);
+
+/// <summary>DTO for adding a product-supplier link (#92).</summary>
+public record ProductSupplierDto(
+    int ProductId,
+    int SupplierId,
+    decimal UnitCost,
+    string? SupplierSKU = null,
+    bool IsPrimary = false,
+    int LeadTimeDays = 0,
+    int MinOrderQty = 1);
+
+/// <summary>Category tree node for hierarchy display (#31).</summary>
+public record CategoryTreeNode(
+    int CategoryTypeId,
+    string CategoryTypeName,
+    IReadOnlyList<CategoryChild> Children);
+
+public record CategoryChild(
+    int CategoryId,
+    string CategoryName,
+    bool IsActive,
+    int ProductCount);
+
+/// <summary>Supplier with product count (#95).</summary>
+public record SupplierProductCount(
+    int VendorId,
+    string VendorName,
+    int ProductCount);

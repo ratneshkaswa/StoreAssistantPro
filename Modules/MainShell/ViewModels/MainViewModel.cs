@@ -21,6 +21,9 @@ namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
 public partial class MainViewModel : BaseViewModel
 {
+    private const int MaxRecentCommandPaletteItems = 5;
+    private const double QuickActionSlotWidth = 86;
+    private const double QuickActionOverflowButtonWidth = 52;
     private readonly INavigationService _navigationService;
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
@@ -33,6 +36,7 @@ public partial class MainViewModel : BaseViewModel
     private readonly IShortcutService _shortcutService;
     private readonly INotificationService _notificationService;
     private readonly IRegionalSettingsService _regionalSettings;
+    private readonly List<string> _recentCommandPaletteItemIds = [];
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -67,6 +71,8 @@ public partial class MainViewModel : BaseViewModel
     private const string BackupRestorePage = "BackupRestore";
     private const string QuotationsPage = "Quotations";
     private const string GRNPage = "GRN";
+    private const string BarcodeLabelsPage = "BarcodeLabels";
+    private const string CommandPaletteHelpKey = "CommandPalette";
 
     // ── Application state (single source of truth) ──
 
@@ -74,7 +80,24 @@ public partial class MainViewModel : BaseViewModel
 
     // ── Derived display properties ──
 
-    public string WindowTitle => $"{AppState.FirmName} — Store Assistant Pro";
+    public string WindowTitle
+    {
+        get
+        {
+            const string appName = "Store Assistant Pro";
+            var pageTitle = GetPageDisplayName(_currentPage);
+            var firmName = AppState.FirmName;
+
+            if (string.IsNullOrWhiteSpace(firmName))
+                return string.IsNullOrWhiteSpace(pageTitle)
+                    ? appName
+                    : $"{pageTitle} — {appName}";
+
+            return string.IsNullOrWhiteSpace(pageTitle)
+                ? $"{firmName} — {appName}"
+                : $"{pageTitle} — {firmName} — {appName}";
+        }
+    }
 
     // ── Status bar ──
 
@@ -99,6 +122,21 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsShortcutCheatSheetVisible { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsCommandPaletteVisible { get; set; }
+
+    [ObservableProperty]
+    public partial string CommandPaletteQuery { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial CommandPaletteItem? SelectedCommandPaletteItem { get; set; }
+
+    [ObservableProperty]
+    public partial double QuickActionBarViewportWidth { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsQuickActionOverflowOpen { get; set; }
+
     /// <summary>Raised when Ctrl+F is pressed to focus the search box (#420).</summary>
     public event EventHandler? SearchFocusRequested;
 
@@ -109,6 +147,11 @@ public partial class MainViewModel : BaseViewModel
     // ── Quick Action Bar ──
 
     public ObservableCollection<QuickAction> QuickActions { get; } = [];
+    public ObservableCollection<CommandPaletteItem> CommandPaletteItems { get; } = [];
+    public ObservableCollection<QuickAction> VisibleQuickActions { get; } = [];
+    public ObservableCollection<QuickAction> OverflowQuickActions { get; } = [];
+    public bool HasCommandPaletteItems => CommandPaletteItems.Count > 0;
+    public bool HasOverflowQuickActions => OverflowQuickActions.Count > 0;
 
     // ── Feature-gated visibility ──
 
@@ -145,6 +188,7 @@ public partial class MainViewModel : BaseViewModel
     public bool IsBackupRestoreVisible => IsAdmin && _features.IsEnabled(FeatureFlags.Backup);
     public bool IsQuotationsVisible => _features.IsEnabled(FeatureFlags.Quotations);
     public bool IsGRNVisible => _features.IsEnabled(FeatureFlags.GRN);
+    public bool IsBarcodeLabelsVisible => _features.IsEnabled(FeatureFlags.Products);
 
     // ── Navigation ──
 
@@ -241,7 +285,7 @@ public partial class MainViewModel : BaseViewModel
         await _sessionService.LoginAsync(userType);
 
         _navigationService.NavigateTo(MainWorkspacePage);
-        _currentPage = MainWorkspacePage;
+        SetCurrentPage(MainWorkspacePage);
         _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
 
         RefreshQuickActions();
@@ -249,8 +293,17 @@ public partial class MainViewModel : BaseViewModel
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(INavigationService.CurrentPageKey)
+            && !string.IsNullOrWhiteSpace(_navigationService.CurrentPageKey))
+        {
+            SetCurrentPage(_navigationService.CurrentPageKey!);
+        }
+
         if (e.PropertyName == nameof(INavigationService.CurrentView))
+        {
             OnPropertyChanged(nameof(CurrentView));
+            OnPropertyChanged(nameof(WindowTitle));
+        }
     }
 
     private void OnAppStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -309,15 +362,31 @@ public partial class MainViewModel : BaseViewModel
     private void ToggleShortcutCheatSheet() =>
         IsShortcutCheatSheetVisible = !IsShortcutCheatSheetVisible;
 
+    [RelayCommand]
+    private void ToggleCommandPalette() =>
+        IsCommandPaletteVisible = !IsCommandPaletteVisible;
+
+    [RelayCommand]
+    private void CloseCommandPalette() =>
+        IsCommandPaletteVisible = false;
+
+    [RelayCommand]
+    private void ToggleQuickActionOverflow() =>
+        IsQuickActionOverflowOpen = !IsQuickActionOverflowOpen;
+
+    [RelayCommand]
+    private void CloseQuickActionOverflow() =>
+        IsQuickActionOverflowOpen = false;
+
     /// <summary>Returns all registered shortcuts for the cheat sheet overlay.</summary>
     public IReadOnlyList<ShortcutEntry> GetShortcutEntries()
     {
-        return _quickActionService.GetActions()
+        return (_quickActionService.GetActions() ?? [])
+            .Where(IsQuickActionAccessible)
             .Where(a => !string.IsNullOrWhiteSpace(a.Gesture))
             .OrderBy(a => a.SortOrder)
             .Select(a => new ShortcutEntry(a.ShortcutText, a.Title, a.Description))
-            .Append(new ShortcutEntry("F1", "Shortcuts", "Show this shortcut reference"))
-            .Append(new ShortcutEntry("Ctrl+F", "Search", "Focus the search box"))
+            .DistinctBy(entry => $"{entry.Key}|{entry.Title}", StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 
@@ -325,6 +394,28 @@ public partial class MainViewModel : BaseViewModel
 
     [RelayCommand]
     private void FocusSearch() => SearchFocusRequested?.Invoke(this, EventArgs.Empty);
+
+    [RelayCommand]
+    private void SelectNextCommandPaletteItem() => MoveCommandPaletteSelection(1);
+
+    [RelayCommand]
+    private void SelectPreviousCommandPaletteItem() => MoveCommandPaletteSelection(-1);
+
+    [RelayCommand]
+    private void ExecuteSelectedCommandPaletteItem() =>
+        ExecuteCommandPaletteItem(SelectedCommandPaletteItem);
+
+    [RelayCommand]
+    private void ExecuteCommandPaletteItem(CommandPaletteItem? item)
+    {
+        var target = item ?? SelectedCommandPaletteItem ?? CommandPaletteItems.FirstOrDefault();
+        if (target?.Action.Command is null || !target.Action.Command.CanExecute(null))
+            return;
+
+        RememberCommandPaletteItem(target.Id);
+        IsCommandPaletteVisible = false;
+        target.Action.Command.Execute(null);
+    }
 
     private void NotifyCombinedVisibility()
     {
@@ -356,6 +447,7 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsBackupRestoreVisible));
         OnPropertyChanged(nameof(IsQuotationsVisible));
         OnPropertyChanged(nameof(IsGRNVisible));
+        OnPropertyChanged(nameof(IsBarcodeLabelsVisible));
     }
 
     // ── Navigation commands ──
@@ -364,7 +456,7 @@ public partial class MainViewModel : BaseViewModel
     private void NavigateToMainWorkspace()
     {
         _navigationService.NavigateTo(MainWorkspacePage);
-        _currentPage = MainWorkspacePage;
+        SetCurrentPage(MainWorkspacePage);
         _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
     }
 
@@ -555,6 +647,12 @@ public partial class MainViewModel : BaseViewModel
         NavigateToPage(GRNPage, "Goods received notes");
     }
 
+    [RelayCommand]
+    private void OpenBarcodeLabels()
+    {
+        NavigateToPage(BarcodeLabelsPage, "Barcode labels");
+    }
+
     // ── Switch User / Logout ──
 
     [RelayCommand]
@@ -573,7 +671,7 @@ public partial class MainViewModel : BaseViewModel
             await _commandBus.SendAsync(new LogoutCommand(currentRole));
 
             _navigationService.NavigateTo(LoginPage);
-            _currentPage = LoginPage;
+            SetCurrentPage(LoginPage);
             _statusBar.SetPersistent(string.Empty);
 
             if (_navigationService.CurrentView is LoginViewModel loginVm)
@@ -596,7 +694,7 @@ public partial class MainViewModel : BaseViewModel
 
         // Navigate back to login page
         _navigationService.NavigateTo(LoginPage);
-        _currentPage = LoginPage;
+        SetCurrentPage(LoginPage);
         _statusBar.SetPersistent(string.Empty);
         WireLoginCallback();
     }
@@ -851,6 +949,15 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
+            Title = "Barcode Labels", Icon = "🏷",
+            Description = "Generate and print barcode labels",
+            HelpKey = "BarcodeLabels",
+            Command = OpenBarcodeLabelsCommand,
+            SortOrder = 87,
+            RequiredFeature = FeatureFlags.Products
+        });
+        _quickActionService.Register(new QuickAction
+        {
             Title = "Refresh", Icon = "🔄",
             Description = "Reload the current view data",
             HelpKey = "Refresh",
@@ -868,11 +975,20 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
+            Title = "Command Palette", Icon = "⌘",
+            Description = "Search pages, tools, and recent actions",
+            HelpKey = CommandPaletteHelpKey,
+            Command = ToggleCommandPaletteCommand,
+            ShortcutText = "Ctrl+K", Gesture = "Ctrl+K", SortOrder = 96,
+            IsVisible = false
+        });
+        _quickActionService.Register(new QuickAction
+        {
             Title = "Search", Icon = "🔍",
             Description = "Focus the search box",
             HelpKey = "Search",
             Command = FocusSearchCommand,
-            ShortcutText = "Ctrl+F", Gesture = "Ctrl+F", SortOrder = 96,
+            ShortcutText = "Ctrl+F", Gesture = "Ctrl+F", SortOrder = 97,
             IsVisible = false
         });
         _quickActionService.Register(new QuickAction
@@ -888,9 +1004,234 @@ public partial class MainViewModel : BaseViewModel
     private void RefreshQuickActions()
     {
         QuickActions.Clear();
-        foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType, _features))
+        foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType, _features) ?? [])
             QuickActions.Add(action);
+
+        RecomputeQuickActionOverflow();
+
+        if (IsCommandPaletteVisible)
+            RefreshCommandPaletteItems();
     }
+
+    partial void OnCommandPaletteQueryChanged(string value) =>
+        RefreshCommandPaletteItems();
+
+    partial void OnQuickActionBarViewportWidthChanged(double value) =>
+        RecomputeQuickActionOverflow();
+
+    partial void OnIsCommandPaletteVisibleChanged(bool value)
+    {
+        if (!value)
+        {
+            if (!string.IsNullOrEmpty(CommandPaletteQuery))
+                CommandPaletteQuery = string.Empty;
+
+            CommandPaletteItems.Clear();
+            SelectedCommandPaletteItem = null;
+            OnPropertyChanged(nameof(HasCommandPaletteItems));
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(CommandPaletteQuery))
+            CommandPaletteQuery = string.Empty;
+
+        RefreshCommandPaletteItems();
+    }
+
+    private void RefreshCommandPaletteItems()
+    {
+        if (!IsCommandPaletteVisible)
+        {
+            CommandPaletteItems.Clear();
+            SelectedCommandPaletteItem = null;
+            OnPropertyChanged(nameof(HasCommandPaletteItems));
+            return;
+        }
+
+        var query = CommandPaletteQuery.Trim();
+        IEnumerable<CommandPaletteItem> items = (_quickActionService.GetActions() ?? [])
+            .Where(IsQuickActionAccessible)
+            .Where(action => !string.Equals(GetCommandPaletteItemId(action), CommandPaletteHelpKey, StringComparison.OrdinalIgnoreCase))
+            .Select(CreateCommandPaletteItem);
+
+        items = string.IsNullOrWhiteSpace(query)
+            ? items
+                .OrderByDescending(item => item.IsRecent)
+                .ThenBy(item => item.SortOrder)
+            : items
+                .Where(item => MatchesCommandPaletteQuery(item, query))
+                .OrderBy(item => GetCommandPaletteMatchRank(item, query))
+                .ThenByDescending(item => item.IsRecent)
+                .ThenBy(item => item.SortOrder);
+
+        CommandPaletteItems.Clear();
+        foreach (var item in items)
+            CommandPaletteItems.Add(item);
+
+        SelectedCommandPaletteItem = CommandPaletteItems.FirstOrDefault();
+        OnPropertyChanged(nameof(HasCommandPaletteItems));
+    }
+
+    private void RecomputeQuickActionOverflow()
+    {
+        VisibleQuickActions.Clear();
+        OverflowQuickActions.Clear();
+
+        var actions = QuickActions.ToList();
+        if (actions.Count == 0)
+        {
+            IsQuickActionOverflowOpen = false;
+            OnPropertyChanged(nameof(HasOverflowQuickActions));
+            return;
+        }
+
+        if (QuickActionBarViewportWidth <= 0)
+        {
+            foreach (var action in actions)
+                VisibleQuickActions.Add(action);
+
+            IsQuickActionOverflowOpen = false;
+            OnPropertyChanged(nameof(HasOverflowQuickActions));
+            return;
+        }
+
+        var visibleCount = (int)Math.Floor(QuickActionBarViewportWidth / QuickActionSlotWidth);
+        if (actions.Count > visibleCount)
+        {
+            var reducedWidth = Math.Max(
+                QuickActionBarViewportWidth - QuickActionOverflowButtonWidth,
+                QuickActionSlotWidth);
+            visibleCount = Math.Max(1, (int)Math.Floor(reducedWidth / QuickActionSlotWidth));
+        }
+
+        visibleCount = Math.Clamp(visibleCount, 1, actions.Count);
+
+        foreach (var action in actions.Take(visibleCount))
+            VisibleQuickActions.Add(action);
+
+        foreach (var action in actions.Skip(visibleCount))
+            OverflowQuickActions.Add(action);
+
+        if (OverflowQuickActions.Count == 0)
+            IsQuickActionOverflowOpen = false;
+
+        OnPropertyChanged(nameof(HasOverflowQuickActions));
+    }
+
+    private bool IsQuickActionAccessible(QuickAction action)
+    {
+        if (action.RequiredRoles.Count > 0 && !action.RequiredRoles.Contains(AppState.CurrentUserType))
+            return false;
+
+        if (action.RequiredFeature is not null && !_features.IsEnabled(action.RequiredFeature))
+            return false;
+
+        return action.Command is not null;
+    }
+
+    private CommandPaletteItem CreateCommandPaletteItem(QuickAction action)
+    {
+        var id = GetCommandPaletteItemId(action);
+        return new CommandPaletteItem(
+            id,
+            action.Title,
+            string.IsNullOrWhiteSpace(action.Description) ? "No description available." : action.Description,
+            action.Icon,
+            action.ShortcutText,
+            GetCommandPaletteCategory(action),
+            action.SortOrder,
+            IsRecentCommandPaletteItem(id),
+            action);
+    }
+
+    private void MoveCommandPaletteSelection(int direction)
+    {
+        if (CommandPaletteItems.Count == 0)
+            return;
+
+        if (SelectedCommandPaletteItem is null)
+        {
+            SelectedCommandPaletteItem = direction >= 0
+                ? CommandPaletteItems[0]
+                : CommandPaletteItems[^1];
+            return;
+        }
+
+        var currentIndex = CommandPaletteItems.IndexOf(SelectedCommandPaletteItem);
+        if (currentIndex < 0)
+        {
+            SelectedCommandPaletteItem = CommandPaletteItems[0];
+            return;
+        }
+
+        var nextIndex = (currentIndex + direction + CommandPaletteItems.Count) % CommandPaletteItems.Count;
+        SelectedCommandPaletteItem = CommandPaletteItems[nextIndex];
+    }
+
+    private void RememberCommandPaletteItem(string id)
+    {
+        _recentCommandPaletteItemIds.RemoveAll(existing =>
+            string.Equals(existing, id, StringComparison.OrdinalIgnoreCase));
+
+        _recentCommandPaletteItemIds.Insert(0, id);
+        if (_recentCommandPaletteItemIds.Count > MaxRecentCommandPaletteItems)
+        {
+            _recentCommandPaletteItemIds.RemoveRange(
+                MaxRecentCommandPaletteItems,
+                _recentCommandPaletteItemIds.Count - MaxRecentCommandPaletteItems);
+        }
+    }
+
+    private bool IsRecentCommandPaletteItem(string id) =>
+        _recentCommandPaletteItemIds.Any(existing =>
+            string.Equals(existing, id, StringComparison.OrdinalIgnoreCase));
+
+    private static string GetCommandPaletteItemId(QuickAction action) =>
+        action.HelpKey ?? action.Title;
+
+    private static bool MatchesCommandPaletteQuery(CommandPaletteItem item, string query)
+    {
+        var tokens = query.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (tokens.Length == 0)
+            return true;
+
+        return tokens.All(token =>
+            item.Title.Contains(token, StringComparison.OrdinalIgnoreCase)
+            || item.Description.Contains(token, StringComparison.OrdinalIgnoreCase)
+            || item.Category.Contains(token, StringComparison.OrdinalIgnoreCase)
+            || item.ShortcutText.Contains(token, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static int GetCommandPaletteMatchRank(CommandPaletteItem item, string query)
+    {
+        if (item.Title.StartsWith(query, StringComparison.OrdinalIgnoreCase))
+            return 0;
+
+        if (item.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
+            return 1;
+
+        if (item.Description.Contains(query, StringComparison.OrdinalIgnoreCase))
+            return 2;
+
+        if (item.Category.Contains(query, StringComparison.OrdinalIgnoreCase))
+            return 3;
+
+        if (item.ShortcutText.Contains(query, StringComparison.OrdinalIgnoreCase))
+            return 4;
+
+        return 5;
+    }
+
+    private static string GetCommandPaletteCategory(QuickAction action) =>
+        (action.HelpKey ?? action.Title) switch
+        {
+            "Home" or "Search" or "Shortcuts" or CommandPaletteHelpKey or "Refresh" or "Logout" => "Shell",
+            "Billing" or "SaleHistory" or "CashRegister" or "Customers" or "Orders" or "Payments" or "Debtors" or "Reports" or "Quotations" or "SalesPurchase" => "Sales",
+            "Products" or "Categories" or "Brands" or "Tax" or "Vendors" or "Inventory" or "Inward" or "PurchaseOrders" or "GRN" or "BarcodeLabels" => "Inventory",
+            "Settings" or "Backup" or "FinancialYear" or "Firm" or "Users" => "Administration",
+            "Expenses" or "Salaries" or "Branch" or "Ironing" => "Operations",
+            _ => "Actions"
+        };
 
     private void OpenDialog(string dialogKey, string displayName, string? closedStatus = null)
     {
@@ -907,9 +1248,51 @@ public partial class MainViewModel : BaseViewModel
     private void NavigateToPage(string pageKey, string displayName)
     {
         _navigationService.NavigateTo(pageKey);
-        _currentPage = pageKey;
+        SetCurrentPage(pageKey);
         _statusBar.SetPersistent(displayName);
     }
+
+    private void SetCurrentPage(string pageKey)
+    {
+        _currentPage = pageKey;
+        OnPropertyChanged(nameof(WindowTitle));
+    }
+
+    private static string GetPageDisplayName(string? pageKey) => pageKey switch
+    {
+        LoginPage => "Sign in",
+        MainWorkspacePage => "Home",
+        FirmManagementPage => "Firm management",
+        UserManagementPage => "User management",
+        TaxManagementPage => "Tax management",
+        VendorManagementPage => "Vendor management",
+        ProductManagementPage => "Product management",
+        CategoryManagementPage => "Category management",
+        BrandManagementPage => "Brand management",
+        InventoryPage => "Inventory management",
+        BillingPage => "Billing",
+        SaleHistoryPage => "Sale history",
+        CashRegisterPage => "Cash register",
+        CustomerManagementPage => "Customer management",
+        PurchaseOrdersPage => "Purchase orders",
+        FinancialYearPage => "Financial year",
+        SystemSettingsPage => "System settings",
+        InwardEntryPage => "Inward entry",
+        ExpenseManagementPage => "Expense management",
+        DebtorManagementPage => "Debtor management",
+        OrderManagementPage => "Order management",
+        IroningManagementPage => "Ironing management",
+        SalaryManagementPage => "Salary management",
+        BranchManagementPage => "Branch management",
+        SalesPurchasePage => "Sales/Purchase register",
+        PaymentManagementPage => "Payment management",
+        ReportsPage => "Reports",
+        BackupRestorePage => "Backup and restore",
+        QuotationsPage => "Quotations",
+        GRNPage => "Goods received notes",
+        BarcodeLabelsPage => "Barcode labels",
+        _ => string.Empty
+    };
 
     /// <summary>
     /// Syncs <see cref="QuickAction.Gesture"/>-based <c>KeyBinding</c>s

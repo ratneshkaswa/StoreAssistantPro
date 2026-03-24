@@ -88,6 +88,7 @@ public sealed class QuickAccessToggleCommandTests
             .Returns(Task.FromResult<IReadOnlyList<Brand>>(new List<Brand>()));
         productService.GetActiveVendorsAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyList<Vendor>>(new List<Vendor>()));
+        var regionalSettings = Substitute.For<IRegionalSettingsService>();
         taxGroupService.GetActiveGroupsAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyList<TaxGroup>>(new List<TaxGroup>()));
         taxGroupService.GetActiveHSNCodesAsync(Arg.Any<CancellationToken>())
@@ -102,7 +103,7 @@ public sealed class QuickAccessToggleCommandTests
 
         var productViewModel = new ProductManagementViewModel(
             productService, taxGroupService,
-            Substitute.For<INavigationService>(), new ProductContextHolder());
+            Substitute.For<INavigationService>(), regionalSettings, new ProductContextHolder());
         var variantViewModel = new VariantManagementViewModel(
             variantService, productService,
             new ProductContextHolder(), Substitute.For<INavigationService>())

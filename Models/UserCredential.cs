@@ -14,4 +14,16 @@ public class UserCredential
     public int FailedAttempts { get; set; }
 
     public DateTime? LockoutEndTime { get; set; }
+
+    /// <summary>User display name (#281).</summary>
+    [MaxLength(100)]
+    public string? DisplayName { get; set; }
+
+    /// <summary>User email (#281).</summary>
+    [MaxLength(100)]
+    public string? Email { get; set; }
+
+    /// <summary>User phone (#281).</summary>
+    [MaxLength(15)]
+    public string? Phone { get; set; }
 }

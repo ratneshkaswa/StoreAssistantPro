@@ -28,7 +28,13 @@ public sealed record FirmManagementSnapshot(
     bool NegativeStockAllowed,
     string NumberToWordsLanguage,
     string InvoicePrefix,
-    string ReceiptFooterText);
+    string ReceiptFooterText,
+    string LogoPath,
+    string BankName,
+    string BankAccountNumber,
+    string BankIFSC,
+    string ReceiptHeaderText,
+    string InvoiceResetPeriod);
 
 public record FirmUpdateDto(
     string FirmName,
@@ -52,4 +58,10 @@ public record FirmUpdateDto(
     bool NegativeStockAllowed,
     string NumberToWordsLanguage,
     string InvoicePrefix,
-    string ReceiptFooterText);
+    string ReceiptFooterText,
+    string LogoPath,
+    string BankName,
+    string BankAccountNumber,
+    string BankIFSC,
+    string ReceiptHeaderText,
+    string InvoiceResetPeriod);
