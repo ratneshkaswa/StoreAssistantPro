@@ -110,7 +110,8 @@
                               AutomationProperties.Name="Purchase order supplier"
                               ItemsSource="{Binding Suppliers}"
                               SelectedItem="{Binding SelectedSupplier}"
-                              DisplayMemberPath="Name"/>
+                              DisplayMemberPath="Name"
+                              Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Expected"
                                Style="{StaticResource FormRowLabelStyle}"/>
@@ -145,7 +146,8 @@
                                               AutomationProperties.Name="Purchase order line product"
                                               DisplayMemberPath="Name"
                                               SelectedValuePath="Id"
-                                              SelectedValue="{Binding ProductId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                              SelectedValue="{Binding ProductId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -170,8 +172,17 @@
                             Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Grid.Column="2" Content="Remove Line" Command="{Binding RemoveLineItemCommand}"
                             Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Grid.Column="3" Content="Create PO" Command="{Binding CreateOrderCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <controls:SplitButton Grid.Column="3"
+                                          Content="Create PO"
+                                          Command="{Binding CreateOrderCommand}"
+                                          Margin="{StaticResource InlineControlSpacing}">
+                        <controls:SplitButton.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Duplicate selected order"
+                                          Command="{Binding DuplicateOrderCommand}"/>
+                            </ContextMenu>
+                        </controls:SplitButton.ContextMenu>
+                    </controls:SplitButton>
                 </Grid>
             </Grid>
         </Grid>
@@ -197,6 +208,13 @@
             <Button Content="Cancel PO" Command="{Binding CancelOrderCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </StackPanel>
+        <controls:ErrorStateOverlay Grid.Row="2"
+                                    IsOpen="{Binding HasLoadError}"
+                                    Icon=":("
+                                    Title="Couldn't load purchase order data"
+                                    Description="{Binding LoadErrorMessage}"
+                                    ActionText="Retry"
+                                    ActionCommand="{Binding LoadCommand}"/>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Processing purchase order..."/>
     </Grid>

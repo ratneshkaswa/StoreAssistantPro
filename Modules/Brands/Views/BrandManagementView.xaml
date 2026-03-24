@@ -37,21 +37,66 @@
         </Grid>
 
         <!-- DataGrid -->
-        <DataGrid AutomationProperties.Name="Brands list" Grid.Row="2"
+        <DataGrid x:Name="BrandsGrid"
+                  AutomationProperties.Name="Brands list" Grid.Row="2"
                   ItemsSource="{Binding Brands}"
                   SelectedItem="{Binding SelectedBrand}"
                   Style="{StaticResource EnterpriseDataGridStyle}"
                   h:DataGridEmptyState.Icon="🏷"
                   h:DataGridEmptyState.Title="No brands yet"
                   h:DataGridEmptyState.Description="Add your first brand to organize products and supplier assortments."
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  SelectionMode="Single"
+                  AutoGenerateColumns="False" IsReadOnly="False"
+                  SelectionMode="Extended"
+                  h:DataGridMultiSelect.IsEnabled="True"
+                  BeginningEdit="OnBrandsGridBeginningEdit"
+                  CellEditEnding="OnBrandsGridCellEditEnding"
+                  PreviewMouseDoubleClick="OnBrandsGridPreviewMouseDoubleClick"
                   HeadersVisibility="Column" CanUserAddRows="False"
                   Margin="{StaticResource ItemSpacing}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Brand" Binding="{Binding Name}" Width="*"/>
-                <DataGridTextColumn Header="Products" Binding="{Binding ProductCount}" Width="{StaticResource ColumnWidthQty}"/>
-                <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                <DataGridTemplateColumn x:Name="BrandNameColumn"
+                                        Header="Brand"
+                                        SortMemberPath="Name"
+                                        Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Text="{Binding Name}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock x:Name="PencilIcon"
+                                           Text="&#xE70F;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconSmall}"
+                                           Foreground="{StaticResource FluentTextTertiary}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Opacity="0"/>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsMouseOver}"
+                                             Value="True">
+                                    <Setter TargetName="PencilIcon" Property="Opacity" Value="0.8"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource DataGridInlineEditTextBoxStyle}"
+                                     MaxLength="100"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Products"
+                                    Binding="{Binding ProductCount}"
+                                    Width="{StaticResource ColumnWidthQty}"
+                                    IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="Active"
+                                        CellTemplate="{StaticResource ActiveToggleCellTemplate}"
+                                        Width="{StaticResource ColumnWidthQty}"
+                                        IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
 

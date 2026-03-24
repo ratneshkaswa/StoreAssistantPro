@@ -135,13 +135,14 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <ScrollViewer x:Name="WorkspaceScrollViewer"
-                  VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled"
-                  ScrollChanged="OnWorkspaceScrollChanged">
-    <Grid Margin="{StaticResource PagePadding}"
-          TextOptions.TextFormattingMode="Display"
-          TextOptions.TextRenderingMode="ClearType">
+    <Grid>
+        <ScrollViewer x:Name="WorkspaceScrollViewer"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      ScrollChanged="OnWorkspaceScrollChanged">
+        <Grid Margin="{StaticResource PagePadding}"
+              TextOptions.TextFormattingMode="Display"
+              TextOptions.TextRenderingMode="ClearType">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -289,19 +290,6 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="StartBillingButton"
-                            Command="{Binding DataContext.OpenBillingCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            MinWidth="148"
-                            AutomationProperties.Name="Start billing"
-                            Visibility="{Binding DataContext.IsBillingVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FluentIconFont}"
-                                       Text="&#xE710;"
-                                       Margin="0,0,8,0"/>
-                            <TextBlock Text="Start Billing"/>
-                        </StackPanel>
-                    </Button>
                 </StackPanel>
             </Grid>
         </Grid>
@@ -1031,6 +1019,25 @@
                 </Grid>
             </Border>
         </Grid>
+        </Grid>
+        </ScrollViewer>
+
+        <Button x:Name="StartBillingFab"
+                Width="56"
+                Height="56"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,24,24"
+                Command="{Binding DataContext.OpenBillingCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                Style="{StaticResource FloatingActionButtonStyle}"
+                ToolTip="Start billing"
+                AutomationProperties.Name="Start billing"
+                Visibility="{Binding DataContext.IsBillingVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock FontFamily="{StaticResource FluentIconFont}"
+                       Text="&#xE710;"
+                       FontSize="20"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+        </Button>
     </Grid>
-    </ScrollViewer>
 </UserControl>

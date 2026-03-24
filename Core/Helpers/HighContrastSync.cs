@@ -42,6 +42,14 @@ public static class HighContrastSync
         _isAttached = false;
     }
 
+    public static void OverrideDefaultPalette(IReadOnlyDictionary<string, Brush> palette)
+    {
+        _defaultPalette = palette.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value.CloneCurrentValue(),
+            StringComparer.Ordinal);
+    }
+
     private static void OnSystemParametersChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (!string.IsNullOrWhiteSpace(e.PropertyName) &&

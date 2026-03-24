@@ -283,6 +283,107 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
             : string.Empty;
     }
 
+    public async Task<bool> TryInlineRenameTypeAsync(
+        CategoryType? categoryType,
+        string? editedName,
+        string? originalName,
+        CancellationToken ct = default)
+    {
+        if (categoryType is null)
+            return false;
+
+        ClearMessages();
+
+        var fallbackName = string.IsNullOrWhiteSpace(originalName)
+            ? categoryType.Name
+            : originalName.Trim();
+        var trimmedName = editedName?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(trimmedName))
+        {
+            categoryType.Name = fallbackName;
+            ErrorMessage = "Type name is required.";
+            return false;
+        }
+
+        if (string.Equals(trimmedName, fallbackName, StringComparison.Ordinal))
+        {
+            categoryType.Name = trimmedName;
+            if (SelectedType?.Id == categoryType.Id)
+                TypeName = trimmedName;
+            return true;
+        }
+
+        try
+        {
+            await categoryService.UpdateTypeAsync(categoryType.Id, trimmedName, ct);
+            categoryType.Name = trimmedName;
+            if (SelectedType?.Id == categoryType.Id)
+                TypeName = trimmedName;
+
+            SuccessMessage = "Category type updated.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            categoryType.Name = fallbackName;
+            ErrorMessage = ex.Message;
+            return false;
+        }
+    }
+
+    public async Task<bool> TryInlineRenameCategoryAsync(
+        Category? category,
+        string? editedName,
+        string? originalName,
+        CancellationToken ct = default)
+    {
+        if (category is null)
+            return false;
+
+        ClearMessages();
+
+        var fallbackName = string.IsNullOrWhiteSpace(originalName)
+            ? category.Name
+            : originalName.Trim();
+        var trimmedName = editedName?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(trimmedName))
+        {
+            category.Name = fallbackName;
+            ErrorMessage = "Category name is required.";
+            return false;
+        }
+
+        if (string.Equals(trimmedName, fallbackName, StringComparison.Ordinal))
+        {
+            category.Name = trimmedName;
+            if (SelectedCategory?.Id == category.Id)
+                CategoryName = trimmedName;
+            return true;
+        }
+
+        try
+        {
+            await categoryService.UpdateAsync(
+                category.Id,
+                new CategoryDto(trimmedName, category.CategoryTypeId),
+                ct);
+            category.Name = trimmedName;
+            if (SelectedCategory?.Id == category.Id)
+                CategoryName = trimmedName;
+
+            SuccessMessage = "Category updated.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            category.Name = fallbackName;
+            ErrorMessage = ex.Message;
+            return false;
+        }
+    }
+
     private void ClearMessages()
     {
         ErrorMessage = string.Empty;

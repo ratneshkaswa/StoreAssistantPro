@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              mc:Ignorable="d"
              UseLayoutRounding="True"
@@ -85,16 +86,13 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
-                <TextBlock Text="From" VerticalAlignment="Center" Margin="0,0,6,0"
-                           Foreground="{StaticResource FluentTextSecondary}"/>
-                <DatePicker SelectedDate="{Binding DateFrom}" Width="{StaticResource FieldWidthStandard}"
-                            AutomationProperties.Name="Report start date"/>
-                <TextBlock Text="To" VerticalAlignment="Center" Margin="10,0,6,0"
-                           Foreground="{StaticResource FluentTextSecondary}"/>
-                <DatePicker SelectedDate="{Binding DateTo}" Width="{StaticResource FieldWidthStandard}"
-                            AutomationProperties.Name="Report end date"/>
-            </StackPanel>
+            <controls:DateRangePicker Grid.Column="1"
+                                      Margin="16,0,0,0"
+                                      Width="344"
+                                      StartDate="{Binding DateFrom, Mode=TwoWay}"
+                                      EndDate="{Binding DateTo, Mode=TwoWay}"
+                                      StartHeader="From"
+                                      EndHeader="To"/>
 
             <Button Grid.Column="4" Content="Refresh" Style="{StaticResource RefreshButtonStyle}"
                     Command="{Binding RefreshCommand}"/>

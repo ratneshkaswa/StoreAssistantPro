@@ -12,8 +12,9 @@ public class SystemSettingsViewModelTests
     private readonly ISystemSettingsService _settingsService = Substitute.For<ISystemSettingsService>();
     private readonly ILoginService _loginService = Substitute.For<ILoginService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
+    private readonly IUiDensityService _uiDensityService = Substitute.For<IUiDensityService>();
 
-    private SystemSettingsViewModel CreateSut() => new(_settingsService, _loginService, _dialogService);
+    private SystemSettingsViewModel CreateSut() => new(_settingsService, _loginService, _dialogService, _uiDensityService);
 
     [Fact]
     public async Task LoadCommand_SyncsNumericBridgeProperties()
@@ -50,5 +51,16 @@ public class SystemSettingsViewModelTests
         Assert.Equal(0, sut.AutoLogoutMinutes);
         Assert.Equal(0d, sut.AutoLogoutMinutesValue);
         Assert.Equal("Auto-logout is disabled.", sut.AutoLogoutSummary);
+    }
+
+    [Fact]
+    public void SetDensityModeCommand_UpdatesUiDensityService()
+    {
+        var sut = CreateSut();
+
+        sut.SetDensityModeCommand.Execute("Compact");
+
+        Assert.True(sut.IsCompactModeEnabled);
+        _uiDensityService.Received(1).SetCompactMode(true);
     }
 }

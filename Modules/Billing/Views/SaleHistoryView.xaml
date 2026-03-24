@@ -116,9 +116,10 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="{Binding SaleDetail}" TextWrapping="Wrap"
-                           Foreground="{StaticResource FluentTextSecondary}"
-                           Margin="{StaticResource ItemSpacing}"/>
+                <controls:ExpandableTextBlock Text="{Binding SaleDetail}"
+                                              CollapsedLineCount="3"
+                                              Foreground="{StaticResource FluentTextSecondary}"
+                                              Margin="{StaticResource ItemSpacing}"/>
 
                 <Button Grid.Row="1" Content="Preview Receipt"
                         Command="{Binding PreviewReceiptCommand}"

@@ -137,6 +137,9 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsQuickActionOverflowOpen { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsNavigationRailExpanded { get; set; }
+
     /// <summary>Raised when Ctrl+F is pressed to focus the search box (#420).</summary>
     public event EventHandler? SearchFocusRequested;
 
@@ -150,8 +153,11 @@ public partial class MainViewModel : BaseViewModel
     public ObservableCollection<CommandPaletteItem> CommandPaletteItems { get; } = [];
     public ObservableCollection<QuickAction> VisibleQuickActions { get; } = [];
     public ObservableCollection<QuickAction> OverflowQuickActions { get; } = [];
+    public ObservableCollection<string> ShellBreadcrumbItems { get; } = [];
     public bool HasCommandPaletteItems => CommandPaletteItems.Count > 0;
     public bool HasOverflowQuickActions => OverflowQuickActions.Count > 0;
+    public double NavigationRailWidth => IsNavigationRailExpanded ? 320 : 56;
+    public bool IsNavigationRailBackMode => !string.Equals(_currentPage, MainWorkspacePage, StringComparison.Ordinal);
 
     // ── Feature-gated visibility ──
 
@@ -253,8 +259,15 @@ public partial class MainViewModel : BaseViewModel
         _navigationService.NavigateTo(LoginPage);
         SetCurrentPage(LoginPage);
         WireLoginCallback();
+    }
 
-        // Attempt auto-login in background
+    /// <summary>
+    /// Starts the background auto-login sequence.
+    /// Called by <see cref="IMainShellFlow"/> after the window is shown
+    /// so the login page renders before any navigation occurs.
+    /// </summary>
+    internal void TriggerAutoLogin()
+    {
         _ = AutoLoginAsUserAsync();
     }
 
@@ -264,6 +277,12 @@ public partial class MainViewModel : BaseViewModel
     /// </summary>
     private async Task AutoLoginAsUserAsync()
     {
+        // Yield so the window completes its first layout/render pass
+        // before we touch CurrentView. Without this, the synchronous
+        // pipeline path can navigate before the first paint, leaving
+        // the window visually blank during the transition animation.
+        await Task.Yield();
+
         try
         {
             var result = await _commandBus.SendAsync(
@@ -409,6 +428,18 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void CloseQuickActionOverflow() =>
         IsQuickActionOverflowOpen = false;
+
+    [RelayCommand]
+    private void ToggleNavigationRailOrNavigateBack()
+    {
+        if (IsNavigationRailBackMode)
+        {
+            NavigateToMainWorkspace();
+            return;
+        }
+
+        IsNavigationRailExpanded = !IsNavigationRailExpanded;
+    }
 
     /// <summary>Returns all registered shortcuts for the cheat sheet overlay.</summary>
     public IReadOnlyList<ShortcutEntry> GetShortcutEntries()
@@ -1289,7 +1320,24 @@ public partial class MainViewModel : BaseViewModel
     {
         _currentPage = pageKey;
         UpdateQuickActionActiveState();
+        UpdateShellBreadcrumbs();
+        OnPropertyChanged(nameof(IsNavigationRailBackMode));
         OnPropertyChanged(nameof(WindowTitle));
+    }
+
+    partial void OnIsNavigationRailExpandedChanged(bool value) =>
+        OnPropertyChanged(nameof(NavigationRailWidth));
+
+    [RelayCommand]
+    private void ActivateBreadcrumb(string? crumb)
+    {
+        if (string.IsNullOrWhiteSpace(crumb))
+            return;
+
+        if (string.Equals(crumb, "Home", StringComparison.OrdinalIgnoreCase))
+        {
+            NavigateToMainWorkspace();
+        }
     }
 
     private void UpdateQuickActionActiveState()
@@ -1300,6 +1348,13 @@ public partial class MainViewModel : BaseViewModel
             action.IsActive = !string.IsNullOrWhiteSpace(activeHelpKey) &&
                               string.Equals(action.HelpKey, activeHelpKey, StringComparison.OrdinalIgnoreCase);
         }
+    }
+
+    private void UpdateShellBreadcrumbs()
+    {
+        ShellBreadcrumbItems.Clear();
+        foreach (var item in GetPageBreadcrumbItems(_currentPage))
+            ShellBreadcrumbItems.Add(item);
     }
 
     private static string? GetActiveQuickActionHelpKey(string? pageKey) => pageKey switch
@@ -1370,6 +1425,23 @@ public partial class MainViewModel : BaseViewModel
         GRNPage => "Goods received notes",
         BarcodeLabelsPage => "Barcode labels",
         _ => string.Empty
+    };
+
+    private static IReadOnlyList<string> GetPageBreadcrumbItems(string? pageKey) => pageKey switch
+    {
+        LoginPage => [],
+        MainWorkspacePage => ["Home"],
+        BillingPage or SaleHistoryPage or CashRegisterPage or CustomerManagementPage or OrderManagementPage
+            or PaymentManagementPage or DebtorManagementPage or ReportsPage or QuotationsPage or SalesPurchasePage
+            => ["Home", "Sales", GetPageDisplayName(pageKey)],
+        VendorManagementPage or ProductManagementPage or CategoryManagementPage or BrandManagementPage
+            or InventoryPage or PurchaseOrdersPage or InwardEntryPage or GRNPage or BarcodeLabelsPage or TaxManagementPage
+            => ["Home", "Inventory", GetPageDisplayName(pageKey)],
+        FirmManagementPage or UserManagementPage or FinancialYearPage or SystemSettingsPage or BackupRestorePage
+            => ["Home", "Administration", GetPageDisplayName(pageKey)],
+        ExpenseManagementPage or IroningManagementPage or SalaryManagementPage or BranchManagementPage
+            => ["Home", "Operations", GetPageDisplayName(pageKey)],
+        _ => ["Home", GetPageDisplayName(pageKey)]
     };
 
     /// <summary>

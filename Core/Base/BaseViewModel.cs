@@ -65,6 +65,15 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public partial string ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
+    /// Last page-load failure captured by <see cref="RunLoadAsync"/>.
+    /// Views use this to show retry-oriented error overlays without
+    /// hijacking inline validation and command errors.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasLoadError))]
+    public partial string LoadErrorMessage { get; set; } = string.Empty;
+
+    /// <summary>
     /// Identifies the field that caused the first validation failure.
     /// Views use this key for structured focus routing instead of
     /// parsing <see cref="ErrorMessage"/> text.
@@ -91,6 +100,11 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     /// <c>true</c> when <see cref="SuccessMessage"/> is non-empty.
     /// </summary>
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
+
+    /// <summary>
+    /// <c>true</c> when the last load operation failed.
+    /// </summary>
+    public bool HasLoadError => !string.IsNullOrEmpty(LoadErrorMessage);
 
     /// <summary>
     /// All validation errors from the last <see cref="Validate"/> call (#432).
@@ -282,6 +296,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     {
         var ct = ResetCancellation();
         ErrorMessage = string.Empty;
+        LoadErrorMessage = string.Empty;
         IsLoading = true;
         try
         {
@@ -295,6 +310,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
         {
             VmLogger.LogError(ex, "RunLoadAsync failed in {ViewModel}", GetType().Name);
             ErrorMessage = ex.Message;
+            LoadErrorMessage = ex.Message;
         }
         finally
         {
@@ -309,6 +325,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public virtual void ClearState()
     {
         ErrorMessage = string.Empty;
+        LoadErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
         IsBusy = false;
         IsLoading = false;

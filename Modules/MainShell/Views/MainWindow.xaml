@@ -166,6 +166,204 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="ShellBreadcrumbBarStyle" TargetType="controls:BreadcrumbBar">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="NavigationRailActionButtonStyle" TargetType="Button" BasedOn="{x:Null}">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RailButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource FluentCornerLarge}">
+                            <Grid>
+                                <Border x:Name="RailSelectionBar"
+                                        Width="3"
+                                        Margin="0,8,0,8"
+                                        HorizontalAlignment="Left"
+                                        Background="{StaticResource FluentAccentDefault}"
+                                        CornerRadius="2"
+                                        Opacity="0"/>
+                                <Grid Margin="12,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Icon}"
+                                               VerticalAlignment="Center"
+                                               FontSize="{StaticResource FontSizeIconMedium}"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="12,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding Title}"
+                                               FontSize="{StaticResource FontSizeCaption}"
+                                               FontWeight="Normal"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                               Visibility="{Binding DataContext.IsNavigationRailExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RailButtonBorder" Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RailButtonBorder" Property="Background" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="True">
+                                <Setter TargetName="RailButtonBorder" Property="Background" Value="{StaticResource LayerFillColorDefault}"/>
+                                <Setter TargetName="RailSelectionBar" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="RailButtonBorder" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavigationRailUtilityButtonStyle" TargetType="Button" BasedOn="{x:Null}">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RailUtilityBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource FluentCornerLarge}">
+                            <ContentPresenter Margin="12,8"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RailUtilityBorder" Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RailUtilityBorder" Property="Background" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="RailUtilityBorder" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavigationRailToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource NavigationRailUtilityButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RailToggleBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource FluentCornerLarge}">
+                            <Grid Margin="12,8">
+                                <TextBlock x:Name="HamburgerGlyph"
+                                           Text="&#xE700;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconMedium}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform Angle="0"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                                <TextBlock x:Name="BackGlyph"
+                                           Text="&#xE72B;"
+                                           FontFamily="{StaticResource FluentIconFont}"
+                                           FontSize="{StaticResource FontSizeIconMedium}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Opacity="0"
+                                           RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform Angle="-90"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RailToggleBorder" Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RailToggleBorder" Property="Background" Value="{StaticResource SubtleFillColorTertiary}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
+                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
+                                                             To="90"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
+                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
+                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
+                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
+                                                             To="-90"
+                                                             Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -514,12 +712,12 @@
                                                             </DockPanel>
 
                                                             <!-- Message -->
-                                                            <TextBlock Grid.Column="1" Grid.Row="1"
-                                                                       Text="{Binding Message}"
-                                                                       Foreground="{StaticResource FluentTextSecondary}" FontSize="{StaticResource FontSizeCaption}"
-                                                                       TextWrapping="WrapWithOverflow"
-                                                                       TextTrimming="CharacterEllipsis"
-                                                                       MaxHeight="{StaticResource NotificationMessageMaxHeight}" Margin="{StaticResource HintTextSpacing}"/>
+                                                            <controls:ExpandableTextBlock Grid.Column="1" Grid.Row="1"
+                                                                                          Text="{Binding Message}"
+                                                                                          Foreground="{StaticResource FluentTextSecondary}"
+                                                                                          FontSize="{StaticResource FontSizeCaption}"
+                                                                                          CollapsedLineCount="2"
+                                                                                          Margin="{StaticResource HintTextSpacing}"/>
                                                         </Grid>
                                                     </Border>
                                                 </DataTemplate>
@@ -564,12 +762,23 @@
                 <!-- Quick actions (left, fills remaining space) -->
                 <Grid x:Name="QuickActionsViewport"
                       SizeChanged="OnQuickActionsViewportSizeChanged">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <ItemsControl Grid.Column="0"
+                    <controls:BreadcrumbBar Grid.Row="0"
+                                            Grid.ColumnSpan="2"
+                                            Style="{StaticResource ShellBreadcrumbBarStyle}"
+                                            ItemsSource="{Binding ShellBreadcrumbItems}"
+                                            ItemClickCommand="{Binding ActivateBreadcrumbCommand}"/>
+
+                    <ItemsControl Grid.Row="1"
+                                  Grid.Column="0"
                                   ItemsSource="{Binding VisibleQuickActions}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -585,7 +794,8 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <Grid Grid.Column="1"
+                    <Grid Grid.Row="1"
+                          Grid.Column="1"
                           Margin="6,0,0,0"
                           VerticalAlignment="Center"
                           Visibility="{Binding HasOverflowQuickActions, Converter={StaticResource BoolToVisibility}}">
@@ -664,8 +874,103 @@
                     </Style.Triggers>
                 </Style>
             </Border.Style>
-            <controls:ResponsiveContentControl x:Name="ShellContentHost"
-                                               Content="{Binding CurrentView}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="NavigationRailHost"
+                        Grid.Column="0"
+                        Width="56"
+                        Margin="8"
+                        Padding="8"
+                        VerticalAlignment="Stretch"
+                        Background="{StaticResource ChromeAltFillColorSecondary}"
+                        BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource FluentCornerXLarge}"
+                        Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Button Grid.Row="0"
+                                Command="{Binding ToggleNavigationRailOrNavigateBackCommand}"
+                                Tag="{Binding IsNavigationRailBackMode}"
+                                Style="{StaticResource NavigationRailToggleButtonStyle}"
+                                AutomationProperties.Name="Navigation rail toggle"
+                                ToolTip="Navigation"/>
+
+                        <ScrollViewer Grid.Row="1"
+                                      Margin="0,8,0,8"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Focusable="False">
+                            <ItemsControl ItemsSource="{Binding QuickActions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding Command}"
+                                                Tag="{Binding IsActive}"
+                                                Style="{StaticResource NavigationRailActionButtonStyle}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <Button Grid.Row="2"
+                                Command="{Binding ToggleNotificationsPanelCommand}"
+                                Style="{StaticResource NavigationRailUtilityButtonStyle}"
+                                AutomationProperties.Name="Notifications rail shortcut"
+                                ToolTip="Notifications">
+                            <Grid h:NotificationBadgeBehavior.Count="{Binding AppState.UnreadNotificationCount}"
+                                  h:NotificationBadgeBehavior.DotOnly="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="🔔"
+                                           VerticalAlignment="Center"
+                                           FontSize="{StaticResource FontSizeIconMedium}"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                <TextBlock Grid.Column="1"
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Text="Notifications"
+                                           FontSize="{StaticResource FontSizeCaption}"
+                                           FontWeight="Normal"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                           Visibility="{Binding IsNavigationRailExpanded, Converter={StaticResource BoolToVisibility}}"/>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <controls:ResponsiveContentControl x:Name="ShellContentHost"
+                                                   Grid.Column="1"
+                                                   Content="{Binding CurrentView}"/>
+
+                <!-- Safety fallback: visible only while CurrentView is null -->
+                <TextBlock Grid.Column="1"
+                           Text="Loading…"
+                           Foreground="{StaticResource FluentTextTertiary}"
+                           FontSize="{StaticResource FontSizeBody}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentView}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
         </Border>
 
         <Grid Grid.Row="0"

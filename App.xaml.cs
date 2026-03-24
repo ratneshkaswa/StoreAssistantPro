@@ -83,7 +83,9 @@ public partial class App : Application
         _host.Services.GetRequiredService<OnboardingTipRegistrar>();
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
+        var themeService = _host.Services.GetRequiredService<IThemeService>();
         HighContrastSync.Attach(this);
+        SystemThemeSync.Attach(this, themeService);
         SystemAccentSync.Attach(this);
 
         // Wire static logger factory into BaseViewModel so all
@@ -164,6 +166,7 @@ public partial class App : Application
         finally
         {
             HighContrastSync.Detach();
+            SystemThemeSync.Detach();
             SystemAccentSync.Detach();
             host?.Dispose();
             base.OnExit(e);

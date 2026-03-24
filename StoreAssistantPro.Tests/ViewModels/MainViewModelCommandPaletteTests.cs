@@ -140,6 +140,30 @@ public sealed class MainViewModelCommandPaletteTests
         Assert.False(sut.QuickActions.Single(action => action.Title == "Billing").IsActive);
     }
 
+    [Fact]
+    public void NavigationRail_Toggle_Should_Expand_On_Home_And_Go_Back_From_Inner_Page()
+    {
+        var sut = CreateSut();
+
+        sut.NavigateToMainWorkspaceCommand.Execute(null);
+
+        Assert.False(sut.IsNavigationRailBackMode);
+
+        sut.ToggleNavigationRailOrNavigateBackCommand.Execute(null);
+
+        Assert.True(sut.IsNavigationRailExpanded);
+        Assert.Equal(320, sut.NavigationRailWidth);
+
+        sut.OpenReportsCommand.Execute(null);
+
+        Assert.True(sut.IsNavigationRailBackMode);
+
+        sut.ToggleNavigationRailOrNavigateBackCommand.Execute(null);
+
+        Assert.False(sut.IsNavigationRailBackMode);
+        Assert.Contains("Home", sut.WindowTitle);
+    }
+
     private MainViewModel CreateSut()
     {
         var navigation = new StubNavigationService();

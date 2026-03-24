@@ -118,6 +118,7 @@ internal static class HostingExtensions
         services.AddSingleton<IOfflineModeService, OfflineModeService>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IToastService, ToastService>();
+        services.AddSingleton<IUiDensityService, UiDensityService>();
         services.AddSingleton<ICalmUIService, CalmUIService>();
         services.AddSingleton<IFocusRuleEngine, FocusRuleEngine>();
         services.AddSingleton<IPredictiveFocusService, PredictiveFocusService>();
@@ -139,6 +140,7 @@ internal static class HostingExtensions
         services.AddSingleton<IAutoLogoutService, AutoLogoutService>();
         services.AddTransient<ISystemHealthService, SystemHealthService>();
         services.AddSingleton<IUndoService, UndoService>();
+        services.AddSingleton<IThemeService, ThemeService>();
 
         return services;
     }

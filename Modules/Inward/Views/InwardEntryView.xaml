@@ -26,125 +26,222 @@
             </Grid.RowDefinitions>
             <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inward Entry"/></TextBlock>
 
-            <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource ItemSpacing}" Width="{StaticResource StepIndicatorWidth}">
+            <Grid Grid.Row="1"
+                  HorizontalAlignment="Center"
+                  Margin="0,12,0,0"
+                  Width="336">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="8"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Step 1 -->
-                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                    <Ellipse Width="{StaticResource StepDotSize}" Height="{StaticResource StepDotSize}" HorizontalAlignment="Center">
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <TextBlock Text="Parcels" HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsStep1}" Value="True">
-                                        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
-
-                <Border Grid.Column="1" Height="{StaticResource StepConnectorHeight}" VerticalAlignment="Top" Margin="{StaticResource StepConnectorTopOffset}">
+                <Border x:Name="Step1Segment"
+                        Grid.Column="0"
+                        Height="8"
+                        CornerRadius="4"
+                        Background="{StaticResource FluentAccentDefault}"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <ScaleTransform ScaleX="1"
+                                        ScaleY="1"/>
+                    </Border.RenderTransform>
                     <Border.Style>
                         <Style TargetType="Border">
-                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="Step1PulseStoryboard">
+                                            <Storyboard AutoReverse="True"
+                                                        RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                 To="1.03"
+                                                                 Duration="0:0:0.45"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                 To="1.18"
+                                                                 Duration="0:0:0.45"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="Step1PulseStoryboard"/>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                 To="1"
+                                                                 Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                 To="1"
+                                                                 Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <Border x:Name="Step2Segment"
+                        Grid.Column="2"
+                        Height="8"
+                        CornerRadius="4"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <ScaleTransform ScaleX="1"
+                                        ScaleY="1"/>
+                    </Border.RenderTransform>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource ChromeAltFillColorSecondary}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsStep1}" Value="False">
                                     <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
                                 </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                </Border>
-
-                <!-- Step 2 -->
-                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                    <Ellipse Width="{StaticResource StepDotSize}" Height="{StaticResource StepDotSize}" HorizontalAlignment="Center">
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="{StaticResource FluentStrokeDefault}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsStep1}" Value="False">
-                                        <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <TextBlock Text="Transport" HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsStep2}" Value="True">
-                                        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
-
-                <Border Grid.Column="3" Height="{StaticResource StepConnectorHeight}" VerticalAlignment="Top" Margin="{StaticResource StepConnectorTopOffset}">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="Background" Value="{StaticResource FluentStrokeDefault}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                <DataTrigger Binding="{Binding IsStep2}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="Step2PulseStoryboard">
+                                            <Storyboard AutoReverse="True"
+                                                        RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                 To="1.03"
+                                                                 Duration="0:0:0.45"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                 To="1.18"
+                                                                 Duration="0:0:0.45"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="Step2PulseStoryboard"/>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                 To="1"
+                                                                 Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                 To="1"
+                                                                 Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
                 </Border>
 
-                <!-- Step 3 -->
-                <StackPanel Grid.Column="4" HorizontalAlignment="Center">
-                    <Ellipse Width="{StaticResource StepDotSize}" Height="{StaticResource StepDotSize}" HorizontalAlignment="Center">
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="{StaticResource FluentStrokeDefault}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsStep3}" Value="True">
-                                        <Setter Property="Fill" Value="{StaticResource FluentAccentDefault}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <TextBlock Text="Products" HorizontalAlignment="Center"
-                               FontSize="{StaticResource FontSizeCaption}" Margin="{StaticResource StepLabelSpacing}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsStep3}" Value="True">
-                                        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
+                <Border x:Name="Step3Segment"
+                        Grid.Column="4"
+                        Height="8"
+                        CornerRadius="4"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <ScaleTransform ScaleX="1"
+                                        ScaleY="1"/>
+                    </Border.RenderTransform>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource ChromeAltFillColorSecondary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard x:Name="Step3PulseStoryboard">
+                                            <Storyboard AutoReverse="True"
+                                                        RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                 To="1.03"
+                                                                 Duration="0:0:0.45"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                 To="1.18"
+                                                                 Duration="0:0:0.45"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="Step3PulseStoryboard"/>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                 To="1"
+                                                                 Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                 To="1"
+                                                                 Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           Margin="0,8,0,0"
+                           Text="Parcels"
+                           TextAlignment="Center"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="2"
+                           Margin="0,8,0,0"
+                           Text="Transport"
+                           TextAlignment="Center"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep1}" Value="False">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsStep2}" Value="True">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="4"
+                           Margin="0,8,0,0"
+                           Text="Products"
+                           TextAlignment="Center"
+                           FontSize="{StaticResource FontSizeCaption}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStep3}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </Grid>
 
@@ -241,7 +338,8 @@
                                                   AutomationProperties.Name="Parcel vendor"
                                                   ItemsSource="{Binding DataContext.Vendors, ElementName=Root}"
                                                   SelectedItem="{Binding SelectedVendor}"
-                                                  DisplayMemberPath="Name"/>
+                                                  DisplayMemberPath="Name"
+                                                  Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                     </Grid>
 
                                     <!-- Product rows -->
@@ -291,7 +389,8 @@
                                                         <ComboBox ItemsSource="{Binding DataContext.Products, ElementName=Root}"
                                                                   AutomationProperties.Name="Parcel product"
                                                                   SelectedItem="{Binding SelectedProduct}"
-                                                                  DisplayMemberPath="Name"/>
+                                                                  DisplayMemberPath="Name"
+                                                                  Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                                         <TextBox Grid.Column="1"
                                                                  AutomationProperties.Name="Parcel quantity"
                                                                  Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
@@ -303,25 +402,29 @@
                                                                   ItemsSource="{Binding DataContext.Colours, ElementName=Root}"
                                                                   SelectedItem="{Binding SelectedColour}"
                                                                   IsEnabled="{Binding CanSelectColour}"
-                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"
+                                                                  Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                                         <ComboBox Grid.Column="3"
                                                                   AutomationProperties.Name="Parcel size"
                                                                   ItemsSource="{Binding DataContext.Sizes, ElementName=Root}"
                                                                   SelectedItem="{Binding SelectedSize}"
                                                                   IsEnabled="{Binding CanSelectSize}"
-                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"
+                                                                  Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                                         <ComboBox Grid.Column="4"
                                                                   AutomationProperties.Name="Parcel pattern"
                                                                   ItemsSource="{Binding DataContext.Patterns, ElementName=Root}"
                                                                   SelectedItem="{Binding SelectedPattern}"
                                                                   IsEnabled="{Binding CanSelectPattern}"
-                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"
+                                                                  Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                                         <ComboBox Grid.Column="5"
                                                                   AutomationProperties.Name="Parcel variant type"
                                                                   ItemsSource="{Binding DataContext.VariantTypes, ElementName=Root}"
                                                                   SelectedItem="{Binding SelectedVariantType}"
                                                                   IsEnabled="{Binding CanSelectVariantType}"
-                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"/>
+                                                                  DisplayMemberPath="Name" Margin="{StaticResource InlineControlSpacing}"
+                                                                  Style="{StaticResource FluentAutoSuggestComboBoxStyle}"/>
                                                         <Button Grid.Column="6"
                                                                 Content="Remove"
                                                                 Command="{Binding DataContext.RemoveProductRowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -379,6 +482,13 @@
                         Visibility="{Binding IsLastStep, Converter={StaticResource BoolToVisibility}}"/>
             </Grid>
         </Grid>
+        <controls:ErrorStateOverlay Grid.Row="1"
+                                    IsOpen="{Binding HasLoadError}"
+                                    Icon=":("
+                                    Title="Couldn't load inward entry data"
+                                    Description="{Binding LoadErrorMessage}"
+                                    ActionText="Retry"
+                                    ActionCommand="{Binding LoadCommand}"/>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving inward entry..."/>
     </Grid>

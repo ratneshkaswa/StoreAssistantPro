@@ -264,6 +264,9 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Margin="0,0,16,0">
@@ -334,6 +337,55 @@
                                                Visibility="Visible"
                                                Margin="0,6,0,0"
                                                TextWrapping="Wrap"/>
+
+                                    <Border Grid.Row="5" Grid.ColumnSpan="2"
+                                            Height="1"
+                                            Margin="0,12,0,12"
+                                            Background="{StaticResource DividerStrokeColorDefault}"/>
+
+                                    <StackPanel Grid.Row="6" Grid.RowSpan="2" Grid.Column="0" Margin="0,0,16,0">
+                                        <TextBlock x:Name="DensityModeLabel"
+                                                   Text="Density"
+                                                   Style="{StaticResource FormRowLabelStyle}"
+                                                   Margin="0"/>
+                                        <TextBlock Text="Switch shared lists and grids between the normal and compact row densities."
+                                                   Style="{StaticResource HintTextStyle}"
+                                                   Visibility="Visible"
+                                                   Margin="0,4,0,0"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <Border Grid.Row="6" Grid.Column="1"
+                                            Background="{StaticResource LayerFillColorSecondary}"
+                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                            BorderThickness="1"
+                                            CornerRadius="16"
+                                            Padding="4"
+                                            HorizontalAlignment="Left"
+                                            AutomationProperties.Name="Density mode">
+                                        <StackPanel Orientation="Horizontal"
+                                                    Style="{StaticResource SegmentedFilterHostStyle}">
+                                            <Button Content="Normal"
+                                                    Command="{Binding SetDensityModeCommand}"
+                                                    CommandParameter="Normal"
+                                                    Style="{StaticResource SegmentedFilterButtonStyle}"
+                                                    Tag="{Binding IsCompactModeEnabled, Converter={StaticResource InverseBoolConverter}}"
+                                                    AutomationProperties.LabeledBy="{Binding ElementName=DensityModeLabel}"/>
+                                            <Button Content="Compact"
+                                                    Command="{Binding SetDensityModeCommand}"
+                                                    CommandParameter="Compact"
+                                                    Style="{StaticResource SegmentedFilterButtonStyle}"
+                                                    Tag="{Binding IsCompactModeEnabled}"
+                                                    AutomationProperties.LabeledBy="{Binding ElementName=DensityModeLabel}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <TextBlock Grid.Row="7" Grid.Column="1"
+                                               Text="{Binding DensitySummaryText}"
+                                               Style="{StaticResource HintTextStyle}"
+                                               Visibility="Visible"
+                                               Margin="0,6,0,0"
+                                               TextWrapping="Wrap"/>
                                 </Grid>
                             </Grid>
                         </Border>
@@ -355,6 +407,10 @@
                                            Visibility="Visible"
                                            TextWrapping="Wrap"/>
                                 <TextBlock Text="{Binding AutoLogoutSummary}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           Visibility="Visible"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding DensitySummaryText}"
                                            Style="{StaticResource HintTextStyle}"
                                            Visibility="Visible"
                                            TextWrapping="Wrap"/>

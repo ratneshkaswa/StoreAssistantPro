@@ -169,6 +169,55 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
             : string.Empty;
     }
 
+    public async Task<bool> TryInlineRenameAsync(
+        Brand? brand,
+        string? editedName,
+        string? originalName,
+        CancellationToken ct = default)
+    {
+        if (brand is null)
+            return false;
+
+        ClearMessages();
+
+        var fallbackName = string.IsNullOrWhiteSpace(originalName)
+            ? brand.Name
+            : originalName.Trim();
+        var trimmedName = editedName?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(trimmedName))
+        {
+            brand.Name = fallbackName;
+            ErrorMessage = "Brand name is required.";
+            return false;
+        }
+
+        if (string.Equals(trimmedName, fallbackName, StringComparison.Ordinal))
+        {
+            brand.Name = trimmedName;
+            if (SelectedBrand?.Id == brand.Id)
+                BrandName = trimmedName;
+            return true;
+        }
+
+        try
+        {
+            await brandService.UpdateAsync(brand.Id, trimmedName, ct);
+            brand.Name = trimmedName;
+            if (SelectedBrand?.Id == brand.Id)
+                BrandName = trimmedName;
+
+            SuccessMessage = "Brand updated.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            brand.Name = fallbackName;
+            ErrorMessage = ex.Message;
+            return false;
+        }
+    }
+
     private void ClearMessages()
     {
         ErrorMessage = string.Empty;

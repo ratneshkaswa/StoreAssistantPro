@@ -34,6 +34,7 @@ public class FluentControlsTests
     [InlineData(typeof(ProgressRing))]
     [InlineData(typeof(LoadingOverlay))]
     [InlineData(typeof(NumberBox))]
+    [InlineData(typeof(DateRangePicker))]
     [InlineData(typeof(FluentExpander))]
     [InlineData(typeof(BreadcrumbBar))]
     [InlineData(typeof(BreadcrumbBarItem))]
@@ -83,6 +84,16 @@ public class FluentControlsTests
     }
 
     [Fact]
+    public void DateRangePicker_HasRequiredDependencyProperties()
+    {
+        Assert.NotNull(DateRangePicker.StartDateProperty);
+        Assert.NotNull(DateRangePicker.EndDateProperty);
+        Assert.NotNull(DateRangePicker.StartHeaderProperty);
+        Assert.NotNull(DateRangePicker.EndHeaderProperty);
+        Assert.NotNull(DateRangePicker.IsDropDownOpenProperty);
+    }
+
+    [Fact]
     public void FluentExpander_HasRequiredDependencyProperties()
     {
         Assert.NotNull(FluentExpander.IsExpandedProperty);
@@ -103,6 +114,20 @@ public class FluentControlsTests
             as FrameworkPropertyMetadata;
         Assert.NotNull(metadata);
         Assert.True(metadata.BindsTwoWayByDefault);
+    }
+
+    [Fact]
+    public void DateRangePicker_DateProperties_BindTwoWayByDefault()
+    {
+        var startMetadata = DateRangePicker.StartDateProperty.GetMetadata(typeof(DateRangePicker))
+            as FrameworkPropertyMetadata;
+        var endMetadata = DateRangePicker.EndDateProperty.GetMetadata(typeof(DateRangePicker))
+            as FrameworkPropertyMetadata;
+
+        Assert.NotNull(startMetadata);
+        Assert.NotNull(endMetadata);
+        Assert.True(startMetadata.BindsTwoWayByDefault);
+        Assert.True(endMetadata.BindsTwoWayByDefault);
     }
 
     [Fact]
@@ -146,11 +171,31 @@ public class FluentControlsTests
         });
     }
 
+    [Fact]
+    public void DateRangePicker_Maintains_A_Valid_Range()
+    {
+        RunOnSta(() =>
+        {
+            var picker = new DateRangePicker
+            {
+                StartDate = new DateTime(2026, 3, 20),
+                EndDate = new DateTime(2026, 3, 24)
+            };
+
+            picker.StartDate = new DateTime(2026, 3, 28);
+            Assert.Equal(new DateTime(2026, 3, 28), picker.EndDate);
+
+            picker.EndDate = new DateTime(2026, 3, 12);
+            Assert.Equal(new DateTime(2026, 3, 12), picker.StartDate);
+        });
+    }
+
     [Theory]
     [InlineData(typeof(InfoBar), typeof(Control))]
     [InlineData(typeof(ProgressRing), typeof(Control))]
     [InlineData(typeof(LoadingOverlay), typeof(Control))]
     [InlineData(typeof(NumberBox), typeof(Control))]
+    [InlineData(typeof(DateRangePicker), typeof(Control))]
     [InlineData(typeof(FluentExpander), typeof(HeaderedContentControl))]
     [InlineData(typeof(BreadcrumbBar), typeof(ItemsControl))]
     [InlineData(typeof(BreadcrumbBarItem), typeof(ContentControl))]

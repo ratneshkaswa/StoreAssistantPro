@@ -12,7 +12,8 @@ namespace StoreAssistantPro.Modules.Settings.ViewModels;
 public partial class SystemSettingsViewModel(
     ISystemSettingsService settingsService,
     ILoginService loginService,
-    IDialogService dialogService) : BaseViewModel
+    IDialogService dialogService,
+    IUiDensityService uiDensityService) : BaseViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BackupModeTitle))]
@@ -50,6 +51,10 @@ public partial class SystemSettingsViewModel(
     public partial double AutoLogoutMinutesValue { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DensitySummaryText))]
+    public partial bool IsCompactModeEnabled { get; set; }
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RestoreStatusText))]
     public partial string RestoreFilePath { get; set; } = string.Empty;
 
@@ -76,6 +81,10 @@ public partial class SystemSettingsViewModel(
     public string AutoLogoutSummary => AutoLogoutMinutes > 0
         ? $"Auto-logout after {AutoLogoutMinutes} minutes of inactivity."
         : "Auto-logout is disabled.";
+
+    public string DensitySummaryText => IsCompactModeEnabled
+        ? "Compact density is active. Shared table rows use the tighter layout."
+        : "Normal density is active. Shared table rows use the standard layout.";
 
     public string RestoreStatusText => string.IsNullOrWhiteSpace(RestoreFilePath)
         ? "No restore file selected."
@@ -127,6 +136,9 @@ public partial class SystemSettingsViewModel(
             AutoLogoutMinutes = roundedValue;
     }
 
+    partial void OnIsCompactModeEnabledChanged(bool value) =>
+        uiDensityService.SetCompactMode(value);
+
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
@@ -138,7 +150,12 @@ public partial class SystemSettingsViewModel(
         PrinterWidth = settings.PrinterWidth;
         DefaultPageSize = settings.DefaultPageSize;
         AutoLogoutMinutes = settings.AutoLogoutMinutes;
+        IsCompactModeEnabled = uiDensityService.IsCompactModeEnabled;
     });
+
+    [RelayCommand]
+    private void SetDensityMode(string? mode) =>
+        IsCompactModeEnabled = string.Equals(mode, "Compact", StringComparison.OrdinalIgnoreCase);
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>

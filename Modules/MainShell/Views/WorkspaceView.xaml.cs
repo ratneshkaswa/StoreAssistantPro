@@ -21,10 +21,10 @@ public partial class WorkspaceView : UserControl
             catch { /* RunLoadAsync handles logging */ }
         }
 
-        if (StartBillingButton.Visibility == Visibility.Visible)
+        if (StartBillingFab.Visibility == Visibility.Visible)
         {
             _ = Dispatcher.BeginInvoke(
-                () => StartBillingButton.Focus(),
+                () => StartBillingFab.Focus(),
                 DispatcherPriority.Input);
         }
     }

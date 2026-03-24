@@ -421,7 +421,7 @@
 
     <!-- ComboBoxItem ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Fluent hover/selection highlight -->
     <Style x:Key="FluentComboBoxItemStyle" TargetType="ComboBoxItem">
-        <Setter Property="Padding"             Value="10,6"/>
+        <Setter Property="Padding"             Value="12,8"/>
         <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"            Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground"          Value="{StaticResource FluentTextPrimary}"/>
@@ -434,7 +434,7 @@
                             Background="Transparent"
                             CornerRadius="{StaticResource FluentCornerSmall}"
                             Padding="{TemplateBinding Padding}"
-                            Margin="4,1"
+                            Margin="4,0"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
                         <ContentPresenter VerticalAlignment="Center"/>
@@ -628,12 +628,13 @@
         <Setter Property="BorderThickness"         Value="0"/>
         <Setter Property="FontFamily"              Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"                Value="{StaticResource FontSizeBody}"/>
-        <Setter Property="FontWeight"              Value="SemiBold"/>
+        <Setter Property="FontWeight"              Value="Normal"/>
         <Setter Property="Padding"                 Value="16,8"/>
         <Setter Property="Cursor"                  Value="Hand"/>
         <Setter Property="UseLayoutRounding"       Value="True"/>
         <Setter Property="SnapsToDevicePixels"     Value="True"/>
         <Setter Property="h:AutomationNameFallback.UseToolTipFallback" Value="True"/>
+        <Setter Property="h:ClickRipple.IsEnabled" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -739,6 +740,15 @@
         </Setter>
     </Style>
 
+    <Style x:Key="FluentAutoSuggestComboBoxStyle"
+           TargetType="ComboBox"
+           BasedOn="{StaticResource FluentComboBoxStyle}">
+        <Setter Property="IsEditable" Value="True"/>
+        <Setter Property="IsTextSearchEnabled" Value="False"/>
+        <Setter Property="StaysOpenOnEdit" Value="True"/>
+        <Setter Property="h:AutoCompleteComboBox.IsEnabled" Value="True"/>
+    </Style>
+
     <Style TargetType="{x:Type Hyperlink}">
         <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
         <Setter Property="TextDecorations" Value="{x:Null}"/>
@@ -769,6 +779,7 @@
         <Setter Property="UseLayoutRounding"       Value="True"/>
         <Setter Property="SnapsToDevicePixels"     Value="True"/>
         <Setter Property="h:AutomationNameFallback.UseToolTipFallback" Value="True"/>
+        <Setter Property="h:ClickRipple.IsEnabled" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -1279,6 +1290,7 @@
     <Style x:Key="FlyoutMenuSurfaceStyle"
            TargetType="Border"
            BasedOn="{StaticResource FlyoutPopupSurfaceStyle}">
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerMedium}"/>
         <Setter Property="Padding" Value="4"/>
     </Style>
 
@@ -1394,8 +1406,8 @@
                         <Border x:Name="TopBd"
                                 Background="Transparent"
                                 CornerRadius="{StaticResource FluentCornerSmall}"
-                                Padding="10,5"
-                                Margin="1,0"
+                                Padding="12,4"
+                                Margin="0,0,4,0"
                                 UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter ContentSource="Header"
@@ -1477,7 +1489,7 @@
         <Setter Property="Background"         Value="{StaticResource ChromeAltFillColorSecondary}"/>
         <Setter Property="BorderBrush"        Value="{StaticResource DividerStrokeColorDefault}"/>
         <Setter Property="BorderThickness"    Value="0,0,0,1"/>
-        <Setter Property="Padding"            Value="16,10"/>
+        <Setter Property="Padding"            Value="16,12"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
@@ -1492,7 +1504,7 @@
         <Setter Property="Foreground"          Value="{StaticResource FluentStatusBarForeground}"/>
         <Setter Property="FontFamily"          Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize"            Value="{StaticResource FontSizeCaption}"/>
-        <Setter Property="Padding"             Value="12,6"/>
+        <Setter Property="Padding"             Value="12,8"/>
         <Setter Property="UseLayoutRounding"   Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
@@ -1769,7 +1781,7 @@
                     <Border Background="{StaticResource LayerFillColorSecondary}"
                             BorderBrush="{StaticResource DividerStrokeColorDefault}"
                             BorderThickness="1"
-                            CornerRadius="{StaticResource FluentCornerLarge}"
+                            CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="4"
                             Margin="4"
                             Effect="{StaticResource ElevationEffectFlyout}"
@@ -1890,18 +1902,33 @@
         <Setter Property="Control.Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Border BorderBrush="#99000000"
-                            BorderThickness="{StaticResource FocusVisualThickness}"
-                            Margin="{StaticResource FocusVisualMargin}"
-                            CornerRadius="{StaticResource FluentCornerMedium}"
-                            UseLayoutRounding="True"
-                            SnapsToDevicePixels="True">
-                        <Border BorderBrush="#F2FFFFFF"
-                                BorderThickness="1"
+                    <Grid UseLayoutRounding="True"
+                          SnapsToDevicePixels="True">
+                        <Border x:Name="FocusGlow"
+                                Margin="-6"
+                                Background="{StaticResource FluentAccentDefault}"
+                                CornerRadius="{StaticResource FluentCornerMedium}"
+                                Opacity="0.18"
+                                UseLayoutRounding="True"
+                                SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <BlurEffect Radius="10"
+                                            RenderingBias="Performance"/>
+                            </Border.Effect>
+                        </Border>
+                        <Border BorderBrush="#99000000"
+                                BorderThickness="{StaticResource FocusVisualThickness}"
+                                Margin="{StaticResource FocusVisualMargin}"
                                 CornerRadius="{StaticResource FluentCornerMedium}"
                                 UseLayoutRounding="True"
-                                SnapsToDevicePixels="True"/>
-                    </Border>
+                                SnapsToDevicePixels="True">
+                            <Border BorderBrush="#F2FFFFFF"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource FluentCornerMedium}"
+                                    UseLayoutRounding="True"
+                                    SnapsToDevicePixels="True"/>
+                        </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -2916,6 +2943,7 @@
         <Setter Property="Background"              Value="{StaticResource FluentSurface}"/>
         <Setter Property="BorderBrush"             Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="MinHeight"               Value="{StaticResource ControlHeight}"/>
+        <Setter Property="h:BringFocusedFieldIntoView.IsEnabled" Value="True"/>
         <Setter Property="UseLayoutRounding"       Value="True"/>
         <Setter Property="SnapsToDevicePixels"     Value="True"/>
         <Setter Property="Template">
@@ -2980,7 +3008,7 @@
                                     <Button x:Name="PART_UpButton"
                                             Content="&#xE70E;"
                                             FontFamily="{StaticResource FluentIconFont}"
-                                            FontSize="10" Padding="6,2"
+                                            FontSize="10" Padding="8,4"
                                             Background="Transparent" BorderThickness="0"
                                             ToolTip="Increase value"
                                             AutomationProperties.Name="Increase value"
@@ -2988,7 +3016,7 @@
                                     <Button x:Name="PART_DownButton"
                                             Content="&#xE70D;"
                                             FontFamily="{StaticResource FluentIconFont}"
-                                            FontSize="10" Padding="6,2"
+                                            FontSize="10" Padding="8,4"
                                             Background="Transparent" BorderThickness="0"
                                             ToolTip="Decrease value"
                                             AutomationProperties.Name="Decrease value"
@@ -3327,7 +3355,7 @@
                         <Trigger Property="IsLast" Value="True">
                             <Setter TargetName="PART_Button" Property="Foreground"
                                     Value="{StaticResource FluentTextPrimary}"/>
-                            <Setter TargetName="PART_Button" Property="FontWeight" Value="SemiBold"/>
+                            <Setter TargetName="PART_Button" Property="FontWeight" Value="Normal"/>
                             <Setter TargetName="PART_Button" Property="IsEnabled" Value="False"/>
                             <Setter TargetName="Chevron" Property="Visibility" Value="Collapsed"/>
                         </Trigger>

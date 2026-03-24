@@ -39,6 +39,15 @@ public class BaseViewModelTests
     }
 
     [Fact]
+    public void LoadErrorMessage_DefaultsToEmpty()
+    {
+        var sut = new TestViewModel();
+
+        Assert.Equal(string.Empty, sut.LoadErrorMessage);
+        Assert.False(sut.HasLoadError);
+    }
+
+    [Fact]
     public void IsLoading_DefaultsToFalse()
     {
         var sut = new TestViewModel();
@@ -60,6 +69,7 @@ public class BaseViewModelTests
         var sut = new TestViewModel
         {
             ErrorMessage = "some error",
+            LoadErrorMessage = "load error",
             IsBusy = true,
             IsLoading = true
         };
@@ -67,6 +77,7 @@ public class BaseViewModelTests
         sut.ClearState();
 
         Assert.Equal(string.Empty, sut.ErrorMessage);
+        Assert.Equal(string.Empty, sut.LoadErrorMessage);
         Assert.False(sut.IsBusy);
         Assert.False(sut.IsLoading);
     }
@@ -173,6 +184,7 @@ public class BaseViewModelTests
         Assert.True(wasLoadingDuring);
         Assert.False(sut.IsLoading);
         Assert.Equal(string.Empty, sut.ErrorMessage);
+        Assert.Equal(string.Empty, sut.LoadErrorMessage);
     }
 
     [Fact]
@@ -183,6 +195,8 @@ public class BaseViewModelTests
         await sut.TestRunLoadAsync(ct => throw new InvalidOperationException("load fail"));
 
         Assert.Equal("load fail", sut.ErrorMessage);
+        Assert.Equal("load fail", sut.LoadErrorMessage);
+        Assert.True(sut.HasLoadError);
         Assert.False(sut.IsLoading);
     }
 
@@ -194,6 +208,7 @@ public class BaseViewModelTests
         await sut.TestRunLoadAsync(ct => throw new OperationCanceledException());
 
         Assert.Equal(string.Empty, sut.ErrorMessage);
+        Assert.Equal(string.Empty, sut.LoadErrorMessage);
         Assert.False(sut.IsLoading);
     }
 

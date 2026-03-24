@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using StoreAssistantPro.Core.Helpers;
 
 namespace StoreAssistantPro.Core.Controls;
 
@@ -19,6 +20,7 @@ public class ResponsiveContentControl : ContentControl
     private const string PartTransitionHost = "PART_TransitionHost";
     private const string PartCurrentPresenter = "PART_CurrentPresenter";
     private const string PartPreviousSnapshot = "PART_PreviousSnapshot";
+    private const string PartConnectedSnapshot = "PART_ConnectedSnapshot";
 
     private const string PageExitDurationKey = "FluentDurationPageExit";
     private const string PageExitOffsetKey = "MotionSlideOffsetExitSmall";
@@ -26,6 +28,7 @@ public class ResponsiveContentControl : ContentControl
     private const string ViewSwitchEnterDurationKey = "FluentDurationViewSwitchEnter";
     private const string ViewSwitchEnterDelayKey = "FluentDurationViewSwitchOverlap";
     private const string ViewSwitchEnterEaseKey = "FluentEaseDecelerate";
+    private const string ConnectedAnimationDurationKey = "FluentDurationConnectedAnimation";
 
     public static readonly DependencyProperty PreviousSnapshotProperty =
         DependencyProperty.Register(
@@ -45,6 +48,7 @@ public class ResponsiveContentControl : ContentControl
     private FrameworkElement? _transitionHost;
     private ContentPresenter? _currentPresenter;
     private Image? _previousSnapshotImage;
+    private Image? _connectedSnapshotImage;
     private int _transitionVersion;
 
     static ResponsiveContentControl()
@@ -80,6 +84,7 @@ public class ResponsiveContentControl : ContentControl
         _transitionHost = GetTemplateChild(PartTransitionHost) as FrameworkElement;
         _currentPresenter = GetTemplateChild(PartCurrentPresenter) as ContentPresenter;
         _previousSnapshotImage = GetTemplateChild(PartPreviousSnapshot) as Image;
+        _connectedSnapshotImage = GetTemplateChild(PartConnectedSnapshot) as Image;
 
         if (_scrollViewer is not null)
         {
@@ -119,6 +124,7 @@ public class ResponsiveContentControl : ContentControl
         var version = ++_transitionVersion;
         StartCurrentEnterTransition(version);
         StartSnapshotExitTransition(previousSnapshot, version);
+        StartConnectedTransition(version);
     }
 
     private RenderTargetBitmap? CaptureCurrentSnapshot(object oldContent, object newContent)
@@ -239,6 +245,85 @@ public class ResponsiveContentControl : ContentControl
         _currentPresenter.BeginAnimation(OpacityProperty, fadeAnimation);
     }
 
+    private void StartConnectedTransition(int version)
+    {
+        if (_connectedSnapshotImage is null ||
+            _transitionHost is null ||
+            !IsLoaded)
+        {
+            ClearConnectedSnapshotState();
+            return;
+        }
+
+        var window = Window.GetWindow(this);
+        if (window is null ||
+            !ConnectedNavigationSource.TryConsume(window, out var snapshot))
+        {
+            ClearConnectedSnapshotState();
+            return;
+        }
+
+        var hostBounds = _transitionHost.TransformToAncestor(window)
+            .TransformBounds(new Rect(0, 0, _transitionHost.ActualWidth, _transitionHost.ActualHeight));
+
+        var startLeft = snapshot.SourceBounds.Left - hostBounds.Left;
+        var startTop = snapshot.SourceBounds.Top - hostBounds.Top;
+        var startWidth = Math.Max(1, snapshot.SourceBounds.Width);
+        var startHeight = Math.Max(1, snapshot.SourceBounds.Height);
+        var duration = GetDuration(ConnectedAnimationDurationKey, TimeSpan.FromMilliseconds(250));
+        var easing = TryFindEase(ViewSwitchEnterEaseKey);
+
+        _connectedSnapshotImage.Source = snapshot.Snapshot;
+        _connectedSnapshotImage.Visibility = Visibility.Visible;
+        _connectedSnapshotImage.Opacity = 1;
+        _connectedSnapshotImage.Width = startWidth;
+        _connectedSnapshotImage.Height = startHeight;
+        Canvas.SetLeft(_connectedSnapshotImage, startLeft);
+        Canvas.SetTop(_connectedSnapshotImage, startTop);
+
+        if (duration == TimeSpan.Zero)
+        {
+            ClearConnectedSnapshotState();
+            return;
+        }
+
+        var fadeAnimation = new DoubleAnimation(1, 0, new Duration(duration))
+        {
+            EasingFunction = easing,
+            FillBehavior = FillBehavior.Stop
+        };
+        fadeAnimation.Completed += (_, _) => CompleteConnectedTransition(version);
+        _connectedSnapshotImage.BeginAnimation(OpacityProperty, fadeAnimation);
+        _connectedSnapshotImage.BeginAnimation(
+            WidthProperty,
+            new DoubleAnimation(startWidth, _transitionHost.ActualWidth, new Duration(duration))
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+        _connectedSnapshotImage.BeginAnimation(
+            HeightProperty,
+            new DoubleAnimation(startHeight, _transitionHost.ActualHeight, new Duration(duration))
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+        _connectedSnapshotImage.BeginAnimation(
+            Canvas.LeftProperty,
+            new DoubleAnimation(startLeft, 0, new Duration(duration))
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+        _connectedSnapshotImage.BeginAnimation(
+            Canvas.TopProperty,
+            new DoubleAnimation(startTop, 0, new Duration(duration))
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+    }
+
     private void CompleteSnapshotExit(int version)
     {
         if (version != _transitionVersion)
@@ -257,6 +342,14 @@ public class ResponsiveContentControl : ContentControl
         }
 
         ResetCurrentPresenter();
+    }
+
+    private void CompleteConnectedTransition(int version)
+    {
+        if (version != _transitionVersion)
+            return;
+
+        ClearConnectedSnapshotState();
     }
 
     private void ResetCurrentPresenter()
@@ -302,6 +395,27 @@ public class ResponsiveContentControl : ContentControl
         var translate = EnsureTranslateTransform(_previousSnapshotImage);
         translate.BeginAnimation(TranslateTransform.YProperty, null);
         translate.Y = 0;
+
+        ClearConnectedSnapshotState();
+    }
+
+    private void ClearConnectedSnapshotState()
+    {
+        if (_connectedSnapshotImage is null)
+            return;
+
+        _connectedSnapshotImage.BeginAnimation(OpacityProperty, null);
+        _connectedSnapshotImage.BeginAnimation(WidthProperty, null);
+        _connectedSnapshotImage.BeginAnimation(HeightProperty, null);
+        _connectedSnapshotImage.BeginAnimation(Canvas.LeftProperty, null);
+        _connectedSnapshotImage.BeginAnimation(Canvas.TopProperty, null);
+        _connectedSnapshotImage.Visibility = Visibility.Collapsed;
+        _connectedSnapshotImage.Source = null;
+        _connectedSnapshotImage.Width = double.NaN;
+        _connectedSnapshotImage.Height = double.NaN;
+        _connectedSnapshotImage.Opacity = 1;
+        Canvas.SetLeft(_connectedSnapshotImage, 0);
+        Canvas.SetTop(_connectedSnapshotImage, 0);
     }
 
     private TimeSpan GetDuration(string key, TimeSpan fallback)
