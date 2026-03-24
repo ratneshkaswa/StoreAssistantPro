@@ -10,6 +10,7 @@
          ================================================================= -->
     <Thickness x:Key="InlineValidationTextPadding">12,8,32,8</Thickness>
     <Thickness x:Key="InlineValidationTrailingChromePadding">12,8,36,8</Thickness>
+    <h:DoubleGreaterThanConverter x:Key="DoubleGreaterThanConverter"/>
 
     <!-- ErrorTemplate = adorner layer. Keep the border on the control
          itself, then overlay a small inline error badge inside the
@@ -1180,6 +1181,13 @@
                                       Data="M 0,0 L 4,4 L 8,0 Z"/>
                             </Grid>
                         </Border>
+                        <Border x:Name="StickyHeaderShadow"
+                                Height="4"
+                                Margin="0,0,0,-4"
+                                VerticalAlignment="Bottom"
+                                Background="{StaticResource StickyHeaderShadowBrush}"
+                                Opacity="0"
+                                IsHitTestVisible="False"/>
                         <Thumb x:Name="PART_RightHeaderGripper"
                                HorizontalAlignment="Right" Width="6"
                                Background="Transparent"
@@ -1202,6 +1210,13 @@
                         </Thumb>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding VerticalOffset,
+                                                       RelativeSource={RelativeSource AncestorType=ScrollViewer},
+                                                       Converter={StaticResource DoubleGreaterThanConverter},
+                                                       ConverterParameter=0}"
+                                     Value="True">
+                            <Setter TargetName="StickyHeaderShadow" Property="Opacity" Value="1"/>
+                        </DataTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="HeaderBd" Property="Background"
                                     Value="{StaticResource SubtleFillColorSecondary}"/>

@@ -142,6 +142,10 @@
     <SolidColorBrush x:Key="SubtleFillColorTertiary"    Color="#12000000"/>
     <SolidColorBrush x:Key="ChromeAltFillColorSecondary" Color="#FFF6F6F6"/>
     <SolidColorBrush x:Key="ControlAltFillColorSecondary" Color="#FFF3F3F3"/>
+    <LinearGradientBrush x:Key="StickyHeaderShadowBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="#14000000"/>
+        <GradientStop Offset="1" Color="#00000000"/>
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="SmokeOverlayBrush"          Color="#66000000"/>
     <SolidColorBrush x:Key="DialogOwnerSmokeOverlayBrush" Color="#66F3F3F3"/>
     <SolidColorBrush x:Key="DialogHeaderFrostBrush" Color="#99FFFFFF"/>

@@ -42,6 +42,66 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="ResponsiveSidebarGapColumnStyle" TargetType="ColumnDefinition">
+            <Setter Property="Width" Value="16"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActualWidth,
+                                               RelativeSource={RelativeSource AncestorType=Window},
+                                               Converter={StaticResource DoubleLessThanConverter},
+                                               ConverterParameter=1440}"
+                             Value="True">
+                    <Setter Property="Width" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ResponsiveSidebarColumnStyle" TargetType="ColumnDefinition">
+            <Setter Property="Width" Value="320"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActualWidth,
+                                               RelativeSource={RelativeSource AncestorType=Window},
+                                               Converter={StaticResource DoubleLessThanConverter},
+                                               ConverterParameter=1440}"
+                             Value="True">
+                    <Setter Property="Width" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ResponsiveSidebarPanelStyle" TargetType="{x:Type FrameworkElement}">
+            <Setter Property="Grid.Column" Value="2"/>
+            <Setter Property="Grid.Row" Value="0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActualWidth,
+                                               RelativeSource={RelativeSource AncestorType=Window},
+                                               Converter={StaticResource DoubleLessThanConverter},
+                                               ConverterParameter=1440}"
+                             Value="True">
+                    <Setter Property="Grid.Column" Value="0"/>
+                    <Setter Property="Grid.Row" Value="1"/>
+                    <Setter Property="Margin" Value="0,16,0,0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ResponsiveSidebarCardStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource CardStyle}">
+            <Setter Property="Grid.Column" Value="2"/>
+            <Setter Property="Grid.Row" Value="0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActualWidth,
+                                               RelativeSource={RelativeSource AncestorType=Window},
+                                               Converter={StaticResource DoubleLessThanConverter},
+                                               ConverterParameter=1440}"
+                             Value="True">
+                    <Setter Property="Grid.Column" Value="0"/>
+                    <Setter Property="Grid.Row" Value="1"/>
+                    <Setter Property="Margin" Value="0,16,0,0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="KpiTrendGlyphStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -501,10 +561,14 @@
         </WrapPanel>
 
         <Grid Grid.Row="3" Margin="0,16,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Style="{StaticResource ResponsiveSidebarGapColumnStyle}"/>
+                <ColumnDefinition Style="{StaticResource ResponsiveSidebarColumnStyle}"/>
             </Grid.ColumnDefinitions>
 
             <Border Style="{StaticResource CardStyle}"
@@ -590,7 +654,7 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Column="2">
+            <Grid Style="{StaticResource ResponsiveSidebarPanelStyle}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="12"/>
@@ -776,16 +840,21 @@
             </Grid>
 
             <controls:LoadingOverlay Grid.ColumnSpan="3"
+                                     Grid.RowSpan="2"
                                      IsActive="{Binding IsLoading}"
                                      Message="Refreshing dashboard"/>
         </Grid>
 
         <!-- #398 Monthly Sales Trend + #401 Payment Method Breakdown -->
         <Grid Grid.Row="4" Margin="0,16,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Style="{StaticResource ResponsiveSidebarGapColumnStyle}"/>
+                <ColumnDefinition Style="{StaticResource ResponsiveSidebarColumnStyle}"/>
             </Grid.ColumnDefinitions>
 
             <!-- #398 Monthly Sales Trend -->
@@ -860,8 +929,7 @@
             </Border>
 
             <!-- #401 Payment Method Breakdown -->
-            <Border Grid.Column="2"
-                    Style="{StaticResource CardStyle}"
+            <Border Style="{StaticResource ResponsiveSidebarCardStyle}"
                     Padding="{StaticResource CardPadding}"
                     h:Motion.StaggerIndex="14">
                 <Grid>
