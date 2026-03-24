@@ -257,13 +257,22 @@ public partial class MainViewModel : BaseViewModel
     /// </summary>
     private async Task AutoLoginAsUserAsync()
     {
-        var result = await _commandBus.SendAsync(
-            new LoginUserCommand(UserType.User, string.Empty));
+        try
+        {
+            var result = await _commandBus.SendAsync(
+                new LoginUserCommand(UserType.User, string.Empty));
 
-        if (result.Succeeded)
-            await OnLoginSucceededAsync(UserType.User);
-
-        IsReady = true;
+            if (result.Succeeded)
+                await OnLoginSucceededAsync(UserType.User);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"AutoLogin failed: {ex.Message}");
+        }
+        finally
+        {
+            IsReady = true;
+        }
     }
 
     /// <summary>
