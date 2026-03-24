@@ -98,6 +98,7 @@
                                          AutomationProperties.LabeledBy="{Binding ElementName=PhoneLabel}"
                                          AutomationProperties.HelpText="10 digits"
                                          MaxLength="10"
+                                         h:NumericInput.Scope="TelephoneNumber"
                                          h:NumericInput.IsIntegerOnly="True"
                                          h:Watermark.Text="e.g. 9876543210"/>
                                 <TextBlock Text="{Binding PhoneValidationHint}"
@@ -117,6 +118,7 @@
                                          MaxLength="6"
                                          Width="{StaticResource FieldWidthCompact}"
                                          HorizontalAlignment="Left"
+                                         h:NumericInput.Scope="Digits"
                                          h:NumericInput.IsIntegerOnly="True"
                                          h:Watermark.Text="e.g. 302001"/>
                             </StackPanel>

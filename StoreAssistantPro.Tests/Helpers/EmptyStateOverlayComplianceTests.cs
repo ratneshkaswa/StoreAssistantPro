@@ -45,6 +45,33 @@ public partial class EmptyStateOverlayComplianceTests
         Assert.Contains("ControlTemplate", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void EmptyStateOverlay_Should_Support_Icon_Title_Description_And_Optional_Action()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "EmptyStateOverlay.cs"));
+
+        Assert.Contains("nameof(Icon)", content, StringComparison.Ordinal);
+        Assert.Contains("nameof(Title)", content, StringComparison.Ordinal);
+        Assert.Contains("nameof(Description)", content, StringComparison.Ordinal);
+        Assert.Contains("nameof(ActionText)", content, StringComparison.Ordinal);
+        Assert.Contains("nameof(ActionCommand)", content, StringComparison.Ordinal);
+        Assert.Contains("nameof(ItemCount)", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DataGridEmptyState_Should_Default_To_A_Full_EmptyState_Pattern()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "DataGridEmptyState.cs"));
+
+        Assert.Contains("new PropertyMetadata(\"📂\", OnPresentationPropertyChanged)", content, StringComparison.Ordinal);
+        Assert.Contains("new PropertyMetadata(\"No items to display\", OnPresentationPropertyChanged)", content, StringComparison.Ordinal);
+        Assert.Contains("new PropertyMetadata(\"This collection is empty right now.\", OnPresentationPropertyChanged)", content, StringComparison.Ordinal);
+        Assert.Contains("ActionTextProperty", content, StringComparison.Ordinal);
+        Assert.Contains("ActionCommandProperty", content, StringComparison.Ordinal);
+    }
+
     // ── Regex ────────────────────────────────────────────────────────
 
     /// <summary>

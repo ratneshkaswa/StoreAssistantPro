@@ -135,8 +135,10 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer x:Name="WorkspaceScrollViewer"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  ScrollChanged="OnWorkspaceScrollChanged">
     <Grid Margin="{StaticResource PagePadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType">
@@ -153,6 +155,31 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+
+            <Grid Grid.ColumnSpan="2"
+                  IsHitTestVisible="False">
+                <Grid.RenderTransform>
+                    <TranslateTransform x:Name="HeroBackdropParallaxTransform"/>
+                </Grid.RenderTransform>
+
+                <Border Width="320"
+                        Height="176"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="-32,-24,0,0"
+                        CornerRadius="160"
+                        Background="{StaticResource FluentAccentLight3}"
+                        Opacity="0.16"/>
+
+                <Border Width="220"
+                        Height="136"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,-8,36,0"
+                        CornerRadius="110"
+                        Background="{StaticResource FluentAccentLight2}"
+                        Opacity="0.10"/>
+            </Grid>
 
             <StackPanel>
                 <controls:BreadcrumbBar ItemsSource="{Binding BreadcrumbItems}"

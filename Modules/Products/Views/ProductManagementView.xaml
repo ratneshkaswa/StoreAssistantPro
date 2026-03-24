@@ -29,6 +29,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
@@ -53,6 +54,18 @@
                       Margin="{StaticResource InlineControlSpacing}"/>
             <Button Grid.Column="4" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <Button Grid.Column="5"
+                    Width="36"
+                    Height="36"
+                    Margin="{StaticResource InlineControlSpacing}"
+                    Style="{StaticResource FluentSubtleButtonStyle}"
+                    ToolTip="Choose columns"
+                    AutomationProperties.Name="Choose columns"
+                    h:DataGridColumnChooser.Target="{Binding ElementName=ProductsGrid}">
+                <TextBlock Text="&#xE713;"
+                           FontFamily="{StaticResource FluentIconFont}"
+                           FontSize="14"/>
+            </Button>
         </Grid>
 
         <!-- Filter count -->
@@ -69,7 +82,8 @@
             </Grid.RowDefinitions>
 
             <!-- Product grid -->
-            <DataGrid AutomationProperties.Name="Products list"
+            <DataGrid x:Name="ProductsGrid"
+                      AutomationProperties.Name="Products list"
                       ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
@@ -84,9 +98,48 @@
                       Margin="{StaticResource ItemSpacing}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Product" Binding="{Binding Name}" Width="*"/>
-                    <DataGridTextColumn Header="Type" Binding="{Binding ProductType}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Brand" Binding="{Binding Brand.Name}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTemplateColumn Header="Type" SortMemberPath="ProductType" Width="{StaticResource ColumnWidthPrice}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                        Background="{Binding ProductType, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                        BorderBrush="{Binding ProductType, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding ProductType, TargetNullValue=Unspecified}"
+                                               Style="{StaticResource SemanticTagChipTextStyle}"
+                                               Foreground="{Binding ProductType, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Category" SortMemberPath="Category.Name" Width="{StaticResource ColumnWidthPrice}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                        Background="{Binding Category.Name, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                        BorderBrush="{Binding Category.Name, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Category.Name, TargetNullValue=Uncategorized}"
+                                               Style="{StaticResource SemanticTagChipTextStyle}"
+                                               Foreground="{Binding Category.Name, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Brand" SortMemberPath="Brand.Name" Width="{StaticResource ColumnWidthPrice}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                        Background="{Binding Brand.Name, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                        BorderBrush="{Binding Brand.Name, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Brand.Name, TargetNullValue=Unbranded}"
+                                               Style="{StaticResource SemanticTagChipTextStyle}"
+                                               Foreground="{Binding Brand.Name, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Sale ₹" Binding="{Binding SalePrice, StringFormat=N0}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Cost ₹" Binding="{Binding CostPrice, StringFormat=N0}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
@@ -157,11 +210,13 @@
                 <TextBox Text="{Binding SalePriceText, UpdateSourceTrigger=PropertyChanged}"
                          h:Watermark.Text="Sale price" MaxLength="10"
                          h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                         h:NumericInput.Scope="Number"
                          AutomationProperties.Name="Sale price"
                          Width="{StaticResource FieldWidthCompact}"/>
                 <TextBox Text="{Binding CostPriceText, UpdateSourceTrigger=PropertyChanged}"
                          h:Watermark.Text="Cost price" MaxLength="10"
                          h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                         h:NumericInput.Scope="Number"
                          AutomationProperties.Name="Cost price"
                          Width="{StaticResource FieldWidthCompact}" Margin="{StaticResource InlineControlSpacing}"/>
                 <CheckBox Content="Tax inclusive" IsChecked="{Binding IsTaxInclusive}"

@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -26,5 +27,10 @@ public partial class WorkspaceView : UserControl
                 () => StartBillingButton.Focus(),
                 DispatcherPriority.Input);
         }
+    }
+
+    private void OnWorkspaceScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        HeroBackdropParallaxTransform.Y = Math.Min(e.VerticalOffset * 0.5, 56);
     }
 }

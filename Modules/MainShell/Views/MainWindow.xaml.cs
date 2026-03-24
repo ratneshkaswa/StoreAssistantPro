@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
@@ -13,7 +15,11 @@ public partial class MainWindow : Window
 {
     private const double NotificationPanelEdgeMargin = 16;
     private const double NotificationPanelVerticalMargin = 24;
+    private const double QuickActionBarAutoHideThreshold = 48;
+    private const double QuickActionBarRevealThreshold = 12;
     private MainViewModel? _boundViewModel;
+    private bool _isQuickActionBarVisible = true;
+    private double _quickActionBarExpandedHeight;
 
     public MainWindow(IWindowSizingService sizingService)
     {
@@ -23,9 +29,12 @@ public partial class MainWindow : Window
 
         SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
         Loaded += (_, _) => UpdateNotificationsPopupLayout();
+        Loaded += (_, _) => InitializeQuickActionBarChrome();
         SizeChanged += (_, _) => UpdateNotificationsPopupLayout();
         LocationChanged += (_, _) => UpdateNotificationsPopupLayout();
         NotificationBellButton.SizeChanged += (_, _) => UpdateNotificationsPopupLayout();
+        ShellContentHost.ScrollOffsetChanged += OnShellContentScrollChanged;
+        QuickActionBarHost.SizeChanged += OnQuickActionBarHostSizeChanged;
 
         DataContextChanged += OnDataContextChanged;
         Closed += OnClosed;
@@ -87,6 +96,105 @@ public partial class MainWindow : Window
 
     private double GetResourceDouble(string key, double fallback) =>
         TryFindResource(key) is double value ? value : fallback;
+
+    private void InitializeQuickActionBarChrome()
+    {
+        if (QuickActionBarHost.Visibility != Visibility.Visible)
+            return;
+
+        CaptureQuickActionBarExpandedHeight();
+        QuickActionBarHost.MaxHeight = _quickActionBarExpandedHeight > 0
+            ? _quickActionBarExpandedHeight
+            : double.PositiveInfinity;
+        QuickActionBarHost.Opacity = 1;
+        QuickActionBarTransform.Y = 0;
+        QuickActionBarShadow.Opacity = 0;
+        _isQuickActionBarVisible = true;
+    }
+
+    private void OnQuickActionBarHostSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (!_isQuickActionBarVisible || QuickActionBarHost.Visibility != Visibility.Visible)
+            return;
+
+        CaptureQuickActionBarExpandedHeight();
+        if (_quickActionBarExpandedHeight > 0)
+            QuickActionBarHost.MaxHeight = _quickActionBarExpandedHeight;
+    }
+
+    private void OnShellContentScrollChanged(object? sender, ScrollChangedEventArgs e)
+    {
+        UpdateQuickActionBarShadow(e.VerticalOffset > 0.5);
+
+        if (QuickActionBarHost.Visibility != Visibility.Visible)
+            return;
+
+        if (e.VerticalOffset <= 0.5)
+        {
+            SetQuickActionBarVisible(true);
+            return;
+        }
+
+        if (e.VerticalChange > 1 && e.VerticalOffset > QuickActionBarAutoHideThreshold)
+        {
+            SetQuickActionBarVisible(false);
+            return;
+        }
+
+        if (e.VerticalChange < -1 || e.VerticalOffset < QuickActionBarRevealThreshold)
+            SetQuickActionBarVisible(true);
+    }
+
+    private void CaptureQuickActionBarExpandedHeight()
+    {
+        if (QuickActionBarHost.ActualHeight > 0)
+            _quickActionBarExpandedHeight = QuickActionBarHost.ActualHeight;
+    }
+
+    private void UpdateQuickActionBarShadow(bool showShadow)
+    {
+        var targetOpacity = showShadow ? 1d : 0d;
+        if (Math.Abs(QuickActionBarShadow.Opacity - targetOpacity) < 0.01)
+            return;
+
+        var animation = new DoubleAnimation(targetOpacity, TimeSpan.FromMilliseconds(120))
+        {
+            EasingFunction = FindResource("FluentEaseDecelerate") as IEasingFunction
+        };
+        QuickActionBarShadow.BeginAnimation(OpacityProperty, animation);
+    }
+
+    private void SetQuickActionBarVisible(bool visible)
+    {
+        if (_isQuickActionBarVisible == visible || QuickActionBarHost.Visibility != Visibility.Visible)
+            return;
+
+        CaptureQuickActionBarExpandedHeight();
+
+        var targetHeight = visible
+            ? Math.Max(_quickActionBarExpandedHeight, QuickActionBarHost.ActualHeight)
+            : 0d;
+        var targetOpacity = visible ? 1d : 0d;
+        var targetOffset = visible ? 0d : -8d;
+        var duration = TimeSpan.FromMilliseconds(150);
+        var ease = FindResource("FluentEaseDecelerate") as IEasingFunction;
+
+        QuickActionBarHost.BeginAnimation(FrameworkElement.MaxHeightProperty, null);
+        QuickActionBarHost.MaxHeight = Math.Max(0, QuickActionBarHost.ActualHeight);
+        QuickActionBarHost.BeginAnimation(
+            FrameworkElement.MaxHeightProperty,
+            new DoubleAnimation(targetHeight, duration) { EasingFunction = ease });
+
+        QuickActionBarHost.BeginAnimation(
+            OpacityProperty,
+            new DoubleAnimation(targetOpacity, duration) { EasingFunction = ease });
+
+        QuickActionBarTransform.BeginAnimation(
+            System.Windows.Media.TranslateTransform.YProperty,
+            new DoubleAnimation(targetOffset, duration) { EasingFunction = ease });
+
+        _isQuickActionBarVisible = visible;
+    }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
@@ -194,6 +302,9 @@ public partial class MainWindow : Window
 
     private void OnClosed(object? sender, EventArgs e)
     {
+        ShellContentHost.ScrollOffsetChanged -= OnShellContentScrollChanged;
+        QuickActionBarHost.SizeChanged -= OnQuickActionBarHostSizeChanged;
+
         if (_boundViewModel is not null)
         {
             _boundViewModel.RequestClose = null;

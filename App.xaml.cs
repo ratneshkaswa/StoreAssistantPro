@@ -32,7 +32,6 @@ public partial class App : Application
     public App()
     {
         SetIndianCulture();
-        ApplyHighContrastOverridesIfNeeded();
     }
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -84,6 +83,7 @@ public partial class App : Application
         _host.Services.GetRequiredService<OnboardingTipRegistrar>();
 
         _logger = _host.Services.GetRequiredService<ILogger<App>>();
+        HighContrastSync.Attach(this);
         SystemAccentSync.Attach(this);
 
         // Wire static logger factory into BaseViewModel so all
@@ -163,6 +163,7 @@ public partial class App : Application
         }
         finally
         {
+            HighContrastSync.Detach();
             SystemAccentSync.Detach();
             host?.Dispose();
             base.OnExit(e);
@@ -231,24 +232,6 @@ public partial class App : Application
 
     private static string GenerateErrorId() =>
         $"ERR-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-
-    /// <summary>
-    /// Conditionally merges HighContrastOverrides.xaml LAST so its brush tokens
-    /// override DesignSystem.xaml when the OS high-contrast mode is active (#422).
-    /// Must run in the constructor before any UI materializes (StaticResource).
-    /// </summary>
-    private void ApplyHighContrastOverridesIfNeeded()
-    {
-        if (!SystemParameters.HighContrast)
-            return;
-
-        var hcDict = new ResourceDictionary
-        {
-            Source = new Uri("Core/Styles/HighContrastOverrides.xaml", UriKind.Relative)
-        };
-
-        Resources.MergedDictionaries.Add(hcDict);
-    }
 
     private static void SetIndianCulture()
     {

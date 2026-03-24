@@ -91,6 +91,7 @@
             <helpers:HintForegroundConverter x:Key="HintForegroundConverter"/>
             <helpers:StatusDisplayTextConverter x:Key="StatusDisplayTextConverter"/>
             <helpers:RelativeDateTimeConverter x:Key="RelativeDateTimeConverter"/>
+            <helpers:TagChipBrushConverter x:Key="TagChipBrushConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">

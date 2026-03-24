@@ -121,7 +121,7 @@
         </Grid>
 
         <!-- Filter Chips -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <StackPanel Grid.Row="4" Margin="{StaticResource ItemSpacing}">
             <Border Style="{StaticResource SegmentedFilterHostStyle}">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="All" Command="{Binding SetStatusFilterCommand}" CommandParameter="All"
@@ -156,9 +156,31 @@
                     </Button>
                 </StackPanel>
             </Border>
-            <TextBlock Text="{Binding FilterCountText}" FontSize="11"
-                       Margin="12,0,0,0"
-                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+
+            <ScrollViewer Margin="0,8,0,0"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="{Binding ActiveStatusFilter, StringFormat=Status: {0}}"
+                            Command="{Binding SetStatusFilterCommand}"
+                            CommandParameter="All">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ActiveFilterChipButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveStatusFilter}" Value="All">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+
+            <TextBlock Text="{Binding FilterCountText}"
+                       FontSize="11"
+                       Margin="0,8,0,0"
+                       Foreground="{StaticResource FluentTextTertiary}"/>
         </StackPanel>
 
         <!-- DataGrid -->

@@ -111,6 +111,7 @@
                                  AutomationProperties.Name="Customer phone"
                                  Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                                  MaxLength="15"
+                                 h:NumericInput.Scope="TelephoneNumber"
                                  h:Watermark.Text="e.g. 9876543210"/>
 
                         <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
@@ -192,7 +193,20 @@
                             <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="120"/>
                             <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="100"/>
                             <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat=₹\{0:N0\}}" Width="100"/>
-                            <DataGridTextColumn Header="PAYMENT" Binding="{Binding PaymentMethod}" Width="*"/>
+                            <DataGridTemplateColumn Header="PAYMENT" SortMemberPath="PaymentMethod" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                                Background="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                                BorderBrush="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding PaymentMethod, TargetNullValue=Unknown}"
+                                                       Style="{StaticResource SemanticTagChipTextStyle}"
+                                                       Foreground="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -217,6 +231,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged}"
                                          AutomationProperties.Name="Payment amount"
+                                         h:NumericInput.Scope="Number"
                                          h:Watermark.Text="₹ Amount"/>
                                 <ComboBox Grid.Column="2" ItemsSource="{Binding PaymentMethods}"
                                           SelectedItem="{Binding PaymentMethod}"

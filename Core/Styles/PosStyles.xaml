@@ -625,6 +625,20 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="SemanticTagChipBorderStyle" TargetType="Border"
+           BasedOn="{StaticResource StatusBadgePillStyle}">
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style x:Key="SemanticTagChipTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+
     <Style x:Key="PaidStatusPillTextStyle" TargetType="TextBlock"
            BasedOn="{StaticResource SemanticStatusPillTextStyle}">
         <Setter Property="Text" Value="Unpaid"/>
@@ -1040,6 +1054,116 @@
                             <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextDisabled}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ActiveFilterChipButtonStyle" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentAccentDark2}"/>
+        <Setter Property="Background" Value="{StaticResource FluentAccentLight3}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentAccentLight2}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="ChipBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="14"
+                            Padding="{TemplateBinding Padding}"
+                            RenderTransformOrigin="0.5,0.5"
+                            UseLayoutRounding="True"
+                            SnapsToDevicePixels="True">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="ChipScale" ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <StackPanel Orientation="Horizontal">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE711;"
+                                       FontFamily="{StaticResource FluentIconFont}"
+                                       FontSize="10"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{TemplateBinding Foreground}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ChipBorder" Property="Background"
+                                    Value="{StaticResource FluentAccentLight2}"/>
+                            <Setter TargetName="ChipBorder" Property="BorderBrush"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScaleHover}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScaleHover}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScaleRest}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScaleRest}"
+                                                         Duration="{StaticResource FluentDurationNormal}"
+                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="ChipBorder" Property="Background"
+                                    Value="{StaticResource FluentAccentLight1}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="{StaticResource MotionButtonScalePressed}"
+                                                         Duration="{StaticResource FluentDurationFast}"
+                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="{StaticResource MotionButtonScalePressed}"
+                                                         Duration="{StaticResource FluentDurationFast}"
+                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ChipBorder" Property="Opacity" Value="0.4"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

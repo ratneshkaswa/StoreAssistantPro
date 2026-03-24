@@ -68,6 +68,9 @@ public static class SystemAccentSync
         if (app is null)
             return;
 
+        if (SystemParameters.HighContrast)
+            return;
+
         var accent = Normalize(ReadSystemAccent());
 
         UpdateBrush(app, "FluentAccentDefault", accent);

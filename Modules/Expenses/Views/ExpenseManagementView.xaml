@@ -118,7 +118,7 @@
         </Grid>
 
         <!-- Filter Chips -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <StackPanel Grid.Row="4" Margin="{StaticResource ItemSpacing}">
             <Border Style="{StaticResource SegmentedFilterHostStyle}">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="All" Command="{Binding SetDateFilterCommand}" CommandParameter="All"
@@ -163,9 +163,31 @@
                     </Button>
                 </StackPanel>
             </Border>
-            <TextBlock Text="{Binding FilterCountText}" FontSize="11"
-                       Margin="12,0,0,0"
-                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+
+            <ScrollViewer Margin="0,8,0,0"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="{Binding ActiveDateFilter, StringFormat=Date: {0}}"
+                            Command="{Binding SetDateFilterCommand}"
+                            CommandParameter="All">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ActiveFilterChipButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveDateFilter}" Value="All">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+
+            <TextBlock Text="{Binding FilterCountText}"
+                       FontSize="11"
+                       Margin="0,8,0,0"
+                       Foreground="{StaticResource FluentTextTertiary}"/>
         </StackPanel>
 
         <!-- DataGrid -->
@@ -192,14 +214,20 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="DATE" Binding="{Binding Date, StringFormat=dd-MMM-yyyy}"
                                     SortMemberPath="Date" Width="100"/>
-                <DataGridTextColumn Header="CATEGORY" Binding="{Binding Category}"
-                                    SortMemberPath="Category" Width="*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                <DataGridTemplateColumn Header="CATEGORY" SortMemberPath="Category" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                    Background="{Binding Category, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                    BorderBrush="{Binding Category, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                    HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding Category, TargetNullValue=Uncategorized}"
+                                           Style="{StaticResource SemanticTagChipTextStyle}"
+                                           Foreground="{Binding Category, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="AMOUNT" Binding="{Binding Amount, StringFormat='₹{0:N0}'}"
                                     SortMemberPath="Amount" Width="120">
                     <DataGridTextColumn.ElementStyle>

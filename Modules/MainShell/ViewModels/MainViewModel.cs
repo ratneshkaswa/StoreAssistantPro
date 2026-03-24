@@ -247,7 +247,14 @@ public partial class MainViewModel : BaseViewModel
             contributor.Contribute(_quickActionService);
         RefreshQuickActions();
 
-        // Auto-login as User — skip login page entirely to avoid flash
+        // Navigate to the login page synchronously so the window always
+        // has content before it is shown. Auto-login replaces it with the
+        // workspace on success; if it fails the user stays on login.
+        _navigationService.NavigateTo(LoginPage);
+        SetCurrentPage(LoginPage);
+        WireLoginCallback();
+
+        // Attempt auto-login in background
         _ = AutoLoginAsUserAsync();
     }
 
@@ -271,6 +278,22 @@ public partial class MainViewModel : BaseViewModel
         }
         finally
         {
+            // If auto-login didn't complete, show login page so the window
+            // always has content — prevents blank window on any failure path.
+            if (!AppState.IsLoggedIn)
+            {
+                try
+                {
+                    _navigationService.NavigateTo(LoginPage);
+                    SetCurrentPage(LoginPage);
+                    WireLoginCallback();
+                }
+                catch
+                {
+                    // Last resort — window will still be visible even without content.
+                }
+            }
+
             IsReady = true;
         }
     }

@@ -30,6 +30,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="From:" VerticalAlignment="Center" Margin="{StaticResource InlineLabelGap}"/>
@@ -51,6 +52,19 @@
 
             <Button Grid.Column="6" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}"/>
+
+            <Button Grid.Column="7"
+                    Width="36"
+                    Height="36"
+                    Margin="{StaticResource InlineControlSpacing}"
+                    Style="{StaticResource FluentSubtleButtonStyle}"
+                    ToolTip="Choose columns"
+                    AutomationProperties.Name="Choose columns"
+                    h:DataGridColumnChooser.Target="{Binding ElementName=SaleHistoryGrid}">
+                <TextBlock Text="&#xE713;"
+                           FontFamily="{StaticResource FluentIconFont}"
+                           FontSize="14"/>
+            </Button>
         </Grid>
 
         <!-- Content: Sale list + Detail/Receipt -->
@@ -62,7 +76,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- Sale list -->
-            <DataGrid AutomationProperties.Name="Sale history" ItemsSource="{Binding Sales}"
+            <DataGrid x:Name="SaleHistoryGrid"
+                      AutomationProperties.Name="Sale history" ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
                       h:DataGridEmptyState.Icon="🧾"
@@ -75,7 +90,20 @@
                     <DataGridTextColumn Header="Invoice" Binding="{Binding InvoiceNumber}" Width="*"/>
                     <DataGridTextColumn Header="Date" Binding="{Binding SaleDate, StringFormat=g}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Payment" Binding="{Binding PaymentMethod}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTemplateColumn Header="Payment" Width="{StaticResource ColumnWidthPrice}" SortMemberPath="PaymentMethod">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                        Background="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                        BorderBrush="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding PaymentMethod, TargetNullValue=Unknown}"
+                                               Style="{StaticResource SemanticTagChipTextStyle}"
+                                               Foreground="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Items" Binding="{Binding Items.Count}" Width="{StaticResource ColumnWidthQty}"/>
                 </DataGrid.Columns>
             </DataGrid>

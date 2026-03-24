@@ -13,6 +13,16 @@
          ================================================================= -->
 
     <!-- Background -->
+    <DrawingBrush x:Key="AppBackgroundBrush"
+                  Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <GeometryDrawing Brush="#FF000000">
+                <GeometryDrawing.Geometry>
+                    <RectangleGeometry Rect="0,0,1,1"/>
+                </GeometryDrawing.Geometry>
+            </GeometryDrawing>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
     <SolidColorBrush x:Key="FluentBackgroundPrimary"   Color="#FF000000"/>
     <SolidColorBrush x:Key="FluentBackgroundSecondary" Color="#FF1A1A1A"/>
 
@@ -42,12 +52,37 @@
     <SolidColorBrush x:Key="FluentAccentHover"         Color="#FF40FFFF"/>
     <SolidColorBrush x:Key="FluentAccentPressed"       Color="#FF00CCCC"/>
     <SolidColorBrush x:Key="FluentAccentDisabled"      Color="#FF808080"/>
+    <SolidColorBrush x:Key="FluentAccentLight1"        Color="#FF66FFFF"/>
+    <SolidColorBrush x:Key="FluentAccentLight2"        Color="#FF8AFFFF"/>
+    <SolidColorBrush x:Key="FluentAccentLight3"        Color="#FFB2FFFF"/>
+    <SolidColorBrush x:Key="FluentAccentDark1"         Color="#FF00D7D7"/>
+    <SolidColorBrush x:Key="FluentAccentDark2"         Color="#FF00B4B4"/>
+    <SolidColorBrush x:Key="FluentAccentDark3"         Color="#FF008C8C"/>
+    <SolidColorBrush x:Key="FluentTextSelectionBrush"  Color="#FF00FFFF" Opacity="0.4"/>
+    <LinearGradientBrush x:Key="FluentAccentGradient" StartPoint="0.5,0" EndPoint="0.5,1">
+        <GradientStop Color="#FF66FFFF" Offset="0"/>
+        <GradientStop Color="#FF00FFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="FluentAccentGradientHover" StartPoint="0.5,0" EndPoint="0.5,1">
+        <GradientStop Color="#FF8AFFFF" Offset="0"/>
+        <GradientStop Color="#FF40FFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="FluentAccentGradientPressed" StartPoint="0.5,0" EndPoint="0.5,1">
+        <GradientStop Color="#FF00D7D7" Offset="0"/>
+        <GradientStop Color="#FF00CCCC" Offset="1"/>
+    </LinearGradientBrush>
 
     <!-- Control fills -->
     <SolidColorBrush x:Key="FluentControlFillDefault"   Color="#FF2D2D2D"/>
     <SolidColorBrush x:Key="FluentControlFillSecondary" Color="#FF3D3D3D"/>
     <SolidColorBrush x:Key="FluentControlFillTertiary"  Color="#FF4D4D4D"/>
     <SolidColorBrush x:Key="FluentControlFillDisabled"  Color="#FF1A1A1A"/>
+    <SolidColorBrush x:Key="LayerFillColorDefault"      Color="#FF1F1F1F"/>
+    <SolidColorBrush x:Key="LayerFillColorSecondary"    Color="#FF2B2B2B"/>
+    <SolidColorBrush x:Key="SubtleFillColorSecondary"   Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="SubtleFillColorTertiary"    Color="#4DFFFFFF"/>
+    <SolidColorBrush x:Key="ChromeAltFillColorSecondary" Color="#FF151515"/>
+    <SolidColorBrush x:Key="ControlAltFillColorSecondary" Color="#FF262626"/>
 
     <!-- Subtle -->
     <SolidColorBrush x:Key="FluentSubtleTransparent"   Color="Transparent"/>

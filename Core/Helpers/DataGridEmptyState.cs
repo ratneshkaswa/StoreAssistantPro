@@ -27,7 +27,7 @@ public static class DataGridEmptyState
             "Icon",
             typeof(string),
             typeof(DataGridEmptyState),
-            new PropertyMetadata(string.Empty, OnPresentationPropertyChanged));
+            new PropertyMetadata("📂", OnPresentationPropertyChanged));
 
     public static readonly DependencyProperty TitleProperty =
         DependencyProperty.RegisterAttached(
@@ -41,7 +41,7 @@ public static class DataGridEmptyState
             "Description",
             typeof(string),
             typeof(DataGridEmptyState),
-            new PropertyMetadata(string.Empty, OnPresentationPropertyChanged));
+            new PropertyMetadata("This collection is empty right now.", OnPresentationPropertyChanged));
 
     public static readonly DependencyProperty ActionTextProperty =
         DependencyProperty.RegisterAttached(

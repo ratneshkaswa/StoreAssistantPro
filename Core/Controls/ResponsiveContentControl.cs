@@ -34,6 +34,13 @@ public class ResponsiveContentControl : ContentControl
             typeof(ResponsiveContentControl),
             new PropertyMetadata(null));
 
+    public static readonly DependencyProperty VerticalScrollOffsetProperty =
+        DependencyProperty.Register(
+            nameof(VerticalScrollOffset),
+            typeof(double),
+            typeof(ResponsiveContentControl),
+            new PropertyMetadata(0d));
+
     private ScrollViewer? _scrollViewer;
     private FrameworkElement? _transitionHost;
     private ContentPresenter? _currentPresenter;
@@ -53,13 +60,36 @@ public class ResponsiveContentControl : ContentControl
         private set => SetValue(PreviousSnapshotProperty, value);
     }
 
+    public double VerticalScrollOffset
+    {
+        get => (double)GetValue(VerticalScrollOffsetProperty);
+        private set => SetValue(VerticalScrollOffsetProperty, value);
+    }
+
+    public event ScrollChangedEventHandler? ScrollOffsetChanged;
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
+        if (_scrollViewer is not null)
+        {
+            _scrollViewer.ScrollChanged -= OnScrollViewerScrollChanged;
+        }
+
         _scrollViewer = GetTemplateChild(PartScrollViewer) as ScrollViewer;
         _transitionHost = GetTemplateChild(PartTransitionHost) as FrameworkElement;
         _currentPresenter = GetTemplateChild(PartCurrentPresenter) as ContentPresenter;
         _previousSnapshotImage = GetTemplateChild(PartPreviousSnapshot) as Image;
+
+        if (_scrollViewer is not null)
+        {
+            _scrollViewer.ScrollChanged += OnScrollViewerScrollChanged;
+            VerticalScrollOffset = _scrollViewer.VerticalOffset;
+        }
+        else
+        {
+            VerticalScrollOffset = 0;
+        }
 
         ResetCurrentPresenter();
         ClearTransitionState();
@@ -71,6 +101,7 @@ public class ResponsiveContentControl : ContentControl
 
         base.OnContentChanged(oldContent, newContent);
         _scrollViewer?.ScrollToTop();
+        VerticalScrollOffset = 0;
 
         if (previousSnapshot is null ||
             _previousSnapshotImage is null ||
@@ -241,6 +272,12 @@ public class ResponsiveContentControl : ContentControl
         var translate = EnsureTranslateTransform(_currentPresenter);
         translate.BeginAnimation(TranslateTransform.YProperty, null);
         translate.Y = 0;
+    }
+
+    private void OnScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        VerticalScrollOffset = e.VerticalOffset;
+        ScrollOffsetChanged?.Invoke(this, e);
     }
 
     private void CancelActiveTransition()

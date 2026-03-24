@@ -169,25 +169,6 @@
     </Window.Resources>
 
     <Grid>
-        <Grid.Style>
-            <Style TargetType="Grid">
-                <Setter Property="Opacity" Value="0"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsReady}" Value="True">
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                     To="1"
-                                                     Duration="{StaticResource FluentDurationPageFade}"
-                                                     EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -348,11 +329,17 @@
         </Menu>
 
         <!-- QUICK ACTION BAR -->
-        <Border Grid.Row="1"
-                Style="{StaticResource FluentToolbarStyle}"
-                Margin="{StaticResource ItemSpacing}"
-                Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
-            <DockPanel>
+        <Grid x:Name="QuickActionBarHost"
+              Grid.Row="1"
+              ClipToBounds="True"
+              Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="QuickActionBarTransform"/>
+            </Grid.RenderTransform>
+            <Border x:Name="QuickActionBar"
+                    Style="{StaticResource FluentToolbarStyle}"
+                    Margin="{StaticResource ItemSpacing}">
+                <DockPanel>
                 <!-- Notification bell + indicators (right-docked) -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                             VerticalAlignment="Center" Margin="{StaticResource SidebarNavItemPadding}">
@@ -647,8 +634,16 @@
                         </Popup>
                     </Grid>
                 </Grid>
-            </DockPanel>
-        </Border>
+                </DockPanel>
+            </Border>
+            <Border x:Name="QuickActionBarShadow"
+                    Margin="16,0,16,0"
+                    VerticalAlignment="Bottom"
+                    Height="1"
+                    Background="{StaticResource CommandBarScrollShadowBrush}"
+                    Opacity="0"
+                    IsHitTestVisible="False"/>
+        </Grid>
 
         <!-- BODY: WORKSPACE / LOGIN -->
         <Border Grid.Row="2">
@@ -669,7 +664,8 @@
                     </Style.Triggers>
                 </Style>
             </Border.Style>
-            <controls:ResponsiveContentControl Content="{Binding CurrentView}"/>
+            <controls:ResponsiveContentControl x:Name="ShellContentHost"
+                                               Content="{Binding CurrentView}"/>
         </Border>
 
         <Grid Grid.Row="0"

@@ -114,6 +114,7 @@
                              Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left" MaxLength="15"
                              AutomationProperties.Name="Vendor mobile"
+                             h:NumericInput.Scope="TelephoneNumber"
                              h:Watermark.Text="e.g. 9876543210"/>
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Email" Style="{StaticResource FormRowLabelStyle}"/>
@@ -155,6 +156,7 @@
                              Text="{Binding PinCode, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left" MaxLength="6"
                              AutomationProperties.Name="Vendor postal PIN"
+                             h:NumericInput.Scope="Digits"
                              h:Watermark.Text="e.g. 302022"/>
 
                     <TextBlock Grid.Row="18" Grid.Column="0" Text="GSTIN" Style="{StaticResource FormRowLabelStyle}"/>

@@ -24,8 +24,8 @@ namespace StoreAssistantPro.Core.Helpers;
 ///   <item><b>Badge entrance</b> — when the badge first appears
 ///         (count was 0), it fades + scales in from 0 → 1
 ///         (FluentDurationNormal, FluentEaseDecelerate). When the count
-///         merely changes (already visible), a quick opacity blink
-///         confirms the update.</item>
+///         merely changes (already visible), the badge performs a short
+///         1.0 → 1.2 → 1.0 scale bounce over 200 ms.</item>
 /// </list>
 /// No animation plays when the count decreases or stays the same —
 /// dismissals should feel quiet.
@@ -139,7 +139,10 @@ public static class NotificationBadgeBehavior
         {
             var wasHidden = oldCount == 0;
             PlayBellPulse(panel);
-            PlayBadgeEntrance(badge, wasHidden);
+            if (wasHidden)
+                PlayBadgeEntrance(badge);
+            else
+                PlayBadgeBounce(badge);
         }
     }
 
@@ -287,60 +290,68 @@ public static class NotificationBadgeBehavior
     }
 
     /// <summary>
-    /// Badge entrance: if <paramref name="firstAppearance"/> is true,
-    /// scale + fade from 0 → 1; otherwise just a quick opacity blink
-    /// (1 → 0.4 → 1) to confirm the count updated.
+    /// Badge entrance: scale + fade from 0 → 1 for first appearance.
     /// </summary>
-    private static void PlayBadgeEntrance(Border badge, bool firstAppearance)
+    private static void PlayBadgeEntrance(Border badge)
     {
         if (badge.RenderTransform is not ScaleTransform badgeSt)
             return;
 
-        if (firstAppearance)
+        var duration = ResolveDuration(badge, "FluentDurationNormal", 167);
+        var ease = ResolveEase(badge, "FluentEaseDecelerate");
+
+        // Scale from 0 → 1
+        var scaleX = new DoubleAnimation(0, 1, new Duration(duration))
         {
-            var duration = ResolveDuration(badge, "FluentDurationNormal", 167);
-            var ease = ResolveEase(badge, "FluentEaseDecelerate");
-
-            // Scale from 0 → 1
-            var scaleX = new DoubleAnimation(0, 1, new Duration(duration))
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.Stop
-            };
-            scaleX.Freeze();
-            var scaleY = new DoubleAnimation(0, 1, new Duration(duration))
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.Stop
-            };
-            scaleY.Freeze();
-
-            // Fade from 0 → 1
-            var fade = new DoubleAnimation(0, 1, new Duration(duration))
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.Stop
-            };
-            fade.Freeze();
-
-            badgeSt.BeginAnimation(ScaleTransform.ScaleXProperty, scaleX);
-            badgeSt.BeginAnimation(ScaleTransform.ScaleYProperty, scaleY);
-            badge.BeginAnimation(UIElement.OpacityProperty, fade);
-        }
-        else
+            EasingFunction = ease,
+            FillBehavior = FillBehavior.Stop
+        };
+        scaleX.Freeze();
+        var scaleY = new DoubleAnimation(0, 1, new Duration(duration))
         {
-            // Quick blink: 1 → 0.4 → 1
-            var duration = ResolveDuration(badge, "FluentDurationNormal", 167);
-            var ease = ResolveEase(badge, "FluentEasePoint");
+            EasingFunction = ease,
+            FillBehavior = FillBehavior.Stop
+        };
+        scaleY.Freeze();
 
-            var blink = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
-            var half = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / 2);
-            blink.KeyFrames.Add(new EasingDoubleKeyFrame(0.4, KeyTime.FromTimeSpan(half), ease));
-            blink.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
-            blink.Freeze();
+        // Fade from 0 → 1
+        var fade = new DoubleAnimation(0, 1, new Duration(duration))
+        {
+            EasingFunction = ease,
+            FillBehavior = FillBehavior.Stop
+        };
+        fade.Freeze();
 
-            badge.BeginAnimation(UIElement.OpacityProperty, blink);
-        }
+        badgeSt.BeginAnimation(ScaleTransform.ScaleXProperty, scaleX);
+        badgeSt.BeginAnimation(ScaleTransform.ScaleYProperty, scaleY);
+        badge.BeginAnimation(UIElement.OpacityProperty, fade);
+    }
+
+    /// <summary>
+    /// Animated count-badge update confirmation:
+    /// scale 1.0 → 1.2 → 1.0 over 200 ms.
+    /// </summary>
+    private static void PlayBadgeBounce(Border badge)
+    {
+        if (badge.RenderTransform is not ScaleTransform badgeSt)
+            return;
+
+        var duration = TimeSpan.FromMilliseconds(200);
+        var ease = ResolveEase(badge, "FluentEasePoint");
+        var half = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / 2);
+
+        var scaleX = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
+        scaleX.KeyFrames.Add(new EasingDoubleKeyFrame(1.2, KeyTime.FromTimeSpan(half), ease));
+        scaleX.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
+        scaleX.Freeze();
+
+        var scaleY = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
+        scaleY.KeyFrames.Add(new EasingDoubleKeyFrame(1.2, KeyTime.FromTimeSpan(half), ease));
+        scaleY.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
+        scaleY.Freeze();
+
+        badgeSt.BeginAnimation(ScaleTransform.ScaleXProperty, scaleX);
+        badgeSt.BeginAnimation(ScaleTransform.ScaleYProperty, scaleY);
     }
 
     // ── Transform helpers ─────────────────────────────────────────

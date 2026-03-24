@@ -63,9 +63,5 @@ public class ToastHost : Control
         FocusableProperty.OverrideMetadata(
             typeof(ToastHost),
             new FrameworkPropertyMetadata(false));
-
-        IsHitTestVisibleProperty.OverrideMetadata(
-            typeof(ToastHost),
-            new FrameworkPropertyMetadata(false));
     }
 }

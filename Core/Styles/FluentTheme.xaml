@@ -163,6 +163,7 @@
                                         BorderBrush="{StaticResource FluentInfo}"
                                         BorderThickness="1"
                                         CornerRadius="{StaticResource FluentCornerLarge}"
+                                        h:ToastSwipeDismiss.IsEnabled="True"
                                         UseLayoutRounding="True"
                                         SnapsToDevicePixels="True"
                                         Effect="{StaticResource ElevationEffectFlyout}">
@@ -2955,6 +2956,7 @@
                                              Grid.Column="1"
                                              Background="Transparent"
                                              BorderThickness="0"
+                                             InputScope="Number"
                                              Padding="0"
                                              VerticalContentAlignment="Center"
                                              FontFamily="{TemplateBinding FontFamily}"
