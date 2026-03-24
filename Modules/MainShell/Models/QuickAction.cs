@@ -50,6 +50,10 @@ public partial class QuickAction : ObservableObject
     [ObservableProperty]
     public partial bool IsVisible { get; set; }
 
+    /// <summary>Whether this action points at the currently active page.</summary>
+    [ObservableProperty]
+    public partial bool IsActive { get; set; }
+
     /// <summary>Determines display order in the toolbar (ascending).</summary>
     [ObservableProperty]
     public partial int SortOrder { get; set; }

@@ -1007,6 +1007,7 @@ public partial class MainViewModel : BaseViewModel
         foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType, _features) ?? [])
             QuickActions.Add(action);
 
+        UpdateQuickActionActiveState();
         RecomputeQuickActionOverflow();
 
         if (IsCommandPaletteVisible)
@@ -1255,8 +1256,53 @@ public partial class MainViewModel : BaseViewModel
     private void SetCurrentPage(string pageKey)
     {
         _currentPage = pageKey;
+        UpdateQuickActionActiveState();
         OnPropertyChanged(nameof(WindowTitle));
     }
+
+    private void UpdateQuickActionActiveState()
+    {
+        var activeHelpKey = GetActiveQuickActionHelpKey(_currentPage);
+        foreach (var action in QuickActions)
+        {
+            action.IsActive = !string.IsNullOrWhiteSpace(activeHelpKey) &&
+                              string.Equals(action.HelpKey, activeHelpKey, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    private static string? GetActiveQuickActionHelpKey(string? pageKey) => pageKey switch
+    {
+        MainWorkspacePage => "Home",
+        FirmManagementPage => "Firm",
+        UserManagementPage => "Users",
+        TaxManagementPage => "Tax",
+        VendorManagementPage => "Vendors",
+        ProductManagementPage => "Products",
+        CategoryManagementPage => "Categories",
+        BrandManagementPage => "Brands",
+        InventoryPage => "Inventory",
+        BillingPage => "Billing",
+        SaleHistoryPage => "SaleHistory",
+        CustomerManagementPage => "Customers",
+        PurchaseOrdersPage => "PurchaseOrders",
+        FinancialYearPage => "FinancialYear",
+        SystemSettingsPage => "Settings",
+        InwardEntryPage => "Inward",
+        ExpenseManagementPage => "Expenses",
+        DebtorManagementPage => "Debtors",
+        OrderManagementPage => "Orders",
+        IroningManagementPage => "Ironing",
+        SalaryManagementPage => "Salaries",
+        BranchManagementPage => "Branch",
+        SalesPurchasePage => "SalesPurchase",
+        PaymentManagementPage => "Payments",
+        ReportsPage => "Reports",
+        BackupRestorePage => "Backup",
+        QuotationsPage => "Quotations",
+        GRNPage => "GRN",
+        BarcodeLabelsPage => "BarcodeLabels",
+        _ => null
+    };
 
     private static string GetPageDisplayName(string? pageKey) => pageKey switch
     {

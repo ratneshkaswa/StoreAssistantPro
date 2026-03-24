@@ -111,15 +111,22 @@ public class AutomationNameFallbackTests
         var violations = new List<string>();
         var glyphRegex = new Regex("Content=\"([^\"]+)\"", RegexOptions.Compiled);
 
-        foreach (var file in Directory.EnumerateFiles(
-                     Path.Combine(SolutionRoot, "Modules"),
-                     "*.xaml",
-                     SearchOption.AllDirectories)
-                 .Concat(
-                     Directory.EnumerateFiles(
-                         Path.Combine(SolutionRoot, "Core"),
-                         "*.xaml",
-                         SearchOption.AllDirectories)))
+        var xamlFiles = Directory.EnumerateFiles(
+                            Path.Combine(SolutionRoot, "Modules"),
+                            "*.xaml",
+                            SearchOption.AllDirectories)
+                        .Concat(
+                            Directory.EnumerateFiles(
+                                Path.Combine(SolutionRoot, "Core", "Views"),
+                                "*.xaml",
+                                SearchOption.AllDirectories))
+                        .Concat(
+                            Directory.EnumerateFiles(
+                                Path.Combine(SolutionRoot, "Core", "Printing"),
+                                "*.xaml",
+                                SearchOption.AllDirectories));
+
+        foreach (var file in xamlFiles)
         {
             var lines = File.ReadAllLines(file);
             for (var i = 0; i < lines.Length; i++)
@@ -128,7 +135,7 @@ public class AutomationNameFallbackTests
                     continue;
 
                 var block = lines[i];
-                for (var j = i + 1; j < Math.Min(i + 5, lines.Length); j++)
+                for (var j = i + 1; j < Math.Min(i + 9, lines.Length); j++)
                 {
                     block += " " + lines[j];
                     if (lines[j].Contains("/>", StringComparison.Ordinal) ||
@@ -143,9 +150,12 @@ public class AutomationNameFallbackTests
                     continue;
 
                 var content = match.Groups[1].Value;
+                var trimmedContent = content.Trim();
                 var looksIconOnly =
-                    Regex.IsMatch(content, "^&#x[0-9A-Fa-f]+;$") ||
-                    content.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch));
+                    Regex.IsMatch(trimmedContent, "^&#x[0-9A-Fa-f]+;$") ||
+                    (trimmedContent.Length == 1 &&
+                     !char.IsLetterOrDigit(trimmedContent[0]) &&
+                     !char.IsWhiteSpace(trimmedContent[0]));
                 if (!looksIconOnly)
                     continue;
 

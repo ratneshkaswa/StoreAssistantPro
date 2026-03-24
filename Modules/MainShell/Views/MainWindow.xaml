@@ -130,6 +130,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -154,6 +155,11 @@
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="OverflowItemBorder" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="True">
+                                <Setter TargetName="OverflowItemBorder" Property="Background" Value="{StaticResource LayerFillColorDefault}"/>
+                                <Setter TargetName="OverflowItemBorder" Property="BorderBrush" Value="{StaticResource DividerStrokeColorDefault}"/>
+                                <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -586,6 +592,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Command="{Binding Command}"
+                                        Tag="{Binding IsActive}"
                                         Style="{StaticResource QuickActionButtonStyle}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -613,6 +620,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Button Style="{StaticResource QuickActionOverflowItemStyle}"
+                                                    Tag="{Binding IsActive}"
                                                     Command="{Binding Command}"
                                                     Click="OnQuickActionOverflowItemClick">
                                                 <DockPanel LastChildFill="True">
@@ -624,10 +632,11 @@
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="{Binding Icon}"
                                                                    Margin="0,0,8,0"
-                                                                   VerticalAlignment="Center"/>
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                                         <TextBlock Text="{Binding Title}"
                                                                    VerticalAlignment="Center"
-                                                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                                     </StackPanel>
                                                 </DockPanel>
                                             </Button>

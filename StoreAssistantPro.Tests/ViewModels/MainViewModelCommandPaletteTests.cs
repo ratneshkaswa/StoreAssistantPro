@@ -128,6 +128,18 @@ public sealed class MainViewModelCommandPaletteTests
         Assert.Equal(sut.QuickActions.Count, sut.VisibleQuickActions.Count);
     }
 
+    [Fact]
+    public void Navigating_To_A_Page_Should_Mark_Its_QuickAction_As_Active()
+    {
+        var sut = CreateSut();
+
+        sut.OpenReportsCommand.Execute(null);
+
+        Assert.True(sut.QuickActions.Single(action => action.Title == "Reports").IsActive);
+        Assert.False(sut.QuickActions.Single(action => action.Title == "Home").IsActive);
+        Assert.False(sut.QuickActions.Single(action => action.Title == "Billing").IsActive);
+    }
+
     private MainViewModel CreateSut()
     {
         var navigation = new StubNavigationService();

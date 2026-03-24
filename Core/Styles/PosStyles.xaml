@@ -62,7 +62,7 @@
         <Setter Property="Background" Value="{StaticResource FluentSurfaceElevated}"/>
         <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Stretch"/>
@@ -312,6 +312,15 @@
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="Tag" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{StaticResource LayerFillColorDefault}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{StaticResource DividerStrokeColorDefault}"/>
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource FluentAccentDefault}"/>
+                            <Setter TargetName="AccentIndicator" Property="Opacity" Value="1"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4"/>

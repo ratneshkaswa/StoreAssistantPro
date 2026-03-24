@@ -18,6 +18,21 @@ public sealed class QuickActionOverflowStandardsTests
         Assert.Contains("Style=\"{StaticResource FlyoutMenuSurfaceStyle}\"", mainWindowXaml, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void QuickActions_Should_Bind_Active_State_Into_Accent_Icon_Styling()
+    {
+        var mainWindowXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+        var posStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml"));
+
+        Assert.Contains("Tag=\"{Binding IsActive}\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("<Trigger Property=\"Tag\" Value=\"True\">", posStyles, StringComparison.Ordinal);
+        Assert.Contains("Value=\"{StaticResource FluentAccentDefault}\"", posStyles, StringComparison.Ordinal);
+        Assert.Contains("x:Key=\"QuickActionButtonStyle\"", posStyles, StringComparison.Ordinal);
+        Assert.Contains("x:Key=\"QuickActionOverflowItemStyle\"", mainWindowXaml, StringComparison.Ordinal);
+    }
+
     private static string FindSolutionRoot()
     {
         var dir = AppContext.BaseDirectory;
