@@ -140,7 +140,9 @@
                                              AutomationProperties.Name="Unit price"/>
                                     <Button Grid.Column="3" Content="✕" Command="{Binding DataContext.RemoveLineCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" Style="{StaticResource SecondaryButtonStyle}"
-                                            Margin="4,0,0,0" Padding="6,2"/>
+                                            Margin="4,0,0,0" Padding="6,2"
+                                            ToolTip="Remove quotation line"
+                                            AutomationProperties.Name="Remove quotation line"/>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Text.RegularExpressions;
 using StoreAssistantPro.Core.Helpers;
 
 namespace StoreAssistantPro.Tests.Helpers;
@@ -102,6 +103,67 @@ public class AutomationNameFallbackTests
             "<Setter Property=\"h:AutomationNameFallback.UseToolTipFallback\" Value=\"True\"/>",
             fluentTheme,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ExplicitIconOnlyButtons_Should_Expose_AccessibleNames_OrTooltips()
+    {
+        var violations = new List<string>();
+        var glyphRegex = new Regex("Content=\"([^\"]+)\"", RegexOptions.Compiled);
+
+        foreach (var file in Directory.EnumerateFiles(
+                     Path.Combine(SolutionRoot, "Modules"),
+                     "*.xaml",
+                     SearchOption.AllDirectories)
+                 .Concat(
+                     Directory.EnumerateFiles(
+                         Path.Combine(SolutionRoot, "Core"),
+                         "*.xaml",
+                         SearchOption.AllDirectories)))
+        {
+            var lines = File.ReadAllLines(file);
+            for (var i = 0; i < lines.Length; i++)
+            {
+                if (!lines[i].Contains("<Button", StringComparison.Ordinal))
+                    continue;
+
+                var block = lines[i];
+                for (var j = i + 1; j < Math.Min(i + 5, lines.Length); j++)
+                {
+                    block += " " + lines[j];
+                    if (lines[j].Contains("/>", StringComparison.Ordinal) ||
+                        lines[j].Contains(">", StringComparison.Ordinal))
+                    {
+                        break;
+                    }
+                }
+
+                var match = glyphRegex.Match(block);
+                if (!match.Success)
+                    continue;
+
+                var content = match.Groups[1].Value;
+                var looksIconOnly =
+                    Regex.IsMatch(content, "^&#x[0-9A-Fa-f]+;$") ||
+                    content.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch));
+                if (!looksIconOnly)
+                    continue;
+
+                if (block.Contains("AutomationProperties.Name=", StringComparison.Ordinal) ||
+                    block.Contains("ToolTip=", StringComparison.Ordinal) ||
+                    block.Contains("h:SmartTooltip.", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                violations.Add($"{Path.GetRelativePath(SolutionRoot, file)}:{i + 1}");
+            }
+        }
+
+        Assert.True(
+            violations.Count == 0,
+            "Explicit icon-only buttons must expose an automation name directly or provide a tooltip fallback.\n"
+            + string.Join("\n", violations));
     }
 
     private static string FindSolutionRoot()

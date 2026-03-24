@@ -81,6 +81,7 @@
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource FluentFocusVisualStyle}"/>
         <Setter Property="h:AsyncCommandVisualState.IsEnabled" Value="True"/>
+        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
     </Style>
 
     <Style TargetType="TextBlock">
@@ -119,6 +120,7 @@
         <Setter Property="h:SelectOnFocus.IsEnabled" Value="True"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
         <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
+        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
@@ -412,6 +414,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
         <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
+        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationTrailingChromeErrorTemplate}"/>
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
@@ -431,7 +434,9 @@
     <Style TargetType="ComboBoxItem" BasedOn="{StaticResource FluentComboBoxItemStyle}"/>
 
     <!-- CheckBox inherits FluentCheckBoxStyle (accent fill, rounded box, glyph) -->
-    <Style TargetType="CheckBox" BasedOn="{StaticResource FluentCheckBoxStyle}"/>
+    <Style TargetType="CheckBox" BasedOn="{StaticResource FluentCheckBoxStyle}">
+        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
+    </Style>
 
     <!-- GroupBox inherits FluentGroupBoxStyle (card container, header region) -->
     <Style TargetType="GroupBox" BasedOn="{StaticResource FluentGroupBoxStyle}"/>
@@ -1662,6 +1667,8 @@
                                     Cursor="Hand"
                                     VerticalAlignment="Center"
                                     Focusable="False"
+                                    ToolTip="Dismiss tip"
+                                    AutomationProperties.Name="Dismiss tip"
                                     Opacity="0"
                                     IsHitTestVisible="True">
                                 <Button.Template>

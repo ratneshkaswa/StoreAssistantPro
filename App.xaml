@@ -90,6 +90,7 @@
             <helpers:PriceToDisplayConverter x:Key="PriceToDisplayConverter"/>
             <helpers:HintForegroundConverter x:Key="HintForegroundConverter"/>
             <helpers:StatusDisplayTextConverter x:Key="StatusDisplayTextConverter"/>
+            <helpers:RelativeDateTimeConverter x:Key="RelativeDateTimeConverter"/>
 
         <!-- ViewModel → View DataTemplates (MainShell module) -->
         <DataTemplate DataType="{x:Type shellVm:WorkspaceViewModel}">

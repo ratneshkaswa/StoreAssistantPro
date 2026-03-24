@@ -197,6 +197,8 @@
                                                     Style="{StaticResource ToolbarLinkButtonStyle}"
                                                     Command="{Binding DataContext.RemoveFromBatchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}"
+                                                    ToolTip="Remove label from batch"
+                                                    AutomationProperties.Name="Remove label from batch"
                                                     Margin="8,0,0,0"/>
                                         </Grid>
                                     </Border>

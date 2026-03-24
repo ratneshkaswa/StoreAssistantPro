@@ -510,7 +510,8 @@
 
                                                             <!-- Title + timestamp -->
                                                             <DockPanel Grid.Column="1" Grid.Row="0">
-                                                                <TextBlock Text="{Binding Timestamp, StringFormat=t}"
+                                                                <TextBlock Text="{Binding Timestamp, Converter={StaticResource RelativeDateTimeConverter}}"
+                                                                           ToolTip="{Binding Timestamp, Converter={StaticResource RelativeDateTimeConverter}, ConverterParameter=Full}"
                                                                            Foreground="{StaticResource FluentTextTertiary}" FontSize="{StaticResource FontSizeStatusBar}"
                                                                            DockPanel.Dock="Right"
                                                                            VerticalAlignment="Center"/>

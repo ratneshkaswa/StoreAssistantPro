@@ -1,0 +1,74 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- =================================================================
+         HIGH CONTRAST OVERRIDES (#422)
+         =================================================================
+         Merged conditionally at startup when SystemParameters.HighContrast
+         is true or ThemeMode = "HighContrast".
+
+         Overrides key DesignSystem.xaml tokens with WCAG AAA-compliant
+         high-contrast values: dark backgrounds, bright foregrounds,
+         thick borders.
+         ================================================================= -->
+
+    <!-- Background -->
+    <SolidColorBrush x:Key="FluentBackgroundPrimary"   Color="#FF000000"/>
+    <SolidColorBrush x:Key="FluentBackgroundSecondary" Color="#FF1A1A1A"/>
+
+    <!-- Surface -->
+    <SolidColorBrush x:Key="FluentSurface"             Color="#FF1A1A1A"/>
+    <SolidColorBrush x:Key="FluentSurfaceElevated"     Color="#FF2D2D2D"/>
+    <SolidColorBrush x:Key="FluentSurfaceStroke"       Color="#FFFFFFFF"/>
+
+    <!-- Stroke -->
+    <SolidColorBrush x:Key="FluentStrokeDefault"       Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="FluentStrokeFocus"         Color="#FF00FFFF"/>
+    <SolidColorBrush x:Key="FluentStrokeError"         Color="#FFFF0000"/>
+    <SolidColorBrush x:Key="DividerStrokeColorDefault" Color="#FF808080"/>
+    <SolidColorBrush x:Key="FocusVisualOuterBrush"     Color="#FFFFFF00"/>
+    <SolidColorBrush x:Key="FocusVisualInnerBrush"     Color="#FF000000"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="FluentTextPrimary"         Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="FluentTextSecondary"       Color="#FFE0E0E0"/>
+    <SolidColorBrush x:Key="FluentTextTertiary"        Color="#FFC0C0C0"/>
+    <SolidColorBrush x:Key="FluentTextDisabled"        Color="#FF808080"/>
+    <SolidColorBrush x:Key="FluentTextOnAccent"        Color="#FF000000"/>
+    <SolidColorBrush x:Key="FluentTextOnAccentPressed" Color="#FF000000"/>
+
+    <!-- Accent -->
+    <SolidColorBrush x:Key="FluentAccentDefault"       Color="#FF00FFFF"/>
+    <SolidColorBrush x:Key="FluentAccentHover"         Color="#FF40FFFF"/>
+    <SolidColorBrush x:Key="FluentAccentPressed"       Color="#FF00CCCC"/>
+    <SolidColorBrush x:Key="FluentAccentDisabled"      Color="#FF808080"/>
+
+    <!-- Control fills -->
+    <SolidColorBrush x:Key="FluentControlFillDefault"   Color="#FF2D2D2D"/>
+    <SolidColorBrush x:Key="FluentControlFillSecondary" Color="#FF3D3D3D"/>
+    <SolidColorBrush x:Key="FluentControlFillTertiary"  Color="#FF4D4D4D"/>
+    <SolidColorBrush x:Key="FluentControlFillDisabled"  Color="#FF1A1A1A"/>
+
+    <!-- Subtle -->
+    <SolidColorBrush x:Key="FluentSubtleTransparent"   Color="Transparent"/>
+    <SolidColorBrush x:Key="FluentSubtleHover"         Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="FluentSubtlePressed"       Color="#1AFFFFFF"/>
+    <SolidColorBrush x:Key="FluentSubtleBackground"    Color="#FF2D2D2D"/>
+
+    <!-- Semantic -->
+    <SolidColorBrush x:Key="FluentSuccess"             Color="#FF00FF00"/>
+    <SolidColorBrush x:Key="FluentSuccessBackground"   Color="#FF003300"/>
+    <SolidColorBrush x:Key="FluentWarning"             Color="#FFFFFF00"/>
+    <SolidColorBrush x:Key="FluentWarningBackground"   Color="#FF333300"/>
+    <SolidColorBrush x:Key="FluentError"               Color="#FFFF0000"/>
+    <SolidColorBrush x:Key="FluentErrorBackground"     Color="#FF330000"/>
+    <SolidColorBrush x:Key="FluentInfo"                Color="#FF00FFFF"/>
+    <SolidColorBrush x:Key="FluentInfoBackground"      Color="#FF003333"/>
+
+    <!-- Overlay -->
+    <SolidColorBrush x:Key="SmokeOverlayBrush"          Color="#CC000000"/>
+    <SolidColorBrush x:Key="DialogOwnerSmokeOverlayBrush" Color="#CC000000"/>
+    <SolidColorBrush x:Key="DialogHeaderFrostBrush"     Color="#CC1A1A1A"/>
+    <SolidColorBrush x:Key="WindowEdgeFrameBrush"       Color="#FFFFFFFF"/>
+
+</ResourceDictionary>

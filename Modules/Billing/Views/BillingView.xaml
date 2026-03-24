@@ -498,7 +498,8 @@
                                             CommandParameter="{Binding}"
                                             Style="{StaticResource SecondaryButtonStyle}"
                                             Margin="4,0,0,0"
-                                            ToolTip="Discard this held bill"/>
+                                            ToolTip="Discard this held bill"
+                                            AutomationProperties.Name="Discard this held bill"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

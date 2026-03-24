@@ -571,8 +571,8 @@
 | 418 | Enter to confirm | P0 | ✅ | Enter key submits active form (KeyboardNav.DefaultCommand). |
 | 419 | Arrow keys in DataGrid | P0 | ✅ | Navigate DataGrid rows with up/down arrows. Enter to select. |
 | 420 | Quick search focus (Ctrl+F) | P1 | ✅ | Ctrl+F focuses the search box from anywhere on the page. |
-| 421 | Screen reader labels | P2 | 🔨 | AutomationProperties.Name on all interactive controls for accessibility. |
-| 422 | High contrast mode | P2 | 🔨 | Alternative high-contrast color theme for visually impaired users. |
+| 421 | Screen reader labels | P2 | ✅ | AutomationProperties.Name on all interactive controls for accessibility. |
+| 422 | High contrast mode | P2 | ✅ | Alternative high-contrast color theme for visually impaired users. |
 | 423 | Font size scaling | P2 | ✅ | Configurable font scale factor (100%/125%/150%) for readability. |
 | 424 | Keyboard-only billing | P0 | ✅ | Complete entire sale flow without touching mouse. |
 | 425 | Input focus restore | P1 | ✅ | After dialog closes, focus returns to the element that opened it. |
