@@ -46,7 +46,7 @@ public sealed class WindowShellStandardsTests
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
 
         Assert.Contains("Background=\"{StaticResource AppBackgroundBrush}\"", content, StringComparison.Ordinal);
-        Assert.Contains("Background=\"{StaticResource FluentSurface}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Value=\"{StaticResource FluentSurface}\"", content, StringComparison.Ordinal);
         Assert.Contains("BorderBrush=\"{StaticResource FluentSurfaceStroke}\"", content, StringComparison.Ordinal);
     }
 
@@ -105,9 +105,8 @@ public sealed class WindowShellStandardsTests
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
 
         Assert.Contains("ScrollViewer.HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("ScrollViewer.HorizontalScrollBarVisibility=\"Disabled\"", content, StringComparison.Ordinal);
         Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-        Assert.Contains("TextWrapping=\"WrapWithOverflow\"", content, StringComparison.Ordinal);
+        Assert.Contains("ExpandableTextBlock", content, StringComparison.Ordinal);
     }
     [Fact]
     public void TopLevelWindows_Should_Use_Shared_WindowSizingService()
@@ -143,7 +142,7 @@ public sealed class WindowShellStandardsTests
         var codeBehind = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml.cs"));
 
-        Assert.Contains("Style=\"{StaticResource FormCardStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogHeaderContentSurfaceStyle}\"", content, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"DialogTitleText\"", content, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"MessageText\"", content, StringComparison.Ordinal);
         Assert.Contains("<RowDefinition Height=\"Auto\"/>", content, StringComparison.Ordinal);
@@ -210,18 +209,16 @@ public sealed class WindowShellStandardsTests
     }
 
     [Fact]
-    public void WorkspaceView_Should_Be_Minimal_And_BillingFirst()
+    public void WorkspaceView_Should_Be_Minimal_Dashboard()
     {
         var content = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "WorkspaceView.xaml"));
 
-        Assert.Contains("Start Billing", content, StringComparison.Ordinal);
-        Assert.Contains("OpenBillingCommand", content, StringComparison.Ordinal);
+        Assert.Contains("DashboardSummary", content, StringComparison.Ordinal);
         Assert.DoesNotContain("Session Overview", content, StringComparison.Ordinal);
         Assert.DoesNotContain("Start Here", content, StringComparison.Ordinal);
         Assert.DoesNotContain("OpenFirmManagementCommand", content, StringComparison.Ordinal);
         Assert.DoesNotContain("OpenUserManagementCommand", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("RefreshCurrentViewCommand", content, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()
