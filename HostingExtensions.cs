@@ -48,6 +48,8 @@ using StoreAssistantPro.Modules.Backup;
 using StoreAssistantPro.Modules.Quotations;
 using StoreAssistantPro.Modules.GRN;
 using StoreAssistantPro.Modules.BarcodeLabels;
+using StoreAssistantPro.Modules.Hardware;
+using StoreAssistantPro.Modules.SmartFeatures;
 
 namespace StoreAssistantPro;
 
@@ -118,6 +120,8 @@ internal static class HostingExtensions
         services.AddSingleton<IOfflineModeService, OfflineModeService>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<IToastService, ToastService>();
+        services.AddSingleton<IWindowsNotificationPresenter, WindowsToastNotificationPresenter>();
+        services.AddSingleton<WindowsNotificationBridge>();
         services.AddSingleton<IUiDensityService, UiDensityService>();
         services.AddSingleton<ICalmUIService, CalmUIService>();
         services.AddSingleton<IFocusRuleEngine, FocusRuleEngine>();
@@ -184,7 +188,9 @@ internal static class HostingExtensions
             .AddBackupModule(pageRegistry)
             .AddQuotationsModule(pageRegistry)
             .AddGRNModule(pageRegistry)
-            .AddBarcodeLabelsModule(pageRegistry);
+            .AddBarcodeLabelsModule(pageRegistry)
+            .AddHardwareModule()
+            .AddSmartFeaturesModule();
 
         return services;
     }

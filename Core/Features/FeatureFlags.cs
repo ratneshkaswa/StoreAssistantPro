@@ -38,4 +38,19 @@ public static class FeatureFlags
     public const string Quotations = "Quotations";
     public const string GRN = "GRN";
     public const string BarcodeLabels = "BarcodeLabels";
+
+    // ── G1: Hardware Integration ──
+    public const string BarcodeScanner = "BarcodeScanner";
+    public const string ThermalPrinter = "ThermalPrinter";
+    public const string CashDrawer = "CashDrawer";
+    public const string WeighingScale = "WeighingScale";
+    public const string LabelPrinter = "LabelPrinter";
+    public const string CustomerDisplay = "CustomerDisplay";
+
+    // ── G2: AI & Smart Features ──
+    public const string SalesForecasting = "SalesForecasting";
+    public const string SmartPricing = "SmartPricing";
+    public const string CustomerInsights = "CustomerInsights";
+    public const string SmartSearch = "SmartSearch";
+    public const string AnomalyDetection = "AnomalyDetection";
 }
