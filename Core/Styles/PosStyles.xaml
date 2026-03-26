@@ -507,6 +507,18 @@
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
+    <Style x:Key="CountBadgePillStyle" TargetType="Border"
+           BasedOn="{StaticResource StatusBadgePillStyle}">
+        <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
+        <Setter Property="Padding" Value="8,3"/>
+    </Style>
+
+    <Style x:Key="InfoBadgePillStyle" TargetType="Border"
+           BasedOn="{StaticResource StatusBadgePillStyle}">
+        <Setter Property="Background" Value="{StaticResource SubtleFillColorSecondary}"/>
+        <Setter Property="Padding" Value="8,3"/>
+    </Style>
+
     <Style x:Key="SemanticStatusPillStyle" TargetType="Border"
            BasedOn="{StaticResource StatusBadgePillStyle}">
         <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>

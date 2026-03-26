@@ -214,12 +214,9 @@
                         CornerRadius="16"
                         Padding="{StaticResource WorkspaceHeaderStatusCardPadding}">
                     <StackPanel Orientation="Horizontal">
-                        <Border Width="40"
-                                Height="40"
-                                CornerRadius="20"
-                                Background="{StaticResource FluentAccentLight2}">
+                        <Border Style="{StaticResource ShellIdentityBadgeStyle}">
                             <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUserInitials, RelativeSource={RelativeSource AncestorType=Window}}"
-                                       Style="{StaticResource DashboardHeaderMonogramTextStyle}"/>
+                                       Style="{StaticResource ShellIdentityBadgeTextStyle}"/>
                         </Border>
 
                         <StackPanel Margin="{StaticResource WorkspaceHeaderStatusStackGap}">
@@ -227,30 +224,17 @@
                                        Style="{StaticResource DashboardHeaderPrimaryTextStyle}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
-                                    <Ellipse.Style>
-                                        <Style TargetType="Ellipse">
-                                            <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DataContext.DashboardSummary.IsOfflineMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
-                                                    <Setter Property="Fill" Value="{StaticResource FluentError}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Ellipse.Style>
-                                </Ellipse>
+                                <Ellipse Style="{StaticResource ConnectionStatusDotStyle}"
+                                         Tag="{Binding DataContext.DashboardSummary.IsOfflineMode, RelativeSource={RelativeSource AncestorType=Window}}"/>
 
                                 <TextBlock Text="{Binding DataContext.DashboardSummary.ConnectionStatusText, RelativeSource={RelativeSource AncestorType=Window}}"
-                                           Margin="8,0,0,0"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                                           Style="{StaticResource ShellConnectionPrimaryTextStyle}"/>
 
                                 <TextBlock Text="  "
                                            FontSize="{StaticResource FontSizeCaption}"/>
 
                                 <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentTime, RelativeSource={RelativeSource AncestorType=Window}}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                                           Style="{StaticResource ShellConnectionDetailTextStyle}"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -532,8 +516,7 @@
                         </StackPanel>
 
                         <Border Grid.Column="1"
-                                Style="{StaticResource StatusBadgePillStyle}"
-                                Background="{StaticResource LayerFillColorSecondary}">
+                                Style="{StaticResource CountBadgePillStyle}">
                             <TextBlock Text="{Binding RecentSalesDisplay.Count}"
                                        Style="{StaticResource DashboardCountBadgeTextStyle}"/>
                         </Border>
@@ -617,8 +600,7 @@
                             </StackPanel>
 
                             <Border Grid.Column="1"
-                                    Style="{StaticResource StatusBadgePillStyle}"
-                                    Background="{StaticResource LayerFillColorSecondary}">
+                                    Style="{StaticResource CountBadgePillStyle}">
                                 <TextBlock Text="{Binding TopProductsTodayDisplay.Count}"
                                            Style="{StaticResource DashboardCountBadgeTextStyle}"/>
                             </Border>
@@ -697,8 +679,7 @@
                             </StackPanel>
 
                             <Border Grid.Column="1"
-                                    Style="{StaticResource StatusBadgePillStyle}"
-                                    Background="{StaticResource LayerFillColorSecondary}">
+                                    Style="{StaticResource CountBadgePillStyle}">
                                 <TextBlock Text="{Binding TopProductsDisplay.Count}"
                                            Style="{StaticResource DashboardCountBadgeTextStyle}"/>
                             </Border>

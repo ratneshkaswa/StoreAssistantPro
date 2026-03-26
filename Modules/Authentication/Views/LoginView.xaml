@@ -73,36 +73,36 @@
 
     <Grid Background="{StaticResource AppBackgroundBrush}">
         <Grid IsHitTestVisible="False">
-            <Ellipse Width="760"
-                     Height="760"
-                     Margin="-220,-180,0,0"
+            <Ellipse Width="{StaticResource LoginHeroAccentPrimarySize}"
+                     Height="{StaticResource LoginHeroAccentPrimarySize}"
+                     Margin="{StaticResource LoginHeroAccentPrimaryMargin}"
                      HorizontalAlignment="Left"
                      VerticalAlignment="Top"
                      Fill="{StaticResource FluentAccentDefault}"
                      Opacity="0.055">
                 <Ellipse.Effect>
-                    <BlurEffect Radius="120"/>
+                    <BlurEffect Radius="{StaticResource LoginHeroAccentPrimaryBlurRadius}"/>
                 </Ellipse.Effect>
             </Ellipse>
-            <Ellipse Width="540"
-                     Height="540"
-                     Margin="0,0,-120,-80"
+            <Ellipse Width="{StaticResource LoginHeroAccentSecondarySize}"
+                     Height="{StaticResource LoginHeroAccentSecondarySize}"
+                     Margin="{StaticResource LoginHeroAccentSecondaryMargin}"
                      HorizontalAlignment="Right"
                      VerticalAlignment="Bottom"
                      Fill="{StaticResource FluentAccentLight2}"
                      Opacity="0.045">
                 <Ellipse.Effect>
-                    <BlurEffect Radius="96"/>
+                    <BlurEffect Radius="{StaticResource LoginHeroAccentSecondaryBlurRadius}"/>
                 </Ellipse.Effect>
             </Ellipse>
-            <Border Width="520"
-                    Height="520"
+            <Border Width="{StaticResource LoginHeroOutlineSize}"
+                    Height="{StaticResource LoginHeroOutlineSize}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Margin="0,60,0,0"
+                    Margin="{StaticResource LoginHeroOutlineMargin}"
                     BorderBrush="{StaticResource FluentSurfaceStroke}"
                     BorderThickness="1"
-                    CornerRadius="260"
+                    CornerRadius="{StaticResource LoginHeroOutlineCornerRadius}"
                     Opacity="0.2"/>
         </Grid>
         <Border Style="{StaticResource CenteredSurfaceCardStyle}">
@@ -231,13 +231,12 @@
                             </UniformGrid>
 
                             <!-- Forgot PIN link -->
-                            <TextBlock HorizontalAlignment="Center"
-                                       FontSize="{StaticResource FontSizeCaption}"
-                                       Margin="{StaticResource CompactItemSpacing}">
-                                <Hyperlink Command="{Binding ForgotPinCommand}">
-                                    Forgot PIN?
-                                </Hyperlink>
-                            </TextBlock>
+                            <Button Content="Forgot PIN?"
+                                    Command="{Binding ForgotPinCommand}"
+                                    Style="{StaticResource ToolbarLinkButtonStyle}"
+                                    HorizontalAlignment="Center"
+                                    Margin="{StaticResource CompactItemSpacing}"
+                                    AutomationProperties.Name="Forgot PIN"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -314,8 +313,8 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <controls:LoadingOverlay IsActive="{Binding IsVerifying}"
-                                             Message="Verifying login..."/>
+                    <controls:LoadingOverlay IsActive="{Binding IsWorking}"
+                                             Message="{Binding WorkingMessage}"/>
                 </Grid>
                 </Border>
 

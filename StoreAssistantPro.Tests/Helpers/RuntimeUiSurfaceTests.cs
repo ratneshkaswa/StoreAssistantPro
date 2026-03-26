@@ -964,8 +964,8 @@ public sealed class RuntimeUiSurfaceTests
         switch (window.DataContext)
         {
             case LoginViewModel loginViewModel:
-                loginViewModel.IsVerifying = false;
                 loginViewModel.IsBusy = false;
+                loginViewModel.IsLoading = false;
                 break;
         }
     }

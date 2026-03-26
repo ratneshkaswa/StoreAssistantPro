@@ -34,6 +34,15 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<sys:Double x:Key=\"EntityLookupSuggestionMinWidth\">300</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"HeldBillsOverlayMinWidth\">360</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"TransientListOverlayMaxHeight\">400</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"LoginHeroAccentPrimarySize\">760</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Thickness x:Key=\"LoginHeroAccentPrimaryMargin\">-220,-180,0,0</Thickness>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"LoginHeroAccentPrimaryBlurRadius\">120</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"LoginHeroAccentSecondarySize\">540</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Thickness x:Key=\"LoginHeroAccentSecondaryMargin\">0,0,-120,-80</Thickness>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"LoginHeroAccentSecondaryBlurRadius\">96</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"LoginHeroOutlineSize\">520</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Thickness x:Key=\"LoginHeroOutlineMargin\">0,60,0,0</Thickness>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"LoginHeroOutlineCornerRadius\">260</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"SettingsFieldColumnWidth\">192</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"ReportDateRangeWidth\">344</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"QuickActionOverflowButtonSize\">40</sys:Double>", designSystem, StringComparison.Ordinal);
@@ -147,6 +156,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<Style x:Key=\"PaginatorRightAlignedBarStyle\" TargetType=\"StackPanel\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"PaginatorNavButtonStyle\" TargetType=\"Button\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"PaginatorInfoTextStyle\" TargetType=\"TextBlock\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"DataGridInlineEditHintIconStyle\" TargetType=\"TextBlock\">", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"OperationalEditorSectionCardStyle\" TargetType=\"Border\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"OperationalEditorSectionTitleStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"OperationalEditorSectionDescriptionStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
@@ -195,6 +205,18 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<Style x:Key=\"DashboardListSecondaryTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"DashboardHeaderMonogramTextStyle\" TargetType=\"TextBlock\">", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"DashboardHeaderPrimaryTextStyle\" TargetType=\"TextBlock\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ShellIdentityBadgeStyle\" TargetType=\"Border\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ShellCompactIdentityBadgeStyle\" TargetType=\"Border\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ShellIdentityBadgeTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ShellCompactIdentityBadgeTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ConnectionStatusDotStyle\" TargetType=\"Ellipse\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ShellConnectionPrimaryTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"ShellConnectionDetailTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
+
+        Assert.Contains("<Style x:Key=\"CountBadgePillStyle\" TargetType=\"Border\"", File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml")), StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"InfoBadgePillStyle\" TargetType=\"Border\"", File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml")), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -325,8 +347,12 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("CornerRadius=\"{StaticResource WorkspaceHeroAccentRightCornerRadius}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Padding=\"{StaticResource WorkspaceHeaderStatusCardPadding}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Margin=\"{StaticResource WorkspaceHeaderStatusStackGap}\"", workspaceView, StringComparison.Ordinal);
-        Assert.Contains("Style=\"{StaticResource DashboardHeaderMonogramTextStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellIdentityBadgeStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellIdentityBadgeTextStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource DashboardHeaderPrimaryTextStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ConnectionStatusDotStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellConnectionPrimaryTextStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellConnectionDetailTextStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource SummaryStatCardStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource SummaryStatLabelTextStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource SummaryStatValueTextStyle}\"", workspaceView, StringComparison.Ordinal);
@@ -358,6 +384,87 @@ public sealed class UiStandardizationStandardsTests
         Assert.DoesNotContain("Icon=\"📦\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Icon=\"📊\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Icon=\"💳\"", workspaceView, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Shell_Status_And_Notification_Badges_Should_Use_Shared_Semantic_Styles()
+    {
+        var mainWindow = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+        var workspaceView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "WorkspaceView.xaml"));
+        var printPreview = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml"));
+
+        Assert.Contains("Style=\"{StaticResource ShellCompactIdentityBadgeStyle}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellCompactIdentityBadgeTextStyle}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ConnectionStatusDotStyle}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellConnectionPrimaryTextStyle}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellConnectionDetailTextStyle}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Equal(2, Regex.Matches(mainWindow, "NotificationBadgeBehavior\\.DotOnly=\"True\"").Count);
+        Assert.DoesNotContain("<Ellipse Width=\"8\" Height=\"8\" VerticalAlignment=\"Center\">", mainWindow, StringComparison.Ordinal);
+
+        Assert.Contains("Style=\"{StaticResource ShellIdentityBadgeStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellIdentityBadgeTextStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ConnectionStatusDotStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellConnectionPrimaryTextStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ShellConnectionDetailTextStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Equal(3, Regex.Matches(workspaceView, "Style=\\\"\\{StaticResource CountBadgePillStyle\\}\\\"").Count);
+        Assert.DoesNotContain("Style=\"{StaticResource StatusBadgePillStyle}\"", workspaceView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Ellipse Width=\"8\" Height=\"8\" VerticalAlignment=\"Center\">", workspaceView, StringComparison.Ordinal);
+
+        Assert.Contains("Style=\"{StaticResource InfoBadgePillStyle}\"", printPreview, StringComparison.Ordinal);
+        Assert.DoesNotContain("Style=\"{StaticResource StatusBadgePillStyle}\"", printPreview, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Transaction_Row_Context_Menus_Should_Render_Shared_Icons_And_Consistent_Action_Grammar()
+    {
+        var fluentTheme = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
+        var branchView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Branch", "Views", "BranchManagementView.xaml"));
+        var debtorView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Debtors", "Views", "DebtorManagementView.xaml"));
+        var expenseView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Expenses", "Views", "ExpenseManagementView.xaml"));
+        var orderView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Orders", "Views", "OrderManagementView.xaml"));
+        var paymentView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Payments", "Views", "PaymentManagementView.xaml"));
+        var ironingView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Ironing", "Views", "IroningManagementView.xaml"));
+        var salaryView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Salaries", "Views", "SalaryManagementView.xaml"));
+        var salesPurchaseView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "SalesPurchase", "Views", "SalesPurchaseView.xaml"));
+
+        Assert.Contains("ContentSource=\"Icon\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("ContentSource=\"Header\"", fluentTheme, StringComparison.Ordinal);
+
+        foreach (var xaml in new[]
+                 {
+                     branchView, debtorView, expenseView, orderView,
+                     paymentView, ironingView, salaryView, salesPurchaseView
+                 })
+        {
+            Assert.Contains("<DataGrid.ContextMenu>", xaml, StringComparison.Ordinal);
+            Assert.Contains("<MenuItem Header=\"Edit\"", xaml, StringComparison.Ordinal);
+            Assert.Contains("<MenuItem Header=\"Delete\"", xaml, StringComparison.Ordinal);
+            Assert.Contains("<MenuItem.Icon>", xaml, StringComparison.Ordinal);
+            Assert.Contains("Text=\"&#xE70F;\"", xaml, StringComparison.Ordinal);
+            Assert.Contains("Text=\"&#xE74D;\"", xaml, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("<Separator/>", branchView, StringComparison.Ordinal);
+        Assert.Contains("Header=\"Mark Cleared\"", branchView, StringComparison.Ordinal);
+        Assert.Contains("<Separator/>", orderView, StringComparison.Ordinal);
+        Assert.Contains("Header=\"Mark Delivered\"", orderView, StringComparison.Ordinal);
+        Assert.Contains("Header=\"Mark Pending\"", orderView, StringComparison.Ordinal);
+        Assert.Contains("<Separator/>", ironingView, StringComparison.Ordinal);
+        Assert.Contains("Header=\"Mark Paid\"", ironingView, StringComparison.Ordinal);
+        Assert.Contains("<Separator/>", salaryView, StringComparison.Ordinal);
+        Assert.Contains("Header=\"Mark Paid\"", salaryView, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -537,7 +644,31 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<Style x:Key=\"SplitToolPageContentGridStyle\" TargetType=\"Grid\">", globalStyles, StringComparison.Ordinal);
 
         Assert.Contains("Style=\"{StaticResource CenteredSurfaceCardStyle}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Width=\"{StaticResource LoginHeroAccentPrimarySize}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Height=\"{StaticResource LoginHeroAccentPrimarySize}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Margin=\"{StaticResource LoginHeroAccentPrimaryMargin}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Radius=\"{StaticResource LoginHeroAccentPrimaryBlurRadius}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Width=\"{StaticResource LoginHeroAccentSecondarySize}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Height=\"{StaticResource LoginHeroAccentSecondarySize}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Margin=\"{StaticResource LoginHeroAccentSecondaryMargin}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Radius=\"{StaticResource LoginHeroAccentSecondaryBlurRadius}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Width=\"{StaticResource LoginHeroOutlineSize}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Height=\"{StaticResource LoginHeroOutlineSize}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Margin=\"{StaticResource LoginHeroOutlineMargin}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("CornerRadius=\"{StaticResource LoginHeroOutlineCornerRadius}\"", loginView, StringComparison.Ordinal);
         Assert.DoesNotContain("MaxWidth=\"{StaticResource LoginCardMaxWidth}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Width=\"760\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Height=\"760\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Margin=\"-220,-180,0,0\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Radius=\"120\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Width=\"540\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Height=\"540\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Margin=\"0,0,-120,-80\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Radius=\"96\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Width=\"520\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Height=\"520\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Margin=\"0,60,0,0\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("CornerRadius=\"260\"", loginView, StringComparison.Ordinal);
 
         Assert.Contains("Style=\"{StaticResource CenteredPageContentHostStyle}\"", firmView, StringComparison.Ordinal);
         Assert.DoesNotContain("MaxWidth=\"{StaticResource SettingsDialogContentMaxWidth}\"", firmView, StringComparison.Ordinal);
@@ -1841,6 +1972,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("Style=\"{StaticResource InlineMoneyActionCommandRowStyle}\"", customerView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource InlineMoneyActionPrimaryButtonStyle}\"", customerView, StringComparison.Ordinal);
         Assert.Contains("h:TextBoxAdornment.PrefixText=\"{Binding CurrencySymbol}\"", customerView, StringComparison.Ordinal);
+        Assert.Contains("h:NumericInput.IsDecimalOnly=\"True\"", customerView, StringComparison.Ordinal);
         Assert.Contains("AutomationProperties.Name=\"Payment reference\"", customerView, StringComparison.Ordinal);
         Assert.DoesNotContain("Foreground=\"{StaticResource FluentError}\"", customerView, StringComparison.Ordinal);
     }
@@ -1909,6 +2041,32 @@ public sealed class UiStandardizationStandardsTests
         Assert.DoesNotContain("h:Watermark.Text=\"e.g. 15000\"", vendorView, StringComparison.Ordinal);
         Assert.DoesNotContain("h:Watermark.Text=\"e.g. CHQ-12345\"", vendorView, StringComparison.Ordinal);
         Assert.DoesNotContain("Style=\"{StaticResource FluentCardStyle}\"", vendorView, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Representative_Money_Editors_Should_Use_Currency_Prefix_And_Decimal_Input_Constraints()
+    {
+        var customerView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Customers", "Views", "CustomerManagementView.xaml"));
+        var productView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Products", "Views", "ProductManagementView.xaml"));
+        var salesPurchaseView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "SalesPurchase", "Views", "SalesPurchaseView.xaml"));
+
+        Assert.Contains("AutomationProperties.Name=\"Payment amount\"", customerView, StringComparison.Ordinal);
+        Assert.Contains("h:TextBoxAdornment.PrefixText=\"{Binding CurrencySymbol}\"", customerView, StringComparison.Ordinal);
+        Assert.Contains("h:NumericInput.Scope=\"Number\"", customerView, StringComparison.Ordinal);
+        Assert.Contains("h:NumericInput.IsDecimalOnly=\"True\"", customerView, StringComparison.Ordinal);
+
+        Assert.Contains("AutomationProperties.Name=\"Sale price\"", productView, StringComparison.Ordinal);
+        Assert.Contains("AutomationProperties.Name=\"Cost price\"", productView, StringComparison.Ordinal);
+        Assert.Equal(2, Regex.Matches(productView, "h:NumericInput\\.IsDecimalOnly=\"True\"").Count);
+        Assert.Equal(2, Regex.Matches(productView, Regex.Escape("h:TextBoxAdornment.PrefixText=\"{Binding CurrencySymbol}\"")).Count);
+
+        Assert.Contains("AutomationProperties.Name=\"Amount\"", salesPurchaseView, StringComparison.Ordinal);
+        Assert.Contains("h:TextBoxAdornment.PrefixText=\"{Binding CurrencySymbol}\"", salesPurchaseView, StringComparison.Ordinal);
+        Assert.Contains("h:NumericInput.Scope=\"Number\"", salesPurchaseView, StringComparison.Ordinal);
+        Assert.Contains("h:NumericInput.IsDecimalOnly=\"True\"", salesPurchaseView, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -2784,6 +2942,93 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("\"Restore Database\"", settingsViewModel, StringComparison.Ordinal);
         Assert.Contains("\"Factory Reset\"", settingsViewModel, StringComparison.Ordinal);
         Assert.Equal(2, Regex.Matches(settingsViewModel, "dialogService\\.Confirm\\(").Count);
+    }
+
+    [Fact]
+    public void Ui_Standardization_Charter_Should_Define_Product_Level_Governance_Rules()
+    {
+        var charter = File.ReadAllText(
+            Path.Combine(SolutionRoot, "docs", "ui", "UI_STANDARDIZATION_CHARTER.md"));
+
+        Assert.Contains("# UI Standardization Charter", charter, StringComparison.Ordinal);
+        Assert.Contains("## Source Of Truth", charter, StringComparison.Ordinal);
+        Assert.Contains("## Universal Action Rules", charter, StringComparison.Ordinal);
+        Assert.Contains("## Page Classes", charter, StringComparison.Ordinal);
+        Assert.Contains("## State Surfaces", charter, StringComparison.Ordinal);
+        Assert.Contains("## Input Rules", charter, StringComparison.Ordinal);
+        Assert.Contains("## Dialog Taxonomy", charter, StringComparison.Ordinal);
+        Assert.Contains("## Edit Surface Decision Rules", charter, StringComparison.Ordinal);
+        Assert.Contains("## Disclosure And Overflow Rules", charter, StringComparison.Ordinal);
+        Assert.Contains("## Reporting Rules", charter, StringComparison.Ordinal);
+        Assert.Contains("## Responsive And Hover Rules", charter, StringComparison.Ordinal);
+        Assert.Contains("## Governance", charter, StringComparison.Ordinal);
+        Assert.Contains("UiStandardizationStandardsTests", charter, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Representative_Loading_Overlays_Should_Use_Shared_Working_State_Contract()
+    {
+        var baseViewModel = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Base", "BaseViewModel.cs"));
+        var loginView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginView.xaml"));
+        var loginViewModel = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "ViewModels", "LoginViewModel.cs"));
+        var firmView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Firm", "Views", "FirmManagementView.xaml"));
+        var firmViewModel = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Firm", "ViewModels", "FirmViewModel.cs"));
+
+        Assert.Contains("public bool IsWorking => IsBusy || IsLoading;", baseViewModel, StringComparison.Ordinal);
+        Assert.Contains("public virtual string WorkingMessage => IsLoading", baseViewModel, StringComparison.Ordinal);
+        Assert.Contains("partial void OnIsBusyChanged(bool value)", baseViewModel, StringComparison.Ordinal);
+        Assert.Contains("partial void OnIsLoadingChanged(bool value)", baseViewModel, StringComparison.Ordinal);
+        Assert.Contains("OnPropertyChanged(nameof(IsWorking));", baseViewModel, StringComparison.Ordinal);
+        Assert.Contains("OnPropertyChanged(nameof(WorkingMessage));", baseViewModel, StringComparison.Ordinal);
+
+        Assert.Contains("LoadingOverlay IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Message=\"{Binding WorkingMessage}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("IsActive=\"{Binding IsVerifying}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Message=\"Verifying login...\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("public override string WorkingMessage => IsForgotPinMode", loginViewModel, StringComparison.Ordinal);
+        Assert.Contains("partial void OnIsForgotPinModeChanged(bool value) => OnPropertyChanged(nameof(WorkingMessage));", loginViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("public partial bool IsVerifying { get; set; }", loginViewModel, StringComparison.Ordinal);
+
+        Assert.Contains("LoadingOverlay IsActive=\"{Binding IsWorking}\"", firmView, StringComparison.Ordinal);
+        Assert.Contains("Message=\"{Binding WorkingMessage}\"", firmView, StringComparison.Ordinal);
+        Assert.Contains("public override string WorkingMessage => IsLoading", firmViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("public bool IsWorking => IsBusy || IsLoading;", firmViewModel, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Text_Action_Commands_Should_Use_Shared_Link_Button_Styles()
+    {
+        var posStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml"));
+        var loginView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginView.xaml"));
+
+        Assert.Contains("<Style x:Key=\"ToolbarLinkButtonStyle\" TargetType=\"Button\">", posStyles, StringComparison.Ordinal);
+        Assert.Contains("Content=\"Forgot PIN?\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ToolbarLinkButtonStyle}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Hyperlink Command=\"{Binding ForgotPinCommand}\">", loginView, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Inline_Edit_Hint_Icons_Should_Use_Shared_Hover_Reveal_Style()
+    {
+        var brandsView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Brands", "Views", "BrandManagementView.xaml"));
+        var categoriesView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Categories", "Views", "CategoryManagementView.xaml"));
+
+        Assert.Contains("Style=\"{StaticResource DataGridInlineEditHintIconStyle}\"", brandsView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Path=IsMouseOver", brandsView, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"PencilIcon\"", brandsView, StringComparison.Ordinal);
+
+        Assert.Equal(2, Regex.Matches(categoriesView, "Style=\\\"\\{StaticResource DataGridInlineEditHintIconStyle\\}\\\"").Count);
+        Assert.DoesNotContain("Path=IsMouseOver", categoriesView, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"PencilIcon\"", categoriesView, StringComparison.Ordinal);
     }
 
     private static string FindXaml(string fileName)

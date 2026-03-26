@@ -398,9 +398,7 @@ public partial class FirmViewModel : BaseViewModel
         }
     }
 
-    public bool IsWorking => IsBusy || IsLoading;
-
-    public string WorkingMessage => IsLoading
+    public override string WorkingMessage => IsLoading
         ? "Loading business settings..."
         : "Saving business settings...";
 
@@ -664,12 +662,6 @@ public partial class FirmViewModel : BaseViewModel
     {
         if (_isHydrating || string.IsNullOrWhiteSpace(e.PropertyName))
             return;
-
-        if (e.PropertyName is nameof(IsBusy) or nameof(IsLoading))
-        {
-            OnPropertyChanged(nameof(IsWorking));
-            OnPropertyChanged(nameof(WorkingMessage));
-        }
 
         if (DirtyTrackedProperties.Contains(e.PropertyName))
             IsDirty = true;

@@ -57,6 +57,20 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public partial bool IsLoading { get; set; }
 
     /// <summary>
+    /// Shared loading-overlay activity signal for views that want one
+    /// contract whether the ViewModel is saving or loading.
+    /// </summary>
+    public bool IsWorking => IsBusy || IsLoading;
+
+    /// <summary>
+    /// Shared loading-overlay message. Derived ViewModels can override
+    /// this when the default message should be more specific.
+    /// </summary>
+    public virtual string WorkingMessage => IsLoading
+        ? "Loading content..."
+        : "Working...";
+
+    /// <summary>
     /// Last error message to display in the View. Set by
     /// <see cref="RunAsync"/> on failure, or by <see cref="Validate"/>.
     /// </summary>
@@ -118,6 +132,18 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     /// <c>true</c> when <see cref="ValidationErrors"/> contains at least one error.
     /// </summary>
     public bool HasValidationErrors => ValidationErrors.Count > 0;
+
+    partial void OnIsBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsWorking));
+        OnPropertyChanged(nameof(WorkingMessage));
+    }
+
+    partial void OnIsLoadingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsWorking));
+        OnPropertyChanged(nameof(WorkingMessage));
+    }
 
     /// <summary>
     /// Human-readable title derived from the class name by default.

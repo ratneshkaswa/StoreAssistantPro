@@ -4,6 +4,7 @@ using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
+using StoreAssistantPro.Modules.Users.Commands;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
@@ -239,5 +240,60 @@ public class LoginViewModelTests
         sut.Dispose();
 
         Assert.Null(sut.LoginSucceeded);
+    }
+
+    [Fact]
+    public async Task Login_InFlight_ExposesSharedWorkingState()
+    {
+        var pendingLogin = new TaskCompletionSource<CommandResult>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
+            .Returns(_ => pendingLogin.Task);
+
+        var sut = CreateSut();
+        sut.SelectUserCommand.Execute(UserType.Admin);
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+        sut.PinPad.AddDigitCommand.Execute("4");
+
+        await Task.Yield();
+
+        Assert.True(sut.IsBusy);
+        Assert.True(sut.IsWorking);
+        Assert.Equal("Verifying login...", sut.WorkingMessage);
+
+        pendingLogin.SetResult(CommandResult.Failure("Invalid PIN."));
+        await Task.Delay(50);
+
+        Assert.False(sut.IsWorking);
+    }
+
+    [Fact]
+    public async Task ResetPin_InFlight_UsesResetWorkingMessage()
+    {
+        var pendingReset = new TaskCompletionSource<CommandResult>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _commandBus.SendAsync(Arg.Any<ChangePinCommand>())
+            .Returns(_ => pendingReset.Task);
+
+        var sut = CreateSut();
+        sut.SelectUserCommand.Execute(UserType.Admin);
+        sut.ForgotPinCommand.Execute(null);
+        sut.MasterPassword = "123456";
+        sut.NewPin = "5831";
+        sut.NewPinConfirm = "5831";
+
+        var resetTask = sut.ResetPinCommand.ExecuteAsync(null);
+        await Task.Yield();
+
+        Assert.True(sut.IsBusy);
+        Assert.True(sut.IsWorking);
+        Assert.Equal("Resetting PIN...", sut.WorkingMessage);
+
+        pendingReset.SetResult(CommandResult.Success());
+        await resetTask;
+
+        Assert.False(sut.IsWorking);
     }
 }

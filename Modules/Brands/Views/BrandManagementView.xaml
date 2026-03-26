@@ -72,21 +72,9 @@
                                     <TextBlock Text="{Binding Name}"
                                                VerticalAlignment="Center"
                                                TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock x:Name="PencilIcon"
-                                               Text="&#xE70F;"
-                                               FontFamily="{StaticResource FluentIconFont}"
-                                               FontSize="{StaticResource FontSizeIconSmall}"
-                                               Foreground="{StaticResource FluentTextTertiary}"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Center"
-                                               Opacity="0"/>
+                                    <TextBlock Text="&#xE70F;"
+                                               Style="{StaticResource DataGridInlineEditHintIconStyle}"/>
                                 </Grid>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsMouseOver}"
-                                                 Value="True">
-                                        <Setter TargetName="PencilIcon" Property="Opacity" Value="0.8"/>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>

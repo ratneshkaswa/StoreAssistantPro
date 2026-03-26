@@ -258,6 +258,7 @@
                                          Margin="0,0,8,4"
                                          h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                                          h:NumericInput.Scope="Number"
+                                         h:NumericInput.IsDecimalOnly="True"
                                          h:Watermark.Text="Payment amount"/>
                                 <ComboBox ItemsSource="{Binding PaymentMethods}"
                                           SelectedItem="{Binding PaymentMethod}"

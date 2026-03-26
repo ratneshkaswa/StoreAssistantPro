@@ -57,8 +57,7 @@
                                 Content="Previous"
                                 Style="{StaticResource PaginatorNavButtonStyle}"
                                 Click="OnPreviousPageClick"/>
-                        <Border Style="{StaticResource StatusBadgePillStyle}"
-                                Background="{StaticResource LayerFillColorSecondary}"
+                        <Border Style="{StaticResource InfoBadgePillStyle}"
                                 Margin="{StaticResource InlineItemGap}">
                             <TextBlock x:Name="PageStatusText"
                                        Text="Page 1 of 1"

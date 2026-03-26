@@ -527,6 +527,15 @@
     <sys:Double x:Key="LoginKeypadButtonMinSize">76</sys:Double>
     <sys:Double x:Key="LoginKeypadWidth">252</sys:Double>
     <sys:Double x:Key="LoginKeypadHeight">336</sys:Double>
+    <sys:Double x:Key="LoginHeroAccentPrimarySize">760</sys:Double>
+    <Thickness x:Key="LoginHeroAccentPrimaryMargin">-220,-180,0,0</Thickness>
+    <sys:Double x:Key="LoginHeroAccentPrimaryBlurRadius">120</sys:Double>
+    <sys:Double x:Key="LoginHeroAccentSecondarySize">540</sys:Double>
+    <Thickness x:Key="LoginHeroAccentSecondaryMargin">0,0,-120,-80</Thickness>
+    <sys:Double x:Key="LoginHeroAccentSecondaryBlurRadius">96</sys:Double>
+    <sys:Double x:Key="LoginHeroOutlineSize">520</sys:Double>
+    <Thickness x:Key="LoginHeroOutlineMargin">0,60,0,0</Thickness>
+    <sys:Double x:Key="LoginHeroOutlineCornerRadius">260</sys:Double>
     <sys:Double x:Key="ErrorAreaMinHeight">18</sys:Double>
     <sys:Double x:Key="MessageAreaMinHeight">24</sys:Double>
     <sys:Double x:Key="StepIndicatorWidth">260</sys:Double>

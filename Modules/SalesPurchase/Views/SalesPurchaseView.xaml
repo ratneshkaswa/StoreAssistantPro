@@ -97,6 +97,8 @@
                         <TextBlock Text="Amount" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                                  h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                                 h:NumericInput.Scope="Number"
+                                 h:NumericInput.IsDecimalOnly="True"
                                  h:Watermark.Text="Amount" MaxLength="12"
                                  AutomationProperties.Name="Amount"/>
                     </StackPanel>

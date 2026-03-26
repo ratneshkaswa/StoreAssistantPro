@@ -64,9 +64,6 @@ public partial class LoginViewModel : BaseViewModel
         _ => "Select a role above"
     };
 
-    [ObservableProperty]
-    public partial bool IsVerifying { get; set; }
-
     // ── L1: Firm name ──
     public string FirmName => _appState.FirmName;
 
@@ -81,6 +78,10 @@ public partial class LoginViewModel : BaseViewModel
     public string ConnectionStatus => IsOffline ? "● Offline" : "● Connected";
     public string AppVersion { get; } =
         System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
+
+    public override string WorkingMessage => IsForgotPinMode
+        ? "Resetting PIN..."
+        : "Verifying login...";
 
     // ── L9: Clock ──
     [ObservableProperty]
@@ -189,7 +190,7 @@ public partial class LoginViewModel : BaseViewModel
     private async Task LoginUserDirectAsync()
     {
         ClearMessages();
-        IsVerifying = true;
+        IsBusy = true;
         try
         {
             var result = await _commandBus.SendAsync(
@@ -208,7 +209,7 @@ public partial class LoginViewModel : BaseViewModel
         }
         finally
         {
-            IsVerifying = false;
+            IsBusy = false;
         }
     }
 
@@ -234,7 +235,7 @@ public partial class LoginViewModel : BaseViewModel
 
         ClearMessages();
         PinPad.Lock();
-        IsVerifying = true;
+        IsBusy = true;
         try
         {
             var result = await _commandBus.SendAsync(
@@ -254,7 +255,7 @@ public partial class LoginViewModel : BaseViewModel
         }
         finally
         {
-            IsVerifying = false;
+            IsBusy = false;
             PinPad.Unlock();
         }
     }
@@ -265,6 +266,8 @@ public partial class LoginViewModel : BaseViewModel
     public partial bool IsForgotPinMode { get; set; }
 
     public bool IsNormalMode => !IsForgotPinMode;
+
+    partial void OnIsForgotPinModeChanged(bool value) => OnPropertyChanged(nameof(WorkingMessage));
 
     public string MasterPassword { get; set; } = string.Empty;
     public string NewPin { get; set; } = string.Empty;
@@ -315,7 +318,7 @@ public partial class LoginViewModel : BaseViewModel
             return;
 
         ClearMessages();
-        IsVerifying = true;
+        IsBusy = true;
         try
         {
             var result = await _commandBus.SendAsync(
@@ -338,7 +341,7 @@ public partial class LoginViewModel : BaseViewModel
         }
         finally
         {
-            IsVerifying = false;
+            IsBusy = false;
         }
     }
 

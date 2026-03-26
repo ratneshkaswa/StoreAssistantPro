@@ -732,6 +732,21 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="DataGridInlineEditHintIconStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentIconFont}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeIconSmall}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Opacity" Value="0"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsMouseOver}"
+                         Value="True">
+                <Setter Property="Opacity" Value="0.8"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="PrimaryButtonStyle" TargetType="Button"
            BasedOn="{StaticResource FluentAccentButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}"/>
@@ -1358,6 +1373,54 @@
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+    </Style>
+
+    <Style x:Key="ShellIdentityBadgeStyle" TargetType="Border">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Background" Value="{StaticResource FluentAccentLight2}"/>
+    </Style>
+
+    <Style x:Key="ShellCompactIdentityBadgeStyle" TargetType="Border"
+           BasedOn="{StaticResource ShellIdentityBadgeStyle}">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="CornerRadius" Value="16"/>
+    </Style>
+
+    <Style x:Key="ShellIdentityBadgeTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource DashboardHeaderMonogramTextStyle}">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="ShellCompactIdentityBadgeTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource ShellIdentityBadgeTextStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+    </Style>
+
+    <Style x:Key="ConnectionStatusDotStyle" TargetType="Ellipse">
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="True">
+                <Setter Property="Fill" Value="{StaticResource FluentError}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ShellConnectionPrimaryTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionLabelStyle}">
+        <Setter Property="Margin" Value="8,0,0,0"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+    </Style>
+
+    <Style x:Key="ShellConnectionDetailTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionLabelStyle}">
+        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
     </Style>
 
     <Style x:Key="InlineMoneyActionPanelStyle" TargetType="Border"

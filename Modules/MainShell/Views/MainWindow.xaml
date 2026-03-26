@@ -1183,15 +1183,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="32"
-                            Height="32"
-                            CornerRadius="16"
-                            Background="{StaticResource FluentAccentLight2}">
+                    <Border Style="{StaticResource ShellCompactIdentityBadgeStyle}">
                         <TextBlock Text="{Binding DashboardSummary.CurrentUserInitials}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentAccentDark2}"/>
+                                   Style="{StaticResource ShellCompactIdentityBadgeTextStyle}"/>
                     </Border>
 
                     <StackPanel Margin="10,0,0,0">
@@ -1201,30 +1195,17 @@
                                    Foreground="{StaticResource FluentTextPrimary}"/>
 
                         <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                            <Ellipse Width="8" Height="8" VerticalAlignment="Center">
-                                <Ellipse.Style>
-                                    <Style TargetType="Ellipse">
-                                        <Setter Property="Fill" Value="{StaticResource FluentSuccess}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DashboardSummary.IsOfflineMode}" Value="True">
-                                                <Setter Property="Fill" Value="{StaticResource FluentError}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Ellipse.Style>
-                            </Ellipse>
+                            <Ellipse Style="{StaticResource ConnectionStatusDotStyle}"
+                                     Tag="{Binding DashboardSummary.IsOfflineMode}"/>
 
                             <TextBlock Text="{Binding DashboardSummary.ConnectionStatusText}"
-                                       Margin="8,0,0,0"
-                                       FontSize="{StaticResource FontSizeStatusBar}"
-                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                                       Style="{StaticResource ShellConnectionPrimaryTextStyle}"/>
 
                             <TextBlock Text="  "
                                        FontSize="{StaticResource FontSizeStatusBar}"/>
 
                             <TextBlock Text="{Binding DashboardSummary.ConnectionStatusDetail}"
-                                       FontSize="{StaticResource FontSizeStatusBar}"
-                                       Foreground="{StaticResource FluentTextTertiary}"/>
+                                       Style="{StaticResource ShellConnectionDetailTextStyle}"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
