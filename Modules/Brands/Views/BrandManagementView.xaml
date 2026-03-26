@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Brands.Views.BrandManagementView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Brands.Views.BrandManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -30,114 +30,137 @@
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox AutomationProperties.Name="Brand search"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      h:Watermark.Text="Search brands by name"/>
-            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- DataGrid -->
-        <DataGrid x:Name="BrandsGrid"
-                  AutomationProperties.Name="Brands list" Grid.Row="2"
-                  ItemsSource="{Binding Brands}"
-                  SelectedItem="{Binding SelectedBrand}"
-                  Style="{StaticResource EnterpriseDataGridStyle}"
-                  h:DataGridLayoutPersistence.Key="BrandsGrid"
-                  h:DataGridEmptyState.Icon="🏷"
-                  h:DataGridEmptyState.Title="No brands yet"
-                  h:DataGridEmptyState.Description="Add your first brand to organize products and supplier assortments."
-                  AutoGenerateColumns="False" IsReadOnly="False"
-                  SelectionMode="Extended"
-                  h:DataGridMultiSelect.IsEnabled="True"
-                  BeginningEdit="OnBrandsGridBeginningEdit"
-                  CellEditEnding="OnBrandsGridCellEditEnding"
-                  PreviewMouseDoubleClick="OnBrandsGridPreviewMouseDoubleClick"
-                  HeadersVisibility="Column" CanUserAddRows="False"
-                  Margin="{StaticResource ItemSpacing}">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn x:Name="BrandNameColumn"
-                                        Header="Brand"
-                                        SortMemberPath="Name"
-                                        Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <TextBlock Text="{Binding Name}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"/>
-                                <TextBlock x:Name="PencilIcon"
-                                           Text="&#xE70F;"
-                                           FontFamily="{StaticResource FluentIconFont}"
-                                           FontSize="{StaticResource FontSizeIconSmall}"
-                                           Foreground="{StaticResource FluentTextTertiary}"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Opacity="0"/>
-                            </Grid>
-                            <DataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsMouseOver}"
-                                             Value="True">
-                                    <Setter TargetName="PencilIcon" Property="Opacity" Value="0.8"/>
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource DataGridInlineEditTextBoxStyle}"
-                                     MaxLength="100"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Products"
-                                    Binding="{Binding ProductCount}"
-                                    Width="{StaticResource ColumnWidthQty}"
-                                    IsReadOnly="True"/>
-                <DataGridTemplateColumn Header="Active"
-                                        CellTemplate="{StaticResource ActiveToggleCellTemplate}"
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DataGrid x:Name="BrandsGrid"
+                      AutomationProperties.Name="Brands list"
+                      ItemsSource="{Binding Brands}"
+                      SelectedItem="{Binding SelectedBrand}"
+                      Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="BrandsGrid"
+                      h:DataGridEmptyState.Icon="{StaticResource EmptyStateBrandIconGlyph}"
+                      h:DataGridEmptyState.Title="No brands yet"
+                      h:DataGridEmptyState.Description="Add your first brand to organize products and supplier assortments."
+                      AutoGenerateColumns="False" IsReadOnly="False"
+                      SelectionMode="Extended"
+                      h:DataGridMultiSelect.IsEnabled="True"
+                      BeginningEdit="OnBrandsGridBeginningEdit"
+                      CellEditEnding="OnBrandsGridCellEditEnding"
+                      PreviewMouseDoubleClick="OnBrandsGridPreviewMouseDoubleClick"
+                      HeadersVisibility="Column" CanUserAddRows="False"
+                      Margin="{StaticResource ItemSpacing}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn x:Name="BrandNameColumn"
+                                            Header="Brand"
+                                            SortMemberPath="Name"
+                                            Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding Name}"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock x:Name="PencilIcon"
+                                               Text="&#xE70F;"
+                                               FontFamily="{StaticResource FluentIconFont}"
+                                               FontSize="{StaticResource FontSizeIconSmall}"
+                                               Foreground="{StaticResource FluentTextTertiary}"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center"
+                                               Opacity="0"/>
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridCell}, Path=IsMouseOver}"
+                                                 Value="True">
+                                        <Setter TargetName="PencilIcon" Property="Opacity" Value="0.8"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource DataGridInlineEditTextBoxStyle}"
+                                         MaxLength="100"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Products"
+                                        Binding="{Binding ProductCount}"
                                         Width="{StaticResource ColumnWidthQty}"
                                         IsReadOnly="True"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                    <DataGridTemplateColumn Header="Active"
+                                            CellTemplate="{StaticResource ActiveToggleCellTemplate}"
+                                            Width="{StaticResource ColumnWidthQty}"
+                                            IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
-        <!-- Form -->
-        <Grid Grid.Row="3" Margin="{StaticResource StepContentTopSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                <Run Text="Brand Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
-            </TextBlock>
-            <TextBox Grid.Column="1"
-                     AutomationProperties.Name="Brand name"
-                     Text="{Binding BrandName, UpdateSourceTrigger=PropertyChanged}"
-                     Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                     MaxLength="100" h:Watermark.Text="Brand name"/>
-        </Grid>
-
-        <!-- Buttons -->
-        <Grid Grid.Row="4" Margin="{StaticResource FormActionBarSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource FormActionRowStyle}">
-                <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                        Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Content="Save" Command="{Binding SaveCommand}"
-                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <StackPanel Grid.Row="1"
+                        Style="{StaticResource PaginatorRightAlignedBarStyle}"
+                        Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
+                <Button Content="Prev"
+                        Command="{Binding PreviousPageCommand}"
+                        IsEnabled="{Binding HasPreviousPage}"
+                        Style="{StaticResource PaginatorNavButtonStyle}"
+                        Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding PagingInfo}"
+                           VerticalAlignment="Center"
+                           Style="{StaticResource PaginatorInfoTextStyle}"/>
+                <Button Content="Next"
+                        Command="{Binding NextPageCommand}"
+                        IsEnabled="{Binding HasNextPage}"
+                        Style="{StaticResource PaginatorNavButtonStyle}"
+                        Margin="8,0,0,0"/>
             </StackPanel>
         </Grid>
+
+        <!-- Editor -->
+        <Border Grid.Row="3" Grid.RowSpan="2"
+                Margin="{StaticResource StepContentTopSpacing}"
+                Style="{StaticResource OperationalEditorSectionCardStyle}">
+            <StackPanel>
+                <TextBlock Text="Brand Details"
+                           Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                <TextBlock Text="Create or update a brand entry so products, vendors, and filters stay consistent across the catalogue."
+                           Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
+                        <Run Text="Brand Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             AutomationProperties.Name="Brand name"
+                             Text="{Binding BrandName, UpdateSourceTrigger=PropertyChanged}"
+                             Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
+                             MaxLength="100" h:Watermark.Text="Brand name"/>
+                </Grid>
+
+                <StackPanel Style="{StaticResource FormActionRowStyle}">
+                    <Button Content="Clear" Command="{Binding ClearFormCommand}"
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Save" Command="{Binding SaveCommand}"
+                            Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
         <!-- Messages -->
         <Grid Grid.Row="5" MinHeight="{StaticResource MessageAreaMinHeight}"
@@ -153,3 +176,4 @@
                                  Message="Saving brand changes..."/>
     </Grid>
 </UserControl>
+

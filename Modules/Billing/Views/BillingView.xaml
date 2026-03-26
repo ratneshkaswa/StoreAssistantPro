@@ -67,7 +67,7 @@
                     <KeyBinding Key="Enter" Command="{Binding SearchCustomersCommand}"/>
                 </TextBox.InputBindings>
             </TextBox>
-            <Button Grid.Column="5" Content="Find Customer"
+            <Button Grid.Column="5" Content="Search Customers"
                     Command="{Binding SearchCustomersCommand}"
                     Style="{StaticResource SearchButtonStyle}"
                     Margin="{StaticResource InlineControlSpacing}"
@@ -86,7 +86,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border Style="{StaticResource SearchSuggestionCardStyle}"
-                            MinWidth="300">
+                            MinWidth="{StaticResource EntityLookupSuggestionMinWidth}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -128,7 +128,7 @@
             <Button Grid.Column="2" Content="Add Selected"
                     Command="{Binding AddProductToCartCommand}"
                     CommandParameter="{Binding SelectedSearchResult}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource AddButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
 
             <TextBox Grid.Column="4"
                      Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
@@ -136,7 +136,7 @@
                      Width="{StaticResource FieldWidthStandard}"
                      h:Watermark.Text="Scan or enter barcode"/>
             <Button Grid.Column="5" Content="Scan" Command="{Binding ScanBarcodeCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Main content: Cart (left) + Payment (right) -->
@@ -372,21 +372,21 @@
                                              Width="{StaticResource FieldWidthCompact}"
                                              Margin="{StaticResource InlineControlSpacing}"
                                              AutomationProperties.Name="Split reference"
-                                             h:Watermark.Text="Ref #"
+                                             h:Watermark.Text="Payment reference"
                                              MaxLength="50"
                                              Visibility="{Binding RequiresReference, Converter={StaticResource BoolToVisibility}}"/>
-                                    <Button Grid.Column="3" Content="×" ToolTip="Remove line"
+                                    <Button Grid.Column="3" Content="Remove" ToolTip="Remove line"
                                             Command="{Binding DataContext.RemoveSplitLineCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Style="{StaticResource InlineCollectionRemoveButtonStyle}"
                                             Margin="{StaticResource InlineControlSpacing}"
                                             Padding="6,2"/>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <Button Content="+ Add Line" Command="{Binding AddSplitLineCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
+                    <Button Content="Add Line" Command="{Binding AddSplitLineCommand}"
+                            Style="{StaticResource InlineCollectionAddButtonStyle}"
                             HorizontalAlignment="Left"
                             Margin="0,4,0,0"/>
                 </StackPanel>
@@ -437,7 +437,7 @@
                     Style="{StaticResource CancelButtonStyle}"/>
 
             <Button Grid.Column="1" Command="{Binding HoldBillCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}">
+                    Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock FontFamily="{StaticResource FluentIconFont}" Text="&#xE785;" Margin="0,0,6,0"/>
                     <TextBlock Text="Hold Bill"/>
@@ -445,7 +445,7 @@
             </Button>
 
             <Button Grid.Column="2" Command="{Binding ToggleHeldBillListCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}">
+                    Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock FontFamily="{StaticResource FluentIconFont}" Text="&#xE7C3;" Margin="0,0,6,0"/>
                     <TextBlock Text="Recall"/>
@@ -457,14 +457,15 @@
             <Button Grid.Column="4" Content="Remove Item" Command="{Binding RemoveCartItemCommand}"
                     Style="{StaticResource DeleteButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Grid.Column="5" Content="Complete Sale" Command="{Binding CompleteSaleCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Held bill list popup -->
         <Border Grid.Row="3" Grid.RowSpan="3"
                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
                 Margin="0,0,0,48"
-                MinWidth="360" MaxHeight="400"
+                MinWidth="{StaticResource HeldBillsOverlayMinWidth}"
+                MaxHeight="{StaticResource TransientListOverlayMaxHeight}"
                 Style="{StaticResource AdminSectionCardStyle}"
                 Visibility="{Binding ShowHeldBillList, Converter={StaticResource BoolToVisibility}}">
             <Grid>
@@ -519,12 +520,12 @@
                                     <Button Grid.Column="1" Content="Recall"
                                             Command="{Binding DataContext.RecallBillCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Style="{StaticResource ViewButtonStyle}"
                                             Margin="8,0,0,0"/>
-                                    <Button Grid.Column="2" Content="×"
+                                    <Button Grid.Column="2" Content="Discard"
                                             Command="{Binding DataContext.DiscardHeldBillCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Style="{StaticResource DeleteButtonStyle}"
                                             Margin="4,0,0,0"
                                             ToolTip="Discard this held bill"
                                             AutomationProperties.Name="Discard this held bill"/>

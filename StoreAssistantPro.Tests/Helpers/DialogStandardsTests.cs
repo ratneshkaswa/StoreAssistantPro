@@ -72,9 +72,17 @@ public sealed class DialogStandardsTests
         Assert.Contains("DialogHeaderBackdropStyle", globalStyles, StringComparison.Ordinal);
         Assert.Contains("BlurEffect Radius=\"8\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("DialogHeaderContentSurfaceStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterBarStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterActionRowStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterPrimaryButtonStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterSecondaryButtonStyle", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterCloseButtonStyle", globalStyles, StringComparison.Ordinal);
         Assert.Contains("DialogHeaderBackdropStyle", messageDialog, StringComparison.Ordinal);
         Assert.Contains("DialogHeaderBackdropStyle", masterPinDialog, StringComparison.Ordinal);
         Assert.Contains("DialogHeaderBackdropStyle", printPreview, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterBarStyle", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterBarStyle", masterPinDialog, StringComparison.Ordinal);
+        Assert.Contains("DialogFooterBarStyle", printPreview, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -101,15 +109,45 @@ public sealed class DialogStandardsTests
     }
 
     [Fact]
+    public void Shared_Dialogs_Should_Use_Semantic_Footer_Action_Styles()
+    {
+        var messageDialog = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "AppMessageDialog.xaml"));
+        var masterPinDialog = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Views", "MasterPinDialog.xaml"));
+        var printPreview = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml"));
+
+        Assert.Contains("Style=\"{StaticResource DialogFooterBarStyle}\"", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterActionRowStyle}\"", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterSecondaryButtonStyle}\"", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterPrimaryButtonStyle}\"", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("IsCancel=\"True\"", messageDialog, StringComparison.Ordinal);
+        Assert.Contains("IsDefault=\"True\"", messageDialog, StringComparison.Ordinal);
+
+        Assert.Contains("Style=\"{StaticResource DialogFooterBarStyle}\"", masterPinDialog, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterActionRowStyle}\"", masterPinDialog, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterSecondaryButtonStyle}\"", masterPinDialog, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterPrimaryButtonStyle}\"", masterPinDialog, StringComparison.Ordinal);
+
+        Assert.Contains("Style=\"{StaticResource DialogFooterBarStyle}\"", printPreview, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterActionRowStyle}\"", printPreview, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterCloseButtonStyle}\"", printPreview, StringComparison.Ordinal);
+        Assert.Contains("IsDefault=\"True\"", printPreview, StringComparison.Ordinal);
+        Assert.Contains("IsCancel=\"True\"", printPreview, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void LoginView_Should_Use_OverflowScrollHost_For_MessageGrowth()
     {
         var content = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginView.xaml"));
 
         Assert.Contains("<ScrollViewer VerticalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-        Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
+        Assert.Contains("HorizontalScrollBarVisibility=\"Disabled\"", content, StringComparison.Ordinal);
         Assert.Contains("MinWidth=\"{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}\"", content, StringComparison.Ordinal);
         Assert.Contains("MinHeight=\"{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}\"", content, StringComparison.Ordinal);
+        Assert.Contains("PanningMode=\"VerticalOnly\"", content, StringComparison.Ordinal);
         Assert.DoesNotContain("<controls:ViewportConstrainedPanel", content, StringComparison.Ordinal);
     }
 
@@ -119,10 +157,8 @@ public sealed class DialogStandardsTests
         var content = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "Billing", "Views", "SaleHistoryView.xaml"));
 
-        Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-        Assert.Contains("PanningMode=\"Both\"", content, StringComparison.Ordinal);
-        Assert.Contains("TextWrapping=\"NoWrap\"", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("h:SmoothScroll.IsEnabled=\"True\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ReadOnlyPreviewScrollViewerStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ReadOnlyPreviewTextStyle}\"", content, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -136,7 +172,7 @@ public sealed class DialogStandardsTests
     }
 
     [Fact]
-    public void DenseDialogForms_Should_Allow_Horizontal_Overflow_Recovery()
+    public void DenseDialogForms_Should_Use_Vertical_Only_Responsive_Scroll_Hosts()
     {
         var files = new[]
         {
@@ -152,10 +188,9 @@ public sealed class DialogStandardsTests
         foreach (var file in files)
         {
             var content = File.ReadAllText(file);
-            Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-            Assert.Contains("PanningMode=\"Both\"", content, StringComparison.Ordinal);
-            Assert.DoesNotContain("PanningMode=\"VerticalOnly\"", content, StringComparison.Ordinal);
-            Assert.DoesNotContain("h:SmoothScroll.IsEnabled=\"True\"", content, StringComparison.Ordinal);
+            Assert.Contains("HorizontalScrollBarVisibility=\"Disabled\"", content, StringComparison.Ordinal);
+            Assert.Contains("PanningMode=\"VerticalOnly\"", content, StringComparison.Ordinal);
+            Assert.DoesNotContain("PanningMode=\"Both\"", content, StringComparison.Ordinal);
         }
     }
     [Fact]

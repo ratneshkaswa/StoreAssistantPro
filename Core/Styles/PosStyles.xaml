@@ -217,6 +217,7 @@
                                         VerticalAlignment="Center">
                                 <TextBlock x:Name="IconText"
                                            Text="{Binding Icon}"
+                                           FontFamily="{StaticResource FluentIconFont}"
                                            FontSize="{StaticResource FontSizeDialogTitle}"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock x:Name="TitleText"

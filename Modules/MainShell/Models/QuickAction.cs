@@ -15,9 +15,9 @@ namespace StoreAssistantPro.Modules.MainShell.Models;
 /// <code>
 /// QuickActions =
 /// [
-///     new() { Title = "New Sale",  Icon = "🛒", Command = NewSaleCommand,  ShortcutText = "F5", SortOrder = 0 },
-///     new() { Title = "Products",  Icon = "📦", Command = ProductsCommand, ShortcutText = "F6", SortOrder = 1 },
-///     new() { Title = "Settings",  Icon = "⚙️", Command = SettingsCommand, ShortcutText = "F9", SortOrder = 9, IsVisible = false },
+///     new() { Title = "New Sale", Icon = "\uE7BF", Command = NewSaleCommand, ShortcutText = "F5", SortOrder = 0 },
+///     new() { Title = "Products", Icon = "\uE719", Command = ProductsCommand, ShortcutText = "F6", SortOrder = 1 },
+///     new() { Title = "Settings", Icon = "\uE713", Command = SettingsCommand, ShortcutText = "F9", SortOrder = 9, IsVisible = false },
 /// ];
 /// </code>
 /// </summary>
@@ -27,7 +27,7 @@ public partial class QuickAction : ObservableObject
     [ObservableProperty]
     public partial string Title { get; set; }
 
-    /// <summary>Emoji or icon-font glyph displayed alongside the title.</summary>
+    /// <summary>Icon-font glyph displayed alongside the title.</summary>
     [ObservableProperty]
     public partial string Icon { get; set; }
 

@@ -105,16 +105,7 @@
                     CornerRadius="260"
                     Opacity="0.2"/>
         </Grid>
-        <Border MaxWidth="{StaticResource LoginCardMaxWidth}"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Center"
-                Margin="{StaticResource CardMargin}"
-                Background="{StaticResource FluentSurface}"
-                BorderBrush="{StaticResource FluentSurfaceStroke}"
-                BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                CornerRadius="{StaticResource FluentCornerXLarge}"
-                Padding="{StaticResource CardPadding}"
-                Effect="{StaticResource FluentShadowMedium}">
+        <Border Style="{StaticResource CenteredSurfaceCardStyle}">
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled"
                           Focusable="False"
@@ -318,7 +309,7 @@
                                     AutomationProperties.Name="Cancel PIN reset"/>
                             <Button Content="Reset PIN"
                                     Command="{Binding ResetPinCommand}"
-                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Style="{StaticResource ConfirmButtonStyle}"
                                     AutomationProperties.Name="Confirm PIN reset"/>
                         </StackPanel>
                     </StackPanel>

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -23,17 +24,47 @@ public partial class ReportsViewModel(
     [ObservableProperty]
     public partial DateTime DateFrom { get; set; } = new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
-    partial void OnDateFromChanged(DateTime value) => PersistViewState();
+    partial void OnDateFromChanged(DateTime value)
+    {
+        PersistViewState();
+        OnPropertyChanged(nameof(SelectedPeriodSummary));
+    }
 
     [ObservableProperty]
     public partial DateTime DateTo { get; set; } = DateTime.Today;
 
-    partial void OnDateToChanged(DateTime value) => PersistViewState();
+    partial void OnDateToChanged(DateTime value)
+    {
+        PersistViewState();
+        OnPropertyChanged(nameof(SelectedPeriodSummary));
+    }
 
     [ObservableProperty]
     public partial string ActivePreset { get; set; } = "This Month";
 
-    partial void OnActivePresetChanged(string value) => PersistViewState();
+    partial void OnActivePresetChanged(string value)
+    {
+        PersistViewState();
+        OnPropertyChanged(nameof(SelectedPresetSummary));
+    }
+
+    [ObservableProperty]
+    public partial DateTime? LastRefreshedAt { get; set; }
+
+    partial void OnLastRefreshedAtChanged(DateTime? value) => OnPropertyChanged(nameof(LastUpdatedSummary));
+
+    public string SelectedPeriodSummary =>
+        string.Create(
+            CultureInfo.InvariantCulture,
+            $"{DateFrom:dd MMM yyyy} - {DateTo:dd MMM yyyy}");
+
+    public string SelectedPresetSummary =>
+        string.IsNullOrWhiteSpace(ActivePreset) ? "Custom range" : ActivePreset;
+
+    public string LastUpdatedSummary =>
+        LastRefreshedAt is null
+            ? "Not refreshed yet"
+            : $"Updated {LastRefreshedAt.Value.ToString("dd MMM yyyy, hh:mm tt", CultureInfo.InvariantCulture)}";
 
     // ── Daily sales summary (#255) ──
 
@@ -554,6 +585,7 @@ public partial class ReportsViewModel(
         DebtorCount = debtor.Count;
         DebtorOutstanding = debtor.TotalOutstanding;
         TopDebtors = new ObservableCollection<TopDebtor>(debtor.TopDebtors);
+        LastRefreshedAt = DateTime.Now;
     }
 
     private void RestoreViewState()

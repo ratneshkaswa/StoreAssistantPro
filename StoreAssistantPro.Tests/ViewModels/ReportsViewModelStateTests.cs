@@ -60,6 +60,22 @@ public sealed class ReportsViewModelStateTests : IDisposable
         Assert.Equal("This Year", state.ActivePreset);
     }
 
+    [Fact]
+    public async Task Refresh_Should_Update_Report_Context_Summaries()
+    {
+        var sut = CreateSut();
+        sut.DateFrom = new DateTime(2026, 1, 1);
+        sut.DateTo = new DateTime(2026, 1, 31);
+        sut.ActivePreset = "This Month";
+
+        await sut.RefreshCommand.ExecuteAsync(null);
+
+        Assert.Equal("01 Jan 2026 - 31 Jan 2026", sut.SelectedPeriodSummary);
+        Assert.Equal("This Month", sut.SelectedPresetSummary);
+        Assert.NotNull(sut.LastRefreshedAt);
+        Assert.StartsWith("Updated ", sut.LastUpdatedSummary);
+    }
+
     private ReportsViewModel CreateSut() => new(
         _reportsService,
         Substitute.For<IPrintReportService>(),

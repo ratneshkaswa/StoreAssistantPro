@@ -11,6 +11,7 @@ namespace StoreAssistantPro.Tests.ViewModels;
 public sealed class OrderManagementViewModelStateTests : IDisposable
 {
     private readonly IOrderService _orderService = Substitute.For<IOrderService>();
+    private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
     public OrderManagementViewModelStateTests() => UserPreferencesStore.ClearForTests();
 
@@ -55,7 +56,7 @@ public sealed class OrderManagementViewModelStateTests : IDisposable
                 }
             ]));
 
-        var sut = new OrderManagementViewModel(_orderService);
+        var sut = new OrderManagementViewModel(_orderService, _regional);
 
         await sut.LoadCommand.ExecuteAsync(null);
 

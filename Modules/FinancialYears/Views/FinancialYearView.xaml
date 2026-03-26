@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.FinancialYears.Views.FinancialYearView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.FinancialYears.Views.FinancialYearView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -37,8 +37,17 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Current Financial Year"
-                           Style="{StaticResource AdminSectionTitleStyle}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Current Financial Year"
+                               Style="{StaticResource AdminSectionTitleStyle}"/>
+                    <Button Grid.Column="1"
+                            Style="{StaticResource InlineHelpButtonStyle}"
+                            h:HelpHint.HelpText="The current financial year controls which accounting period receives new billing activity. Switch it carefully and use billing reset only when your year-end process requires new counters."/>
+                </Grid>
                 <TextBlock Grid.Row="1"
                            Text="{Binding CurrentYear.Name, FallbackValue='Not set'}"
                            FontSize="{StaticResource FontSizeSubtitle}"
@@ -61,7 +70,7 @@
                   SelectedItem="{Binding SelectedYear}"
                   Style="{StaticResource EnterpriseDataGridStyle}"
                   h:DataGridLayoutPersistence.Key="FinancialYearsGrid"
-                  h:DataGridEmptyState.Icon="📅"
+                  h:DataGridEmptyState.Icon="{StaticResource EmptyStateCalendarIconGlyph}"
                   h:DataGridEmptyState.Title="No financial years configured"
                   h:DataGridEmptyState.Description="Create a financial year to define accounting periods and switch-over history."
                   AutoGenerateColumns="False"
@@ -78,16 +87,9 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Reset confirmation -->
         <Border Grid.Row="3"
-                Style="{StaticResource WarningCalloutCardStyle}"
-                Visibility="{Binding IsConfirmingReset, Converter={StaticResource BoolToVisibility}}">
+                Style="{StaticResource WarningCalloutCardStyle}">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -97,23 +99,12 @@
                                Text="&#xE7BA;"
                                Style="{StaticResource WarningCalloutIconStyle}"/>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Reset billing numbers for the current year?"
+                        <TextBlock Text="Reset billing numbers only as part of the approved year-end workflow."
                                    Style="{StaticResource WarningCalloutTitleTextStyle}"/>
-                        <TextBlock Text="This will reset all billing counters for the current year. This action cannot be undone."
+                        <TextBlock Text="The shared confirmation dialog appears before reset continues. This action cannot be undone."
                                    Style="{StaticResource WarningCalloutBodyTextStyle}"/>
                     </StackPanel>
                 </Grid>
-
-                <StackPanel Grid.Row="1"
-                            Style="{StaticResource FormActionRowStyle}">
-                    <Button Content="Confirm Reset"
-                            Command="{Binding ConfirmResetCommand}"
-                            Style="{StaticResource DeleteButtonStyle}"
-                            Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Content="Cancel"
-                            Command="{Binding CancelResetCommand}"
-                            Style="{StaticResource CancelButtonStyle}"/>
-                </StackPanel>
             </Grid>
         </Border>
 
@@ -143,7 +134,7 @@
                         Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Content="Set as Current"
                         Command="{Binding SetCurrentCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
+                        Style="{StaticResource SaveButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Content="Reset Billing"
                         Command="{Binding ShowResetConfirmationCommand}"
@@ -156,3 +147,4 @@
                                  Message="Updating financial year..."/>
     </Grid>
 </UserControl>
+

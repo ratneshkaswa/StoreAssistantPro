@@ -66,8 +66,8 @@ public class UsersViewModelTests
     {
         var sut = CreateSut();
         sut.SelectedUser = new UserCredential { UserType = UserType.User };
-        sut.NewPin = "1234";
-        sut.ConfirmPin = "5678";
+        sut.NewPin = "2580";
+        sut.ConfirmPin = "7392";
 
         await sut.ChangePinCommand.ExecuteAsync(null);
 
@@ -82,13 +82,13 @@ public class UsersViewModelTests
 
         var sut = CreateSut();
         sut.SelectedUser = new UserCredential { UserType = UserType.User };
-        sut.NewPin = "5821";
-        sut.ConfirmPin = "5821";
+        sut.NewPin = "2580";
+        sut.ConfirmPin = "2580";
 
         await sut.ChangePinCommand.ExecuteAsync(null);
 
         await _commandBus.Received(1).SendAsync(Arg.Is<ChangePinCommand>(c =>
-            c.UserType == UserType.User && c.NewPin == "5821" && c.MasterPin == null));
+            c.UserType == UserType.User && c.NewPin == "2580" && c.MasterPin == null));
         Assert.Contains("User PIN changed", sut.SuccessMessage);
         Assert.Empty(sut.NewPin);
         Assert.Empty(sut.ConfirmPin);
@@ -102,8 +102,8 @@ public class UsersViewModelTests
 
         var sut = CreateSut();
         sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
-        sut.NewPin = "5821";
-        sut.ConfirmPin = "5821";
+        sut.NewPin = "2580";
+        sut.ConfirmPin = "2580";
         sut.MasterPin = "000000";
 
         await sut.ChangePinCommand.ExecuteAsync(null);
@@ -120,14 +120,14 @@ public class UsersViewModelTests
 
         var sut = CreateSut();
         sut.SelectedUser = new UserCredential { UserType = UserType.Admin };
-        sut.NewPin = "9753";
-        sut.ConfirmPin = "9753";
+        sut.NewPin = "2580";
+        sut.ConfirmPin = "2580";
         sut.MasterPin = "123456";
 
         await sut.ChangePinCommand.ExecuteAsync(null);
 
         await _commandBus.Received(1).SendAsync(Arg.Is<ChangePinCommand>(c =>
-            c.UserType == UserType.Admin && c.NewPin == "9753" && c.MasterPin == "123456"));
+            c.UserType == UserType.Admin && c.NewPin == "2580" && c.MasterPin == "123456"));
         Assert.Contains("Admin PIN changed", sut.SuccessMessage);
     }
 

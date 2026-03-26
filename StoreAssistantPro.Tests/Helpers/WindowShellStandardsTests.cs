@@ -147,9 +147,9 @@ public sealed class WindowShellStandardsTests
         Assert.Contains("x:Name=\"MessageText\"", content, StringComparison.Ordinal);
         Assert.Contains("<RowDefinition Height=\"Auto\"/>", content, StringComparison.Ordinal);
         Assert.Contains("<Viewbox Width=\"16\"", content, StringComparison.Ordinal);
-        Assert.Contains("BorderBrush=\"{StaticResource FluentSurfaceStroke}\"", content, StringComparison.Ordinal);
-        Assert.Contains("Style=\"{StaticResource SecondaryButtonStyle}\"", content, StringComparison.Ordinal);
-        Assert.Contains("Style=\"{StaticResource PrimaryButtonStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterBarStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterSecondaryButtonStyle}\"", content, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterPrimaryButtonStyle}\"", content, StringComparison.Ordinal);
         Assert.Contains("SizeToContent = SizeToContent.Height;", codeBehind, StringComparison.Ordinal);
     }
 

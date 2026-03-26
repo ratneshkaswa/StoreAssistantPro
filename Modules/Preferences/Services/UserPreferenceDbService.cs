@@ -9,7 +9,7 @@ namespace StoreAssistantPro.Modules.Preferences.Services;
 
 public sealed class UserPreferenceDbService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IRegionalSettingsService regional,
+    IRegionalSettingsService regionalSettings,
     ILogger<UserPreferenceDbService> logger) : IUserPreferenceDbService
 {
     public async Task<string?> GetPreferenceAsync(int userId, string key, CancellationToken ct = default)
@@ -161,7 +161,7 @@ public sealed class UserPreferenceDbService(
         var config = await GetQuietHoursAsync(userId, ct).ConfigureAwait(false);
         if (config is null || !config.IsEnabled) return false;
 
-        var now = regional.Now.TimeOfDay;
+        var now = regionalSettings.Now.TimeOfDay;
         return config.Start <= config.End
             ? now >= config.Start && now <= config.End
             : now >= config.Start || now <= config.End;

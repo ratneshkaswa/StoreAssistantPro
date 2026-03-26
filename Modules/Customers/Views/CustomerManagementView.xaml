@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Customers.Views.CustomerManagementView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Customers.Views.CustomerManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -9,7 +9,9 @@
     <Grid Margin="{StaticResource PagePadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
-          KeyboardNavigation.TabNavigation="Continue">
+          KeyboardNavigation.TabNavigation="Continue"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+          ScrollViewer.PanningMode="VerticalOnly">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -28,52 +30,75 @@
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search customers"
                      h:Watermark.Text="Search customers by name or phone"/>
-            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- DataGrid + Form + Details share the * row -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2"
+              Style="{StaticResource MasterDetailPageGridStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto" MaxHeight="320"/>
+                <RowDefinition Height="Auto" MaxHeight="{StaticResource SubordinateDetailRegionMaxHeight}"/>
             </Grid.RowDefinitions>
 
-            <!-- Customer grid -->
-            <DataGrid AutomationProperties.Name="Customers list"
-                      ItemsSource="{Binding Customers}"
-                      SelectedItem="{Binding SelectedCustomer}"
-                      Style="{StaticResource EnterpriseDataGridStyle}"
-                      h:DataGridLayoutPersistence.Key="CustomersGrid"
-                      h:DataGridEmptyState.Icon="&#xE8A5;"
-                      h:DataGridEmptyState.Title="No customers found"
-                      h:DataGridEmptyState.Description="Create a customer profile or broaden the current search to see matching records."
-                      AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single"
-                      HeadersVisibility="Column" CanUserAddRows="False"
-                      EnableRowVirtualization="True"
-                      EnableColumnVirtualization="True"
-                      Margin="{StaticResource ItemSpacing}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                    <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="GSTIN" Binding="{Binding GSTIN}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Customer grid -->
+                <DataGrid AutomationProperties.Name="Customers list"
+                          ItemsSource="{Binding Customers}"
+                          SelectedItem="{Binding SelectedCustomer}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridLayoutPersistence.Key="CustomersGrid"
+                          h:DataGridEmptyState.Icon="{StaticResource EmptyStateCustomerIconGlyph}"
+                          h:DataGridEmptyState.Title="No customers found"
+                          h:DataGridEmptyState.Description="Create a customer profile or broaden the current search to see matching records."
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column" CanUserAddRows="False"
+                          EnableRowVirtualization="True"
+                          EnableColumnVirtualization="True"
+                          Margin="{StaticResource ItemSpacing}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="GSTIN" Binding="{Binding GSTIN}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Grid.Row="1"
+                            Style="{StaticResource PaginatorBarStyle}"
+                            Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
+                    <Button Content="Prev"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPreviousPage}"
+                            Style="{StaticResource PaginatorNavButtonStyle}"
+                            Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding PagingInfo}"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource PaginatorInfoTextStyle}"/>
+                    <Button Content="Next"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNextPage}"
+                            Style="{StaticResource PaginatorNavButtonStyle}"
+                            Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
 
             <!-- Bottom: Form (left) + Purchase History & Payment (right) -->
             <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="{StaticResource MasterDetailPaneGapWidth}"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -179,36 +204,45 @@
                     </Border>
 
                     <!-- Purchase history grid (#159) -->
-                    <DataGrid Grid.Row="1" Margin="0,8,0,0"
-                              AutomationProperties.Name="Purchase history"
-                              ItemsSource="{Binding PurchaseHistory}"
-                              Style="{StaticResource EnterpriseDataGridStyle}"
-                              h:DataGridEmptyState.Icon="&#xE8A5;"
-                              h:DataGridEmptyState.Title="No purchase history"
-                              h:DataGridEmptyState.Description="Past purchases will appear when a customer is selected."
-                              AutoGenerateColumns="False" IsReadOnly="True"
-                              HeadersVisibility="Column" CanUserAddRows="False"
-                              EnableRowVirtualization="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="120"/>
-                            <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="100"/>
-                            <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="100"/>
-                            <DataGridTemplateColumn Header="PAYMENT" SortMemberPath="PaymentMethod" Width="*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource SemanticTagChipBorderStyle}"
-                                                Background="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
-                                                BorderBrush="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
-                                                HorizontalAlignment="Left">
-                                            <TextBlock Text="{Binding PaymentMethod, TargetNullValue=Unknown}"
-                                                       Style="{StaticResource SemanticTagChipTextStyle}"
-                                                       Foreground="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Border Grid.Row="1" Margin="0,8,0,0"
+                            Style="{StaticResource ReadOnlyInspectionSectionCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Purchase History"
+                                       Style="{StaticResource ReadOnlyInspectionSectionTitleStyle}"/>
+                            <TextBlock Text="Review completed invoices for the selected customer before collecting payments or following up on outstanding balances."
+                                       Style="{StaticResource ReadOnlyInspectionSectionDescriptionStyle}"/>
+                            <DataGrid AutomationProperties.Name="Purchase history"
+                                      ItemsSource="{Binding PurchaseHistory}"
+                                      Style="{StaticResource EnterpriseDataGridStyle}"
+                                      h:DataGridEmptyState.Icon="{StaticResource EmptyStateCustomerIconGlyph}"
+                                      h:DataGridEmptyState.Title="No purchase history"
+                                      h:DataGridEmptyState.Description="Past purchases will appear when a customer is selected."
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      HeadersVisibility="Column" CanUserAddRows="False"
+                                      EnableRowVirtualization="True"
+                                      MaxHeight="{StaticResource ReadOnlyInspectionGridMaxHeight}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="120"/>
+                                    <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="100"/>
+                                    <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="100"/>
+                                    <DataGridTemplateColumn Header="PAYMENT" SortMemberPath="PaymentMethod" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource SemanticTagChipBorderStyle}"
+                                                        Background="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Background}"
+                                                        BorderBrush="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Border}"
+                                                        HorizontalAlignment="Left">
+                                                    <TextBlock Text="{Binding PaymentMethod, TargetNullValue=Unknown}"
+                                                               Style="{StaticResource SemanticTagChipTextStyle}"
+                                                               Foreground="{Binding PaymentMethod, Converter={StaticResource TagChipBrushConverter}, ConverterParameter=Foreground}"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
 
                     <!-- Payment collection (#161) -->
                     <Border Grid.Row="2" Margin="0,8,0,0"
@@ -224,7 +258,7 @@
                                          Margin="0,0,8,4"
                                          h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                                          h:NumericInput.Scope="Number"
-                                         h:Watermark.Text="Amount"/>
+                                         h:Watermark.Text="Payment amount"/>
                                 <ComboBox ItemsSource="{Binding PaymentMethods}"
                                           SelectedItem="{Binding PaymentMethod}"
                                           Width="{StaticResource FieldWidthStandard}"
@@ -237,7 +271,7 @@
                             <TextBox Text="{Binding PaymentReference, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.Name="Payment reference"
                                      Width="{StaticResource FieldWidthWide}"
-                                     h:Watermark.Text="Reference or note (optional)"/>
+                                     h:Watermark.Text="Payment reference or note (optional)"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -265,8 +299,7 @@
                                   AutomationProperties.HelpText="{Binding SuccessMessage}"/>
             </Grid>
 
-            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
-                        Margin="{StaticResource FormActionBarSpacing}">
+            <StackPanel Grid.Row="1" Style="{StaticResource FormActionRowStyle}">
                 <Button Content="New Customer" Command="{Binding NewCustomerCommand}"
                         Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Content="Save" Command="{Binding SaveCommand}"
@@ -277,4 +310,6 @@
                                  Message="Saving customer changes..."/>
     </Grid>
 </UserControl>
+
+
 

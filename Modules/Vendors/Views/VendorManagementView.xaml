@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Vendors.Views.VendorManagementView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Vendors.Views.VendorManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -9,7 +9,9 @@
     <Grid Margin="{StaticResource PagePadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
-          KeyboardNavigation.TabNavigation="Continue">
+          KeyboardNavigation.TabNavigation="Continue"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+          ScrollViewer.PanningMode="VerticalOnly">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -29,39 +31,62 @@
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search vendors"
                      h:Watermark.Text="Search vendors by name or GSTIN"/>
-            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Two-column layout: list + form -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2"
+              Style="{StaticResource MasterDetailPageGridStyle}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="12"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="{StaticResource MasterDetailListPaneWidth}"/>
+                <ColumnDefinition Width="{StaticResource MasterDetailPaneGapWidth}"/>
+                <ColumnDefinition Width="{StaticResource MasterDetailEditorPaneWidth}"/>
             </Grid.ColumnDefinitions>
 
             <!-- Vendor list -->
-            <DataGrid AutomationProperties.Name="Vendors list" ItemsSource="{Binding Vendors}"
-                      SelectedItem="{Binding SelectedVendor}"
-                      Style="{StaticResource EnterpriseDataGridStyle}"
-                      h:DataGridLayoutPersistence.Key="VendorsGrid"
-                      h:DataGridEmptyState.Icon="&#xE7B8;"
-                      h:DataGridEmptyState.Title="No vendors found"
-                      h:DataGridEmptyState.Description="Add a vendor to start tracking supplier contacts, ledgers, and purchase activity."
-                      HeadersVisibility="Column">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                    <DataGridTextColumn Header="City" Binding="{Binding City}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid AutomationProperties.Name="Vendors list" ItemsSource="{Binding Vendors}"
+                          SelectedItem="{Binding SelectedVendor}"
+                          Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridLayoutPersistence.Key="VendorsGrid"
+                          h:DataGridEmptyState.Icon="{StaticResource EmptyStateVendorIconGlyph}"
+                          h:DataGridEmptyState.Title="No vendors found"
+                          h:DataGridEmptyState.Description="Add a vendor to start tracking supplier contacts, ledgers, and purchase activity."
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="City" Binding="{Binding City}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Grid.Row="1"
+                            Style="{StaticResource PaginatorBarStyle}"
+                            Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
+                    <Button Content="Prev"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPreviousPage}"
+                            Style="{StaticResource PaginatorNavButtonStyle}"
+                            Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding PagingInfo}"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource PaginatorInfoTextStyle}"/>
+                    <Button Content="Next"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNextPage}"
+                            Style="{StaticResource PaginatorNavButtonStyle}"
+                            Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
 
             <!-- Vendor form -->
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
@@ -199,11 +224,10 @@
         </Grid>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
-                    Margin="{StaticResource FormActionBarSpacing}">
+        <StackPanel Grid.Row="4" Style="{StaticResource FormActionRowStyle}">
             <Button Content="Ledger" Command="{Binding LoadLedgerCommand}"
                     IsEnabled="{Binding IsEditing}"
-                    Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    Style="{StaticResource ViewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="New Vendor" Command="{Binding NewVendorCommand}"
                     Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Save" Command="{Binding SaveCommand}"
@@ -212,7 +236,7 @@
 
         <!-- Ledger overlay panel -->
         <Border Grid.Row="0" Grid.RowSpan="5"
-                Background="{StaticResource FluentSolidBackgroundFillColorBase}"
+                Style="{StaticResource DetailOverlayHostStyle}"
                 Visibility="{Binding ShowLedger, Converter={StaticResource BoolToVisibility}}">
             <Grid Margin="{StaticResource PagePadding}">
                 <Grid.RowDefinitions>
@@ -224,67 +248,104 @@
                 </Grid.RowDefinitions>
 
                 <!-- Ledger title -->
-                <Grid>
+                <Grid Style="{StaticResource DetailOverlayHeaderRowStyle}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A1;"/><Run Text=" Supplier Ledger"/></TextBlock>
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource DetailOverlayTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A1;"/><Run Text=" Supplier Ledger"/></TextBlock>
+                        <TextBlock Text="Review balances, inspect posted entries, and record supplier payments without leaving the selected vendor context."
+                                   Style="{StaticResource DetailOverlaySubtitleStyle}"/>
+                    </StackPanel>
                     <Button Grid.Column="1" Content="Close" Command="{Binding CloseLedgerCommand}"
                             Style="{StaticResource CloseButtonStyle}"/>
                 </Grid>
 
-                <!-- Summary cards -->
-                <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-                    <Border Style="{StaticResource SummaryStatCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Opening Balance" Style="{StaticResource SummaryStatLabelTextStyle}"/>
-                            <TextBlock Text="{Binding LedgerSummary.OpeningBalance, StringFormat={}{0:C}}" Style="{StaticResource SummaryStatValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource SummaryStatCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Total Purchases" Style="{StaticResource SummaryStatLabelTextStyle}"/>
-                            <TextBlock Text="{Binding LedgerSummary.TotalPurchases, StringFormat={}{0:C}}" Style="{StaticResource SummaryStatValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource SummaryStatCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Total Payments" Style="{StaticResource SummaryStatLabelTextStyle}"/>
-                            <TextBlock Text="{Binding LedgerSummary.TotalPayments, StringFormat={}{0:C}}" Style="{StaticResource SummaryStatValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource SummaryStatCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Running Balance" Style="{StaticResource SummaryStatLabelTextStyle}"/>
-                            <TextBlock Text="{Binding LedgerSummary.RunningBalance, StringFormat={}{0:C}}" Style="{StaticResource SummaryHeadlineValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource SummaryStatCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Credit Limit" Style="{StaticResource SummaryStatLabelTextStyle}"/>
-                            <TextBlock Text="{Binding LedgerSummary.CreditLimit, StringFormat={}{0:C}}" Style="{StaticResource SummaryStatValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-                </WrapPanel>
+                <!-- Summary -->
+                <Border Grid.Row="1" Style="{StaticResource SummaryPanelStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Ledger Summary"
+                                   Style="{StaticResource SummaryPanelTitleStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Opening Balance"
+                                       Style="{StaticResource SummaryKeyTextStyle}"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding LedgerSummary.OpeningBalance, StringFormat={}{0:C}}"
+                                       Style="{StaticResource SummaryValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="2"
+                                       Text="Total Purchases"
+                                       Style="{StaticResource SummaryKeyTextStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding LedgerSummary.TotalPurchases, StringFormat={}{0:C}}"
+                                       Style="{StaticResource SummaryValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="4"
+                                       Text="Total Payments"
+                                       Style="{StaticResource SummaryKeyTextStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1"
+                                       Text="{Binding LedgerSummary.TotalPayments, StringFormat={}{0:C}}"
+                                       Style="{StaticResource SummaryValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="6"
+                                       Text="Credit Limit"
+                                       Style="{StaticResource SummaryKeyTextStyle}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1"
+                                       Text="{Binding LedgerSummary.CreditLimit, StringFormat={}{0:C}}"
+                                       Style="{StaticResource SummaryValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="8"
+                                       Text="Running Balance"
+                                       Style="{StaticResource SummaryKeyTextStyle}"/>
+                            <TextBlock Grid.Row="8" Grid.Column="1"
+                                       Text="{Binding LedgerSummary.RunningBalance, StringFormat={}{0:C}}"
+                                       Style="{StaticResource SummaryHeadlineValueTextStyle}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
                 <!-- Ledger entries grid -->
-                <DataGrid Grid.Row="2" AutomationProperties.Name="Ledger entries"
-                          ItemsSource="{Binding LedgerEntries}"
-                          Style="{StaticResource EnterpriseDataGridStyle}"
-                          HeadersVisibility="Column"
-                          IsReadOnly="True"
-                          Margin="{StaticResource ItemSpacing}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="{StaticResource ColumnWidthQty}"/>
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
-                        <DataGridTextColumn Header="Debit" Binding="{Binding Debit, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Credit" Binding="{Binding Credit, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Balance" Binding="{Binding Balance, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Reference" Binding="{Binding Reference}" Width="{StaticResource ColumnWidthPrice}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <Border Grid.Row="2" Style="{StaticResource ReadOnlyInspectionSectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Ledger Entries"
+                                   Style="{StaticResource ReadOnlyInspectionSectionTitleStyle}"/>
+                        <TextBlock Text="Review posted supplier ledger activity and open balances without switching away from the overlay."
+                                   Style="{StaticResource ReadOnlyInspectionSectionDescriptionStyle}"/>
+                        <DataGrid AutomationProperties.Name="Ledger entries"
+                                  ItemsSource="{Binding LedgerEntries}"
+                                  Style="{StaticResource EnterpriseDataGridStyle}"
+                                  HeadersVisibility="Column"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReadOnlyInspectionGridMaxHeight}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="{StaticResource ColumnWidthQty}"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                                <DataGridTextColumn Header="Debit" Binding="{Binding Debit, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Credit" Binding="{Binding Credit, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Balance" Binding="{Binding Balance, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Reference" Binding="{Binding Reference}" Width="{StaticResource ColumnWidthPrice}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
 
                 <!-- Messages -->
                 <Grid Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
@@ -345,6 +406,7 @@
                                  Message="Saving vendor changes..."/>
     </Grid>
 </UserControl>
+
 
 
 

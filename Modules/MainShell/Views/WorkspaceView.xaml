@@ -136,7 +136,10 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer x:Name="WorkspaceScrollViewer"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ScrollViewer x:Name="WorkspaceScrollViewer" Grid.Row="0"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       ScrollChanged="OnWorkspaceScrollChanged">
@@ -216,16 +219,12 @@
                                 CornerRadius="20"
                                 Background="{StaticResource FluentAccentLight2}">
                             <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUserInitials, RelativeSource={RelativeSource AncestorType=Window}}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentAccentDark2}"/>
+                                       Style="{StaticResource DashboardHeaderMonogramTextStyle}"/>
                         </Border>
 
                         <StackPanel Margin="{StaticResource WorkspaceHeaderStatusStackGap}">
                             <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUserLabel, RelativeSource={RelativeSource AncestorType=Window}}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                                       Style="{StaticResource DashboardHeaderPrimaryTextStyle}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                 <Ellipse Width="8" Height="8" VerticalAlignment="Center">
@@ -279,16 +278,10 @@
                                 Margin="8,0,0,0"/>
                     </StackPanel>
 
-                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                    <Button Content="Refresh"
+                            Style="{StaticResource RefreshButtonStyle}"
                             Command="{Binding RefreshCommand}"
-                            Margin="{StaticResource InlineControlSpacing}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource FluentIconFont}"
-                                       Text="&#xE72C;"
-                                       Margin="0,0,8,0"/>
-                            <TextBlock Text="Refresh"/>
-                        </StackPanel>
-                    </Button>
+                            Margin="{StaticResource InlineControlSpacing}"/>
 
                 </StackPanel>
             </Grid>
@@ -303,22 +296,17 @@
                           Margin="0,16,0,0"/>
 
         <WrapPanel Grid.Row="2" Margin="0,16,0,0">
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="168"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileWideMinWidth}"
                     h:Motion.StaggerIndex="0">
                 <StackPanel>
                     <TextBlock Text="TODAY"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding TodaySales}"
                                h:AnimatedNumberText.FormatMode="CompactCurrency"
                                h:AnimatedNumberText.CurrencySymbol="{Binding CurrencySymbol}"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentAccentDefault}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                     <StackPanel Orientation="Horizontal"
                                 DataContext="{Binding TodaySalesTrend}"
                                 Margin="0,8,0,0">
@@ -329,28 +317,21 @@
                                    Margin="4,0,0,0"/>
                     </StackPanel>
                     <TextBlock Text="{Binding TodayTransactionsLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="168"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileWideMinWidth}"
                     h:Motion.StaggerIndex="1">
                 <StackPanel>
                     <TextBlock Text="THIS MONTH"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding ThisMonthSales}"
                                h:AnimatedNumberText.FormatMode="CompactCurrency"
                                h:AnimatedNumberText.CurrencySymbol="{Binding CurrencySymbol}"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentSuccess}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentSuccess}"/>
                     <StackPanel Orientation="Horizontal"
                                 DataContext="{Binding ThisMonthSalesTrend}"
                                 Margin="0,8,0,0">
@@ -361,72 +342,51 @@
                                    Margin="4,0,0,0"/>
                     </StackPanel>
                     <TextBlock Text="{Binding ThisMonthTransactionsLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="156"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileStandardMinWidth}"
                     h:Motion.StaggerIndex="2">
                 <StackPanel>
                     <TextBlock Text="PRODUCTS"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding TotalProducts}"
                                h:AnimatedNumberText.FormatMode="CompactNumber"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentAccentDark1}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                     <TextBlock Text="{Binding ProductStatusLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="156"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileStandardMinWidth}"
                     h:Motion.StaggerIndex="3">
                 <StackPanel>
                     <TextBlock Text="LOW STOCK"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding LowStockCount}"
                                h:AnimatedNumberText.FormatMode="CompactNumber"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentWarning}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                     <TextBlock Text="{Binding LowStockLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="150"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileCompactMinWidth}"
                     h:Motion.StaggerIndex="4">
                 <StackPanel>
                     <TextBlock Text="RETURNS"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding TodayReturns}"
                                h:AnimatedNumberText.FormatMode="CompactCurrency"
                                h:AnimatedNumberText.CurrencySymbol="{Binding CurrencySymbol}"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentError}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentError}"/>
                     <StackPanel Orientation="Horizontal"
                                 DataContext="{Binding TodayReturnsTrend}"
                                 Margin="0,8,0,0">
@@ -437,28 +397,21 @@
                                    Margin="4,0,0,0"/>
                     </StackPanel>
                     <TextBlock Text="{Binding TodayReturnsLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="150"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileCompactMinWidth}"
                     h:Motion.StaggerIndex="5">
                 <StackPanel>
                     <TextBlock Text="NET SALES"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding TodayNetSales}"
                                h:AnimatedNumberText.FormatMode="CompactCurrency"
                                h:AnimatedNumberText.CurrencySymbol="{Binding CurrencySymbol}"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentAccentDefault}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                     <StackPanel Orientation="Horizontal"
                                 DataContext="{Binding TodayNetSalesTrend}"
                                 Margin="0,8,0,0">
@@ -469,28 +422,21 @@
                                    Margin="4,0,0,0"/>
                     </StackPanel>
                     <TextBlock Text="{Binding TodayNetSalesLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="150"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileCompactMinWidth}"
                     h:Motion.StaggerIndex="6">
                 <StackPanel>
                     <TextBlock Text="AVG BILL"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding AverageBillValue}"
                                h:AnimatedNumberText.FormatMode="CompactCurrency"
                                h:AnimatedNumberText.CurrencySymbol="{Binding CurrencySymbol}"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentAccentDark1}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                     <StackPanel Orientation="Horizontal"
                                 DataContext="{Binding AverageBillTrend}"
                                 Margin="0,8,0,0">
@@ -501,76 +447,53 @@
                                    Margin="4,0,0,0"/>
                     </StackPanel>
                     <TextBlock Text="{Binding AverageBillLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="156"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileStandardMinWidth}"
                     h:Motion.StaggerIndex="7">
                 <StackPanel>
                     <TextBlock Text="ORDERS"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding PendingOrdersCount}"
                                h:AnimatedNumberText.FormatMode="CompactNumber"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentAccentDefault}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                     <TextBlock Text="{Binding PendingOrdersLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="168"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileWideMinWidth}"
                     h:Motion.StaggerIndex="8">
                 <StackPanel>
                     <TextBlock Text="RECEIVABLES"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding OutstandingReceivables}"
                                h:AnimatedNumberText.FormatMode="CompactCurrency"
                                h:AnimatedNumberText.CurrencySymbol="{Binding CurrencySymbol}"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentError}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentError}"/>
                     <TextBlock Text="{Binding ReceivablesLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardContentPadding}"
-                    Margin="{StaticResource StatCardGap}"
-                    MinWidth="168"
+            <Border Style="{StaticResource SummaryStatCardStyle}"
+                    MinWidth="{StaticResource DashboardMetricTileWideMinWidth}"
                     h:Motion.StaggerIndex="9">
                 <StackPanel>
                     <TextBlock Text="PENDING PAYMENTS"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextTertiary}"/>
+                               Style="{StaticResource SummaryStatLabelTextStyle}"/>
                     <TextBlock h:AnimatedNumberText.Value="{Binding PendingPaymentsCount}"
                                h:AnimatedNumberText.FormatMode="CompactNumber"
-                               FontSize="{StaticResource FontSizeHeadline}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentWarning}"
-                               Margin="{StaticResource KpiValueSpacing}"/>
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                     <TextBlock Text="{Binding PendingPaymentsLabel}"
-                               Margin="{StaticResource HintTextSpacing}"
-                               FontSize="{StaticResource FontSizeCaption}"
-                               Foreground="{StaticResource FluentTextSecondary}"/>
+                               Style="{StaticResource DashboardMetricMetaTextStyle}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -603,22 +526,16 @@
 
                         <StackPanel>
                             <TextBlock Text="Recent Sales"
-                                       FontSize="{StaticResource FontSizeBody}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                                       Style="{StaticResource DashboardSectionTitleStyle}"/>
                             <TextBlock Text="Latest completed invoices and payment methods."
-                                       Margin="0,4,0,0"
-                                       FontSize="{StaticResource FontSizeCaption}"
-                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                                       Style="{StaticResource DashboardSectionDescriptionStyle}"/>
                         </StackPanel>
 
                         <Border Grid.Column="1"
                                 Style="{StaticResource StatusBadgePillStyle}"
                                 Background="{StaticResource LayerFillColorSecondary}">
                             <TextBlock Text="{Binding RecentSalesDisplay.Count}"
-                                       Foreground="{StaticResource FluentTextSecondary}"
-                                       FontSize="{StaticResource FontSizeCaption}"
-                                       FontWeight="SemiBold"/>
+                                       Style="{StaticResource DashboardCountBadgeTextStyle}"/>
                         </Border>
                     </Grid>
 
@@ -661,7 +578,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
 
-                        <controls:EmptyStateOverlay Icon="📄"
+                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateInvoiceIconGlyph}"
                                                     Title="No recent sales yet"
                                                     Description="Completed bills will appear here as soon as the counter starts moving."
                                                     ItemCount="{Binding RecentSalesDisplay.Count}"/>
@@ -694,22 +611,16 @@
 
                             <StackPanel>
                                 <TextBlock Text="Today's Bestsellers"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource FluentTextPrimary}"/>
+                                           Style="{StaticResource DashboardSectionTitleStyle}"/>
                                 <TextBlock Text="Top products sold today."
-                                           Margin="0,4,0,0"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                                           Style="{StaticResource DashboardSectionDescriptionStyle}"/>
                             </StackPanel>
 
                             <Border Grid.Column="1"
                                     Style="{StaticResource StatusBadgePillStyle}"
                                     Background="{StaticResource LayerFillColorSecondary}">
                                 <TextBlock Text="{Binding TopProductsTodayDisplay.Count}"
-                                           Foreground="{StaticResource FluentTextSecondary}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           FontWeight="SemiBold"/>
+                                           Style="{StaticResource DashboardCountBadgeTextStyle}"/>
                             </Border>
                         </Grid>
 
@@ -734,22 +645,18 @@
                                                     </Grid.RowDefinitions>
 
                                                     <TextBlock Text="{Binding ProductName}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource FluentTextPrimary}"
+                                                               Style="{StaticResource DashboardListPrimaryTextStyle}"
                                                                TextTrimming="CharacterEllipsis"
                                                                ToolTip="{Binding ProductName}"/>
 
                                                     <TextBlock Grid.Column="1"
                                                                Text="{Binding RevenueCompact}"
                                                                ToolTip="{Binding RevenueToolTip}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                                               Style="{StaticResource DashboardListAccentTextStyle}"/>
 
                                                     <TextBlock Grid.Row="1"
                                                                Text="{Binding QuantitySoldLabel}"
-                                                               Margin="0,4,0,0"
-                                                               FontSize="{StaticResource FontSizeCaption}"
-                                                               Foreground="{StaticResource FluentTextSecondary}"/>
+                                                               Style="{StaticResource DashboardListSecondaryTextStyle}"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -757,7 +664,7 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <controls:EmptyStateOverlay Icon="🔥"
+                            <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateProductIconGlyph}"
                                                         Title="No sales today yet"
                                                         Description="Today's best-selling products will appear here."
                                                         ItemCount="{Binding TopProductsTodayDisplay.Count}"/>
@@ -784,22 +691,16 @@
 
                             <StackPanel>
                                 <TextBlock Text="Top Products"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource FluentTextPrimary}"/>
+                                           Style="{StaticResource DashboardSectionTitleStyle}"/>
                                 <TextBlock Text="Best revenue contributors this month."
-                                           Margin="0,4,0,0"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"/>
+                                           Style="{StaticResource DashboardSectionDescriptionStyle}"/>
                             </StackPanel>
 
                             <Border Grid.Column="1"
                                     Style="{StaticResource StatusBadgePillStyle}"
                                     Background="{StaticResource LayerFillColorSecondary}">
                                 <TextBlock Text="{Binding TopProductsDisplay.Count}"
-                                           Foreground="{StaticResource FluentTextSecondary}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           FontWeight="SemiBold"/>
+                                           Style="{StaticResource DashboardCountBadgeTextStyle}"/>
                             </Border>
                         </Grid>
 
@@ -824,22 +725,18 @@
                                                     </Grid.RowDefinitions>
 
                                                     <TextBlock Text="{Binding ProductName}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource FluentTextPrimary}"
+                                                               Style="{StaticResource DashboardListPrimaryTextStyle}"
                                                                TextTrimming="CharacterEllipsis"
                                                                ToolTip="{Binding ProductName}"/>
 
                                                     <TextBlock Grid.Column="1"
                                                                Text="{Binding RevenueCompact}"
                                                                ToolTip="{Binding RevenueToolTip}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                                               Style="{StaticResource DashboardListAccentTextStyle}"/>
 
                                                     <TextBlock Grid.Row="1"
                                                                Text="{Binding QuantitySoldLabel}"
-                                                               Margin="0,4,0,0"
-                                                               FontSize="{StaticResource FontSizeCaption}"
-                                                               Foreground="{StaticResource FluentTextSecondary}"/>
+                                                               Style="{StaticResource DashboardListSecondaryTextStyle}"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -847,7 +744,7 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <controls:EmptyStateOverlay Icon="📦"
+                            <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateProductIconGlyph}"
                                                         Title="No product trends yet"
                                                         Description="Top-selling products will show up here once this month's sales data is available."
                                                         ItemCount="{Binding TopProductsDisplay.Count}"/>
@@ -886,16 +783,14 @@
 
                     <StackPanel>
                         <TextBlock Text="Monthly Sales Trend"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                                   Style="{StaticResource DashboardSectionTitleStyle}"/>
                         <TextBlock Text="Daily sales for the last 30 days."
-                                   Margin="0,4,0,0"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                                   Style="{StaticResource DashboardSectionDescriptionStyle}"/>
                     </StackPanel>
 
-                    <Grid Grid.Row="1" Margin="0,12,0,0" MaxHeight="280">
+                    <Grid Grid.Row="1"
+                          Margin="0,12,0,0"
+                          MaxHeight="{StaticResource DashboardTrendRegionMaxHeight}">
                         <ScrollViewer VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding DailySalesTrendDisplay}"
@@ -938,7 +833,7 @@
                             </ItemsControl>
                         </ScrollViewer>
 
-                        <controls:EmptyStateOverlay Icon="📊"
+                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateCalendarIconGlyph}"
                                                     Title="No sales trend data"
                                                     Description="Daily sales trend will appear once sales are recorded."
                                                     ItemCount="{Binding DailySalesTrendDisplay.Count}"/>
@@ -958,13 +853,9 @@
 
                     <StackPanel>
                         <TextBlock Text="Payment Methods"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                                   Style="{StaticResource DashboardSectionTitleStyle}"/>
                         <TextBlock Text="Revenue split by payment type this month."
-                                   Margin="0,4,0,0"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                                   Style="{StaticResource DashboardSectionDescriptionStyle}"/>
                     </StackPanel>
 
                     <Grid Grid.Row="1" Margin="0,12,0,0">
@@ -986,32 +877,26 @@
                                             </Grid.RowDefinitions>
 
                                             <TextBlock Text="{Binding Method}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource FluentTextPrimary}"/>
+                                                       Style="{StaticResource DashboardListPrimaryTextStyle}"/>
 
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding PercentageLabel}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource FluentAccentDefault}"/>
+                                                       Style="{StaticResource DashboardListAccentTextStyle}"/>
 
                                             <TextBlock Grid.Row="1"
                                                        Text="{Binding CountLabel}"
-                                                       Margin="0,4,0,0"
-                                                       FontSize="{StaticResource FontSizeCaption}"
-                                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                                                       Style="{StaticResource DashboardListSecondaryTextStyle}"/>
 
                                             <TextBlock Grid.Row="1" Grid.Column="1"
                                                        Text="{Binding AmountFormatted}"
-                                                       Margin="0,4,0,0"
-                                                       FontSize="{StaticResource FontSizeCaption}"
-                                                       Foreground="{StaticResource FluentTextSecondary}"/>
+                                                       Style="{StaticResource DashboardListSecondaryTextStyle}"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <controls:EmptyStateOverlay Icon="💳"
+                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStatePaymentIconGlyph}"
                                                     Title="No payment data"
                                                     Description="Payment method breakdown will appear once sales are completed."
                                                     ItemCount="{Binding PaymentMethodDisplay.Count}"/>
@@ -1027,7 +912,7 @@
                 Height="56"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
-                Margin="0,0,24,24"
+                Margin="{StaticResource FloatingActionButtonMargin}"
                 Command="{Binding DataContext.OpenBillingCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                 Style="{StaticResource FloatingActionButtonStyle}"
                 ToolTip="Start billing"

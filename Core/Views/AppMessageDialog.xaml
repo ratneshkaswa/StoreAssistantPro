@@ -64,22 +64,16 @@
         </Grid>
 
         <Border Grid.Row="1"
-                Margin="0,12,0,0"
-                Padding="0,12,0,0"
-                BorderBrush="{StaticResource FluentSurfaceStroke}"
-                BorderThickness="0,1,0,0">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Right">
+                Style="{StaticResource DialogFooterBarStyle}">
+            <StackPanel Style="{StaticResource DialogFooterActionRowStyle}">
                 <Button x:Name="SecondaryButton"
-                        MinWidth="96"
-                        MinHeight="36"
-                        Style="{StaticResource SecondaryButtonStyle}"
+                        Style="{StaticResource DialogFooterSecondaryButtonStyle}"
                         Margin="0,0,8,0"
+                        IsCancel="True"
                         Click="OnSecondaryClick"/>
                 <Button x:Name="PrimaryButton"
-                        MinWidth="96"
-                        MinHeight="36"
-                        Style="{StaticResource PrimaryButtonStyle}"
+                        Style="{StaticResource DialogFooterPrimaryButtonStyle}"
+                        IsDefault="True"
                         Click="OnPrimaryClick"/>
             </StackPanel>
         </Border>

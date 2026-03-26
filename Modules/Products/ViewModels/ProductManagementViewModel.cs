@@ -22,8 +22,19 @@ public partial class ProductManagementViewModel(
 {
     private List<Product> _allProducts = [];
     private bool _isRestoringViewState;
+    private bool _isHydratingEditor;
 
     public string CurrencySymbol => regional.CurrencySymbol;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DirtyStateSummaryText))]
+    public partial bool IsDirty { get; set; }
+
+    public string DirtyStateSummaryText => IsDirty
+        ? "You have unsaved product changes."
+        : IsEditing
+            ? "No unsaved product changes."
+            : "Start entering product details to create a new product.";
 
     [ObservableProperty]
     public partial ObservableCollection<Product> Products { get; set; } = [];
@@ -44,12 +55,15 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial TaxGroup? SelectedTaxGroup { get; set; }
+    partial void OnSelectedTaxGroupChanged(TaxGroup? value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial HSNCode? SelectedHSNCode { get; set; }
+    partial void OnSelectedHSNCodeChanged(HSNCode? value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool OverrideAllowed { get; set; }
+    partial void OnOverrideAllowedChanged(bool value) => MarkEditorDirty();
 
     // â”€â”€ Category & Brand dropdowns â”€â”€
 
@@ -61,9 +75,11 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial Category? SelectedCategory { get; set; }
+    partial void OnSelectedCategoryChanged(Category? value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial Brand? SelectedBrand { get; set; }
+    partial void OnSelectedBrandChanged(Brand? value) => MarkEditorDirty();
 
     // â”€â”€ Vendor dropdown â”€â”€
 
@@ -72,6 +88,7 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial Vendor? SelectedVendor { get; set; }
+    partial void OnSelectedVendorChanged(Vendor? value) => MarkEditorDirty();
 
     // ── Search & filter ──
 
@@ -99,39 +116,51 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial string ProductName { get; set; } = string.Empty;
+    partial void OnProductNameChanged(string value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial ProductType SelectedProductType { get; set; } = ProductType.Readymade;
+    partial void OnSelectedProductTypeChanged(ProductType value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial ProductUnit SelectedUnit { get; set; } = ProductUnit.Piece;
+    partial void OnSelectedUnitChanged(ProductUnit value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial TaxMaster? SelectedTax { get; set; }
+    partial void OnSelectedTaxChanged(TaxMaster? value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial string SalePriceText { get; set; } = string.Empty;
+    partial void OnSalePriceTextChanged(string value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial string CostPriceText { get; set; } = string.Empty;
+    partial void OnCostPriceTextChanged(string value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial string Barcode { get; set; } = string.Empty;
+    partial void OnBarcodeChanged(string value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool IsTaxInclusive { get; set; }
+    partial void OnIsTaxInclusiveChanged(bool value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool SupportsColour { get; set; } = true;
+    partial void OnSupportsColourChanged(bool value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool SupportsSize { get; set; } = true;
+    partial void OnSupportsSizeChanged(bool value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool SupportsPattern { get; set; }
+    partial void OnSupportsPatternChanged(bool value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool SupportsType { get; set; }
+    partial void OnSupportsTypeChanged(bool value) => MarkEditorDirty();
 
     [ObservableProperty]
     public partial bool IsEditing { get; set; }
@@ -153,28 +182,33 @@ public partial class ProductManagementViewModel(
         }
 
         PopulateForm(value);
-        ClearMappingSelection();
+        RunEditorHydration(ClearMappingSelection);
         _ = LoadMappingForProductCommand.ExecuteAsync(value.Id);
     }
 
     private void PopulateForm(Product value)
     {
-        ProductName = value.Name;
-        SelectedProductType = value.ProductType;
-        SelectedUnit = value.Unit;
-        SelectedTax = Taxes.FirstOrDefault(t => t.Id == value.TaxId);
-        SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.CategoryId);
-        SelectedBrand = Brands.FirstOrDefault(b => b.Id == value.BrandId);
-        SelectedVendor = Vendors.FirstOrDefault(v => v.Id == value.VendorId);
-        SalePriceText = value.SalePrice > 0 ? value.SalePrice.ToString("F0") : string.Empty;
-        CostPriceText = value.CostPrice > 0 ? value.CostPrice.ToString("F0") : string.Empty;
-        Barcode = value.Barcode ?? string.Empty;
-        IsTaxInclusive = value.IsTaxInclusive;
-        SupportsColour = value.SupportsColour;
-        SupportsSize = value.SupportsSize;
-        SupportsPattern = value.SupportsPattern;
-        SupportsType = value.SupportsType;
+        RunEditorHydration(() =>
+        {
+            ProductName = value.Name;
+            SelectedProductType = value.ProductType;
+            SelectedUnit = value.Unit;
+            SelectedTax = Taxes.FirstOrDefault(t => t.Id == value.TaxId);
+            SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.CategoryId);
+            SelectedBrand = Brands.FirstOrDefault(b => b.Id == value.BrandId);
+            SelectedVendor = Vendors.FirstOrDefault(v => v.Id == value.VendorId);
+            SalePriceText = value.SalePrice > 0 ? value.SalePrice.ToString("F0") : string.Empty;
+            CostPriceText = value.CostPrice > 0 ? value.CostPrice.ToString("F0") : string.Empty;
+            Barcode = value.Barcode ?? string.Empty;
+            IsTaxInclusive = value.IsTaxInclusive;
+            SupportsColour = value.SupportsColour;
+            SupportsSize = value.SupportsSize;
+            SupportsPattern = value.SupportsPattern;
+            SupportsType = value.SupportsType;
+        });
         IsEditing = true;
+        IsDirty = false;
+        ValidationErrors = [];
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
     }
@@ -186,18 +220,21 @@ public partial class ProductManagementViewModel(
         if (SelectedProduct?.Id != productId)
             return;
 
-        if (mapping is not null)
+        RunEditorHydration(() =>
         {
-            SelectedTaxGroup = TaxGroups.FirstOrDefault(g => g.Id == mapping.TaxGroupId);
-            SelectedHSNCode = HSNCodes.FirstOrDefault(h => h.Id == mapping.HSNCodeId);
-            OverrideAllowed = mapping.OverrideAllowed;
-        }
-        else
-        {
-            SelectedTaxGroup = null;
-            SelectedHSNCode = null;
-            OverrideAllowed = false;
-        }
+            if (mapping is not null)
+            {
+                SelectedTaxGroup = TaxGroups.FirstOrDefault(g => g.Id == mapping.TaxGroupId);
+                SelectedHSNCode = HSNCodes.FirstOrDefault(h => h.Id == mapping.HSNCodeId);
+                OverrideAllowed = mapping.OverrideAllowed;
+            }
+            else
+            {
+                SelectedTaxGroup = null;
+                SelectedHSNCode = null;
+                OverrideAllowed = false;
+            }
+        });
     });
 
     [RelayCommand]
@@ -215,23 +252,28 @@ public partial class ProductManagementViewModel(
 
     private void ResetForm(bool clearMessages)
     {
-        ProductName = string.Empty;
-        SelectedProductType = ProductType.Readymade;
-        SelectedUnit = ProductUnit.Piece;
-        SelectedTax = null;
-        ClearMappingSelection();
-        SelectedCategory = null;
-        SelectedBrand = null;
-        SelectedVendor = null;
-        SalePriceText = string.Empty;
-        CostPriceText = string.Empty;
-        Barcode = string.Empty;
-        IsTaxInclusive = false;
-        SupportsColour = true;
-        SupportsSize = true;
-        SupportsPattern = false;
-        SupportsType = false;
+        RunEditorHydration(() =>
+        {
+            ProductName = string.Empty;
+            SelectedProductType = ProductType.Readymade;
+            SelectedUnit = ProductUnit.Piece;
+            SelectedTax = null;
+            ClearMappingSelection();
+            SelectedCategory = null;
+            SelectedBrand = null;
+            SelectedVendor = null;
+            SalePriceText = string.Empty;
+            CostPriceText = string.Empty;
+            Barcode = string.Empty;
+            IsTaxInclusive = false;
+            SupportsColour = true;
+            SupportsSize = true;
+            SupportsPattern = false;
+            SupportsType = false;
+        });
         IsEditing = false;
+        IsDirty = false;
+        ValidationErrors = [];
 
         if (clearMessages)
         {
@@ -253,12 +295,16 @@ public partial class ProductManagementViewModel(
             (!decimal.TryParse(SalePriceText, out salePrice) || salePrice < 0))
         {
             ErrorMessage = "Sale price must be a valid positive number.";
+            FirstErrorFieldKey = nameof(SalePriceText);
+            ValidationErrors = [ErrorMessage];
             return;
         }
         if (!string.IsNullOrWhiteSpace(CostPriceText) &&
             (!decimal.TryParse(CostPriceText, out costPrice) || costPrice < 0))
         {
             ErrorMessage = "Cost price must be a valid positive number.";
+            FirstErrorFieldKey = nameof(CostPriceText);
+            ValidationErrors = [ErrorMessage];
             return;
         }
 
@@ -525,5 +571,37 @@ public partial class ProductManagementViewModel(
         if (CsvExporter.Export(rows, "ProductVariants.csv"))
             SuccessMessage = $"Exported {variants.Count} variants.";
     });
+
+    private void RunEditorHydration(Action action)
+    {
+        _isHydratingEditor = true;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _isHydratingEditor = false;
+        }
+    }
+
+    private void MarkEditorDirty()
+    {
+        if (_isHydratingEditor)
+            return;
+
+        IsDirty = true;
+
+        if (!string.IsNullOrEmpty(ErrorMessage))
+            ErrorMessage = string.Empty;
+
+        if (!string.IsNullOrEmpty(SuccessMessage))
+            SuccessMessage = string.Empty;
+
+        if (!string.IsNullOrEmpty(FirstErrorFieldKey))
+            FirstErrorFieldKey = string.Empty;
+
+        ValidationErrors = [];
+    }
 }
 

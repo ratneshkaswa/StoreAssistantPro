@@ -27,31 +27,31 @@ public class StartupService(
         // 1. Apply migrations (creates the database if it doesn't exist)
         context.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
 
-        var pending = (await context.Database.GetPendingMigrationsAsync(ct).ConfigureAwait(false)).ToList();
-
-        if (pending.Count == 0)
+        try
         {
-            logger.LogInformation("Database is up to date — no pending migrations");
-            await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
+            var pending = (await context.Database.GetPendingMigrationsAsync(ct).ConfigureAwait(false)).ToList();
+
+            if (pending.Count == 0)
+            {
+                logger.LogInformation("Database is up to date — no pending migrations");
+                await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
                 return;
             }
 
             logger.LogInformation("Applying {Count} pending migration(s): {Migrations}",
                 pending.Count, string.Join(", ", pending));
 
-            try
-            {
-                await context.Database.MigrateAsync(ct).ConfigureAwait(false);
-            }
-            catch (InvalidOperationException ex)
-                when (ex.Message.Contains("PendingModelChangesWarning", StringComparison.Ordinal))
-            {
-                logger.LogWarning(
-                    ex,
-                    "Skipping EF migration apply due to pending model-change warning and continuing with compatibility patches");
-            }
+            await context.Database.MigrateAsync(ct).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException ex)
+            when (ex.Message.Contains("PendingModelChangesWarning", StringComparison.Ordinal))
+        {
+            logger.LogWarning(
+                ex,
+                "Skipping EF migration apply due to pending model-change warning and continuing with compatibility patches");
+        }
 
-            await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
+        await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
 
         logger.LogInformation("All migrations applied successfully");
     }

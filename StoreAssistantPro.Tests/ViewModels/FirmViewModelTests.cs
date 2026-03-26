@@ -136,6 +136,8 @@ public class FirmViewModelTests
         await sut.SaveFirmCommand.ExecuteAsync(null);
 
         Assert.True(sut.HasErrors);
+        Assert.True(sut.HasValidationErrors);
+        Assert.Contains("Firm name is required.", sut.ValidationErrors);
         Assert.Equal(nameof(FirmViewModel.FirmName), sut.FirstErrorFieldKey);
         Assert.Equal("Review the highlighted business fields before saving.", sut.ErrorMessage);
         await _firmService.DidNotReceive().UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>());

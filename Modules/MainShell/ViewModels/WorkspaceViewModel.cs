@@ -239,15 +239,15 @@ public sealed partial class WorkspaceViewModel(
         _autoRefreshTimer.Start();
     }
 
-    private void OnAutoRefreshTick(object? sender, EventArgs e)
-    {
-        _ = OnAutoRefreshTickAsync();
-    }
-
     private async Task OnAutoRefreshTickAsync()
     {
         if (IsLoading || IsBusy) return;
         await RefreshAsync();
+    }
+
+    private void OnAutoRefreshTick(object? sender, EventArgs e)
+    {
+        _ = OnAutoRefreshTickAsync();
     }
 
     public override void Dispose()

@@ -6,6 +6,13 @@ using StoreAssistantPro;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
+/// <summary>
+/// Manages WPF <see cref="Application"/> lifetime for runtime tests.
+/// The App is created once and kept alive across all calls because WPF's internal
+/// resource-package manager (<c>Application.GetResourcePackage</c>) holds static state
+/// that cannot be reset — re-creating the App triggers <c>Environment.FailFast</c>.
+/// Each <see cref="Run"/> call creates a fresh STA thread with its own dispatcher.
+/// </summary>
 internal static class WpfTestApplication
 {
     private static readonly object SyncRoot = new();
@@ -21,17 +28,21 @@ internal static class WpfTestApplication
 
     public static void EnsureStoreAssistantApplication()
     {
-        if (Application.Current is App)
+        if (Application.Current is not null)
             return;
 
         ResetApplicationState();
 
-        var app = new App
+        // Use a plain Application — not App — so that OnStartup (which
+        // boots the full DI host) never fires. The AutoGrow tests only
+        // need a live Application for Window.Show(); they don't reference
+        // any custom styles.  This also avoids calling InitializeComponent
+        // / Application.LoadComponent, which FailFasts on a second call
+        // per AppDomain.
+        _ = new Application
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown
         };
-
-        app.InitializeComponent();
     }
 
     public static void Run(Action action)
@@ -62,21 +73,19 @@ internal static class WpfTestApplication
             {
                 try
                 {
-                    ShutdownCurrentApplication();
+                    CloseAllWindows();
                 }
                 catch
                 {
                     // Best-effort test cleanup.
                 }
 
-                try
-                {
-                    Dispatcher.CurrentDispatcher.InvokeShutdown();
-                }
-                catch
-                {
-                    // Dispatcher may already be stopping.
-                }
+                // Do NOT call Dispatcher.InvokeShutdown(). Shutting down
+                // the dispatcher triggers Application.DoShutdown which
+                // nulls _appInstance. The App must stay alive so subsequent
+                // tests skip InitializeComponent (which FailFasts on re-entry).
+                // The background STA thread exits naturally when the lambda
+                // completes; the dispatcher is simply abandoned.
 
                 completed.Set();
             }
@@ -97,22 +106,7 @@ internal static class WpfTestApplication
 
     public static void ShutdownCurrentApplication()
     {
-        var current = Application.Current;
-        if (current is not null)
-        {
-            foreach (var window in current.Windows.OfType<Window>().ToArray())
-            {
-                try
-                {
-                    window.Close();
-                }
-                catch
-                {
-                    // Best-effort test cleanup.
-                }
-            }
-        }
-
+        CloseAllWindows();
         ResetApplicationState();
     }
 
@@ -139,6 +133,25 @@ internal static class WpfTestApplication
 
         timer.Start();
         Dispatcher.PushFrame(frame);
+    }
+
+    private static void CloseAllWindows()
+    {
+        var current = Application.Current;
+        if (current is null)
+            return;
+
+        foreach (var window in current.Windows.OfType<Window>().ToArray())
+        {
+            try
+            {
+                window.Close();
+            }
+            catch
+            {
+                // Best-effort test cleanup.
+            }
+        }
     }
 
     private static void ResetApplicationState()

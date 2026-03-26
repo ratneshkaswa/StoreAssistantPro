@@ -55,7 +55,7 @@
                                 Margin="{StaticResource ToolbarGroupGap}">
                         <Button x:Name="PreviousPageButton"
                                 Content="Previous"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource PaginatorNavButtonStyle}"
                                 Click="OnPreviousPageClick"/>
                         <Border Style="{StaticResource StatusBadgePillStyle}"
                                 Background="{StaticResource LayerFillColorSecondary}"
@@ -67,7 +67,7 @@
                         </Border>
                         <Button x:Name="NextPageButton"
                                 Content="Next"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource PaginatorNavButtonStyle}"
                                 Margin="{StaticResource InlineItemGap}"
                                 Click="OnNextPageClick"/>
                     </StackPanel>
@@ -94,7 +94,7 @@
                                    VerticalAlignment="Center"
                                    Margin="{StaticResource InlineItemGap}"/>
                         <Button Content="Fit Width"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource ViewButtonStyle}"
                                 Margin="{StaticResource InlineItemGap}"
                                 Click="OnFitWidthClick"/>
                     </StackPanel>
@@ -105,7 +105,8 @@
                                 VerticalAlignment="Center"
                                 Margin="{StaticResource ToolbarSectionGap}">
                         <Button Content="Print"
-                                Style="{StaticResource PrimaryButtonStyle}"
+                                Style="{StaticResource PrintButtonStyle}"
+                                IsDefault="True"
                                 Click="OnPrintClick"/>
                     </StackPanel>
                 </Grid>
@@ -126,11 +127,14 @@
         </Border>
 
         <!-- Close button -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="{StaticResource ItemSpacing}">
-            <Button Content="Close" Style="{StaticResource SecondaryButtonStyle}"
-                    Click="OnCloseClick"/>
-        </StackPanel>
+        <Border Grid.Row="2"
+                Style="{StaticResource DialogFooterBarStyle}">
+            <StackPanel Style="{StaticResource DialogFooterActionRowStyle}">
+                <Button Content="Close"
+                        Style="{StaticResource DialogFooterCloseButtonStyle}"
+                        IsCancel="True"
+                        Click="OnCloseClick"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </core:BaseDialogWindow>

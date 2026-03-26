@@ -12,12 +12,18 @@ public sealed class PrintPreviewStandardsTests
         var xaml = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml"));
 
-        Assert.Contains("Style=\"{StaticResource FluentToolbarStyle}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("DialogHeaderContentSurfaceStyle", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"PreviousPageButton\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"NextPageButton\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"PageStatusText\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"ZoomSlider\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"ZoomStatusText\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource PaginatorNavButtonStyle}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ViewButtonStyle}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource PrintButtonStyle}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource DialogFooterCloseButtonStyle}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("IsDefault=\"True\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("IsCancel=\"True\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Click=\"OnFitWidthClick\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Click=\"OnPrintClick\"", xaml, StringComparison.Ordinal);
     }

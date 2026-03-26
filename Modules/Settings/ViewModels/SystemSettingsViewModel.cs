@@ -16,6 +16,8 @@ public partial class SystemSettingsViewModel(
     IDialogService dialogService,
     IUiDensityService uiDensityService) : BaseViewModel
 {
+    private bool _isHydrating;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BackupModeTitle))]
     public partial string BackupLocation { get; set; } = string.Empty;
@@ -83,6 +85,10 @@ public partial class SystemSettingsViewModel(
     [NotifyPropertyChangedFor(nameof(LastBackupSummary))]
     public partial string LastBackupPath { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DirtyStateSummaryText))]
+    public partial bool IsDirty { get; set; }
+
     public string BackupScheduleSummary => AutoBackupEnabled
         ? string.IsNullOrWhiteSpace(BackupTime)
             ? "Auto backup is enabled. Choose a daily backup time."
@@ -148,11 +154,24 @@ public partial class SystemSettingsViewModel(
         ? "No backup has been created in this session."
         : $"Last backup: {Path.GetFileName(LastBackupPath.Trim())}";
 
+    public string DirtyStateSummaryText => IsDirty
+        ? "You have unsaved workstation settings changes."
+        : "No unsaved workstation settings changes.";
+
+    partial void OnBackupLocationChanged(string value) => MarkDirtyFromEditableChange();
+    partial void OnAutoBackupEnabledChanged(bool value) => MarkDirtyFromEditableChange();
+    partial void OnBackupTimeChanged(string value) => MarkDirtyFromEditableChange();
+    partial void OnDefaultPrinterChanged(string value) => MarkDirtyFromEditableChange();
+
     partial void OnPrinterWidthChanged(int value)
     {
         if (Math.Abs(PrinterWidthValue - value) > double.Epsilon)
             PrinterWidthValue = value;
+
+        MarkDirtyFromEditableChange();
     }
+
+    partial void OnDefaultPageSizeChanged(string value) => MarkDirtyFromEditableChange();
 
     partial void OnPrinterWidthValueChanged(double value)
     {
@@ -173,6 +192,8 @@ public partial class SystemSettingsViewModel(
     {
         if (Math.Abs(AutoLogoutMinutesValue - value) > double.Epsilon)
             AutoLogoutMinutesValue = value;
+
+        MarkDirtyFromEditableChange();
     }
 
     partial void OnAutoLogoutMinutesValueChanged(double value)
@@ -190,27 +211,47 @@ public partial class SystemSettingsViewModel(
             AutoLogoutMinutes = roundedValue;
     }
 
-    partial void OnIsCompactModeEnabledChanged(bool value) =>
+    partial void OnIsCompactModeEnabledChanged(bool value)
+    {
         uiDensityService.SetCompactMode(value);
+        MarkDirtyFromEditableChange();
+    }
+
+    partial void OnRestoreLastVisitedPageOnLoginChanged(bool value) => MarkDirtyFromEditableChange();
+    partial void OnInAppToastsEnabledChanged(bool value) => MarkDirtyFromEditableChange();
+    partial void OnWindowsNotificationsEnabledChanged(bool value) => MarkDirtyFromEditableChange();
+    partial void OnNotificationSoundEnabledChanged(bool value) => MarkDirtyFromEditableChange();
+    partial void OnMinimumNotificationLevelChanged(AppNotificationLevel value) => MarkDirtyFromEditableChange();
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
-        var settings = await settingsService.GetAsync(ct).ConfigureAwait(false);
-        BackupLocation = settings.BackupLocation ?? string.Empty;
-        AutoBackupEnabled = settings.AutoBackupEnabled;
-        BackupTime = settings.BackupTime ?? string.Empty;
-        DefaultPrinter = settings.DefaultPrinter ?? string.Empty;
-        PrinterWidth = settings.PrinterWidth;
-        DefaultPageSize = settings.DefaultPageSize;
-        AutoLogoutMinutes = settings.AutoLogoutMinutes;
-        IsCompactModeEnabled = uiDensityService.IsCompactModeEnabled;
-        var preferences = UserPreferencesStore.GetSnapshot();
-        RestoreLastVisitedPageOnLogin = preferences.RestoreLastVisitedPageOnLogin;
-        InAppToastsEnabled = preferences.InAppToastsEnabled;
-        WindowsNotificationsEnabled = preferences.WindowsNotificationsEnabled;
-        NotificationSoundEnabled = preferences.NotificationSoundEnabled;
-        MinimumNotificationLevel = preferences.MinimumNotificationLevel;
+        _isHydrating = true;
+        try
+        {
+            var settings = await settingsService.GetAsync(ct).ConfigureAwait(false);
+            BackupLocation = settings.BackupLocation ?? string.Empty;
+            AutoBackupEnabled = settings.AutoBackupEnabled;
+            BackupTime = settings.BackupTime ?? string.Empty;
+            DefaultPrinter = settings.DefaultPrinter ?? string.Empty;
+            PrinterWidth = settings.PrinterWidth;
+            DefaultPageSize = settings.DefaultPageSize;
+            AutoLogoutMinutes = settings.AutoLogoutMinutes;
+            IsCompactModeEnabled = uiDensityService.IsCompactModeEnabled;
+            var preferences = UserPreferencesStore.GetSnapshot();
+            RestoreLastVisitedPageOnLogin = preferences.RestoreLastVisitedPageOnLogin;
+            InAppToastsEnabled = preferences.InAppToastsEnabled;
+            WindowsNotificationsEnabled = preferences.WindowsNotificationsEnabled;
+            NotificationSoundEnabled = preferences.NotificationSoundEnabled;
+            MinimumNotificationLevel = preferences.MinimumNotificationLevel;
+        }
+        finally
+        {
+            _isHydrating = false;
+        }
+
+        IsDirty = false;
+        ValidationErrors = [];
     });
 
     [RelayCommand]
@@ -248,6 +289,8 @@ public partial class SystemSettingsViewModel(
             state.NotificationSoundEnabled = NotificationSoundEnabled;
             state.MinimumNotificationLevel = MinimumNotificationLevel;
         });
+        IsDirty = false;
+        ValidationErrors = [];
         SuccessMessage = "Settings saved.";
     });
 
@@ -268,6 +311,13 @@ public partial class SystemSettingsViewModel(
         if (!Validate(v => v.Rule(!string.IsNullOrWhiteSpace(RestoreFilePath), "Select a backup file first.", nameof(RestoreFilePath))))
             return;
 
+        if (!dialogService.Confirm(
+                $"Restore the database from '{Path.GetFileName(RestoreFilePath)}'?\n\nThis replaces all current workstation data and cannot be undone.",
+                "Restore Database",
+                "Restore Database",
+                "Cancel"))
+            return;
+
         await settingsService.RestoreDatabaseAsync(RestoreFilePath, ct).ConfigureAwait(false);
         SuccessMessage = "Database restored successfully. Please restart the application.";
     });
@@ -279,7 +329,9 @@ public partial class SystemSettingsViewModel(
 
         if (!dialogService.Confirm(
             "This will permanently delete ALL data and reset the application to factory defaults.\n\nAre you sure?",
-            "Factory Reset"))
+            "Factory Reset",
+            "Factory Reset",
+            "Cancel"))
             return;
 
         var masterPin = dialogService.PromptPassword(
@@ -302,4 +354,23 @@ public partial class SystemSettingsViewModel(
         await settingsService.FactoryResetAsync(ct).ConfigureAwait(false);
         SuccessMessage = "Factory reset complete. Please restart the application.";
     });
+
+    private void MarkDirtyFromEditableChange()
+    {
+        if (_isHydrating)
+            return;
+
+        IsDirty = true;
+
+        if (!string.IsNullOrEmpty(ErrorMessage))
+            ErrorMessage = string.Empty;
+
+        if (!string.IsNullOrEmpty(SuccessMessage))
+            SuccessMessage = string.Empty;
+
+        if (!string.IsNullOrEmpty(FirstErrorFieldKey))
+            FirstErrorFieldKey = string.Empty;
+
+        ValidationErrors = [];
+    }
 }

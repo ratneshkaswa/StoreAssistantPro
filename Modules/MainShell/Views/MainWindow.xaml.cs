@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,10 @@ public partial class MainWindow : Window
     private MainViewModel? _boundViewModel;
     private bool _isQuickActionBarVisible = true;
     private double _quickActionBarExpandedHeight;
+
+    private Core.Controls.ResponsiveContentControl ShellContentHost =>
+        (Core.Controls.ResponsiveContentControl)ShellContentPanel.Children
+            .OfType<Core.Controls.ResponsiveContentControl>().First();
 
     public MainWindow(IWindowSizingService sizingService)
     {

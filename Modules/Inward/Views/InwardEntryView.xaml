@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Inward.Views.InwardEntryView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Inward.Views.InwardEntryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -10,7 +10,9 @@
     <Grid Margin="{StaticResource PagePadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
-          KeyboardNavigation.TabNavigation="Continue">
+          KeyboardNavigation.TabNavigation="Continue"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+          ScrollViewer.PanningMode="VerticalOnly">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -285,13 +287,16 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Transport Charges (₹)"
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Transport charges"
                            Style="{StaticResource FormRowLabelStyle}"/>
                 <TextBox Grid.Row="0" Grid.Column="1"
                          AutomationProperties.Name="Transport charges"
                          Text="{Binding TransportCharges, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         h:Watermark.Text="Parcel amount"/>
+                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                         h:NumericInput.Scope="Number"
+                         h:NumericInput.IsDecimalOnly="True"
+                         h:Watermark.Text="Transport charges"/>
 
             </Grid>
 
@@ -328,7 +333,7 @@
                                         <Button Grid.Column="1"
                                                 Content="Add Row"
                                                 Command="{Binding AddProductRowCommand}"
-                                                Style="{StaticResource SecondaryButtonStyle}"/>
+                                                Style="{StaticResource InlineCollectionAddButtonStyle}"/>
                                     </Grid>
 
                                     <!-- Vendor selection -->
@@ -433,7 +438,7 @@
                                                                 Content="Remove"
                                                                 Command="{Binding DataContext.RemoveProductRowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                 CommandParameter="{Binding}"
-                                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                                Style="{StaticResource InlineCollectionRemoveButtonStyle}"
                                                                 Margin="{StaticResource InlineControlSpacing}"/>
                                                     </Grid>
                                                 </DataTemplate>
@@ -468,7 +473,7 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0" Content="&#x2190; Back" Command="{Binding BackCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}"
+                    Style="{StaticResource BackButtonStyle}"
                     Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVisibility}}"/>
 
             <Grid Grid.Column="2">
@@ -477,7 +482,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Button Content="Next &#x2192;" Command="{Binding NextCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
+                        Style="{StaticResource NextButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding CanGoNext, Converter={StaticResource BoolToVisibility}}"/>
                 <Button Grid.Column="1" Content="Save" Command="{Binding SaveCommand}"
@@ -497,3 +502,4 @@
                                  Message="Saving inward entry..."/>
     </Grid>
 </UserControl>
+

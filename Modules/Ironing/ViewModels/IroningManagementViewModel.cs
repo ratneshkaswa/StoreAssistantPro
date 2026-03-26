@@ -9,10 +9,14 @@ using StoreAssistantPro.Modules.Ironing.Services;
 
 namespace StoreAssistantPro.Modules.Ironing.ViewModels;
 
-public partial class IroningManagementViewModel(IIroningService ironingService) : BaseViewModel
+public partial class IroningManagementViewModel(
+    IIroningService ironingService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<IroningEntry> _allItems = [];
     private bool _isRestoringViewState;
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<IroningEntry> Entries { get; set; } = [];

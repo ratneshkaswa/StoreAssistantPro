@@ -16,6 +16,8 @@ public partial class InwardEntryViewModel(
     IProductService productService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    public string CurrencySymbol => regional.CurrencySymbol;
+
     // â”€â”€ Step tracking â”€â”€
 
     [ObservableProperty]

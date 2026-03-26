@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -31,17 +32,9 @@
         </StackPanel>
 
         <!-- Date Range Bar -->
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
+        <WrapPanel Grid.Row="1" Style="{StaticResource ReportFilterBarStyle}">
             <Border Style="{StaticResource SegmentedFilterHostStyle}">
-                <StackPanel Orientation="Horizontal">
+                <WrapPanel Style="{StaticResource SegmentedFilterButtonRowStyle}">
                     <Button Content="This Month" Style="{StaticResource SegmentedFilterButtonStyle}"
                             Command="{Binding SetPresetCommand}" CommandParameter="This Month" Margin="0,0,4,0">
                         <Button.Tag>
@@ -87,10 +80,10 @@
                             </MultiBinding>
                         </Button.Tag>
                     </Button>
-                </StackPanel>
+                </WrapPanel>
             </Border>
 
-            <controls:DateRangePicker Grid.Column="1"
+            <controls:DateRangePicker
                                       Margin="16,0,0,0"
                                       Width="{StaticResource ReportDateRangeWidth}"
                                       StartDate="{Binding DateFrom, Mode=TwoWay}"
@@ -98,9 +91,11 @@
                                       StartHeader="From"
                                       EndHeader="To"/>
 
-            <Button Grid.Column="4" Content="Refresh" Style="{StaticResource RefreshButtonStyle}"
+            <Button Content="Refresh"
+                    Margin="16,0,0,0"
+                    Style="{StaticResource RefreshButtonStyle}"
                     Command="{Binding RefreshCommand}"/>
-        </Grid>
+        </WrapPanel>
 
         <WrapPanel Grid.Row="2"
                    Margin="0,0,0,16">
@@ -119,8 +114,25 @@
                 </Button>
         </WrapPanel>
 
+        <Border Grid.Row="3" Style="{StaticResource ReportSummaryStripStyle}">
+            <WrapPanel>
+                <StackPanel Style="{StaticResource ReportSummaryItemHostStyle}">
+                    <TextBlock Text="Selected period" Style="{StaticResource ReportSummaryItemLabelStyle}"/>
+                    <TextBlock Text="{Binding SelectedPeriodSummary}" Style="{StaticResource ReportSummaryItemValueStyle}"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource ReportSummaryItemHostStyle}">
+                    <TextBlock Text="Preset" Style="{StaticResource ReportSummaryItemLabelStyle}"/>
+                    <TextBlock Text="{Binding SelectedPresetSummary}" Style="{StaticResource ReportSummaryItemValueStyle}"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource ReportSummaryItemHostStyle}">
+                    <TextBlock Text="Last updated" Style="{StaticResource ReportSummaryItemLabelStyle}"/>
+                    <TextBlock Text="{Binding LastUpdatedSummary}" Style="{StaticResource ReportSummaryItemValueStyle}"/>
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+
         <!-- Report Sections -->
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
                 <!-- ═══ TODAY'S SALES SUMMARY ═══ -->
@@ -139,7 +151,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="REVENUE" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalSales, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TodayTotalSales, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
@@ -147,7 +159,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="RETURNS" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalReturns, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TodayTotalReturns, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
@@ -155,7 +167,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="NET SALES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayNetSales, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TodayNetSales, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                 </StackPanel>
@@ -163,14 +175,14 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="TAX" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalTax, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TodayTotalTax, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="DISCOUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalDiscount, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TodayTotalDiscount, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentWarning}"/>
                                 </StackPanel>
@@ -200,7 +212,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="REVENUE" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding GrossRevenue, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding GrossRevenue, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
@@ -208,14 +220,14 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="COGS" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding GrossCogs, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding GrossCogs, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="GROSS PROFIT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding GrossProfit, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding GrossProfit, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                     <TextBlock Style="{StaticResource ReportMetricLabelTextStyle}">
@@ -227,7 +239,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="EXPENSES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TotalExpensesForProfit, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TotalExpensesForProfit, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
@@ -235,7 +247,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="NET PROFIT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding NetProfit, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding NetProfit, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                     <TextBlock Style="{StaticResource ReportMetricLabelTextStyle}">
@@ -264,7 +276,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="TOTAL TAX" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TotalTaxCollected, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TotalTaxCollected, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
@@ -272,14 +284,14 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="CGST" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TotalCgst, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TotalCgst, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="SGST" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TotalSgst, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding TotalSgst, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
@@ -300,18 +312,20 @@
                                     Command="{Binding ExportBestSellingCsvCommand}"/>
                         </Grid>
                         <DataGrid ItemsSource="{Binding BestSellingProducts}" AutoGenerateColumns="False"
-                                  IsReadOnly="True" MaxHeight="300" Margin="0,8,0,0"
-                                  h:DataGridEmptyState.Icon="📦"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReportAnalyticalGridMaxHeight}"
+                                  Margin="0,8,0,0"
+                                  h:DataGridEmptyState.Icon="{StaticResource EmptyStateProductIconGlyph}"
                                   h:DataGridEmptyState.Title="No best sellers yet"
                                   h:DataGridEmptyState.Description="This section will fill in once the selected date range has enough completed sales data."
-                                  Style="{StaticResource {x:Type DataGrid}}">
+                                  Style="{StaticResource AnalyticalReportDataGridStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="#" Binding="{Binding ProductId}" Width="{StaticResource ColumnWidthId}"/>
                                 <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
                                 <DataGridTextColumn Header="HSN" Binding="{Binding HsnCode}" Width="80"/>
                                 <DataGridTextColumn Header="Qty Sold" Binding="{Binding TotalQuantitySold}" Width="{StaticResource ColumnWidthQty}"/>
-                                <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat='₹{0:N0}'}" Width="{StaticResource ColumnWidthPrice}"/>
-                                <DataGridTextColumn Header="Avg Price" Binding="{Binding AverageSellingPrice, StringFormat='₹{0:N0}'}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat={}{0:C0}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Avg Price" Binding="{Binding AverageSellingPrice, StringFormat={}{0:C0}}" Width="{StaticResource ColumnWidthPrice}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -330,16 +344,18 @@
                                     Command="{Binding ExportSlowMovingCsvCommand}"/>
                         </Grid>
                         <DataGrid ItemsSource="{Binding SlowMovingProducts}" AutoGenerateColumns="False"
-                                  IsReadOnly="True" MaxHeight="300" Margin="0,8,0,0"
-                                  h:DataGridEmptyState.Icon="🐢"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReportAnalyticalGridMaxHeight}"
+                                  Margin="0,8,0,0"
+                                  h:DataGridEmptyState.Icon="{StaticResource EmptyStateProductIconGlyph}"
                                   h:DataGridEmptyState.Title="No slow movers detected"
                                   h:DataGridEmptyState.Description="Products with weak movement will appear here when the selected period has comparison data."
-                                  Style="{StaticResource {x:Type DataGrid}}">
+                                  Style="{StaticResource AnalyticalReportDataGridStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="#" Binding="{Binding ProductId}" Width="{StaticResource ColumnWidthId}"/>
                                 <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
                                 <DataGridTextColumn Header="Qty Sold" Binding="{Binding TotalQuantitySold}" Width="{StaticResource ColumnWidthQty}"/>
-                                <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat='₹{0:N0}'}" Width="{StaticResource ColumnWidthPrice}"/>
+                                <DataGridTextColumn Header="Revenue" Binding="{Binding TotalRevenue, StringFormat={}{0:C0}}" Width="{StaticResource ColumnWidthPrice}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -371,7 +387,7 @@
                                                    Style="{StaticResource ReportListPrimaryTextStyle}"/>
                                         <TextBlock Grid.Column="1" Text="{Binding SaleCount}"
                                                    Style="{StaticResource ReportListSecondaryTextStyle}"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}"
+                                        <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat={}{0:C0}}"
                                                    Style="{StaticResource ReportListValueTextStyle}"/>
                                         <TextBlock Grid.Column="3"
                                                    Style="{StaticResource ReportListMetaTextStyle}">
@@ -413,12 +429,12 @@
                                             <Run Text="{Binding SaleCount, Mode=OneWay}"/>
                                             <Run Text="sales"/>
                                         </TextBlock>
-                                        <TextBlock Grid.Column="2" Text="{Binding TotalRevenue, StringFormat='₹{0:N0}'}"
+                                        <TextBlock Grid.Column="2" Text="{Binding TotalRevenue, StringFormat={}{0:C0}}"
                                                    Style="{StaticResource ReportListValueTextStyle}"/>
                                         <TextBlock Grid.Column="3"
                                                    Style="{StaticResource ReportListMetaTextStyle}">
-                                            <Run Text="avg ₹"/>
-                                            <Run Text="{Binding AverageSaleValue, StringFormat='{}{0:N0}', Mode=OneWay}"/>
+                                            <Run Text="avg "/>
+                                            <Run Text="{Binding AverageSaleValue, StringFormat={}{0:C0}, Mode=OneWay}"/>
                                         </TextBlock>
                                     </Grid>
                                 </DataTemplate>
@@ -451,7 +467,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding ExpenseTotal, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding ExpenseTotal, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
@@ -479,7 +495,7 @@
                                                 <Binding Path="Amount" Converter="{x:Null}" FallbackValue="50"/>
                                             </Border.Width>
                                         </Border>
-                                        <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat='₹{0:N0}'}"
+                                        <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat={}{0:C0}}"
                                                    Style="{StaticResource ReportListMetaTextStyle}"/>
                                     </Grid>
                                 </DataTemplate>
@@ -490,11 +506,12 @@
                         <TextBlock Text="Recent Entries"
                                    Style="{StaticResource ReportSubsectionTitleStyle}"/>
                         <DataGrid ItemsSource="{Binding ExpenseRecent}" AutoGenerateColumns="False"
-                                  IsReadOnly="True" MaxHeight="200"
-                                  h:DataGridEmptyState.Icon="🧾"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReportOperationalGridMaxHeight}"
+                                  h:DataGridEmptyState.Icon="{StaticResource EmptyStateExpenseIconGlyph}"
                                   h:DataGridEmptyState.Title="No recent expenses"
                                   h:DataGridEmptyState.Description="Expense entries will appear here after spending activity is recorded for the chosen date range."
-                                  Style="{StaticResource {x:Type DataGrid}}">
+                                  Style="{StaticResource AnalyticalReportDataGridStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
                                 <DataGridTemplateColumn Header="Category" SortMemberPath="Category" Width="*">
@@ -511,7 +528,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='₹{0:N0}'}" Width="100"/>
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat={}{0:C0}}" Width="100"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -540,14 +557,14 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding IroningTotal, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding IroningTotal, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="PAID" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding IroningPaid, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding IroningPaid, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                 </StackPanel>
@@ -555,22 +572,23 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="UNPAID" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding IroningUnpaid, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding IroningUnpaid, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
                             </Border>
                         </WrapPanel>
                         <DataGrid ItemsSource="{Binding IroningRecent}" AutoGenerateColumns="False"
-                                  IsReadOnly="True" MaxHeight="200"
-                                  h:DataGridEmptyState.Icon="🧺"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReportOperationalGridMaxHeight}"
+                                  h:DataGridEmptyState.Icon="{StaticResource EmptyStateIroningIconGlyph}"
                                   h:DataGridEmptyState.Title="No ironing entries"
                                   h:DataGridEmptyState.Description="Ironing jobs will appear here once activity exists in the selected reporting period."
-                                  Style="{StaticResource {x:Type DataGrid}}">
+                                  Style="{StaticResource AnalyticalReportDataGridStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
                                 <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*"/>
-                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='₹{0:N0}'}" Width="100"/>
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat={}{0:C0}}" Width="100"/>
                                 <DataGridCheckBoxColumn Header="Paid" Binding="{Binding IsPaid}" Width="60"/>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -600,7 +618,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding OrderTotal, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding OrderTotal, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
@@ -622,24 +640,25 @@
                             </Border>
                         </WrapPanel>
                         <DataGrid ItemsSource="{Binding OrderRecent}" AutoGenerateColumns="False"
-                                  IsReadOnly="True" MaxHeight="200"
-                                  h:DataGridEmptyState.Icon="📦"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReportOperationalGridMaxHeight}"
+                                  h:DataGridEmptyState.Icon="{StaticResource EmptyStateOrderIconGlyph}"
                                   h:DataGridEmptyState.Title="No recent orders"
                                   h:DataGridEmptyState.Description="Order activity will show up here after new orders are created in the selected period."
-                                  Style="{StaticResource {x:Type DataGrid}}">
+                                  Style="{StaticResource AnalyticalReportDataGridStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="100"/>
                                 <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*"/>
-                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='₹{0:N0}'}" Width="100"/>
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat={}{0:C0}}" Width="100"/>
                                 <DataGridTemplateColumn Header="Status" SortMemberPath="Status" Width="90">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Style="{StaticResource SemanticStatusPillStyle}"
-                                                    Tag="{Binding Status}"
+                                                    Tag="{Binding Status, StringFormat={}{0}}"
                                                     HorizontalAlignment="Left">
-                                                <TextBlock Text="{Binding Status}"
+                                                <TextBlock Text="{Binding Status, Converter={StaticResource StatusDisplayTextConverter}}"
                                                            Style="{StaticResource SemanticStatusPillTextStyle}"
-                                                           Tag="{Binding Status}"/>
+                                                           Tag="{Binding Status, StringFormat={}{0}}"/>
                                             </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -672,21 +691,22 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding InwardTotal, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding InwardTotal, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                         </WrapPanel>
                         <DataGrid ItemsSource="{Binding InwardRecent}" AutoGenerateColumns="False"
-                                  IsReadOnly="True" MaxHeight="200"
-                                  h:DataGridEmptyState.Icon="🚚"
+                                  IsReadOnly="True"
+                                  MaxHeight="{StaticResource ReportOperationalGridMaxHeight}"
+                                  h:DataGridEmptyState.Icon="{StaticResource EmptyStatePurchaseDocumentIconGlyph}"
                                   h:DataGridEmptyState.Title="No inward entries"
                                   h:DataGridEmptyState.Description="Incoming stock receipts will appear here once inward processing starts for the selected dates."
-                                  Style="{StaticResource {x:Type DataGrid}}">
+                                  Style="{StaticResource AnalyticalReportDataGridStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Date" Binding="{Binding InwardDate, StringFormat=d}" Width="100"/>
                                 <DataGridTextColumn Header="Vendor" Binding="{Binding Vendor.Name}" Width="*"/>
-                                <DataGridTextColumn Header="Transport" Binding="{Binding TransportCharges, StringFormat='₹{0:N0}'}" Width="100"/>
+                                <DataGridTextColumn Header="Transport" Binding="{Binding TransportCharges, StringFormat={}{0:C0}}" Width="100"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -707,7 +727,7 @@
                             <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
                                     <TextBlock Text="OUTSTANDING" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding DebtorOutstanding, StringFormat='₹{0:N0}'}"
+                                    <TextBlock Text="{Binding DebtorOutstanding, StringFormat={}{0:C0}}"
                                                Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
@@ -730,7 +750,7 @@
                                                    Style="{StaticResource ReportListValueTextStyle}"
                                                    Foreground="{StaticResource FluentError}">
                                             <TextBlock.Text>
-                                                <Binding Path="Balance" StringFormat="₹{0:N0}"/>
+                                                <Binding Path="Balance" StringFormat="{}{0:C0}"/>
                                             </TextBlock.Text>
                                         </TextBlock>
                                     </Grid>
@@ -744,4 +764,10 @@
         </ScrollViewer>
     </Grid>
 </UserControl>
+
+
+
+
+
+
 

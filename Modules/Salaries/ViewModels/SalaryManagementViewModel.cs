@@ -9,10 +9,14 @@ using StoreAssistantPro.Modules.Salaries.Services;
 
 namespace StoreAssistantPro.Modules.Salaries.ViewModels;
 
-public partial class SalaryManagementViewModel(ISalaryService salaryService) : BaseViewModel
+public partial class SalaryManagementViewModel(
+    ISalaryService salaryService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<Salary> _allItems = [];
     private bool _isRestoringViewState;
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<Salary> Salaries { get; set; } = [];

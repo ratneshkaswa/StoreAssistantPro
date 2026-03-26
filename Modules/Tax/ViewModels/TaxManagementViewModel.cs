@@ -13,6 +13,8 @@ public partial class TaxManagementViewModel(
     ITaxGroupService taxGroupService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    public string CurrencySymbol => regional.CurrencySymbol;
+
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     //  Tab Navigation
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

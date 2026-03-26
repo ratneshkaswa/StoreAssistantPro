@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Products.Views.ProductManagementView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Products.Views.ProductManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
@@ -9,8 +9,11 @@
     <Grid Margin="{StaticResource PagePadding}"
           TextOptions.TextFormattingMode="Display"
           TextOptions.TextRenderingMode="ClearType"
-          KeyboardNavigation.TabNavigation="Continue">
+          KeyboardNavigation.TabNavigation="Continue"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+          ScrollViewer.PanningMode="VerticalOnly">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -26,60 +29,76 @@
         </StackPanel>
 
         <!-- Search & Filter Toolbar -->
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+        <Grid Grid.Row="1" Style="{StaticResource PageToolbarHostStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search products by name or barcode"
-                     AutomationProperties.Name="Search products"/>
-            <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding FilterCategory}"
-                      DisplayMemberPath="Name"
-                      AutomationProperties.Name="Filter by category"
-                      Width="{StaticResource FieldWidthStandard}"
-                      Margin="{StaticResource InlineControlSpacing}"/>
-            <ComboBox Grid.Column="2" ItemsSource="{Binding Brands}"
-                      SelectedItem="{Binding FilterBrand}"
-                      DisplayMemberPath="Name"
-                      AutomationProperties.Name="Filter by brand"
-                      Width="{StaticResource FieldWidthStandard}"
-                      Margin="{StaticResource InlineControlSpacing}"/>
-            <ComboBox Grid.Column="3" ItemsSource="{Binding StockStatusOptions}"
-                      SelectedItem="{Binding FilterStockStatus}"
-                      AutomationProperties.Name="Filter by stock"
-                      Width="{StaticResource FieldWidthCompact}"
-                      Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="4" Content="Search" Command="{Binding SearchCommand}"
-                    Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="5"
-                    Width="36"
-                    Height="36"
-                    Margin="{StaticResource InlineControlSpacing}"
-                    Style="{StaticResource FluentSubtleButtonStyle}"
-                    ToolTip="Choose columns"
-                    AutomationProperties.Name="Choose columns"
-                    h:DataGridColumnChooser.Target="{Binding ElementName=ProductsGrid}">
-                <TextBlock Text="&#xE713;"
-                           FontFamily="{StaticResource FluentIconFont}"
-                           FontSize="14"/>
-            </Button>
+            <WrapPanel Style="{StaticResource PageToolbarContentRowStyle}">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FluentSearchTextBoxStyle}"
+                         Width="{StaticResource FieldWidthWide}"
+                         h:Watermark.Text="Search products by name or barcode"
+                         AutomationProperties.Name="Search products"/>
+                <ComboBox ItemsSource="{Binding Categories}"
+                          SelectedItem="{Binding FilterCategory}"
+                          DisplayMemberPath="Name"
+                          AutomationProperties.Name="Filter by category"
+                          Width="{StaticResource FieldWidthStandard}"
+                          Margin="{StaticResource InlineControlSpacing}"/>
+                <ComboBox ItemsSource="{Binding Brands}"
+                          SelectedItem="{Binding FilterBrand}"
+                          DisplayMemberPath="Name"
+                          AutomationProperties.Name="Filter by brand"
+                          Width="{StaticResource FieldWidthStandard}"
+                          Margin="{StaticResource InlineControlSpacing}"/>
+                <ComboBox ItemsSource="{Binding StockStatusOptions}"
+                          SelectedItem="{Binding FilterStockStatus}"
+                          AutomationProperties.Name="Filter by stock"
+                          Width="{StaticResource FieldWidthCompact}"
+                          Margin="{StaticResource InlineControlSpacing}"/>
+            </WrapPanel>
+            <WrapPanel Grid.Column="1" Style="{StaticResource PageToolbarActionRowStyle}">
+                <TextBlock Text="{Binding FilterCountText}"
+                           Style="{StaticResource PageToolbarMetaTextStyle}"
+                           Visibility="{Binding FilterCountText, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+                <Button Content="Search" Command="{Binding SearchCommand}"
+                        Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <Button Margin="{StaticResource InlineControlSpacing}"
+                        Style="{StaticResource ToolbarIconButtonStyle}"
+                        ToolTip="Choose columns"
+                        AutomationProperties.Name="Choose columns"
+                        h:DataGridColumnChooser.Target="{Binding ElementName=ProductsGrid}">
+                    <TextBlock Text="&#xE713;"
+                               FontFamily="{StaticResource FluentIconFont}"
+                               FontSize="14"/>
+                </Button>
+            </WrapPanel>
         </Grid>
 
-        <!-- Filter count -->
-        <TextBlock Grid.Row="1" Text="{Binding FilterCountText}" Foreground="{StaticResource FluentTextTertiary}"
-                   FontSize="{StaticResource FontSizeCaption}" HorizontalAlignment="Right"
-                   VerticalAlignment="Bottom" Margin="{StaticResource ItemSpacing}"
-                   Visibility="{Binding FilterCountText, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+        <Border Grid.Row="2"
+                Style="{StaticResource ValidationSummaryCardStyle}"
+                Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="Review these items before saving."
+                           Style="{StaticResource ValidationSummaryTitleTextStyle}"/>
+                <ItemsControl ItemsSource="{Binding ValidationErrors}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="- "
+                                           Style="{StaticResource ValidationSummaryItemTextStyle}"/>
+                                <TextBlock Text="{Binding}"
+                                           Style="{StaticResource ValidationSummaryItemTextStyle}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
 
         <!-- DataGrid + Form share the * row -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto" MaxHeight="320"/>
@@ -92,7 +111,7 @@
                       SelectedItem="{Binding SelectedProduct}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
                       h:DataGridLayoutPersistence.Key="ProductsGrid"
-                      h:DataGridEmptyState.Icon="📦"
+                      h:DataGridEmptyState.Icon="{StaticResource EmptyStateProductIconGlyph}"
                       h:DataGridEmptyState.Title="No products found"
                       h:DataGridEmptyState.Description="Add a product or relax the current brand, category, and stock filters to see more items."
                       AutoGenerateColumns="False" IsReadOnly="True"
@@ -145,8 +164,8 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Sale ₹" Binding="{Binding SalePrice, StringFormat=N0}" Width="{StaticResource ColumnWidthPrice}"/>
-                    <DataGridTextColumn Header="Cost ₹" Binding="{Binding CostPrice, StringFormat=N0}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Sale" Binding="{Binding SalePrice, StringFormat={}{0:C0}}" Width="{StaticResource ColumnWidthPrice}"/>
+                    <DataGridTextColumn Header="Cost" Binding="{Binding CostPrice, StringFormat={}{0:C0}}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
                     <DataGridTextColumn Header="Tax" Binding="{Binding Tax.TaxName}" Width="{StaticResource ColumnWidthPrice}"/>
                     <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
@@ -307,7 +326,7 @@
         </Grid>
 
         <!-- Messages -->
-        <Grid Grid.Row="3" MinHeight="{StaticResource MessageAreaMinHeight}"
+        <Grid Grid.Row="4" MinHeight="{StaticResource MessageAreaMinHeight}"
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Severity="Error"
                               Title="Product issue"
@@ -323,18 +342,34 @@
                               AutomationProperties.HelpText="{Binding SuccessMessage}"/>
         </Grid>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
-                    Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="New Product" Command="{Binding NewProductCommand}"
-                    Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Variants" Command="{Binding ManageVariantsCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Content="Save" Command="{Binding SaveCommand}"
-                    Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-        </StackPanel>
+        <!-- Commit actions -->
+        <Border Grid.Row="5"
+                Style="{StaticResource StickyFooterActionBarStyle}">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding DirtyStateSummaryText}"
+                           Style="{StaticResource DirtyStateHintTextStyle}"
+                           Margin="0"
+                           VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="New Product" Command="{Binding NewProductCommand}"
+                            Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Variants" Command="{Binding ManageVariantsCommand}"
+                            Style="{StaticResource ViewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Save" Command="{Binding SaveCommand}"
+                            Style="{StaticResource SaveButtonStyle}"
+                            IsEnabled="{Binding IsDirty}"
+                            IsDefault="True"
+                            Margin="0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving product changes..."/>
     </Grid>
 </UserControl>
+
+

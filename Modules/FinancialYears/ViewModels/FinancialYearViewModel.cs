@@ -10,7 +10,8 @@ namespace StoreAssistantPro.Modules.FinancialYears.ViewModels;
 
 public partial class FinancialYearViewModel(
     IFinancialYearService fyService,
-    IRegionalSettingsService regional) : BaseViewModel
+    IRegionalSettingsService regional,
+    IDialogService dialogService) : BaseViewModel
 {
     [ObservableProperty]
     public partial ObservableCollection<FinancialYear> FinancialYears { get; set; } = [];
@@ -20,9 +21,6 @@ public partial class FinancialYearViewModel(
 
     [ObservableProperty]
     public partial FinancialYear? SelectedYear { get; set; }
-
-    [ObservableProperty]
-    public partial bool IsConfirmingReset { get; set; }
 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
@@ -56,32 +54,27 @@ public partial class FinancialYearViewModel(
         }
 
         SuccessMessage = string.Empty;
-        IsConfirmingReset = false;
         await fyService.SetCurrentAsync(SelectedYear.Id, ct);
         SuccessMessage = $"Active year set to {SelectedYear.Name}.";
         await LoadAsync();
     });
 
     [RelayCommand]
-    private void ShowResetConfirmation()
+    private Task ShowResetConfirmationAsync() => RunAsync(async ct =>
     {
-        IsConfirmingReset = true;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
-    }
 
-    [RelayCommand]
-    private void CancelReset()
-    {
-        IsConfirmingReset = false;
-    }
+        var confirmed = dialogService.Confirm(
+            "Reset billing numbers for the current financial year?\n\nThis resets all current-year billing counters and cannot be undone.",
+            "Reset Billing",
+            "Reset Billing",
+            "Cancel");
 
-    [RelayCommand]
-    private Task ConfirmResetAsync() => RunAsync(async ct =>
-    {
-        SuccessMessage = string.Empty;
+        if (!confirmed)
+            return;
+
         await fyService.EnsureCurrentYearAsync(ct);
-        IsConfirmingReset = false;
         SuccessMessage = "Billing numbers have been reset for the current financial year.";
         await LoadAsync();
     });

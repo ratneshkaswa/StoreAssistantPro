@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.GRN.Views.GRNManagementView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.GRN.Views.GRNManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -23,37 +23,40 @@
                        Style="{StaticResource PageSubtitleStyle}"/>
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+        <Grid Grid.Row="1" Style="{StaticResource PageToolbarHostStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource FluentSearchTextBoxStyle}"
-                     AutomationProperties.Name="Search GRNs"
-                     h:Watermark.Text="Search GRNs by number, PO, or supplier"/>
-            <ComboBox Grid.Column="1"
-                      ItemsSource="{Binding StatusOptions}"
-                      SelectedItem="{Binding FilterStatus}"
-                      Style="{StaticResource FluentComboBoxStyle}"
-                      Width="{StaticResource FieldWidthStandard}"
-                      Margin="{StaticResource InlineControlSpacing}"
-                      AutomationProperties.Name="Filter by status">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Button Grid.Column="2"
-                    Content="Search"
-                    Command="{Binding SearchCommand}"
-                    Style="{StaticResource SearchButtonStyle}"
-                    Margin="{StaticResource InlineControlSpacing}"/>
+            <WrapPanel Style="{StaticResource PageToolbarContentRowStyle}">
+                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FluentSearchTextBoxStyle}"
+                         Width="{StaticResource FieldWidthWide}"
+                         AutomationProperties.Name="Search GRNs"
+                         h:Watermark.Text="Search GRNs by number, PO, or supplier"/>
+                <ComboBox ItemsSource="{Binding StatusOptions}"
+                          SelectedItem="{Binding FilterStatus}"
+                          Style="{StaticResource FluentComboBoxStyle}"
+                          Width="{StaticResource FieldWidthStandard}"
+                          Margin="{StaticResource InlineControlSpacing}"
+                          AutomationProperties.Name="Filter by status">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </WrapPanel>
+            <WrapPanel Grid.Column="1" Style="{StaticResource PageToolbarActionRowStyle}">
+                <Button Content="Search"
+                        Command="{Binding SearchCommand}"
+                        Style="{StaticResource SearchButtonStyle}"
+                        Margin="{StaticResource InlineControlSpacing}"/>
+            </WrapPanel>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2"
+              Style="{StaticResource MasterDetailPageGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{StaticResource MasterDetailListPaneWidth}"/>
                 <ColumnDefinition Width="{StaticResource MasterDetailPaneGapWidth}"/>
@@ -71,7 +74,7 @@
                           SelectedItem="{Binding SelectedGRN}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
                           h:DataGridLayoutPersistence.Key="GRNGrid"
-                          h:DataGridEmptyState.Icon="&#x1F4E6;"
+                          h:DataGridEmptyState.Icon="{StaticResource EmptyStatePurchaseDocumentIconGlyph}"
                           h:DataGridEmptyState.Title="No goods received notes"
                           h:DataGridEmptyState.Description="Create a GRN from a purchase order to track goods received."
                           HeadersVisibility="Column">
@@ -81,7 +84,19 @@
                         <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier.Name}" Width="*"/>
                         <DataGridTextColumn Header="Date" Binding="{Binding ReceivedDate, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTemplateColumn Header="Status" SortMemberPath="Status" Width="{StaticResource ColumnWidthQty}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource SemanticStatusPillStyle}"
+                                            Tag="{Binding Status, StringFormat={}{0}}"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusDisplayTextConverter}}"
+                                                   Style="{StaticResource SemanticStatusPillTextStyle}"
+                                                   Tag="{Binding Status, StringFormat={}{0}}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -90,6 +105,7 @@
                             Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
                     <Button Content="Prev"
                             Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPreviousPage}"
                             Style="{StaticResource PaginatorNavButtonStyle}"
                             Margin="0,0,8,0"/>
                     <TextBlock Text="{Binding PagingInfo}"
@@ -97,6 +113,7 @@
                                Style="{StaticResource PaginatorInfoTextStyle}"/>
                     <Button Content="Next"
                             Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNextPage}"
                             Style="{StaticResource PaginatorNavButtonStyle}"
                             Margin="8,0,0,0"/>
                 </StackPanel>
@@ -196,3 +213,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

@@ -22,6 +22,7 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -36,18 +37,40 @@
                        Style="{StaticResource PageSubtitleStyle}"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1"
+        <Border Grid.Row="1"
+                Style="{StaticResource ValidationSummaryCardStyle}"
+                Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="Review these items before saving."
+                           Style="{StaticResource ValidationSummaryTitleTextStyle}"/>
+                <ItemsControl ItemsSource="{Binding ValidationErrors}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="- "
+                                           Style="{StaticResource ValidationSummaryItemTextStyle}"/>
+                                <TextBlock Text="{Binding}"
+                                           Style="{StaticResource ValidationSummaryItemTextStyle}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="2"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Focusable="False"
                       PanningMode="VerticalOnly">
-            <StackPanel Margin="{StaticResource ItemSpacing}"
-                        Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                        MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"
-                        HorizontalAlignment="Center">
-                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+            <StackPanel Style="{StaticResource CenteredPageContentHostStyle}"
+                        Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
-                        <TextBlock Text="Business Profile" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Text="Business Profile"
+                                   Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                        <TextBlock Text="Maintain the core business identity and contact details printed across billing and reporting surfaces."
+                                   Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -64,8 +87,9 @@
 
                             <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource FirmFieldPanelStyle}">
                                 <TextBlock x:Name="FirmNameLabel"
-                                           Text="Firm Name *"
-                                           Style="{StaticResource FormRowLabelStyle}"/>
+                                           Style="{StaticResource FormRowLabelStyle}">
+                                    <Run Text="Firm Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
+                                </TextBlock>
                                 <TextBox x:Name="FirmNameBox"
                                          Text="{Binding FirmName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                                          MaxLength="100"
@@ -155,9 +179,12 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
-                        <TextBlock Text="Tax &amp; Compliance" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Text="Tax &amp; Compliance"
+                                   Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                        <TextBlock Text="Configure GST registration, filing identifiers, and statutory details used for compliance workflows."
+                                   Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -242,9 +269,12 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
-                        <TextBlock Text="Billing &amp; Regional Rules" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Text="Billing &amp; Regional Rules"
+                                   Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                        <TextBlock Text="Choose invoice currency, financial-year behavior, and rounding defaults so billing stays consistent across the app."
+                                   Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -349,9 +379,12 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource FormCardStyle}" Margin="{StaticResource SectionSpacing}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
-                        <TextBlock Text="Invoice &amp; Receipt" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Text="Invoice &amp; Receipt"
+                                   Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                        <TextBlock Text="Set invoice numbering and receipt footer details that appear on printed customer documents."
+                                   Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -397,7 +430,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Grid Grid.Row="2"
+        <Grid Grid.Row="3"
               MinHeight="{StaticResource MessageAreaMinHeight}"
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Severity="Error"
@@ -414,21 +447,25 @@
                               AutomationProperties.HelpText="{Binding SuccessMessage}"/>
         </Grid>
 
-        <Border Grid.Row="3"
-                Margin="{StaticResource FormActionBarSpacing}"
-                Padding="{StaticResource CardContentPadding}"
-                Background="{StaticResource FluentSurfaceElevated}"
-                BorderBrush="{StaticResource FluentStrokeDefault}"
-                BorderThickness="{StaticResource FluentBorderThicknessThin}"
-                CornerRadius="{StaticResource CornerRadiusMedium}">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Right">
+        <Border Grid.Row="4"
+                Style="{StaticResource StickyFooterActionBarStyle}">
+            <DockPanel LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding DirtyStateSummaryText}"
+                           Style="{StaticResource DirtyStateHintTextStyle}"
+                           Margin="0"
+                           VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
                     <Button Content="Save"
                             Command="{Binding SaveFirmCommand}"
                             Style="{StaticResource SaveButtonStyle}"
-                            MinWidth="120"
-                            Margin="{StaticResource InlineControlSpacing}"/>
-            </StackPanel>
+                            IsEnabled="{Binding IsDirty}"
+                            IsDefault="True"
+                            Margin="0"/>
+                </StackPanel>
+            </DockPanel>
         </Border>
 
         <controls:LoadingOverlay IsActive="{Binding IsWorking}"

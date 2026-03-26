@@ -35,7 +35,7 @@ public sealed class IndianNumberFormatService : IIndianNumberFormatService
     }
 }
 
-public sealed class RegionalCalendarService(IRegionalSettingsService regional) : IRegionalCalendarService
+public sealed class RegionalCalendarService(IRegionalSettingsService regionalSettings) : IRegionalCalendarService
 {
     public IReadOnlyList<string> GetAvailableDateFormats() =>
         ["dd-MM-yyyy", "dd/MM/yyyy", "MM-dd-yyyy", "yyyy-MM-dd", "dd MMM yyyy", "dd MMMM yyyy"];
@@ -59,7 +59,7 @@ public sealed class RegionalCalendarService(IRegionalSettingsService regional) :
     public string FormatDate(DateTime date, string formatString) => date.ToString(formatString, CultureInfo.CurrentCulture);
 
     public RegionalCalendarDate GetCurrentRegionalDate(RegionalCalendarType calendarType)
-        => ConvertToRegionalCalendar(regional.Now, calendarType);
+        => ConvertToRegionalCalendar(regionalSettings.Now, calendarType);
 }
 
 public sealed class StateTaxLabelService : IStateTaxLabelService

@@ -9,10 +9,14 @@ using StoreAssistantPro.Modules.Orders.Services;
 
 namespace StoreAssistantPro.Modules.Orders.ViewModels;
 
-public partial class OrderManagementViewModel(IOrderService orderService) : BaseViewModel
+public partial class OrderManagementViewModel(
+    IOrderService orderService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private List<Order> _allItems = [];
     private bool _isRestoringViewState;
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<Order> Orders { get; set; } = [];

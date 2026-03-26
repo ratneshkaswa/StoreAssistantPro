@@ -38,10 +38,12 @@
                 <StackPanel>
                     <!-- OPEN REGISTER (shown when closed) -->
                     <Border Visibility="{Binding IsRegisterClosed, Converter={StaticResource BoolToVisibility}}"
-                            Style="{StaticResource AdminSectionCardStyle}">
+                            Style="{StaticResource OperationalEditorSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Open Register"
-                                       Style="{StaticResource AdminSectionTitleStyle}"/>
+                                       Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                            <TextBlock Text="Start the till with the opening cash so expected-balance tracking begins for the day."
+                                       Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -60,40 +62,56 @@
                                          h:Watermark.Text="Opening amount"/>
                             </Grid>
                             <Button Content="Open Register" Command="{Binding OpenRegisterCommand}"
-                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Style="{StaticResource SaveButtonStyle}"
                                     Margin="0,12,0,0"/>
                         </StackPanel>
                     </Border>
 
                     <!-- REGISTER STATUS (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            Style="{StaticResource AdminSectionHighlightCardStyle}">
+                            Style="{StaticResource SummaryBannerStyle}">
                         <StackPanel>
                             <TextBlock Text="Register Open"
-                                       Style="{StaticResource AdminSectionTitleStyle}"
+                                       Style="{StaticResource SummaryPanelTitleStyle}"
                                        Foreground="{StaticResource FluentSuccess}"/>
-                            <TextBlock Margin="0,4,0,0">
-                                <Run Text="Opening: " FontWeight="SemiBold"/>
-                                <Run Text="{Binding OpenRegister.OpeningBalance, StringFormat={}{0:C}, Mode=OneWay}"/>
-                            </TextBlock>
-                            <TextBlock Margin="0,4,0,0">
-                                <Run Text="Expected Cash: " FontWeight="SemiBold"/>
-                                <Run Text="{Binding ExpectedBalance, StringFormat={}{0:C}, Mode=OneWay}"/>
-                            </TextBlock>
-                            <TextBlock Margin="0,4,0,0" Foreground="{StaticResource FluentTextSecondary}"
-                                       FontSize="{StaticResource FontSizeCaption}">
-                                <Run Text="Opened: "/>
-                                <Run Text="{Binding OpenRegister.OpenedAt, StringFormat={}{0:dd MMM yyyy hh:mm tt}, Mode=OneWay}"/>
-                            </TextBlock>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="{StaticResource FormRowSpacing}"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="Opening"
+                                           Style="{StaticResource SummaryBannerLabelTextStyle}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding OpenRegister.OpeningBalance, StringFormat={}{0:C}, Mode=OneWay}"
+                                           Style="{StaticResource SummaryValueTextStyle}"/>
+
+                                <TextBlock Grid.Row="2"
+                                           Text="Expected Cash"
+                                           Style="{StaticResource SummaryBannerLabelTextStyle}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1"
+                                           Text="{Binding ExpectedBalance, StringFormat={}{0:C}, Mode=OneWay}"
+                                           Style="{StaticResource SummaryAccentValueTextStyle}"/>
+                            </Grid>
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="{Binding OpenRegister.OpenedAt, StringFormat=Opened {0:dd MMM yyyy hh:mm tt}, Mode=OneWay}"
+                                       Style="{StaticResource SummaryMetaTextStyle}"/>
                         </StackPanel>
                     </Border>
 
                     <!-- CASH MOVEMENT (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            Style="{StaticResource AdminSectionCardStyle}">
+                            Style="{StaticResource OperationalEditorSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Cash In / Out"
-                                       Style="{StaticResource AdminSectionTitleStyle}"/>
+                                       Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                            <TextBlock Text="Record petty cash movement and adjustments while the register remains open."
+                                       Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -136,17 +154,19 @@
                                          h:Watermark.Text="Movement reason"/>
                             </Grid>
                             <Button Content="Record Movement" Command="{Binding RecordMovementCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Style="{StaticResource SaveButtonStyle}"
                                     Margin="0,12,0,0"/>
                         </StackPanel>
                     </Border>
 
                     <!-- CLOSE REGISTER (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            Style="{StaticResource AdminSectionCardStyle}">
+                            Style="{StaticResource OperationalEditorSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Close Register / Day End"
-                                       Style="{StaticResource AdminSectionTitleStyle}"/>
+                                       Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                            <TextBlock Text="Capture the counted cash and close the register once trading is complete."
+                                       Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -180,22 +200,24 @@
                                          h:Watermark.Text="Closing notes (optional)"/>
                             </Grid>
                             <Button Content="Close Register" Command="{Binding CloseRegisterCommand}"
-                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Style="{StaticResource SaveButtonStyle}"
                                     Margin="0,12,0,0"/>
                         </StackPanel>
                     </Border>
 
                     <!-- MOVEMENTS TABLE (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            Style="{StaticResource AdminSectionCardStyle}">
+                            Style="{StaticResource ReadOnlyInspectionSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Today's Movements"
-                                       Style="{StaticResource AdminSectionTitleStyle}"/>
+                                       Style="{StaticResource ReadOnlyInspectionSectionTitleStyle}"/>
+                            <TextBlock Text="Review recorded cash in and cash out entries before closing the register."
+                                       Style="{StaticResource ReadOnlyInspectionSectionDescriptionStyle}"/>
                             <DataGrid ItemsSource="{Binding Movements}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
                                       SelectionMode="Single"
                                       HeadersVisibility="Column" CanUserAddRows="False"
-                                      MaxHeight="200">
+                                      MaxHeight="{StaticResource ReadOnlyInspectionGridMaxHeight}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Time" Binding="{Binding Timestamp, StringFormat={}{0:hh:mm tt}}" Width="Auto"/>
                                     <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" Width="Auto"/>
@@ -317,29 +339,36 @@
                     </Border>
 
                     <!-- REGISTER HISTORY -->
-                    <TextBlock Text="Register History"
-                               Style="{StaticResource AdminSectionTitleStyle}"/>
-                    <DataGrid ItemsSource="{Binding RegisterHistory}"
-                              AutoGenerateColumns="False" IsReadOnly="True"
-                              SelectionMode="Single"
-                              HeadersVisibility="Column" CanUserAddRows="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Date" Binding="{Binding OpenedAt, StringFormat={}{0:dd MMM yyyy}}" Width="Auto"/>
-                            <DataGridTextColumn Header="Opening" Binding="{Binding OpeningBalance, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                            <DataGridTextColumn Header="Closing" Binding="{Binding ClosingBalance, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                            <DataGridTextColumn Header="Discrepancy" Binding="{Binding Discrepancy, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                            <DataGridTemplateColumn Header="" Width="Auto">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="Summary"
-                                                Command="{Binding DataContext.ViewDayEndSummaryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource SecondaryButtonStyle}" Padding="8,2"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Border Style="{StaticResource ReadOnlyInspectionSectionCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Register History"
+                                       Style="{StaticResource ReadOnlyInspectionSectionTitleStyle}"/>
+                            <TextBlock Text="Review previous register sessions and reopen day-end summaries when reconciliation details are needed."
+                                       Style="{StaticResource ReadOnlyInspectionSectionDescriptionStyle}"/>
+                            <DataGrid ItemsSource="{Binding RegisterHistory}"
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      HeadersVisibility="Column" CanUserAddRows="False"
+                                      MaxHeight="{StaticResource ReadOnlyInspectionGridMaxHeight}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Date" Binding="{Binding OpenedAt, StringFormat={}{0:dd MMM yyyy}}" Width="*"/>
+                                    <DataGridTextColumn Header="Opening" Binding="{Binding OpeningBalance, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                    <DataGridTextColumn Header="Closing" Binding="{Binding ClosingBalance, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                    <DataGridTextColumn Header="Discrepancy" Binding="{Binding Discrepancy, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
+                                    <DataGridTemplateColumn Header="" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Summary"
+                                                        Command="{Binding DataContext.ViewDayEndSummaryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource ViewButtonStyle}" Padding="8,2"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

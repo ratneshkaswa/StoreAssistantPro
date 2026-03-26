@@ -11,15 +11,19 @@ public class DialogService(
     IWindowSizingService sizingService,
     ILogger<DialogService> logger) : IDialogService
 {
-    public bool Confirm(string message, string title = "Confirm")
+    public bool Confirm(
+        string message,
+        string title = "Confirm",
+        string primaryButtonText = "Yes",
+        string secondaryButtonText = "No")
     {
         var dialog = new AppMessageDialog(
             sizingService,
             title,
             message,
             AppMessageDialogKind.Question,
-            primaryButtonText: "Yes",
-            secondaryButtonText: "No");
+            primaryButtonText,
+            secondaryButtonText);
 
         PrepareOwner(dialog);
         return dialog.ShowDialog() == true && dialog.Confirmed;

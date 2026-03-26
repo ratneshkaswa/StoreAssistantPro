@@ -105,7 +105,17 @@ public sealed class IconService : IIconService
         ["Info"] = "\uE946", ["Home"] = "\uE80F", ["Cart"] = "\uE7BF",
         ["User"] = "\uE77B", ["Store"] = "\uE7BF", ["Chart"] = "\uE9D9",
         ["Calendar"] = "\uE787", ["Clock"] = "\uE823", ["Money"] = "\uE8C7",
-        ["Barcode"] = "\uE8C8", ["Camera"] = "\uE722", ["Notification"] = "\uEA8F"
+        ["Barcode"] = "\uE8C8", ["Camera"] = "\uE722", ["Notification"] = "\uEA8F",
+        ["Firm"] = "\uE7BF", ["Users"] = "\uE77B", ["Tax"] = "\uE8C7",
+        ["Vendors"] = "\uE7B8", ["Products"] = "\uE719", ["Categories"] = "\uE8B7",
+        ["Brands"] = "\uE8EC", ["Inward"] = "\uE8B5", ["Inventory"] = "\uE9D9",
+        ["Billing"] = "\uE7BF", ["SaleHistory"] = "\uE9D9", ["Customers"] = "\uE8A5",
+        ["PurchaseOrders"] = "\uE7B8", ["FinancialYear"] = "\uE787",
+        ["Expenses"] = "\uE8C7", ["Debtors"] = "\uE779", ["Orders"] = "\uE719",
+        ["Ironing"] = "\uEDA1", ["Salaries"] = "\uE7EE", ["Branches"] = "\uE7BF",
+        ["SalesPurchase"] = "\uE9D9", ["Payments"] = "\uE8C7", ["Reports"] = "\uE9D9",
+        ["BarcodeLabels"] = "\uE8C8", ["Shortcuts"] = "\uE765",
+        ["CommandPalette"] = "\uE70F", ["Logout"] = "\uE8AC"
     };
 
     public string GetGlyph(string iconName)

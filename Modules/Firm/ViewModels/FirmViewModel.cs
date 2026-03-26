@@ -90,7 +90,12 @@ public partial class FirmViewModel : BaseViewModel
     }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DirtyStateSummaryText))]
     public partial bool IsDirty { get; set; }
+
+    public string DirtyStateSummaryText => IsDirty
+        ? "You have unsaved business settings changes."
+        : "No unsaved business settings changes.";
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
@@ -558,6 +563,7 @@ public partial class FirmViewModel : BaseViewModel
         }
 
         ClearErrors();
+        ValidationErrors = [];
         ValidateProperty(FirmName, nameof(FirmName));
         ValidateProperty(Address, nameof(Address));
         ValidateProperty(State, nameof(State));
@@ -587,6 +593,13 @@ public partial class FirmViewModel : BaseViewModel
 
         if (HasErrors || !validSelections)
         {
+            var selectionErrors = ValidationErrors;
+            var combinedErrors = CollectObservableValidationErrors();
+            combinedErrors.AddRange(selectionErrors);
+            ValidationErrors = combinedErrors
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+
             if (string.IsNullOrWhiteSpace(FirstErrorFieldKey))
                 FirstErrorFieldKey = GetFirstInvalidFieldKey();
 
@@ -638,6 +651,7 @@ public partial class FirmViewModel : BaseViewModel
         SuccessMessage = "Business settings saved.";
         IsDirty = false;
         FirstErrorFieldKey = string.Empty;
+        ValidationErrors = [];
     });
 
     public override void Dispose()
@@ -671,6 +685,27 @@ public partial class FirmViewModel : BaseViewModel
 
         if (!string.IsNullOrEmpty(FirstErrorFieldKey))
             FirstErrorFieldKey = string.Empty;
+
+        ValidationErrors = [];
+    }
+
+    private List<string> CollectObservableValidationErrors()
+    {
+        var errors = new List<string>();
+
+        foreach (var propertyName in ValidationFieldOrder)
+        {
+            if (GetErrors(propertyName) is not IEnumerable<object> propertyErrors)
+                continue;
+
+            foreach (var error in propertyErrors)
+            {
+                if (error is not null)
+                    errors.Add(error.ToString() ?? string.Empty);
+            }
+        }
+
+        return errors;
     }
 
     private string GetFirstInvalidFieldKey()

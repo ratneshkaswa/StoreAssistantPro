@@ -132,8 +132,56 @@ public sealed class ProductManagementViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.Equal("Product created.", sut.SuccessMessage);
+        Assert.False(sut.IsDirty);
         Assert.False(sut.IsEditing);
         Assert.Empty(sut.ProductName);
+    }
+
+    [Fact]
+    public async Task InvalidPriceValidation_ShouldPopulateValidationSummary()
+    {
+        var sut = CreateSut();
+        sut.ProductName = "Oxford Shirt";
+        sut.SalePriceText = "-1";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.HasValidationErrors);
+        Assert.Contains("Sale price must be a valid positive number.", sut.ValidationErrors);
+        Assert.Equal(nameof(ProductManagementViewModel.SalePriceText), sut.FirstErrorFieldKey);
+    }
+
+    [Fact]
+    public void SelectingExistingProduct_ThenEditingField_TracksDirtyState()
+    {
+        var sut = CreateSut();
+        sut.Taxes = [new TaxMaster { Id = 3, TaxName = "GST 5%" }];
+        sut.Categories = [new Category { Id = 4, Name = "Shirts" }];
+        sut.Brands = [new Brand { Id = 5, Name = "Acme" }];
+        sut.Vendors = [new Vendor { Id = 6, Name = "Jaipur Textiles" }];
+
+        sut.SelectedProduct = new Product
+        {
+            Id = 10,
+            Name = "Oxford Shirt",
+            ProductType = ProductType.Readymade,
+            Unit = ProductUnit.Piece,
+            TaxId = 3,
+            CategoryId = 4,
+            BrandId = 5,
+            VendorId = 6,
+            SupportsColour = true,
+            SupportsSize = true,
+            SupportsPattern = false,
+            SupportsType = false
+        };
+
+        Assert.False(sut.IsDirty);
+
+        sut.ProductName = "Updated Oxford Shirt";
+
+        Assert.True(sut.IsDirty);
+        Assert.Equal("You have unsaved product changes.", sut.DirtyStateSummaryText);
     }
 
     [Fact]

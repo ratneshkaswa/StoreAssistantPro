@@ -35,16 +35,16 @@
                     Content="Print Labels"
                     Command="{Binding PrintLabelsCommand}"
                     Style="{StaticResource PrintButtonStyle}"
-                    MinWidth="148"/>
+                    MinWidth="{StaticResource CompactToolPrimaryActionMinWidth}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+        <Grid Grid.Row="1" Style="{StaticResource SplitToolPageContentGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="320"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="{StaticResource CompactToolPaneGapWidth}"/>
+                <ColumnDefinition Width="{StaticResource BarcodeToolQueuePaneWidth}"/>
+                <ColumnDefinition Width="{StaticResource CompactToolPaneGapWidth}"/>
+                <ColumnDefinition Width="{StaticResource BarcodeToolTemplatePaneWidth}"/>
             </Grid.ColumnDefinitions>
 
             <Border Style="{StaticResource AdminSectionCardStyle}" Margin="0">
@@ -67,7 +67,7 @@
 
                         <Button Grid.Column="1"
                                 Content="Add All"
-                                Style="{StaticResource UtilityButtonStyle}"
+                                Style="{StaticResource AddButtonStyle}"
                                 Command="{Binding AddAllToBatchCommand}"/>
                     </Grid>
 
@@ -110,7 +110,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
 
-                        <controls:EmptyStateOverlay Icon="📦"
+                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateProductIconGlyph}"
                                                     Title="No products found"
                                                     Description="Add products with barcodes to generate labels."
                                                     ItemCount="{Binding Products.Count}"/>
@@ -182,14 +182,14 @@
                                                                Foreground="{StaticResource FluentTextTertiary}"
                                                                Margin="0,0,4,0"/>
                                                     <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
-                                                             Width="48"
+                                                             Width="{StaticResource InlineQuantityFieldWidth}"
                                                              h:NumericInput.IsIntegerOnly="True"
                                                              TextAlignment="Center"/>
                                                 </StackPanel>
 
                                                 <Button Grid.Column="2"
                                                         Content="Remove"
-                                                        Style="{StaticResource UtilityButtonStyle}"
+                                                        Style="{StaticResource InlineCollectionRemoveButtonStyle}"
                                                         Command="{Binding DataContext.RemoveFromBatchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip="Remove label from batch"
@@ -202,7 +202,7 @@
                             </ItemsControl>
                         </ScrollViewer>
 
-                        <controls:EmptyStateOverlay Icon="🏷"
+                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStatePurchaseDocumentIconGlyph}"
                                                     Title="No labels queued"
                                                     Description="Double-click products to add them to the print queue."
                                                     ItemCount="{Binding BatchItems.Count}"/>
@@ -280,8 +280,10 @@
 
                             <StackPanel>
                                 <TextBlock Text="Label width"
-                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                           Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox Text="{Binding LabelWidth, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}"
+                                         HorizontalAlignment="Left"
                                          Margin="0,4,0,0"
                                          h:NumericInput.Scope="Number"
                                          h:TextBoxAdornment.SuffixText="mm"/>
@@ -289,8 +291,10 @@
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Label height"
-                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                           Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox Text="{Binding LabelHeight, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}"
+                                         HorizontalAlignment="Left"
                                          Margin="0,4,0,0"
                                          h:NumericInput.Scope="Number"
                                          h:TextBoxAdornment.SuffixText="mm"/>
@@ -298,16 +302,20 @@
 
                             <StackPanel Grid.Row="2">
                                 <TextBlock Text="Columns"
-                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                           Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox Text="{Binding ColumnsPerSheet, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}"
+                                         HorizontalAlignment="Left"
                                          Margin="0,4,0,0"
                                          h:NumericInput.IsIntegerOnly="True"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="2">
                                 <TextBlock Text="Rows"
-                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                           Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox Text="{Binding RowsPerSheet, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="{StaticResource FieldWidthCompact}"
+                                         HorizontalAlignment="Left"
                                          Margin="0,4,0,0"
                                          h:NumericInput.IsIntegerOnly="True"/>
                             </StackPanel>

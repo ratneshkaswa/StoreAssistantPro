@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Quotations.Views.QuotationManagementView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Quotations.Views.QuotationManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
@@ -18,42 +18,45 @@
         </Grid.RowDefinitions>
 
         <StackPanel>
-            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A5;"/><Run Text=" Quotation Management"/></TextBlock>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8A5;"/><Run Text=" Quotations"/></TextBlock>
             <TextBlock Text="Build customer quotations, manage line items, and move approved quotations into the next sales step."
                        Style="{StaticResource PageSubtitleStyle}"/>
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+        <Grid Grid.Row="1" Style="{StaticResource PageToolbarHostStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource FluentSearchTextBoxStyle}"
-                     AutomationProperties.Name="Search quotations"
-                     h:Watermark.Text="Search quotations by number or customer"/>
-            <ComboBox Grid.Column="1"
-                      ItemsSource="{Binding StatusOptions}"
-                      SelectedItem="{Binding FilterStatus}"
-                      Style="{StaticResource FluentComboBoxStyle}"
-                      Width="{StaticResource FieldWidthStandard}"
-                      Margin="{StaticResource InlineControlSpacing}"
-                      AutomationProperties.Name="Filter by status">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Button Grid.Column="2"
-                    Content="Search"
-                    Command="{Binding SearchCommand}"
-                    Style="{StaticResource SearchButtonStyle}"
-                    Margin="{StaticResource InlineControlSpacing}"/>
+            <WrapPanel Style="{StaticResource PageToolbarContentRowStyle}">
+                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FluentSearchTextBoxStyle}"
+                         Width="{StaticResource FieldWidthWide}"
+                         AutomationProperties.Name="Search quotations"
+                         h:Watermark.Text="Search quotations by number or customer"/>
+                <ComboBox ItemsSource="{Binding StatusOptions}"
+                          SelectedItem="{Binding FilterStatus}"
+                          Style="{StaticResource FluentComboBoxStyle}"
+                          Width="{StaticResource FieldWidthStandard}"
+                          Margin="{StaticResource InlineControlSpacing}"
+                          AutomationProperties.Name="Filter by status">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource NullToAllConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </WrapPanel>
+            <WrapPanel Grid.Column="1" Style="{StaticResource PageToolbarActionRowStyle}">
+                <Button Content="Search"
+                        Command="{Binding SearchCommand}"
+                        Style="{StaticResource SearchButtonStyle}"
+                        Margin="{StaticResource InlineControlSpacing}"/>
+            </WrapPanel>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2"
+              Style="{StaticResource MasterDetailPageGridStyle}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{StaticResource MasterDetailListPaneWidth}"/>
                 <ColumnDefinition Width="{StaticResource MasterDetailPaneGapWidth}"/>
@@ -71,7 +74,7 @@
                           SelectedItem="{Binding SelectedQuotation}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
                           h:DataGridLayoutPersistence.Key="QuotationsGrid"
-                          h:DataGridEmptyState.Icon="&#x1F4CB;"
+                          h:DataGridEmptyState.Icon="{StaticResource EmptyStateQuotationIconGlyph}"
                           h:DataGridEmptyState.Title="No quotations found"
                           h:DataGridEmptyState.Description="Create a quotation to estimate pricing for customers."
                           HeadersVisibility="Column">
@@ -81,7 +84,19 @@
                         <DataGridTextColumn Header="Date" Binding="{Binding QuoteDate, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTextColumn Header="Valid Until" Binding="{Binding ValidUntil, StringFormat=dd-MMM-yyyy}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="{StaticResource ColumnWidthQty}"/>
+                        <DataGridTemplateColumn Header="Status" SortMemberPath="Status" Width="{StaticResource ColumnWidthQty}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource SemanticStatusPillStyle}"
+                                            Tag="{Binding Status, StringFormat={}{0}}"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusDisplayTextConverter}}"
+                                                   Style="{StaticResource SemanticStatusPillTextStyle}"
+                                                   Tag="{Binding Status, StringFormat={}{0}}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -90,6 +105,7 @@
                             Visibility="{Binding TotalCount, Converter={StaticResource PositiveToVisibility}}">
                     <Button Content="Prev"
                             Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPreviousPage}"
                             Style="{StaticResource PaginatorNavButtonStyle}"
                             Margin="0,0,8,0"/>
                     <TextBlock Text="{Binding PagingInfo}"
@@ -97,6 +113,7 @@
                                Style="{StaticResource PaginatorInfoTextStyle}"/>
                     <Button Content="Next"
                             Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNextPage}"
                             Style="{StaticResource PaginatorNavButtonStyle}"
                             Margin="8,0,0,0"/>
                 </StackPanel>
@@ -244,3 +261,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

@@ -909,15 +909,172 @@
         <Setter Property="Tag" Value="&#xE74D;"/>
     </Style>
 
+    <Style x:Key="ConfirmButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE73E;"/>
+    </Style>
+
+    <Style x:Key="DialogFooterBarStyle" TargetType="Border">
+        <Setter Property="Margin" Value="0,16,0,0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <Style x:Key="DialogFooterActionRowStyle" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+    </Style>
+
+    <Style x:Key="DialogFooterPrimaryButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource ConfirmButtonStyle}">
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="DialogFooterSecondaryButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource CancelButtonStyle}">
+        <Setter Property="Margin" Value="0,0,8,0"/>
+    </Style>
+
+    <Style x:Key="DialogFooterCloseButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource CloseButtonStyle}">
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="RunButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE768;"/>
+    </Style>
+
+    <Style x:Key="RestoreButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE8B5;"/>
+    </Style>
+
     <Style x:Key="UtilityButtonStyle" TargetType="Button"
            BasedOn="{StaticResource ToolbarButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}"/>
     </Style>
 
+    <Style x:Key="ViewButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE8A7;"/>
+    </Style>
+
+    <Style x:Key="AddButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE710;"/>
+    </Style>
+
+    <Style x:Key="ImportButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE8B5;"/>
+    </Style>
+
+    <Style x:Key="ExportButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE78B;"/>
+    </Style>
+
+    <Style x:Key="NextButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE72A;"/>
+    </Style>
+
+    <Style x:Key="BackButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="ContentTemplate" Value="{StaticResource CommandButtonContentTemplate}"/>
+        <Setter Property="Tag" Value="&#xE72B;"/>
+    </Style>
+
+    <Style x:Key="PageToolbarHostStyle" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,12"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <Style x:Key="CenteredSurfaceCardStyle" TargetType="Border">
+        <Setter Property="MaxWidth" Value="{StaticResource LoginCardMaxWidth}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="{StaticResource CardMargin}"/>
+        <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerXLarge}"/>
+        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
+        <Setter Property="Effect" Value="{StaticResource FluentShadowMedium}"/>
+    </Style>
+
+    <Style x:Key="CenteredPageContentHostStyle" TargetType="StackPanel">
+        <Setter Property="Margin" Value="{StaticResource ItemSpacing}"/>
+        <Setter Property="MaxWidth" Value="{StaticResource SettingsDialogContentMaxWidth}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="SplitToolPageContentGridStyle" TargetType="Grid">
+        <Setter Property="Margin" Value="{StaticResource ItemSpacing}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <Style x:Key="MasterDetailPageGridStyle" TargetType="Grid">
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+    </Style>
+
+    <Style x:Key="PageToolbarContentRowStyle" TargetType="WrapPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="PageToolbarActionRowStyle" TargetType="WrapPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="SegmentedFilterButtonRowStyle" TargetType="WrapPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="ItemHeight" Value="32"/>
+    </Style>
+
+    <Style x:Key="SectionCommandBarStyle" TargetType="WrapPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Margin" Value="0,12,0,0"/>
+        <Setter Property="ItemHeight" Value="36"/>
+    </Style>
+
+    <Style x:Key="PageToolbarMetaTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+    </Style>
+
+    <Style x:Key="ToolbarIconButtonStyle" TargetType="Button"
+           BasedOn="{StaticResource UtilityButtonStyle}">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="MinWidth" Value="36"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
     <Style x:Key="FormActionRowStyle" TargetType="StackPanel">
         <Setter Property="Orientation" Value="Horizontal"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
-        <Setter Property="Margin" Value="0,8,0,0"/>
+        <Setter Property="Margin" Value="{StaticResource FormActionBarSpacing}"/>
     </Style>
 
     <Style x:Key="AdminSectionCardStyle" TargetType="Border"
@@ -947,6 +1104,17 @@
 
     <Style x:Key="AdminInlineFieldRowStyle" TargetType="Grid">
         <Setter Property="Margin" Value="0,8,0,0"/>
+    </Style>
+
+    <Style x:Key="SectionDividerStyle" TargetType="Border">
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="Background" Value="{StaticResource DividerStrokeColorDefault}"/>
+        <Setter Property="Margin" Value="0,12,0,12"/>
+    </Style>
+
+    <Style x:Key="SettingsSectionDividerStyle" TargetType="Border"
+           BasedOn="{StaticResource SectionDividerStyle}">
+        <Setter Property="Margin" Value="{StaticResource SettingsSectionDividerMargin}"/>
     </Style>
 
     <Style x:Key="PathPickerRowStyle" TargetType="Grid"
@@ -990,6 +1158,21 @@
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="Margin" Value="0,4,0,0"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="ValidationSummaryCardStyle" TargetType="Border"
+           BasedOn="{StaticResource WarningCalloutCardStyle}">
+        <Setter Property="Margin" Value="{StaticResource SectionSpacing}"/>
+    </Style>
+
+    <Style x:Key="ValidationSummaryTitleTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource WarningCalloutTitleTextStyle}">
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="ValidationSummaryItemTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource WarningCalloutBodyTextStyle}">
+        <Setter Property="Margin" Value="0,2,0,0"/>
     </Style>
 
     <Style x:Key="EntityLookupValueTextStyle" TargetType="TextBlock">
@@ -1122,6 +1305,61 @@
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
+    <Style x:Key="DashboardMetricMetaTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionLabelStyle}">
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+    </Style>
+
+    <Style x:Key="DashboardSectionTitleStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource SectionHeaderStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSubtitle}"/>
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="DashboardSectionDescriptionStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Margin" Value="0,4,0,0"/>
+    </Style>
+
+    <Style x:Key="DashboardCountBadgeTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionLabelStyle}">
+        <Setter Property="Foreground" Value="{StaticResource FluentAccentDark2}"/>
+    </Style>
+
+    <Style x:Key="DashboardListPrimaryTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+    </Style>
+
+    <Style x:Key="DashboardListAccentTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource DashboardListPrimaryTextStyle}">
+        <Setter Property="Foreground" Value="{StaticResource FluentAccentDefault}"/>
+    </Style>
+
+    <Style x:Key="DashboardListSecondaryTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+
+    <Style x:Key="DashboardHeaderMonogramTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSubtitle}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentAccentDark2}"/>
+    </Style>
+
+    <Style x:Key="DashboardHeaderPrimaryTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+    </Style>
+
     <Style x:Key="InlineMoneyActionPanelStyle" TargetType="Border"
            BasedOn="{StaticResource SummaryPanelStyle}">
         <Setter Property="Margin" Value="0"/>
@@ -1184,6 +1422,65 @@
         <Setter Property="Margin" Value="0,0,0,12"/>
     </Style>
 
+    <Style x:Key="ReadOnlyInspectionSectionCardStyle" TargetType="Border"
+           BasedOn="{StaticResource SummaryPanelStyle}">
+        <Setter Property="Margin" Value="0,0,0,12"/>
+    </Style>
+
+    <Style x:Key="ReadOnlyInspectionSectionTitleStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource SummaryPanelTitleStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+
+    <Style x:Key="ReadOnlyInspectionSectionDescriptionStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+
+    <Style x:Key="DetailOverlayHostStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DividerStrokeColorDefault}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerLarge}"/>
+        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="DetailOverlayHeaderRowStyle" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,12"/>
+    </Style>
+
+    <Style x:Key="DetailOverlayTitleStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource SummaryPanelTitleStyle}">
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="DetailOverlaySubtitleStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Margin" Value="0,4,0,0"/>
+    </Style>
+
+    <Style x:Key="ReadOnlyPreviewSurfaceStyle" TargetType="Border"
+           BasedOn="{StaticResource SummaryPanelStyle}">
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="ReadOnlyPreviewScrollViewerStyle" TargetType="ScrollViewer">
+        <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <Style x:Key="ReadOnlyPreviewTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
     <Style x:Key="LineItemActionRowStyle" TargetType="WrapPanel">
         <Setter Property="Margin" Value="0,12,0,0"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
@@ -1227,6 +1524,12 @@
         <Setter Property="Margin" Value="0,0,0,12"/>
     </Style>
 
+    <Style x:Key="ReportFilterBarStyle" TargetType="WrapPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
     <Style x:Key="ReportSectionTitleStyle" TargetType="TextBlock"
            BasedOn="{StaticResource SectionHeaderStyle}">
         <Setter Property="FontSize" Value="16"/>
@@ -1264,8 +1567,27 @@
     </Style>
 
     <Style x:Key="ReportExportButtonStyle" TargetType="Button"
-           BasedOn="{StaticResource ToolbarButtonStyle}">
+           BasedOn="{StaticResource ExportButtonStyle}">
         <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}"/>
+    </Style>
+
+    <Style x:Key="ReportSummaryStripStyle" TargetType="Border"
+           BasedOn="{StaticResource SummaryPanelStyle}">
+        <Setter Property="Margin" Value="0,0,0,12"/>
+    </Style>
+
+    <Style x:Key="ReportSummaryItemHostStyle" TargetType="StackPanel">
+        <Setter Property="Margin" Value="0,0,24,8"/>
+    </Style>
+
+    <Style x:Key="ReportSummaryItemLabelStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource CaptionLabelStyle}">
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+    </Style>
+
+    <Style x:Key="ReportSummaryItemValueStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource SummaryValueTextStyle}">
+        <Setter Property="HorizontalAlignment" Value="Left"/>
     </Style>
 
     <Style x:Key="ReportSubsectionTitleStyle" TargetType="TextBlock"
@@ -1575,6 +1897,20 @@
         <Setter Property="Margin" Value="{StaticResource HintTextTopSpacing}"/>
     </Style>
 
+    <Style x:Key="DirtyStateHintTextStyle" TargetType="TextBlock"
+           BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.IsDirty, RelativeSource={RelativeSource Self}}"
+                         Value="True">
+                <Setter Property="Foreground" Value="{StaticResource FluentWarning}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- Auto-collapsing hint text (collapses when empty or null) -->
     <Style x:Key="CollapsibleHintTextStyle" TargetType="TextBlock">
         <Setter Property="Visibility" Value="Collapsed"/>
@@ -1710,6 +2046,25 @@
         <Setter Property="RowHeight" Value="{DynamicResource AppDataGridRowHeight}"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="True"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+    </Style>
+
+    <Style x:Key="AnalyticalReportDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader"
+           BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style x:Key="AnalyticalReportDataGridStyle" TargetType="DataGrid"
+           BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource AnalyticalReportDataGridColumnHeaderStyle}"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="AlternationCount" Value="2"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="CanUserResizeRows" Value="False"/>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="IsReadOnly" Value="True"/>
         <Setter Property="AutoGenerateColumns" Value="False"/>

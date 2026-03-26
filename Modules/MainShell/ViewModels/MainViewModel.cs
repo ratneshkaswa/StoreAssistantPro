@@ -16,6 +16,7 @@ using StoreAssistantPro.Modules.Authentication.ViewModels;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
+using StoreAssistantPro.Modules.UIPolish.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
@@ -24,6 +25,7 @@ public partial class MainViewModel : BaseViewModel
     private const int MaxRecentCommandPaletteItems = 5;
     private const double QuickActionSlotWidth = 86;
     private const double QuickActionOverflowButtonWidth = 52;
+    private static readonly IconService ShellIconService = new();
     private readonly INavigationService _navigationService;
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
@@ -567,43 +569,43 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenFirmManagement()
     {
-        NavigateToPage(FirmManagementPage, "Firm management");
+        NavigateToPage(FirmManagementPage, "Firm");
     }
 
     [RelayCommand]
     private void OpenUserManagement()
     {
-        NavigateToPage(UserManagementPage, "User management");
+        NavigateToPage(UserManagementPage, "Users");
     }
 
     [RelayCommand]
     private void OpenTaxManagement()
     {
-        NavigateToPage(TaxManagementPage, "Tax management");
+        NavigateToPage(TaxManagementPage, "Tax");
     }
 
     [RelayCommand]
     private void OpenVendorManagement()
     {
-        NavigateToPage(VendorManagementPage, "Vendor management");
+        NavigateToPage(VendorManagementPage, "Vendors");
     }
 
     [RelayCommand]
     private void OpenProductManagement()
     {
-        NavigateToPage(ProductManagementPage, "Product management");
+        NavigateToPage(ProductManagementPage, "Products");
     }
 
     [RelayCommand]
     private void OpenCategoryManagement()
     {
-        NavigateToPage(CategoryManagementPage, "Category management");
+        NavigateToPage(CategoryManagementPage, "Categories");
     }
 
     [RelayCommand]
     private void OpenBrandManagement()
     {
-        NavigateToPage(BrandManagementPage, "Brand management");
+        NavigateToPage(BrandManagementPage, "Brands");
     }
 
     [RelayCommand]
@@ -627,7 +629,7 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenInventory()
     {
-        NavigateToPage(InventoryPage, "Inventory management");
+        NavigateToPage(InventoryPage, "Inventory");
     }
 
     [RelayCommand]
@@ -651,7 +653,7 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenCustomerManagement()
     {
-        NavigateToPage(CustomerManagementPage, "Customer management");
+        NavigateToPage(CustomerManagementPage, "Customers");
     }
 
     [RelayCommand]
@@ -663,37 +665,37 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenExpenseManagement()
     {
-        NavigateToPage(ExpenseManagementPage, "Expense management");
+        NavigateToPage(ExpenseManagementPage, "Expenses");
     }
 
     [RelayCommand]
     private void OpenDebtorManagement()
     {
-        NavigateToPage(DebtorManagementPage, "Debtor management");
+        NavigateToPage(DebtorManagementPage, "Debtors");
     }
 
     [RelayCommand]
     private void OpenOrderManagement()
     {
-        NavigateToPage(OrderManagementPage, "Order management");
+        NavigateToPage(OrderManagementPage, "Orders");
     }
 
     [RelayCommand]
     private void OpenIroningManagement()
     {
-        NavigateToPage(IroningManagementPage, "Ironing management");
+        NavigateToPage(IroningManagementPage, "Ironing");
     }
 
     [RelayCommand]
     private void OpenSalaryManagement()
     {
-        NavigateToPage(SalaryManagementPage, "Salary management");
+        NavigateToPage(SalaryManagementPage, "Salaries");
     }
 
     [RelayCommand]
     private void OpenBranchManagement()
     {
-        NavigateToPage(BranchManagementPage, "Branch management");
+        NavigateToPage(BranchManagementPage, "Branches");
     }
 
     [RelayCommand]
@@ -705,7 +707,7 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void OpenPaymentManagement()
     {
-        NavigateToPage(PaymentManagementPage, "Payment management");
+        NavigateToPage(PaymentManagementPage, "Payments");
     }
 
     [RelayCommand]
@@ -799,7 +801,7 @@ public partial class MainViewModel : BaseViewModel
     {
         _quickActionService.Register(new QuickAction
         {
-            Title = "Home", Icon = "🏠",
+            Title = "Home", Icon = ShellIconService.GetGlyph("Home"),
             Description = "Go to the main dashboard",
             HelpKey = "Home",
             Command = NavigateToMainWorkspaceCommand,
@@ -807,7 +809,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Firm", Icon = "🏢",
+            Title = "Firm", Icon = ShellIconService.GetGlyph("Firm"),
             Description = "Edit firm details and address",
             HelpKey = "Firm",
             Command = OpenFirmManagementCommand,
@@ -817,7 +819,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Users", Icon = "👥",
+            Title = "Users", Icon = ShellIconService.GetGlyph("Users"),
             Description = "Manage users, roles, and PINs",
             HelpKey = "Users",
             Command = OpenUserManagementCommand,
@@ -827,7 +829,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Tax", Icon = "💰",
+            Title = "Tax", Icon = ShellIconService.GetGlyph("Tax"),
             Description = "Manage GST tax slabs and HSN codes",
             HelpKey = "Tax",
             Command = OpenTaxManagementCommand,
@@ -837,7 +839,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Vendors", Icon = "📦",
+            Title = "Vendors", Icon = ShellIconService.GetGlyph("Vendors"),
             Description = "Manage vendor details and GST info",
             HelpKey = "Vendors",
             Command = OpenVendorManagementCommand,
@@ -847,7 +849,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Products", Icon = "👕",
+            Title = "Products", Icon = ShellIconService.GetGlyph("Products"),
             Description = "Manage product categories and attributes",
             HelpKey = "Products",
             Command = OpenProductManagementCommand,
@@ -857,7 +859,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Categories", Icon = "🏷",
+            Title = "Categories", Icon = ShellIconService.GetGlyph("Categories"),
             Description = "Manage product categories",
             HelpKey = "Categories",
             Command = OpenCategoryManagementCommand,
@@ -867,7 +869,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Brands", Icon = "🔖",
+            Title = "Brands", Icon = ShellIconService.GetGlyph("Brands"),
             Description = "Manage product brands",
             HelpKey = "Brands",
             Command = OpenBrandManagementCommand,
@@ -877,7 +879,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Inward", Icon = "📥",
+            Title = "Inward", Icon = ShellIconService.GetGlyph("Inward"),
             Description = "Record new stock inward entries",
             HelpKey = "Inward",
             Command = OpenInwardEntryCommand,
@@ -886,7 +888,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Inventory", Icon = "📊",
+            Title = "Inventory", Icon = ShellIconService.GetGlyph("Inventory"),
             Description = "Stock adjustments, alerts, and valuation",
             HelpKey = "Inventory",
             Command = OpenInventoryCommand,
@@ -895,7 +897,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Billing", Icon = "🛒",
+            Title = "Billing", Icon = ShellIconService.GetGlyph("Billing"),
             Description = "Create new sales and process payments",
             HelpKey = "Billing",
             Command = OpenBillingCommand,
@@ -904,7 +906,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Sales", Icon = "📋",
+            Title = "Sale History", Icon = ShellIconService.GetGlyph("SaleHistory"),
             Description = "View sale history and reprint receipts",
             HelpKey = "SaleHistory",
             Command = OpenSaleHistoryCommand,
@@ -913,7 +915,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Customers", Icon = "👤",
+            Title = "Customers", Icon = ShellIconService.GetGlyph("Customers"),
             Description = "Manage customer records and contacts",
             HelpKey = "Customers",
             Command = OpenCustomerManagementCommand,
@@ -922,7 +924,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "PO", Icon = "📦",
+            Title = "Purchase Orders", Icon = ShellIconService.GetGlyph("PurchaseOrders"),
             Description = "Create and track purchase orders",
             HelpKey = "PurchaseOrders",
             Command = OpenPurchaseOrdersCommand,
@@ -932,7 +934,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "FY", Icon = "📅",
+            Title = "Financial Year", Icon = ShellIconService.GetGlyph("FinancialYear"),
             Description = "Change financial year and reset billing",
             HelpKey = "FinancialYear",
             Command = OpenFinancialYearCommand,
@@ -942,7 +944,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Settings", Icon = "⚙",
+            Title = "Settings", Icon = ShellIconService.GetGlyph("Settings"),
             Description = "Backup, restore, and system defaults",
             HelpKey = "Settings",
             Command = OpenSystemSettingsCommand,
@@ -952,7 +954,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Expenses", Icon = "💸",
+            Title = "Expenses", Icon = ShellIconService.GetGlyph("Expenses"),
             Description = "Track petty cash and daily expenses",
             HelpKey = "Expenses",
             Command = OpenExpenseManagementCommand,
@@ -961,7 +963,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Debtors", Icon = "📒",
+            Title = "Debtors", Icon = ShellIconService.GetGlyph("Debtors"),
             Description = "Manage debtor accounts and balances",
             HelpKey = "Debtors",
             Command = OpenDebtorManagementCommand,
@@ -970,7 +972,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Orders", Icon = "📝",
+            Title = "Orders", Icon = ShellIconService.GetGlyph("Orders"),
             Description = "Create and track customer orders",
             HelpKey = "Orders",
             Command = OpenOrderManagementCommand,
@@ -979,7 +981,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Ironing", Icon = "👔",
+            Title = "Ironing", Icon = ShellIconService.GetGlyph("Ironing"),
             Description = "Manage ironing batches and entries",
             HelpKey = "Ironing",
             Command = OpenIroningManagementCommand,
@@ -988,7 +990,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Salaries", Icon = "💰",
+            Title = "Salaries", Icon = ShellIconService.GetGlyph("Salaries"),
             Description = "Record and manage staff salaries",
             HelpKey = "Salaries",
             Command = OpenSalaryManagementCommand,
@@ -998,7 +1000,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Branch", Icon = "🏬",
+            Title = "Branches", Icon = ShellIconService.GetGlyph("Branches"),
             Description = "Track branch bills sent and received",
             HelpKey = "Branch",
             Command = OpenBranchManagementCommand,
@@ -1007,7 +1009,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Sales/Purchase", Icon = "📊",
+            Title = "Sales/Purchase", Icon = ShellIconService.GetGlyph("SalesPurchase"),
             Description = "Sales and purchase register entries",
             HelpKey = "SalesPurchase",
             Command = OpenSalesPurchaseCommand,
@@ -1016,7 +1018,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Payments", Icon = "💳",
+            Title = "Payments", Icon = ShellIconService.GetGlyph("Payments"),
             Description = "Record customer payments",
             HelpKey = "Payments",
             Command = OpenPaymentManagementCommand,
@@ -1025,7 +1027,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Reports", Icon = "📈",
+            Title = "Reports", Icon = ShellIconService.GetGlyph("Reports"),
             Description = "View expense, order, and financial reports",
             HelpKey = "Reports",
             Command = OpenReportsCommand,
@@ -1034,7 +1036,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Barcode Labels", Icon = "🏷",
+            Title = "Barcode Labels", Icon = ShellIconService.GetGlyph("BarcodeLabels"),
             Description = "Generate and print barcode labels",
             HelpKey = "BarcodeLabels",
             Command = OpenBarcodeLabelsCommand,
@@ -1043,7 +1045,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Refresh", Icon = "🔄",
+            Title = "Refresh", Icon = ShellIconService.GetGlyph("Refresh"),
             Description = "Reload the current view data",
             HelpKey = "Refresh",
             Command = RefreshCurrentViewCommand,
@@ -1051,7 +1053,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Shortcuts", Icon = "⌨",
+            Title = "Shortcuts", Icon = ShellIconService.GetGlyph("Shortcuts"),
             Description = "Show keyboard shortcut reference",
             HelpKey = "Shortcuts",
             Command = ToggleShortcutCheatSheetCommand,
@@ -1060,7 +1062,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Command Palette", Icon = "⌘",
+            Title = "Command Palette", Icon = ShellIconService.GetGlyph("CommandPalette"),
             Description = "Search pages, tools, and recent actions",
             HelpKey = CommandPaletteHelpKey,
             Command = ToggleCommandPaletteCommand,
@@ -1069,7 +1071,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Search", Icon = "🔍",
+            Title = "Search", Icon = ShellIconService.GetGlyph("Search"),
             Description = "Focus the search box",
             HelpKey = "Search",
             Command = FocusSearchCommand,
@@ -1078,7 +1080,7 @@ public partial class MainViewModel : BaseViewModel
         });
         _quickActionService.Register(new QuickAction
         {
-            Title = "Logout", Icon = "🚪",
+            Title = "Logout", Icon = ShellIconService.GetGlyph("Logout"),
             Description = "Sign out and return to the login screen",
             HelpKey = "Logout",
             Command = LogoutCommand,
@@ -1424,30 +1426,30 @@ public partial class MainViewModel : BaseViewModel
     {
         LoginPage => "Sign in",
         MainWorkspacePage => "Home",
-        FirmManagementPage => "Firm management",
-        UserManagementPage => "User management",
-        TaxManagementPage => "Tax management",
-        VendorManagementPage => "Vendor management",
-        ProductManagementPage => "Product management",
-        CategoryManagementPage => "Category management",
-        BrandManagementPage => "Brand management",
-        InventoryPage => "Inventory management",
+        FirmManagementPage => "Firm",
+        UserManagementPage => "Users",
+        TaxManagementPage => "Tax",
+        VendorManagementPage => "Vendors",
+        ProductManagementPage => "Products",
+        CategoryManagementPage => "Categories",
+        BrandManagementPage => "Brands",
+        InventoryPage => "Inventory",
         BillingPage => "Billing",
         SaleHistoryPage => "Sale history",
         CashRegisterPage => "Cash register",
-        CustomerManagementPage => "Customer management",
+        CustomerManagementPage => "Customers",
         PurchaseOrdersPage => "Purchase orders",
         FinancialYearPage => "Financial year",
         SystemSettingsPage => "System settings",
         InwardEntryPage => "Inward entry",
-        ExpenseManagementPage => "Expense management",
-        DebtorManagementPage => "Debtor management",
-        OrderManagementPage => "Order management",
-        IroningManagementPage => "Ironing management",
-        SalaryManagementPage => "Salary management",
-        BranchManagementPage => "Branch management",
+        ExpenseManagementPage => "Expenses",
+        DebtorManagementPage => "Debtors",
+        OrderManagementPage => "Orders",
+        IroningManagementPage => "Ironing",
+        SalaryManagementPage => "Salaries",
+        BranchManagementPage => "Branches",
         SalesPurchasePage => "Sales/Purchase register",
-        PaymentManagementPage => "Payment management",
+        PaymentManagementPage => "Payments",
         ReportsPage => "Reports",
         BackupRestorePage => "Backup and restore",
         QuotationsPage => "Quotations",

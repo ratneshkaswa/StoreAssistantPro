@@ -4,7 +4,9 @@
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              Loaded="OnLoaded">
-    <Grid Margin="{StaticResource PagePadding}">
+    <Grid Margin="{StaticResource PagePadding}"
+         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+         ScrollViewer.PanningMode="VerticalOnly">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>  <!-- Title + Back -->
             <RowDefinition Height="*"/>     <!-- Content -->
@@ -12,14 +14,22 @@
         </Grid.RowDefinitions>
 
         <!-- Title row with back navigation -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             <Button Content="Back to Products" Command="{Binding BackToProductsCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}"
+                    Style="{StaticResource BackButtonStyle}"
                     Margin="{StaticResource InlineControlSpacing}"/>
-            <TextBlock Style="{StaticResource PageTitleStyle}" VerticalAlignment="Center">
-                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE71D;"/><Run Text=" Variants - "/><Run Text="{Binding Product.Name, FallbackValue='(no product)'}"/>
-            </TextBlock>
-        </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Style="{StaticResource PageTitleStyle}">
+                    <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE71D;"/><Run Text=" Variants - "/><Run Text="{Binding Product.Name, FallbackValue='(no product)'}"/>
+                </TextBlock>
+                <TextBlock Text="Manage product variants, adjust prices and stock, and create combinations in bulk."
+                           Style="{StaticResource PageSubtitleStyle}"/>
+            </StackPanel>
+        </Grid>
 
         <!-- Two-column: left = variant list + form, right = bulk create -->
             <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -132,59 +142,56 @@
                                 Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     </StackPanel>
                 </Grid>
-            </Grid>            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Text="Bulk Create" Style="{StaticResource SectionHeaderStyle}"/>
-
-                <TextBlock Grid.Row="1" Text="Sizes" Style="{StaticResource FormRowLabelStyle}"
-                           Margin="{StaticResource StepContentTopSpacing}"/>
-                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              Focusable="False"
-                              PanningMode="VerticalOnly">
-                    <ItemsControl ItemsSource="{Binding BulkSizes}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Content="{Binding DisplayName}"
-                                          IsChecked="{Binding IsSelected}"
-                                          Margin="{StaticResource CheckListItemSpacing}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-
-                <TextBlock Grid.Row="3" Text="Colours" Style="{StaticResource FormRowLabelStyle}"
-                           Margin="{StaticResource StepContentTopSpacing}"/>
-                <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              Focusable="False"
-                              PanningMode="VerticalOnly">
-                    <ItemsControl ItemsSource="{Binding BulkColours}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Content="{Binding DisplayName}"
-                                          IsChecked="{Binding IsSelected}"
-                                          Margin="{StaticResource CheckListItemSpacing}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-
-                <Button Grid.Row="5"
-                        Content="Bulk Create"
-                        Command="{Binding BulkCreateCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        HorizontalAlignment="Stretch"
-                        Margin="{StaticResource FormActionBarSpacing}"/>
             </Grid>
+            <Border Grid.Column="2"
+                    Style="{StaticResource OperationalEditorSectionCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Bulk Create"
+                               Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
+                    <TextBlock Text="Select sizes and colours, then generate the required variant combinations from one shared bulk editor surface."
+                               Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
+
+                    <TextBlock Text="Sizes" Style="{StaticResource FormRowLabelStyle}"
+                               Margin="{StaticResource StepContentTopSpacing}"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Focusable="False"
+                                  PanningMode="VerticalOnly">
+                        <ItemsControl ItemsSource="{Binding BulkSizes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding DisplayName}"
+                                              IsChecked="{Binding IsSelected}"
+                                              Margin="{StaticResource CheckListItemSpacing}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <TextBlock Text="Colours" Style="{StaticResource FormRowLabelStyle}"
+                               Margin="{StaticResource StepContentTopSpacing}"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Focusable="False"
+                                  PanningMode="VerticalOnly">
+                        <ItemsControl ItemsSource="{Binding BulkColours}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding DisplayName}"
+                                              IsChecked="{Binding IsSelected}"
+                                              Margin="{StaticResource CheckListItemSpacing}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Button Content="Bulk Create"
+                            Command="{Binding BulkCreateCommand}"
+                            Style="{StaticResource NewButtonStyle}"
+                            HorizontalAlignment="Stretch"
+                            Margin="{StaticResource FormActionBarSpacing}"/>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Messages -->

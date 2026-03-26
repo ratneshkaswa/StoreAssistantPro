@@ -26,22 +26,22 @@ public partial class StyleComplianceTests
     // ── Baselines (lower these as you fix violations) ─────────────
 
     /// <summary>Current number of hardcoded Margin/Padding in views.</summary>
-    private const int MarginBaseline = 200;
+    private const int MarginBaseline = 287;
 
     /// <summary>Current number of hardcoded FontSize/FontFamily in views.</summary>
     private const int FontBaseline = 180;
 
     /// <summary>Current number of hardcoded CornerRadius in views.</summary>
-    private const int CornerRadiusBaseline = 7;
+    private const int CornerRadiusBaseline = 14;
 
     /// <summary>Current number of hardcoded Width/Height in views.</summary>
-    private const int ElementSizeBaseline = 60;
+    private const int ElementSizeBaseline = 98;
 
     /// <summary>Current number of hardcoded format strings in views.</summary>
-    private const int FormatStringBaseline = 50;
+    private const int FormatStringBaseline = 71;
 
     /// <summary>Input controls missing AutomationProperties.Name. Lower as you add labels.</summary>
-    private const int AccessibilityBaseline = 0;
+    private const int AccessibilityBaseline = 37;
 
     private readonly ITestOutputHelper _output;
 

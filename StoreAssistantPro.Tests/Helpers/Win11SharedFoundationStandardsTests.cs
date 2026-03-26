@@ -39,7 +39,7 @@ public sealed class Win11SharedFoundationStandardsTests
         AssertStyleBlockContains(
             globalStyles,
             "<Style TargetType=\"DataGridCell\">",
-            "<Setter Property=\"Padding\" Value=\"12,8\"/>");
+            "<Setter Property=\"Padding\" Value=\"{DynamicResource AppDataGridCellPadding}\"/>");
         AssertStyleBlockContains(
             globalStyles,
             "<Style x:Key=\"SplitButtonFlyoutActionStyle\" TargetType=\"Button\" BasedOn=\"{x:Null}\">",
@@ -92,8 +92,9 @@ public sealed class Win11SharedFoundationStandardsTests
             "<Setter Property=\"FontWeight\" Value=\"SemiBold\"/>");
         AssertStyleBlockContains(
             globalStyles,
-            "<Style x:Key=\"FieldLabelStyle\" TargetType=\"TextBlock\">",
-            "<Setter Property=\"FontWeight\" Value=\"Normal\"/>");
+            "<Style x:Key=\"FieldLabelStyle\" TargetType=\"TextBlock\"",
+            "BasedOn=\"{StaticResource FormRowLabelStyle}\"",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
         AssertStyleBlockContains(
             globalStyles,
             "<Style x:Key=\"FormRowLabelStyle\" TargetType=\"TextBlock\">",
