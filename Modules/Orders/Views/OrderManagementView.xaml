@@ -25,39 +25,47 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE719;"/>
-            <Run Text=" Order Management"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE719;"/>
+                <Run Text=" Orders"/>
+            </TextBlock>
+            <TextBlock Text="Manage order lifecycle, customer commitments, and delivery progress from one view."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding PendingCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentWarning}" Margin="0,2,0,0"/>
+                    <TextBlock Text="PENDING" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding PendingCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="ACTIVE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding ActiveCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="0,2,0,0"/>
+                    <TextBlock Text="ACTIVE" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding ActiveCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="DELIVERED" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding DeliveredCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentSuccess}" Margin="0,2,0,0"/>
+                    <TextBlock Text="DELIVERED" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding DeliveredCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentSuccess}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -116,11 +124,11 @@
                                     AutomationProperties.Name="Delivery date"/>
                     </StackPanel>
                 </Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <StackPanel Style="{StaticResource FormActionRowStyle}">
                     <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"/>
+                            Style="{StaticResource SaveButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -140,7 +148,7 @@
         </Grid>
 
         <!-- Filter Chips -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <StackPanel Grid.Row="4" Margin="{StaticResource ItemSpacing}">
             <Border Style="{StaticResource SegmentedFilterHostStyle}">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="All" Command="{Binding SetStatusFilterCommand}" CommandParameter="All"
@@ -185,15 +193,31 @@
                     </Button>
                 </StackPanel>
             </Border>
+            <WrapPanel Margin="0,8,0,0">
+                <Button Content="{Binding ActiveStatusFilter, StringFormat=Status: {0}}"
+                        Command="{Binding SetStatusFilterCommand}"
+                        CommandParameter="All">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ActiveFilterChipButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveStatusFilter}" Value="All">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </WrapPanel>
             <TextBlock Text="{Binding FilterCountText}" FontSize="11"
-                       Margin="12,0,0,0"
-                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+                       Margin="0,8,0,0"
+                       Foreground="{StaticResource FluentTextTertiary}"/>
         </StackPanel>
 
         <!-- DataGrid -->
         <DataGrid Grid.Row="5" AutomationProperties.Name="Order list"
                   ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}"
                   Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="OrdersGrid"
                   h:DataGridEmptyState.Icon="📦"
                   h:DataGridEmptyState.Title="No orders found"
                   h:DataGridEmptyState.Description="Create an order or change the active filters to bring matching work back into view.">

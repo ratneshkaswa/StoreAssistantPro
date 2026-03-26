@@ -18,7 +18,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inventory Management"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inventory"/></TextBlock>
+            <TextBlock Text="Adjust stock, review movement history, and run controlled stock takes."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Tab selector -->
         <Border Grid.Row="1"
@@ -89,6 +93,7 @@
             <DataGrid AutomationProperties.Name="Stock overview" ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="InventoryStockOverviewGrid"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column" CanUserAddRows="False">
@@ -115,17 +120,17 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="New Quantity "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="New Quantity "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
                          AutomationProperties.Name="New quantity"
                          Text="{Binding NewQuantity, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding HasSelectedProduct}"
                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                         MaxLength="8" h:Watermark.Text="e.g. 50"/>
+                         MaxLength="8" h:Watermark.Text="Updated quantity"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Reason "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Reason "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <ComboBox Grid.Row="2" Grid.Column="1"
                           AutomationProperties.Name="Adjustment reason"
@@ -141,7 +146,7 @@
                          Text="{Binding AdjustmentNotes, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource FluentMultilineTextBoxStyle}"
                          IsEnabled="{Binding HasSelectedProduct}"
-                         MaxLength="300" h:Watermark.Text="e.g. Cycle count correction"/>
+                         MaxLength="300" h:Watermark.Text="Adjustment reason"/>
             </Grid>
 
             <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
@@ -155,15 +160,15 @@
                 </Grid.ColumnDefinitions>
                 <!-- #76: Batch import/export -->
                 <Button Content="Import CSV" Command="{Binding ImportCsvCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}"/>
+                        Style="{StaticResource UtilityButtonStyle}"/>
                 <Button Grid.Column="1" Content="Export CSV" Command="{Binding ExportCsvCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <!-- #73: Stock movement history button -->
-                <Button Grid.Column="2" Content="View History" 
+                <Button Grid.Column="2" Content="View History"
                         Command="{Binding LoadMovementHistoryCommand}"
                         CommandParameter="{Binding SelectedProduct}"
                         IsEnabled="{Binding HasSelectedProduct}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Grid.Column="5" Content="Apply Adjustment" Command="{Binding AdjustCommand}"
                         Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
@@ -329,7 +334,7 @@
                              AutomationProperties.Name="Stock take notes"
                              Style="{StaticResource FluentMultilineTextBoxStyle}"
                              Width="{StaticResource FieldWidthWide}"
-                             h:Watermark.Text="Optional notes for this count"
+                             h:Watermark.Text="Count notes (optional)"
                              MaxLength="500"/>
                     <Button Content="Start New Stock Take" Command="{Binding StartStockTakeCommand}"
                             Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
@@ -341,6 +346,7 @@
                 <DataGrid Grid.Row="2" AutomationProperties.Name="Recent stock takes"
                           ItemsSource="{Binding RecentStockTakes}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridLayoutPersistence.Key="RecentStockTakesGrid"
                           AutoGenerateColumns="False" IsReadOnly="True"
                           SelectionMode="Single"
                           HeadersVisibility="Column" CanUserAddRows="False"
@@ -393,6 +399,7 @@
                 <DataGrid Grid.Row="1" AutomationProperties.Name="Stock take items"
                           ItemsSource="{Binding StockTakeItems}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridLayoutPersistence.Key="StockTakeItemsGrid"
                           AutoGenerateColumns="False"
                           SelectionMode="Single"
                           HeadersVisibility="Column" CanUserAddRows="False"
@@ -427,7 +434,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Content="Cancel Stock Take" Command="{Binding CancelStockTakeCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}"/>
+                        Style="{StaticResource DeleteButtonStyle}"/>
                 <Button Grid.Column="2" Content="Complete Stock Take" Command="{Binding CompleteStockTakeCommand}"
                         Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
@@ -438,10 +445,10 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Updating inventory..."/>

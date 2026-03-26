@@ -50,6 +50,26 @@ using StoreAssistantPro.Modules.GRN;
 using StoreAssistantPro.Modules.BarcodeLabels;
 using StoreAssistantPro.Modules.Hardware;
 using StoreAssistantPro.Modules.SmartFeatures;
+using StoreAssistantPro.Modules.Api;
+using StoreAssistantPro.Modules.Mobile;
+using StoreAssistantPro.Modules.HR;
+using StoreAssistantPro.Modules.UIPolish;
+using StoreAssistantPro.Modules.DbAdmin;
+using StoreAssistantPro.Modules.Documents;
+using StoreAssistantPro.Modules.WorkflowAutomation;
+using StoreAssistantPro.Modules.Preferences;
+using StoreAssistantPro.Modules.Localization;
+using StoreAssistantPro.Modules.Commercial;
+using StoreAssistantPro.Modules.MultiStore;
+using StoreAssistantPro.Modules.Ecommerce;
+using StoreAssistantPro.Modules.MultiCountry;
+using StoreAssistantPro.Modules.NicheVertical;
+using StoreAssistantPro.Modules.Touch;
+using StoreAssistantPro.Modules.CRM;
+using StoreAssistantPro.Modules.Compliance;
+using StoreAssistantPro.Modules.PaymentGateway;
+using StoreAssistantPro.Modules.Budgeting;
+using StoreAssistantPro.Modules.AdvancedReporting;
 
 namespace StoreAssistantPro;
 
@@ -190,7 +210,27 @@ internal static class HostingExtensions
             .AddGRNModule(pageRegistry)
             .AddBarcodeLabelsModule(pageRegistry)
             .AddHardwareModule()
-            .AddSmartFeaturesModule();
+            .AddSmartFeaturesModule()
+            .AddApiModule()
+            .AddMobileModule()
+            .AddHRModule()
+            .AddUIPolishModule()
+            .AddDbAdminModule()
+            .AddDocumentsModule()
+            .AddWorkflowAutomationModule()
+            .AddPreferencesModule()
+            .AddLocalizationModule()
+            .AddCommercialModule()
+            .AddMultiStoreModule()
+            .AddEcommerceModule()
+            .AddMultiCountryModule()
+            .AddNicheVerticalModule()
+            .AddTouchModule()
+            .AddCRMModule()
+            .AddComplianceModule()
+            .AddPaymentGatewayModule()
+            .AddBudgetingModule()
+            .AddAdvancedReportingModule();
 
         return services;
     }

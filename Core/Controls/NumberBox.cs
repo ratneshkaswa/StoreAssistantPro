@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -137,6 +139,8 @@ public class NumberBox : Control
         set => SetValue(DecimalPlacesProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new NumberBoxAutomationPeer(this);
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -167,11 +171,17 @@ public class NumberBox : Control
 
         _upButton = GetTemplateChild("PART_UpButton") as Button;
         if (_upButton is not null)
+        {
+            AutomationProperties.SetName(_upButton, "Increase value");
             _upButton.Click += OnUpButtonClick;
+        }
 
         _downButton = GetTemplateChild("PART_DownButton") as Button;
         if (_downButton is not null)
+        {
+            AutomationProperties.SetName(_downButton, "Decrease value");
             _downButton.Click += OnDownButtonClick;
+        }
     }
 
     private void Increment() => Value += SmallChange;
@@ -262,6 +272,32 @@ public class NumberBox : Control
     {
         SetValue(HasPrefixTextPropertyKey, !string.IsNullOrWhiteSpace(PrefixText));
         SetValue(HasSuffixTextPropertyKey, !string.IsNullOrWhiteSpace(SuffixText));
+    }
+
+    private sealed class NumberBoxAutomationPeer(NumberBox owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(NumberBox);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Spinner;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (NumberBox)Owner;
+            if (!string.IsNullOrWhiteSpace(owner.PlaceholderText))
+                return owner.PlaceholderText;
+
+            if (!string.IsNullOrWhiteSpace(owner.PrefixText))
+                return $"{owner.PrefixText.Trim()} input";
+
+            if (!string.IsNullOrWhiteSpace(owner.Name))
+                return owner.Name;
+
+            return "Number input";
+        }
     }
 }
 

@@ -25,39 +25,47 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7BF;"/>
-            <Run Text=" Expense Management"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7BF;"/>
+                <Run Text=" Expenses"/>
+            </TextBlock>
+            <TextBlock Text="Record cash movement, categorize expenses, and review the running balance."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="BALANCE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding Balance, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="0,2,0,0"/>
+                    <TextBlock Text="BALANCE" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding Balance, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL IN" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalDeposits, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentSuccess}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL IN" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalDeposits, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentSuccess}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL OUT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalExpenses, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentError}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL OUT" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalExpenses, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentError}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="ENTRIES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding ExpenseCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="ENTRIES" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding ExpenseCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -78,7 +86,7 @@
                     <StackPanel>
                         <TextBlock Text="Category" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}"
-                                 h:Watermark.Text="e.g. Tea, Travel, Stationery" MaxLength="100"
+                                 h:Watermark.Text="Expense category" MaxLength="100"
                                  AutomationProperties.Name="Category"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
@@ -94,11 +102,11 @@
                                     AutomationProperties.Name="Expense date"/>
                     </StackPanel>
                 </Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <StackPanel Style="{StaticResource FormActionRowStyle}">
                     <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"/>
+                            Style="{StaticResource SaveButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -111,7 +119,7 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search expenses by category"
+                     h:Watermark.Text="Search expenses by category or note"
                      AutomationProperties.Name="Search expenses"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
@@ -164,10 +172,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer Margin="0,8,0,0"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Disabled">
-                <StackPanel Orientation="Horizontal">
+            <WrapPanel Margin="0,8,0,0">
                     <Button Content="{Binding ActiveDateFilter, StringFormat=Date: {0}}"
                             Command="{Binding SetDateFilterCommand}"
                             CommandParameter="All">
@@ -181,8 +186,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                </StackPanel>
-            </ScrollViewer>
+            </WrapPanel>
 
             <TextBlock Text="{Binding FilterCountText}"
                        FontSize="11"
@@ -194,6 +198,7 @@
         <DataGrid Grid.Row="5" AutomationProperties.Name="Expense entries"
                   ItemsSource="{Binding Expenses}" SelectedItem="{Binding SelectedExpense}"
                   Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="ExpensesGrid"
                   h:DataGridEmptyState.Icon="🧾"
                   h:DataGridEmptyState.Title="No expenses found"
                   h:DataGridEmptyState.Description="Record an expense or widen the current date and search filters to see entries.">
@@ -277,15 +282,15 @@
             </Grid.RowDefinitions>
 
             <!-- Paging -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,4"
+            <StackPanel Style="{StaticResource PaginatorRightAlignedBarStyle}"
                         Visibility="{Binding PagingInfo, Converter={StaticResource NonEmptyStringToVisibility}}">
                 <Button Content="◀" Command="{Binding PreviousPageCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" Margin="0,0,4,0"
+                        Style="{StaticResource PaginatorNavButtonStyle}" Margin="0,0,4,0"
                         IsEnabled="{Binding HasPreviousPage}" AutomationProperties.Name="Previous page"/>
                 <TextBlock Text="{Binding PagingInfo}" VerticalAlignment="Center"
-                           FontSize="11" Foreground="{StaticResource FluentTextSecondary}" Margin="4,0"/>
+                           Style="{StaticResource PaginatorInfoTextStyle}"/>
                 <Button Content="▶" Command="{Binding NextPageCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" Margin="4,0,0,0"
+                        Style="{StaticResource PaginatorNavButtonStyle}" Margin="4,0,0,0"
                         IsEnabled="{Binding HasNextPage}" AutomationProperties.Name="Next page"/>
             </StackPanel>
 

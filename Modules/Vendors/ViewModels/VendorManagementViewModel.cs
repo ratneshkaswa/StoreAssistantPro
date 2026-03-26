@@ -279,6 +279,8 @@ public partial class VendorManagementViewModel(
         "Cheque"
     ];
 
+    public string CurrencySymbol => regional.CurrencySymbol;
+
     public string FormatCurrency(decimal amount) => regional.FormatCurrency(amount);
 
     [RelayCommand]

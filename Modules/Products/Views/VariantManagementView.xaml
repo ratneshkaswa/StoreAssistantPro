@@ -13,25 +13,21 @@
 
         <!-- Title row with back navigation -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-            <Button Content="← Back to Products" Command="{Binding BackToProductsCommand}"
+            <Button Content="Back to Products" Command="{Binding BackToProductsCommand}"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Margin="{StaticResource InlineControlSpacing}"/>
             <TextBlock Style="{StaticResource PageTitleStyle}" VerticalAlignment="Center">
-                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE71D;"/><Run Text=" Variants — "/><Run Text="{Binding Product.Name, FallbackValue='(no product)'}"/>
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE71D;"/><Run Text=" Variants - "/><Run Text="{Binding Product.Name, FallbackValue='(no product)'}"/>
             </TextBlock>
         </StackPanel>
 
         <!-- Two-column: left = variant list + form, right = bulk create -->
-        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="12"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- ═══════════════════════════════════════════
-                 Left: Variants list + single form
-                 ═══════════════════════════════════════════ -->
+            <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -41,6 +37,7 @@
 
                 <DataGrid AutomationProperties.Name="Variants list" ItemsSource="{Binding Variants}"
                           SelectedItem="{Binding SelectedVariant}"
+                          h:DataGridLayoutPersistence.Key="VariantsGrid"
                           AutoGenerateColumns="False" IsReadOnly="True"
                           SelectionMode="Single"
                           HeadersVisibility="Column" CanUserAddRows="False">
@@ -49,7 +46,7 @@
                         <DataGridTextColumn Header="Colour" Binding="{Binding Colour.Name}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="*"/>
                         <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="{StaticResource ColumnWidthQty}"/>
-                        <DataGridTextColumn Header="± Price" Binding="{Binding AdditionalPrice, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
+                        <DataGridTextColumn Header="+/- Price" Binding="{Binding AdditionalPrice, StringFormat={}{0:G}}" Width="{StaticResource ColumnWidthPrice}"/>
                         <DataGridTemplateColumn Header="Active" CellTemplate="{StaticResource ActiveToggleCellTemplate}" Width="{StaticResource ColumnWidthQty}"/>
                     </DataGrid.Columns>
                 </DataGrid>
@@ -73,7 +70,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                        <Run Text="Size "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        <Run Text="Size "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                     </TextBlock>
                     <ComboBox Grid.Row="0" Grid.Column="1"
                               AutomationProperties.Name="Variant size"
@@ -83,7 +80,7 @@
                               Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                        <Run Text="Colour "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        <Run Text="Colour "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                     </TextBlock>
                     <ComboBox Grid.Row="2" Grid.Column="1"
                               AutomationProperties.Name="Variant colour"
@@ -98,7 +95,7 @@
                              Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}"
                              AutomationProperties.Name="Variant barcode"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="50" h:Watermark.Text="e.g. BAR-1001"/>
+                             MaxLength="50" h:Watermark.Text="Barcode"/>
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Quantity"
                                Style="{StaticResource FormRowLabelStyle}"/>
@@ -106,15 +103,15 @@
                              Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
                              AutomationProperties.Name="Variant quantity"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="8" h:Watermark.Text="e.g. 12"/>
+                             MaxLength="8" h:Watermark.Text="Stock quantity"/>
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="± Price"
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="+/- Price"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="8" Grid.Column="1"
                              Text="{Binding AdditionalPrice, UpdateSourceTrigger=PropertyChanged}"
                              AutomationProperties.Name="Variant additional price"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="10" h:Watermark.Text="e.g. 49.50"/>
+                             MaxLength="10" h:Watermark.Text="Additional price"/>
                 </Grid>
 
                 <!-- Buttons -->
@@ -126,19 +123,16 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="1" Content="Clear" Command="{Binding ClearFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Grid.Column="2" Content="Delete" Command="{Binding DeleteCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Grid.Column="3" Content="Save" Command="{Binding SaveCommand}"
-                            Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource FormActionRowStyle}">
+                        <Button Content="Clear" Command="{Binding ClearFormCommand}"
+                                Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="Delete" Command="{Binding DeleteCommand}"
+                                Style="{StaticResource DeleteButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="Save" Command="{Binding SaveCommand}"
+                                Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </StackPanel>
                 </Grid>
-            </Grid>
-
-            <!-- ═══════════════════════════════════════════
-                 Right: Bulk creation
-                 ═══════════════════════════════════════════ -->
-            <Grid Grid.Column="2">
+            </Grid>            <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -153,9 +147,9 @@
                 <TextBlock Grid.Row="1" Text="Sizes" Style="{StaticResource FormRowLabelStyle}"
                            Margin="{StaticResource StepContentTopSpacing}"/>
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
                               Focusable="False"
-                              PanningMode="Both">
+                              PanningMode="VerticalOnly">
                     <ItemsControl ItemsSource="{Binding BulkSizes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -170,9 +164,9 @@
                 <TextBlock Grid.Row="3" Text="Colours" Style="{StaticResource FormRowLabelStyle}"
                            Margin="{StaticResource StepContentTopSpacing}"/>
                 <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
                               Focusable="False"
-                              PanningMode="Both">
+                              PanningMode="VerticalOnly">
                     <ItemsControl ItemsSource="{Binding BulkColours}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -198,12 +192,13 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving variants..."/>
     </Grid>
 </UserControl>
+

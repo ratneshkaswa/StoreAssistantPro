@@ -19,6 +19,8 @@ public partial class QuotationViewModel(
     IDialogService dialogService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private bool _isRestoringViewState;
+
     // ── List ──
 
     [ObservableProperty]
@@ -43,8 +45,12 @@ public partial class QuotationViewModel(
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
+    partial void OnSearchQueryChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial QuotationStatus? FilterStatus { get; set; }
+
+    partial void OnFilterStatusChanged(QuotationStatus? value) => PersistViewState();
 
     public ObservableCollection<QuotationStatus?> StatusOptions { get; } =
     [
@@ -63,6 +69,8 @@ public partial class QuotationViewModel(
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
     [NotifyPropertyChangedFor(nameof(HasNextPage))]
     public partial int CurrentPage { get; set; } = 1;
+
+    partial void OnCurrentPageChanged(int value) => PersistViewState();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
@@ -105,6 +113,7 @@ public partial class QuotationViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         var customersTask = customerService.GetActiveAsync(ct);
         var productsTask = productService.GetActiveAsync(ct);
 
@@ -326,6 +335,39 @@ public partial class QuotationViewModel(
         });
         if (CsvExporter.Export(rows, "Quotations.csv"))
             SuccessMessage = "Quotations exported.";
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetQuotationsState();
+            SearchQuery = state.SearchText;
+            CurrentPage = state.CurrentPage;
+            FilterStatus = string.Equals(state.ActiveFilter, "All", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : Enum.TryParse<QuotationStatus>(state.ActiveFilter, true, out var status)
+                    ? status
+                    : null;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetQuotationsState(new PagedSearchFilterViewState
+        {
+            SearchText = SearchQuery,
+            ActiveFilter = FilterStatus?.ToString() ?? "All",
+            CurrentPage = CurrentPage
+        });
     }
 }
 

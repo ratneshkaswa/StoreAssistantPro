@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
@@ -7,13 +8,6 @@ namespace StoreAssistantPro.Core.Controls;
 /// <summary>
 /// Windows 11 WinUI-style Expander with animated expand/collapse.
 /// Displays a header with a chevron indicator that toggles a content area.
-/// <example>
-/// <code>
-/// &lt;controls:FluentExpander Header="Advanced Options"&gt;
-///     &lt;StackPanel&gt;...&lt;/StackPanel&gt;
-/// &lt;/controls:FluentExpander&gt;
-/// </code>
-/// </example>
 /// </summary>
 public class FluentExpander : HeaderedContentControl
 {
@@ -50,6 +44,8 @@ public class FluentExpander : HeaderedContentControl
         get => (string)GetValue(IconProperty);
         set => SetValue(IconProperty, value);
     }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new FluentExpanderAutomationPeer(this);
 
     public override void OnApplyTemplate()
     {
@@ -220,5 +216,30 @@ public class FluentExpander : HeaderedContentControl
 
         _contentArea.Measure(new Size(availableWidth, double.PositiveInfinity));
         return Math.Max(0, _contentArea.DesiredSize.Height);
+    }
+
+    private sealed class FluentExpanderAutomationPeer(FluentExpander owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(FluentExpander);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            var owner = (FluentExpander)Owner;
+            var headerText = owner.Header?.ToString();
+
+            if (!string.IsNullOrWhiteSpace(explicitName) &&
+                !string.Equals(explicitName, headerText, StringComparison.Ordinal))
+            {
+                return explicitName;
+            }
+
+            if (string.IsNullOrWhiteSpace(headerText))
+                headerText = "Section";
+
+            return $"{headerText}, {(owner.IsExpanded ? "expanded" : "collapsed")}";
+        }
     }
 }

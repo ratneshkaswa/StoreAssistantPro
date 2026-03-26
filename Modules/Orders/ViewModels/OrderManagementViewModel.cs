@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Orders.Services;
 
@@ -11,6 +12,7 @@ namespace StoreAssistantPro.Modules.Orders.ViewModels;
 public partial class OrderManagementViewModel(IOrderService orderService) : BaseViewModel
 {
     private List<Order> _allItems = [];
+    private bool _isRestoringViewState;
 
     [ObservableProperty]
     public partial ObservableCollection<Order> Orders { get; set; } = [];
@@ -59,8 +61,12 @@ public partial class OrderManagementViewModel(IOrderService orderService) : Base
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveStatusFilter { get; set; } = "All";
+
+    partial void OnActiveStatusFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -73,6 +79,7 @@ public partial class OrderManagementViewModel(IOrderService orderService) : Base
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await ReloadAsync(ct);
     });
 
@@ -202,7 +209,11 @@ public partial class OrderManagementViewModel(IOrderService orderService) : Base
         }
 
         if (ActiveStatusFilter != "All")
-            query = query.Where(o => o.Status == ActiveStatusFilter);
+        {
+            query = ActiveStatusFilter == "Active"
+                ? query.Where(o => o.Status != "Delivered" && o.Status != "Cancelled")
+                : query.Where(o => o.Status == ActiveStatusFilter);
+        }
 
         var list = query.ToList();
         Orders = new ObservableCollection<Order>(list);
@@ -227,5 +238,32 @@ public partial class OrderManagementViewModel(IOrderService orderService) : Base
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetOrderManagementState();
+            SearchText = state.SearchText;
+            ActiveStatusFilter = state.ActiveFilter;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetOrderManagementState(new SearchFilterViewState
+        {
+            SearchText = SearchText,
+            ActiveFilter = ActiveStatusFilter
+        });
     }
 }

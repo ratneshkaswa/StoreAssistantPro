@@ -25,6 +25,7 @@ public partial class UiDensityService : ObservableObject, IUiDensityService
 
     public UiDensityService()
     {
+        IsCompactModeEnabled = UserPreferencesStore.GetSnapshot().IsCompactModeEnabled;
         ApplyCurrentDensity();
     }
 
@@ -36,7 +37,11 @@ public partial class UiDensityService : ObservableObject, IUiDensityService
         IsCompactModeEnabled = enabled;
     }
 
-    partial void OnIsCompactModeEnabledChanged(bool value) => ApplyCurrentDensity();
+    partial void OnIsCompactModeEnabledChanged(bool value)
+    {
+        UserPreferencesStore.Update(state => state.IsCompactModeEnabled = value);
+        ApplyCurrentDensity();
+    }
 
     private void ApplyCurrentDensity()
     {

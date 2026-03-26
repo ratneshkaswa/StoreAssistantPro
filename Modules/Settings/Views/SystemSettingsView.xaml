@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:StoreAssistantPro.Core.Controls"
              xmlns:h="clr-namespace:StoreAssistantPro.Core.Helpers"
+             xmlns:models="clr-namespace:StoreAssistantPro.Models"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
              Loaded="OnLoaded">
@@ -26,9 +27,9 @@
 
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
                       Focusable="False"
-                      PanningMode="Both">
+                      PanningMode="VerticalOnly">
             <StackPanel Margin="{StaticResource ItemSpacing}"
                         MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"
                         HorizontalAlignment="Center">
@@ -164,10 +165,10 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <Grid Grid.Row="0" Margin="16,16,16,12">
+                                <Grid Grid.Row="0" Margin="{StaticResource SettingsSectionHeaderRowMargin}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="192"/>
+                                        <ColumnDefinition Width="{StaticResource SettingsFieldColumnWidth}"/>
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Margin="0,0,16,0">
@@ -198,13 +199,13 @@
 
                                 <Border Grid.Row="1"
                                         Height="1"
-                                        Margin="16,0"
+                                        Margin="{StaticResource SettingsSectionDividerMargin}"
                                         Background="{StaticResource DividerStrokeColorDefault}"/>
 
-                                <Grid Grid.Row="2" Margin="16,12">
+                                <Grid Grid.Row="2" Margin="{StaticResource SettingsSectionRowMargin}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="192"/>
+                                        <ColumnDefinition Width="{StaticResource SettingsFieldColumnWidth}"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -250,13 +251,13 @@
 
                                 <Border Grid.Row="3"
                                         Height="1"
-                                        Margin="16,0"
+                                        Margin="{StaticResource SettingsSectionDividerMargin}"
                                         Background="{StaticResource DividerStrokeColorDefault}"/>
 
-                                <Grid Grid.Row="4" Margin="16,12,16,16">
+                                <Grid Grid.Row="4" Margin="{StaticResource SettingsSectionFooterRowMargin}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="192"/>
+                                        <ColumnDefinition Width="{StaticResource SettingsFieldColumnWidth}"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -356,15 +357,11 @@
                                     </StackPanel>
 
                                     <Border Grid.Row="6" Grid.Column="1"
-                                            Background="{StaticResource LayerFillColorSecondary}"
-                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                            BorderThickness="1"
-                                            CornerRadius="16"
-                                            Padding="4"
+                                            Style="{StaticResource SegmentedFilterHostStyle}"
                                             HorizontalAlignment="Left"
                                             AutomationProperties.Name="Density mode">
                                         <StackPanel Orientation="Horizontal"
-                                                    Style="{StaticResource SegmentedFilterHostStyle}">
+                                                    VerticalAlignment="Center">
                                             <Button Content="Normal"
                                                     Command="{Binding SetDensityModeCommand}"
                                                     CommandParameter="Normal"
@@ -423,17 +420,175 @@
                     </Grid>
                 </controls:FluentExpander>
 
+                <controls:FluentExpander Header="Experience &amp; Notifications"
+                                         Icon="&#xE7F4;"
+                                         IsExpanded="True"
+                                         Margin="{StaticResource SectionSpacing}">
+                    <Grid Margin="{StaticResource ItemSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="{StaticResource SetupFormRowSpacing}"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Style="{StaticResource SectionCardStyle}"
+                                Margin="{StaticResource ItemSpacing}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" Margin="{StaticResource SettingsSectionHeaderRowMargin}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock x:Name="RestoreWorkspaceLabel"
+                                                       Text="Workspace Restore"
+                                                       Style="{StaticResource FormRowLabelStyle}"
+                                                       Margin="0"/>
+                                            <Button Style="{StaticResource InlineHelpButtonStyle}"
+                                                    AutomationProperties.Name="Help for workspace restore"
+                                                    h:HelpHint.HelpText="When enabled, the workstation reopens the last page used before sign-out. Turn this off if staff should always land on Home."
+                                                    h:HelpHint.Category="Settings"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding WorkspaceRestoreSummaryText}"
+                                                   Style="{StaticResource HintTextStyle}"
+                                                   Margin="0,4,0,0"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <CheckBox Grid.Column="1"
+                                              VerticalAlignment="Top"
+                                              IsChecked="{Binding RestoreLastVisitedPageOnLogin}"
+                                              AutomationProperties.Name="Restore last visited page after sign in"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=RestoreWorkspaceLabel}"/>
+                                </Grid>
+
+                                <Border Grid.Row="1"
+                                        Height="1"
+                                        Margin="16,0"
+                                        Background="{StaticResource DividerStrokeColorDefault}"/>
+
+                                <Grid Grid.Row="2" Margin="16,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="{StaticResource SettingsFieldColumnWidth}"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,16,0">
+                                        <TextBlock Text="Notification Surfaces"
+                                                   Style="{StaticResource FormRowLabelStyle}"/>
+                                        <TextBlock Text="Choose which notification surfaces stay active on this workstation."
+                                                   Style="{StaticResource HintTextStyle}"
+                                                   Margin="0,4,0,0"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1">
+                                        <CheckBox Content="In-app toasts"
+                                                  IsChecked="{Binding InAppToastsEnabled}"
+                                                  AutomationProperties.Name="Enable in-app toast notifications"/>
+                                        <CheckBox Content="Windows notifications"
+                                                  IsChecked="{Binding WindowsNotificationsEnabled}"
+                                                  Margin="0,8,0,0"
+                                                  AutomationProperties.Name="Enable Windows notifications"/>
+                                        <CheckBox Content="Play notification sound"
+                                                  IsChecked="{Binding NotificationSoundEnabled}"
+                                                  Margin="0,8,0,0"
+                                                  AutomationProperties.Name="Play notification sound"/>
+                                    </StackPanel>
+
+                                    <Border Grid.Row="1" Grid.ColumnSpan="2"
+                                            Height="1"
+                                            Margin="0,12"
+                                            Background="{StaticResource DividerStrokeColorDefault}"/>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,16,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock x:Name="NotificationThresholdLabel"
+                                                       Text="Minimum Severity"
+                                                       Style="{StaticResource FormRowLabelStyle}"
+                                                       Margin="0"/>
+                                            <Button Style="{StaticResource InlineHelpButtonStyle}"
+                                                    AutomationProperties.Name="Help for notification minimum severity"
+                                                    h:HelpHint.HelpText="Use this to reduce noise. Warnings and errors keep attention on important events, while Errors only reserves alerts for failures."
+                                                    h:HelpHint.Category="Settings"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Lower-priority notifications stay in the notification center but do not surface as live alerts."
+                                                   Style="{StaticResource HintTextStyle}"
+                                                   Margin="0,4,0,0"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <ComboBox Grid.Row="2" Grid.Column="1"
+                                              SelectedValue="{Binding MinimumNotificationLevel, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectedValuePath="Tag"
+                                              AutomationProperties.Name="Minimum notification severity"
+                                              AutomationProperties.LabeledBy="{Binding ElementName=NotificationThresholdLabel}">
+                                        <ComboBoxItem Content="Info and above" Tag="{x:Static models:AppNotificationLevel.Info}"/>
+                                        <ComboBoxItem Content="Warning and error" Tag="{x:Static models:AppNotificationLevel.Warning}"/>
+                                        <ComboBoxItem Content="Error only" Tag="{x:Static models:AppNotificationLevel.Error}"/>
+                                    </ComboBox>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Style="{StaticResource SectionCardStyle}"
+                                Margin="{StaticResource ItemSpacing}">
+                            <StackPanel Margin="16">
+                                <TextBlock Text="Current experience summary"
+                                           Style="{StaticResource SectionHeaderStyle}"
+                                           Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding WorkspaceRestoreSummaryText}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding NotificationPreferencesSummaryText}"
+                                           Style="{StaticResource HintTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </controls:FluentExpander>
+
                 <controls:FluentExpander Header="Danger Zone"
                                          Icon="&#xE814;"
                                          Margin="{StaticResource SectionSpacing}">
                     <StackPanel Margin="{StaticResource ItemSpacing}">
-                        <TextBlock Text="Factory reset will permanently erase all data and cannot be undone."
-                                   Style="{StaticResource HintTextStyle}"
-                                   Foreground="{StaticResource FluentStrokeError}"
-                                   TextWrapping="Wrap"/>
+                        <Border Style="{StaticResource WarningCalloutCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="&#xE7BA;"
+                                           Style="{StaticResource WarningCalloutIconStyle}"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Factory reset erases all workstation data."
+                                               Style="{StaticResource WarningCalloutTitleTextStyle}"/>
+                                    <TextBlock Text="This action cannot be undone."
+                                               Style="{StaticResource WarningCalloutBodyTextStyle}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                         <Button Content="Factory Reset"
                                 Command="{Binding FactoryResetCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource DeleteButtonStyle}"
                                 Margin="0,8,0,0"
                                 AutomationProperties.Name="Factory reset erases all data"/>
                     </StackPanel>
@@ -447,13 +602,13 @@
             <controls:InfoBar Severity="Error"
                               Title="Settings issue"
                               Message="{Binding ErrorMessage}"
-                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              IsOpen="{Binding HasError}"
                               AutomationProperties.LiveSetting="Assertive"
                               AutomationProperties.HelpText="{Binding ErrorMessage}"/>
             <controls:InfoBar Severity="Success"
                               Title="Settings saved"
                               Message="{Binding SuccessMessage}"
-                              Visibility="{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              IsOpen="{Binding HasSuccess}"
                               AutomationProperties.LiveSetting="Polite"
                               AutomationProperties.HelpText="{Binding SuccessMessage}"/>
         </Grid>
@@ -470,9 +625,9 @@
                 <StackPanel DockPanel.Dock="Right"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
-                    <Button Content="Save Settings"
+                    <Button Content="Save"
                             Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"
+                            Style="{StaticResource SaveButtonStyle}"
                             Margin="0"/>
                 </StackPanel>
             </DockPanel>

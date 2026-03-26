@@ -294,7 +294,7 @@ public class BillingService(
         // Try variant barcode first
         var variant = await context.ProductVariants
             .AsNoTracking()
-            .Include(v => v.Product)
+            .Include(v => v.Product!)
                 .ThenInclude(p => p.Tax)
             .Include(v => v.Size)
             .Include(v => v.Colour)

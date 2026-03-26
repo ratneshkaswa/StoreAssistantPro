@@ -18,7 +18,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE77B;"/><Run Text=" Customer Management"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE77B;"/><Run Text=" Customers"/></TextBlock>
+            <TextBlock Text="Maintain customer profiles, review purchase history, and collect outstanding balances."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Search bar -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -29,7 +33,7 @@
             <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search customers"
-                     h:Watermark.Text="e.g. Aarav or 9876543210"/>
+                     h:Watermark.Text="Search customers by name or phone"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
@@ -46,7 +50,8 @@
                       ItemsSource="{Binding Customers}"
                       SelectedItem="{Binding SelectedCustomer}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
-                      h:DataGridEmptyState.Icon="👤"
+                      h:DataGridLayoutPersistence.Key="CustomersGrid"
+                      h:DataGridEmptyState.Icon="&#xE8A5;"
                       h:DataGridEmptyState.Title="No customers found"
                       h:DataGridEmptyState.Description="Create a customer profile or broaden the current search to see matching records."
                       AutoGenerateColumns="False" IsReadOnly="True"
@@ -74,8 +79,8 @@
 
                 <!-- Form fields -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto"
-                              Focusable="False" PanningMode="Both">
+                              HorizontalScrollBarVisibility="Disabled"
+                              Focusable="False" PanningMode="VerticalOnly">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -96,13 +101,13 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                            <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                            <Run Text="Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                         </TextBlock>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
                                  MaxLength="200"
                                  AutomationProperties.Name="Customer name"
-                                 h:Watermark.Text="e.g. Amit Sharma"/>
+                                 h:Watermark.Text="Customer name"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Phone"
                                    Style="{StaticResource FormRowLabelStyle}"/>
@@ -112,7 +117,7 @@
                                  Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
                                  MaxLength="15"
                                  h:NumericInput.Scope="TelephoneNumber"
-                                 h:Watermark.Text="e.g. 9876543210"/>
+                                 h:Watermark.Text="Phone number"/>
 
                         <TextBlock Grid.Row="4" Grid.Column="0" Text="Email"
                                    Style="{StaticResource FormRowLabelStyle}"/>
@@ -120,7 +125,7 @@
                                  Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
                                  MaxLength="200"
                                  AutomationProperties.Name="Customer email"
-                                 h:Watermark.Text="e.g. amit@example.com"/>
+                                 h:Watermark.Text="Email address"/>
 
                         <TextBlock Grid.Row="6" Grid.Column="0" Text="Address"
                                    Style="{StaticResource FormRowLabelStyle}"/>
@@ -129,7 +134,7 @@
                                  Style="{StaticResource FluentMultilineTextBoxStyle}"
                                  MaxLength="500"
                                  AutomationProperties.Name="Customer address"
-                                 h:Watermark.Text="e.g. 24 MI Road, Jaipur"/>
+                                 h:Watermark.Text="Street address"/>
 
                         <TextBlock Grid.Row="8" Grid.Column="0" Text="GSTIN"
                                    Style="{StaticResource FormRowLabelStyle}"/>
@@ -138,7 +143,7 @@
                                  AutomationProperties.Name="Customer GSTIN"
                                  Width="{StaticResource FieldWidthWide}" HorizontalAlignment="Left"
                                  MaxLength="15"
-                                 h:Watermark.Text="e.g. 08ABCDE1234F1Z5"/>
+                                 h:Watermark.Text="GSTIN"/>
 
                         <TextBlock Grid.Row="10" Grid.Column="0" Text="Notes"
                                    Style="{StaticResource FormRowLabelStyle}"/>
@@ -147,7 +152,7 @@
                                  Style="{StaticResource FluentMultilineTextBoxStyle}"
                                  MaxLength="500"
                                  AutomationProperties.Name="Customer notes"
-                                 h:Watermark.Text="e.g. Prefers WhatsApp updates"/>
+                                 h:Watermark.Text="Customer notes (optional)"/>
                     </Grid>
                 </ScrollViewer>
 
@@ -160,21 +165,16 @@
                     </Grid.RowDefinitions>
 
                     <!-- Outstanding balance banner -->
-                    <Border Background="{StaticResource LayerFillColorSecondary}"
-                            CornerRadius="{StaticResource FluentCornerMedium}"
-                            Padding="{StaticResource CardContentPadding}"
+                    <Border Style="{StaticResource SummaryBannerStyle}"
                             Visibility="{Binding SelectedCustomer, Converter={StaticResource NullToCollapsed}}">
                         <DockPanel>
-                            <TextBlock Text="Outstanding" DockPanel.Dock="Left"
-                                       FontSize="{StaticResource FontSizeLabel}"
-                                       Foreground="{StaticResource FluentTextSecondary}"
-                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Outstanding"
+                                       DockPanel.Dock="Left"
+                                       Style="{StaticResource SummaryBannerLabelTextStyle}"/>
                             <TextBlock Text="{Binding OutstandingBalanceDisplay}"
-                                       DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                       FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeBody}"
-                                       Foreground="{StaticResource FluentError}"
-                                       VerticalAlignment="Center"/>
+                                       DockPanel.Dock="Right"
+                                       HorizontalAlignment="Right"
+                                       Style="{StaticResource SummaryBannerValueTextStyle}"/>
                         </DockPanel>
                     </Border>
 
@@ -183,7 +183,7 @@
                               AutomationProperties.Name="Purchase history"
                               ItemsSource="{Binding PurchaseHistory}"
                               Style="{StaticResource EnterpriseDataGridStyle}"
-                              h:DataGridEmptyState.Icon="📄"
+                              h:DataGridEmptyState.Icon="&#xE8A5;"
                               h:DataGridEmptyState.Title="No purchase history"
                               h:DataGridEmptyState.Description="Past purchases will appear when a customer is selected."
                               AutoGenerateColumns="False" IsReadOnly="True"
@@ -192,7 +192,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="120"/>
                             <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="100"/>
-                            <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat=₹\{0:N0\}}" Width="100"/>
+                            <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="100"/>
                             <DataGridTemplateColumn Header="PAYMENT" SortMemberPath="PaymentMethod" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -212,35 +212,32 @@
 
                     <!-- Payment collection (#161) -->
                     <Border Grid.Row="2" Margin="0,8,0,0"
-                            Background="{StaticResource LayerFillColorSecondary}"
-                            CornerRadius="{StaticResource FluentCornerMedium}"
-                            Padding="{StaticResource CardContentPadding}"
+                            Style="{StaticResource InlineMoneyActionPanelStyle}"
                             Visibility="{Binding SelectedCustomer, Converter={StaticResource NullToCollapsed}}">
                         <StackPanel>
-                            <TextBlock Text="Collect Payment" FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeLabel}"
-                                       Foreground="{StaticResource FluentTextPrimary}"
-                                       Margin="0,0,0,8"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="8"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="8"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                            <TextBlock Text="Collect Payment"
+                                       Style="{StaticResource InlineMoneyActionTitleStyle}"/>
+                            <WrapPanel Style="{StaticResource InlineMoneyActionCommandRowStyle}">
                                 <TextBox Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged}"
                                          AutomationProperties.Name="Payment amount"
+                                         Width="{StaticResource FieldWidthStandard}"
+                                         Margin="0,0,8,4"
+                                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
                                          h:NumericInput.Scope="Number"
-                                         h:Watermark.Text="₹ Amount"/>
-                                <ComboBox Grid.Column="2" ItemsSource="{Binding PaymentMethods}"
+                                         h:Watermark.Text="Amount"/>
+                                <ComboBox ItemsSource="{Binding PaymentMethods}"
                                           SelectedItem="{Binding PaymentMethod}"
-                                          Width="{StaticResource FieldWidthCompact}"
-                                          AutomationProperties.Name="Payment method"/>
-                                <Button Grid.Column="4" Content="Collect"
+                                          Width="{StaticResource FieldWidthStandard}"
+                                          AutomationProperties.Name="Payment method"
+                                          Margin="0,0,8,4"/>
+                                <Button Content="Collect"
                                         Command="{Binding CollectPaymentCommand}"
-                                        Style="{StaticResource PrimaryButtonStyle}"/>
-                            </Grid>
+                                        Style="{StaticResource InlineMoneyActionPrimaryButtonStyle}"/>
+                            </WrapPanel>
+                            <TextBox Text="{Binding PaymentReference, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Payment reference"
+                                     Width="{StaticResource FieldWidthWide}"
+                                     h:Watermark.Text="Reference or note (optional)"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -258,19 +255,19 @@
                   Margin="{StaticResource FieldLabelSpacing}">
                 <controls:InfoBar Message="{Binding ErrorMessage}"
                                   Severity="Error"
-                                  IsOpen="{Binding HasErrorMessage}"
+                                  IsOpen="{Binding HasError}"
                                   AutomationProperties.LiveSetting="Assertive"
                                   AutomationProperties.HelpText="{Binding ErrorMessage}"/>
                 <controls:InfoBar Message="{Binding SuccessMessage}"
                                   Severity="Success"
-                                  IsOpen="{Binding HasSuccessMessage}"
+                                  IsOpen="{Binding HasSuccess}"
                                   AutomationProperties.LiveSetting="Polite"
                                   AutomationProperties.HelpText="{Binding SuccessMessage}"/>
             </Grid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
                         Margin="{StaticResource FormActionBarSpacing}">
-                <Button Content="New" Command="{Binding NewCustomerCommand}"
+                <Button Content="New Customer" Command="{Binding NewCustomerCommand}"
                         Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Content="Save" Command="{Binding SaveCommand}"
                         Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
@@ -280,3 +277,4 @@
                                  Message="Saving customer changes..."/>
     </Grid>
 </UserControl>
+

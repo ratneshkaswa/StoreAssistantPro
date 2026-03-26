@@ -15,6 +15,8 @@ public partial class SaleHistoryViewModel(
     IReceiptService receiptService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private bool _isRestoringViewState;
+
     // ── Filters ──
 
     [ObservableProperty]
@@ -25,6 +27,12 @@ public partial class SaleHistoryViewModel(
 
     [ObservableProperty]
     public partial string InvoiceSearch { get; set; } = string.Empty;
+
+    partial void OnDateFromChanged(DateTime? value) => PersistViewState();
+
+    partial void OnDateToChanged(DateTime? value) => PersistViewState();
+
+    partial void OnInvoiceSearchChanged(string value) => PersistViewState();
 
     // ── Paging ──
 
@@ -86,6 +94,7 @@ public partial class SaleHistoryViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await ReloadAsync(ct);
     });
 
@@ -145,5 +154,34 @@ public partial class SaleHistoryViewModel(
         PagingInfo = TotalCount > 0
             ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
             : string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetSaleHistoryState();
+            DateFrom = state.DateFrom;
+            DateTo = state.DateTo;
+            InvoiceSearch = state.InvoiceSearch;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetSaleHistoryState(new SaleHistoryViewState
+        {
+            DateFrom = DateFrom,
+            DateTo = DateTo,
+            InvoiceSearch = InvoiceSearch
+        });
     }
 }

@@ -1,4 +1,5 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.PurchaseOrders.Services;
@@ -17,8 +18,18 @@ public class PurchaseOrderViewModelTests
     [Fact]
     public async Task Load_SeedsBlankLineAndLoadsProducts()
     {
-        _purchaseOrderService.GetAllAsync(Arg.Any<CancellationToken>())
-            .Returns(new List<PurchaseOrder> { new() { Id = 1, OrderNumber = "PO-1" } });
+        _purchaseOrderService.GetPagedAsync(
+                Arg.Any<PagedQuery>(),
+                Arg.Any<string?>(),
+                Arg.Any<PurchaseOrderStatus?>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new PagedResult<PurchaseOrder>(
+                [new PurchaseOrder { Id = 1, OrderNumber = "PO-1" }],
+                1,
+                1,
+                25)));
         _purchaseOrderService.GetActiveSuppliersAsync(Arg.Any<CancellationToken>())
             .Returns(new List<Supplier> { new() { Id = 7, Name = "Jaipur Textiles" } });
         _productService.GetActiveAsync(Arg.Any<CancellationToken>())
@@ -55,8 +66,18 @@ public class PurchaseOrderViewModelTests
     {
         _purchaseOrderService.CreateAsync(Arg.Any<CreatePurchaseOrderDto>(), Arg.Any<CancellationToken>())
             .Returns(new PurchaseOrder { Id = 1, OrderNumber = "PO-20260313-0001" });
-        _purchaseOrderService.GetAllAsync(Arg.Any<CancellationToken>())
-            .Returns(new List<PurchaseOrder>());
+        _purchaseOrderService.GetPagedAsync(
+                Arg.Any<PagedQuery>(),
+                Arg.Any<string?>(),
+                Arg.Any<PurchaseOrderStatus?>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new PagedResult<PurchaseOrder>(
+                Array.Empty<PurchaseOrder>(),
+                0,
+                1,
+                25)));
 
         var sut = CreateSut();
         sut.SelectedSupplier = new Supplier { Id = 7, Name = "Jaipur Textiles" };

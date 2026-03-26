@@ -2,6 +2,7 @@ using StoreAssistantPro.Core.Printing;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
+[Collection("UserPreferences")]
 public sealed class PrintPreviewZoomStateTests : IDisposable
 {
     public void Dispose() => PrintPreviewZoomState.Clear();

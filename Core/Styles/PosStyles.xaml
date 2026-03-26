@@ -191,6 +191,7 @@
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="h:ConnectedNavigationSource.IsEnabled" Value="True"/>
         <!-- SmartTooltip — auto-wired from QuickAction DataContext -->
         <Setter Property="h:SmartTooltip.Header"     Value="{Binding Title}"/>
         <Setter Property="h:SmartTooltip.Text"       Value="{Binding Description}"/>
@@ -1075,6 +1076,7 @@
         <Setter Property="MinHeight" Value="28"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="h:AnimatedDismissButton.IsEnabled" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">

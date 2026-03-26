@@ -110,6 +110,10 @@ public sealed class ToastService : IToastService, IDisposable
     private Task OnNotificationPostedAsync(NotificationPostedEvent e)
     {
         var n = e.Notification;
+        var preferences = UserPreferencesStore.GetSnapshot();
+        if (!preferences.InAppToastsEnabled || !UserPreferencesStore.MeetsNotificationThreshold(n.Level))
+            return Task.CompletedTask;
+
         Show(n.Message, n.Level);
         return Task.CompletedTask;
     }

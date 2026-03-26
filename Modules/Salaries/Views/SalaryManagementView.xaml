@@ -25,39 +25,47 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7EE;"/>
-            <Run Text=" Salary Management"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7EE;"/>
+                <Run Text=" Salaries"/>
+            </TextBlock>
+            <TextBlock Text="Track salary payments, pending payouts, and staff payroll records."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL PAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalPaid, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentSuccess}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL PAID" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalPaid, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentSuccess}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalPending, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentWarning}" Margin="0,2,0,0"/>
+                    <TextBlock Text="PENDING" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalPending, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="UNPAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding UnpaidCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentError}" Margin="0,2,0,0"/>
+                    <TextBlock Text="UNPAID" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding UnpaidCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentError}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -159,11 +167,11 @@
                                  h:Watermark.Text="Incentive" MaxLength="10"
                                  AutomationProperties.Name="Incentive"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="8" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <StackPanel Grid.Column="8" Style="{StaticResource FormActionRowStyle}" VerticalAlignment="Bottom">
                         <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                                Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                         <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                                Style="{StaticResource PrimaryButtonStyle}"/>
+                                Style="{StaticResource SaveButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>
@@ -177,14 +185,14 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search by employee name or month"
+                     h:Watermark.Text="Search salaries by employee or month"
                      AutomationProperties.Name="Search salaries"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Filter Chips -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <StackPanel Grid.Row="4" Margin="{StaticResource ItemSpacing}">
             <Border Style="{StaticResource SegmentedFilterHostStyle}">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="All" Command="{Binding SetPaidFilterCommand}" CommandParameter="All"
@@ -219,15 +227,31 @@
                     </Button>
                 </StackPanel>
             </Border>
+            <WrapPanel Margin="0,8,0,0">
+                <Button Content="{Binding ActivePaidFilter, StringFormat=Status: {0}}"
+                        Command="{Binding SetPaidFilterCommand}"
+                        CommandParameter="All">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ActiveFilterChipButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActivePaidFilter}" Value="All">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </WrapPanel>
             <TextBlock Text="{Binding FilterCountText}" FontSize="11"
-                       Margin="12,0,0,0"
-                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+                       Margin="0,8,0,0"
+                       Foreground="{StaticResource FluentTextTertiary}"/>
         </StackPanel>
 
         <!-- DataGrid -->
         <DataGrid Grid.Row="5" AutomationProperties.Name="Salary records"
                   ItemsSource="{Binding Salaries}" SelectedItem="{Binding SelectedSalary}"
                   Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="SalariesGrid"
                   h:DataGridEmptyState.Icon="💼"
                   h:DataGridEmptyState.Title="No salary records found"
                   h:DataGridEmptyState.Description="Create a salary entry or switch the current payment filter to load matching records.">

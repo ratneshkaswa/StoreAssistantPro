@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -72,6 +73,8 @@ public class ResponsiveContentControl : ContentControl
 
     public event ScrollChangedEventHandler? ScrollOffsetChanged;
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new ResponsiveContentControlAutomationPeer(this);
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -127,6 +130,11 @@ public class ResponsiveContentControl : ContentControl
         StartConnectedTransition(version);
     }
 
+    // Render at half resolution — the snapshot is only shown briefly during a
+    // crossfade exit (~100 ms) so full-DPI fidelity is unnecessary. Quarter
+    // pixel count cuts RenderTargetBitmap.Render cost by ~75%.
+    private const double SnapshotScale = 0.5;
+
     private RenderTargetBitmap? CaptureCurrentSnapshot(object oldContent, object newContent)
     {
         if (_transitionHost is null ||
@@ -146,8 +154,10 @@ public class ResponsiveContentControl : ContentControl
         }
 
         var dpi = VisualTreeHelper.GetDpi(_transitionHost);
-        var width = Math.Max(1, (int)Math.Ceiling(_transitionHost.ActualWidth * dpi.DpiScaleX));
-        var height = Math.Max(1, (int)Math.Ceiling(_transitionHost.ActualHeight * dpi.DpiScaleY));
+        var scaledDpiX = 96d * dpi.DpiScaleX * SnapshotScale;
+        var scaledDpiY = 96d * dpi.DpiScaleY * SnapshotScale;
+        var width = Math.Max(1, (int)Math.Ceiling(_transitionHost.ActualWidth * dpi.DpiScaleX * SnapshotScale));
+        var height = Math.Max(1, (int)Math.Ceiling(_transitionHost.ActualHeight * dpi.DpiScaleY * SnapshotScale));
 
         var visual = new DrawingVisual();
         using (var context = visual.RenderOpen())
@@ -161,8 +171,8 @@ public class ResponsiveContentControl : ContentControl
         var bitmap = new RenderTargetBitmap(
             width,
             height,
-            96d * dpi.DpiScaleX,
-            96d * dpi.DpiScaleY,
+            scaledDpiX,
+            scaledDpiY,
             PixelFormats.Pbgra32);
 
         bitmap.Render(visual);
@@ -474,5 +484,18 @@ public class ResponsiveContentControl : ContentControl
         wrappedGroup.Children.Add(wrappedTranslate);
         element.RenderTransform = wrappedGroup;
         return wrappedTranslate;
+    }
+
+    private sealed class ResponsiveContentControlAutomationPeer(ResponsiveContentControl owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(ResponsiveContentControl);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Pane;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            return string.IsNullOrWhiteSpace(explicitName) ? "Page content" : explicitName;
+        }
     }
 }

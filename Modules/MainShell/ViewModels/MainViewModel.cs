@@ -240,7 +240,10 @@ public partial class MainViewModel : BaseViewModel
         AppState = appState;
         StatusBar = statusBar;
         ToastService = toastService;
-        DashboardSummary = new DashboardViewModel(appState, eventBus, dashboardService);
+        DashboardSummary = new DashboardViewModel(appState, eventBus, dashboardService, regionalSettings);
+        var preferences = UserPreferencesStore.GetSnapshot();
+        IsNavigationRailExpanded = preferences.IsNavigationRailExpanded;
+        _recentCommandPaletteItemIds.AddRange(preferences.RecentCommandPaletteItemIds);
 
         ((ObservableObject)_navigationService).PropertyChanged += OnNavigationPropertyChanged;
 
@@ -335,11 +338,30 @@ public partial class MainViewModel : BaseViewModel
     {
         await _sessionService.LoginAsync(userType);
 
-        _navigationService.NavigateTo(MainWorkspacePage);
-        SetCurrentPage(MainWorkspacePage);
-        _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
+        var startupPage = ResolveStartupPage();
+        _navigationService.NavigateTo(startupPage);
+        SetCurrentPage(startupPage);
+        _statusBar.SetPersistent(
+            string.Equals(startupPage, MainWorkspacePage, StringComparison.Ordinal)
+                ? (IsBillingVisible ? "Billing ready" : "Workspace")
+                : GetPageDisplayName(startupPage));
 
         RefreshQuickActions();
+
+        var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
+        if (activationRequest is not null)
+        {
+            if (!string.IsNullOrWhiteSpace(activationRequest.PageKey))
+            {
+                _navigationService.NavigateTo(activationRequest.PageKey);
+                SetCurrentPage(activationRequest.PageKey);
+                _statusBar.SetPersistent(GetPageDisplayName(activationRequest.PageKey));
+                RefreshQuickActions();
+            }
+
+            if (activationRequest.OpenNotificationsRequested)
+                IsNotificationsPanelVisible = true;
+        }
     }
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -1244,6 +1266,9 @@ public partial class MainViewModel : BaseViewModel
                 MaxRecentCommandPaletteItems,
                 _recentCommandPaletteItemIds.Count - MaxRecentCommandPaletteItems);
         }
+
+        UserPreferencesStore.Update(state =>
+            state.RecentCommandPaletteItemIds = [.. _recentCommandPaletteItemIds]);
     }
 
     private bool IsRecentCommandPaletteItem(string id) =>
@@ -1319,14 +1344,18 @@ public partial class MainViewModel : BaseViewModel
     private void SetCurrentPage(string pageKey)
     {
         _currentPage = pageKey;
+        PersistCurrentPage(pageKey);
         UpdateQuickActionActiveState();
         UpdateShellBreadcrumbs();
         OnPropertyChanged(nameof(IsNavigationRailBackMode));
         OnPropertyChanged(nameof(WindowTitle));
     }
 
-    partial void OnIsNavigationRailExpandedChanged(bool value) =>
+    partial void OnIsNavigationRailExpandedChanged(bool value)
+    {
+        UserPreferencesStore.Update(state => state.IsNavigationRailExpanded = value);
         OnPropertyChanged(nameof(NavigationRailWidth));
+    }
 
     [RelayCommand]
     private void ActivateBreadcrumb(string? crumb)
@@ -1442,6 +1471,67 @@ public partial class MainViewModel : BaseViewModel
         ExpenseManagementPage or IroningManagementPage or SalaryManagementPage or BranchManagementPage
             => ["Home", "Operations", GetPageDisplayName(pageKey)],
         _ => ["Home", GetPageDisplayName(pageKey)]
+    };
+
+    private void PersistCurrentPage(string pageKey)
+    {
+        if (string.IsNullOrWhiteSpace(pageKey) ||
+            string.Equals(pageKey, LoginPage, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        UserPreferencesStore.Update(state => state.LastVisitedPage = pageKey);
+    }
+
+    private string ResolveStartupPage()
+    {
+        var preferences = UserPreferencesStore.GetSnapshot();
+        var pageKey = preferences.LastVisitedPage;
+
+        if (!preferences.RestoreLastVisitedPageOnLogin ||
+            string.IsNullOrWhiteSpace(pageKey) ||
+            !IsRestorablePageAccessible(pageKey))
+        {
+            return MainWorkspacePage;
+        }
+
+        return pageKey;
+    }
+
+    private bool IsRestorablePageAccessible(string? pageKey) => pageKey switch
+    {
+        MainWorkspacePage => true,
+        FirmManagementPage => IsFirmManagementVisible,
+        UserManagementPage => IsUserManagementVisible,
+        TaxManagementPage => IsTaxManagementVisible,
+        VendorManagementPage => IsVendorManagementVisible,
+        ProductManagementPage => IsProductManagementVisible,
+        CategoryManagementPage => IsCategoryManagementVisible,
+        BrandManagementPage => IsBrandManagementVisible,
+        InventoryPage => IsInventoryVisible,
+        BillingPage => IsBillingVisible,
+        SaleHistoryPage => IsSaleHistoryVisible,
+        CashRegisterPage => IsCashRegisterVisible,
+        CustomerManagementPage => IsCustomerManagementVisible,
+        PurchaseOrdersPage => IsPurchaseOrdersVisible,
+        FinancialYearPage => IsFinancialYearVisible,
+        SystemSettingsPage => IsSystemSettingsVisible,
+        InwardEntryPage => IsInwardEntryVisible,
+        ExpenseManagementPage => IsExpenseManagementVisible,
+        DebtorManagementPage => IsDebtorManagementVisible,
+        OrderManagementPage => IsOrderManagementVisible,
+        IroningManagementPage => IsIroningManagementVisible,
+        SalaryManagementPage => IsSalaryManagementVisible,
+        BranchManagementPage => IsBranchManagementVisible,
+        SalesPurchasePage => IsSalesPurchaseVisible,
+        PaymentManagementPage => IsPaymentManagementVisible,
+        ReportsPage => IsReportsVisible,
+        BackupRestorePage => IsBackupRestoreVisible,
+        QuotationsPage => IsQuotationsVisible,
+        GRNPage => IsGRNVisible,
+        BarcodeLabelsPage => IsBarcodeLabelsVisible,
+        _ => false
     };
 
     /// <summary>

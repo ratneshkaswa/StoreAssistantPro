@@ -14,6 +14,8 @@ public partial class ExpenseManagementViewModel(
     IExpenseService expenseService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private bool _isRestoringViewState;
+
     public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
@@ -84,8 +86,12 @@ public partial class ExpenseManagementViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveDateFilter { get; set; } = "All";
+
+    partial void OnActiveDateFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -99,6 +105,8 @@ public partial class ExpenseManagementViewModel(
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
     [NotifyPropertyChangedFor(nameof(HasNextPage))]
     public partial int CurrentPage { get; set; } = 1;
+
+    partial void OnCurrentPageChanged(int value) => PersistViewState();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
@@ -121,6 +129,7 @@ public partial class ExpenseManagementViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         var categories = await expenseService.GetCategoriesAsync(ct);
         ExpenseCategoryList = new ObservableCollection<ExpenseCategory>(categories);
         await ReloadAsync(ct);
@@ -299,5 +308,34 @@ public partial class ExpenseManagementViewModel(
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetExpenseManagementState();
+            SearchText = state.SearchText;
+            ActiveDateFilter = state.ActiveFilter;
+            CurrentPage = state.CurrentPage;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetExpenseManagementState(new PagedSearchFilterViewState
+        {
+            SearchText = SearchText,
+            ActiveFilter = ActiveDateFilter,
+            CurrentPage = CurrentPage
+        });
     }
 }

@@ -40,6 +40,7 @@ public partial class App : Application
 
         try
         {
+            AppLaunchActivationStore.Initialize(e.Args);
             await InitializeAndRunAsync(startupTimestamp);
         }
         catch (Exception ex)
@@ -77,6 +78,8 @@ public partial class App : Application
         // Eagerly resolve the focus lock service so it subscribes
         // to mode-changed events before any mode transition occurs.
         _host.Services.GetRequiredService<IFocusLockService>();
+        _host.Services.GetRequiredService<IUiDensityService>();
+        _host.Services.GetRequiredService<WindowsNotificationBridge>();
 
         // Eagerly resolve the onboarding tip registrar so all first-time
         // tips are registered before any view loads.
@@ -106,15 +109,19 @@ public partial class App : Application
 
         _logger.LogInformation("Application starting");
 
-        // ── Phase 3: Pre-warm EF Core model ──────────────────────────
+        // ── Phase 3: Pre-warm EF Core model (overlapped with host start) ─
         var warmupTask = Task.Run(async () =>
         {
             try
             {
                 var factory = _host.Services
                     .GetRequiredService<IDbContextFactory<AppDbContext>>();
-                await using var _ = await factory.CreateDbContextAsync()
+                await using var ctx = await factory.CreateDbContextAsync()
                     .ConfigureAwait(false);
+
+                // Force SQL Server connection pool to open a connection early
+                // so subsequent queries don't pay cold-connection cost.
+                await ctx.Database.CanConnectAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -122,8 +129,8 @@ public partial class App : Application
             }
         });
 
-        await _host.StartAsync();
-        await warmupTask;
+        // Run host startup and EF warmup concurrently
+        await Task.WhenAll(_host.StartAsync(), warmupTask);
 
         var startupElapsed = Stopwatch.GetElapsedTime(startupTimestamp);
         _logger.LogInformation("Application ready in {ElapsedMs:F0} ms", startupElapsed.TotalMilliseconds);

@@ -14,6 +14,7 @@ public partial class BranchManagementViewModel(
     IRegionalSettingsService regional) : BaseViewModel
 {
     private List<BranchBill> _allItems = [];
+    private bool _isRestoringViewState;
 
     public string CurrencySymbol => regional.CurrencySymbol;
 
@@ -55,8 +56,12 @@ public partial class BranchManagementViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveStatusFilter { get; set; } = "All";
+
+    partial void OnActiveStatusFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -69,6 +74,7 @@ public partial class BranchManagementViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await ReloadAsync(ct);
     });
 
@@ -214,5 +220,32 @@ public partial class BranchManagementViewModel(
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetBranchManagementState();
+            SearchText = state.SearchText;
+            ActiveStatusFilter = state.ActiveFilter;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetBranchManagementState(new SearchFilterViewState
+        {
+            SearchText = SearchText,
+            ActiveFilter = ActiveStatusFilter
+        });
     }
 }

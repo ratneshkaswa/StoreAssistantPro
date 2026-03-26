@@ -14,13 +14,14 @@ public class DashboardViewModelTests
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
     private readonly IDashboardService _dashboardService = Substitute.For<IDashboardService>();
+    private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
 
     public DashboardViewModelTests()
     {
         _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
     }
 
-    private DashboardViewModel CreateSut() => new(_appState, _eventBus, _dashboardService);
+    private DashboardViewModel CreateSut() => new(_appState, _eventBus, _dashboardService, _regional);
 
     [Fact]
     public void CurrentUser_FormatsUserType()

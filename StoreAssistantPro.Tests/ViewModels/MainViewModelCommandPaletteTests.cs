@@ -12,10 +12,12 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
+using StoreAssistantPro.Tests.Helpers;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public sealed class MainViewModelCommandPaletteTests
+[Collection("UserPreferences")]
+public sealed class MainViewModelCommandPaletteTests : IDisposable
 {
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly ICommandBus _commandBus = Substitute.For<ICommandBus>();
@@ -27,6 +29,7 @@ public sealed class MainViewModelCommandPaletteTests
 
     public MainViewModelCommandPaletteTests()
     {
+        UserPreferencesStore.ClearForTests();
         _appState.FirmName.Returns("Contoso Fabrics");
         _appState.Notifications.Returns(new ObservableCollection<AppNotification>());
         _appState.CurrentMode.Returns(OperationalMode.Management);
@@ -36,6 +39,8 @@ public sealed class MainViewModelCommandPaletteTests
             .Returns(Task.FromResult(CommandResult.Success()));
         _features.IsEnabled(Arg.Any<string>()).Returns(true);
     }
+
+    public void Dispose() => UserPreferencesStore.ClearForTests();
 
     [Fact]
     public void ToggleCommandPalette_Should_Populate_Items_And_Select_First_Result()

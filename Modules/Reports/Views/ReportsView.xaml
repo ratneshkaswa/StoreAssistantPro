@@ -1,4 +1,4 @@
-<UserControl x:Class="StoreAssistantPro.Modules.Reports.Views.ReportsView"
+﻿<UserControl x:Class="StoreAssistantPro.Modules.Reports.Views.ReportsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -21,10 +21,14 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9F9;"/>
-            <Run Text=" Reports"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9F9;"/>
+                <Run Text=" Reports"/>
+            </TextBlock>
+            <TextBlock Text="Review sales, tax, expense, and operational performance for the selected reporting period."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Date Range Bar -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -88,7 +92,7 @@
 
             <controls:DateRangePicker Grid.Column="1"
                                       Margin="16,0,0,0"
-                                      Width="344"
+                                      Width="{StaticResource ReportDateRangeWidth}"
                                       StartDate="{Binding DateFrom, Mode=TwoWay}"
                                       EndDate="{Binding DateTo, Mode=TwoWay}"
                                       StartHeader="From"
@@ -98,11 +102,8 @@
                     Command="{Binding RefreshCommand}"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="2"
-                      Margin="0,0,0,16"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Disabled">
-            <StackPanel Orientation="Horizontal">
+        <WrapPanel Grid.Row="2"
+                   Margin="0,0,0,16">
                 <Button Content="{Binding ActivePreset, StringFormat=Preset: {0}}"
                         Command="{Binding SetPresetCommand}"
                         CommandParameter="This Month">
@@ -116,57 +117,61 @@
                         </Style>
                     </Button.Style>
                 </Button>
-            </StackPanel>
-        </ScrollViewer>
+        </WrapPanel>
 
         <!-- Report Sections -->
         <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
                 <!-- ═══ TODAY'S SALES SUMMARY ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="Today's Sales" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                        <TextBlock Text="Today's Sales" Style="{StaticResource ReportSectionTitleStyle}"/>
                         <WrapPanel Margin="0,8,0,0">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="SALES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TodaySaleCount}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="SALES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TodaySaleCount}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="REVENUE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TodayTotalSales, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="REVENUE" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TodayTotalSales, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="RETURNS" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TodayTotalReturns, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="RETURNS" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TodayTotalReturns, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="NET SALES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TodayNetSales, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="NET SALES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TodayNetSales, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="TAX" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TodayTotalTax, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="TAX" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TodayTotalTax, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="DISCOUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TodayTotalDiscount, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="DISCOUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TodayTotalDiscount, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentWarning}"/>
                                 </StackPanel>
                             </Border>
@@ -175,17 +180,15 @@
                 </Border>
 
                 <!-- ═══ PROFIT SUMMARY ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Profit Summary" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <TextBlock Grid.Column="1" FontSize="12" VerticalAlignment="Center"
-                                       Foreground="{StaticResource FluentTextTertiary}">
+                            <TextBlock Text="Profit Summary" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <TextBlock Grid.Column="1" Style="{StaticResource ReportSectionMetaTextStyle}">
                                 <Run Text="Selected period •"/>
                                 <Run Text="{Binding PeriodSaleCount, Mode=OneWay}"/>
                                 <Run Text="sales •"/>
@@ -194,43 +197,48 @@
                             </TextBlock>
                         </Grid>
                         <WrapPanel Margin="0,8,0,0">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="REVENUE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding GrossRevenue, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="REVENUE" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding GrossRevenue, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="COGS" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding GrossCogs, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="COGS" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding GrossCogs, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="GROSS PROFIT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding GrossProfit, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="GROSS PROFIT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding GrossProfit, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
-                                    <TextBlock FontSize="10" Foreground="{StaticResource FluentTextTertiary}">
+                                    <TextBlock Style="{StaticResource ReportMetricLabelTextStyle}">
                                         <Run Text="Margin:"/>
                                         <Run Text="{Binding GrossMarginPercent, StringFormat='{}{0:N1}%', Mode=OneWay}"/>
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="EXPENSES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TotalExpensesForProfit, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="EXPENSES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TotalExpensesForProfit, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="NET PROFIT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding NetProfit, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="NET PROFIT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding NetProfit, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
-                                    <TextBlock FontSize="10" Foreground="{StaticResource FluentTextTertiary}">
+                                    <TextBlock Style="{StaticResource ReportMetricLabelTextStyle}">
                                         <Run Text="Margin:"/>
                                         <Run Text="{Binding NetMarginPercent, StringFormat='{}{0:N1}%', Mode=OneWay}"/>
                                     </TextBlock>
@@ -241,36 +249,38 @@
                 </Border>
 
                 <!-- ═══ TAX SUMMARY ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Tax Summary (Current Month)" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export HSN CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Tax Summary (Current Month)" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export HSN CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportHsnTaxCsvCommand}"/>
                         </Grid>
                         <WrapPanel Margin="0,8,0,0">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="TOTAL TAX" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TotalTaxCollected, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="TOTAL TAX" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TotalTaxCollected, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="CGST" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TotalCgst, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="CGST" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TotalCgst, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,4">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="SGST" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding TotalSgst, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="SGST" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding TotalSgst, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                         </WrapPanel>
@@ -278,16 +288,15 @@
                 </Border>
 
                 <!-- ═══ BEST SELLING PRODUCTS ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Best Selling Products" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Best Selling Products" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportBestSellingCsvCommand}"/>
                         </Grid>
                         <DataGrid ItemsSource="{Binding BestSellingProducts}" AutoGenerateColumns="False"
@@ -309,16 +318,15 @@
                 </Border>
 
                 <!-- ═══ SLOW MOVING PRODUCTS ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Slow Moving Products" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Slow Moving Products" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportSlowMovingCsvCommand}"/>
                         </Grid>
                         <DataGrid ItemsSource="{Binding SlowMovingProducts}" AutoGenerateColumns="False"
@@ -338,16 +346,15 @@
                 </Border>
 
                 <!-- ═══ SALES BY PAYMENT METHOD ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Sales by Payment Method" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Sales by Payment Method" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportSalesByPaymentMethodCsvCommand}"/>
                         </Grid>
                         <ItemsControl ItemsSource="{Binding SalesByPaymentMethod}" Margin="0,8,0,0">
@@ -360,13 +367,14 @@
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="60"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding PaymentMethod}" FontSize="13" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding SaleCount}" FontSize="13"
-                                                   Foreground="{StaticResource FluentTextSecondary}"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}" FontSize="13"
-                                                   FontWeight="SemiBold" HorizontalAlignment="Right"/>
-                                        <TextBlock Grid.Column="3" FontSize="12" HorizontalAlignment="Right"
-                                                   Foreground="{StaticResource FluentTextTertiary}">
+                                        <TextBlock Text="{Binding PaymentMethod}"
+                                                   Style="{StaticResource ReportListPrimaryTextStyle}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding SaleCount}"
+                                                   Style="{StaticResource ReportListSecondaryTextStyle}"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}"
+                                                   Style="{StaticResource ReportListValueTextStyle}"/>
+                                        <TextBlock Grid.Column="3"
+                                                   Style="{StaticResource ReportListMetaTextStyle}">
                                             <Run Text="{Binding Percentage, StringFormat='{}{0:N1}%', Mode=OneWay}"/>
                                         </TextBlock>
                                     </Grid>
@@ -377,16 +385,15 @@
                 </Border>
 
                 <!-- ═══ SALES BY CASHIER ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Sales by Cashier" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Sales by Cashier" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportSalesByUserCsvCommand}"/>
                         </Grid>
                         <ItemsControl ItemsSource="{Binding SalesByUser}" Margin="0,8,0,0">
@@ -399,16 +406,17 @@
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="100"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding CashierRole}" FontSize="13" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Column="1" FontSize="13"
-                                                   Foreground="{StaticResource FluentTextSecondary}">
+                                        <TextBlock Text="{Binding CashierRole}"
+                                                   Style="{StaticResource ReportListPrimaryTextStyle}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Style="{StaticResource ReportListSecondaryTextStyle}">
                                             <Run Text="{Binding SaleCount, Mode=OneWay}"/>
                                             <Run Text="sales"/>
                                         </TextBlock>
-                                        <TextBlock Grid.Column="2" Text="{Binding TotalRevenue, StringFormat='₹{0:N0}'}" FontSize="13"
-                                                   FontWeight="SemiBold" HorizontalAlignment="Right"/>
-                                        <TextBlock Grid.Column="3" FontSize="12" HorizontalAlignment="Right"
-                                                   Foreground="{StaticResource FluentTextTertiary}">
+                                        <TextBlock Grid.Column="2" Text="{Binding TotalRevenue, StringFormat='₹{0:N0}'}"
+                                                   Style="{StaticResource ReportListValueTextStyle}"/>
+                                        <TextBlock Grid.Column="3"
+                                                   Style="{StaticResource ReportListMetaTextStyle}">
                                             <Run Text="avg ₹"/>
                                             <Run Text="{Binding AverageSaleValue, StringFormat='{}{0:N0}', Mode=OneWay}"/>
                                         </TextBlock>
@@ -420,38 +428,39 @@
                 </Border>
 
                 <!-- ═══ EXPENSES SECTION ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Expenses" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Expenses" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportExpenseCsvCommand}"/>
                         </Grid>
                         <WrapPanel Margin="0,8,0,8">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="COUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding ExpenseCount}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="COUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding ExpenseCount}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding ExpenseTotal, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding ExpenseTotal, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentAccentDefault}"/>
                                 </StackPanel>
                             </Border>
                         </WrapPanel>
 
                         <!-- Category breakdown -->
-                        <TextBlock Text="By Category" FontSize="13" FontWeight="SemiBold" Margin="0,4,0,4"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                        <TextBlock Text="By Category"
+                                   Style="{StaticResource ReportSubsectionTitleStyle}"/>
                         <ItemsControl ItemsSource="{Binding ExpenseByCategory}" Margin="0,0,0,8">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -461,7 +470,8 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="80"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Category}" FontSize="12"/>
+                                        <TextBlock Text="{Binding Category}"
+                                                   Style="{StaticResource ReportListSecondaryTextStyle}"/>
                                         <Border Grid.Column="1" Height="14" CornerRadius="2"
                                                 Background="{StaticResource FluentAccentDefault}"
                                                 HorizontalAlignment="Left" Margin="4,0">
@@ -470,15 +480,15 @@
                                             </Border.Width>
                                         </Border>
                                         <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat='₹{0:N0}'}"
-                                                   HorizontalAlignment="Right" FontSize="12"/>
+                                                   Style="{StaticResource ReportListMetaTextStyle}"/>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
                         <!-- Recent expenses -->
-                        <TextBlock Text="Recent Entries" FontSize="13" FontWeight="SemiBold" Margin="0,4,0,4"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                        <TextBlock Text="Recent Entries"
+                                   Style="{StaticResource ReportSubsectionTitleStyle}"/>
                         <DataGrid ItemsSource="{Binding ExpenseRecent}" AutoGenerateColumns="False"
                                   IsReadOnly="True" MaxHeight="200"
                                   h:DataGridEmptyState.Icon="🧾"
@@ -508,42 +518,45 @@
                 </Border>
 
                 <!-- ═══ IRONING SECTION ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Ironing" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Ironing" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportIroningCsvCommand}"/>
                         </Grid>
                         <WrapPanel Margin="0,8,0,8">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="COUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding IroningCount}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="COUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding IroningCount}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding IroningTotal, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding IroningTotal, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="PAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding IroningPaid, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="PAID" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding IroningPaid, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="UNPAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding IroningUnpaid, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="UNPAID" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding IroningUnpaid, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
                             </Border>
@@ -565,42 +578,45 @@
                 </Border>
 
                 <!-- ═══ ORDERS SECTION ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Orders" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Orders" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportOrderCsvCommand}"/>
                         </Grid>
                         <WrapPanel Margin="0,8,0,8">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="COUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding OrderCount}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="COUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding OrderCount}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding OrderTotal, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding OrderTotal, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="DELIVERED" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding OrderDelivered}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="DELIVERED" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding OrderDelivered}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentSuccess}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding OrderPending}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="PENDING" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding OrderPending}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentWarning}"/>
                                 </StackPanel>
                             </Border>
@@ -634,29 +650,30 @@
                 </Border>
 
                 <!-- ═══ INWARD SECTION ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Inward" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource FluentTextPrimary}"/>
-                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ToolbarButtonStyle}"
+                            <TextBlock Text="Inward" Style="{StaticResource ReportSectionTitleStyle}"/>
+                            <Button Grid.Column="1" Content="Export CSV" Style="{StaticResource ReportExportButtonStyle}"
                                     Command="{Binding ExportInwardCsvCommand}"/>
                         </Grid>
                         <WrapPanel Margin="0,8,0,8">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="COUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding InwardCount}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="COUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding InwardCount}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding InwardTotal, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="TOTAL" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding InwardTotal, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
                         </WrapPanel>
@@ -676,28 +693,29 @@
                 </Border>
 
                 <!-- ═══ DEBTORS SECTION ═══ -->
-                <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,0,0,12">
+                <Border Style="{StaticResource ReportSectionCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="Debtors" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                        <TextBlock Text="Debtors" Style="{StaticResource ReportSectionTitleStyle}"/>
                         <WrapPanel Margin="0,8,0,8">
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6" Margin="0,0,8,0">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding DebtorCount}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="PENDING" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding DebtorCount}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource CardStyle}" Padding="10,6">
+                            <Border Style="{StaticResource ReportMetricTileStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="OUTSTANDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding DebtorOutstanding, StringFormat='₹{0:N0}'}" FontSize="16" FontWeight="Bold"
+                                    <TextBlock Text="OUTSTANDING" Style="{StaticResource ReportMetricLabelTextStyle}"/>
+                                    <TextBlock Text="{Binding DebtorOutstanding, StringFormat='₹{0:N0}'}"
+                                               Style="{StaticResource ReportMetricValueTextStyle}"
                                                Foreground="{StaticResource FluentError}"/>
                                 </StackPanel>
                             </Border>
                         </WrapPanel>
 
-                        <TextBlock Text="Top Debtors" FontSize="13" FontWeight="SemiBold" Margin="0,4,0,4"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                        <TextBlock Text="Top Debtors"
+                                   Style="{StaticResource ReportSubsectionTitleStyle}"/>
                         <ItemsControl ItemsSource="{Binding TopDebtors}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -706,8 +724,10 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Name}" FontSize="13"/>
-                                        <TextBlock Grid.Column="1" FontSize="13" FontWeight="SemiBold"
+                                        <TextBlock Text="{Binding Name}"
+                                                   Style="{StaticResource ReportListSecondaryTextStyle}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Style="{StaticResource ReportListValueTextStyle}"
                                                    Foreground="{StaticResource FluentError}">
                                             <TextBlock.Text>
                                                 <Binding Path="Balance" StringFormat="₹{0:N0}"/>
@@ -724,3 +744,4 @@
         </ScrollViewer>
     </Grid>
 </UserControl>
+

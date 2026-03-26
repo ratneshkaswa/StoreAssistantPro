@@ -16,10 +16,14 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7A1;"/>
-            <Run Text=" Cash Register"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7A1;"/>
+                <Run Text=" Cash Register"/>
+            </TextBlock>
+            <TextBlock Text="Open the till, record cash movement, and review day-end cash totals in one place."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Main content -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -34,15 +38,10 @@
                 <StackPanel>
                     <!-- OPEN REGISTER (shown when closed) -->
                     <Border Visibility="{Binding IsRegisterClosed, Converter={StaticResource BoolToVisibility}}"
-                            BorderBrush="{StaticResource FluentStrokeDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusMedium}"
-                            Padding="{StaticResource DialogPadding}"
-                            Margin="{StaticResource ItemSpacing}">
+                            Style="{StaticResource AdminSectionCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Open Register" FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeSubtitle}"
-                                       Margin="{StaticResource ItemSpacing}"/>
+                            <TextBlock Text="Open Register"
+                                       Style="{StaticResource AdminSectionTitleStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -55,7 +54,10 @@
                                          AutomationProperties.Name="Opening balance"
                                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                                          MaxLength="10"
-                                         h:Watermark.Text="e.g. 5000"/>
+                                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                                         h:NumericInput.Scope="Number"
+                                         h:NumericInput.IsDecimalOnly="True"
+                                         h:Watermark.Text="Opening amount"/>
                             </Grid>
                             <Button Content="Open Register" Command="{Binding OpenRegisterCommand}"
                                     Style="{StaticResource PrimaryButtonStyle}"
@@ -65,16 +67,11 @@
 
                     <!-- REGISTER STATUS (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            BorderBrush="{StaticResource FluentAccentDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusMedium}"
-                            Padding="{StaticResource DialogPadding}"
-                            Margin="{StaticResource ItemSpacing}">
+                            Style="{StaticResource AdminSectionHighlightCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Register Open" FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeSubtitle}"
-                                       Foreground="{StaticResource FluentSuccess}"
-                                       Margin="{StaticResource ItemSpacing}"/>
+                            <TextBlock Text="Register Open"
+                                       Style="{StaticResource AdminSectionTitleStyle}"
+                                       Foreground="{StaticResource FluentSuccess}"/>
                             <TextBlock Margin="0,4,0,0">
                                 <Run Text="Opening: " FontWeight="SemiBold"/>
                                 <Run Text="{Binding OpenRegister.OpeningBalance, StringFormat={}{0:C}, Mode=OneWay}"/>
@@ -93,15 +90,10 @@
 
                     <!-- CASH MOVEMENT (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            BorderBrush="{StaticResource FluentStrokeDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusMedium}"
-                            Padding="{StaticResource DialogPadding}"
-                            Margin="{StaticResource ItemSpacing}">
+                            Style="{StaticResource AdminSectionCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Cash In / Out" FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeSubtitle}"
-                                       Margin="{StaticResource ItemSpacing}"/>
+                            <TextBlock Text="Cash In / Out"
+                                       Style="{StaticResource AdminSectionTitleStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -130,7 +122,10 @@
                                          AutomationProperties.Name="Movement amount"
                                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                                          MaxLength="10"
-                                         h:Watermark.Text="e.g. 500"/>
+                                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                                         h:NumericInput.Scope="Number"
+                                         h:NumericInput.IsDecimalOnly="True"
+                                         h:Watermark.Text="Movement amount"/>
 
                                 <TextBlock Grid.Row="4" Text="Reason"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -138,7 +133,7 @@
                                          Text="{Binding MovementReason, UpdateSourceTrigger=PropertyChanged}"
                                          AutomationProperties.Name="Movement reason"
                                          MaxLength="200"
-                                         h:Watermark.Text="e.g. Petty cash withdrawal"/>
+                                         h:Watermark.Text="Movement reason"/>
                             </Grid>
                             <Button Content="Record Movement" Command="{Binding RecordMovementCommand}"
                                     Style="{StaticResource SecondaryButtonStyle}"
@@ -148,15 +143,10 @@
 
                     <!-- CLOSE REGISTER (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            BorderBrush="{StaticResource FluentStrokeDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusMedium}"
-                            Padding="{StaticResource DialogPadding}"
-                            Margin="{StaticResource ItemSpacing}">
+                            Style="{StaticResource AdminSectionCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Close Register / Day End" FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeSubtitle}"
-                                       Margin="{StaticResource ItemSpacing}"/>
+                            <TextBlock Text="Close Register / Day End"
+                                       Style="{StaticResource AdminSectionTitleStyle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FormLabelColumnMinWidth}"/>
@@ -175,7 +165,10 @@
                                          AutomationProperties.Name="Closing balance"
                                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
                                          MaxLength="10"
-                                         h:Watermark.Text="Count your cash"/>
+                                         h:TextBoxAdornment.PrefixText="{Binding CurrencySymbol}"
+                                         h:NumericInput.Scope="Number"
+                                         h:NumericInput.IsDecimalOnly="True"
+                                         h:Watermark.Text="Actual cash counted"/>
 
                                 <TextBlock Grid.Row="2" Text="Notes"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -184,7 +177,7 @@
                                          Style="{StaticResource FluentMultilineTextBoxStyle}"
                                          AutomationProperties.Name="Close notes"
                                          MaxLength="500"
-                                         h:Watermark.Text="e.g. ₹50 note damaged"/>
+                                         h:Watermark.Text="Closing notes (optional)"/>
                             </Grid>
                             <Button Content="Close Register" Command="{Binding CloseRegisterCommand}"
                                     Style="{StaticResource PrimaryButtonStyle}"
@@ -194,15 +187,10 @@
 
                     <!-- MOVEMENTS TABLE (shown when open) -->
                     <Border Visibility="{Binding IsRegisterOpen, Converter={StaticResource BoolToVisibility}}"
-                            BorderBrush="{StaticResource FluentStrokeDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusMedium}"
-                            Padding="{StaticResource DialogPadding}"
-                            Margin="{StaticResource ItemSpacing}">
+                            Style="{StaticResource AdminSectionCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Today's Movements" FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeSubtitle}"
-                                       Margin="{StaticResource ItemSpacing}"/>
+                            <TextBlock Text="Today's Movements"
+                                       Style="{StaticResource AdminSectionTitleStyle}"/>
                             <DataGrid ItemsSource="{Binding Movements}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
                                       SelectionMode="Single"
@@ -225,23 +213,18 @@
                 <StackPanel>
                     <!-- DAY-END SUMMARY (shown after close or when viewing history) -->
                     <Border Visibility="{Binding HasDayEndSummary, Converter={StaticResource BoolToVisibility}}"
-                            Background="{StaticResource FluentSurface}"
-                            BorderBrush="{StaticResource FluentStrokeDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusMedium}"
-                            Padding="{StaticResource DialogPadding}"
-                            Margin="{StaticResource ItemSpacing}">
+                            Style="{StaticResource SummaryPanelStyle}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Day-End Summary" FontWeight="SemiBold"
-                                           FontSize="{StaticResource FontSizeSubtitle}"/>
-                                <Button Grid.Column="1" Content="✕" ToolTip="Dismiss"
+                                <TextBlock Text="Day-End Summary"
+                                           Style="{StaticResource SummaryPanelTitleStyle}"/>
+                                <Button Grid.Column="1" Content="Close" ToolTip="Close summary"
                                         Command="{Binding DismissSummaryCommand}"
-                                        Style="{StaticResource SecondaryButtonStyle}" Padding="6,2"/>
+                                        Style="{StaticResource CloseButtonStyle}"/>
                             </Grid>
 
                             <Grid Margin="0,12,0,0">
@@ -261,64 +244,72 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Text="Opening Balance" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Column="1" Text="{Binding DayEndSummary.OpeningBalance, StringFormat={}{0:C}}" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Opening Balance" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding DayEndSummary.OpeningBalance, StringFormat={}{0:C}}" Style="{StaticResource SummaryValueTextStyle}"/>
 
-                                <TextBlock Grid.Row="1" Text="Cash Sales" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DayEndSummary.TotalCashSales, StringFormat={}{0:C}}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="1" Text="Cash Sales" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DayEndSummary.TotalCashSales, StringFormat={}{0:C}}" Style="{StaticResource SummaryValueTextStyle}"/>
 
-                                <TextBlock Grid.Row="2" Text="Card Sales" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DayEndSummary.TotalCardSales, StringFormat={}{0:C}}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="2" Text="Card Sales" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DayEndSummary.TotalCardSales, StringFormat={}{0:C}}" Style="{StaticResource SummaryValueTextStyle}"/>
 
-                                <TextBlock Grid.Row="3" Text="UPI Sales" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DayEndSummary.TotalUpiSales, StringFormat={}{0:C}}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="3" Text="UPI Sales" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DayEndSummary.TotalUpiSales, StringFormat={}{0:C}}" Style="{StaticResource SummaryValueTextStyle}"/>
 
-                                <TextBlock Grid.Row="4" Text="Credit Sales" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DayEndSummary.TotalCreditSales, StringFormat={}{0:C}}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="4" Text="Credit Sales" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DayEndSummary.TotalCreditSales, StringFormat={}{0:C}}" Style="{StaticResource SummaryValueTextStyle}"/>
 
-                                <TextBlock Grid.Row="5" Text="Cash Returns" Style="{StaticResource FormRowLabelStyle}" Foreground="{StaticResource FluentError}"/>
-                                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DayEndSummary.TotalCashReturns, StringFormat=-{0:C}}" HorizontalAlignment="Right" Foreground="{StaticResource FluentError}"/>
+                                <TextBlock Grid.Row="5" Text="Cash Returns" Style="{StaticResource SummaryKeyTextStyle}" Foreground="{StaticResource FluentError}"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DayEndSummary.TotalCashReturns, StringFormat=-{0:C}}" Style="{StaticResource SummaryValueTextStyle}" Foreground="{StaticResource FluentError}"/>
 
-                                <TextBlock Grid.Row="6" Text="Cash In / Out" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Grid.Row="6" Text="Cash In / Out" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource SummaryValueTextStyle}">
                                     <Run Text="+"/><Run Text="{Binding DayEndSummary.TotalCashIn, StringFormat={}{0:C}, Mode=OneWay}"/>
                                     <Run Text=" / -"/><Run Text="{Binding DayEndSummary.TotalCashOut, StringFormat={}{0:C}, Mode=OneWay}"/>
                                 </TextBlock>
 
                                 <Separator Grid.Row="7" Grid.ColumnSpan="2" Margin="0,8"/>
 
-                                <TextBlock Grid.Row="8" Text="Expected Cash" FontWeight="Bold" Style="{StaticResource FormRowLabelStyle}"/>
-                                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding DayEndSummary.ExpectedCash, StringFormat={}{0:C}}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="8" Text="Expected Cash" FontWeight="SemiBold" Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding DayEndSummary.ExpectedCash, StringFormat={}{0:C}}" Style="{StaticResource SummaryAccentValueTextStyle}"/>
                             </Grid>
 
                             <StackPanel Margin="0,12,0,0">
-                                <TextBlock>
-                                    <Run Text="Actual Cash: " FontWeight="SemiBold"/>
-                                    <Run Text="{Binding DayEndSummary.ActualCash, StringFormat={}{0:C}, Mode=OneWay}"/>
-                                </TextBlock>
-                                <TextBlock FontWeight="Bold"
-                                           Foreground="{StaticResource FluentAccentDefault}">
-                                    <Run Text="Discrepancy: "/>
-                                    <Run Text="{Binding DayEndSummary.Discrepancy, StringFormat={}{0:C}, Mode=OneWay}"/>
-                                </TextBlock>
-                                <TextBlock Foreground="{StaticResource FluentTextSecondary}"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Margin="0,4,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="Actual Cash"
+                                               Style="{StaticResource SummaryKeyTextStyle}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding DayEndSummary.ActualCash, StringFormat={}{0:C}, Mode=OneWay}"
+                                               Style="{StaticResource SummaryValueTextStyle}"/>
+
+                                    <TextBlock Grid.Row="1"
+                                               Text="Discrepancy"
+                                               Style="{StaticResource SummaryKeyTextStyle}"
+                                               Foreground="{StaticResource FluentAccentDefault}"/>
+                                    <TextBlock Grid.Row="1"
+                                               Grid.Column="1"
+                                               Text="{Binding DayEndSummary.Discrepancy, StringFormat={}{0:C}, Mode=OneWay}"
+                                               Style="{StaticResource SummaryAccentValueTextStyle}"/>
+                                </Grid>
+                                <TextBlock Style="{StaticResource SummaryMetaTextStyle}">
                                     <Run Text="Sales: "/><Run Text="{Binding DayEndSummary.SaleCount, Mode=OneWay}"/>
-                                    <Run Text=" · Returns: "/><Run Text="{Binding DayEndSummary.ReturnCount, Mode=OneWay}"/>
+                                    <Run Text=" - Returns: "/><Run Text="{Binding DayEndSummary.ReturnCount, Mode=OneWay}"/>
                                 </TextBlock>
 
                                 <!-- Cash variance alert (#252) -->
                                 <Border Visibility="{Binding HasCashVarianceAlert, Converter={StaticResource BoolToVisibility}}"
-                                        Background="{StaticResource FluentErrorBackground}"
-                                        BorderBrush="{StaticResource FluentStrokeError}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource ControlCornerRadius}"
-                                        Padding="12,8"
-                                        Margin="0,8,0,0">
+                                        Style="{StaticResource WarningCalloutCardStyle}">
                                     <TextBlock Text="{Binding CashVarianceAlertMessage}"
-                                               Foreground="{StaticResource FluentError}"
-                                               FontWeight="SemiBold"
+                                               Style="{StaticResource WarningCalloutTitleTextStyle}"
                                                TextWrapping="Wrap"/>
                                 </Border>
                             </StackPanel>
@@ -326,9 +317,8 @@
                     </Border>
 
                     <!-- REGISTER HISTORY -->
-                    <TextBlock Text="Register History" FontWeight="SemiBold"
-                               FontSize="{StaticResource FontSizeSubtitle}"
-                               Margin="{StaticResource ItemSpacing}"/>
+                    <TextBlock Text="Register History"
+                               Style="{StaticResource AdminSectionTitleStyle}"/>
                     <DataGrid ItemsSource="{Binding RegisterHistory}"
                               AutoGenerateColumns="False" IsReadOnly="True"
                               SelectionMode="Single"
@@ -360,14 +350,16 @@
             <controls:InfoBar Severity="Error"
                               Title="Cash Register"
                               Message="{Binding ErrorMessage}"
-                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Severity="Success"
                               Title="Cash Register"
                               Message="{Binding SuccessMessage}"
-                              Visibility="{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
 
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Loading register..."/>
     </Grid>
 </UserControl>
+
+

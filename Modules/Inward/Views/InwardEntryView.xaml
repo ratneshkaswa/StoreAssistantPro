@@ -24,7 +24,11 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inward Entry"/></TextBlock>
+            <StackPanel>
+                <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE7B8;"/><Run Text=" Inward Entry"/></TextBlock>
+                <TextBlock Text="Capture parcel intake, transport charges, and received products in a guided flow."
+                           Style="{StaticResource PageSubtitleStyle}"/>
+            </StackPanel>
 
             <Grid Grid.Row="1"
                   HorizontalAlignment="Center"
@@ -260,7 +264,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Number of Parcels "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Number of Parcels "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <ComboBox Grid.Row="0" Grid.Column="1"
                           AutomationProperties.Name="Number of parcels"
@@ -287,7 +291,7 @@
                          AutomationProperties.Name="Transport charges"
                          Text="{Binding TransportCharges, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         h:Watermark.Text="e.g. 250"/>
+                         h:Watermark.Text="Parcel amount"/>
 
             </Grid>
 
@@ -295,9 +299,9 @@
             <ScrollViewer Visibility="{Binding IsStep3, Converter={StaticResource BoolToVisibility}}"
                           AutomationProperties.Name="Parcel entry list"
                           VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
                           Focusable="False"
-                          PanningMode="Both">
+                          PanningMode="VerticalOnly">
                 <ItemsControl ItemsSource="{Binding Parcels}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -396,7 +400,7 @@
                                                                  Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
                                                                  IsEnabled="{Binding HasSelectedProduct}"
                                                                  Margin="{StaticResource InlineControlSpacing}" MaxLength="8"
-                                                                 h:Watermark.Text="e.g. 12"/>
+                                                                 h:Watermark.Text="Parcel count"/>
                                                         <ComboBox Grid.Column="2"
                                                                   AutomationProperties.Name="Parcel colour"
                                                                   ItemsSource="{Binding DataContext.Colours, ElementName=Root}"
@@ -449,10 +453,10 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
 
         <!-- Row 3: Navigation buttons -->
@@ -476,8 +480,8 @@
                         Style="{StaticResource PrimaryButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding CanGoNext, Converter={StaticResource BoolToVisibility}}"/>
-                <Button Grid.Column="1" Content="Save Entry" Command="{Binding SaveCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
+                <Button Grid.Column="1" Content="Save" Command="{Binding SaveCommand}"
+                        Style="{StaticResource SaveButtonStyle}"
                         Margin="{StaticResource InlineControlSpacing}"
                         Visibility="{Binding IsLastStep, Converter={StaticResource BoolToVisibility}}"/>
             </Grid>

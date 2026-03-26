@@ -239,7 +239,12 @@ public sealed partial class WorkspaceViewModel(
         _autoRefreshTimer.Start();
     }
 
-    private async void OnAutoRefreshTick(object? sender, EventArgs e)
+    private void OnAutoRefreshTick(object? sender, EventArgs e)
+    {
+        _ = OnAutoRefreshTickAsync();
+    }
+
+    private async Task OnAutoRefreshTickAsync()
     {
         if (IsLoading || IsBusy) return;
         await RefreshAsync();

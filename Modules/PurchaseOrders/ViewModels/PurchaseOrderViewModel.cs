@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Products.Services;
 using StoreAssistantPro.Modules.PurchaseOrders.Services;
@@ -14,6 +15,8 @@ public partial class PurchaseOrderViewModel(
     IPurchaseOrderService poService,
     IProductService productService) : BaseViewModel
 {
+    private bool _isRestoringViewState;
+
     [ObservableProperty]
     public partial ObservableCollection<PurchaseOrder> Orders { get; set; } = [];
 
@@ -32,8 +35,12 @@ public partial class PurchaseOrderViewModel(
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
 
+    partial void OnSearchQueryChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial PurchaseOrderStatus? FilterStatus { get; set; }
+
+    partial void OnFilterStatusChanged(PurchaseOrderStatus? value) => PersistViewState();
 
     public ObservableCollection<PurchaseOrderStatus?> StatusOptions { get; } =
     [
@@ -51,6 +58,8 @@ public partial class PurchaseOrderViewModel(
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
     [NotifyPropertyChangedFor(nameof(HasNextPage))]
     public partial int CurrentPage { get; set; } = 1;
+
+    partial void OnCurrentPageChanged(int value) => PersistViewState();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
@@ -102,6 +111,7 @@ public partial class PurchaseOrderViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         var suppliersTask = poService.GetActiveSuppliersAsync(ct);
         var productsTask = productService.GetActiveAsync(ct);
 
@@ -394,6 +404,39 @@ public partial class PurchaseOrderViewModel(
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetPurchaseOrdersState();
+            SearchQuery = state.SearchText;
+            CurrentPage = state.CurrentPage;
+            FilterStatus = string.Equals(state.ActiveFilter, "All", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : Enum.TryParse<PurchaseOrderStatus>(state.ActiveFilter, true, out var status)
+                    ? status
+                    : null;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetPurchaseOrdersState(new PagedSearchFilterViewState
+        {
+            SearchText = SearchQuery,
+            ActiveFilter = FilterStatus?.ToString() ?? "All",
+            CurrentPage = CurrentPage
+        });
     }
 }
 

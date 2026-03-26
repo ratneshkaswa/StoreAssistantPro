@@ -1,11 +1,12 @@
-﻿using System.Windows;
+using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
 namespace StoreAssistantPro.Core.Controls;
 
 /// <summary>
 /// Displays the app logo (from Assets/logo-64.png) + styled "Store Assistant Pro" title.
-/// Falls back to a 🏪 emoji if the logo image file is not found.
+/// Falls back to a store emoji if the logo image file is not found.
 /// </summary>
 public class AppBranding : Control
 {
@@ -61,5 +62,26 @@ public class AppBranding : Control
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(AppBranding),
             new FrameworkPropertyMetadata(typeof(AppBranding)));
+    }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new AppBrandingAutomationPeer(this);
+
+    private sealed class AppBrandingAutomationPeer(AppBranding owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(AppBranding);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Text;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (AppBranding)Owner;
+            return string.IsNullOrWhiteSpace(owner.Subtitle)
+                ? "Store Assistant Pro"
+                : $"Store Assistant Pro, {owner.Subtitle}";
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
 namespace StoreAssistantPro.Core.Controls;
@@ -68,6 +69,8 @@ public class InfoBar : ContentControl
         set => SetValue(IsOpenProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new InfoBarAutomationPeer(this);
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -82,6 +85,25 @@ public class InfoBar : ContentControl
     }
 
     private void OnCloseButtonClick(object sender, RoutedEventArgs e) => IsOpen = false;
+
+    private sealed class InfoBarAutomationPeer(InfoBar owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(InfoBar);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.StatusBar;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (InfoBar)Owner;
+            return string.IsNullOrWhiteSpace(owner.Title)
+                ? owner.Message ?? "Status message"
+                : $"{owner.Title}: {owner.Message}".Trim();
+        }
+    }
 }
 
 public enum InfoBarSeverity

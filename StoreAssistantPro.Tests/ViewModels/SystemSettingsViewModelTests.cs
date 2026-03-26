@@ -4,15 +4,21 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Settings.Services;
 using StoreAssistantPro.Modules.Settings.ViewModels;
+using StoreAssistantPro.Tests.Helpers;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
-public class SystemSettingsViewModelTests
+[Collection("UserPreferences")]
+public class SystemSettingsViewModelTests : IDisposable
 {
     private readonly ISystemSettingsService _settingsService = Substitute.For<ISystemSettingsService>();
     private readonly ILoginService _loginService = Substitute.For<ILoginService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IUiDensityService _uiDensityService = Substitute.For<IUiDensityService>();
+
+    public SystemSettingsViewModelTests() => UserPreferencesStore.ClearForTests();
+
+    public void Dispose() => UserPreferencesStore.ClearForTests();
 
     private SystemSettingsViewModel CreateSut() => new(_settingsService, _loginService, _dialogService, _uiDensityService);
 
@@ -62,5 +68,54 @@ public class SystemSettingsViewModelTests
 
         Assert.True(sut.IsCompactModeEnabled);
         _uiDensityService.Received(1).SetCompactMode(true);
+    }
+
+    [Fact]
+    public async Task LoadCommand_Should_Read_Experience_And_Notification_Preferences()
+    {
+        UserPreferencesStore.Update(state =>
+        {
+            state.RestoreLastVisitedPageOnLogin = false;
+            state.InAppToastsEnabled = false;
+            state.WindowsNotificationsEnabled = true;
+            state.NotificationSoundEnabled = true;
+            state.MinimumNotificationLevel = AppNotificationLevel.Warning;
+        });
+
+        _settingsService.GetAsync(Arg.Any<CancellationToken>()).Returns(new SystemSettings());
+        _uiDensityService.IsCompactModeEnabled.Returns(true);
+        var sut = CreateSut();
+
+        await sut.LoadCommand.ExecuteAsync(null);
+
+        Assert.False(sut.RestoreLastVisitedPageOnLogin);
+        Assert.False(sut.InAppToastsEnabled);
+        Assert.True(sut.WindowsNotificationsEnabled);
+        Assert.True(sut.NotificationSoundEnabled);
+        Assert.Equal(AppNotificationLevel.Warning, sut.MinimumNotificationLevel);
+    }
+
+    [Fact]
+    public async Task SaveCommand_Should_Persist_Experience_And_Notification_Preferences()
+    {
+        _settingsService.UpdateAsync(Arg.Any<SystemSettingsDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+        sut.BackupTime = "09:30";
+        sut.AutoBackupEnabled = false;
+        sut.RestoreLastVisitedPageOnLogin = false;
+        sut.InAppToastsEnabled = false;
+        sut.WindowsNotificationsEnabled = true;
+        sut.NotificationSoundEnabled = true;
+        sut.MinimumNotificationLevel = AppNotificationLevel.Error;
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var snapshot = UserPreferencesStore.GetSnapshot();
+        Assert.False(snapshot.RestoreLastVisitedPageOnLogin);
+        Assert.False(snapshot.InAppToastsEnabled);
+        Assert.True(snapshot.WindowsNotificationsEnabled);
+        Assert.True(snapshot.NotificationSoundEnabled);
+        Assert.Equal(AppNotificationLevel.Error, snapshot.MinimumNotificationLevel);
     }
 }

@@ -163,21 +163,21 @@
                     <TranslateTransform x:Name="HeroBackdropParallaxTransform"/>
                 </Grid.RenderTransform>
 
-                <Border Width="320"
-                        Height="176"
+                <Border Width="{StaticResource WorkspaceHeroAccentLeftWidth}"
+                        Height="{StaticResource WorkspaceHeroAccentLeftHeight}"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
-                        Margin="-32,-24,0,0"
-                        CornerRadius="160"
+                        Margin="{StaticResource WorkspaceHeroAccentLeftMargin}"
+                        CornerRadius="{StaticResource WorkspaceHeroAccentLeftCornerRadius}"
                         Background="{StaticResource FluentAccentLight3}"
                         Opacity="0.16"/>
 
-                <Border Width="220"
-                        Height="136"
+                <Border Width="{StaticResource WorkspaceHeroAccentRightWidth}"
+                        Height="{StaticResource WorkspaceHeroAccentRightHeight}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
-                        Margin="0,-8,36,0"
-                        CornerRadius="110"
+                        Margin="{StaticResource WorkspaceHeroAccentRightMargin}"
+                        CornerRadius="{StaticResource WorkspaceHeroAccentRightCornerRadius}"
                         Background="{StaticResource FluentAccentLight2}"
                         Opacity="0.10"/>
             </Grid>
@@ -209,7 +209,7 @@
                         BorderBrush="{StaticResource DividerStrokeColorDefault}"
                         BorderThickness="1"
                         CornerRadius="16"
-                        Padding="12,10">
+                        Padding="{StaticResource WorkspaceHeaderStatusCardPadding}">
                     <StackPanel Orientation="Horizontal">
                         <Border Width="40"
                                 Height="40"
@@ -222,7 +222,7 @@
                                        Foreground="{StaticResource FluentAccentDark2}"/>
                         </Border>
 
-                        <StackPanel Margin="12,0,0,0">
+                        <StackPanel Margin="{StaticResource WorkspaceHeaderStatusStackGap}">
                             <TextBlock Text="{Binding DataContext.DashboardSummary.CurrentUserLabel, RelativeSource={RelativeSource AncestorType=Window}}"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource FluentTextPrimary}"/>

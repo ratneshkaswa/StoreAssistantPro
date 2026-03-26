@@ -19,7 +19,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE719;"/><Run Text=" Product Management"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE719;"/><Run Text=" Products"/></TextBlock>
+            <TextBlock Text="Manage product master data, pricing, stock context, and supplier links."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Search & Filter Toolbar -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -33,7 +37,7 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search by name or barcode"
+                     h:Watermark.Text="Search products by name or barcode"
                      AutomationProperties.Name="Search products"/>
             <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}"
                       SelectedItem="{Binding FilterCategory}"
@@ -87,6 +91,7 @@
                       ItemsSource="{Binding Products}"
                       SelectedItem="{Binding SelectedProduct}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="ProductsGrid"
                       h:DataGridEmptyState.Icon="📦"
                       h:DataGridEmptyState.Title="No products found"
                       h:DataGridEmptyState.Description="Add a product or relax the current brand, category, and stock filters to see more items."
@@ -150,9 +155,9 @@
 
             <!-- Form fields (scrollable when clamped) -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
                           Focusable="False"
-                          PanningMode="Both"
+                          PanningMode="VerticalOnly"
                           Margin="{StaticResource ItemSpacing}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -183,13 +188,13 @@
                     </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                <Run Text="Product Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                <Run Text="Product Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
             </TextBlock>
             <TextBox Grid.Row="0" Grid.Column="1"
                      Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}"
                      MaxLength="200"
                      AutomationProperties.Name="Product name"
-                     h:Watermark.Text="e.g. Oxford Shirt"/>
+                     h:Watermark.Text="Product name"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Product Type"
                        Style="{StaticResource FormRowLabelStyle}"/>
@@ -307,13 +312,13 @@
             <controls:InfoBar Severity="Error"
                               Title="Product issue"
                               Message="{Binding ErrorMessage}"
-                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              IsOpen="{Binding HasError}"
                               AutomationProperties.LiveSetting="Assertive"
                               AutomationProperties.HelpText="{Binding ErrorMessage}"/>
             <controls:InfoBar Severity="Success"
                               Title="Product saved"
                               Message="{Binding SuccessMessage}"
-                              Visibility="{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              IsOpen="{Binding HasSuccess}"
                               AutomationProperties.LiveSetting="Polite"
                               AutomationProperties.HelpText="{Binding SuccessMessage}"/>
         </Grid>
@@ -321,7 +326,7 @@
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="{StaticResource FormActionBarSpacing}">
-            <Button Content="New" Command="{Binding NewProductCommand}"
+            <Button Content="New Product" Command="{Binding NewProductCommand}"
                     Style="{StaticResource NewButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Content="Variants" Command="{Binding ManageVariantsCommand}"
                     Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>

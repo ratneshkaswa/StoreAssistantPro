@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -42,6 +44,8 @@ public class BreadcrumbBar : ItemsControl
         set => SetValue(ItemClickCommandProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new BreadcrumbBarAutomationPeer(this);
+
     protected override DependencyObject GetContainerForItemOverride() => new BreadcrumbBarItem();
 
     protected override bool IsItemItsOwnContainerOverride(object item) => item is BreadcrumbBarItem;
@@ -61,6 +65,21 @@ public class BreadcrumbBar : ItemsControl
         RaiseEvent(new RoutedEventArgs(ItemClickedEvent, item));
         if (ItemClickCommand is { } cmd && cmd.CanExecute(item))
             cmd.Execute(item);
+    }
+
+    private sealed class BreadcrumbBarAutomationPeer(BreadcrumbBar owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(BreadcrumbBar);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ToolBar;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            return !string.IsNullOrWhiteSpace(explicitName)
+                ? explicitName
+                : "Breadcrumb navigation";
+        }
     }
 }
 
@@ -86,6 +105,8 @@ public class BreadcrumbBarItem : ContentControl
         set => SetValue(IsLastProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new BreadcrumbBarItemAutomationPeer(this);
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -96,9 +117,48 @@ public class BreadcrumbBarItem : ContentControl
         _button = GetTemplateChild("PART_Button") as Button;
 
         if (_button is not null)
+        {
+            AutomationProperties.SetName(_button, GetAutomationName());
             _button.Click += OnPartButtonClick;
+        }
+    }
+
+    protected override void OnContentChanged(object oldContent, object newContent)
+    {
+        base.OnContentChanged(oldContent, newContent);
+
+        if (_button is not null)
+            AutomationProperties.SetName(_button, GetAutomationName());
     }
 
     private void OnPartButtonClick(object sender, RoutedEventArgs e) =>
         ParentBar?.RaiseItemClicked(Content ?? DataContext);
+
+    private string GetAutomationName()
+    {
+        var label = (Content ?? DataContext)?.ToString();
+        return string.IsNullOrWhiteSpace(label)
+            ? "Navigate through breadcrumb"
+            : $"Navigate to {label.Trim()}";
+    }
+
+    private sealed class BreadcrumbBarItemAutomationPeer(BreadcrumbBarItem owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(BreadcrumbBarItem);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Button;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (BreadcrumbBarItem)Owner;
+            var label = (owner.Content ?? owner.DataContext)?.ToString();
+            return string.IsNullOrWhiteSpace(label)
+                ? "Navigate through breadcrumb"
+                : $"Navigate to {label.Trim()}";
+        }
+    }
 }

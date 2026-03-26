@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
 namespace StoreAssistantPro.Core.Controls;
@@ -87,6 +88,8 @@ public class DateRangePicker : Control
         set => SetValue(IsDropDownOpenProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new DateRangePickerAutomationPeer(this);
+
     private static void OnStartDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not DateRangePicker picker ||
@@ -111,5 +114,22 @@ public class DateRangePicker : Control
         }
 
         picker.StartDate = end;
+    }
+
+    private sealed class DateRangePickerAutomationPeer(DateRangePicker owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(DateRangePicker);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ComboBox;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (DateRangePicker)Owner;
+            return $"{owner.StartHeader} to {owner.EndHeader}";
+        }
     }
 }

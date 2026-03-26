@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
 namespace StoreAssistantPro.Core.Controls;
@@ -45,5 +46,24 @@ public class LoadingOverlay : Control
     {
         get => (string)GetValue(MessageProperty);
         set => SetValue(MessageProperty, value);
+    }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new LoadingOverlayAutomationPeer(this);
+
+    private sealed class LoadingOverlayAutomationPeer(LoadingOverlay owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(LoadingOverlay);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ProgressBar;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (LoadingOverlay)Owner;
+            return string.IsNullOrWhiteSpace(owner.Message) ? "Loading content" : owner.Message;
+        }
     }
 }

@@ -27,16 +27,20 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Style="{StaticResource PageTitleStyle}" Margin="{StaticResource TitleSpacing}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE731;"/>
-            <Run Text=" Business Settings"/>
-        </TextBlock>
+        <StackPanel Margin="{StaticResource TitleSpacing}">
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE731;"/>
+                <Run Text=" Business Settings"/>
+            </TextBlock>
+            <TextBlock Text="Maintain business identity, tax details, and defaults used across the app."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
                       Focusable="False"
-                      PanningMode="Both">
+                      PanningMode="VerticalOnly">
             <StackPanel Margin="{StaticResource ItemSpacing}"
                         Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                         MaxWidth="{StaticResource SettingsDialogContentMaxWidth}"
@@ -68,7 +72,7 @@
                                          AutomationProperties.Name="Firm Name"
                                          AutomationProperties.LabeledBy="{Binding ElementName=FirmNameLabel}"
                                          AutomationProperties.IsRequiredForForm="True"
-                                         h:Watermark.Text="e.g. Sonali Collection"/>
+                                         h:Watermark.Text="Store name"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}">
@@ -100,7 +104,7 @@
                                          MaxLength="10"
                                          h:NumericInput.Scope="TelephoneNumber"
                                          h:NumericInput.IsIntegerOnly="True"
-                                         h:Watermark.Text="e.g. 9876543210"/>
+                                         h:Watermark.Text="Primary phone"/>
                                 <TextBlock Text="{Binding PhoneValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"
@@ -120,7 +124,7 @@
                                          HorizontalAlignment="Left"
                                          h:NumericInput.Scope="Digits"
                                          h:NumericInput.IsIntegerOnly="True"
-                                         h:Watermark.Text="e.g. 302001"/>
+                                         h:Watermark.Text="PIN code"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}">
@@ -132,7 +136,7 @@
                                          MaxLength="100"
                                          AutomationProperties.Name="Email"
                                          AutomationProperties.LabeledBy="{Binding ElementName=EmailLabel}"
-                                         h:Watermark.Text="e.g. hello@yourstore.in"/>
+                                         h:Watermark.Text="Email address"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Style="{StaticResource FirmFieldPanelStyle}">
@@ -191,7 +195,7 @@
                                          MaxLength="6"
                                          h:TextBoxAdornment.SuffixText="%"
                                          h:NumericInput.IsDecimalOnly="True"
-                                         h:Watermark.Text="e.g. 1 or 1.5"/>
+                                         h:Watermark.Text="Composition rate"/>
                                 <TextBlock Text="{Binding CompositionRateValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"
@@ -208,7 +212,7 @@
                                          AutomationProperties.LabeledBy="{Binding ElementName=GstinLabel}"
                                          MaxLength="15"
                                          CharacterCasing="Upper"
-                                         h:Watermark.Text="e.g. 27ABCDE1234F1Z5"/>
+                                         h:Watermark.Text="GSTIN"/>
                                 <TextBlock Text="{Binding GstinValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"
@@ -227,7 +231,7 @@
                                          CharacterCasing="Upper"
                                          Width="{StaticResource FieldWidthStandard}"
                                          HorizontalAlignment="Left"
-                                         h:Watermark.Text="e.g. ABCDE1234F"/>
+                                         h:Watermark.Text="PAN"/>
                                 <TextBlock Text="{Binding PanValidationHint}"
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"
@@ -367,8 +371,8 @@
                                          MaxLength="20"
                                          Width="{StaticResource FieldWidthStandard}"
                                          HorizontalAlignment="Left"
-                                         h:Watermark.Text="e.g. INV or SA-2025-"/>
-                                <TextBlock Text="Prefix added before invoice numbers (e.g. INV-00001)."
+                                         h:Watermark.Text="Invoice prefix"/>
+                                <TextBlock Text="Prefix added before invoice numbers, for example INV-00001."
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"/>
                             </StackPanel>
@@ -382,7 +386,7 @@
                                          AutomationProperties.Name="Receipt footer text"
                                          AutomationProperties.LabeledBy="{Binding ElementName=ReceiptFooterLabel}"
                                          MaxLength="200"
-                                         h:Watermark.Text="e.g. Thank you! Visit again!"/>
+                                         h:Watermark.Text="Receipt footer message"/>
                                 <TextBlock Text="Printed at the bottom of every receipt."
                                            Margin="{StaticResource ValidationHintMargin}"
                                            Style="{StaticResource HintTextStyle}"/>
@@ -399,13 +403,13 @@
             <controls:InfoBar Severity="Error"
                               Title="Business issue"
                               Message="{Binding ErrorMessage}"
-                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              IsOpen="{Binding HasError}"
                               AutomationProperties.LiveSetting="Assertive"
                               AutomationProperties.HelpText="{Binding ErrorMessage}"/>
             <controls:InfoBar Severity="Success"
                               Title="Business settings saved"
                               Message="{Binding SuccessMessage}"
-                              Visibility="{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                              IsOpen="{Binding HasSuccess}"
                               AutomationProperties.LiveSetting="Polite"
                               AutomationProperties.HelpText="{Binding SuccessMessage}"/>
         </Grid>
@@ -419,9 +423,9 @@
                 CornerRadius="{StaticResource CornerRadiusMedium}">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right">
-                    <Button Content="Save Changes"
+                    <Button Content="Save"
                             Command="{Binding SaveFirmCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"
+                            Style="{StaticResource SaveButtonStyle}"
                             MinWidth="120"
                             Margin="{StaticResource InlineControlSpacing}"/>
             </StackPanel>

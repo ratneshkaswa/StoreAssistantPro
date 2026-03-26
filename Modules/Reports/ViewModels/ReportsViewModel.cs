@@ -16,16 +16,24 @@ public partial class ReportsViewModel(
     IPrintPreviewService printPreviewService,
     IAuditService auditService) : BaseViewModel
 {
+    private bool _isRestoringViewState;
+
     // ── Date range ──
 
     [ObservableProperty]
     public partial DateTime DateFrom { get; set; } = new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
+    partial void OnDateFromChanged(DateTime value) => PersistViewState();
+
     [ObservableProperty]
     public partial DateTime DateTo { get; set; } = DateTime.Today;
 
+    partial void OnDateToChanged(DateTime value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActivePreset { get; set; } = "This Month";
+
+    partial void OnActivePresetChanged(string value) => PersistViewState();
 
     // ── Daily sales summary (#255) ──
 
@@ -185,6 +193,7 @@ public partial class ReportsViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await RefreshAllAsync(ct);
     });
 
@@ -545,5 +554,34 @@ public partial class ReportsViewModel(
         DebtorCount = debtor.Count;
         DebtorOutstanding = debtor.TotalOutstanding;
         TopDebtors = new ObservableCollection<TopDebtor>(debtor.TopDebtors);
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetReportsState();
+            DateFrom = state.DateFrom;
+            DateTo = state.DateTo;
+            ActivePreset = state.ActivePreset;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetReportsState(new ReportsViewState
+        {
+            DateFrom = DateFrom,
+            DateTo = DateTo,
+            ActivePreset = ActivePreset
+        });
     }
 }

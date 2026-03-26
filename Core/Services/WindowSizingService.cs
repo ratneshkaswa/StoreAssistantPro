@@ -18,9 +18,15 @@ public class WindowSizingService : IWindowSizingService
         _mainWindow = window;
 
         window.ShowActivated = true;
+        window.SizeToContent = SizeToContent.Manual;
         window.WindowStartupLocation = WindowStartupLocation.Manual;
         window.WindowState = WindowState.Maximized;
         window.ResizeMode = ResizeMode.NoResize;
+        window.Loaded += (_, _) =>
+        {
+            if (window.WindowState != WindowState.Maximized)
+                window.WindowState = WindowState.Maximized;
+        };
         AttachVisibilityGuard(window);
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;
@@ -136,7 +142,7 @@ public class WindowSizingService : IWindowSizingService
 
     private static void ClampWindowToVisibleArea(Window window)
     {
-        if (window.WindowState == WindowState.Minimized)
+        if (window.WindowState != WindowState.Normal)
             return;
 
         var width = window.ActualWidth > 0 ? window.ActualWidth : window.Width;

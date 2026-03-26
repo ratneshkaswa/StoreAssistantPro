@@ -15,9 +15,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -27,41 +27,30 @@
             <StackPanel>
                 <TextBlock Text="Barcode Labels"
                            Style="{StaticResource PageTitleStyle}"/>
-                <TextBlock Text="Generate and print barcode labels for your products."
-                           Margin="0,4,0,0"
-                           FontSize="{StaticResource FontSizeBody}"
-                           Foreground="{StaticResource FluentTextSecondary}"/>
+                <TextBlock Text="Build a print queue, adjust label settings, and print barcode sheets from one compact tool surface."
+                           Style="{StaticResource PageSubtitleStyle}"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                <Button Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding PrintLabelsCommand}"
-                        MinWidth="120">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource FluentIconFont}"
-                                   Text="&#xE749;"
-                                   Margin="0,0,8,0"/>
-                        <TextBlock Text="Print Labels"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+            <Button Grid.Column="1"
+                    Content="Print Labels"
+                    Command="{Binding PrintLabelsCommand}"
+                    Style="{StaticResource PrintButtonStyle}"
+                    MinWidth="148"/>
         </Grid>
 
-        <!-- Main content: 3-column layout -->
-        <Grid Grid.Row="1" Margin="0,16,0,0">
+        <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition Width="320"/>
                 <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left: Product list -->
-            <Border Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardPadding}">
+            <Border Style="{StaticResource AdminSectionCardStyle}" Margin="0">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -74,63 +63,67 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Text="Products"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                                   Style="{StaticResource AdminSectionTitleStyle}"/>
 
                         <Button Grid.Column="1"
                                 Content="Add All"
-                                Style="{StaticResource ToolbarLinkButtonStyle}"
+                                Style="{StaticResource UtilityButtonStyle}"
                                 Command="{Binding AddAllToBatchCommand}"/>
                     </Grid>
 
-                    <TextBox Grid.Row="1"
+                    <TextBlock Grid.Row="1"
+                               Text="Search products and add them into the current label print queue."
+                               Style="{StaticResource AdminSectionDescriptionStyle}"/>
+
+                    <TextBox Grid.Row="2"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             h:Watermark.Text="Search by name, barcode, or SKU…"
+                             Style="{StaticResource FluentSearchTextBoxStyle}"
+                             AutomationProperties.Name="Search products"
+                             h:Watermark.Text="Search products by name, barcode, or SKU"
                              Margin="0,8,0,0"/>
 
-                    <DataGrid Grid.Row="2"
-                              ItemsSource="{Binding Products}"
-                              Style="{StaticResource EnterpriseDataGridStyle}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              HeadersVisibility="Column"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              Margin="0,8,0,0"
-                              h:DataGridEmptyState.IsEnabled="False">
-                        <DataGrid.InputBindings>
-                            <MouseBinding MouseAction="LeftDoubleClick"
-                                          Command="{Binding AddToBatchCommand}"
-                                          CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                        </DataGrid.InputBindings>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="PRODUCT"
-                                                Binding="{Binding Name}"
-                                                Width="*"/>
-                            <DataGridTextColumn Header="BARCODE"
-                                                Binding="{Binding Barcode}"
-                                                Width="140"/>
-                            <DataGridTextColumn Header="PRICE"
-                                                Binding="{Binding SalePrice, StringFormat=N2}"
-                                                Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid Grid.Row="3" Margin="0,8,0,0">
+                        <DataGrid ItemsSource="{Binding Products}"
+                                  Style="{StaticResource EnterpriseDataGridStyle}"
+                                  AutomationProperties.Name="Products"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  h:DataGridEmptyState.IsEnabled="False">
+                            <DataGrid.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick"
+                                              Command="{Binding AddToBatchCommand}"
+                                              CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                            </DataGrid.InputBindings>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="PRODUCT"
+                                                    Binding="{Binding Name}"
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="BARCODE"
+                                                    Binding="{Binding Barcode}"
+                                                    Width="140"/>
+                                <DataGridTextColumn Header="PRICE"
+                                                    Binding="{Binding SalePrice, StringFormat=N2}"
+                                                    Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
-                    <controls:EmptyStateOverlay Grid.Row="2"
-                                                Icon="📦"
-                                                Title="No products found"
-                                                Description="Add products with barcodes to generate labels."
-                                                ItemCount="{Binding Products.Count}"/>
+                        <controls:EmptyStateOverlay Icon="📦"
+                                                    Title="No products found"
+                                                    Description="Add products with barcodes to generate labels."
+                                                    ItemCount="{Binding Products.Count}"/>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- Center: Batch queue (#382) -->
             <Border Grid.Column="2"
-                    Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardPadding}">
+                    Style="{StaticResource AdminSectionCardStyle}"
+                    Margin="0">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
@@ -143,95 +136,98 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Text="Print Queue"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                                   Style="{StaticResource AdminSectionTitleStyle}"/>
 
                         <Button Grid.Column="1"
                                 Content="Clear"
-                                Style="{StaticResource ToolbarLinkButtonStyle}"
+                                Style="{StaticResource UtilityButtonStyle}"
                                 Command="{Binding ClearBatchCommand}"/>
                     </Grid>
 
-                    <ScrollViewer Grid.Row="1"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  Margin="0,8,0,0">
-                        <ItemsControl ItemsSource="{Binding BatchItems}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="0,6">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="1"
+                               Text="Adjust quantities before printing the current batch of labels."
+                               Style="{StaticResource AdminSectionDescriptionStyle}"/>
 
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding ProductName}"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource FluentTextPrimary}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding Barcode}"
-                                                           FontSize="{StaticResource FontSizeCaption}"
-                                                           Foreground="{StaticResource FluentTextSecondary}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
+                    <Grid Grid.Row="2" Margin="0,8,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding BatchItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                                BorderThickness="0,0,0,1"
+                                                Padding="0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                                        VerticalAlignment="Center" Margin="8,0,0,0">
-                                                <TextBlock Text="×" VerticalAlignment="Center"
-                                                           Foreground="{StaticResource FluentTextTertiary}"
-                                                           Margin="0,0,4,0"/>
-                                                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
-                                                         Width="40"
-                                                         h:NumericInput.IsIntegerOnly="True"
-                                                         TextAlignment="Center"/>
-                                            </StackPanel>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding ProductName}"
+                                                               Style="{StaticResource ReportListPrimaryTextStyle}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Barcode}"
+                                                               Style="{StaticResource ReportListSecondaryTextStyle}"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
 
-                                            <Button Grid.Column="2"
-                                                    Content="✕"
-                                                    Style="{StaticResource ToolbarLinkButtonStyle}"
-                                                    Command="{Binding DataContext.RemoveFromBatchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    ToolTip="Remove label from batch"
-                                                    AutomationProperties.Name="Remove label from batch"
-                                                    Margin="8,0,0,0"/>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            Margin="8,0,0,0">
+                                                    <TextBlock Text="x"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{StaticResource FluentTextTertiary}"
+                                                               Margin="0,0,4,0"/>
+                                                    <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                                                             Width="48"
+                                                             h:NumericInput.IsIntegerOnly="True"
+                                                             TextAlignment="Center"/>
+                                                </StackPanel>
 
-                    <controls:EmptyStateOverlay Grid.Row="1"
-                                                Icon="🏷"
-                                                Title="No labels queued"
-                                                Description="Double-click products to add them to the print queue."
-                                                ItemCount="{Binding BatchItems.Count}"/>
+                                                <Button Grid.Column="2"
+                                                        Content="Remove"
+                                                        Style="{StaticResource UtilityButtonStyle}"
+                                                        Command="{Binding DataContext.RemoveFromBatchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip="Remove label from batch"
+                                                        AutomationProperties.Name="Remove label from batch"
+                                                        Margin="8,0,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
 
-                    <Border Grid.Row="2"
-                            Background="{StaticResource LayerFillColorSecondary}"
-                            CornerRadius="6"
-                            Padding="12,8"
+                        <controls:EmptyStateOverlay Icon="🏷"
+                                                    Title="No labels queued"
+                                                    Description="Double-click products to add them to the print queue."
+                                                    ItemCount="{Binding BatchItems.Count}"/>
+                    </Grid>
+
+                    <Border Grid.Row="3"
+                            Style="{StaticResource SummaryPanelStyle}"
                             Margin="0,8,0,0">
-                        <TextBlock Text="{Binding TotalLabelsLabel}"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextSecondary}"
-                                   FontWeight="SemiBold"/>
+                        <StackPanel>
+                            <TextBlock Text="Batch Summary"
+                                       Style="{StaticResource SummaryPanelTitleStyle}"/>
+                            <TextBlock Text="{Binding TotalLabelsLabel}"
+                                       Style="{StaticResource SummaryMetaTextStyle}"
+                                       Margin="0"/>
+                        </StackPanel>
                     </Border>
                 </Grid>
             </Border>
 
-            <!-- Right: Template settings (#377) + Preview -->
             <Border Grid.Column="4"
-                    Style="{StaticResource CardStyle}"
-                    Padding="{StaticResource CardPadding}">
+                    Style="{StaticResource AdminSectionCardStyle}"
+                    Margin="0">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -239,31 +235,33 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Label Template"
-                               FontSize="{StaticResource FontSizeBody}"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource FluentTextPrimary}"/>
+                               Style="{StaticResource AdminSectionTitleStyle}"/>
 
-                    <!-- Toggle options -->
-                    <StackPanel Grid.Row="1" Margin="0,12,0,0">
-                        <CheckBox Content="Product name (#378)"
+                    <TextBlock Grid.Row="1"
+                               Text="Choose which fields appear and how labels are arranged on each page."
+                               Style="{StaticResource AdminSectionDescriptionStyle}"/>
+
+                    <StackPanel Grid.Row="2" Margin="0,8,0,0">
+                        <CheckBox Content="Product name"
                                   IsChecked="{Binding ShowProductName}"
                                   Margin="0,4"/>
-                        <CheckBox Content="Sale price (#379)"
+                        <CheckBox Content="Sale price"
                                   IsChecked="{Binding ShowSalePrice}"
                                   Margin="0,4"/>
-                        <CheckBox Content="MRP (#380)"
+                        <CheckBox Content="MRP"
                                   IsChecked="{Binding ShowMRP}"
                                   Margin="0,4"/>
                         <CheckBox Content="Barcode"
                                   IsChecked="{Binding ShowBarcode}"
                                   Margin="0,4"/>
+                        <CheckBox Content="Size and color"
+                                  IsChecked="{Binding ShowSizeColor}"
+                                  Margin="0,4"/>
                     </StackPanel>
 
-                    <!-- Sheet layout (#445) -->
-                    <StackPanel Grid.Row="2" Margin="0,16,0,0">
-                        <TextBlock Text="SHEET LAYOUT"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextTertiary}"
+                    <StackPanel Grid.Row="3" Margin="0,16,0,0">
+                        <TextBlock Text="Sheet Layout"
+                                   Style="{StaticResource AdminSectionTitleStyle}"
                                    Margin="0,0,0,8"/>
 
                         <Grid>
@@ -274,37 +272,54 @@
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="8"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="8"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <StackPanel>
-                                <TextBlock Text="Columns"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"/>
-                                <TextBox Text="{Binding ColumnsPerSheet, UpdateSourceTrigger=PropertyChanged}"
-                                         h:NumericInput.IsIntegerOnly="True"
-                                         Margin="0,4,0,0"/>
+                                <TextBlock Text="Label width"
+                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBox Text="{Binding LabelWidth, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,4,0,0"
+                                         h:NumericInput.Scope="Number"
+                                         h:TextBoxAdornment.SuffixText="mm"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Rows"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextSecondary}"/>
-                                <TextBox Text="{Binding RowsPerSheet, UpdateSourceTrigger=PropertyChanged}"
-                                         h:NumericInput.IsIntegerOnly="True"
-                                         Margin="0,4,0,0"/>
+                                <TextBlock Text="Label height"
+                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBox Text="{Binding LabelHeight, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,4,0,0"
+                                         h:NumericInput.Scope="Number"
+                                         h:TextBoxAdornment.SuffixText="mm"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Margin="0,8,0,0">
+                            <StackPanel Grid.Row="2">
+                                <TextBlock Text="Columns"
+                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBox Text="{Binding ColumnsPerSheet, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,4,0,0"
+                                         h:NumericInput.IsIntegerOnly="True"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2">
+                                <TextBlock Text="Rows"
+                                           Style="{StaticResource SummaryKeyTextStyle}"/>
+                                <TextBox Text="{Binding RowsPerSheet, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,4,0,0"
+                                         h:NumericInput.IsIntegerOnly="True"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
                                 <TextBlock Text="Labels per sheet"
-                                           FontSize="{StaticResource FontSizeCaption}"
-                                           Foreground="{StaticResource FluentTextTertiary}"/>
-                                <TextBlock FontSize="{StaticResource FontSizeBody}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource FluentAccentDefault}"
+                                           Style="{StaticResource SummaryMetaTextStyle}"
+                                           Margin="0"/>
+                                <TextBlock Style="{StaticResource SummaryAccentValueTextStyle}"
                                            Margin="0,4,0,0">
                                     <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0} × {1} = {2}">
+                                        <MultiBinding StringFormat="{}{0} x {1} = {2}">
                                             <Binding Path="ColumnsPerSheet"/>
                                             <Binding Path="RowsPerSheet"/>
                                             <Binding Path="TotalLabelCount" FallbackValue="0"/>
@@ -315,19 +330,14 @@
                         </Grid>
                     </StackPanel>
 
-                    <!-- Label preview -->
-                    <StackPanel Grid.Row="3" Margin="0,16,0,0">
-                        <TextBlock Text="PREVIEW"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   Foreground="{StaticResource FluentTextTertiary}"
+                    <StackPanel Grid.Row="4" Margin="0,16,0,0">
+                        <TextBlock Text="Preview"
+                                   Style="{StaticResource AdminSectionTitleStyle}"
                                    Margin="0,0,0,8"/>
 
-                        <Border Background="{StaticResource LayerFillColorSecondary}"
-                                BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                MinHeight="100"
-                                Padding="12,8">
+                        <Border Style="{StaticResource SummaryPanelStyle}"
+                                Margin="0"
+                                MinHeight="100">
                             <TextBlock Text="{Binding PreviewText}"
                                        FontFamily="Consolas"
                                        FontSize="{StaticResource FontSizeCaption}"
@@ -342,17 +352,17 @@
 
             <controls:LoadingOverlay Grid.ColumnSpan="5"
                                      IsActive="{Binding IsLoading}"
-                                     Message="Loading products…"/>
+                                     Message="Loading products..."/>
         </Grid>
 
-        <!-- Messages -->
-        <controls:InfoBar Grid.Row="0"
-                          Title="Error"
-                          Message="{Binding ErrorMessage}"
-                          Severity="Error"
-                          IsOpen="{Binding HasError}"
-                          Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}"
-                          VerticalAlignment="Bottom"
-                          Margin="0,8,0,0"/>
+        <Grid Grid.Row="2"
+              MinHeight="{StaticResource MessageAreaMinHeight}"
+              Margin="{StaticResource FieldLabelSpacing}">
+            <controls:InfoBar Title="Barcode Labels"
+                              Message="{Binding ErrorMessage}"
+                              Severity="Error"
+                              IsOpen="{Binding HasError}"
+                              Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}"/>
+        </Grid>
     </Grid>
 </UserControl>

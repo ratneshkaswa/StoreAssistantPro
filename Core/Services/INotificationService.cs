@@ -42,7 +42,8 @@ public interface INotificationService
     /// <c>NotificationsChangedEvent</c>.
     /// </summary>
     Task PostAsync(string title, string message,
-                   AppNotificationLevel level = AppNotificationLevel.Info);
+                   AppNotificationLevel level = AppNotificationLevel.Info,
+                   string? pageKey = null);
 
     /// <summary>
     /// Marks a single notification as read.

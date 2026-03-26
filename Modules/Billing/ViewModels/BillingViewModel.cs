@@ -43,6 +43,8 @@ public partial class BillingViewModel : BaseViewModel
         TransitionBillingSession(BillingSessionState.None);
     }
 
+    public string CurrencySymbol => _regional.CurrencySymbol;
+
     // ═══════════════════════════════════════════════════════════════
     //  Cart
     // ═══════════════════════════════════════════════════════════════

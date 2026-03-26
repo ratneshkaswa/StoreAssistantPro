@@ -4,13 +4,15 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Customers.Services;
 
 namespace StoreAssistantPro.Modules.Customers.ViewModels;
 
 public partial class CustomerManagementViewModel(
-    ICustomerService customerService) : BaseViewModel
+    ICustomerService customerService,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     [ObservableProperty]
     public partial ObservableCollection<Customer> Customers { get; set; } = [];
@@ -90,6 +92,7 @@ public partial class CustomerManagementViewModel(
     public partial string PaymentReference { get; set; } = string.Empty;
 
     public ObservableCollection<string> PaymentMethods { get; } = ["Cash", "UPI", "Card", "Bank Transfer"];
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     partial void OnSelectedCustomerChanged(Customer? value)
     {

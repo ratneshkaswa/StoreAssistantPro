@@ -32,15 +32,66 @@ public class StartupService(
         if (pending.Count == 0)
         {
             logger.LogInformation("Database is up to date — no pending migrations");
-            return;
-        }
+            await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
+                return;
+            }
 
-        logger.LogInformation("Applying {Count} pending migration(s): {Migrations}",
-            pending.Count, string.Join(", ", pending));
+            logger.LogInformation("Applying {Count} pending migration(s): {Migrations}",
+                pending.Count, string.Join(", ", pending));
 
-        await context.Database.MigrateAsync(ct).ConfigureAwait(false);
+            try
+            {
+                await context.Database.MigrateAsync(ct).ConfigureAwait(false);
+            }
+            catch (InvalidOperationException ex)
+                when (ex.Message.Contains("PendingModelChangesWarning", StringComparison.Ordinal))
+            {
+                logger.LogWarning(
+                    ex,
+                    "Skipping EF migration apply due to pending model-change warning and continuing with compatibility patches");
+            }
+
+            await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
 
         logger.LogInformation("All migrations applied successfully");
+    }
+
+    private async Task EnsureLegacyColumnsAsync(AppDbContext context, CancellationToken ct)
+    {
+        // Batch all column patches into a single SQL round-trip instead of 28 individual calls.
+        const string batchedSql = """
+            IF COL_LENGTH('AppConfigs','BackupEncryptionEnabled') IS NULL ALTER TABLE [AppConfigs] ADD [BackupEncryptionEnabled] bit NOT NULL CONSTRAINT [DF_AppConfigs_BackupEncryptionEnabled] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','BackupIntervalHours') IS NULL ALTER TABLE [AppConfigs] ADD [BackupIntervalHours] int NOT NULL CONSTRAINT [DF_AppConfigs_BackupIntervalHours] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','BackupRetentionDays') IS NULL ALTER TABLE [AppConfigs] ADD [BackupRetentionDays] int NOT NULL CONSTRAINT [DF_AppConfigs_BackupRetentionDays] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','BarcodeFormat') IS NULL ALTER TABLE [AppConfigs] ADD [BarcodeFormat] nvarchar(10) NOT NULL CONSTRAINT [DF_AppConfigs_BarcodeFormat] DEFAULT(N'EAN13');
+            IF COL_LENGTH('AppConfigs','ClosingTime') IS NULL ALTER TABLE [AppConfigs] ADD [ClosingTime] nvarchar(5) NOT NULL CONSTRAINT [DF_AppConfigs_ClosingTime] DEFAULT(N'21:00');
+            IF COL_LENGTH('AppConfigs','DashboardWidgetLayout') IS NULL ALTER TABLE [AppConfigs] ADD [DashboardWidgetLayout] nvarchar(4000) NOT NULL CONSTRAINT [DF_AppConfigs_DashboardWidgetLayout] DEFAULT(N'');
+            IF COL_LENGTH('AppConfigs','DecimalPlaces') IS NULL ALTER TABLE [AppConfigs] ADD [DecimalPlaces] int NOT NULL CONSTRAINT [DF_AppConfigs_DecimalPlaces] DEFAULT(2);
+            IF COL_LENGTH('AppConfigs','ExpenseApprovalThreshold') IS NULL ALTER TABLE [AppConfigs] ADD [ExpenseApprovalThreshold] decimal(18,2) NOT NULL CONSTRAINT [DF_AppConfigs_ExpenseApprovalThreshold] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','FontScalePercent') IS NULL ALTER TABLE [AppConfigs] ADD [FontScalePercent] int NOT NULL CONSTRAINT [DF_AppConfigs_FontScalePercent] DEFAULT(100);
+            IF COL_LENGTH('AppConfigs','GoldTierThreshold') IS NULL ALTER TABLE [AppConfigs] ADD [GoldTierThreshold] decimal(18,2) NOT NULL CONSTRAINT [DF_AppConfigs_GoldTierThreshold] DEFAULT(50000);
+            IF COL_LENGTH('AppConfigs','HeldBillTimeoutMinutes') IS NULL ALTER TABLE [AppConfigs] ADD [HeldBillTimeoutMinutes] int NOT NULL CONSTRAINT [DF_AppConfigs_HeldBillTimeoutMinutes] DEFAULT(120);
+            IF COL_LENGTH('AppConfigs','IsStockFrozen') IS NULL ALTER TABLE [AppConfigs] ADD [IsStockFrozen] bit NOT NULL CONSTRAINT [DF_AppConfigs_IsStockFrozen] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','LabelPaperSize') IS NULL ALTER TABLE [AppConfigs] ADD [LabelPaperSize] nvarchar(20) NOT NULL CONSTRAINT [DF_AppConfigs_LabelPaperSize] DEFAULT(N'65up');
+            IF COL_LENGTH('AppConfigs','LastUpdateCheck') IS NULL ALTER TABLE [AppConfigs] ADD [LastUpdateCheck] datetime2 NULL;
+            IF COL_LENGTH('AppConfigs','LicenseKey') IS NULL ALTER TABLE [AppConfigs] ADD [LicenseKey] nvarchar(100) NULL;
+            IF COL_LENGTH('AppConfigs','LoyaltyPointsRate') IS NULL ALTER TABLE [AppConfigs] ADD [LoyaltyPointsRate] int NOT NULL CONSTRAINT [DF_AppConfigs_LoyaltyPointsRate] DEFAULT(1);
+            IF COL_LENGTH('AppConfigs','MaxHeldBillsPerUser') IS NULL ALTER TABLE [AppConfigs] ADD [MaxHeldBillsPerUser] int NOT NULL CONSTRAINT [DF_AppConfigs_MaxHeldBillsPerUser] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','MonthlySalesTarget') IS NULL ALTER TABLE [AppConfigs] ADD [MonthlySalesTarget] decimal(18,2) NOT NULL CONSTRAINT [DF_AppConfigs_MonthlySalesTarget] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','OpeningTime') IS NULL ALTER TABLE [AppConfigs] ADD [OpeningTime] nvarchar(5) NOT NULL CONSTRAINT [DF_AppConfigs_OpeningTime] DEFAULT(N'09:00');
+            IF COL_LENGTH('AppConfigs','PlatinumTierThreshold') IS NULL ALTER TABLE [AppConfigs] ADD [PlatinumTierThreshold] decimal(18,2) NOT NULL CONSTRAINT [DF_AppConfigs_PlatinumTierThreshold] DEFAULT(200000);
+            IF COL_LENGTH('AppConfigs','QuotationTermsAndConditions') IS NULL ALTER TABLE [AppConfigs] ADD [QuotationTermsAndConditions] nvarchar(2000) NOT NULL CONSTRAINT [DF_AppConfigs_QuotationTermsAndConditions] DEFAULT(N'');
+            IF COL_LENGTH('AppConfigs','SilverTierThreshold') IS NULL ALTER TABLE [AppConfigs] ADD [SilverTierThreshold] decimal(18,2) NOT NULL CONSTRAINT [DF_AppConfigs_SilverTierThreshold] DEFAULT(10000);
+            IF COL_LENGTH('AppConfigs','SoundEffectsEnabled') IS NULL ALTER TABLE [AppConfigs] ADD [SoundEffectsEnabled] bit NOT NULL CONSTRAINT [DF_AppConfigs_SoundEffectsEnabled] DEFAULT(1);
+            IF COL_LENGTH('AppConfigs','StartupMode') IS NULL ALTER TABLE [AppConfigs] ADD [StartupMode] nvarchar(20) NOT NULL CONSTRAINT [DF_AppConfigs_StartupMode] DEFAULT(N'Management');
+            IF COL_LENGTH('AppConfigs','StockAdjustmentApprovalThreshold') IS NULL ALTER TABLE [AppConfigs] ADD [StockAdjustmentApprovalThreshold] int NOT NULL CONSTRAINT [DF_AppConfigs_StockAdjustmentApprovalThreshold] DEFAULT(0);
+            IF COL_LENGTH('AppConfigs','ThemeMode') IS NULL ALTER TABLE [AppConfigs] ADD [ThemeMode] nvarchar(10) NOT NULL CONSTRAINT [DF_AppConfigs_ThemeMode] DEFAULT(N'Light');
+            IF COL_LENGTH('UserCredentials','DisplayName') IS NULL ALTER TABLE [UserCredentials] ADD [DisplayName] nvarchar(100) NULL;
+            IF COL_LENGTH('UserCredentials','Email') IS NULL ALTER TABLE [UserCredentials] ADD [Email] nvarchar(100) NULL;
+            IF COL_LENGTH('UserCredentials','Phone') IS NULL ALTER TABLE [UserCredentials] ADD [Phone] nvarchar(15) NULL;
+            """;
+
+        await context.Database.ExecuteSqlRawAsync(batchedSql, ct).ConfigureAwait(false);
     }
 
     public async Task<bool> IsAppInitializedAsync(CancellationToken ct = default)

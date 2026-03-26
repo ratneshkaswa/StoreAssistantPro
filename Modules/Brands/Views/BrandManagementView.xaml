@@ -20,7 +20,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8EC;"/><Run Text=" Brand Management"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8EC;"/><Run Text=" Brands"/></TextBlock>
+            <TextBlock Text="Organize product brands and keep supplier assortments easy to manage."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Search -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -31,7 +35,7 @@
             <TextBox AutomationProperties.Name="Brand search"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     h:Watermark.Text="e.g. Raymond"/>
+                     h:Watermark.Text="Search brands by name"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
@@ -42,6 +46,7 @@
                   ItemsSource="{Binding Brands}"
                   SelectedItem="{Binding SelectedBrand}"
                   Style="{StaticResource EnterpriseDataGridStyle}"
+                  h:DataGridLayoutPersistence.Key="BrandsGrid"
                   h:DataGridEmptyState.Icon="🏷"
                   h:DataGridEmptyState.Title="No brands yet"
                   h:DataGridEmptyState.Description="Add your first brand to organize products and supplier assortments."
@@ -108,13 +113,13 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                <Run Text="Brand Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                <Run Text="Brand Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
             </TextBlock>
             <TextBox Grid.Column="1"
                      AutomationProperties.Name="Brand name"
                      Text="{Binding BrandName, UpdateSourceTrigger=PropertyChanged}"
                      Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                     MaxLength="100" h:Watermark.Text="e.g. Raymond"/>
+                     MaxLength="100" h:Watermark.Text="Brand name"/>
         </Grid>
 
         <!-- Buttons -->
@@ -126,10 +131,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" Content="Clear" Command="{Binding ClearFormCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-            <Button Grid.Column="2" Content="Save" Command="{Binding SaveCommand}"
-                    Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource FormActionRowStyle}">
+                <Button Content="Clear" Command="{Binding ClearFormCommand}"
+                        Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <Button Content="Save" Command="{Binding SaveCommand}"
+                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+            </StackPanel>
         </Grid>
 
         <!-- Messages -->
@@ -137,10 +144,10 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving brand changes..."/>

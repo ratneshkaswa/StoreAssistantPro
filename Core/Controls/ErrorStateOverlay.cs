@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -73,5 +74,26 @@ public class ErrorStateOverlay : Control
     {
         get => (ICommand?)GetValue(ActionCommandProperty);
         set => SetValue(ActionCommandProperty, value);
+    }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new ErrorStateOverlayAutomationPeer(this);
+
+    private sealed class ErrorStateOverlayAutomationPeer(ErrorStateOverlay owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(ErrorStateOverlay);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (ErrorStateOverlay)Owner;
+            return string.IsNullOrWhiteSpace(owner.Description)
+                ? owner.Title
+                : $"{owner.Title}: {owner.Description}";
+        }
     }
 }

@@ -28,14 +28,16 @@ public class NotificationService : INotificationService
     public int UnreadCount => _appState.UnreadNotificationCount;
 
     public async Task PostAsync(string title, string message,
-                                AppNotificationLevel level = AppNotificationLevel.Info)
+                                AppNotificationLevel level = AppNotificationLevel.Info,
+                                string? pageKey = null)
     {
         var notification = new AppNotification
         {
             Title = title,
             Message = message,
             Level = level,
-            Timestamp = _regional.Now
+            Timestamp = _regional.Now,
+            ActivationPageKey = string.IsNullOrWhiteSpace(pageKey) ? null : pageKey.Trim()
         };
 
         _appState.AddNotification(notification);

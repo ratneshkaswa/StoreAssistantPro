@@ -25,32 +25,39 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE779;"/>
-            <Run Text=" Debtor Management"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE779;"/>
+                <Run Text=" Debtors"/>
+            </TextBlock>
+            <TextBlock Text="Track outstanding debtor balances, follow-up status, and settlement progress."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="OUTSTANDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalOutstanding, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentError}" Margin="0,2,0,0"/>
+                    <TextBlock Text="OUTSTANDING" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalOutstanding, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentError}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding PendingDebtors}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentWarning}" Margin="0,2,0,0"/>
+                    <TextBlock Text="PENDING" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding PendingDebtors}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalDebtors}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalDebtors}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -116,14 +123,14 @@
                         <TextBlock Text="Note" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FluentMultilineTextBoxStyle}"
-                                 h:Watermark.Text="Optional note" MaxLength="500"
+                                 h:Watermark.Text="Note (optional)" MaxLength="500"
                                  AutomationProperties.Name="Note"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="8,0,0,0">
+                    <StackPanel Grid.Column="1" Style="{StaticResource FormActionRowStyle}" VerticalAlignment="Bottom" Margin="8,0,0,0">
                         <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                                Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                         <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                                Style="{StaticResource PrimaryButtonStyle}"/>
+                                Style="{StaticResource SaveButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>
@@ -137,7 +144,7 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search by name or phone"
+                     h:Watermark.Text="Search debtors by name or phone"
                      AutomationProperties.Name="Search debtors"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
@@ -180,10 +187,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer Margin="0,8,0,0"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Disabled">
-                <StackPanel Orientation="Horizontal">
+            <WrapPanel Margin="0,8,0,0">
                     <Button Content="{Binding ActiveStatusFilter, StringFormat=Status: {0}}"
                             Command="{Binding SetStatusFilterCommand}"
                             CommandParameter="All">
@@ -197,8 +201,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                </StackPanel>
-            </ScrollViewer>
+            </WrapPanel>
 
             <TextBlock Text="{Binding FilterCountText}"
                        FontSize="11"
@@ -210,6 +213,7 @@
         <DataGrid Grid.Row="5" AutomationProperties.Name="Debtor list"
                   ItemsSource="{Binding Debtors}" SelectedItem="{Binding SelectedDebtor}"
                   Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="DebtorsGrid"
                   h:DataGridEmptyState.Icon="💳"
                   h:DataGridEmptyState.Title="No debtor balances found"
                   h:DataGridEmptyState.Description="Adjust the current filters or wait for unpaid invoices to surface here.">

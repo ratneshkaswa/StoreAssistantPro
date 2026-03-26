@@ -21,6 +21,7 @@ public class InwardService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.InwardEntries
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(e => e.Vendor)
             .Include(e => e.Parcels)
                 .ThenInclude(p => p.Products)
@@ -37,6 +38,7 @@ public class InwardService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.InwardEntries
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(e => e.Vendor)
             .Include(e => e.Parcels)
                 .ThenInclude(p => p.Vendor)

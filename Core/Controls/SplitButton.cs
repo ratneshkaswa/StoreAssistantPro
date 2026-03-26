@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -10,6 +12,7 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class SplitButton : ContentControl
 {
+    private ButtonBase? _primaryButton;
     private ButtonBase? _dropDownButton;
 
     static SplitButton()
@@ -37,6 +40,8 @@ public class SplitButton : ContentControl
         set => SetValue(CommandParameterProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new SplitButtonAutomationPeer(this);
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -46,11 +51,23 @@ public class SplitButton : ContentControl
             _dropDownButton.Click -= OnDropDownButtonClick;
         }
 
+        _primaryButton = GetTemplateChild("PART_PrimaryButton") as ButtonBase;
+        if (_primaryButton is not null)
+            AutomationProperties.SetName(_primaryButton, GetPrimaryAutomationName());
+
         _dropDownButton = GetTemplateChild("PART_DropDownButton") as ButtonBase;
         if (_dropDownButton is not null)
         {
             _dropDownButton.Click += OnDropDownButtonClick;
         }
+    }
+
+    protected override void OnContentChanged(object oldContent, object newContent)
+    {
+        base.OnContentChanged(oldContent, newContent);
+
+        if (_primaryButton is not null)
+            AutomationProperties.SetName(_primaryButton, GetPrimaryAutomationName());
     }
 
     private void OnDropDownButtonClick(object sender, RoutedEventArgs e)
@@ -65,5 +82,33 @@ public class SplitButton : ContentControl
         menu.Placement = PlacementMode.Bottom;
         menu.MinWidth = ActualWidth;
         menu.IsOpen = true;
+    }
+
+    private string GetPrimaryAutomationName()
+    {
+        var label = Content?.ToString();
+        return string.IsNullOrWhiteSpace(label)
+            ? "Primary action"
+            : label.Trim();
+    }
+
+    private sealed class SplitButtonAutomationPeer(SplitButton owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(SplitButton);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.SplitButton;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (SplitButton)Owner;
+            var label = owner.Content?.ToString();
+            return string.IsNullOrWhiteSpace(label)
+                ? "Split action"
+                : label.Trim();
+        }
     }
 }

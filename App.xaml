@@ -221,6 +221,11 @@
                                                       Content="{TemplateBinding Content}"
                                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    <Canvas IsHitTestVisible="False">
+                                        <Image x:Name="PART_ConnectedSnapshot"
+                                               Visibility="Collapsed"
+                                               Stretch="Fill"/>
+                                    </Canvas>
                                 </Grid>
                             </controls:ViewportConstrainedPanel>
                         </ScrollViewer>

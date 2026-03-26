@@ -16,6 +16,7 @@ public partial class SalesPurchaseViewModel(
     IRegionalSettingsService regional) : BaseViewModel
 {
     private List<SalesPurchaseEntry> _allItems = [];
+    private bool _isRestoringViewState;
 
     public string CurrencySymbol => regional.CurrencySymbol;
 
@@ -63,11 +64,17 @@ public partial class SalesPurchaseViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveDateFilter { get; set; } = "All";
 
+    partial void OnActiveDateFilterChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveTypeFilter { get; set; } = "All";
+
+    partial void OnActiveTypeFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -87,28 +94,14 @@ public partial class SalesPurchaseViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await ReloadAsync(ct);
     });
 
     // ── Search ──
 
     [RelayCommand]
-    private void Search()
-    {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            ApplyFilters();
-            return;
-        }
-        var query = SearchText;
-        var filtered = _allItems
-            .Where(e => (e.Note ?? "").Contains(query, StringComparison.OrdinalIgnoreCase)
-                     || (e.Type ?? "").Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        Entries = new ObservableCollection<SalesPurchaseEntry>(filtered);
-        HasItems = filtered.Count > 0;
-        FilterCountText = $"{filtered.Count} results";
-    }
+    private void Search() => ApplyFilters();
 
     // ── Filters ──
 
@@ -147,10 +140,20 @@ public partial class SalesPurchaseViewModel(
             filtered = filtered.Where(e => e.Type == ActiveTypeFilter);
         }
 
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var query = SearchText.Trim();
+            filtered = filtered.Where(e =>
+                (e.Note ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                (e.Type ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase));
+        }
+
         var list = filtered.ToList();
         Entries = new ObservableCollection<SalesPurchaseEntry>(list);
         HasItems = list.Count > 0;
-        FilterCountText = (ActiveDateFilter == "All" && ActiveTypeFilter == "All") ? "" : $"{list.Count} entries";
+        FilterCountText = (ActiveDateFilter == "All" && ActiveTypeFilter == "All" && string.IsNullOrWhiteSpace(SearchText))
+            ? string.Empty
+            : $"{list.Count} entries";
     }
 
     // ── CRUD ──
@@ -257,5 +260,34 @@ public partial class SalesPurchaseViewModel(
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetSalesPurchaseManagementState();
+            SearchText = state.SearchText;
+            ActiveDateFilter = state.PrimaryFilter;
+            ActiveTypeFilter = state.SecondaryFilter;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetSalesPurchaseManagementState(new DualFilterViewState
+        {
+            SearchText = SearchText,
+            PrimaryFilter = ActiveDateFilter,
+            SecondaryFilter = ActiveTypeFilter
+        });
     }
 }

@@ -17,6 +17,7 @@ public class PurchaseOrderService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.PurchaseOrders
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(po => po.Supplier)
             .Include(po => po.Items).ThenInclude(i => i.Product)
             .OrderByDescending(po => po.OrderDate)
@@ -34,6 +35,7 @@ public class PurchaseOrderService(
 
         var q = context.PurchaseOrders
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(po => po.Supplier)
             .Include(po => po.Items).ThenInclude(i => i.Product)
             .AsQueryable();
@@ -68,6 +70,7 @@ public class PurchaseOrderService(
 
         var q = context.PurchaseOrders
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(po => po.Supplier)
             .Include(po => po.Items).ThenInclude(i => i.Product)
             .AsQueryable();
@@ -95,6 +98,7 @@ public class PurchaseOrderService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.PurchaseOrders
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(po => po.Supplier)
             .Include(po => po.Items).ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(po => po.Id == id, ct)

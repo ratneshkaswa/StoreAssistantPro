@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -88,6 +89,8 @@ public class ExpandableTextBlock : Control
         get => (string)GetValue(ShowLessTextProperty);
         set => SetValue(ShowLessTextProperty, value);
     }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new ExpandableTextBlockAutomationPeer(this);
 
     public override void OnApplyTemplate()
     {
@@ -355,4 +358,27 @@ public class ExpandableTextBlock : Control
             FontWeight = FontWeight,
             FontStretch = FontStretch
         };
+
+    private sealed class ExpandableTextBlockAutomationPeer(ExpandableTextBlock owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(ExpandableTextBlock);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Text;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            if (!string.IsNullOrWhiteSpace(explicitName))
+                return explicitName;
+
+            var owner = (ExpandableTextBlock)Owner;
+            if (string.IsNullOrWhiteSpace(owner.Text))
+                return "Expandable text";
+
+            var normalized = owner.Text.Trim();
+            return normalized.Length <= 80
+                ? normalized
+                : normalized[..80] + "…";
+        }
+    }
 }

@@ -25,39 +25,47 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xEDA1;"/>
-            <Run Text=" Ironing Management"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xEDA1;"/>
+                <Run Text=" Ironing"/>
+            </TextBlock>
+            <TextBlock Text="Track ironing jobs, payment status, and amount due across current entries."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL AMOUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL AMOUNT" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="UNPAID" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding UnpaidEntries}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentWarning}" Margin="0,2,0,0"/>
+                    <TextBlock Text="UNPAID" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding UnpaidEntries}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="BATCHES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding ActiveBatches}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentInfo}" Margin="0,2,0,0"/>
+                    <TextBlock Text="BATCHES" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding ActiveBatches}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentInfo}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalEntries}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalEntries}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -109,11 +117,11 @@
                                     AutomationProperties.Name="Entry date"/>
                     </StackPanel>
                 </Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <StackPanel Style="{StaticResource FormActionRowStyle}">
                     <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"/>
+                            Style="{StaticResource SaveButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -169,10 +177,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer Margin="0,8,0,0"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Disabled">
-                <StackPanel Orientation="Horizontal">
+            <WrapPanel Margin="0,8,0,0">
                     <Button Content="{Binding ActivePaidFilter, StringFormat=Payment: {0}}"
                             Command="{Binding SetPaidFilterCommand}"
                             CommandParameter="All">
@@ -186,8 +191,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                </StackPanel>
-            </ScrollViewer>
+            </WrapPanel>
 
             <TextBlock Text="{Binding FilterCountText}"
                        FontSize="11"
@@ -198,7 +202,8 @@
         <!-- DataGrid -->
         <DataGrid Grid.Row="5" AutomationProperties.Name="Ironing entries"
                   ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}"
-                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column">
+                  Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="IroningEntriesGrid">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit" Command="{Binding EditCommand}" CommandParameter="{Binding SelectedEntry}">

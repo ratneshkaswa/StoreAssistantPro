@@ -18,7 +18,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/><Run Text=" Sale History"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/><Run Text=" Sale History"/></TextBlock>
+            <TextBlock Text="Review invoice history, narrow the date range, and inspect completed sale totals."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Filters -->
         <Grid Grid.Row="1" Margin="{StaticResource ItemSpacing}">
@@ -48,7 +52,7 @@
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Invoice search"
                      Width="{StaticResource FieldWidthStandard}" Margin="{StaticResource InlineControlSpacing}"
-                     h:Watermark.Text="e.g. INV-1024"/>
+                     h:Watermark.Text="Search invoices by invoice number"/>
 
             <Button Grid.Column="6" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}"/>
@@ -80,6 +84,7 @@
                       AutomationProperties.Name="Sale history" ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="SaleHistoryGrid"
                       h:DataGridEmptyState.Icon="🧾"
                       h:DataGridEmptyState.Title="No completed sales yet"
                       h:DataGridEmptyState.Description="Closed invoices will appear here once checkout activity starts."
@@ -145,10 +150,10 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Loading sale history..."/>

@@ -18,7 +18,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8C7;"/><Run Text=" Tax Management"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8C7;"/><Run Text=" Taxes"/></TextBlock>
+            <TextBlock Text="Manage tax rates, grouped slabs, and HSN codes used across products and billing."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Tab selector buttons -->
         <Border Grid.Row="1"
@@ -76,6 +80,7 @@
             <DataGrid AutomationProperties.Name="Tax rates" ItemsSource="{Binding Taxes}"
                       SelectedItem="{Binding SelectedTax}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="TaxRatesGrid"
                       HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Tax Name" Binding="{Binding TaxName}" Width="*"/>
@@ -96,22 +101,22 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Tax Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Tax Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
                          AutomationProperties.Name="Tax name"
                          Text="{Binding TaxName, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         MaxLength="100" h:Watermark.Text="e.g. GST 5%"/>
+                         MaxLength="100" h:Watermark.Text="Tax name"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Slab % "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Slab % "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1"
                          AutomationProperties.Name="Tax slab percentage"
                          Text="{Binding SlabPercent, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                         MaxLength="6" h:Watermark.Text="e.g. 5"/>
+                         MaxLength="6" h:Watermark.Text="Tax percentage"/>
             </Grid>
 
             <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
@@ -122,12 +127,14 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="1" Content="Clear" Command="{Binding ClearFormCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Grid.Column="2" Content="Delete" Command="{Binding DeleteRateCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Grid.Column="3" Content="Save" Command="{Binding SaveRateCommand}"
-                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource FormActionRowStyle}">
+                    <Button Content="Clear" Command="{Binding ClearFormCommand}"
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Delete" Command="{Binding DeleteRateCommand}"
+                            Style="{StaticResource DeleteButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Save" Command="{Binding SaveRateCommand}"
+                            Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                </StackPanel>
             </Grid>
         </Grid>
 
@@ -150,6 +157,7 @@
                 <DataGrid AutomationProperties.Name="Tax groups" ItemsSource="{Binding TaxGroups}"
                           SelectedItem="{Binding SelectedGroup}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridLayoutPersistence.Key="TaxGroupsGrid"
                           HeadersVisibility="Column">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Group Name" Binding="{Binding Name}" Width="*"/>
@@ -179,19 +187,19 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                        <Run Text="Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        <Run Text="Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                     </TextBlock>
                     <TextBox Grid.Row="0" Grid.Column="1"
                              AutomationProperties.Name="Tax group name"
                              Text="{Binding GroupName, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="100" h:Watermark.Text="e.g. GST Garments"/>
+                             MaxLength="100" h:Watermark.Text="Group name"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Description"
                                Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="2" Grid.Column="1"
                              AutomationProperties.Name="Tax group description"
                              Text="{Binding GroupDescription, UpdateSourceTrigger=PropertyChanged}"
-                             MaxLength="300" h:Watermark.Text="e.g. Garments up to Rs. 1000"/>
+                             MaxLength="300" h:Watermark.Text="Group description"/>
                 </Grid>
 
                 <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
@@ -202,10 +210,12 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="1" Content="Clear" Command="{Binding ClearGroupFormCommand}"
-                             Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                    <Button Grid.Column="2" Content="Save Group" Command="{Binding SaveGroupCommand}"
-                             Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource FormActionRowStyle}">
+                        <Button Content="Clear" Command="{Binding ClearGroupFormCommand}"
+                                 Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        <Button Content="Save Group" Command="{Binding SaveGroupCommand}"
+                                 Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    </StackPanel>
                 </Grid>
             </Grid>
 
@@ -223,6 +233,7 @@
                           ItemsSource="{Binding GroupSlabs}"
                           SelectedItem="{Binding SelectedSlab}"
                           Style="{StaticResource EnterpriseDataGridStyle}"
+                          h:DataGridLayoutPersistence.Key="TaxGroupSlabsGrid"
                           HeadersVisibility="Column"
                           Margin="{StaticResource ItemSpacing}">
                     <DataGrid.Columns>
@@ -246,13 +257,13 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                        <Run Text="GST % "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                        <Run Text="GST % "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                     </TextBlock>
                     <TextBox Grid.Row="0" Grid.Column="1"
                              AutomationProperties.Name="Slab GST percentage"
                              Text="{Binding SlabGST, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthCompact}" HorizontalAlignment="Left"
-                             MaxLength="6" h:Watermark.Text="e.g. 5"/>
+                             MaxLength="6" h:Watermark.Text="Tax percentage"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Price From ₹"
                                Style="{StaticResource FormRowLabelStyle}"/>
@@ -260,7 +271,7 @@
                              AutomationProperties.Name="Slab price from"
                              Text="{Binding SlabPriceFrom, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="12" h:Watermark.Text="e.g. 0"/>
+                             MaxLength="12" h:Watermark.Text="Cess percentage"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Price To ₹"
                                Style="{StaticResource FormRowLabelStyle}"/>
@@ -268,7 +279,7 @@
                              AutomationProperties.Name="Slab price to"
                              Text="{Binding SlabPriceTo, UpdateSourceTrigger=PropertyChanged}"
                              Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                             MaxLength="12" h:Watermark.Text="e.g. 1000 or blank"/>
+                             MaxLength="12" h:Watermark.Text="Maximum amount (optional)"/>
                 </Grid>
 
                 <Grid Grid.Row="3" Margin="{StaticResource FormActionBarSpacing}">
@@ -280,9 +291,9 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="1" Content="Clear" Command="{Binding ClearSlabFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Grid.Column="2" Content="Delete Slab" Command="{Binding DeleteSlabCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource DeleteButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Grid.Column="3" Content="{Binding SlabActionText}" Command="{Binding AddSlabCommand}"
                             Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 </Grid>
@@ -301,6 +312,7 @@
             <DataGrid AutomationProperties.Name="HSN codes" ItemsSource="{Binding HSNCodes}"
                       SelectedItem="{Binding SelectedHSN}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="HSNCodesGrid"
                       HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="HSN Code" Binding="{Binding Code}" Width="{StaticResource ColumnWidthPrice}"/>
@@ -334,21 +346,21 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="HSN Code "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="HSN Code "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
                          AutomationProperties.Name="HSN code"
                          Text="{Binding HSNCodeValue, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         MaxLength="8" h:Watermark.Text="e.g. 6109"/>
+                         MaxLength="8" h:Watermark.Text="HSN code"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Description "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Description "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1"
                          AutomationProperties.Name="HSN description"
                          Text="{Binding HSNDescription, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="300" h:Watermark.Text="e.g. T-shirts, singlets and other vests"/>
+                         MaxLength="300" h:Watermark.Text="HSN description"/>
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Category"
                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -368,9 +380,9 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="1" Content="Clear" Command="{Binding ClearHSNFormCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                 <Button Grid.Column="2" Content="Save HSN" Command="{Binding SaveHSNCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
         </Grid>
 
@@ -379,10 +391,10 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving tax settings..."/>

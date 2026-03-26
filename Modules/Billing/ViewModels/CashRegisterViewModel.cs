@@ -41,11 +41,13 @@ public partial class CashRegisterViewModel(
 
     public string CashVarianceAlertMessage =>
         DayEndSummary?.Discrepancy is { } d && Math.Abs(d) > VarianceAlertThreshold
-            ? $"⚠ Cash variance of {regional.FormatCurrency(Math.Abs(d))} detected ({(d > 0 ? "surplus" : "shortage")}). Please verify."
+            ? $"Cash variance of {regional.FormatCurrency(Math.Abs(d))} detected ({(d > 0 ? "surplus" : "shortage")}). Please verify."
             : string.Empty;
 
     [ObservableProperty]
     public partial decimal ExpectedBalance { get; set; }
+
+    public string CurrencySymbol => regional.CurrencySymbol;
 
     [ObservableProperty]
     public partial ObservableCollection<CashMovement> Movements { get; set; } = [];
@@ -327,3 +329,4 @@ public partial class CashRegisterViewModel(
         SuccessMessage = string.Empty;
     }
 }
+

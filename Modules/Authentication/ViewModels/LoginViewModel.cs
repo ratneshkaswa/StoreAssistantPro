@@ -271,7 +271,10 @@ public partial class LoginViewModel : BaseViewModel
     public string NewPinConfirm { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasResetSuccessMessage))]
     public partial string ResetSuccessMessage { get; set; } = string.Empty;
+
+    public bool HasResetSuccessMessage => !string.IsNullOrEmpty(ResetSuccessMessage);
 
     [RelayCommand]
     private void ForgotPin()

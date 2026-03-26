@@ -18,6 +18,7 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Products
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Tax)
             .Include(p => p.Category)
             .Include(p => p.Brand)
@@ -33,6 +34,7 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Products
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Tax)
             .Include(p => p.Category)
             .Include(p => p.Brand)
@@ -49,6 +51,7 @@ public class ProductService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.Products
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Tax)
             .Include(p => p.Category)
             .Include(p => p.Brand)

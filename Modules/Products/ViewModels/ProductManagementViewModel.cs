@@ -21,6 +21,7 @@ public partial class ProductManagementViewModel(
     ProductContextHolder productContextHolder) : BaseViewModel
 {
     private List<Product> _allProducts = [];
+    private bool _isRestoringViewState;
 
     public string CurrencySymbol => regional.CurrencySymbol;
 
@@ -76,6 +77,8 @@ public partial class ProductManagementViewModel(
 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
+
+    partial void OnSearchTextChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial Category? FilterCategory { get; set; }
@@ -368,9 +371,31 @@ public partial class ProductManagementViewModel(
         ApplyFilters();
     }
 
-    partial void OnFilterCategoryChanged(Category? value) => ApplyFilters();
+    partial void OnFilterCategoryChanged(Category? value)
+    {
+        if (_isRestoringViewState)
+            return;
 
-    partial void OnFilterBrandChanged(Brand? value) => ApplyFilters();
+        ApplyFilters();
+        PersistViewState();
+    }
+
+    partial void OnFilterBrandChanged(Brand? value)
+    {
+        if (_isRestoringViewState)
+            return;
+
+        ApplyFilters();
+        PersistViewState();
+    }
+
+    partial void OnFilterStockStatusChanged(string value)
+    {
+        if (_isRestoringViewState)
+            return;
+
+        PersistViewState();
+    }
 
     private void ApplyFilters()
     {
@@ -440,11 +465,48 @@ public partial class ProductManagementViewModel(
         Brands = new ObservableCollection<Brand>(brandsTask.Result);
         Vendors = new ObservableCollection<Vendor>(vendorsTask.Result);
 
+        RestoreViewState();
         ApplyFilters();
 
         SelectedProduct = selectedProductId.HasValue
             ? Products.FirstOrDefault(p => p.Id == selectedProductId.Value)
             : null;
+    }
+
+    private void RestoreViewState()
+    {
+        var state = UserPreferencesStore.GetProductManagementState();
+
+        _isRestoringViewState = true;
+        try
+        {
+            SearchText = state.SearchText;
+            FilterStockStatus = state.FilterStockStatus;
+            FilterCategory = state.FilterCategoryId is int categoryId
+                ? Categories.FirstOrDefault(category => category.Id == categoryId)
+                : null;
+            FilterBrand = state.FilterBrandId is int brandId
+                ? Brands.FirstOrDefault(brand => brand.Id == brandId)
+                : null;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetProductManagementState(new ProductManagementViewState
+        {
+            SearchText = SearchText,
+            FilterCategoryId = FilterCategory?.Id,
+            FilterBrandId = FilterBrand?.Id,
+            FilterStockStatus = FilterStockStatus
+        });
     }
 
     // ── Variant export (#63) ──

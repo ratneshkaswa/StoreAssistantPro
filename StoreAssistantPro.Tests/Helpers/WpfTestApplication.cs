@@ -116,6 +116,31 @@ internal static class WpfTestApplication
         ResetApplicationState();
     }
 
+    public static void FlushDispatcher()
+    {
+        Dispatcher.CurrentDispatcher.Invoke(
+            DispatcherPriority.Background,
+            new Action(() => { }));
+    }
+
+    public static void WaitForDispatcher(TimeSpan duration)
+    {
+        var frame = new DispatcherFrame();
+        var timer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = duration
+        };
+
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            frame.Continue = false;
+        };
+
+        timer.Start();
+        Dispatcher.PushFrame(frame);
+    }
+
     private static void ResetApplicationState()
     {
         lock (SyncRoot)

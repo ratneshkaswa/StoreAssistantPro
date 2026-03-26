@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -68,6 +69,8 @@ public class ProgressRing : Control
         set => SetValue(RingBrushProperty, value);
     }
 
+    protected override AutomationPeer OnCreateAutomationPeer() => new ProgressRingAutomationPeer(this);
+
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
@@ -90,14 +93,14 @@ public class ProgressRing : Control
 
     private void UpdateArcGeometry()
     {
-        if (_arcPath is null) return;
+        if (_arcPath is null)
+            return;
 
         var radius = (Diameter - StrokeThickness) / 2;
         var center = Diameter / 2;
 
-        // Draw a 270-degree arc
         const double arcAngle = 270.0;
-        var startAngle = -90.0; // Start at top
+        const double startAngle = -90.0;
         var endAngle = startAngle + arcAngle;
 
         var startRad = startAngle * Math.PI / 180;
@@ -108,8 +111,6 @@ public class ProgressRing : Control
         var endX = center + radius * Math.Cos(endRad);
         var endY = center + radius * Math.Sin(endRad);
 
-        var isLargeArc = arcAngle > 180;
-
         var figure = new PathFigure
         {
             StartPoint = new Point(startX, startY),
@@ -119,7 +120,7 @@ public class ProgressRing : Control
         {
             Point = new Point(endX, endY),
             Size = new Size(radius, radius),
-            IsLargeArc = isLargeArc,
+            IsLargeArc = arcAngle > 180,
             SweepDirection = SweepDirection.Clockwise
         });
 
@@ -135,7 +136,8 @@ public class ProgressRing : Control
 
     private void UpdateVisualState()
     {
-        if (_arcPath is null) return;
+        if (_arcPath is null)
+            return;
 
         if (IsActive)
         {
@@ -151,11 +153,11 @@ public class ProgressRing : Control
 
     private void StartSpinAnimation()
     {
-        if (_arcPath is null) return;
+        if (_arcPath is null)
+            return;
 
         StopSpinAnimation();
 
-        var center = Diameter / 2;
         _arcPath.RenderTransformOrigin = new Point(0.5, 0.5);
         _arcPath.RenderTransform = new RotateTransform(0);
 
@@ -179,5 +181,18 @@ public class ProgressRing : Control
     {
         _spinStoryboard?.Stop();
         _spinStoryboard = null;
+    }
+
+    private sealed class ProgressRingAutomationPeer(ProgressRing owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(ProgressRing);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ProgressBar;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            return string.IsNullOrWhiteSpace(explicitName) ? "Loading progress" : explicitName;
+        }
     }
 }

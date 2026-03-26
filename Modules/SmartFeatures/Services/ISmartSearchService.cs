@@ -27,4 +27,8 @@ public interface ISmartSearchService
 
     /// <summary>Record a product access for recent/frequent tracking.</summary>
     Task RecordProductAccessAsync(int userId, int productId, CancellationToken ct = default);
+
+    /// <summary>Look up a product by scanned barcode image text (OCR output). (#534)</summary>
+    Task<IReadOnlyList<SmartSearchResult>> BarcodeOcrSearchAsync(
+        string ocrText, int maxResults = 5, CancellationToken ct = default);
 }

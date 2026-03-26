@@ -25,39 +25,47 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/>
-            <Run Text=" Sales &amp; Purchase Tracking"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9D9;"/>
+                <Run Text=" Sales &amp; Purchase Tracking"/>
+            </TextBlock>
+            <TextBlock Text="Monitor high-level sales and purchase movement from one operational ledger view."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL SALES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalSales, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentSuccess}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL SALES" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalSales, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentSuccess}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL PURCHASE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalPurchases, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentError}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL PURCHASE" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalPurchases, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentError}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="NET BALANCE" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding NetBalance, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="0,2,0,0"/>
+                    <TextBlock Text="NET BALANCE" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding NetBalance, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="ENTRIES" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding EntryCount}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="ENTRIES" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding EntryCount}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -104,11 +112,11 @@
                         </ComboBox>
                     </StackPanel>
                 </Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <StackPanel Style="{StaticResource FormActionRowStyle}">
                     <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"/>
+                            Style="{StaticResource SaveButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -121,14 +129,14 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search entries by note or type"
+                     h:Watermark.Text="Search sales and purchases by note or type"
                      AutomationProperties.Name="Search entries"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
 
         <!-- Filter Chips -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="{StaticResource ItemSpacing}">
+        <StackPanel Grid.Row="4" Margin="{StaticResource ItemSpacing}">
             <Border Style="{StaticResource SegmentedFilterHostStyle}">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="All" Command="{Binding SetDateFilterCommand}" CommandParameter="All"
@@ -207,15 +215,44 @@
                     </Button>
                 </StackPanel>
             </Border>
+            <WrapPanel Margin="0,8,0,0">
+                <Button Content="{Binding ActiveDateFilter, StringFormat=Date: {0}}"
+                        Command="{Binding SetDateFilterCommand}"
+                        CommandParameter="All">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ActiveFilterChipButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveDateFilter}" Value="All">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="{Binding ActiveTypeFilter, StringFormat=Type: {0}}"
+                        Command="{Binding SetTypeFilterCommand}"
+                        CommandParameter="All">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ActiveFilterChipButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTypeFilter}" Value="All">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </WrapPanel>
             <TextBlock Text="{Binding FilterCountText}" FontSize="11"
-                       Margin="12,0,0,0"
-                       Foreground="{StaticResource FluentTextTertiary}" VerticalAlignment="Center"/>
+                       Margin="0,8,0,0"
+                       Foreground="{StaticResource FluentTextTertiary}"/>
         </StackPanel>
 
         <!-- DataGrid -->
         <DataGrid Grid.Row="5" AutomationProperties.Name="Sales and purchase entries"
                   ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}"
                   Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="SalesPurchaseGrid"
                   h:DataGridEmptyState.Icon="📊"
                   h:DataGridEmptyState.Title="No entries found"
                   h:DataGridEmptyState.Description="Add a sales or purchase entry, or widen the active date and type filters to see results.">

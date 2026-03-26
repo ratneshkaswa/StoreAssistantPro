@@ -203,6 +203,69 @@ public sealed class SmartSearchService(
         return Task.CompletedTask;
     }
 
+    public async Task<IReadOnlyList<SmartSearchResult>> BarcodeOcrSearchAsync(
+        string ocrText, int maxResults = 5, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(ocrText)) return [];
+
+        // Normalise OCR text: strip whitespace, dashes, and common misreads.
+        var cleaned = new string(ocrText.Where(c => char.IsLetterOrDigit(c)).ToArray());
+        if (cleaned.Length == 0) return [];
+
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        // 1. Exact barcode match (most common path).
+        var exactMatch = await context.Products
+            .Where(p => p.IsActive && p.Barcode == cleaned)
+            .Select(p => new SmartSearchResult
+            {
+                ProductId = p.Id,
+                ProductName = p.Name,
+                Barcode = p.Barcode,
+                SalePrice = p.SalePrice,
+                Quantity = p.Quantity,
+                RelevanceScore = 1.0,
+                MatchType = "BarcodeExact"
+            })
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+
+        if (exactMatch is not null) return [exactMatch];
+
+        // 2. Fuzzy barcode match — OCR may misread a digit.
+        var candidates = await context.Products
+            .Where(p => p.IsActive && p.Barcode != null)
+            .Select(p => new { p.Id, p.Name, p.Barcode, p.SalePrice, p.Quantity })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var results = candidates
+            .Select(p =>
+            {
+                var distance = LevenshteinDistance(cleaned, p.Barcode ?? "");
+                return distance <= 2
+                    ? new SmartSearchResult
+                    {
+                        ProductId = p.Id,
+                        ProductName = p.Name,
+                        Barcode = p.Barcode,
+                        SalePrice = p.SalePrice,
+                        Quantity = p.Quantity,
+                        RelevanceScore = Math.Round(1.0 - (double)distance / Math.Max(cleaned.Length, 1), 2),
+                        MatchType = "BarcodeOCR"
+                    }
+                    : null;
+            })
+            .Where(r => r is not null)
+            .OrderByDescending(r => r!.RelevanceScore)
+            .Take(maxResults)
+            .ToList();
+
+        logger.LogDebug("Barcode OCR search '{OcrText}' (cleaned: '{Cleaned}') returned {Count} results",
+            ocrText, cleaned, results.Count);
+        return results!;
+    }
+
     // ── Algorithms ──
 
     /// <summary>Levenshtein edit distance between two strings.</summary>

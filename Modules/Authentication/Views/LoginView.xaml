@@ -116,10 +116,10 @@
                 Padding="{StaticResource CardPadding}"
                 Effect="{StaticResource FluentShadowMedium}">
             <ScrollViewer VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
                           Focusable="False"
                           CanContentScroll="False"
-                          PanningMode="Both">
+                          PanningMode="VerticalOnly">
                 <Grid MinWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                       MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                     <Grid.RowDefinitions>
@@ -193,7 +193,7 @@
                         <controls:InfoBar Severity="Success"
                                           Title="PIN reset complete"
                                           Message="{Binding ResetSuccessMessage}"
-                                          Visibility="{Binding ResetSuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                          IsOpen="{Binding HasResetSuccessMessage}"
                                           Margin="{StaticResource ItemSpacing}"/>
 
                         <StackPanel Style="{StaticResource LoginInteractiveRegionStyle}">
@@ -214,7 +214,7 @@
                             <controls:InfoBar Severity="Error"
                                               Title="Login issue"
                                               Message="{Binding ErrorMessage}"
-                                              Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                              IsOpen="{Binding HasError}"
                                               Margin="{StaticResource ItemSpacing}"/>
 
                             <!-- Fixed square keypad -->
@@ -305,7 +305,7 @@
                         <controls:InfoBar Severity="Error"
                                           Title="Reset issue"
                                           Message="{Binding ErrorMessage}"
-                                          Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}"
+                                          IsOpen="{Binding HasError}"
                                           Margin="{StaticResource ItemSpacing}"/>
 
                         <!-- Action buttons -->
@@ -313,7 +313,7 @@
                                     Margin="{StaticResource FormActionBarSpacing}">
                             <Button Content="Cancel"
                                     Command="{Binding CancelForgotPinCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Style="{StaticResource CancelButtonStyle}"
                                     Margin="{StaticResource InlineControlSpacing}"
                                     AutomationProperties.Name="Cancel PIN reset"/>
                             <Button Content="Reset PIN"

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
 using StoreAssistantPro.Modules.Settings.Services;
 
@@ -55,6 +56,26 @@ public partial class SystemSettingsViewModel(
     public partial bool IsCompactModeEnabled { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WorkspaceRestoreSummaryText))]
+    public partial bool RestoreLastVisitedPageOnLogin { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NotificationPreferencesSummaryText))]
+    public partial bool InAppToastsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NotificationPreferencesSummaryText))]
+    public partial bool WindowsNotificationsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NotificationPreferencesSummaryText))]
+    public partial bool NotificationSoundEnabled { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NotificationPreferencesSummaryText))]
+    public partial AppNotificationLevel MinimumNotificationLevel { get; set; } = AppNotificationLevel.Info;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RestoreStatusText))]
     public partial string RestoreFilePath { get; set; } = string.Empty;
 
@@ -85,6 +106,39 @@ public partial class SystemSettingsViewModel(
     public string DensitySummaryText => IsCompactModeEnabled
         ? "Compact density is active. Shared table rows use the tighter layout."
         : "Normal density is active. Shared table rows use the standard layout.";
+
+    public string WorkspaceRestoreSummaryText => RestoreLastVisitedPageOnLogin
+        ? "Reopen the last visited page after the workstation signs back in."
+        : "Always start from Home after the workstation signs back in.";
+
+    public string NotificationPreferencesSummaryText
+    {
+        get
+        {
+            var surfaces = new List<string>();
+            if (InAppToastsEnabled)
+                surfaces.Add("in-app toasts");
+            if (WindowsNotificationsEnabled)
+                surfaces.Add("Windows notifications");
+
+            var surfaceSummary = surfaces.Count switch
+            {
+                0 => "Notifications are muted.",
+                1 => $"Using {surfaces[0]} only.",
+                _ => "Using in-app toasts and Windows notifications."
+            };
+
+            var soundSummary = NotificationSoundEnabled ? "Sound is on." : "Sound is off.";
+            var thresholdSummary = MinimumNotificationLevel switch
+            {
+                AppNotificationLevel.Error => "Only errors break through.",
+                AppNotificationLevel.Warning => "Warnings and errors break through.",
+                _ => "Info, success, warnings, and errors break through."
+            };
+
+            return $"{surfaceSummary} {soundSummary} {thresholdSummary}";
+        }
+    }
 
     public string RestoreStatusText => string.IsNullOrWhiteSpace(RestoreFilePath)
         ? "No restore file selected."
@@ -151,6 +205,12 @@ public partial class SystemSettingsViewModel(
         DefaultPageSize = settings.DefaultPageSize;
         AutoLogoutMinutes = settings.AutoLogoutMinutes;
         IsCompactModeEnabled = uiDensityService.IsCompactModeEnabled;
+        var preferences = UserPreferencesStore.GetSnapshot();
+        RestoreLastVisitedPageOnLogin = preferences.RestoreLastVisitedPageOnLogin;
+        InAppToastsEnabled = preferences.InAppToastsEnabled;
+        WindowsNotificationsEnabled = preferences.WindowsNotificationsEnabled;
+        NotificationSoundEnabled = preferences.NotificationSoundEnabled;
+        MinimumNotificationLevel = preferences.MinimumNotificationLevel;
     });
 
     [RelayCommand]
@@ -180,6 +240,14 @@ public partial class SystemSettingsViewModel(
             AutoLogoutMinutes);
 
         await settingsService.UpdateAsync(dto, ct).ConfigureAwait(false);
+        UserPreferencesStore.Update(state =>
+        {
+            state.RestoreLastVisitedPageOnLogin = RestoreLastVisitedPageOnLogin;
+            state.InAppToastsEnabled = InAppToastsEnabled;
+            state.WindowsNotificationsEnabled = WindowsNotificationsEnabled;
+            state.NotificationSoundEnabled = NotificationSoundEnabled;
+            state.MinimumNotificationLevel = MinimumNotificationLevel;
+        });
         SuccessMessage = "Settings saved.";
     });
 

@@ -20,6 +20,7 @@ public class GRNService(
 
         var q = context.GoodsReceivedNotes
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(g => g.Supplier)
             .Include(g => g.PurchaseOrder)
             .Include(g => g.Items).ThenInclude(i => i.Product)
@@ -54,6 +55,7 @@ public class GRNService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         return await context.GoodsReceivedNotes
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(g => g.Supplier)
             .Include(g => g.PurchaseOrder)
             .Include(g => g.Items).ThenInclude(i => i.Product)

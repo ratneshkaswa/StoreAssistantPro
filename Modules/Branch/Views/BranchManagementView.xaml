@@ -25,32 +25,39 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}">
-            <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8F1;"/>
-            <Run Text=" Branch Management"/>
-        </TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}">
+                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8F1;"/>
+                <Run Text=" Branches"/>
+            </TextBlock>
+            <TextBlock Text="Track branch bills, settlement status, and outstanding collection activity."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Stat Cards -->
         <WrapPanel Grid.Row="1" Margin="{StaticResource ItemSpacing}">
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL AMOUNT" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDefault}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL AMOUNT" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N0}'}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDefault}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8" Margin="0,0,8,0">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="PENDING" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding PendingBills}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentWarning}" Margin="0,2,0,0"/>
+                    <TextBlock Text="PENDING" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding PendingBills}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentWarning}"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardStyle}" Padding="12,8">
+            <Border Style="{StaticResource SummaryStatCardStyle}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL BILLS" FontSize="10" Foreground="{StaticResource FluentTextTertiary}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding TotalBills}" FontSize="18" FontWeight="Bold"
-                               Foreground="{StaticResource FluentAccentDark1}" Margin="0,2,0,0"/>
+                    <TextBlock Text="TOTAL BILLS" Style="{StaticResource SummaryStatLabelTextStyle}"/>
+                    <TextBlock Text="{Binding TotalBills}"
+                               Style="{StaticResource SummaryStatValueTextStyle}"
+                               Foreground="{StaticResource FluentAccentDark1}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -97,11 +104,11 @@
                         </ComboBox>
                     </StackPanel>
                 </Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <StackPanel Style="{StaticResource FormActionRowStyle}">
                     <Button Content="Clear" Command="{Binding ClearFormCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
                     <Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"/>
+                            Style="{StaticResource SaveButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -114,7 +121,7 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
-                     h:Watermark.Text="Search by bill number or type"
+                     h:Watermark.Text="Search branch bills by bill number or type"
                      AutomationProperties.Name="Search branch bills"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
@@ -157,10 +164,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer Margin="0,8,0,0"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Disabled">
-                <StackPanel Orientation="Horizontal">
+            <WrapPanel Margin="0,8,0,0">
                     <Button Content="{Binding ActiveStatusFilter, StringFormat=Status: {0}}"
                             Command="{Binding SetStatusFilterCommand}"
                             CommandParameter="All">
@@ -174,8 +178,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                </StackPanel>
-            </ScrollViewer>
+            </WrapPanel>
 
             <TextBlock Text="{Binding FilterCountText}"
                        FontSize="11"
@@ -187,6 +190,7 @@
         <DataGrid Grid.Row="5" AutomationProperties.Name="Branch bills"
                   ItemsSource="{Binding Bills}" SelectedItem="{Binding SelectedBill}"
                   Style="{StaticResource EnterpriseDataGridStyle}" HeadersVisibility="Column"
+                  h:DataGridLayoutPersistence.Key="BranchBillsGrid"
                   h:DataGridEmptyState.Icon="🧾"
                   h:DataGridEmptyState.Title="No branch bills found"
                   h:DataGridEmptyState.Description="Try a different status filter or refresh once new branch billing activity is available.">

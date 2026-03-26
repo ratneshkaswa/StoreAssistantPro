@@ -73,6 +73,7 @@ public class SaleHistoryService(
 
         return await context.Sales
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(s => s.Items).ThenInclude(i => i.Product)
             .Include(s => s.Customer)
             .FirstOrDefaultAsync(s => s.Id == saleId, ct)

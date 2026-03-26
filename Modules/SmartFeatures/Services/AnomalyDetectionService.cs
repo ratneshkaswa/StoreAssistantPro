@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models.AI;
 using StoreAssistantPro.Modules.SmartFeatures.Events;
@@ -14,6 +15,7 @@ namespace StoreAssistantPro.Modules.SmartFeatures.Services;
 /// </summary>
 public sealed class AnomalyDetectionService(
     IDbContextFactory<AppDbContext> contextFactory,
+    IRegionalSettingsService regionalSettings,
     IEventBus eventBus,
     ILogger<AnomalyDetectionService> logger) : IAnomalyDetectionService
 {
@@ -22,7 +24,7 @@ public sealed class AnomalyDetectionService(
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var cutoff = DateTime.UtcNow.AddDays(-lookbackDays);
+        var cutoff = regionalSettings.Now.AddDays(-lookbackDays);
 
         // Get sale stats for baseline.
         var sales = await context.Sales
@@ -53,7 +55,7 @@ public sealed class AnomalyDetectionService(
             {
                 AlertType = "UnusualTransaction",
                 Severity = "High",
-                Description = $"Sale #{sale.Id} total ₹{sale.Total:N2} exceeds 3σ threshold (₹{threshold:N2})",
+                Description = $"Sale #{sale.Id} total {regionalSettings.FormatCurrency(sale.Total)} exceeds 3σ threshold ({regionalSettings.FormatCurrency(threshold)})",
                 RelatedEntityId = sale.Id,
                 RelatedEntityType = "Sale",
                 AnomalyScore = Math.Min(1.0, (double)(sale.Total / threshold))
@@ -67,7 +69,7 @@ public sealed class AnomalyDetectionService(
             {
                 AlertType = "UnusualTransaction",
                 Severity = "Medium",
-                Description = $"Sale #{sale.Id} at {sale.SaleDate:HH:mm} — outside normal business hours",
+                Description = $"Sale #{sale.Id} at {regionalSettings.FormatTime(sale.SaleDate)} — outside normal business hours",
                 RelatedEntityId = sale.Id,
                 RelatedEntityType = "Sale",
                 AnomalyScore = 0.6
@@ -83,7 +85,7 @@ public sealed class AnomalyDetectionService(
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var cutoff = DateTime.UtcNow.AddDays(-lookbackDays);
+        var cutoff = regionalSettings.Now.AddDays(-lookbackDays);
         var alerts = new List<AnomalyAlert>();
 
         // Pattern: Staff with high discount ratios (sweethearting).
@@ -145,7 +147,7 @@ public sealed class AnomalyDetectionService(
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var cutoff = DateTime.UtcNow.AddDays(-30);
+        var cutoff = regionalSettings.Now.AddDays(-30);
         var alerts = new List<AnomalyAlert>();
 
         // Compare expected stock (opening + purchases - sales) vs actual.
@@ -230,7 +232,7 @@ public sealed class AnomalyDetectionService(
                 {
                     AlertType = "PriceAnomaly",
                     Severity = Math.Abs(zScore) > 3.5 ? "High" : "Medium",
-                    Description = $"{p.Name}: ₹{p.SalePrice:N2} vs category avg ₹{cat.AvgPrice:N2} (z={zScore:F1})",
+                    Description = $"{p.Name}: {regionalSettings.FormatCurrency(p.SalePrice)} vs category avg {regionalSettings.FormatCurrency(cat.AvgPrice)} (z={zScore:F1})",
                     RelatedEntityId = p.Id,
                     RelatedEntityType = "Product",
                     AnomalyScore = Math.Min(1.0, Math.Abs(zScore) / 4.0)
@@ -247,7 +249,7 @@ public sealed class AnomalyDetectionService(
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var cutoff = DateTime.UtcNow.AddDays(-lookbackDays);
+        var cutoff = regionalSettings.Now.AddDays(-lookbackDays);
         var alerts = new List<AnomalyAlert>();
 
         var staffDiscounts = await context.Sales
@@ -273,7 +275,7 @@ public sealed class AnomalyDetectionService(
                 {
                     AlertType = "DiscountAbuse",
                     Severity = u.AvgDiscountPct > thresholdPercent * 2 ? "Critical" : "High",
-                    Description = $"Staff {u.StaffId}: avg discount {u.AvgDiscountPct:F1}% across {u.DiscountedSales} sales (max ₹{u.MaxDiscount:N2})",
+                    Description = $"Staff {u.StaffId}: avg discount {u.AvgDiscountPct:F1}% across {u.DiscountedSales} sales (max {regionalSettings.FormatCurrency(u.MaxDiscount)})",
                     RelatedEntityId = u.StaffId,
                     RelatedEntityType = "Staff",
                     AnomalyScore = Math.Min(1.0, u.AvgDiscountPct / (thresholdPercent * 2))
@@ -290,10 +292,10 @@ public sealed class AnomalyDetectionService(
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var cutoff = DateTime.UtcNow.AddDays(-lookbackDays);
+        var cutoff = regionalSettings.Now.AddDays(-lookbackDays);
         var alerts = new List<AnomalyAlert>();
 
-        // Use SaleReturns as a proxy for void/cancel patterns since Sale has no IsCancelled flag.
+        // Use SaleReturns as a proxy
         var staffReturns = await context.SaleReturns
             .Where(r => r.ReturnDate >= cutoff)
             .GroupBy(r => r.Sale!.StaffId)
@@ -321,7 +323,7 @@ public sealed class AnomalyDetectionService(
                 {
                     AlertType = "VoidPattern",
                     Severity = staffReturnRate > 0.25 ? "Critical" : "High",
-                    Description = $"Staff {u.StaffId}: {staffReturnRate:P0} return rate ({u.ReturnCount} returns, ₹{u.ReturnTotal:N2}), baseline {overallReturnRate:P1}",
+                    Description = $"Staff {u.StaffId}: {staffReturnRate:P0} return rate ({u.ReturnCount} returns, {regionalSettings.FormatCurrency(u.ReturnTotal)}), baseline {overallReturnRate:P1}",
                     RelatedEntityId = u.StaffId,
                     RelatedEntityType = "Staff",
                     AnomalyScore = Math.Min(1.0, staffReturnRate / 0.3)
@@ -338,16 +340,26 @@ public sealed class AnomalyDetectionService(
     {
         logger.LogInformation("Running full anomaly detection scan (lookback={Days} days)", lookbackDays);
 
-        var all = new List<AnomalyAlert>();
+        var results = await Task.WhenAll(
+            DetectUnusualTransactionsAsync(lookbackDays, ct),
+            DetectTheftPatternsAsync(lookbackDays, ct),
+            DetectInventoryShrinkageAsync(ct),
+            DetectPriceAnomaliesAsync(ct),
+            DetectDiscountAbuseAsync(lookbackDays, ct: ct),
+            DetectVoidPatternsAsync(lookbackDays, ct))
+            .ConfigureAwait(false);
 
-        all.AddRange(await DetectUnusualTransactionsAsync(lookbackDays, ct).ConfigureAwait(false));
-        all.AddRange(await DetectTheftPatternsAsync(lookbackDays, ct).ConfigureAwait(false));
-        all.AddRange(await DetectInventoryShrinkageAsync(ct).ConfigureAwait(false));
-        all.AddRange(await DetectPriceAnomaliesAsync(ct).ConfigureAwait(false));
-        all.AddRange(await DetectDiscountAbuseAsync(lookbackDays, ct: ct).ConfigureAwait(false));
-        all.AddRange(await DetectVoidPatternsAsync(lookbackDays, ct).ConfigureAwait(false));
+        var all = results.SelectMany(r => r).ToList();
 
         logger.LogInformation("Full anomaly scan complete: {Count} alerts total", all.Count);
+
+        // Persist alerts so MarkReviewedAsync can find them.
+        if (all.Count > 0)
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            context.AnomalyAlerts.AddRange(all);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        }
 
         // Publish high-severity alerts to event bus.
         foreach (var alert in all.Where(a => a.Severity is "Critical" or "High"))
@@ -356,10 +368,24 @@ public sealed class AnomalyDetectionService(
         return all.OrderByDescending(a => a.AnomalyScore).ToList();
     }
 
-    public Task MarkReviewedAsync(int alertId, string? notes = null, CancellationToken ct = default)
+    public async Task MarkReviewedAsync(int alertId, string? notes = null, CancellationToken ct = default)
     {
-        // In-memory only for now. Future: persist alerts to DB.
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+        var alert = await context.AnomalyAlerts
+            .FirstOrDefaultAsync(a => a.Id == alertId, ct)
+            .ConfigureAwait(false);
+
+        if (alert is null)
+        {
+            logger.LogWarning("Alert {Id} not found for review", alertId);
+            return;
+        }
+
+        alert.IsReviewed = true;
+        alert.ReviewNotes = notes;
+        await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
         logger.LogInformation("Alert {Id} marked as reviewed. Notes: {Notes}", alertId, notes);
-        return Task.CompletedTask;
     }
 }

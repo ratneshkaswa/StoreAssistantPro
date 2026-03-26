@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Markup;
 
@@ -6,9 +7,7 @@ namespace StoreAssistantPro.Core.Controls;
 
 /// <summary>
 /// Reusable card for setup/configuration pages.
-/// Provides the standard flat card border + two-column form Grid
-/// (label column + input column). Place form row elements directly
-/// inside as content — they become children of the inner Grid.
+/// Provides the standard flat card border + two-column form grid.
 /// </summary>
 [ContentProperty(nameof(FormContent))]
 public class SetupFormCard : Control
@@ -21,10 +20,6 @@ public class SetupFormCard : Control
             typeof(SetupFormCard), new FrameworkPropertyMetadata(false));
     }
 
-    /// <summary>
-    /// The content placed inside the card. Typically a Grid with
-    /// RowDefinitions and form elements using Grid.Row/Grid.Column.
-    /// </summary>
     public static readonly DependencyProperty FormContentProperty =
         DependencyProperty.Register(nameof(FormContent), typeof(object), typeof(SetupFormCard),
             new PropertyMetadata(null));
@@ -33,5 +28,20 @@ public class SetupFormCard : Control
     {
         get => GetValue(FormContentProperty);
         set => SetValue(FormContentProperty, value);
+    }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new SetupFormCardAutomationPeer(this);
+
+    private sealed class SetupFormCardAutomationPeer(SetupFormCard owner) : FrameworkElementAutomationPeer(owner)
+    {
+        protected override string GetClassNameCore() => nameof(SetupFormCard);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            return string.IsNullOrWhiteSpace(explicitName) ? "Setup form" : explicitName;
+        }
     }
 }

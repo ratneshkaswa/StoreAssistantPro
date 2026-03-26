@@ -20,6 +20,12 @@ namespace StoreAssistantPro.Core.Services;
 /// </summary>
 public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
 {
+    private static readonly string SessionId =
+        $"{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}"[..20];
+    private static readonly string MachineName = Environment.MachineName;
+    private static readonly string UserName = Environment.UserName;
+    private static readonly int ProcessId = Environment.ProcessId;
+
     private readonly string _logDirectory;
     private readonly Dictionary<string, FileLogger> _loggers = [];
     private readonly Lock _loggerLock = new();
@@ -35,12 +41,14 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
 
     private readonly LogLevel _minimumLevel;
 
-    public FileLoggerProvider(LogLevel minimumLevel = LogLevel.Information)
+    public FileLoggerProvider(LogLevel minimumLevel = LogLevel.Information, string? logDirectory = null)
     {
         _minimumLevel = minimumLevel;
-        _logDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "StoreAssistantPro", "Logs");
+        _logDirectory = string.IsNullOrWhiteSpace(logDirectory)
+            ? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "StoreAssistantPro", "Logs")
+            : logDirectory;
         Directory.CreateDirectory(_logDirectory);
 
         _writerTask = Task.Run(ProcessQueueAsync);
@@ -74,7 +82,8 @@ public sealed class FileLoggerProvider : ILoggerProvider, IDisposable
     internal void EnqueueEntry(string categoryName, LogLevel level, string message, Exception? exception)
     {
         var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        var entry = $"[{timestamp}Z] [{level,-11}] [{categoryName}] {message}";
+        var entry = $"[{timestamp}Z] [{level,-11}] [{categoryName}] " +
+                    $"[session={SessionId}] [machine={MachineName}] [user={UserName}] [pid={ProcessId}] {message}";
 
         if (exception is not null)
             entry += $"{Environment.NewLine}  Exception: {exception}";

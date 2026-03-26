@@ -7,7 +7,6 @@ namespace StoreAssistantPro.Modules.Debtors.Services;
 
 public class DebtorService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : IDebtorService
 {
     public async Task<IReadOnlyList<Debtor>> GetAllAsync(CancellationToken ct = default)

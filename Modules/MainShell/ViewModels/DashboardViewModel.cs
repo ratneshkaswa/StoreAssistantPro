@@ -18,15 +18,18 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly IAppStateService _appState;
     private readonly IEventBus _eventBus;
     private readonly IDashboardService _dashboardService;
+    private readonly IRegionalSettingsService _regional;
 
     public DashboardViewModel(
         IAppStateService appState,
         IEventBus eventBus,
-        IDashboardService dashboardService)
+        IDashboardService dashboardService,
+        IRegionalSettingsService regional)
     {
         _appState = appState;
         _eventBus = eventBus;
         _dashboardService = dashboardService;
+        _regional = regional;
 
         _appState.PropertyChanged += OnAppStatePropertyChanged;
     }
@@ -36,7 +39,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     public string CurrentUser => CurrentUserLabel;
     public string CurrentUserLabel => _appState.CurrentUserType.ToString();
     public string CurrentUserInitials => BuildInitials(CurrentUserLabel);
-    public string Greeting => BuildGreeting(CurrentUserLabel);
+    public string Greeting => BuildGreeting(CurrentUserLabel, _regional.Now);
     public UserType CurrentUserType => _appState.CurrentUserType;
 
     // Clock
@@ -47,7 +50,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     public bool IsOfflineMode => _appState.IsOfflineMode;
     public string ConnectionStatusText => IsOfflineMode ? "Offline" : "Connected";
-    public string ConnectionStatusDetail => BuildConnectionStatusDetail(_appState.LastConnectionCheck, IsOfflineMode);
+    public string ConnectionStatusDetail => BuildConnectionStatusDetail(_appState.LastConnectionCheck, IsOfflineMode, _regional.Now);
 
     // Live update wiring
 
@@ -96,9 +99,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         return initials.Length == 0 ? "SA" : new string(initials);
     }
 
-    private static string BuildGreeting(string currentUserLabel)
+    private static string BuildGreeting(string currentUserLabel, DateTime now)
     {
-        var prefix = DateTime.Now.Hour switch
+        var prefix = now.Hour switch
         {
             >= 5 and < 12 => "Good morning",
             >= 12 and < 17 => "Good afternoon",
@@ -109,12 +112,12 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         return $"{prefix}, {currentUserLabel}";
     }
 
-    private static string BuildConnectionStatusDetail(DateTime? lastConnectionCheck, bool isOfflineMode)
+    private static string BuildConnectionStatusDetail(DateTime? lastConnectionCheck, bool isOfflineMode, DateTime now)
     {
         if (lastConnectionCheck is null)
             return isOfflineMode ? "Connection unavailable" : "Waiting for first sync";
 
-        var relative = FormatRelative(DateTime.Now - lastConnectionCheck.Value);
+        var relative = FormatRelative(now - lastConnectionCheck.Value);
         return isOfflineMode
             ? $"Last check {relative}"
             : $"Checked {relative}";

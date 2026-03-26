@@ -63,8 +63,8 @@ public partial class UsersViewModel(
         if (!Validate(v => v
             .Rule(selectedUser is not null, "Please select a user.")
             .Rule(InputValidator.IsValidUserPin(NewPin), "New PIN must be exactly 4 digits.")
-            .Rule(!InputValidator.IsWeakPin(NewPin), "PIN is too weak (e.g. 0000, 1234). Choose a stronger PIN.")
             .Rule(InputValidator.AreEqual(NewPin, ConfirmPin), "PINs do not match.")
+            .Rule(!InputValidator.IsWeakPin(NewPin), "PIN is too weak (e.g. 0000, 1234). Choose a stronger PIN.")
             .Rule(selectedUser?.UserType != UserType.Admin || InputValidator.IsValidMasterPin(MasterPin),
                 "Master PIN must be exactly 6 digits.")))
             return;

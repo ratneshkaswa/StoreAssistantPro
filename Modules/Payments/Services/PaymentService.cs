@@ -7,7 +7,6 @@ namespace StoreAssistantPro.Modules.Payments.Services;
 
 public class PaymentService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IRegionalSettingsService regional,
     IPerformanceMonitor perf) : IPaymentService
 {
     public async Task<IReadOnlyList<Payment>> GetAllAsync(CancellationToken ct = default)

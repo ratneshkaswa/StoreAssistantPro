@@ -15,6 +15,7 @@ public partial class DebtorManagementViewModel(
     IRegionalSettingsService regional) : BaseViewModel
 {
     private List<Debtor> _allItems = [];
+    private bool _isRestoringViewState;
 
     public string CurrencySymbol => regional.CurrencySymbol;
 
@@ -62,8 +63,12 @@ public partial class DebtorManagementViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveStatusFilter { get; set; } = "All";
+
+    partial void OnActiveStatusFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -76,6 +81,7 @@ public partial class DebtorManagementViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await ReloadAsync(ct);
     });
 
@@ -220,5 +226,32 @@ public partial class DebtorManagementViewModel(
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetDebtorManagementState();
+            SearchText = state.SearchText;
+            ActiveStatusFilter = state.ActiveFilter;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetDebtorManagementState(new SearchFilterViewState
+        {
+            SearchText = SearchText,
+            ActiveFilter = ActiveStatusFilter
+        });
     }
 }

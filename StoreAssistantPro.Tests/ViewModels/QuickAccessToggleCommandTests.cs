@@ -46,7 +46,9 @@ public sealed class QuickAccessToggleCommandTests
         var appStateService = Substitute.For<IAppStateService>();
 
         var brandViewModel = new BrandManagementViewModel(brandService);
-        var customerViewModel = new CustomerManagementViewModel(customerService);
+        regionalService.CurrencySymbol.Returns("Rs.");
+
+        var customerViewModel = new CustomerManagementViewModel(customerService, regionalService);
         var vendorViewModel = new VendorManagementViewModel(vendorService, ledgerService, regionalService, appStateService);
 
         await brandViewModel.ToggleActiveCommand.ExecuteAsync(brand);

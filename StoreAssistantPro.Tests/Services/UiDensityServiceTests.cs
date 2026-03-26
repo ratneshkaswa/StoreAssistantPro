@@ -1,11 +1,16 @@
+using StoreAssistantPro.Tests.Helpers;
 using System.Windows;
 using StoreAssistantPro.Core.Services;
-using StoreAssistantPro.Tests.Helpers;
 
 namespace StoreAssistantPro.Tests.Services;
 
-public sealed class UiDensityServiceTests
+[Collection("UserPreferences")]
+public sealed class UiDensityServiceTests : IDisposable
 {
+    public UiDensityServiceTests() => UserPreferencesStore.ClearForTests();
+
+    public void Dispose() => UserPreferencesStore.ClearForTests();
+
     [Fact]
     public void SetCompactMode_Should_Update_Shared_Density_Resources()
     {

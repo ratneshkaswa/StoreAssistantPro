@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Ironing.Services;
 
@@ -11,6 +12,7 @@ namespace StoreAssistantPro.Modules.Ironing.ViewModels;
 public partial class IroningManagementViewModel(IIroningService ironingService) : BaseViewModel
 {
     private List<IroningEntry> _allItems = [];
+    private bool _isRestoringViewState;
 
     [ObservableProperty]
     public partial ObservableCollection<IroningEntry> Entries { get; set; } = [];
@@ -56,8 +58,12 @@ public partial class IroningManagementViewModel(IIroningService ironingService) 
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActivePaidFilter { get; set; } = "All";
+
+    partial void OnActivePaidFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -70,6 +76,7 @@ public partial class IroningManagementViewModel(IIroningService ironingService) 
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         await ReloadAsync(ct);
     });
 
@@ -211,5 +218,32 @@ public partial class IroningManagementViewModel(IIroningService ironingService) 
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetIroningManagementState();
+            SearchText = state.SearchText;
+            ActivePaidFilter = state.ActiveFilter;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetIroningManagementState(new SearchFilterViewState
+        {
+            SearchText = SearchText,
+            ActiveFilter = ActivePaidFilter
+        });
     }
 }

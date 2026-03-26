@@ -14,6 +14,7 @@ public partial class PaymentManagementViewModel(
     IRegionalSettingsService regional) : BaseViewModel
 {
     private List<Payment> _allItems = [];
+    private bool _isRestoringViewState;
 
     public string CurrencySymbol => regional.CurrencySymbol;
 
@@ -55,8 +56,12 @@ public partial class PaymentManagementViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
+    partial void OnSearchTextChanged(string value) => PersistViewState();
+
     [ObservableProperty]
     public partial string ActiveDateFilter { get; set; } = "All";
+
+    partial void OnActiveDateFilterChanged(string value) => PersistViewState();
 
     [ObservableProperty]
     public partial string FilterCountText { get; set; } = string.Empty;
@@ -72,6 +77,7 @@ public partial class PaymentManagementViewModel(
     [RelayCommand]
     private Task LoadAsync() => RunLoadAsync(async ct =>
     {
+        RestoreViewState();
         var customers = await paymentService.GetCustomersAsync(ct);
         Customers = new ObservableCollection<Customer>(customers);
         await ReloadAsync(ct);
@@ -213,5 +219,32 @@ public partial class PaymentManagementViewModel(
     {
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+    }
+
+    private void RestoreViewState()
+    {
+        _isRestoringViewState = true;
+        try
+        {
+            var state = UserPreferencesStore.GetPaymentManagementState();
+            SearchText = state.SearchText;
+            ActiveDateFilter = state.ActiveFilter;
+        }
+        finally
+        {
+            _isRestoringViewState = false;
+        }
+    }
+
+    private void PersistViewState()
+    {
+        if (_isRestoringViewState)
+            return;
+
+        UserPreferencesStore.SetPaymentManagementState(new SearchFilterViewState
+        {
+            SearchText = SearchText,
+            ActiveFilter = ActiveDateFilter
+        });
     }
 }

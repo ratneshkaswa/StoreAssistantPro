@@ -31,7 +31,11 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8B7;"/><Run Text=" Category Management"/></TextBlock>
+        <StackPanel>
+            <TextBlock Style="{StaticResource PageTitleStyle}"><Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE8B7;"/><Run Text=" Categories"/></TextBlock>
+            <TextBlock Text="Maintain category types and categories so the product catalogue stays structured."
+                       Style="{StaticResource PageSubtitleStyle}"/>
+        </StackPanel>
 
         <!-- Tab selector -->
         <Border Grid.Row="1"
@@ -78,6 +82,7 @@
                       AutomationProperties.Name="Category types" ItemsSource="{Binding CategoryTypes}"
                       SelectedItem="{Binding SelectedType}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="CategoryTypesGrid"
                       h:DataGridEmptyState.Icon="🗂"
                       h:DataGridEmptyState.Title="No category types yet"
                       h:DataGridEmptyState.Description="Create a category type first so products can be grouped into a clear catalogue structure."
@@ -147,13 +152,13 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Type Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Type Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Column="1"
                          AutomationProperties.Name="Category type name"
                          Text="{Binding TypeName, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         MaxLength="100" h:Watermark.Text="e.g. Men's Wear"/>
+                         MaxLength="100" h:Watermark.Text="Type name"/>
             </Grid>
 
             <Grid Grid.Row="2" Margin="{StaticResource FormActionBarSpacing}">
@@ -164,10 +169,12 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="1" Content="Clear" Command="{Binding ClearTypeFormCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Grid.Column="2" Content="Save" Command="{Binding SaveTypeCommand}"
-                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource FormActionRowStyle}">
+                    <Button Content="Clear" Command="{Binding ClearTypeFormCommand}"
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Save" Command="{Binding SaveTypeCommand}"
+                            Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                </StackPanel>
             </Grid>
         </Grid>
 
@@ -189,7 +196,7 @@
                 <TextBox AutomationProperties.Name="Category search"
                          Style="{StaticResource FluentSearchTextBoxStyle}"
                          Text="{Binding CategorySearchText, UpdateSourceTrigger=PropertyChanged}"
-                         h:Watermark.Text="e.g. Shirts"/>
+                         h:Watermark.Text="Search categories by name"/>
                 <Button Grid.Column="1" Content="Search" Command="{Binding SearchCategoriesCommand}"
                         Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             </Grid>
@@ -199,6 +206,7 @@
                       ItemsSource="{Binding Source={StaticResource GroupedCategoriesView}}"
                       SelectedItem="{Binding SelectedCategory}"
                       Style="{StaticResource EnterpriseDataGridStyle}"
+                      h:DataGridLayoutPersistence.Key="CategoriesGrid"
                       h:DataGridEmptyState.Icon="🏷"
                       h:DataGridEmptyState.Title="No categories found"
                       h:DataGridEmptyState.Description="Add a category or clear the current search to populate this list."
@@ -280,13 +288,13 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource FormRowLabelStyle}">
-                    <Run Text="Category Name "/><Run Text="*" Foreground="{StaticResource FluentError}"/>
+                    <Run Text="Category Name "/><Run Text="*" Style="{StaticResource RequiredFieldIndicatorRunStyle}"/>
                 </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1"
                          AutomationProperties.Name="Category name"
                          Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}"
                          Width="{StaticResource FieldWidthStandard}" HorizontalAlignment="Left"
-                         MaxLength="100" h:Watermark.Text="e.g. Shirts"/>
+                         MaxLength="100" h:Watermark.Text="Category name"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Type"
                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -306,10 +314,12 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="1" Content="Clear" Command="{Binding ClearCategoryFormCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
-                <Button Grid.Column="2" Content="Save" Command="{Binding SaveCategoryCommand}"
-                        Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource FormActionRowStyle}">
+                    <Button Content="Clear" Command="{Binding ClearCategoryFormCommand}"
+                            Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                    <Button Content="Save" Command="{Binding SaveCategoryCommand}"
+                            Style="{StaticResource SaveButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
+                </StackPanel>
             </Grid>
         </Grid>
 
@@ -318,10 +328,10 @@
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Message="{Binding ErrorMessage}"
                               Severity="Error"
-                              IsOpen="{Binding HasErrorMessage}"/>
+                              IsOpen="{Binding HasError}"/>
             <controls:InfoBar Message="{Binding SuccessMessage}"
                               Severity="Success"
-                              IsOpen="{Binding HasSuccessMessage}"/>
+                              IsOpen="{Binding HasSuccess}"/>
         </Grid>
         <controls:LoadingOverlay IsActive="{Binding IsBusy}"
                                  Message="Saving category changes..."/>
