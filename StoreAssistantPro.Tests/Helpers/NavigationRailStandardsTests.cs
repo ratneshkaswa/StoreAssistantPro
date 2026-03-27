@@ -16,6 +16,7 @@ public sealed class NavigationRailStandardsTests
         Assert.Contains("ToggleNavigationRailOrNavigateBackCommand", source, StringComparison.Ordinal);
         Assert.Contains("NotificationBadgeBehavior.Count", source, StringComparison.Ordinal);
         Assert.Contains("DataContext.IsNavigationRailExpanded", source, StringComparison.Ordinal);
+        Assert.Contains("TextTrimming=\"CharacterEllipsis\"", source, StringComparison.Ordinal);
     }
 
     [Fact]

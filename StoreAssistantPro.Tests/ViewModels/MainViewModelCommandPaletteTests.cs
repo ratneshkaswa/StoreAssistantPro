@@ -117,7 +117,7 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
 
         Assert.True(sut.HasOverflowQuickActions);
         Assert.NotEmpty(sut.OverflowQuickActions);
-        Assert.True(sut.VisibleQuickActions.Count < sut.QuickActions.Count);
+        Assert.True(sut.VisibleQuickActions.Count < sut.QuickAccessActions.Count);
     }
 
     [Fact]
@@ -130,7 +130,26 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
 
         Assert.False(sut.HasOverflowQuickActions);
         Assert.Empty(sut.OverflowQuickActions);
-        Assert.Equal(sut.QuickActions.Count, sut.VisibleQuickActions.Count);
+        Assert.Equal(sut.QuickAccessActions.Count, sut.VisibleQuickActions.Count);
+    }
+
+    [Fact]
+    public void QuickAccessBar_Should_Show_Global_Utilities_Without_Duplicating_Rail_Navigation()
+    {
+        var sut = CreateSut();
+
+        Assert.Contains(sut.QuickActions, action => action.Title == "Reports");
+        Assert.Contains(sut.QuickActions, action => action.Title == "Billing");
+        Assert.DoesNotContain(sut.QuickActions, action => action.Title == "Refresh");
+        Assert.DoesNotContain(sut.QuickActions, action => action.Title == "Logout");
+
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Refresh");
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Search");
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Command Palette");
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Shortcuts");
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Logout");
+        Assert.DoesNotContain(sut.QuickAccessActions, action => action.Title == "Reports");
+        Assert.DoesNotContain(sut.QuickAccessActions, action => action.Title == "Billing");
     }
 
     [Fact]

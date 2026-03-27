@@ -211,6 +211,7 @@
                                                Text="{Binding Title}"
                                                FontSize="{StaticResource FontSizeCaption}"
                                                FontWeight="Normal"
+                                               TextTrimming="CharacterEllipsis"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                                Visibility="{Binding DataContext.IsNavigationRailExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
                                 </Grid>
@@ -790,7 +791,26 @@
                             <DataTemplate>
                                 <Button Command="{Binding Command}"
                                         Tag="{Binding IsActive}"
-                                        Style="{StaticResource QuickActionButtonStyle}"/>
+                                        Style="{StaticResource ToolbarLinkButtonStyle}"
+                                        Margin="0,0,8,0"
+                                        Padding="10,8"
+                                        ToolTip="{Binding Description}"
+                                        h:SmartTooltip.Header="{Binding Title}"
+                                        h:SmartTooltip.Text="{Binding Description}"
+                                        h:SmartTooltip.ContextKey="{Binding HelpKey}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Icon}"
+                                                   FontFamily="{StaticResource FluentIconFont}"
+                                                   Margin="0,0,6,0"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                        <TextBlock Text="{Binding Title}"
+                                                   VerticalAlignment="Center"
+                                                   MaxWidth="104"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                    </StackPanel>
+                                </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -835,6 +855,8 @@
                                                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                                         <TextBlock Text="{Binding Title}"
                                                                    VerticalAlignment="Center"
+                                                                   MaxWidth="156"
+                                                                   TextTrimming="CharacterEllipsis"
                                                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                                     </StackPanel>
                                                 </DockPanel>
@@ -944,6 +966,7 @@
                                            Text="Notifications"
                                            FontSize="{StaticResource FontSizeCaption}"
                                            FontWeight="Normal"
+                                           TextTrimming="CharacterEllipsis"
                                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                            Visibility="{Binding IsNavigationRailExpanded, Converter={StaticResource BoolToVisibility}}"/>
                             </Grid>
@@ -1075,11 +1098,9 @@
                                                            Foreground="{StaticResource FluentTextTertiary}"
                                                            Visibility="{Binding HasShortcutText, Converter={StaticResource BoolToVisibility}}"/>
 
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Title}"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource FluentTextPrimary}"/>
-                                                    <Border Margin="8,0,0,0"
+                                                <DockPanel LastChildFill="True">
+                                                    <Border DockPanel.Dock="Right"
+                                                            Margin="8,0,0,0"
                                                             Padding="8,2"
                                                             Background="{StaticResource ControlAltFillColorSecondary}"
                                                             CornerRadius="10"
@@ -1088,7 +1109,11 @@
                                                                    FontSize="{StaticResource FontSizeCaption}"
                                                                    Foreground="{StaticResource FluentAccentDark2}"/>
                                                     </Border>
-                                                </StackPanel>
+                                                    <TextBlock Text="{Binding Title}"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Foreground="{StaticResource FluentTextPrimary}"/>
+                                                </DockPanel>
                                             </DockPanel>
 
                                             <TextBlock Text="{Binding Description}"

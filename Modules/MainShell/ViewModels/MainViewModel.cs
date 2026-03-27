@@ -28,6 +28,14 @@ public partial class MainViewModel : BaseViewModel
     private const double QuickActionSlotWidth = 86;
     private const double QuickActionOverflowButtonWidth = 52;
     private static readonly IconService ShellIconService = new();
+    private static readonly HashSet<string> QuickAccessHelpKeys = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Refresh",
+        "Search",
+        "Shortcuts",
+        "Logout",
+        CommandPaletteHelpKey
+    };
     private readonly INavigationService _navigationService;
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
@@ -41,8 +49,6 @@ public partial class MainViewModel : BaseViewModel
     private readonly INotificationService _notificationService;
     private readonly IRegionalSettingsService _regionalSettings;
     private readonly List<string> _recentCommandPaletteItemIds = [];
-    private bool _quickActionRefreshScheduled;
-    private bool _commandPaletteRefreshScheduled;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -156,6 +162,7 @@ public partial class MainViewModel : BaseViewModel
     // ── Quick Action Bar ──
 
     public ObservableCollection<QuickAction> QuickActions { get; } = [];
+    public ObservableCollection<QuickAction> QuickAccessActions { get; } = [];
     public ObservableCollection<CommandPaletteItem> CommandPaletteItems { get; } = [];
     public ObservableCollection<QuickAction> VisibleQuickActions { get; } = [];
     public ObservableCollection<QuickAction> OverflowQuickActions { get; } = [];
@@ -1089,31 +1096,23 @@ public partial class MainViewModel : BaseViewModel
         }
     }
 
-    private void RequestQuickActionRefresh()
-    {
-        if (_quickActionRefreshScheduled)
-            return;
-
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null || dispatcher.HasShutdownStarted)
-        {
-            RefreshQuickActionsCore();
-            return;
-        }
-
-        _quickActionRefreshScheduled = true;
-        dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
-        {
-            _quickActionRefreshScheduled = false;
-            RefreshQuickActionsCore();
-        }));
-    }
+    private void RequestQuickActionRefresh() => RefreshQuickActionsCore();
 
     private void RefreshQuickActionsCore()
     {
         QuickActions.Clear();
-        foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType, _features) ?? [])
+        foreach (var action in (_quickActionService.GetVisibleActions(AppState.CurrentUserType, _features) ?? [])
+                     .Where(ShouldShowInNavigationRail))
             QuickActions.Add(action);
+
+        QuickAccessActions.Clear();
+        foreach (var action in (_quickActionService.GetActions() ?? [])
+                     .Where(IsQuickActionAccessible)
+                     .Where(ShouldShowInQuickAccessBar)
+                     .OrderBy(action => action.SortOrder))
+        {
+            QuickAccessActions.Add(action);
+        }
 
         UpdateQuickActionActiveState();
         RecomputeQuickActionOverflow();
@@ -1147,25 +1146,7 @@ public partial class MainViewModel : BaseViewModel
         RequestCommandPaletteRefresh();
     }
 
-    private void RequestCommandPaletteRefresh()
-    {
-        if (_commandPaletteRefreshScheduled)
-            return;
-
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null || dispatcher.HasShutdownStarted)
-        {
-            RefreshCommandPaletteItemsCore();
-            return;
-        }
-
-        _commandPaletteRefreshScheduled = true;
-        dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
-        {
-            _commandPaletteRefreshScheduled = false;
-            RefreshCommandPaletteItemsCore();
-        }));
-    }
+    private void RequestCommandPaletteRefresh() => RefreshCommandPaletteItemsCore();
 
     private void RefreshCommandPaletteItemsCore()
     {
@@ -1206,7 +1187,7 @@ public partial class MainViewModel : BaseViewModel
         VisibleQuickActions.Clear();
         OverflowQuickActions.Clear();
 
-        var actions = QuickActions.ToList();
+        var actions = QuickAccessActions.ToList();
         if (actions.Count == 0)
         {
             IsQuickActionOverflowOpen = false;
@@ -1257,6 +1238,13 @@ public partial class MainViewModel : BaseViewModel
 
         return action.Command is not null;
     }
+
+    private static bool ShouldShowInQuickAccessBar(QuickAction action) =>
+        !string.IsNullOrWhiteSpace(action.HelpKey) &&
+        QuickAccessHelpKeys.Contains(action.HelpKey);
+
+    private static bool ShouldShowInNavigationRail(QuickAction action) =>
+        !ShouldShowInQuickAccessBar(action);
 
     private CommandPaletteItem CreateCommandPaletteItem(QuickAction action)
     {
@@ -1415,7 +1403,7 @@ public partial class MainViewModel : BaseViewModel
     private void UpdateQuickActionActiveState()
     {
         var activeHelpKey = GetActiveQuickActionHelpKey(_currentPage);
-        foreach (var action in QuickActions)
+        foreach (var action in _quickActionService.GetActions() ?? [])
         {
             action.IsActive = !string.IsNullOrWhiteSpace(activeHelpKey) &&
                               string.Equals(action.HelpKey, activeHelpKey, StringComparison.OrdinalIgnoreCase);

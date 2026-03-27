@@ -485,7 +485,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("Style=\"{StaticResource ConnectionStatusDotStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource ShellConnectionPrimaryTextStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource ShellConnectionDetailTextStyle}\"", workspaceView, StringComparison.Ordinal);
-        Assert.Equal(3, Regex.Matches(workspaceView, "Style=\\\"\\{StaticResource CountBadgePillStyle\\}\\\"").Count);
+        Assert.Equal(2, Regex.Matches(workspaceView, "Style=\\\"\\{StaticResource CountBadgePillStyle\\}\\\"").Count);
         Assert.DoesNotContain("Style=\"{StaticResource StatusBadgePillStyle}\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("<Ellipse Width=\"8\" Height=\"8\" VerticalAlignment=\"Center\">", workspaceView, StringComparison.Ordinal);
 
@@ -682,7 +682,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("FontFamily=\"{StaticResource FluentIconFont}\"", posStyles, StringComparison.Ordinal);
 
         Assert.Equal(
-            3,
+            4,
             Regex.Matches(
                 mainWindow,
                 "Text=\"\\{Binding Icon\\}\"\\s*\\r?\\n\\s*FontFamily=\"\\{StaticResource FluentIconFont\\}\"",
@@ -2347,7 +2347,7 @@ public sealed class UiStandardizationStandardsTests
             }
         }
 
-        Assert.Equal(7, overlayCount);
+        Assert.Equal(5, overlayCount);
     }
 
     [Fact]

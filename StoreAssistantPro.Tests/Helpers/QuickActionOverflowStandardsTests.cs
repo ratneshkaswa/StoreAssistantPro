@@ -12,10 +12,15 @@ public sealed class QuickActionOverflowStandardsTests
 
         Assert.Contains("QuickActionOverflowButton", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("OverflowQuickActions", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("VisibleQuickActions", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("OnQuickActionsViewportSizeChanged", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("OnQuickActionOverflowItemClick", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource AnchoredFlyoutPopupStyle}\"", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource FlyoutMenuSurfaceStyle}\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("Style=\"{StaticResource ToolbarLinkButtonStyle}\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("MaxWidth=\"104\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("MaxWidth=\"156\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("TextTrimming=\"CharacterEllipsis\"", mainWindowXaml, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -31,6 +36,18 @@ public sealed class QuickActionOverflowStandardsTests
         Assert.Contains("Value=\"{StaticResource FluentAccentDefault}\"", posStyles, StringComparison.Ordinal);
         Assert.Contains("x:Key=\"QuickActionButtonStyle\"", posStyles, StringComparison.Ordinal);
         Assert.Contains("x:Key=\"QuickActionOverflowItemStyle\"", mainWindowXaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainViewModel_Should_Separate_QuickAccess_Utilities_From_Rail_Navigation()
+    {
+        var mainViewModel = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "ViewModels", "MainViewModel.cs"));
+
+        Assert.Contains("QuickAccessActions", mainViewModel, StringComparison.Ordinal);
+        Assert.Contains("ShouldShowInQuickAccessBar", mainViewModel, StringComparison.Ordinal);
+        Assert.Contains("ShouldShowInNavigationRail", mainViewModel, StringComparison.Ordinal);
+        Assert.Contains("QuickAccessHelpKeys", mainViewModel, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

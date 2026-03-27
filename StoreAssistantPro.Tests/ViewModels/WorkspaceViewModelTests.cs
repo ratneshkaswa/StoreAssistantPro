@@ -84,10 +84,10 @@ public class WorkspaceViewModelTests
         Assert.Equal("Updated Just now", sut.LastUpdatedText);
         Assert.True(sut.HasAlertBanner);
         Assert.Equal(InfoBarSeverity.Error, sut.AlertSeverity);
-        Assert.Equal("â†‘", sut.TodaySalesTrend.Glyph);
+        Assert.Equal("↑", sut.TodaySalesTrend.Glyph);
         Assert.Equal("25% vs yesterday", sut.TodaySalesTrend.Label);
         Assert.Equal(KpiTrendTone.Positive, sut.TodaySalesTrend.Tone);
-        Assert.Equal("â†“", sut.TodayReturnsTrend.Glyph);
+        Assert.Equal("↓", sut.TodayReturnsTrend.Glyph);
         Assert.Equal(KpiTrendTone.Positive, sut.TodayReturnsTrend.Tone);
         Assert.Equal("25% vs last month", sut.ThisMonthSalesTrend.Label);
         Assert.Single(sut.RecentSalesDisplay);
