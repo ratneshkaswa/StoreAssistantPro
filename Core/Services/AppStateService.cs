@@ -156,6 +156,9 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
     public partial bool IsDefaultAdminPin { get; set; }
 
     [ObservableProperty]
+    public partial bool IsInitialSetupPending { get; set; }
+
+    [ObservableProperty]
     public partial DateTime? LastConnectionCheck { get; set; }
 
     public ObservableCollection<AppNotification> Notifications { get; }
@@ -222,6 +225,11 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
     public void SetDefaultPinFlag(bool isDefault)
     {
         RunOnDispatcher(() => IsDefaultAdminPin = isDefault);
+    }
+
+    public void SetInitialSetupPending(bool pending)
+    {
+        RunOnDispatcher(() => IsInitialSetupPending = pending);
     }
 
     public void AddNotification(AppNotification notification) =>

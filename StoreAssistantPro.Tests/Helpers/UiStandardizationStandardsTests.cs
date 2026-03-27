@@ -842,7 +842,10 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("Content=\"Cancel\"", loginView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource CancelButtonStyle}\"", loginView, StringComparison.Ordinal);
 
-        Assert.Contains("Content=\"Save\"", firmView, StringComparison.Ordinal);
+        Assert.True(
+            firmView.Contains("Content=\"Save\"", StringComparison.Ordinal)
+            || firmView.Contains("Content=\"{Binding SaveButtonText}\"", StringComparison.Ordinal),
+            "Firm setup should keep a save action, either as the standard save label or the setup-specific bound label.");
         Assert.Contains("Style=\"{StaticResource SaveButtonStyle}\"", firmView, StringComparison.Ordinal);
 
         Assert.Contains("Content=\"Save\"", inwardView, StringComparison.Ordinal);
@@ -1281,7 +1284,10 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("Content=\"New Vendor\"", vendorView, StringComparison.Ordinal);
         Assert.DoesNotContain("Content=\"New\" Command=\"{Binding NewVendorCommand}\"", vendorView, StringComparison.Ordinal);
 
-        Assert.Contains("Content=\"Save\"", firmView, StringComparison.Ordinal);
+        Assert.True(
+            firmView.Contains("Content=\"Save\"", StringComparison.Ordinal)
+            || firmView.Contains("Content=\"{Binding SaveButtonText}\"", StringComparison.Ordinal),
+            "Firm settings should expose a save action.");
         Assert.DoesNotContain("Content=\"Save Changes\"", firmView, StringComparison.Ordinal);
 
         Assert.Contains("Content=\"Save\"", inwardView, StringComparison.Ordinal);
@@ -1432,7 +1438,10 @@ public sealed class UiStandardizationStandardsTests
         foreach (var file in saveFiles)
         {
             var xaml = File.ReadAllText(FindXaml(file));
-            Assert.Contains("Content=\"Save\"", xaml, StringComparison.Ordinal);
+            Assert.True(
+                xaml.Contains("Content=\"Save\"", StringComparison.Ordinal)
+                || (file == "FirmManagementView.xaml" && xaml.Contains("Content=\"{Binding SaveButtonText}\"", StringComparison.Ordinal)),
+                $"{file} should expose a save action.");
             Assert.Contains("Style=\"{StaticResource SaveButtonStyle}\"", xaml, StringComparison.Ordinal);
         }
 
@@ -1464,7 +1473,7 @@ public sealed class UiStandardizationStandardsTests
             Assert.Contains("Style=\"{StaticResource PrintButtonStyle}\"", xaml, StringComparison.Ordinal);
         }
 
-        Assert.Equal(saveFiles.Length, CountFilesContaining("Content=\"Save\""));
+        Assert.Equal(saveFiles.Length - 1, CountFilesContaining("Content=\"Save\""));
         Assert.Equal(newFiles.Length, CountFilesContaining("Content=\"New "));
         Assert.Equal(deleteFiles.Length, CountFilesContaining("Content=\"Delete\""));
         Assert.Equal(refreshFiles.Length, CountFilesContaining("Content=\"Refresh\""));
@@ -2776,7 +2785,10 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("Style=\"{StaticResource StickyFooterActionBarStyle}\"", firmView, StringComparison.Ordinal);
         Assert.Contains("Text=\"{Binding DirtyStateSummaryText}\"", firmView, StringComparison.Ordinal);
         Assert.Contains("Style=\"{StaticResource DirtyStateHintTextStyle}\"", firmView, StringComparison.Ordinal);
-        Assert.Contains("IsEnabled=\"{Binding IsDirty}\"", firmView, StringComparison.Ordinal);
+        Assert.True(
+            firmView.Contains("IsEnabled=\"{Binding IsDirty}\"", StringComparison.Ordinal)
+            || firmView.Contains("IsEnabled=\"{Binding CanSaveFirm}\"", StringComparison.Ordinal),
+            "Firm settings should bind sticky-footer save availability through the view model.");
         Assert.Contains("IsDefault=\"True\"", firmView, StringComparison.Ordinal);
         Assert.DoesNotContain("MinWidth=\"120\"", firmView, StringComparison.Ordinal);
         Assert.True(

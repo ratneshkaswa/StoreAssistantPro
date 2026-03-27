@@ -34,7 +34,8 @@ public sealed record FirmManagementSnapshot(
     string BankAccountNumber,
     string BankIFSC,
     string ReceiptHeaderText,
-    string InvoiceResetPeriod);
+    string InvoiceResetPeriod,
+    bool IsInitialSetupPending = false);
 
 public record FirmUpdateDto(
     string FirmName,

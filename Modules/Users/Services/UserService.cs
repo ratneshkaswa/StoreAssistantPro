@@ -10,6 +10,16 @@ public class UserService(
     IDbContextFactory<AppDbContext> contextFactory,
     IPerformanceMonitor perf) : IUserService
 {
+    public async Task<bool> HasUserRoleAsync(CancellationToken ct = default)
+    {
+        using var _ = perf.BeginScope("UserService.HasUserRoleAsync");
+        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await context.UserCredentials
+            .AsNoTracking()
+            .AnyAsync(user => user.UserType == UserType.User, ct)
+            .ConfigureAwait(false);
+    }
+
     public async Task<IEnumerable<UserCredential>> GetAllUsersAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("UserService.GetAllUsersAsync");

@@ -67,8 +67,7 @@ public class SystemSettings
     public string NumberToWordsLanguage { get; set; } = "English";
 
     /// <summary>
-    /// Legacy flag retained for backward compatibility with older builds.
-    /// First-run completion is determined from AppConfig.IsInitialized.
+    /// Tracks whether the minimum first-run setup has been completed.
     /// </summary>
     public bool SetupCompleted { get; set; }
 

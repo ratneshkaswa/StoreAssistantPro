@@ -8,6 +8,7 @@ using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
+using StoreAssistantPro.Modules.Users.Services;
 using StoreAssistantPro.Modules.Users.Commands;
 
 namespace StoreAssistantPro.Modules.Authentication.ViewModels;
@@ -31,6 +32,7 @@ public partial class LoginViewModel : BaseViewModel
     private readonly IAppStateService _appState;
     private readonly IRegionalSettingsService _regional;
     private readonly IConnectivityMonitorService _connectivity;
+    private readonly IUserService _userService;
     private readonly DispatcherTimer _clockTimer;
     private Action? _resetCompleted;
     private bool _isInitialized;
@@ -104,13 +106,15 @@ public partial class LoginViewModel : BaseViewModel
         ICommandBus commandBus,
         IAppStateService appState,
         IRegionalSettingsService regional,
-        IConnectivityMonitorService connectivity)
+        IConnectivityMonitorService connectivity,
+        IUserService userService)
         : base()
     {
         _commandBus = commandBus;
         _appState = appState;
         _regional = regional;
         _connectivity = connectivity;
+        _userService = userService;
 
         CurrentTime = _regional.FormatTime(_regional.Now);
 
@@ -134,11 +138,13 @@ public partial class LoginViewModel : BaseViewModel
         _clockTimer.Start();
 
         // L2: Pre-select last user if a previous login has occurred
-        if (_appState.LastLoggedInUserType is { } lastUser)
+        if (_appState.LastLoggedInUserType == UserType.Admin)
         {
-            SelectedUserType = lastUser;
+            SelectedUserType = UserType.Admin;
             // Don't auto-login on pre-select — user must click or press F1/F2
         }
+
+        _ = LoadRoleVisibilityAsync();
     }
 
     /// <summary>
@@ -167,6 +173,9 @@ public partial class LoginViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectUserAsync(UserType userType)
     {
+        if (userType == UserType.User && !IsUserRoleVisible)
+            return;
+
         SelectedUserType = userType;
         PinPad.Reset();
         ClearMessages();
@@ -184,6 +193,39 @@ public partial class LoginViewModel : BaseViewModel
         SelectedUserType = null;
         PinPad.Reset();
         ClearMessages();
+    }
+
+    private async Task LoadRoleVisibilityAsync()
+    {
+        try
+        {
+            var hasUserRole = !_appState.IsInitialSetupPending
+                && await _userService.HasUserRoleAsync().ConfigureAwait(true);
+            if (_isDisposed)
+                return;
+
+            IsUserRoleVisible = hasUserRole;
+
+            if (!hasUserRole)
+            {
+                if (SelectedUserType == UserType.User)
+                    SelectedUserType = null;
+
+                SelectedUserType ??= UserType.Admin;
+                return;
+            }
+
+            if (SelectedUserType is null && _appState.LastLoggedInUserType == UserType.User)
+                SelectedUserType = UserType.User;
+        }
+        catch
+        {
+            if (_isDisposed)
+                return;
+
+            IsUserRoleVisible = false;
+            SelectedUserType ??= UserType.Admin;
+        }
     }
 
     /// <summary>Direct login for User role (no PIN required).</summary>

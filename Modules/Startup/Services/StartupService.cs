@@ -228,9 +228,14 @@ public class StartupService(
             .AsNoTracking()
             .SingleOrDefaultAsync(ct)
             .ConfigureAwait(false);
+        var settings = await context.SystemSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
 
         appState.SetFirmInfo(config?.FirmName ?? string.Empty);
         appState.SetDefaultPinFlag(config?.IsDefaultAdminPin ?? false);
+        appState.SetInitialSetupPending(!(settings?.SetupCompleted ?? false));
     }
 
     public void LoadFeatureFlags()

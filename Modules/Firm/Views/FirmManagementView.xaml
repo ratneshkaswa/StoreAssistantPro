@@ -29,11 +29,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Margin="{StaticResource TitleSpacing}">
-            <TextBlock Style="{StaticResource PageTitleStyle}">
-                <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE731;"/>
-                <Run Text=" Business Settings"/>
-            </TextBlock>
-            <TextBlock Text="Maintain business identity, tax details, and defaults used across the app."
+            <TextBlock Text="{Binding PageTitleText}"
+                       Style="{StaticResource PageTitleStyle}"/>
+            <TextBlock Text="{Binding PageSubtitleText}"
                        Style="{StaticResource PageSubtitleStyle}"/>
         </StackPanel>
 
@@ -67,9 +65,9 @@
                         Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                 <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
                     <StackPanel>
-                        <TextBlock Text="Business Profile"
+                        <TextBlock Text="{Binding ProfileSectionTitleText}"
                                    Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
-                        <TextBlock Text="Maintain the core business identity and contact details printed across billing and reporting surfaces."
+                        <TextBlock Text="{Binding ProfileSectionDescriptionText}"
                                    Style="{StaticResource OperationalEditorSectionDescriptionStyle}"/>
 
                         <Grid>
@@ -99,7 +97,8 @@
                                          h:Watermark.Text="Store name"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="1" Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}">
+                            <StackPanel Grid.Row="1" Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}"
+                                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock x:Name="StateLabel"
                                            Text="State / UT"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -116,7 +115,8 @@
                                            Visibility="{Binding StateValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="1" Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}">
+                            <StackPanel Grid.Row="1" Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}"
+                                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock x:Name="PhoneLabel"
                                            Text="Phone"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -135,7 +135,8 @@
                                            Visibility="{Binding PhoneValidationHint, Converter={StaticResource NonEmptyStringToVisibility}}"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="2" Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}">
+                            <StackPanel Grid.Row="2" Grid.Column="0" Style="{StaticResource FirmFieldPanelStyle}"
+                                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock x:Name="PincodeLabel"
                                            Text="Postal PIN"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -151,7 +152,8 @@
                                          h:Watermark.Text="PIN code"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="2" Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}">
+                            <StackPanel Grid.Row="2" Grid.Column="2" Style="{StaticResource FirmFieldPanelStyle}"
+                                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock x:Name="EmailLabel"
                                            Text="Email"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -163,7 +165,8 @@
                                          h:Watermark.Text="Email address"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Style="{StaticResource FirmFieldPanelStyle}">
+                            <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Style="{StaticResource FirmFieldPanelStyle}"
+                                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock x:Name="AddressLabel"
                                            Text="Address"
                                            Style="{StaticResource FormRowLabelStyle}"/>
@@ -179,7 +182,9 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}"
+                        Margin="{StaticResource SectionSpacing}"
+                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
                         <TextBlock Text="Tax &amp; Compliance"
                                    Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
@@ -269,7 +274,9 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}"
+                        Margin="{StaticResource SectionSpacing}"
+                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
                         <TextBlock Text="Billing &amp; Regional Rules"
                                    Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
@@ -379,7 +386,9 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource OperationalEditorSectionCardStyle}" Margin="{StaticResource SectionSpacing}">
+                <Border Style="{StaticResource OperationalEditorSectionCardStyle}"
+                        Margin="{StaticResource SectionSpacing}"
+                        Visibility="{Binding IsExtendedBusinessDetailsVisible, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
                         <TextBlock Text="Invoice &amp; Receipt"
                                    Style="{StaticResource OperationalEditorSectionTitleStyle}"/>
@@ -458,10 +467,10 @@
                 <StackPanel DockPanel.Dock="Right"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
-                    <Button Content="Save"
-                            Command="{Binding SaveFirmCommand}"
+                    <Button Command="{Binding SaveFirmCommand}"
                             Style="{StaticResource SaveButtonStyle}"
-                            IsEnabled="{Binding IsDirty}"
+                            Content="{Binding SaveButtonText}"
+                            IsEnabled="{Binding CanSaveFirm}"
                             IsDefault="True"
                             Margin="0"/>
                 </StackPanel>

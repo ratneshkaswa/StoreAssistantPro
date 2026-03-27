@@ -12,6 +12,7 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
+using StoreAssistantPro.Modules.Users.Services;
 using StoreAssistantPro.Tests.Helpers;
 
 namespace StoreAssistantPro.Tests.ViewModels;
@@ -26,6 +27,7 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IStatusBarService _statusBar = Substitute.For<IStatusBarService>();
     private readonly IFeatureToggleService _features = Substitute.For<IFeatureToggleService>();
+    private readonly IUserService _userService = Substitute.For<IUserService>();
 
     public MainViewModelCommandPaletteTests()
     {
@@ -38,6 +40,7 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
         _commandBus.SendAsync(Arg.Any<ICommandRequest<Unit>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(CommandResult.Success()));
         _features.IsEnabled(Arg.Any<string>()).Returns(true);
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(true);
     }
 
     public void Dispose() => UserPreferencesStore.ClearForTests();
@@ -207,6 +210,7 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
             Substitute.For<INotificationService>(),
             Substitute.For<IToastService>(),
             Substitute.For<IRegionalSettingsService>(),
+            _userService,
             []);
     }
 

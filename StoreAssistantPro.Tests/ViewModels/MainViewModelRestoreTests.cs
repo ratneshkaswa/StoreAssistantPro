@@ -12,6 +12,7 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
+using StoreAssistantPro.Modules.Users.Services;
 using StoreAssistantPro.Tests.Helpers;
 
 namespace StoreAssistantPro.Tests.ViewModels;
@@ -26,6 +27,7 @@ public sealed class MainViewModelRestoreTests : IDisposable
     private readonly IFeatureToggleService _features = Substitute.For<IFeatureToggleService>();
     private readonly ISessionService _sessionService = Substitute.For<ISessionService>();
     private readonly IStatusBarService _statusBar = Substitute.For<IStatusBarService>();
+    private readonly IUserService _userService = Substitute.For<IUserService>();
 
     public MainViewModelRestoreTests()
     {
@@ -40,6 +42,7 @@ public sealed class MainViewModelRestoreTests : IDisposable
             .Returns(Task.FromResult(CommandResult.Success()));
         _sessionService.LoginAsync(Arg.Any<UserType>()).Returns(Task.CompletedTask);
         _features.IsEnabled(Arg.Any<string>()).Returns(true);
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(true);
     }
 
     public void Dispose()
@@ -105,6 +108,28 @@ public sealed class MainViewModelRestoreTests : IDisposable
         Assert.True(sut.IsNotificationsPanelVisible);
     }
 
+    [Fact]
+    public async Task Login_When_InitialSetupPending_Should_Route_To_Firm_Setup()
+    {
+        _appState.IsInitialSetupPending.Returns(true);
+        var sut = CreateSut();
+
+        await InvokeLoginSucceededAsync(sut, UserType.Admin);
+
+        Assert.Contains("Firm", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PrepareStartup_When_NoUserRoleConfigured_Should_Show_Login()
+    {
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(false);
+        var sut = CreateSut();
+
+        await InvokePrepareStartupAsync(sut);
+
+        Assert.Contains("Sign in", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
+    }
+
     private MainViewModel CreateSut()
     {
         var navigation = new StubNavigationService();
@@ -124,6 +149,7 @@ public sealed class MainViewModelRestoreTests : IDisposable
             Substitute.For<INotificationService>(),
             Substitute.For<IToastService>(),
             Substitute.For<IRegionalSettingsService>(),
+            _userService,
             []);
     }
 
@@ -132,6 +158,13 @@ public sealed class MainViewModelRestoreTests : IDisposable
         var method = typeof(MainViewModel).GetMethod("OnLoginSucceededAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
             ?? throw new InvalidOperationException("Could not locate login success handler.");
         return (Task)(method.Invoke(viewModel, [userType]) ?? Task.CompletedTask);
+    }
+
+    private static Task InvokePrepareStartupAsync(MainViewModel viewModel)
+    {
+        var method = typeof(MainViewModel).GetMethod("PrepareStartupAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Could not locate startup preparation method.");
+        return (Task)(method.Invoke(viewModel, null) ?? Task.CompletedTask);
     }
 
     private sealed class StubNavigationService : ObservableObject, INavigationService

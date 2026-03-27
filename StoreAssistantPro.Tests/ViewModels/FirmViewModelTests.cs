@@ -1,6 +1,7 @@
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.Firm.Services;
 using StoreAssistantPro.Modules.Firm.ViewModels;
@@ -11,8 +12,9 @@ public class FirmViewModelTests
 {
     private readonly IFirmService _firmService = Substitute.For<IFirmService>();
     private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
+    private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
 
-    private FirmViewModel CreateSut() => new(_firmService, _eventBus);
+    private FirmViewModel CreateSut() => new(_firmService, _eventBus, _appState);
 
     [Fact]
     public async Task LoadFirm_PopulatesUnifiedFields()
@@ -128,6 +130,51 @@ public class FirmViewModelTests
     }
 
     [Fact]
+    public async Task LoadFirm_WhenInitialSetupPending_UsesMinimalSetupMode()
+    {
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: "My Store",
+            Address: string.Empty,
+            State: string.Empty,
+            Pincode: string.Empty,
+            Phone: string.Empty,
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 0m,
+            StateCode: null,
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: string.Empty,
+            BankAccountNumber: string.Empty,
+            BankIFSC: string.Empty,
+            ReceiptHeaderText: string.Empty,
+            InvoiceResetPeriod: "Never",
+            IsInitialSetupPending: true));
+
+        var sut = CreateSut();
+
+        await sut.LoadFirmCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsInitialSetupMode);
+        Assert.False(sut.IsExtendedBusinessDetailsVisible);
+        Assert.Equal("First-time setup", sut.PageTitleText);
+        Assert.Equal("Save setup", sut.SaveButtonText);
+        Assert.True(sut.CanSaveFirm);
+    }
+
+    [Fact]
     public async Task SaveFirm_EmptyName_BlocksSave()
     {
         var sut = CreateSut();
@@ -200,6 +247,55 @@ public class FirmViewModelTests
         Assert.Equal("Business settings saved.", sut.SuccessMessage);
         Assert.Empty(sut.ErrorMessage);
         Assert.False(sut.IsDirty);
+    }
+
+    [Fact]
+    public async Task SaveFirm_WhenInitialSetupPending_CompletesSetupState()
+    {
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: "My Store",
+            Address: string.Empty,
+            State: string.Empty,
+            Pincode: string.Empty,
+            Phone: string.Empty,
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 0m,
+            StateCode: null,
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: string.Empty,
+            BankAccountNumber: string.Empty,
+            BankIFSC: string.Empty,
+            ReceiptHeaderText: string.Empty,
+            InvoiceResetPeriod: "Never",
+            IsInitialSetupPending: true));
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+
+        await sut.LoadFirmCommand.ExecuteAsync(null);
+        await sut.SaveFirmCommand.ExecuteAsync(null);
+
+        _appState.Received(1).SetInitialSetupPending(false);
+        Assert.True(sut.HasCompletedInitialSetup);
+        Assert.Equal("Store name saved. Setup complete.", sut.SuccessMessage);
+        Assert.False(sut.CanSaveFirm);
     }
 
     [Fact]

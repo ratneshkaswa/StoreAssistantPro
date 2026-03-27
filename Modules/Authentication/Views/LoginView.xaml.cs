@@ -133,7 +133,7 @@ public partial class LoginView : UserControl
                 vm.SelectUserCommand.Execute(UserType.Admin);
                 e.Handled = true;
                 return;
-            case Key.F2 when vm.SelectUserCommand.CanExecute(UserType.User):
+            case Key.F2 when vm.IsUserRoleVisible && vm.SelectUserCommand.CanExecute(UserType.User):
                 vm.SelectUserCommand.Execute(UserType.User);
                 e.Handled = true;
                 return;

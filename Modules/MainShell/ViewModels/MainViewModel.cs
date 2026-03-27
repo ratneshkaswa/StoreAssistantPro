@@ -19,6 +19,7 @@ using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.UIPolish.Services;
+using StoreAssistantPro.Modules.Users.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
@@ -48,6 +49,7 @@ public partial class MainViewModel : BaseViewModel
     private readonly IShortcutService _shortcutService;
     private readonly INotificationService _notificationService;
     private readonly IRegionalSettingsService _regionalSettings;
+    private readonly IUserService _userService;
     private readonly List<string> _recentCommandPaletteItemIds = [];
 
     // ── Well-known page / dialog keys (defined by each module) ──
@@ -236,6 +238,7 @@ public partial class MainViewModel : BaseViewModel
         INotificationService notificationService,
         IToastService toastService,
         IRegionalSettingsService regionalSettings,
+        IUserService userService,
         IEnumerable<IQuickActionContributor> contributors)
     {
         _navigationService = navigationService;
@@ -250,6 +253,7 @@ public partial class MainViewModel : BaseViewModel
         _shortcutService = shortcutService;
         _notificationService = notificationService;
         _regionalSettings = regionalSettings;
+        _userService = userService;
         AppState = appState;
         StatusBar = statusBar;
         ToastService = toastService;
@@ -280,8 +284,22 @@ public partial class MainViewModel : BaseViewModel
         if (IsReady)
             return;
 
+        if (AppState.IsInitialSetupPending)
+        {
+            NavigateToLoginPage();
+            IsReady = true;
+            return;
+        }
+
         try
         {
+            if (!await _userService.HasUserRoleAsync())
+            {
+                NavigateToLoginPage();
+                IsReady = true;
+                return;
+            }
+
             var result = await _commandBus.SendAsync(
                 new LoginUserCommand(UserType.User, string.Empty));
 
@@ -321,7 +339,9 @@ public partial class MainViewModel : BaseViewModel
 
         var startupPage = ResolveStartupPage();
         var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
-        var destinationPage = !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
+        var destinationPage = string.Equals(startupPage, FirmManagementPage, StringComparison.Ordinal)
+            ? startupPage
+            : !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
             ? activationRequest.PageKey!
             : startupPage;
 
@@ -751,6 +771,13 @@ public partial class MainViewModel : BaseViewModel
 
     private async Task AutoLoginAsUserAsync()
     {
+        if (!await _userService.HasUserRoleAsync())
+        {
+            NavigateToLoginPage();
+            _statusBar.SetPersistent(string.Empty);
+            return;
+        }
+
         var currentRole = AppState.CurrentUserType;
         await _commandBus.SendAsync(new LogoutCommand(currentRole));
 
@@ -1517,6 +1544,9 @@ public partial class MainViewModel : BaseViewModel
 
     private string ResolveStartupPage()
     {
+        if (AppState.IsInitialSetupPending && IsFirmManagementVisible)
+            return FirmManagementPage;
+
         var preferences = UserPreferencesStore.GetSnapshot();
         var pageKey = preferences.LastVisitedPage;
 

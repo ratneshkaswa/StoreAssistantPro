@@ -12,6 +12,7 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
+using StoreAssistantPro.Modules.Users.Services;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
@@ -24,6 +25,7 @@ public class MainViewModelFlowStateTests
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IStatusBarService _statusBar = Substitute.For<IStatusBarService>();
     private readonly IFeatureToggleService _features = Substitute.For<IFeatureToggleService>();
+    private readonly IUserService _userService = Substitute.For<IUserService>();
 
     public MainViewModelFlowStateTests()
     {
@@ -34,6 +36,7 @@ public class MainViewModelFlowStateTests
         _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
         _commandBus.SendAsync(Arg.Any<ICommandRequest<Unit>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(CommandResult.Success()));
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(true);
     }
 
     private MainViewModel CreateSut()
@@ -55,6 +58,7 @@ public class MainViewModelFlowStateTests
             Substitute.For<INotificationService>(),
             Substitute.For<IToastService>(),
             Substitute.For<IRegionalSettingsService>(),
+            _userService,
             []);
     }
 

@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Helpers;
+using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.Firm.Services;
 
@@ -67,14 +68,17 @@ public partial class FirmViewModel : BaseViewModel
 
     private readonly IFirmService _firmService;
     private readonly IEventBus _eventBus;
+    private readonly IAppStateService _appState;
     private bool _isHydrating;
 
     public FirmViewModel(
         IFirmService firmService,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        IAppStateService appState)
     {
         _firmService = firmService;
         _eventBus = eventBus;
+        _appState = appState;
 
         SelectedFYStartMonth = "April";
         SelectedCurrencySymbol = "\u20B9";
@@ -90,12 +94,68 @@ public partial class FirmViewModel : BaseViewModel
     }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveFirm))]
     [NotifyPropertyChangedFor(nameof(DirtyStateSummaryText))]
     public partial bool IsDirty { get; set; }
 
-    public string DirtyStateSummaryText => IsDirty
-        ? "You have unsaved business settings changes."
-        : "No unsaved business settings changes.";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsExtendedBusinessDetailsVisible))]
+    [NotifyPropertyChangedFor(nameof(PageTitleText))]
+    [NotifyPropertyChangedFor(nameof(PageSubtitleText))]
+    [NotifyPropertyChangedFor(nameof(ProfileSectionTitleText))]
+    [NotifyPropertyChangedFor(nameof(ProfileSectionDescriptionText))]
+    [NotifyPropertyChangedFor(nameof(SaveButtonText))]
+    [NotifyPropertyChangedFor(nameof(CanSaveFirm))]
+    [NotifyPropertyChangedFor(nameof(DirtyStateSummaryText))]
+    public partial bool IsInitialSetupMode { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveFirm))]
+    [NotifyPropertyChangedFor(nameof(DirtyStateSummaryText))]
+    public partial bool HasCompletedInitialSetup { get; set; }
+
+    public bool IsExtendedBusinessDetailsVisible => !IsInitialSetupMode;
+
+    public string PageTitleText => IsInitialSetupMode
+        ? "First-time setup"
+        : "Business Settings";
+
+    public string PageSubtitleText => IsInitialSetupMode
+        ? "Set your store name to finish setup. You can add tax, invoice, and contact details later."
+        : "Maintain business identity, tax details, and defaults used across the app.";
+
+    public string ProfileSectionTitleText => IsInitialSetupMode
+        ? "Store name"
+        : "Business Profile";
+
+    public string ProfileSectionDescriptionText => IsInitialSetupMode
+        ? "Enter the name that should appear across billing, receipts, and reports."
+        : "Maintain the core business identity and contact details printed across billing and reporting surfaces.";
+
+    public string SaveButtonText => IsInitialSetupMode
+        ? "Save setup"
+        : "Save";
+
+    public bool CanSaveFirm => IsInitialSetupMode
+        ? (!HasCompletedInitialSetup || IsDirty)
+        : IsDirty;
+
+    public string DirtyStateSummaryText
+    {
+        get
+        {
+            if (IsInitialSetupMode)
+            {
+                return HasCompletedInitialSetup
+                    ? "Setup complete. You can continue using the app."
+                    : "Confirm your store name, then save to finish setup.";
+            }
+
+            return IsDirty
+                ? "You have unsaved business settings changes."
+                : "No unsaved business settings changes.";
+        }
+    }
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
@@ -399,8 +459,8 @@ public partial class FirmViewModel : BaseViewModel
     }
 
     public override string WorkingMessage => IsLoading
-        ? "Loading business settings..."
-        : "Saving business settings...";
+        ? (IsInitialSetupMode ? "Loading first-time setup..." : "Loading business settings...")
+        : (IsInitialSetupMode ? "Saving store name..." : "Saving business settings...");
 
     public string TaxModeHint => SelectedTaxMode == "Tax-Inclusive (MRP)"
         ? "Prices already include GST. Tax is back-calculated from the final amount."
@@ -523,6 +583,8 @@ public partial class FirmViewModel : BaseViewModel
         _isHydrating = true;
         try
         {
+            IsInitialSetupMode = snapshot.IsInitialSetupPending;
+            HasCompletedInitialSetup = false;
             FirmName = snapshot.FirmName;
             Address = snapshot.Address;
             State = BusinessProfileRules.GetCanonicalStateName(snapshot.State)
@@ -646,7 +708,15 @@ public partial class FirmViewModel : BaseViewModel
         await _firmService.UpdateFirmAsync(dto, ct).ConfigureAwait(false);
         await _eventBus.PublishAsync(new FirmUpdatedEvent(trimmedName, SelectedCurrencySymbol, SelectedDateFormat)).ConfigureAwait(false);
 
-        SuccessMessage = "Business settings saved.";
+        if (IsInitialSetupMode)
+        {
+            _appState.SetInitialSetupPending(false);
+            HasCompletedInitialSetup = true;
+        }
+
+        SuccessMessage = IsInitialSetupMode
+            ? "Store name saved. Setup complete."
+            : "Business settings saved.";
         IsDirty = false;
         FirstErrorFieldKey = string.Empty;
         ValidationErrors = [];
@@ -669,6 +739,9 @@ public partial class FirmViewModel : BaseViewModel
 
     private void OnEditableFieldChanged()
     {
+        if (IsInitialSetupMode && HasCompletedInitialSetup)
+            HasCompletedInitialSetup = false;
+
         if (!string.IsNullOrEmpty(ErrorMessage))
             ErrorMessage = string.Empty;
 

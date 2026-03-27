@@ -56,7 +56,8 @@ public class FirmService(
             config.BankAccountNumber ?? string.Empty,
             config.BankIFSC ?? string.Empty,
             config.ReceiptHeaderText ?? string.Empty,
-            string.IsNullOrWhiteSpace(config.InvoiceResetPeriod) ? "Never" : config.InvoiceResetPeriod);
+            string.IsNullOrWhiteSpace(config.InvoiceResetPeriod) ? "Never" : config.InvoiceResetPeriod,
+            !(settings?.SetupCompleted ?? false));
     }
 
     public async Task UpdateFirmAsync(FirmUpdateDto dto, CancellationToken ct = default)
@@ -102,6 +103,7 @@ public class FirmService(
         settings.RoundingMethod = string.IsNullOrWhiteSpace(dto.RoundingMethod) ? "None" : dto.RoundingMethod.Trim();
         settings.NegativeStockAllowed = dto.NegativeStockAllowed;
         settings.NumberToWordsLanguage = string.IsNullOrWhiteSpace(dto.NumberToWordsLanguage) ? "English" : dto.NumberToWordsLanguage.Trim();
+        settings.SetupCompleted = true;
 
         config.InvoicePrefix = string.IsNullOrWhiteSpace(dto.InvoicePrefix) ? "INV" : dto.InvoicePrefix.Trim();
         config.ReceiptFooterText = string.IsNullOrWhiteSpace(dto.ReceiptFooterText) ? "Thank you! Visit again!" : dto.ReceiptFooterText.Trim();

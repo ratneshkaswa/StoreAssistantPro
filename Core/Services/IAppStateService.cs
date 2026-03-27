@@ -43,6 +43,12 @@ public interface IAppStateService : INotifyPropertyChanged
     bool IsDefaultAdminPin { get; }
 
     /// <summary>
+    /// <c>true</c> until the minimum first-run setup has been completed.
+    /// Used to route first login into firm setup instead of the workspace.
+    /// </summary>
+    bool IsInitialSetupPending { get; }
+
+    /// <summary>
     /// Timestamp of the most recent connectivity health check.
     /// </summary>
     DateTime? LastConnectionCheck { get; }
@@ -63,6 +69,7 @@ public interface IAppStateService : INotifyPropertyChanged
     void SetConnectivity(bool isOffline, DateTime checkTime);
     void SetSmartTooltipsEnabled(bool enabled);
     void SetDefaultPinFlag(bool isDefault);
+    void SetInitialSetupPending(bool pending);
 
     void AddNotification(AppNotification notification);
     void MarkNotificationRead(AppNotification notification);

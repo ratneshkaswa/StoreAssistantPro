@@ -5,6 +5,7 @@ using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Commands;
 using StoreAssistantPro.Modules.Authentication.ViewModels;
 using StoreAssistantPro.Modules.Users.Commands;
+using StoreAssistantPro.Modules.Users.Services;
 
 namespace StoreAssistantPro.Tests.ViewModels;
 
@@ -14,13 +15,15 @@ public class LoginViewModelTests
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
     private readonly IConnectivityMonitorService _connectivity = Substitute.For<IConnectivityMonitorService>();
+    private readonly IUserService _userService = Substitute.For<IUserService>();
 
     private LoginViewModel CreateSut()
     {
         _regional.Now.Returns(DateTime.Now);
         _regional.FormatTime(Arg.Any<DateTime>()).Returns("12:00 PM");
         _connectivity.IsConnected.Returns(true);
-        var vm = new LoginViewModel(_commandBus, _appState, _regional, _connectivity);
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(true);
+        var vm = new LoginViewModel(_commandBus, _appState, _regional, _connectivity, _userService);
         vm.Initialize();
         return vm;
     }
@@ -36,6 +39,19 @@ public class LoginViewModelTests
 
         Assert.Equal(UserType.Admin, sut.SelectedUserType);
         Assert.True(sut.IsUserSelected);
+    }
+
+    [Fact]
+    public async Task Initialize_When_NoUserRoleConfigured_HidesUserRole_And_SelectsAdmin()
+    {
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(false);
+        var sut = new LoginViewModel(_commandBus, _appState, _regional, _connectivity, _userService);
+
+        sut.Initialize();
+        await Task.Delay(50);
+
+        Assert.False(sut.IsUserRoleVisible);
+        Assert.Equal(UserType.Admin, sut.SelectedUserType);
     }
 
     [Fact]
@@ -215,7 +231,8 @@ public class LoginViewModelTests
         _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
             .Returns(CommandResult.Success());
 
-        var sut = new LoginViewModel(_commandBus, _appState, _regional, _connectivity);
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(true);
+        var sut = new LoginViewModel(_commandBus, _appState, _regional, _connectivity, _userService);
         sut.Initialize();
         sut.Initialize();
         sut.SelectUserCommand.Execute(UserType.Admin);
