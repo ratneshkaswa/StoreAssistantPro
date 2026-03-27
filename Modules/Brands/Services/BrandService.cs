@@ -8,8 +8,12 @@ namespace StoreAssistantPro.Modules.Brands.Services;
 
 public class BrandService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IPerformanceMonitor perf) : IBrandService
+    IPerformanceMonitor perf,
+    IReferenceDataCache referenceDataCache) : IBrandService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveBrandsCacheKey = "Brands.Active";
+
     public async Task<IReadOnlyList<Brand>> GetAllAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("BrandService.GetAllAsync");
@@ -73,13 +77,20 @@ public class BrandService(
     public async Task<IReadOnlyList<Brand>> GetActiveAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("BrandService.GetActiveAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Brands
-            .AsNoTracking()
-            .Where(b => b.IsActive)
-            .OrderBy(b => b.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Brand>(
+            ActiveBrandsCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Brands
+                    .AsNoTracking()
+                    .Where(b => b.IsActive)
+                    .OrderBy(b => b.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<Brand>> SearchAsync(string query, CancellationToken ct = default)
@@ -127,6 +138,7 @@ public class BrandService(
 
         context.Brands.Add(new Brand { Name = trimmed, IsActive = true });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveBrandsCacheKey);
     }
 
     public async Task UpdateAsync(int id, string name, CancellationToken ct = default)
@@ -145,6 +157,7 @@ public class BrandService(
 
         entity.Name = trimmed;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveBrandsCacheKey);
     }
 
     public async Task ToggleActiveAsync(int id, CancellationToken ct = default)
@@ -157,6 +170,7 @@ public class BrandService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveBrandsCacheKey);
     }
 
     public async Task<int> ImportBulkAsync(IReadOnlyList<string> names, CancellationToken ct = default)

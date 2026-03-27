@@ -133,6 +133,7 @@ internal static class HostingExtensions
         services.AddTransient<ITransactionSafetyService, TransactionSafetyService>();
         services.AddTransient<IApplicationInfoService, ApplicationInfoService>();
         services.AddSingleton<IPerformanceMonitor, PerformanceMonitor>();
+        services.AddSingleton<IReferenceDataCache, ReferenceDataCache>();
         services.AddSingleton<ITaxCalculationService, TaxCalculationService>();
         services.AddSingleton<IPricingCalculationService, PricingCalculationService>();
         services.AddSingleton<IBillCalculationService, BillCalculationService>();

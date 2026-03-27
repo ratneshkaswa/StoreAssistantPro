@@ -18,6 +18,12 @@ public class NavigationPageRegistry
         return this;
     }
 
+    public NavigationPageRegistry CachePage(string pageKey)
+    {
+        _registrations.Add(nav => nav.CachePage(pageKey));
+        return this;
+    }
+
     /// <summary>
     /// Maps a page key to a feature flag. Navigation to this page is
     /// blocked when <see cref="Core.Features.IFeatureToggleService.IsEnabled"/>

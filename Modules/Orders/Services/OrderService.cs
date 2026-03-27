@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Orders.Services;
 
 public class OrderService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : IOrderService
+    IPerformanceMonitor perf,
+    IEventBus eventBus) : IOrderService
 {
     public async Task<IReadOnlyList<Order>> GetAllAsync(CancellationToken ct = default)
     {
@@ -54,6 +57,7 @@ public class OrderService(
 
         context.Orders.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("OrderCreated").ConfigureAwait(false);
     }
 
     public async Task UpdateAsync(int id, OrderDto dto, CancellationToken ct = default)
@@ -75,6 +79,7 @@ public class OrderService(
         entity.DeliveryDate = dto.DeliveryDate;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("OrderUpdated").ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
@@ -87,6 +92,7 @@ public class OrderService(
 
         context.Orders.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("OrderDeleted").ConfigureAwait(false);
     }
 
     public async Task SetStatusAsync(int id, string status, CancellationToken ct = default)
@@ -101,6 +107,7 @@ public class OrderService(
 
         entity.Status = status;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("OrderStatusUpdated").ConfigureAwait(false);
     }
 
     public async Task<OrderStats> GetStatsAsync(CancellationToken ct = default)
@@ -115,4 +122,7 @@ public class OrderService(
             all.Count(o => o.Status == "Delivered"),
             all.Count);
     }
+
+    private Task PublishBusinessDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

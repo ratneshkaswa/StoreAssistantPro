@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Ironing.Services;
 
 public class IroningService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : IIroningService
+    IPerformanceMonitor perf,
+    IEventBus eventBus) : IIroningService
 {
     // ── Single entries ──
 
@@ -43,6 +46,7 @@ public class IroningService(
 
         context.IroningEntries.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("IroningEntryCreated").ConfigureAwait(false);
     }
 
     public async Task UpdateEntryAsync(int id, IroningEntryDto dto, CancellationToken ct = default)
@@ -64,6 +68,7 @@ public class IroningService(
         entity.IsPaid = dto.IsPaid;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("IroningEntryUpdated").ConfigureAwait(false);
     }
 
     public async Task DeleteEntryAsync(int id, CancellationToken ct = default)
@@ -76,6 +81,7 @@ public class IroningService(
 
         context.IroningEntries.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("IroningEntryDeleted").ConfigureAwait(false);
     }
 
     public async Task MarkPaidAsync(int id, CancellationToken ct = default)
@@ -88,6 +94,7 @@ public class IroningService(
 
         entity.IsPaid = true;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("IroningEntryMarkedPaid").ConfigureAwait(false);
     }
 
     // ── Batches ──
@@ -263,4 +270,7 @@ public class IroningService(
             entries.Where(e => e.IsPaid).Sum(e => e.Amount),
             activeBatches);
     }
+
+    private Task PublishBusinessDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

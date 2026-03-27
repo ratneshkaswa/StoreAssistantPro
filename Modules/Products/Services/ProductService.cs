@@ -8,8 +8,15 @@ namespace StoreAssistantPro.Modules.Products.Services;
 public class ProductService(
     IDbContextFactory<AppDbContext> contextFactory,
     IAuditService auditService,
+    IReferenceDataCache referenceDataCache,
     IPerformanceMonitor perf) : IProductService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveTaxesCacheKey = "Products.ActiveTaxes";
+    private const string ActiveCategoriesCacheKey = "Products.ActiveCategories";
+    private const string ActiveBrandsCacheKey = "Products.ActiveBrands";
+    private const string ActiveVendorsCacheKey = "Products.ActiveVendors";
+
     // ── Products ─────────────────────────────────────────────────────
 
     public async Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken ct = default)
@@ -186,13 +193,20 @@ public class ProductService(
     public async Task<IReadOnlyList<TaxMaster>> GetActiveTaxesAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("ProductService.GetActiveTaxesAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.TaxMasters
-            .AsNoTracking()
-            .Where(t => t.IsActive)
-            .OrderBy(t => t.SlabPercent)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<TaxMaster>(
+            ActiveTaxesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.TaxMasters
+                    .AsNoTracking()
+                    .Where(t => t.IsActive)
+                    .OrderBy(t => t.SlabPercent)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     // ── Categories (for dropdowns) ───────────────────────────────────
@@ -200,13 +214,20 @@ public class ProductService(
     public async Task<IReadOnlyList<Category>> GetActiveCategoriesAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("ProductService.GetActiveCategoriesAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Categories
-            .AsNoTracking()
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Category>(
+            ActiveCategoriesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Categories
+                    .AsNoTracking()
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     // ── Brands (for dropdowns) ───────────────────────────────────────
@@ -214,13 +235,20 @@ public class ProductService(
     public async Task<IReadOnlyList<Brand>> GetActiveBrandsAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("ProductService.GetActiveBrandsAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Brands
-            .AsNoTracking()
-            .Where(b => b.IsActive)
-            .OrderBy(b => b.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Brand>(
+            ActiveBrandsCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Brands
+                    .AsNoTracking()
+                    .Where(b => b.IsActive)
+                    .OrderBy(b => b.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     // ── Vendors (for dropdowns) ──────────────────────────────────────
@@ -228,13 +256,20 @@ public class ProductService(
     public async Task<IReadOnlyList<Vendor>> GetActiveVendorsAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("ProductService.GetActiveVendorsAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Vendors
-            .AsNoTracking()
-            .Where(v => v.IsActive)
-            .OrderBy(v => v.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Vendor>(
+            ActiveVendorsCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Vendors
+                    .AsNoTracking()
+                    .Where(v => v.IsActive)
+                    .OrderBy(v => v.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     // ── Colours (predefined — read-only) ─────────────────────────────

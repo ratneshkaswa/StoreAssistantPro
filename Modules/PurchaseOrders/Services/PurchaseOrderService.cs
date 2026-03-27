@@ -1,16 +1,23 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.PurchaseOrders.Services;
 
 public class PurchaseOrderService(
     IDbContextFactory<AppDbContext> contextFactory,
     IPerformanceMonitor perf,
-    IRegionalSettingsService regional) : IPurchaseOrderService
+    IRegionalSettingsService regional,
+    IReferenceDataCache referenceDataCache,
+    IEventBus eventBus) : IPurchaseOrderService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveSuppliersCacheKey = "PurchaseOrders.Suppliers.Active";
+
     public async Task<IReadOnlyList<PurchaseOrder>> GetAllAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("PurchaseOrderService.GetAllAsync");
@@ -168,6 +175,7 @@ public class PurchaseOrderService(
 
         context.PurchaseOrders.Add(po);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishPurchaseOrderDataChangedAsync("PurchaseOrderCreated").ConfigureAwait(false);
         return po;
     }
 
@@ -183,6 +191,7 @@ public class PurchaseOrderService(
 
         po.Status = status;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishPurchaseOrderDataChangedAsync("PurchaseOrderStatusUpdated").ConfigureAwait(false);
     }
 
     public async Task ReceiveItemsAsync(int poId, IReadOnlyList<ReceiveLineDto> lines, CancellationToken ct = default)
@@ -231,6 +240,7 @@ public class PurchaseOrderService(
 
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             await tx.CommitAsync(ct).ConfigureAwait(false);
+            await PublishPurchaseOrderDataChangedAsync("PurchaseOrderItemsReceived").ConfigureAwait(false);
         }
         catch
         {
@@ -242,13 +252,20 @@ public class PurchaseOrderService(
     public async Task<IReadOnlyList<Supplier>> GetActiveSuppliersAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("PurchaseOrderService.GetActiveSuppliersAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Suppliers
-            .AsNoTracking()
-            .Where(s => s.IsActive)
-            .OrderBy(s => s.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Supplier>(
+            ActiveSuppliersCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Suppliers
+                    .AsNoTracking()
+                    .Where(s => s.IsActive)
+                    .OrderBy(s => s.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<PurchaseOrder> DuplicateAsync(int purchaseOrderId, CancellationToken ct = default)
@@ -284,6 +301,7 @@ public class PurchaseOrderService(
 
         context.PurchaseOrders.Add(clone);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishPurchaseOrderDataChangedAsync("PurchaseOrderDuplicated").ConfigureAwait(false);
         return clone;
     }
 
@@ -378,6 +396,7 @@ public class PurchaseOrderService(
 
         context.PurchaseOrders.Add(po);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishPurchaseOrderDataChangedAsync("PurchaseOrderImportedFromCsv").ConfigureAwait(false);
         return po;
     }
 
@@ -453,4 +472,7 @@ public class PurchaseOrderService(
             printLines,
             printLines.Sum(l => l.LineTotal));
     }
+
+    private Task PublishPurchaseOrderDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

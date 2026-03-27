@@ -15,10 +15,9 @@ public sealed class WizardProgressStandardsTests
         Assert.Contains("x:Name=\"Step1Segment\"", source, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"Step2Segment\"", source, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"Step3Segment\"", source, StringComparison.Ordinal);
-        Assert.Contains("RepeatBehavior=\"Forever\"", source, StringComparison.Ordinal);
-        Assert.Contains("Step2PulseStoryboard", source, StringComparison.Ordinal);
-        Assert.Contains("Step3PulseStoryboard", source, StringComparison.Ordinal);
         Assert.Contains("ChromeAltFillColorSecondary", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("RepeatBehavior=\"Forever\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PulseStoryboard", source, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

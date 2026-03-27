@@ -4,8 +4,10 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Billing.Services;
 using StoreAssistantPro.Modules.Customers.Services;
 
@@ -13,12 +15,14 @@ namespace StoreAssistantPro.Modules.Billing.ViewModels;
 
 public partial class BillingViewModel : BaseViewModel
 {
+    private static readonly TimeSpan HeldBillsFreshnessWindow = TimeSpan.FromSeconds(45);
     private readonly IBillingService _billingService;
     private readonly ICustomerService _customerService;
     private readonly IAppStateService _appState;
     private readonly IDialogService _dialogService;
     private readonly IRegionalSettingsService _regional;
     private readonly IHeldBillService _heldBillService;
+    private readonly IEventBus _eventBus;
     private readonly HashSet<CartLineViewModel> _trackedCartLines = [];
     private ObservableCollection<CartLineViewModel>? _trackedCartItems;
     private BillingSessionState? _sessionState;
@@ -29,7 +33,8 @@ public partial class BillingViewModel : BaseViewModel
         IAppStateService appState,
         IDialogService dialogService,
         IRegionalSettingsService regional,
-        IHeldBillService heldBillService)
+        IHeldBillService heldBillService,
+        IEventBus eventBus)
     {
         _billingService = billingService;
         _customerService = customerService;
@@ -37,6 +42,7 @@ public partial class BillingViewModel : BaseViewModel
         _dialogService = dialogService;
         _regional = regional;
         _heldBillService = heldBillService;
+        _eventBus = eventBus;
 
         AttachCartCollection(CartItems);
         _trackedCartItems = CartItems;
@@ -429,10 +435,9 @@ public partial class BillingViewModel : BaseViewModel
     });
 
     [RelayCommand]
-    private Task LoadHeldBillsAsync() => RunLoadAsync(async ct =>
-    {
-        await RefreshHeldBillsAsync(ct);
-    });
+    private Task LoadHeldBillsAsync() => LoadOnActivateAsync(
+        async ct => await RefreshHeldBillsAsync(ct),
+        HeldBillsFreshnessWindow);
 
     private async Task RefreshHeldBillsAsync(CancellationToken ct)
     {
@@ -443,6 +448,7 @@ public partial class BillingViewModel : BaseViewModel
         HoldBillCommand.NotifyCanExecuteChanged();
         NextHeldBillCommand.NotifyCanExecuteChanged();
         PreviousHeldBillCommand.NotifyCanExecuteChanged();
+        MarkLoadCompleted();
     }
 
     private bool CanHoldBill() => CartItems.Count > 0;
@@ -716,6 +722,7 @@ public partial class BillingViewModel : BaseViewModel
             SplitPayments: splitLegs);
 
         var sale = await _billingService.CompleteSaleAsync(dto, ct);
+        await _eventBus.PublishAsync(new SalesDataChangedEvent("SaleCompleted", DateTime.UtcNow));
         SuccessMessage = $"Sale {sale.InvoiceNumber} completed - {_regional.FormatCurrency(sale.TotalAmount)}";
 
         TransitionBillingSession(BillingSessionState.Completed);

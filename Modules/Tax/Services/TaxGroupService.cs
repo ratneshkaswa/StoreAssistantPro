@@ -8,8 +8,13 @@ namespace StoreAssistantPro.Modules.Tax.Services;
 public class TaxGroupService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
+    IReferenceDataCache referenceDataCache,
     IPerformanceMonitor perf) : ITaxGroupService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveTaxGroupsCacheKey = "Tax.ActiveGroups";
+    private const string ActiveHsnCodesCacheKey = "Tax.ActiveHSNCodes";
+
     public async Task<IReadOnlyList<TaxGroup>> GetAllGroupsAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.GetAllGroupsAsync");
@@ -25,14 +30,21 @@ public class TaxGroupService(
     public async Task<IReadOnlyList<TaxGroup>> GetActiveGroupsAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.GetActiveGroupsAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.TaxGroups
-            .AsNoTracking()
-            .Where(g => g.IsActive)
-            .Include(g => g.Slabs.Where(s => s.IsActive).OrderBy(s => s.PriceFrom))
-            .OrderBy(g => g.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<TaxGroup>(
+            ActiveTaxGroupsCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.TaxGroups
+                    .AsNoTracking()
+                    .Where(g => g.IsActive)
+                    .Include(g => g.Slabs.Where(s => s.IsActive).OrderBy(s => s.PriceFrom))
+                    .OrderBy(g => g.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<TaxGroup?> GetGroupByIdAsync(int id, CancellationToken ct = default)
@@ -66,6 +78,7 @@ public class TaxGroupService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveTaxGroupsCacheKey);
     }
 
     public async Task UpdateGroupAsync(int id, TaxGroupDto dto, CancellationToken ct = default)
@@ -85,6 +98,7 @@ public class TaxGroupService(
         entity.Name = dto.Name.Trim();
         entity.Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim();
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveTaxGroupsCacheKey);
     }
 
     public async Task ToggleGroupActiveAsync(int id, CancellationToken ct = default)
@@ -97,6 +111,7 @@ public class TaxGroupService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveTaxGroupsCacheKey);
     }
 
     public async Task<IReadOnlyList<TaxSlab>> GetSlabsByGroupAsync(int taxGroupId, CancellationToken ct = default)
@@ -183,13 +198,20 @@ public class TaxGroupService(
     public async Task<IReadOnlyList<HSNCode>> GetActiveHSNCodesAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxGroupService.GetActiveHSNCodesAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.HSNCodes
-            .AsNoTracking()
-            .Where(h => h.IsActive)
-            .OrderBy(h => h.Code)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<HSNCode>(
+            ActiveHsnCodesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.HSNCodes
+                    .AsNoTracking()
+                    .Where(h => h.IsActive)
+                    .OrderBy(h => h.Code)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task CreateHSNCodeAsync(HSNCodeDto dto, CancellationToken ct = default)
@@ -213,6 +235,7 @@ public class TaxGroupService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveHsnCodesCacheKey);
     }
 
     public async Task UpdateHSNCodeAsync(int id, HSNCodeDto dto, CancellationToken ct = default)
@@ -233,6 +256,7 @@ public class TaxGroupService(
         entity.Description = dto.Description.Trim();
         entity.Category = dto.Category;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveHsnCodesCacheKey);
     }
 
     public async Task ToggleHSNActiveAsync(int id, CancellationToken ct = default)
@@ -245,6 +269,7 @@ public class TaxGroupService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveHsnCodesCacheKey);
     }
 
     public async Task<ProductTaxMapping?> GetMappingByProductAsync(int productId, CancellationToken ct = default)

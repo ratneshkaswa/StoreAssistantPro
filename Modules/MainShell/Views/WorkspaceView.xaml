@@ -572,8 +572,7 @@
             <Grid Style="{StaticResource ResponsiveSidebarPanelStyle}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="12"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Today's Bestsellers (#394) -->
@@ -595,7 +594,7 @@
                             <StackPanel>
                                 <TextBlock Text="Today's Bestsellers"
                                            Style="{StaticResource DashboardSectionTitleStyle}"/>
-                                <TextBlock Text="Top products sold today."
+                                <TextBlock Text="Top products sold today. Use Reports for monthly product analysis."
                                            Style="{StaticResource DashboardSectionDescriptionStyle}"/>
                             </StackPanel>
 
@@ -646,89 +645,10 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateProductIconGlyph}"
-                                                        Title="No sales today yet"
-                                                        Description="Today's best-selling products will appear here."
-                                                        ItemCount="{Binding TopProductsTodayDisplay.Count}"/>
-                        </Grid>
-                    </Grid>
-                </Border>
-
-                <!-- Top Products This Month -->
-                <Border Grid.Row="2"
-                        Style="{StaticResource CardStyle}"
-                        Padding="{StaticResource CardPadding}"
-                        h:Motion.StaggerIndex="12">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel>
-                                <TextBlock Text="Top Products"
-                                           Style="{StaticResource DashboardSectionTitleStyle}"/>
-                                <TextBlock Text="Best revenue contributors this month."
-                                           Style="{StaticResource DashboardSectionDescriptionStyle}"/>
-                            </StackPanel>
-
-                            <Border Grid.Column="1"
-                                    Style="{StaticResource CountBadgePillStyle}">
-                                <TextBlock Text="{Binding TopProductsDisplay.Count}"
-                                           Style="{StaticResource DashboardCountBadgeTextStyle}"/>
-                            </Border>
-                        </Grid>
-
-                        <Grid Grid.Row="1" Margin="0,12,0,0">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollBarVisibility="Disabled">
-                                <ItemsControl ItemsSource="{Binding TopProductsDisplay}"
-                                              h:Motion.StaggerChildren="True">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                                    BorderThickness="0,0,0,1"
-                                                    Padding="{StaticResource DashboardListItemSpacing}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto"/>
-                                                        <RowDefinition Height="Auto"/>
-                                                    </Grid.RowDefinitions>
-
-                                                    <TextBlock Text="{Binding ProductName}"
-                                                               Style="{StaticResource DashboardListPrimaryTextStyle}"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               ToolTip="{Binding ProductName}"/>
-
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding RevenueCompact}"
-                                                               ToolTip="{Binding RevenueToolTip}"
-                                                               Style="{StaticResource DashboardListAccentTextStyle}"/>
-
-                                                    <TextBlock Grid.Row="1"
-                                                               Text="{Binding QuantitySoldLabel}"
-                                                               Style="{StaticResource DashboardListSecondaryTextStyle}"/>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-
-                            <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateProductIconGlyph}"
-                                                        Title="No product trends yet"
-                                                        Description="Top-selling products will show up here once this month's sales data is available."
-                                                        ItemCount="{Binding TopProductsDisplay.Count}"/>
+                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStateProductIconGlyph}"
+                                                    Title="No sales today yet"
+                                                    Description="Today's best-selling products will appear here."
+                                                    ItemCount="{Binding TopProductsTodayDisplay.Count}"/>
                         </Grid>
                     </Grid>
                 </Border>
@@ -740,19 +660,15 @@
                                      Message="Refreshing dashboard"/>
         </Grid>
 
-        <!-- #398 Monthly Sales Trend + #401 Payment Method Breakdown -->
+        <!-- #398 Monthly Sales Trend -->
         <Grid Grid.Row="4" Margin="0,16,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Style="{StaticResource ResponsiveSidebarGapColumnStyle}"/>
-                <ColumnDefinition Style="{StaticResource ResponsiveSidebarColumnStyle}"/>
             </Grid.ColumnDefinitions>
 
-            <!-- #398 Monthly Sales Trend -->
             <Border Style="{StaticResource CardStyle}"
                     Padding="{StaticResource CardPadding}"
                     h:Motion.StaggerIndex="13">
@@ -762,12 +678,25 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel>
-                        <TextBlock Text="Monthly Sales Trend"
-                                   Style="{StaticResource DashboardSectionTitleStyle}"/>
-                        <TextBlock Text="Daily sales for the last 30 days."
-                                   Style="{StaticResource DashboardSectionDescriptionStyle}"/>
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Monthly Sales Trend"
+                                       Style="{StaticResource DashboardSectionTitleStyle}"/>
+                            <TextBlock Text="Track the last 30 days at a glance. Use Reports for payment and product breakdowns."
+                                       Style="{StaticResource DashboardSectionDescriptionStyle}"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="Open Reports"
+                                Style="{StaticResource ToolbarLinkButtonStyle}"
+                                Command="{Binding DataContext.OpenReportsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Visibility="{Binding DataContext.IsReportsVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
+                    </Grid>
 
                     <Grid Grid.Row="1"
                           Margin="0,12,0,0"
@@ -818,69 +747,6 @@
                                                     Title="No sales trend data"
                                                     Description="Daily sales trend will appear once sales are recorded."
                                                     ItemCount="{Binding DailySalesTrendDisplay.Count}"/>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- #401 Payment Method Breakdown -->
-            <Border Style="{StaticResource ResponsiveSidebarCardStyle}"
-                    Padding="{StaticResource CardPadding}"
-                    h:Motion.StaggerIndex="14">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel>
-                        <TextBlock Text="Payment Methods"
-                                   Style="{StaticResource DashboardSectionTitleStyle}"/>
-                        <TextBlock Text="Revenue split by payment type this month."
-                                   Style="{StaticResource DashboardSectionDescriptionStyle}"/>
-                    </StackPanel>
-
-                    <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <ItemsControl ItemsSource="{Binding PaymentMethodDisplay}"
-                                      h:Motion.StaggerChildren="True">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="{StaticResource DashboardListItemSpacing}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <TextBlock Text="{Binding Method}"
-                                                       Style="{StaticResource DashboardListPrimaryTextStyle}"/>
-
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding PercentageLabel}"
-                                                       Style="{StaticResource DashboardListAccentTextStyle}"/>
-
-                                            <TextBlock Grid.Row="1"
-                                                       Text="{Binding CountLabel}"
-                                                       Style="{StaticResource DashboardListSecondaryTextStyle}"/>
-
-                                            <TextBlock Grid.Row="1" Grid.Column="1"
-                                                       Text="{Binding AmountFormatted}"
-                                                       Style="{StaticResource DashboardListSecondaryTextStyle}"/>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <controls:EmptyStateOverlay Icon="{StaticResource EmptyStatePaymentIconGlyph}"
-                                                    Title="No payment data"
-                                                    Description="Payment method breakdown will appear once sales are completed."
-                                                    ItemCount="{Binding PaymentMethodDisplay.Count}"/>
                     </Grid>
                 </Grid>
             </Border>

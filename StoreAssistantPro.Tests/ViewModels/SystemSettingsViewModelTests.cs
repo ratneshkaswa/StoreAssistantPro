@@ -1,7 +1,9 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Settings.Services;
 using StoreAssistantPro.Modules.Settings.ViewModels;
 using StoreAssistantPro.Tests.Helpers;
@@ -15,12 +17,13 @@ public class SystemSettingsViewModelTests : IDisposable
     private readonly ILoginService _loginService = Substitute.For<ILoginService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IUiDensityService _uiDensityService = Substitute.For<IUiDensityService>();
+    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
     public SystemSettingsViewModelTests() => UserPreferencesStore.ClearForTests();
 
     public void Dispose() => UserPreferencesStore.ClearForTests();
 
-    private SystemSettingsViewModel CreateSut() => new(_settingsService, _loginService, _dialogService, _uiDensityService);
+    private SystemSettingsViewModel CreateSut() => new(_settingsService, _loginService, _dialogService, _uiDensityService, _eventBus);
 
     [Fact]
     public async Task LoadCommand_SyncsNumericBridgeProperties()
@@ -140,6 +143,24 @@ public class SystemSettingsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task RestoreCommand_WhenConfirmed_ShouldRestoreDatabase_AndPublishDataChangedEvent()
+    {
+        _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(true);
+        _settingsService.RestoreDatabaseAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+        sut.RestoreFilePath = @"C:\Backups\store-20260326.bak";
+
+        await sut.RestoreCommand.ExecuteAsync(null);
+
+        await _settingsService.Received(1).RestoreDatabaseAsync(sut.RestoreFilePath, Arg.Any<CancellationToken>());
+        await _eventBus.Received(1).PublishAsync(Arg.Any<SalesDataChangedEvent>());
+        Assert.Equal("Database restored successfully. Please restart the application.", sut.SuccessMessage);
+    }
+
+    [Fact]
     public async Task FactoryResetCommand_ShouldUseExplicitDestructiveLabels()
     {
         _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
@@ -156,6 +177,27 @@ public class SystemSettingsViewModelTests : IDisposable
             "Cancel");
         _dialogService.DidNotReceive().PromptPassword(Arg.Any<string>(), Arg.Any<string>());
         await _settingsService.DidNotReceive().FactoryResetAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task FactoryResetCommand_WhenConfirmed_ShouldPublishDataChangedEvent()
+    {
+        _dialogService.Confirm(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(true);
+        _dialogService.PromptPassword(Arg.Any<string>(), Arg.Any<string>())
+            .Returns("1234");
+        _loginService.ValidateMasterPinAsync("1234", Arg.Any<CancellationToken>())
+            .Returns(true);
+        _settingsService.FactoryResetAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+
+        await sut.FactoryResetCommand.ExecuteAsync(null);
+
+        await _settingsService.Received(1).FactoryResetAsync(Arg.Any<CancellationToken>());
+        await _eventBus.Received(1).PublishAsync(Arg.Any<SalesDataChangedEvent>());
+        Assert.Equal("Factory reset complete. Please restart the application.", sut.SuccessMessage);
     }
 
     [Fact]

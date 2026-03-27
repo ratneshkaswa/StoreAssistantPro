@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -39,6 +41,8 @@ public partial class MainViewModel : BaseViewModel
     private readonly INotificationService _notificationService;
     private readonly IRegionalSettingsService _regionalSettings;
     private readonly List<string> _recentCommandPaletteItemIds = [];
+    private bool _quickActionRefreshScheduled;
+    private bool _commandPaletteRefreshScheduled;
 
     // ── Well-known page / dialog keys (defined by each module) ──
 
@@ -201,7 +205,7 @@ public partial class MainViewModel : BaseViewModel
     // ── Navigation ──
 
     /// <summary>Tracks the current page key for mode-change fallback logic.</summary>
-    private string _currentPage = LoginPage;
+    private string _currentPage = string.Empty;
 
     public ObservableObject CurrentView => _navigationService.CurrentView;
 
@@ -256,37 +260,18 @@ public partial class MainViewModel : BaseViewModel
         RegisterQuickActions();
         foreach (var contributor in contributors)
             contributor.Contribute(_quickActionService);
-        RefreshQuickActions();
+        RefreshQuickActionsCore();
 
-        // Navigate to the login page synchronously so the window always
-        // has content before it is shown. Auto-login replaces it with the
-        // workspace on success; if it fails the user stays on login.
-        _navigationService.NavigateTo(LoginPage);
-        SetCurrentPage(LoginPage);
-        WireLoginCallback();
+        // Startup now begins in a neutral loading state.
+        // This avoids flashing the login screen before direct user auto-login
+        // resolves the actual landing page. If auto-login fails, we navigate
+        // to login explicitly in the fallback path below.
     }
 
-    /// <summary>
-    /// Starts the background auto-login sequence.
-    /// Called by <see cref="IMainShellFlow"/> after the window is shown
-    /// so the login page renders before any navigation occurs.
-    /// </summary>
-    internal void TriggerAutoLogin()
+    internal async Task PrepareStartupAsync()
     {
-        _ = AutoLoginAsUserAsync();
-    }
-
-    /// <summary>
-    /// Logs in as User directly through the command bus without ever
-    /// showing the login page. Eliminates the startup flash.
-    /// </summary>
-    private async Task AutoLoginAsUserAsync()
-    {
-        // Yield so the window completes its first layout/render pass
-        // before we touch CurrentView. Without this, the synchronous
-        // pipeline path can navigate before the first paint, leaving
-        // the window visually blank during the transition animation.
-        await Task.Yield();
+        if (IsReady)
+            return;
 
         try
         {
@@ -294,32 +279,19 @@ public partial class MainViewModel : BaseViewModel
                 new LoginUserCommand(UserType.User, string.Empty));
 
             if (result.Succeeded)
+            {
                 await OnLoginSucceededAsync(UserType.User);
+                IsReady = true;
+                return;
+            }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"AutoLogin failed: {ex.Message}");
         }
-        finally
-        {
-            // If auto-login didn't complete, show login page so the window
-            // always has content — prevents blank window on any failure path.
-            if (!AppState.IsLoggedIn)
-            {
-                try
-                {
-                    _navigationService.NavigateTo(LoginPage);
-                    SetCurrentPage(LoginPage);
-                    WireLoginCallback();
-                }
-                catch
-                {
-                    // Last resort — window will still be visible even without content.
-                }
-            }
 
-            IsReady = true;
-        }
+        NavigateToLoginPage();
+        IsReady = true;
     }
 
     /// <summary>
@@ -341,29 +313,22 @@ public partial class MainViewModel : BaseViewModel
         await _sessionService.LoginAsync(userType);
 
         var startupPage = ResolveStartupPage();
-        _navigationService.NavigateTo(startupPage);
-        SetCurrentPage(startupPage);
-        _statusBar.SetPersistent(
-            string.Equals(startupPage, MainWorkspacePage, StringComparison.Ordinal)
-                ? (IsBillingVisible ? "Billing ready" : "Workspace")
-                : GetPageDisplayName(startupPage));
-
-        RefreshQuickActions();
-
         var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
-        if (activationRequest is not null)
-        {
-            if (!string.IsNullOrWhiteSpace(activationRequest.PageKey))
-            {
-                _navigationService.NavigateTo(activationRequest.PageKey);
-                SetCurrentPage(activationRequest.PageKey);
-                _statusBar.SetPersistent(GetPageDisplayName(activationRequest.PageKey));
-                RefreshQuickActions();
-            }
+        var destinationPage = !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
+            ? activationRequest.PageKey!
+            : startupPage;
 
-            if (activationRequest.OpenNotificationsRequested)
-                IsNotificationsPanelVisible = true;
-        }
+        _navigationService.NavigateTo(destinationPage);
+        SetCurrentPage(destinationPage);
+        _statusBar.SetPersistent(
+            string.Equals(destinationPage, MainWorkspacePage, StringComparison.Ordinal)
+                ? (IsBillingVisible ? "Billing ready" : "Workspace")
+                : GetPageDisplayName(destinationPage));
+
+        if (activationRequest?.OpenNotificationsRequested == true)
+            IsNotificationsPanelVisible = true;
+
+        RequestQuickActionRefresh();
     }
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -391,7 +356,7 @@ public partial class MainViewModel : BaseViewModel
             case nameof(IAppStateService.CurrentUserType):
                 OnPropertyChanged(nameof(IsAdmin));
                 NotifyCombinedVisibility();
-                RefreshQuickActions();
+                RequestQuickActionRefresh();
                 break;
         }
     }
@@ -401,7 +366,7 @@ public partial class MainViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsUserManagementEnabled));
         OnPropertyChanged(nameof(IsFirmManagementEnabled));
         NotifyCombinedVisibility();
-        RefreshQuickActions();
+        RequestQuickActionRefresh();
     }
 
     // ── Notification popup ──
@@ -552,6 +517,10 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void RefreshCurrentView()
     {
+        if (string.IsNullOrWhiteSpace(_currentPage))
+            return;
+
+        _navigationService.InvalidatePageCache(_currentPage);
         _navigationService.NavigateTo(_currentPage);
         _statusBar.Post("Data refreshed");
     }
@@ -771,6 +740,24 @@ public partial class MainViewModel : BaseViewModel
                 _ = loginVm.SelectUserCommand.ExecuteAsync(UserType.Admin);
             }
         }
+    }
+
+    private async Task AutoLoginAsUserAsync()
+    {
+        var currentRole = AppState.CurrentUserType;
+        await _commandBus.SendAsync(new LogoutCommand(currentRole));
+
+        var result = await _commandBus.SendAsync(
+            new LoginUserCommand(UserType.User, string.Empty));
+
+        if (result.Succeeded)
+        {
+            await OnLoginSucceededAsync(UserType.User);
+            return;
+        }
+
+        NavigateToLoginPage();
+        _statusBar.SetPersistent(string.Empty);
     }
 
     [RelayCommand]
@@ -1088,7 +1075,41 @@ public partial class MainViewModel : BaseViewModel
         });
     }
 
-    private void RefreshQuickActions()
+    private void NavigateToLoginPage()
+    {
+        try
+        {
+            _navigationService.NavigateTo(LoginPage);
+            SetCurrentPage(LoginPage);
+            WireLoginCallback();
+        }
+        catch
+        {
+            // Keep the shell alive even if login navigation fails.
+        }
+    }
+
+    private void RequestQuickActionRefresh()
+    {
+        if (_quickActionRefreshScheduled)
+            return;
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.HasShutdownStarted)
+        {
+            RefreshQuickActionsCore();
+            return;
+        }
+
+        _quickActionRefreshScheduled = true;
+        dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+        {
+            _quickActionRefreshScheduled = false;
+            RefreshQuickActionsCore();
+        }));
+    }
+
+    private void RefreshQuickActionsCore()
     {
         QuickActions.Clear();
         foreach (var action in _quickActionService.GetVisibleActions(AppState.CurrentUserType, _features) ?? [])
@@ -1098,11 +1119,11 @@ public partial class MainViewModel : BaseViewModel
         RecomputeQuickActionOverflow();
 
         if (IsCommandPaletteVisible)
-            RefreshCommandPaletteItems();
+            RequestCommandPaletteRefresh();
     }
 
     partial void OnCommandPaletteQueryChanged(string value) =>
-        RefreshCommandPaletteItems();
+        RequestCommandPaletteRefresh();
 
     partial void OnQuickActionBarViewportWidthChanged(double value) =>
         RecomputeQuickActionOverflow();
@@ -1123,10 +1144,30 @@ public partial class MainViewModel : BaseViewModel
         if (!string.IsNullOrEmpty(CommandPaletteQuery))
             CommandPaletteQuery = string.Empty;
 
-        RefreshCommandPaletteItems();
+        RequestCommandPaletteRefresh();
     }
 
-    private void RefreshCommandPaletteItems()
+    private void RequestCommandPaletteRefresh()
+    {
+        if (_commandPaletteRefreshScheduled)
+            return;
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.HasShutdownStarted)
+        {
+            RefreshCommandPaletteItemsCore();
+            return;
+        }
+
+        _commandPaletteRefreshScheduled = true;
+        dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+        {
+            _commandPaletteRefreshScheduled = false;
+            RefreshCommandPaletteItemsCore();
+        }));
+    }
+
+    private void RefreshCommandPaletteItemsCore()
     {
         if (!IsCommandPaletteVisible)
         {

@@ -10,5 +10,5 @@ public interface IMainShellFlow
     /// Creates and shows the main application window.
     /// The window remains open for the lifetime of the application.
     /// </summary>
-    void ShowMainWindow();
+    Task ShowMainWindowAsync();
 }

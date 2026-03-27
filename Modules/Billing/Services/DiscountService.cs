@@ -11,22 +11,33 @@ namespace StoreAssistantPro.Modules.Billing.Services;
 public class DiscountService(
     IDbContextFactory<AppDbContext> contextFactory,
     IPerformanceMonitor perf,
-    IRegionalSettingsService regional) : IDiscountService
+    IRegionalSettingsService regional,
+    IReferenceDataCache referenceDataCache) : IDiscountService
 {
+    private static readonly TimeSpan ActiveRuleCacheTtl = TimeSpan.FromMinutes(1);
+    private const string ActiveDiscountRulesCacheKey = "Billing.DiscountRules.Active";
+
     public async Task<IReadOnlyList<DiscountRule>> GetActiveRulesAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("DiscountService.GetActiveRulesAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<DiscountRule>(
+            ActiveDiscountRulesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
 
-        var now = regional.Now;
-        return await context.DiscountRules
-            .AsNoTracking()
-            .Where(r => r.IsActive &&
-                        (r.ValidFrom == null || r.ValidFrom <= now) &&
-                        (r.ValidTo == null || r.ValidTo >= now))
-            .OrderByDescending(r => r.Priority)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+                var now = regional.Now;
+                return await context.DiscountRules
+                    .AsNoTracking()
+                    .Where(r => r.IsActive &&
+                                (r.ValidFrom == null || r.ValidFrom <= now) &&
+                                (r.ValidTo == null || r.ValidTo >= now))
+                    .OrderByDescending(r => r.Priority)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ActiveRuleCacheTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<DiscountRule>> GetAllRulesAsync(CancellationToken ct = default)
@@ -74,6 +85,7 @@ public class DiscountService(
 
         context.DiscountRules.Add(rule);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveDiscountRulesCacheKey);
         return rule;
     }
 
@@ -109,6 +121,7 @@ public class DiscountService(
         rule.Description = dto.Description?.Trim();
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveDiscountRulesCacheKey);
     }
 
     public async Task DeactivateRuleAsync(int id, CancellationToken ct = default)
@@ -123,6 +136,7 @@ public class DiscountService(
 
         rule.IsActive = false;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveDiscountRulesCacheKey);
     }
 
     public async Task<IReadOnlyList<AppliedDiscount>> EvaluateCartAsync(

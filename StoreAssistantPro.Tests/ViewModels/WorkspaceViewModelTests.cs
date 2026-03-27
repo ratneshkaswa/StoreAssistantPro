@@ -1,5 +1,7 @@
 using NSubstitute;
 using StoreAssistantPro.Core.Controls;
+using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
@@ -11,18 +13,19 @@ public class WorkspaceViewModelTests
 {
     private readonly IDashboardService _dashboardService = Substitute.For<IDashboardService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
+    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
     public WorkspaceViewModelTests()
     {
         _dashboardService.GetSummaryAsync(Arg.Any<CancellationToken>()).Returns(DashboardSummary.Empty);
-        _regional.CurrencySymbol.Returns("₹");
+        _regional.CurrencySymbol.Returns("Ã¢â€šÂ¹");
         _regional.Now.Returns(new DateTime(2026, 3, 19, 10, 30, 0));
-        _regional.FormatCurrency(Arg.Any<decimal>()).Returns(ci => $"₹{ci.Arg<decimal>():N0}");
+        _regional.FormatCurrency(Arg.Any<decimal>()).Returns(ci => $"Ã¢â€šÂ¹{ci.Arg<decimal>():N0}");
         _regional.FormatDateTime(Arg.Any<DateTime>())
             .Returns(ci => ci.Arg<DateTime>().ToString("dd-MMM HH:mm"));
     }
 
-    private WorkspaceViewModel CreateSut() => new(_dashboardService, _regional);
+    private WorkspaceViewModel CreateSut() => new(_dashboardService, _regional, _eventBus);
 
     [Fact]
     public void CreateSut_DoesNotThrow()
@@ -62,7 +65,7 @@ public class WorkspaceViewModelTests
             [
                 new RecentSaleItem("INV-101", now.AddMinutes(-5), 2500m, "UPI", 3)
             ],
-            TopProducts =
+            TopProductsToday =
             [
                 new TopProductItem("Cotton Shirt", 18, 45000m)
             ]
@@ -74,22 +77,50 @@ public class WorkspaceViewModelTests
         await sut.LoadCommand.ExecuteAsync(null);
 
         Assert.Equal(5000m, sut.TodaySales);
-        Assert.Equal("₹5K", sut.TodaySalesCompact);
-        Assert.Equal("₹1.2L", sut.ThisMonthSalesCompact);
+        Assert.Equal("Ã¢â€šÂ¹5K", sut.TodaySalesCompact);
+        Assert.Equal("Ã¢â€šÂ¹1.2L", sut.ThisMonthSalesCompact);
         Assert.Equal("42", sut.TotalProductsCompact);
-        Assert.Equal("₹45K", sut.ReceivablesCompact);
+        Assert.Equal("Ã¢â€šÂ¹45K", sut.ReceivablesCompact);
         Assert.Equal("Updated Just now", sut.LastUpdatedText);
         Assert.True(sut.HasAlertBanner);
         Assert.Equal(InfoBarSeverity.Error, sut.AlertSeverity);
-        Assert.Equal("↑", sut.TodaySalesTrend.Glyph);
+        Assert.Equal("â†‘", sut.TodaySalesTrend.Glyph);
         Assert.Equal("25% vs yesterday", sut.TodaySalesTrend.Label);
         Assert.Equal(KpiTrendTone.Positive, sut.TodaySalesTrend.Tone);
-        Assert.Equal("↓", sut.TodayReturnsTrend.Glyph);
+        Assert.Equal("â†“", sut.TodayReturnsTrend.Glyph);
         Assert.Equal(KpiTrendTone.Positive, sut.TodayReturnsTrend.Tone);
         Assert.Equal("25% vs last month", sut.ThisMonthSalesTrend.Label);
         Assert.Single(sut.RecentSalesDisplay);
         Assert.Equal("5 min ago", sut.RecentSalesDisplay[0].RelativeDate);
-        Assert.Single(sut.TopProductsDisplay);
-        Assert.Equal("₹45K", sut.TopProductsDisplay[0].RevenueCompact);
+        Assert.Single(sut.TopProductsTodayDisplay);
+        Assert.Equal("Ã¢â€šÂ¹45K", sut.TopProductsTodayDisplay[0].RevenueCompact);
+    }
+
+    [Fact]
+    public async Task OnNavigatedTo_Should_Not_Refetch_When_Data_Is_Still_Fresh()
+    {
+        var sut = CreateSut();
+
+        await sut.OnNavigatedTo();
+        await sut.OnNavigatedTo();
+
+        await _dashboardService.Received(1).GetSummaryAsync(Arg.Any<CancellationToken>());
+        sut.OnNavigatedFrom();
+    }
+
+    [Fact]
+    public async Task RefreshCommand_When_ViewingPastDate_Should_Use_SelectedDate_Summary()
+    {
+        var selectedDate = new DateTime(2026, 3, 18);
+        _dashboardService.GetSummaryForDateAsync(selectedDate, Arg.Any<CancellationToken>())
+            .Returns(DashboardSummary.Empty);
+
+        var sut = CreateSut();
+        sut.SelectedDate = selectedDate;
+
+        await sut.RefreshCommand.ExecuteAsync(null);
+
+        await _dashboardService.Received().GetSummaryForDateAsync(selectedDate, Arg.Any<CancellationToken>());
+        await _dashboardService.DidNotReceive().GetSummaryAsync(Arg.Any<CancellationToken>());
     }
 }

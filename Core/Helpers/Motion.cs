@@ -31,7 +31,7 @@ namespace StoreAssistantPro.Core.Helpers;
 ///   </item>
 ///   <item>
 ///     <term><see cref="ScaleHoverProperty"/></term>
-///     <description>Subtle 0.985 → 1.0 scale pulse on <c>MouseEnter</c> /
+///     <description>Subtle 0.992 → 1.0 scale pulse on <c>MouseEnter</c> /
 ///     <c>MouseLeave</c> (FluentDurationFast, Point curve).</description>
 ///   </item>
 ///   <item>
@@ -77,7 +77,7 @@ public static class Motion
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
 
@@ -116,7 +116,7 @@ public static class Motion
         fe.Unloaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var duration = GetDuration(el, "FluentDurationNormal", TimeSpan.FromMilliseconds(167));
+            var duration = GetDuration(el, "FluentDurationNormal", TimeSpan.FromMilliseconds(100));
             if (duration == TimeSpan.Zero) return;
             var ease = TryFindEase(el, "FluentEaseAccelerate");
 
@@ -130,7 +130,7 @@ public static class Motion
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  SCALE HOVER  —  MouseEnter/Leave → subtle 0.985 → 1.0 pulse
+    //  SCALE HOVER  —  MouseEnter/Leave → subtle 0.992 → 1.0 pulse
     // ═══════════════════════════════════════════════════════════════════
 
     public static readonly DependencyProperty ScaleHoverProperty =
@@ -163,7 +163,7 @@ public static class Motion
         fe.MouseLeave += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var from = TryFindDouble(el, "MotionScaleHoverFrom", 0.985);
+            var from = TryFindDouble(el, "MotionScaleHoverFrom", 0.992);
             AnimateScale(el, from);
         };
 
@@ -171,7 +171,7 @@ public static class Motion
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var from = TryFindDouble(el, "MotionScaleHoverFrom", 0.985);
+            var from = TryFindDouble(el, "MotionScaleHoverFrom", 0.992);
             var st = TryGetScaleTransform(el);
             if (st is not null)
             {
@@ -187,7 +187,7 @@ public static class Motion
         if (st is null)
             return;
 
-        var duration = GetDuration(el, "FluentDurationFast", TimeSpan.FromMilliseconds(83));
+        var duration = GetDuration(el, "FluentDurationFast", TimeSpan.FromMilliseconds(50));
         if (duration == TimeSpan.Zero) { st.ScaleX = to; st.ScaleY = to; return; }
         var ease = TryFindEase(el, "FluentEasePoint");
 
@@ -229,7 +229,7 @@ public static class Motion
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
@@ -291,7 +291,7 @@ public static class Motion
         fe.Loaded += static (sender, _) =>
         {
             var el = (FrameworkElement)sender;
-            var duration = GetDuration(el, "FluentDurationPageFade", TimeSpan.FromMilliseconds(250));
+            var duration = GetDuration(el, "FluentDurationPageFade", TimeSpan.FromMilliseconds(140));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
@@ -349,7 +349,7 @@ public static class Motion
             if (sender is not Window win)
                 return;
 
-            var duration = GetDuration(win, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            var duration = GetDuration(win, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
             if (duration == TimeSpan.Zero) { win.Opacity = 1; return; }
             var ease = TryFindEase(win, "FluentEaseDecelerate");
 
@@ -406,7 +406,7 @@ public static class Motion
                 return;
 
             var el = (FrameworkElement)sender;
-            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
             if (duration == TimeSpan.Zero) return;
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
@@ -480,7 +480,7 @@ public static class Motion
             var el = (FrameworkElement)sender;
             var idx = GetStaggerIndex(el);
             var delay = TimeSpan.FromMilliseconds(idx * 30);
-            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+            var duration = GetDuration(el, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
             if (duration == TimeSpan.Zero) { el.Opacity = 1; return; }
             var ease = TryFindEase(el, "FluentEaseDecelerate");
             var offset = TryFindDouble(el, "MotionSlideOffsetSmall", 16);
@@ -598,7 +598,7 @@ public static class Motion
         {
             var anim = new DoubleAnimationUsingKeyFrames
             {
-                Duration = new Duration(TimeSpan.FromMilliseconds(300))
+                Duration = new Duration(TimeSpan.FromMilliseconds(160))
             };
             anim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0)));
             anim.KeyFrames.Add(new LinearDoubleKeyFrame(-6, KeyTime.FromPercent(0.15)));
@@ -625,7 +625,7 @@ public static class Motion
     /// system, meaning all motion should be skipped entirely.
     /// </summary>
     private static bool IsMotionDisabled(FrameworkElement fe) =>
-        GetDuration(fe, "FluentDurationSlow", TimeSpan.FromMilliseconds(250)) == TimeSpan.Zero;
+        GetDuration(fe, "FluentDurationSlow", TimeSpan.FromMilliseconds(140)) == TimeSpan.Zero;
 
     /// <summary>
     /// Resolves a <see cref="Duration"/> resource from the element's tree,

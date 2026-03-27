@@ -13,16 +13,16 @@ public sealed class DataGridSortTransitionStandardsTests
         Assert.Contains("class DataGridSortTransition", helperSource, StringComparison.Ordinal);
         Assert.Contains("IsEnabledProperty", helperSource, StringComparison.Ordinal);
         Assert.Contains("dataGrid.Sorting += OnDataGridSorting", helperSource, StringComparison.Ordinal);
-        Assert.Contains("TimeSpan.FromMilliseconds(100)", helperSource, StringComparison.Ordinal);
+        Assert.Contains("TimeSpan.FromMilliseconds(60)", helperSource, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Shared_DataGrid_Style_Should_Enable_Sort_Transitions()
+    public void Shared_DataGrid_Style_Should_Default_To_Quiet_Sort_Transitions()
     {
         var styleSource = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
 
-        Assert.Contains("h:DataGridSortTransition.IsEnabled", styleSource, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"h:DataGridSortTransition.IsEnabled\" Value=\"False\"/>", styleSource, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

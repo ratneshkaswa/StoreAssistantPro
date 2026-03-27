@@ -16,7 +16,8 @@ public static class ReportsModule
         NavigationPageRegistry pageRegistry)
     {
         pageRegistry.Map<ReportsViewModel>(ReportsPage)
-            .RequireFeature(ReportsPage, FeatureFlags.Reports);
+            .RequireFeature(ReportsPage, FeatureFlags.Reports)
+            .CachePage(ReportsPage);
         services.AddTransient<IReportsService, ReportsService>();
         services.AddTransient<IPrintReportService, PrintReportService>();
         services.AddTransient<IPrintPreviewService, PrintPreviewService>();

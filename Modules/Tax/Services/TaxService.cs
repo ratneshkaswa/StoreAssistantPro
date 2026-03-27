@@ -9,8 +9,12 @@ public class TaxService(
     IDbContextFactory<AppDbContext> contextFactory,
     IAuditService auditService,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : ITaxService
+    IPerformanceMonitor perf,
+    IReferenceDataCache referenceDataCache) : ITaxService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveTaxesCacheKey = "TaxMasters.Active";
+
     public async Task<IReadOnlyList<TaxMaster>> GetAllAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxService.GetAllAsync");
@@ -25,13 +29,20 @@ public class TaxService(
     public async Task<IReadOnlyList<TaxMaster>> GetActiveAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("TaxService.GetActiveAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.TaxMasters
-            .AsNoTracking()
-            .Where(t => t.IsActive)
-            .OrderBy(t => t.SlabPercent)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<TaxMaster>(
+            ActiveTaxesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.TaxMasters
+                    .AsNoTracking()
+                    .Where(t => t.IsActive)
+                    .OrderBy(t => t.SlabPercent)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task CreateAsync(TaxDto dto, CancellationToken ct = default)
@@ -54,6 +65,7 @@ public class TaxService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveTaxesCacheKey);
 
         // Audit: tax profile created (#203)
         _ = auditService.LogAsync("TaxCreated", "TaxMaster", null,
@@ -82,6 +94,7 @@ public class TaxService(
         entity.TaxName = dto.TaxName.Trim();
         entity.SlabPercent = dto.SlabPercent;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveTaxesCacheKey);
 
         // Audit: tax rate change (#203)
         if (oldRate != dto.SlabPercent || oldName != dto.TaxName.Trim())
@@ -107,6 +120,7 @@ public class TaxService(
 
         context.TaxMasters.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveTaxesCacheKey);
 
         // Audit: tax profile deleted (#203)
         _ = auditService.LogAsync("TaxDeleted", "TaxMaster", id.ToString(),

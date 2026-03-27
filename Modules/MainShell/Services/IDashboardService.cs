@@ -10,6 +10,7 @@ namespace StoreAssistantPro.Modules.MainShell.Services;
 /// </summary>
 public interface IDashboardService
 {
+    void InvalidateCache();
     Task<DashboardSummary> GetSummaryAsync(CancellationToken ct = default);
     Task<DashboardSummary> GetSummaryForDateAsync(DateTime date, CancellationToken ct = default);
 }

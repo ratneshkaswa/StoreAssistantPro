@@ -12,6 +12,8 @@ public sealed class DataGridPerformanceStandardsTests
         Assert.Contains("<Setter Property=\"VirtualizingPanel.IsVirtualizingWhenGrouping\" Value=\"True\"/>", content, StringComparison.Ordinal);
         Assert.Contains("<Setter Property=\"VirtualizingPanel.CacheLength\" Value=\"1,1\"/>", content, StringComparison.Ordinal);
         Assert.Contains("<Setter Property=\"EnableColumnVirtualization\" Value=\"True\"/>", content, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"AnalyticalReportDataGridStyle\" TargetType=\"DataGrid\"", content, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"ScrollViewer.IsDeferredScrollingEnabled\" Value=\"True\"/>", content, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

@@ -217,6 +217,8 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
         }
 
         public void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject { }
+        public void CachePage(string pageKey) { }
+        public void InvalidatePageCache(string pageKey) { }
         public void MapFeature(string pageKey, string featureFlag) { }
     }
 

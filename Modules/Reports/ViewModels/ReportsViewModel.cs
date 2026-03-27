@@ -3,10 +3,12 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Printing;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Reports.Services;
 
 namespace StoreAssistantPro.Modules.Reports.ViewModels;
@@ -15,9 +17,12 @@ public partial class ReportsViewModel(
     IReportsService reportsService,
     IPrintReportService printReportService,
     IPrintPreviewService printPreviewService,
-    IAuditService auditService) : BaseViewModel
+    IAuditService auditService,
+    IEventBus eventBus) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isRestoringViewState;
+    private bool _salesChangeSubscribed;
 
     // ── Date range ──
 
@@ -68,23 +73,9 @@ public partial class ReportsViewModel(
 
     // ── Daily sales summary (#255) ──
 
-    [ObservableProperty]
-    public partial int TodaySaleCount { get; set; }
 
-    [ObservableProperty]
-    public partial decimal TodayTotalSales { get; set; }
 
-    [ObservableProperty]
-    public partial decimal TodayTotalReturns { get; set; }
 
-    [ObservableProperty]
-    public partial decimal TodayNetSales { get; set; }
-
-    [ObservableProperty]
-    public partial decimal TodayTotalTax { get; set; }
-
-    [ObservableProperty]
-    public partial decimal TodayTotalDiscount { get; set; }
 
     // ── Gross profit (#261) ──
 
@@ -222,11 +213,12 @@ public partial class ReportsViewModel(
     // ── Commands ──
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
+        EnsureSalesChangeSubscription();
         RestoreViewState();
         await RefreshAllAsync(ct);
-    });
+    }, NavigationFreshnessWindow);
 
     [RelayCommand]
     private void SetPreset(string preset)
@@ -251,6 +243,7 @@ public partial class ReportsViewModel(
     [RelayCommand]
     private Task RefreshAsync() => RunAsync(async ct =>
     {
+        reportsService.InvalidateCache();
         await RefreshAllAsync(ct);
         SuccessMessage = "Reports refreshed.";
     });
@@ -505,13 +498,6 @@ public partial class ReportsViewModel(
         var to = DateTo.Date.AddDays(1).AddTicks(-1);
 
         // ── Daily sales summary (today) ──
-        var daily = await reportsService.GetDailySalesSummaryAsync(DateTime.Today, ct);
-        TodaySaleCount = daily.SaleCount;
-        TodayTotalSales = daily.TotalSales;
-        TodayTotalReturns = daily.TotalReturns;
-        TodayNetSales = daily.NetSales;
-        TodayTotalTax = daily.TotalTax;
-        TodayTotalDiscount = daily.TotalDiscount;
 
         // ── Gross profit (selected period) ──
         var gross = await reportsService.GetGrossProfitReportAsync(from, to, ct);
@@ -586,6 +572,7 @@ public partial class ReportsViewModel(
         DebtorOutstanding = debtor.TotalOutstanding;
         TopDebtors = new ObservableCollection<TopDebtor>(debtor.TopDebtors);
         LastRefreshedAt = DateTime.Now;
+        MarkLoadCompleted();
     }
 
     private void RestoreViewState()
@@ -615,5 +602,32 @@ public partial class ReportsViewModel(
             DateTo = DateTo,
             ActivePreset = ActivePreset
         });
+    }
+
+    public override void Dispose()
+    {
+        if (_salesChangeSubscribed)
+        {
+            eventBus.Unsubscribe<SalesDataChangedEvent>(HandleSalesDataChangedAsync);
+            _salesChangeSubscribed = false;
+        }
+
+        base.Dispose();
+    }
+
+    private void EnsureSalesChangeSubscription()
+    {
+        if (_salesChangeSubscribed)
+            return;
+
+        eventBus.Subscribe<SalesDataChangedEvent>(HandleSalesDataChangedAsync);
+        _salesChangeSubscribed = true;
+    }
+
+    private Task HandleSalesDataChangedAsync(SalesDataChangedEvent _)
+    {
+        reportsService.InvalidateCache();
+        MarkLoadStale();
+        return Task.CompletedTask;
     }
 }

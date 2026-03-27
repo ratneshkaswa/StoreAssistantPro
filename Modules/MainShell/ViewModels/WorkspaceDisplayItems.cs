@@ -21,17 +21,6 @@ public sealed record DailySalesTrendDisplayItem(
     int TransactionCount,
     double BarWidthRatio);
 
-/// <summary>Display item for payment method breakdown (#401).</summary>
-public sealed record PaymentMethodDisplayItem(
-    string Method,
-    string AmountFormatted,
-    decimal Percentage,
-    int Count)
-{
-    public string PercentageLabel => $"{Percentage}%";
-    public string CountLabel => Count == 1 ? "1 bill" : $"{Count} bills";
-}
-
 public enum KpiTrendTone
 {
     Positive,

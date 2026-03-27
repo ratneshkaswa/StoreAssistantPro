@@ -12,29 +12,41 @@ public class SystemSettingsService(
     IDbContextFactory<AppDbContext> contextFactory,
     IConfiguration configuration,
     IPerformanceMonitor perf,
-    ILogger<SystemSettingsService> logger) : ISystemSettingsService
+    ILogger<SystemSettingsService> logger,
+    IReferenceDataCache referenceDataCache) : ISystemSettingsService
 {
+    private static readonly TimeSpan SettingsCacheTtl = TimeSpan.FromMinutes(2);
+    private const string SystemSettingsCacheKey = "Settings.Current";
+
     public async Task<SystemSettings> GetAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("SystemSettingsService.GetAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+        var settings = await referenceDataCache.GetOrCreateAsync<SystemSettings>(
+            SystemSettingsCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
 
-        var settings = await context.SystemSettings
-            .AsNoTracking()
-            .FirstOrDefaultAsync(ct)
-            .ConfigureAwait(false);
+                var existing = await context.SystemSettings
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(innerCt)
+                    .ConfigureAwait(false);
 
-        if (settings is not null)
-            return settings;
+                if (existing is not null)
+                    return [existing];
 
-        // Seed default row if none exists
-        settings = new SystemSettings
-        {
-            AutoBackupEnabled = false
-        };
-        context.SystemSettings.Add(settings);
-        await context.SaveChangesAsync(ct).ConfigureAwait(false);
-        return settings;
+                var seeded = new SystemSettings
+                {
+                    AutoBackupEnabled = false
+                };
+                context.SystemSettings.Add(seeded);
+                await context.SaveChangesAsync(innerCt).ConfigureAwait(false);
+                return [seeded];
+            },
+            SettingsCacheTtl,
+            ct).ConfigureAwait(false);
+
+        return settings[0];
     }
 
     public async Task UpdateAsync(SystemSettingsDto dto, CancellationToken ct = default)
@@ -57,6 +69,7 @@ public class SystemSettingsService(
         settings.AutoLogoutMinutes = dto.AutoLogoutMinutes;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(SystemSettingsCacheKey);
         logger.LogInformation("System settings updated");
     }
 
@@ -83,7 +96,6 @@ public class SystemSettingsService(
         var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
         var backupPath = Path.Combine(backupDir, $"{dbName}_{timestamp}.bak");
 
-        // Use parameterized dynamic SQL to prevent SQL injection via file path
         var sql = $"DECLARE @sql NVARCHAR(MAX) = N'BACKUP DATABASE ' + QUOTENAME(@p0) + N' TO DISK = ' + QUOTENAME(@p1, '''') + N' WITH FORMAT, INIT, SKIP, NOREWIND, NOUNLOAD'; EXEC sp_executesql @sql;";
 
         await context.Database.ExecuteSqlRawAsync(sql, [dbName, backupPath], ct).ConfigureAwait(false);
@@ -107,11 +119,11 @@ public class SystemSettingsService(
 
         var dbName = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString).InitialCatalog;
 
-        // Use parameterized dynamic SQL to prevent SQL injection via file path
         var sql = $"DECLARE @sql NVARCHAR(MAX) = N'ALTER DATABASE ' + QUOTENAME(@p0) + N' SET SINGLE_USER WITH ROLLBACK IMMEDIATE; RESTORE DATABASE ' + QUOTENAME(@p0) + N' FROM DISK = ' + QUOTENAME(@p1, '''') + N' WITH REPLACE; ALTER DATABASE ' + QUOTENAME(@p0) + N' SET MULTI_USER;'; EXEC sp_executesql @sql;";
 
         await context.Database.ExecuteSqlRawAsync(sql, [dbName, backupPath], ct).ConfigureAwait(false);
 
+        referenceDataCache.Invalidate(SystemSettingsCacheKey);
         logger.LogInformation("Database restored from {Path}", backupPath);
     }
 
@@ -121,6 +133,7 @@ public class SystemSettingsService(
         await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         await context.Database.EnsureDeletedAsync(ct).ConfigureAwait(false);
         await context.Database.MigrateAsync(ct).ConfigureAwait(false);
-        logger.LogWarning("Factory reset completed — database recreated");
+        referenceDataCache.Invalidate(SystemSettingsCacheKey);
+        logger.LogWarning("Factory reset completed - database recreated");
     }
 }

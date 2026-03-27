@@ -27,7 +27,7 @@
                 <Run FontFamily="{StaticResource FluentIconFont}" Text="&#xE9F9;"/>
                 <Run Text=" Reports"/>
             </TextBlock>
-            <TextBlock Text="Review sales, tax, expense, and operational performance for the selected reporting period."
+            <TextBlock Text="Use the dashboard for live counter status and today's snapshot. Use reports for period analysis, exports, and audits."
                        Style="{StaticResource PageSubtitleStyle}"/>
         </StackPanel>
 
@@ -134,62 +134,6 @@
         <!-- Report Sections -->
         <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-
-                <!-- ═══ TODAY'S SALES SUMMARY ═══ -->
-                <Border Style="{StaticResource ReportSectionCardStyle}">
-                    <StackPanel>
-                        <TextBlock Text="Today's Sales" Style="{StaticResource ReportSectionTitleStyle}"/>
-                        <WrapPanel Margin="0,8,0,0">
-                            <Border Style="{StaticResource ReportMetricTileStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="SALES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodaySaleCount}"
-                                               Style="{StaticResource ReportMetricValueTextStyle}"
-                                               Foreground="{StaticResource FluentAccentDefault}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource ReportMetricTileStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="REVENUE" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalSales, StringFormat={}{0:C0}}"
-                                               Style="{StaticResource ReportMetricValueTextStyle}"
-                                               Foreground="{StaticResource FluentAccentDefault}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource ReportMetricTileStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="RETURNS" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalReturns, StringFormat={}{0:C0}}"
-                                               Style="{StaticResource ReportMetricValueTextStyle}"
-                                               Foreground="{StaticResource FluentError}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource ReportMetricTileStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="NET SALES" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayNetSales, StringFormat={}{0:C0}}"
-                                               Style="{StaticResource ReportMetricValueTextStyle}"
-                                               Foreground="{StaticResource FluentSuccess}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource ReportMetricTileStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="TAX" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalTax, StringFormat={}{0:C0}}"
-                                               Style="{StaticResource ReportMetricValueTextStyle}"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource ReportMetricTileStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="DISCOUNT" Style="{StaticResource ReportMetricLabelTextStyle}"/>
-                                    <TextBlock Text="{Binding TodayTotalDiscount, StringFormat={}{0:C0}}"
-                                               Style="{StaticResource ReportMetricValueTextStyle}"
-                                               Foreground="{StaticResource FluentWarning}"/>
-                                </StackPanel>
-                            </Border>
-                        </WrapPanel>
-                    </StackPanel>
-                </Border>
 
                 <!-- ═══ PROFIT SUMMARY ═══ -->
                 <Border Style="{StaticResource ReportSectionCardStyle}">

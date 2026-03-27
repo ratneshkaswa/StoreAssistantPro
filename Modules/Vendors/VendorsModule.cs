@@ -15,7 +15,8 @@ public static class VendorsModule
         NavigationPageRegistry pageRegistry)
     {
         pageRegistry.Map<VendorManagementViewModel>(VendorManagementPage)
-            .RequireFeature(VendorManagementPage, FeatureFlags.VendorManagement);
+            .RequireFeature(VendorManagementPage, FeatureFlags.VendorManagement)
+            .CachePage(VendorManagementPage);
         services.AddTransient<IVendorService, VendorService>();
         services.AddTransient<IVendorLedgerService, VendorLedgerService>();
         services.AddTransient<VendorManagementViewModel>();

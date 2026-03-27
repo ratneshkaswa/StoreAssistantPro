@@ -1,4 +1,5 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Printing;
@@ -50,7 +51,8 @@ public sealed class ViewSnapshotBaselineTests : IDisposable
             regional.FormatDate(Arg.Any<DateTime>())
                 .Returns(call => ((DateTime)call[0]).ToString("dd-MMM-yyyy"));
 
-            var viewModel = new WorkspaceViewModel(dashboardService, regional);
+            var eventBus = Substitute.For<IEventBus>();
+            var viewModel = new WorkspaceViewModel(dashboardService, regional, eventBus);
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
 
             var view = new WorkspaceView
@@ -84,7 +86,8 @@ public sealed class ViewSnapshotBaselineTests : IDisposable
                 settingsService,
                 Substitute.For<ILoginService>(),
                 Substitute.For<IDialogService>(),
-                Substitute.For<IUiDensityService>());
+                Substitute.For<IUiDensityService>(),
+                Substitute.For<IEventBus>());
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
 
             var view = new SystemSettingsView
@@ -146,7 +149,8 @@ public sealed class ViewSnapshotBaselineTests : IDisposable
             historyService.GetPagedAsync(Arg.Any<PagedQuery>(), Arg.Any<DateTime?>(), Arg.Any<DateTime?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
                 .Returns(new PagedResult<Sale>([firstSale, secondSale], 2, 1, 25));
 
-            var viewModel = new SaleHistoryViewModel(historyService, receiptService, regional);
+            var eventBus2 = Substitute.For<IEventBus>();
+            var viewModel = new SaleHistoryViewModel(historyService, receiptService, regional, eventBus2);
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
             viewModel.DateFrom = new DateTime(2026, 3, 1);
             viewModel.DateTo = new DateTime(2026, 3, 31);
@@ -421,7 +425,8 @@ public sealed class ViewSnapshotBaselineTests : IDisposable
             reportsService.GetDebtorReportAsync(Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult(new DebtorReport(6, 42000, [new TopDebtor("Rahul Traders", 18000), new TopDebtor("Meera Boutique", 9500)])));
 
-            var viewModel = new ReportsViewModel(reportsService, printReportService, printPreviewService, auditService);
+            var eventBus3 = Substitute.For<IEventBus>();
+            var viewModel = new ReportsViewModel(reportsService, printReportService, printPreviewService, auditService, eventBus3);
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
             viewModel.ActivePreset = "This Quarter";
             viewModel.DateFrom = new DateTime(2026, 1, 1);

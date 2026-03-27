@@ -1,15 +1,18 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Expenses.Services;
 
 public class ExpenseService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : IExpenseService
+    IPerformanceMonitor perf,
+    IEventBus eventBus) : IExpenseService
 {
     public async Task<IReadOnlyList<Expense>> GetAllAsync(CancellationToken ct = default)
     {
@@ -91,6 +94,7 @@ public class ExpenseService(
 
         context.Expenses.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseCreated").ConfigureAwait(false);
     }
 
     public async Task UpdateAsync(int id, ExpenseDto dto, CancellationToken ct = default)
@@ -110,6 +114,7 @@ public class ExpenseService(
         entity.Description = dto.Description?.Trim();
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseUpdated").ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
@@ -122,6 +127,7 @@ public class ExpenseService(
 
         context.Expenses.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseDeleted").ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<PettyCashDeposit>> GetDepositsAsync(CancellationToken ct = default)
@@ -152,6 +158,7 @@ public class ExpenseService(
 
         context.PettyCashDeposits.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("PettyCashDepositCreated").ConfigureAwait(false);
     }
 
     public async Task DeleteDepositAsync(int id, CancellationToken ct = default)
@@ -164,6 +171,7 @@ public class ExpenseService(
 
         context.PettyCashDeposits.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("PettyCashDepositDeleted").ConfigureAwait(false);
     }
 
     public async Task<ExpenseStats> GetStatsAsync(CancellationToken ct = default)
@@ -216,7 +224,10 @@ public class ExpenseService(
         }
 
         if (count > 0)
+        {
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await PublishBusinessDataChangedAsync("ExpenseImported").ConfigureAwait(false);
+        }
 
         return count;
     }
@@ -249,6 +260,7 @@ public class ExpenseService(
 
         context.ExpenseCategories.Add(new ExpenseCategory { Name = name.Trim() });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseCategoryCreated").ConfigureAwait(false);
     }
 
     public async Task UpdateCategoryAsync(int id, string name, CancellationToken ct = default)
@@ -266,6 +278,7 @@ public class ExpenseService(
 
         entity.Name = name.Trim();
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseCategoryUpdated").ConfigureAwait(false);
     }
 
     public async Task DeleteCategoryAsync(int id, CancellationToken ct = default)
@@ -281,6 +294,7 @@ public class ExpenseService(
 
         entity.IsActive = false;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseCategoryDeleted").ConfigureAwait(false);
     }
 
     public async Task SeedDefaultCategoriesAsync(CancellationToken ct = default)
@@ -298,6 +312,7 @@ public class ExpenseService(
         }
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseCategoriesSeeded").ConfigureAwait(false);
     }
 
     // ── Monthly Expense Report (#232) ─────────────────────────────
@@ -360,6 +375,7 @@ public class ExpenseService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("RecurringExpenseCreated").ConfigureAwait(false);
     }
 
     public async Task UpdateRecurringExpenseAsync(int id, RecurringExpenseDto dto, CancellationToken ct = default)
@@ -382,6 +398,7 @@ public class ExpenseService(
         entity.EndDate = dto.EndDate;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("RecurringExpenseUpdated").ConfigureAwait(false);
     }
 
     public async Task DeleteRecurringExpenseAsync(int id, CancellationToken ct = default)
@@ -396,6 +413,7 @@ public class ExpenseService(
 
         entity.IsActive = false;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("RecurringExpenseDeleted").ConfigureAwait(false);
     }
 
     public async Task<int> GenerateDueRecurringExpensesAsync(CancellationToken ct = default)
@@ -430,7 +448,10 @@ public class ExpenseService(
         }
 
         if (count > 0)
+        {
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await PublishBusinessDataChangedAsync("RecurringExpensesGenerated").ConfigureAwait(false);
+        }
 
         return count;
     }
@@ -465,6 +486,7 @@ public class ExpenseService(
 
         context.Expenses.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("ExpenseCreated").ConfigureAwait(false);
     }
 
     // ── Private helpers ───────────────────────────────────────────
@@ -495,4 +517,7 @@ public class ExpenseService(
         expense.ReceiptPath = receiptPath;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
     }
+
+    private Task PublishBusinessDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

@@ -16,7 +16,8 @@ public static class ProductsModule
         NavigationPageRegistry pageRegistry)
     {
         pageRegistry.Map<ProductManagementViewModel>(ProductManagementPage)
-            .RequireFeature(ProductManagementPage, FeatureFlags.Products);
+            .RequireFeature(ProductManagementPage, FeatureFlags.Products)
+            .CachePage(ProductManagementPage);
         pageRegistry.Map<VariantManagementViewModel>(VariantManagementPage)
             .RequireFeature(VariantManagementPage, FeatureFlags.Products);
         services.AddSingleton<ProductContextHolder>();

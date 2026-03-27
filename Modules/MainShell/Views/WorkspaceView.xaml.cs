@@ -15,12 +15,6 @@ public partial class WorkspaceView : UserControl
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (DataContext is WorkspaceViewModel vm)
-        {
-            try { await vm.LoadCommand.ExecuteAsync(null); }
-            catch { /* RunLoadAsync handles logging */ }
-        }
-
         if (StartBillingFab.Visibility == Visibility.Visible)
         {
             _ = Dispatcher.BeginInvoke(

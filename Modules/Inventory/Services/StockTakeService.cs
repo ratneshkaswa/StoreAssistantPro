@@ -1,13 +1,16 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Inventory.Services;
 
 public class StockTakeService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IRegionalSettingsService regional) : IStockTakeService
+    IRegionalSettingsService regional,
+    IEventBus eventBus) : IStockTakeService
 {
     public async Task<StockTake> StartAsync(string? notes, int userId, CancellationToken ct = default)
     {
@@ -154,6 +157,9 @@ public class StockTakeService(
         stockTake.DiscrepancyCount = discrepancies;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        if (adjusted > 0)
+            await eventBus.PublishAsync(new SalesDataChangedEvent("StockTakeCompleted", DateTime.UtcNow)).ConfigureAwait(false);
 
         return new StockTakeResult(stockTake.TotalItems, discrepancies, adjusted);
     }

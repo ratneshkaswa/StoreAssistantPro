@@ -72,9 +72,9 @@ public class MainViewModelFlowStateTests
 
         sut.OpenVendorManagementCommand.Execute(null);
 
-        _statusBar.Received(1).SetPersistent("Vendor management");
+        _statusBar.Received(1).SetPersistent("Vendors");
         Assert.Equal(
-            "Vendor management — Contoso Fabrics — Store Assistant Pro",
+            "Vendors — Contoso Fabrics — Store Assistant Pro",
             sut.WindowTitle);
     }
 
@@ -127,6 +127,8 @@ public class MainViewModelFlowStateTests
             CurrentView = new StubView();
         }
         public void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject { }
+        public void CachePage(string pageKey) { }
+        public void InvalidatePageCache(string pageKey) { }
         public void MapFeature(string pageKey, string featureFlag) { }
     }
 

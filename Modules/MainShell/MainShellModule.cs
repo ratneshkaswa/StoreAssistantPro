@@ -16,7 +16,8 @@ public static class MainShellModule
         NavigationPageRegistry pageRegistry)
     {
         // Page registration (string-key → ViewModel mapping)
-        pageRegistry.Map<WorkspaceViewModel>(MainWorkspacePage);
+        pageRegistry.Map<WorkspaceViewModel>(MainWorkspacePage)
+            .CachePage(MainWorkspacePage);
 
         // Services
         services.AddSingleton<IDialogService, DialogService>();

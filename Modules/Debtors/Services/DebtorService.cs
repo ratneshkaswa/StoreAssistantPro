@@ -1,13 +1,16 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Debtors.Services;
 
 public class DebtorService(
     IDbContextFactory<AppDbContext> contextFactory,
-    IPerformanceMonitor perf) : IDebtorService
+    IPerformanceMonitor perf,
+    IEventBus eventBus) : IDebtorService
 {
     public async Task<IReadOnlyList<Debtor>> GetAllAsync(CancellationToken ct = default)
     {
@@ -49,6 +52,7 @@ public class DebtorService(
 
         context.Debtors.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("DebtorCreated").ConfigureAwait(false);
     }
 
     public async Task UpdateAsync(int id, DebtorDto dto, CancellationToken ct = default)
@@ -69,6 +73,7 @@ public class DebtorService(
         entity.Note = dto.Note?.Trim() ?? string.Empty;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("DebtorUpdated").ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
@@ -81,6 +86,7 @@ public class DebtorService(
 
         context.Debtors.Remove(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("DebtorDeleted").ConfigureAwait(false);
     }
 
     public async Task RecordPaymentAsync(int id, decimal amount, CancellationToken ct = default)
@@ -93,6 +99,7 @@ public class DebtorService(
 
         entity.PaidAmount += amount;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishBusinessDataChangedAsync("DebtorPaymentRecorded").ConfigureAwait(false);
     }
 
     public async Task<DebtorStats> GetStatsAsync(CancellationToken ct = default)
@@ -107,4 +114,7 @@ public class DebtorService(
             all.Sum(d => d.TotalAmount - d.PaidAmount),
             all.Sum(d => d.PaidAmount));
     }
+
+    private Task PublishBusinessDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

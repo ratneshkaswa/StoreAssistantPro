@@ -33,16 +33,15 @@ internal static class WpfTestApplication
 
         ResetApplicationState();
 
-        // Use a plain Application — not App — so that OnStartup (which
-        // boots the full DI host) never fires. The AutoGrow tests only
-        // need a live Application for Window.Show(); they don't reference
-        // any custom styles.  This also avoids calling InitializeComponent
-        // / Application.LoadComponent, which FailFasts on a second call
-        // per AppDomain.
-        _ = new Application
+        // Create the real App once so runtime render tests get the same
+        // resource graph, converters, and DataTemplates as production.
+        // OnStartup does not run until Application.Run(), so DI boot does
+        // not execute in these tests.
+        var application = new App
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown
         };
+        application.InitializeComponent();
     }
 
     public static void Run(Action action)

@@ -10,18 +10,15 @@ public class MainShellFlow(
     IServiceProvider serviceProvider,
     ILogger<MainShellFlow> logger) : IMainShellFlow
 {
-    public void ShowMainWindow()
+    public async Task ShowMainWindowAsync()
     {
         try
         {
             var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
             var mainVm = serviceProvider.GetRequiredService<MainViewModel>();
             mainWindow.DataContext = mainVm;
+            await mainVm.PrepareStartupAsync();
             mainWindow.Show();
-
-            // Start auto-login AFTER the window is visible so the
-            // login page always renders before any view transition.
-            mainVm.TriggerAutoLogin();
         }
         catch (Exception ex)
         {

@@ -1,7 +1,9 @@
 using System.Runtime.CompilerServices;
 using NSubstitute;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Billing.Services;
 using StoreAssistantPro.Modules.Billing.ViewModels;
 using StoreAssistantPro.Modules.Customers.Services;
@@ -16,6 +18,7 @@ public class BillingViewModelTests
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
     private readonly IRegionalSettingsService _regional = Substitute.For<IRegionalSettingsService>();
     private readonly IHeldBillService _heldBillService = Substitute.For<IHeldBillService>();
+    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
     private BillingViewModel CreateSut()
     {
@@ -23,7 +26,7 @@ public class BillingViewModelTests
         _regional.FormatCurrency(Arg.Any<decimal>())
             .Returns(call => $"Rs. {call.Arg<decimal>():0.00}");
 
-        return new BillingViewModel(_billingService, _customerService, _appState, _dialogService, _regional, _heldBillService);
+        return new BillingViewModel(_billingService, _customerService, _appState, _dialogService, _regional, _heldBillService, _eventBus);
     }
 
     [Fact]
@@ -191,6 +194,7 @@ public class BillingViewModelTests
         Assert.Empty(sut.CartItems);
         Assert.Equal("Sale INV-001 completed - Rs. 999.00", sut.SuccessMessage);
         _appState.Received().SetBillingSession(BillingSessionState.Completed);
+        await _eventBus.Received(1).PublishAsync(Arg.Any<SalesDataChangedEvent>());
     }
 
     [Fact]

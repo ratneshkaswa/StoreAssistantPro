@@ -153,7 +153,7 @@ public partial class App : Application
 
         // Single-window architecture: show MainWindow once.
         // MainViewModel starts on the login page; shell chrome is hidden until login.
-        shellFlow.ShowMainWindow();
+        await shellFlow.ShowMainWindowAsync();
     }
 
     protected override async void OnExit(ExitEventArgs e)

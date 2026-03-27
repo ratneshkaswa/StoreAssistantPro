@@ -15,6 +15,7 @@ public sealed class TaxGroupServiceTests : IDisposable
         .Options;
 
     private readonly IRegionalSettingsService _regionalSettings = Substitute.For<IRegionalSettingsService>();
+    private readonly IReferenceDataCache _referenceDataCache = Substitute.For<IReferenceDataCache>();
     private readonly IPerformanceMonitor _perf =
         new PerformanceMonitor(NullLogger<PerformanceMonitor>.Instance);
 
@@ -29,7 +30,7 @@ public sealed class TaxGroupServiceTests : IDisposable
         factory.CreateDbContextAsync(Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromResult(new AppDbContext(_dbOptions)));
 
-        return new TaxGroupService(factory, _regionalSettings, _perf);
+        return new TaxGroupService(factory, _regionalSettings, _referenceDataCache, _perf);
     }
 
     [Fact]

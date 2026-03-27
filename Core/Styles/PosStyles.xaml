@@ -191,7 +191,6 @@
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="h:ConnectedNavigationSource.IsEnabled" Value="True"/>
         <!-- SmartTooltip — auto-wired from QuickAction DataContext -->
         <Setter Property="h:SmartTooltip.Header"     Value="{Binding Title}"/>
         <Setter Property="h:SmartTooltip.Text"       Value="{Binding Description}"/>
@@ -1089,7 +1088,6 @@
         <Setter Property="MinHeight" Value="28"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="h:AnimatedDismissButton.IsEnabled" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -1099,12 +1097,8 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="14"
                             Padding="{TemplateBinding Padding}"
-                            RenderTransformOrigin="0.5,0.5"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True">
-                        <Border.RenderTransform>
-                            <ScaleTransform x:Name="ChipScale" ScaleX="1" ScaleY="1"/>
-                        </Border.RenderTransform>
                         <StackPanel Orientation="Horizontal">
                             <ContentPresenter VerticalAlignment="Center"/>
                             <TextBlock Text="&#xE711;"
@@ -1122,59 +1116,11 @@
                                     Value="{StaticResource FluentAccentLight2}"/>
                             <Setter TargetName="ChipBorder" Property="BorderBrush"
                                     Value="{StaticResource FluentAccentDefault}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleRest}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleRest}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="ChipBorder" Property="Background"
                                     Value="{StaticResource FluentAccentLight1}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScalePressed}"
-                                                         Duration="{StaticResource FluentDurationFast}"
-                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="ChipScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScalePressed}"
-                                                         Duration="{StaticResource FluentDurationFast}"
-                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
                         </Trigger>
 
                         <Trigger Property="IsEnabled" Value="False">

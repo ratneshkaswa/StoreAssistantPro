@@ -39,45 +39,15 @@
                                 HorizontalAlignment="Left"
                                 Margin="3,0,0,0"
                                 VerticalAlignment="Center"
-                                SnapsToDevicePixels="True">
-                            <Border.RenderTransform>
-                                <TranslateTransform x:Name="ThumbTranslate" X="0"/>
-                            </Border.RenderTransform>
-                        </Border>
+                                SnapsToDevicePixels="True"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Track" Property="Background" Value="{StaticResource FluentAccentDefault}"/>
                             <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource FluentAccentDefault}"/>
                             <Setter TargetName="Thumb" Property="Background" Value="{StaticResource FluentTextOnAccent}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="ThumbTranslate"
-                                                         Storyboard.TargetProperty="X"
-                                                         To="20"
-                                                         Duration="0:0:0.15">
-                                            <DoubleAnimation.EasingFunction>
-                                                <CubicEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="ThumbTranslate"
-                                                         Storyboard.TargetProperty="X"
-                                                         To="0"
-                                                         Duration="0:0:0.15">
-                                            <DoubleAnimation.EasingFunction>
-                                                <CubicEase EasingMode="EaseOut"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
+                            <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
+                            <Setter TargetName="Thumb" Property="Margin" Value="0,0,3,0"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource FluentStrokeFocus}"/>

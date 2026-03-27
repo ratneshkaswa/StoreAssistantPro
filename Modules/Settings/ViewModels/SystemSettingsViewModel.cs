@@ -3,9 +3,11 @@ using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Settings.Services;
 
 namespace StoreAssistantPro.Modules.Settings.ViewModels;
@@ -14,7 +16,8 @@ public partial class SystemSettingsViewModel(
     ISystemSettingsService settingsService,
     ILoginService loginService,
     IDialogService dialogService,
-    IUiDensityService uiDensityService) : BaseViewModel
+    IUiDensityService uiDensityService,
+    IEventBus eventBus) : BaseViewModel
 {
     private bool _isHydrating;
 
@@ -319,6 +322,7 @@ public partial class SystemSettingsViewModel(
             return;
 
         await settingsService.RestoreDatabaseAsync(RestoreFilePath, ct).ConfigureAwait(false);
+        await eventBus.PublishAsync(new SalesDataChangedEvent("SettingsDatabaseRestoreCompleted", DateTime.UtcNow));
         SuccessMessage = "Database restored successfully. Please restart the application.";
     });
 
@@ -352,6 +356,7 @@ public partial class SystemSettingsViewModel(
         }
 
         await settingsService.FactoryResetAsync(ct).ConfigureAwait(false);
+        await eventBus.PublishAsync(new SalesDataChangedEvent("FactoryResetCompleted", DateTime.UtcNow));
         SuccessMessage = "Factory reset complete. Please restart the application.";
     });
 

@@ -17,7 +17,7 @@ namespace StoreAssistantPro.Core.Helpers;
 /// </summary>
 public static class CardHover
 {
-    private static readonly Duration HoverDuration = new(TimeSpan.FromMilliseconds(150));
+    private static readonly Duration HoverDuration = new(TimeSpan.FromMilliseconds(90));
     private static readonly IEasingFunction Easing = new CubicEase { EasingMode = EasingMode.EaseOut };
 
     public static readonly DependencyProperty IsEnabledProperty =
@@ -57,7 +57,7 @@ public static class CardHover
     private static void OnMouseEnter(object sender, MouseEventArgs e)
     {
         if (sender is not Border border) return;
-        AnimateScale(border, 1.015);
+        AnimateScale(border, 1.006);
     }
 
     private static void OnMouseLeave(object sender, MouseEventArgs e)
@@ -69,13 +69,13 @@ public static class CardHover
     private static void OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not Border border) return;
-        AnimateScale(border, 0.98);
+        AnimateScale(border, 0.994);
     }
 
     private static void OnMouseUp(object sender, MouseButtonEventArgs e)
     {
         if (sender is not Border border) return;
-        AnimateScale(border, 1.015);
+        AnimateScale(border, 1.006);
     }
 
     private static void AnimateScale(Border border, double scale)

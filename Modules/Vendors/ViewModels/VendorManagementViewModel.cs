@@ -16,6 +16,8 @@ public partial class VendorManagementViewModel(
     IRegionalSettingsService regional,
     IAppStateService appState) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     [ObservableProperty]
     public partial ObservableCollection<Vendor> Vendors { get; set; } = [];
 
@@ -140,10 +142,9 @@ public partial class VendorManagementViewModel(
     }
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
-    {
-        await ReloadVendorsAsync(ct);
-    });
+    private Task LoadAsync() => LoadOnActivateAsync(
+        async ct => await ReloadVendorsAsync(ct),
+        NavigationFreshnessWindow);
 
     private async Task ReloadVendorsAsync(CancellationToken ct, int? selectedVendorId = null)
     {
@@ -159,6 +160,7 @@ public partial class VendorManagementViewModel(
         SelectedVendor = selectedVendorId.HasValue
             ? Vendors.FirstOrDefault(v => v.Id == selectedVendorId.Value)
             : null;
+        MarkLoadCompleted();
     }
 
     [RelayCommand]

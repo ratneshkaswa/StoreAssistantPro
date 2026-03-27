@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Inward.Services;
 
@@ -10,7 +12,8 @@ public class InwardService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
     IPerformanceMonitor perf,
-    ILogger<InwardService> logger) : IInwardService
+    ILogger<InwardService> logger,
+    IEventBus eventBus) : IInwardService
 {
     private const int MaxParcelsPerEntry = 10;
     private const int MaxProductsPerParcel = 3;
@@ -151,6 +154,7 @@ public class InwardService(
 
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             await transaction.CommitAsync(ct).ConfigureAwait(false);
+            await eventBus.PublishAsync(new SalesDataChangedEvent("InwardEntryCreated", DateTime.UtcNow)).ConfigureAwait(false);
 
             logger.LogInformation(
                 "Inward entry '{Number}' created with {ParcelCount} parcel(s) on {Date}",

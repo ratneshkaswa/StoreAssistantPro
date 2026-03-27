@@ -149,12 +149,12 @@ public static class ClickRipple
             var maxY = Math.Max(_origin.Y, size.Height - _origin.Y);
             var targetRadius = Math.Sqrt((maxX * maxX) + (maxY * maxY));
 
-            var radiusAnimation = new DoubleAnimation(0, targetRadius, TimeSpan.FromMilliseconds(200))
+            var radiusAnimation = new DoubleAnimation(0, targetRadius, TimeSpan.FromMilliseconds(120))
             {
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
             };
 
-            var opacityAnimation = new DoubleAnimation(0.18, 0, TimeSpan.FromMilliseconds(200))
+            var opacityAnimation = new DoubleAnimation(0.18, 0, TimeSpan.FromMilliseconds(120))
             {
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
             };

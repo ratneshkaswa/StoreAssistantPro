@@ -1,12 +1,11 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
-/// Adds a short close animation before executing a dismiss-style button command.
+/// Coordinates dismiss-style button execution while preventing duplicate triggers.
 /// </summary>
 public static class AnimatedDismissButton
 {
@@ -84,43 +83,8 @@ public static class AnimatedDismissButton
 
     private static void RunDismissAnimation(Button button)
     {
-        var width = Math.Max(button.ActualWidth, button.RenderSize.Width);
-        if (width < 1)
-        {
-            ExecuteCommand(button);
-            return;
-        }
-
-        button.BeginAnimation(FrameworkElement.WidthProperty, null);
-        button.Width = width;
-
-        var ease = button.TryFindResource("FluentEaseDecelerate") as IEasingFunction;
-        var duration = new Duration(TimeSpan.FromMilliseconds(150));
-
-        var widthAnimation = new DoubleAnimation(width, 0, duration)
-        {
-            EasingFunction = ease,
-            FillBehavior = FillBehavior.Stop
-        };
-
-        widthAnimation.Completed += (_, _) =>
-        {
-            ExecuteCommand(button);
-            button.BeginAnimation(FrameworkElement.WidthProperty, null);
-            button.ClearValue(FrameworkElement.WidthProperty);
-            button.BeginAnimation(UIElement.OpacityProperty, null);
-            button.Opacity = 1;
-            button.SetValue(IsAnimatingProperty, false);
-        };
-
-        button.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
-        button.BeginAnimation(
-            UIElement.OpacityProperty,
-            new DoubleAnimation(1, 0, duration)
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.Stop
-            });
+        ExecuteCommand(button);
+        button.SetValue(IsAnimatingProperty, false);
     }
 
     private static void ExecuteCommand(Button button)

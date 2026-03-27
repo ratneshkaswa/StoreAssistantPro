@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Inventory.Services;
 
 public class InventoryService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : IInventoryService
+    IPerformanceMonitor perf,
+    IEventBus eventBus) : IInventoryService
 {
     // ── Stock adjustment ─────────────────────────────────────────────
 
@@ -68,6 +71,7 @@ public class InventoryService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        await PublishInventoryDataChangedAsync("InventoryStockAdjusted").ConfigureAwait(false);
     }
 
     // ── Batch stock adjustment ─────────────────────────────────────────
@@ -120,7 +124,10 @@ public class InventoryService(
         }
 
         if (count > 0)
+        {
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await PublishInventoryDataChangedAsync("InventoryBatchAdjusted").ConfigureAwait(false);
+        }
 
         return count;
     }
@@ -337,7 +344,10 @@ public class InventoryService(
         }
 
         if (count > 0)
+        {
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            await PublishInventoryDataChangedAsync("InventoryCsvImported").ConfigureAwait(false);
+        }
 
         return count;
     }
@@ -364,4 +374,7 @@ public class InventoryService(
             .FirstOrDefaultAsync(ct)
             .ConfigureAwait(false);
     }
+
+    private Task PublishInventoryDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

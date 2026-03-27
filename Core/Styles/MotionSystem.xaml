@@ -11,9 +11,9 @@
          Style, plus ready-made styles that compose common motions.
 
          All timings come from DesignSystem.xaml tokens:
-           FluentDurationFast    83 ms   hover, instant feedback
-           FluentDurationNormal  167 ms  focus, panel reveal
-           FluentDurationSlow    250 ms  view transitions, fades
+           FluentDurationFast    50 ms   hover, instant feedback
+           FluentDurationNormal  100 ms  focus, panel reveal
+           FluentDurationSlow    140 ms  view transitions, fades
            FluentEaseDecelerate  CubicEase EaseOut  (entrances)
            FluentEaseAccelerate  CubicEase EaseIn   (exits)
            FluentEasePoint       QuadraticEase EaseInOut (scale)
@@ -32,7 +32,7 @@
            </Trigger.EnterActions>
          ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- Fade In: Opacity 0 → 1 (250 ms decelerate) -->
+    <!-- Fade In: Opacity 0 → 1 (140 ms decelerate) -->
     <Storyboard x:Key="MotionFadeIn">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          From="0" To="1"
@@ -40,7 +40,7 @@
                          EasingFunction="{StaticResource FluentEaseDecelerate}"/>
     </Storyboard>
 
-    <!-- Fade Out: Opacity → 0 (167 ms accelerate) -->
+    <!-- Fade Out: Opacity → 0 (100 ms accelerate) -->
     <Storyboard x:Key="MotionFadeOut">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          To="0"
@@ -48,7 +48,7 @@
                          EasingFunction="{StaticResource FluentEaseAccelerate}"/>
     </Storyboard>
 
-    <!-- Page Fade In: Opacity 0 → 1 (150 ms — page content entrance) -->
+    <!-- Page Fade In: Opacity 0 → 1 (140 ms — page content entrance) -->
     <Storyboard x:Key="MotionPageFadeIn">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          From="0" To="1"
@@ -56,7 +56,7 @@
                          EasingFunction="{StaticResource FluentEaseDecelerate}"/>
     </Storyboard>
 
-    <!-- Quick Fade In: Opacity 0 → 1 (83 ms — hover feedback) -->
+    <!-- Quick Fade In: Opacity 0 → 1 (50 ms — hover feedback) -->
     <Storyboard x:Key="MotionFadeInFast">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          From="0" To="1"
@@ -64,7 +64,7 @@
                          EasingFunction="{StaticResource FluentEaseDecelerate}"/>
     </Storyboard>
 
-    <!-- Quick Fade Out: Opacity → 0 (83 ms) -->
+    <!-- Quick Fade Out: Opacity → 0 (50 ms) -->
     <Storyboard x:Key="MotionFadeOutFast">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          To="0"
@@ -127,7 +127,7 @@
            </EventTrigger>
          ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- Slide up 12 px + fade in (250 ms decelerate) -->
+    <!-- Slide up 12 px + fade in (140 ms decelerate) -->
     <Storyboard x:Key="MotionSlideFadeIn">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          From="0" To="1"
@@ -140,7 +140,7 @@
                          EasingFunction="{StaticResource FluentEaseDecelerate}"/>
     </Storyboard>
 
-    <!-- Slide down 12 px + fade out (167 ms accelerate) -->
+    <!-- Slide down 12 px + fade out (100 ms accelerate) -->
     <Storyboard x:Key="MotionSlideFadeOut">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          To="0"

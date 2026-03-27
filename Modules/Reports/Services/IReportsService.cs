@@ -4,6 +4,7 @@ namespace StoreAssistantPro.Modules.Reports.Services;
 
 public interface IReportsService
 {
+    void InvalidateCache();
     Task<ExpenseReport> GetExpenseReportAsync(DateTime from, DateTime to, CancellationToken ct = default);
     Task<IroningReport> GetIroningReportAsync(DateTime from, DateTime to, CancellationToken ct = default);
     Task<OrderReport> GetOrderReportAsync(DateTime from, DateTime to, CancellationToken ct = default);

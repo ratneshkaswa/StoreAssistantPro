@@ -2,10 +2,12 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Paging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Billing.Services;
 
 namespace StoreAssistantPro.Modules.Billing.ViewModels;
@@ -13,9 +15,12 @@ namespace StoreAssistantPro.Modules.Billing.ViewModels;
 public partial class SaleHistoryViewModel(
     ISaleHistoryService historyService,
     IReceiptService receiptService,
-    IRegionalSettingsService regional) : BaseViewModel
+    IRegionalSettingsService regional,
+    IEventBus eventBus) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isRestoringViewState;
+    private bool _salesChangeSubscribed;
 
     // ── Filters ──
 
@@ -92,11 +97,12 @@ public partial class SaleHistoryViewModel(
     // ── Commands ──
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
+        EnsureSalesChangeSubscription();
         RestoreViewState();
         await ReloadAsync(ct);
-    });
+    }, NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
@@ -154,6 +160,7 @@ public partial class SaleHistoryViewModel(
         PagingInfo = TotalCount > 0
             ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
             : string.Empty;
+        MarkLoadCompleted();
     }
 
     private void RestoreViewState()
@@ -183,5 +190,32 @@ public partial class SaleHistoryViewModel(
             DateTo = DateTo,
             InvoiceSearch = InvoiceSearch
         });
+    }
+
+    public override void Dispose()
+    {
+        if (_salesChangeSubscribed)
+        {
+            eventBus.Unsubscribe<SalesDataChangedEvent>(HandleSalesDataChangedAsync);
+            _salesChangeSubscribed = false;
+        }
+
+        base.Dispose();
+    }
+
+    private void EnsureSalesChangeSubscription()
+    {
+        if (_salesChangeSubscribed)
+            return;
+
+        eventBus.Subscribe<SalesDataChangedEvent>(HandleSalesDataChangedAsync);
+        _salesChangeSubscribed = true;
+    }
+
+    private Task HandleSalesDataChangedAsync(SalesDataChangedEvent _)
+    {
+        historyService.InvalidateCache();
+        MarkLoadStale();
+        return Task.CompletedTask;
     }
 }

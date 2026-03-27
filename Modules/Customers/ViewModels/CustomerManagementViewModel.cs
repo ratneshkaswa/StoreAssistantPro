@@ -14,6 +14,8 @@ public partial class CustomerManagementViewModel(
     ICustomerService customerService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     [ObservableProperty]
     public partial ObservableCollection<Customer> Customers { get; set; } = [];
 
@@ -168,10 +170,9 @@ public partial class CustomerManagementViewModel(
     });
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
-    {
-        await ReloadAsync(ct);
-    });
+    private Task LoadAsync() => LoadOnActivateAsync(
+        async ct => await ReloadAsync(ct),
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
@@ -287,5 +288,6 @@ public partial class CustomerManagementViewModel(
         PagingInfo = TotalCount > 0
             ? $"Page {CurrentPage} of {TotalPages} ({TotalCount} total)"
             : string.Empty;
+        MarkLoadCompleted();
     }
 }

@@ -1,6 +1,8 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Backup.Services;
 using StoreAssistantPro.Modules.Backup.ViewModels;
 
@@ -12,12 +14,13 @@ public class BackupRestoreViewModelTests
     private readonly IAuditService _auditService = Substitute.For<IAuditService>();
     private readonly IAppStateService _appState = Substitute.For<IAppStateService>();
     private readonly IDialogService _dialogService = Substitute.For<IDialogService>();
+    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
     private BackupRestoreViewModel CreateSut()
     {
         _backupService.GetDefaultBackupFolder().Returns(@"C:\Backups");
         _appState.CurrentUserType.Returns(UserType.Admin);
-        return new BackupRestoreViewModel(_backupService, _auditService, _appState, _dialogService);
+        return new BackupRestoreViewModel(_backupService, _auditService, _appState, _dialogService, _eventBus);
     }
 
     [Fact]
@@ -90,5 +93,6 @@ public class BackupRestoreViewModelTests
             UserType.Admin.ToString(),
             "Database restored from backup",
             Arg.Any<CancellationToken>());
+        await _eventBus.Received(1).PublishAsync(Arg.Any<SalesDataChangedEvent>());
     }
 }

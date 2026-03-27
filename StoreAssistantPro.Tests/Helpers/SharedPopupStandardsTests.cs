@@ -78,6 +78,17 @@ public sealed class SharedPopupStandardsTests
     }
 
     [Fact]
+    public void Shared_Tooltip_Templates_Should_Open_Without_Local_Fade_Or_Slide_Storyboards()
+    {
+        var globalStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+
+        Assert.DoesNotContain("BeginStoryboard x:Name=\"OpenStoryboard\"", globalStyles, StringComparison.Ordinal);
+        Assert.DoesNotContain("RoutedEvent=\"Opened\"", globalStyles, StringComparison.Ordinal);
+        Assert.DoesNotContain("RenderTransform.Y", globalStyles, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SmartTooltip_RuntimeContent_Should_Enable_CrispLayout_And_TextRendering()
     {
         var smartTooltip = File.ReadAllText(

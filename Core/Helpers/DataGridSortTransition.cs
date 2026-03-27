@@ -11,8 +11,8 @@ namespace StoreAssistantPro.Core.Helpers;
 /// </summary>
 public static class DataGridSortTransition
 {
-    private const double StartingOpacity = 0.58;
-    private static readonly Duration TransitionDuration = new(TimeSpan.FromMilliseconds(100));
+    private const double StartingOpacity = 0.72;
+    private static readonly Duration TransitionDuration = new(TimeSpan.FromMilliseconds(60));
 
     public static readonly DependencyProperty IsEnabledProperty =
         DependencyProperty.RegisterAttached(

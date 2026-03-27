@@ -118,7 +118,7 @@ public static class AnimatedNumberText
     {
         textBlock.SetValue(PendingTargetValueProperty, to);
 
-        var duration = GetDuration(textBlock, "FluentDurationSlow", TimeSpan.FromMilliseconds(250));
+        var duration = GetDuration(textBlock, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
         if (duration == TimeSpan.Zero || Math.Abs(from - to) < 0.01d)
         {
             textBlock.BeginAnimation(AnimatedValueProperty, null);
@@ -187,7 +187,7 @@ public static class AnimatedNumberText
     }
 
     private static bool IsMotionDisabled(FrameworkElement element) =>
-        GetDuration(element, "FluentDurationSlow", TimeSpan.FromMilliseconds(250)) == TimeSpan.Zero;
+        GetDuration(element, "FluentDurationSlow", TimeSpan.FromMilliseconds(140)) == TimeSpan.Zero;
 
     private static TimeSpan GetDuration(FrameworkElement element, string key, TimeSpan fallback)
     {

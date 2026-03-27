@@ -66,6 +66,14 @@ public sealed class MainViewModelRestoreTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_Should_Not_Navigate_To_Login_Before_AutoLogin_Resolves()
+    {
+        var sut = CreateSut();
+
+        Assert.DoesNotContain("Sign in", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task Login_Should_Restore_Last_Visited_Page_And_Consume_Notification_Activation()
     {
         UserPreferencesStore.Update(state =>
@@ -152,6 +160,8 @@ public sealed class MainViewModelRestoreTests : IDisposable
         }
 
         public void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject { }
+        public void CachePage(string pageKey) { }
+        public void InvalidatePageCache(string pageKey) { }
         public void MapFeature(string pageKey, string featureFlag) { }
     }
 

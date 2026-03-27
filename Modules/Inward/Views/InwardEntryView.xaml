@@ -52,91 +52,18 @@
                         Grid.Column="0"
                         Height="8"
                         CornerRadius="4"
-                        Background="{StaticResource FluentAccentDefault}"
-                        RenderTransformOrigin="0.5,0.5">
-                    <Border.RenderTransform>
-                        <ScaleTransform ScaleX="1"
-                                        ScaleY="1"/>
-                    </Border.RenderTransform>
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsStep1}" Value="True">
-                                    <DataTrigger.EnterActions>
-                                        <BeginStoryboard x:Name="Step1PulseStoryboard">
-                                            <Storyboard AutoReverse="True"
-                                                        RepeatBehavior="Forever">
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                                                                 To="1.03"
-                                                                 Duration="0:0:0.45"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                                                                 To="1.18"
-                                                                 Duration="0:0:0.45"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.EnterActions>
-                                    <DataTrigger.ExitActions>
-                                        <StopStoryboard BeginStoryboardName="Step1PulseStoryboard"/>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                                                                 To="1"
-                                                                 Duration="0:0:0.15"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                                                                 To="1"
-                                                                 Duration="0:0:0.15"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.ExitActions>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                </Border>
+                        Background="{StaticResource FluentAccentDefault}"/>
 
                 <Border x:Name="Step2Segment"
                         Grid.Column="2"
                         Height="8"
-                        CornerRadius="4"
-                        RenderTransformOrigin="0.5,0.5">
-                    <Border.RenderTransform>
-                        <ScaleTransform ScaleX="1"
-                                        ScaleY="1"/>
-                    </Border.RenderTransform>
+                        CornerRadius="4">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource ChromeAltFillColorSecondary}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsStep1}" Value="False">
                                     <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsStep2}" Value="True">
-                                    <DataTrigger.EnterActions>
-                                        <BeginStoryboard x:Name="Step2PulseStoryboard">
-                                            <Storyboard AutoReverse="True"
-                                                        RepeatBehavior="Forever">
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                                                                 To="1.03"
-                                                                 Duration="0:0:0.45"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                                                                 To="1.18"
-                                                                 Duration="0:0:0.45"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.EnterActions>
-                                    <DataTrigger.ExitActions>
-                                        <StopStoryboard BeginStoryboardName="Step2PulseStoryboard"/>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                                                                 To="1"
-                                                                 Duration="0:0:0.15"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                                                                 To="1"
-                                                                 Duration="0:0:0.15"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.ExitActions>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -146,44 +73,13 @@
                 <Border x:Name="Step3Segment"
                         Grid.Column="4"
                         Height="8"
-                        CornerRadius="4"
-                        RenderTransformOrigin="0.5,0.5">
-                    <Border.RenderTransform>
-                        <ScaleTransform ScaleX="1"
-                                        ScaleY="1"/>
-                    </Border.RenderTransform>
+                        CornerRadius="4">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource ChromeAltFillColorSecondary}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsStep3}" Value="True">
                                     <Setter Property="Background" Value="{StaticResource FluentAccentDefault}"/>
-                                    <DataTrigger.EnterActions>
-                                        <BeginStoryboard x:Name="Step3PulseStoryboard">
-                                            <Storyboard AutoReverse="True"
-                                                        RepeatBehavior="Forever">
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                                                                 To="1.03"
-                                                                 Duration="0:0:0.45"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                                                                 To="1.18"
-                                                                 Duration="0:0:0.45"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.EnterActions>
-                                    <DataTrigger.ExitActions>
-                                        <StopStoryboard BeginStoryboardName="Step3PulseStoryboard"/>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                                                                 To="1"
-                                                                 Duration="0:0:0.15"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                                                                 To="1"
-                                                                 Duration="0:0:0.15"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.ExitActions>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

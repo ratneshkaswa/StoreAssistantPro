@@ -83,6 +83,9 @@
             <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <helpers:PinDotConverter x:Key="PinDotConverter"/>
             <helpers:BoolToActiveTextConverter x:Key="BoolToActiveText"/>
+            <helpers:NullToAllConverter x:Key="NullToAllConverter"/>
+            <helpers:NullToCollapsedConverter x:Key="NullToCollapsed"/>
+            <helpers:PositiveToVisibilityConverter x:Key="PositiveToVisibility"/>
             <helpers:NonEmptyStringToVisibilityConverter x:Key="NonEmptyStringToVisibility"/>
             <helpers:RoleColorConverter x:Key="RoleColorConverter"/>
             <helpers:PinStrengthConverter x:Key="PinStrengthConverter"/>
@@ -208,25 +211,9 @@
                             <controls:ViewportConstrainedPanel
                                 ViewportWidth="{Binding ViewportWidth, ElementName=PART_ScrollViewer}"
                                 ViewportHeight="{Binding ViewportHeight, ElementName=PART_ScrollViewer}">
-                                <Grid x:Name="PART_TransitionHost"
-                                      ClipToBounds="True">
-                                    <Image x:Name="PART_PreviousSnapshot"
-                                           Source="{TemplateBinding PreviousSnapshot}"
-                                           Visibility="Collapsed"
-                                           IsHitTestVisible="False"
-                                           HorizontalAlignment="Stretch"
-                                           VerticalAlignment="Stretch"
-                                           Stretch="Fill"/>
-                                    <ContentPresenter x:Name="PART_CurrentPresenter"
-                                                      Content="{TemplateBinding Content}"
-                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                    <Canvas IsHitTestVisible="False">
-                                        <Image x:Name="PART_ConnectedSnapshot"
-                                               Visibility="Collapsed"
-                                               Stretch="Fill"/>
-                                    </Canvas>
-                                </Grid>
+                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             </controls:ViewportConstrainedPanel>
                         </ScrollViewer>
                     </ControlTemplate>

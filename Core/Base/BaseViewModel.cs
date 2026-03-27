@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace StoreAssistantPro.Core;
 
@@ -23,6 +24,8 @@ namespace StoreAssistantPro.Core;
 public abstract partial class BaseViewModel : ObservableValidator, IDisposable
 {
     private static ILoggerFactory? _loggerFactory;
+    private DateTimeOffset? _lastSuccessfulLoadAtUtc;
+    private bool _hasLoadedOnce;
 
     /// <summary>
     /// Called once at app startup to wire the DI logger factory into the
@@ -343,6 +346,83 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
             IsLoading = false;
         }
     }
+
+    /// <summary>
+    /// Runs a tracked load and records when the data was last refreshed successfully.
+    /// </summary>
+    protected Task RunTrackedLoadAsync(Func<CancellationToken, Task> action) =>
+        RunLoadAsync(async ct =>
+        {
+            var startedAt = Stopwatch.GetTimestamp();
+            await action(ct);
+            MarkLoadCompleted();
+
+            var elapsed = Stopwatch.GetElapsedTime(startedAt);
+            if (elapsed > TimeSpan.FromMilliseconds(400))
+            {
+                VmLogger.LogWarning(
+                    "Slow tracked load in {ViewModel}: {ElapsedMs:F1} ms",
+                    GetType().Name,
+                    elapsed.TotalMilliseconds);
+            }
+            else
+            {
+                VmLogger.LogDebug(
+                    "Tracked load completed in {ViewModel}: {ElapsedMs:F1} ms",
+                    GetType().Name,
+                    elapsed.TotalMilliseconds);
+            }
+        });
+
+    /// <summary>
+    /// Optimized load entry point for page activation. The first load is awaited so
+    /// the page becomes ready deterministically. Subsequent stale loads refresh in
+    /// the background to avoid making every revisit feel like a cold start.
+    /// </summary>
+    protected async Task LoadOnActivateAsync(
+        Func<CancellationToken, Task> action,
+        TimeSpan freshnessWindow)
+    {
+        if (!_hasLoadedOnce || HasLoadError)
+        {
+            VmLogger.LogDebug("Activation load awaited for {ViewModel}", GetType().Name);
+            await RunTrackedLoadAsync(action);
+            return;
+        }
+
+        if (IsLoading)
+            return;
+
+        if (_lastSuccessfulLoadAtUtc is not null
+            && DateTimeOffset.UtcNow - _lastSuccessfulLoadAtUtc.Value <= freshnessWindow)
+        {
+            VmLogger.LogDebug(
+                "Activation load skipped for {ViewModel}; data still fresh within {FreshnessWindowMs} ms",
+                GetType().Name,
+                freshnessWindow.TotalMilliseconds);
+            return;
+        }
+
+        VmLogger.LogDebug(
+            "Activation load refreshing in background for {ViewModel}",
+            GetType().Name);
+        _ = RunTrackedLoadAsync(action);
+    }
+
+    protected void MarkLoadCompleted()
+    {
+        _hasLoadedOnce = true;
+        _lastSuccessfulLoadAtUtc = DateTimeOffset.UtcNow;
+        LoadErrorMessage = string.Empty;
+    }
+
+    protected void MarkLoadStale()
+    {
+        _lastSuccessfulLoadAtUtc = null;
+    }
+
+    protected bool HasLoadedOnce => _hasLoadedOnce;
+    protected DateTimeOffset? LastSuccessfulLoadAtUtc => _lastSuccessfulLoadAtUtc;
 
     /// <summary>
     /// Resets transient UI state. Override in derived ViewModels to

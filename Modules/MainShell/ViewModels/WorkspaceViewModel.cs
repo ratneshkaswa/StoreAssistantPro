@@ -7,7 +7,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
 using StoreAssistantPro.Core.Controls;
+using StoreAssistantPro.Core.Events;
+using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Core.Services;
+using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 
@@ -15,17 +18,20 @@ namespace StoreAssistantPro.Modules.MainShell.ViewModels;
 
 public sealed partial class WorkspaceViewModel(
     IDashboardService dashboardService,
-    IRegionalSettingsService regional) : BaseViewModel
+    IRegionalSettingsService regional,
+    IEventBus eventBus) : BaseViewModel, INavigationAware
 {
     private static readonly TimeSpan AutoRefreshInterval = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private DispatcherTimer? _autoRefreshTimer;
     private DateTime _lastRefreshedAt = regional.Now;
+    private bool _salesChangeSubscribed;
 
     public IReadOnlyList<string> BreadcrumbItems { get; } = ["Home", "Dashboard"];
     public string CurrencySymbol => regional.CurrencySymbol;
     public string HeaderSubtitle => IsViewingPastDate
-        ? $"Viewing metrics for {regional.FormatDate(SelectedDate)}."
-        : "Monitor sales, stock, and collections from one place.";
+        ? $"Viewing dashboard snapshot for {regional.FormatDate(SelectedDate)}."
+        : "Track live counter, stock, and collections here. Use Reports for deeper analysis.";
     public string LastUpdatedText => $"Updated {FormatRelativeTime(_lastRefreshedAt)}";
 
     // #410 Dashboard date selector
@@ -42,6 +48,7 @@ public sealed partial class WorkspaceViewModel(
         OnPropertyChanged(nameof(IsViewingPastDate));
         OnPropertyChanged(nameof(DateLabel));
         OnPropertyChanged(nameof(HeaderSubtitle));
+        RestartAutoRefreshForCurrentContext();
         _ = RefreshForDateAsync();
     }
 
@@ -51,11 +58,9 @@ public sealed partial class WorkspaceViewModel(
         SelectedDate = regional.Now.Date;
     }
 
-    private Task RefreshForDateAsync() => RunLoadAsync(async ct =>
+    private Task RefreshForDateAsync() => RunTrackedLoadAsync(async ct =>
     {
-        var summary = IsViewingPastDate
-            ? await dashboardService.GetSummaryForDateAsync(SelectedDate, ct)
-            : await dashboardService.GetSummaryAsync(ct);
+        var summary = await LoadSelectedDateSummaryAsync(ct);
         ApplySummary(summary);
     });
 
@@ -123,18 +128,11 @@ public sealed partial class WorkspaceViewModel(
     public partial ObservableCollection<RecentSaleDisplayItem> RecentSalesDisplay { get; set; } = [];
 
     [ObservableProperty]
-    public partial ObservableCollection<TopProductDisplayItem> TopProductsDisplay { get; set; } = [];
-
-    [ObservableProperty]
     public partial ObservableCollection<TopProductDisplayItem> TopProductsTodayDisplay { get; set; } = [];
 
     // #398 Monthly sales trend
     [ObservableProperty]
     public partial ObservableCollection<DailySalesTrendDisplayItem> DailySalesTrendDisplay { get; set; } = [];
-
-    // #401 Payment method breakdown
-    [ObservableProperty]
-    public partial ObservableCollection<PaymentMethodDisplayItem> PaymentMethodDisplay { get; set; } = [];
 
     // Derived display values
 
@@ -216,18 +214,23 @@ public sealed partial class WorkspaceViewModel(
     // Commands
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
-    {
-        var summary = await dashboardService.GetSummaryAsync(ct);
-        ApplySummary(summary);
-        StartAutoRefresh();
-    });
+    private Task LoadAsync() => LoadOnActivateAsync(
+        async ct =>
+        {
+            EnsureSalesChangeSubscription();
+            var summary = await LoadSelectedDateSummaryAsync(ct);
+            ApplySummary(summary);
+            RestartAutoRefreshForCurrentContext();
+        },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
-    private Task RefreshAsync() => RunLoadAsync(async ct =>
+    private Task RefreshAsync() => RunTrackedLoadAsync(async ct =>
     {
-        var summary = await dashboardService.GetSummaryAsync(ct);
+        dashboardService.InvalidateCache();
+        var summary = await LoadSelectedDateSummaryAsync(ct);
         ApplySummary(summary);
+        RestartAutoRefreshForCurrentContext();
     });
 
     private void StartAutoRefresh()
@@ -241,8 +244,19 @@ public sealed partial class WorkspaceViewModel(
 
     private async Task OnAutoRefreshTickAsync()
     {
-        if (IsLoading || IsBusy) return;
+        if (IsLoading || IsBusy || IsViewingPastDate) return;
         await RefreshAsync();
+    }
+
+    public Task OnNavigatedTo(CancellationToken ct = default)
+    {
+        RestartAutoRefreshForCurrentContext();
+        return LoadAsync();
+    }
+
+    public void OnNavigatedFrom()
+    {
+        StopAutoRefresh();
     }
 
     private void OnAutoRefreshTick(object? sender, EventArgs e)
@@ -250,8 +264,34 @@ public sealed partial class WorkspaceViewModel(
         _ = OnAutoRefreshTickAsync();
     }
 
+    private void StopAutoRefresh()
+    {
+        if (_autoRefreshTimer is null)
+            return;
+
+        _autoRefreshTimer.Stop();
+    }
+
+    private void RestartAutoRefreshForCurrentContext()
+    {
+        if (IsViewingPastDate)
+        {
+            StopAutoRefresh();
+            return;
+        }
+
+        StartAutoRefresh();
+        _autoRefreshTimer?.Start();
+    }
+
     public override void Dispose()
     {
+        if (_salesChangeSubscribed)
+        {
+            eventBus.Unsubscribe<SalesDataChangedEvent>(HandleSalesDataChangedAsync);
+            _salesChangeSubscribed = false;
+        }
+
         if (_autoRefreshTimer is not null)
         {
             _autoRefreshTimer.Stop();
@@ -260,6 +300,31 @@ public sealed partial class WorkspaceViewModel(
         }
         base.Dispose();
     }
+
+    private void EnsureSalesChangeSubscription()
+    {
+        if (_salesChangeSubscribed)
+            return;
+
+        eventBus.Subscribe<SalesDataChangedEvent>(HandleSalesDataChangedAsync);
+        _salesChangeSubscribed = true;
+    }
+
+    private Task HandleSalesDataChangedAsync(SalesDataChangedEvent @event)
+    {
+        dashboardService.InvalidateCache();
+        MarkLoadStale();
+
+        if (!IsViewingPastDate && !IsBusy && !IsLoading)
+            _ = RefreshAsync();
+
+        return Task.CompletedTask;
+    }
+
+    private Task<DashboardSummary> LoadSelectedDateSummaryAsync(CancellationToken ct) =>
+        IsViewingPastDate
+            ? dashboardService.GetSummaryForDateAsync(SelectedDate, ct)
+            : dashboardService.GetSummaryAsync(ct);
 
     private void ApplySummary(DashboardSummary summary)
     {
@@ -286,7 +351,6 @@ public sealed partial class WorkspaceViewModel(
         _previousMonthSales = summary.PreviousMonthSales;
 
         RecentSalesDisplay = new(summary.RecentSales.Select(BuildRecentSaleDisplay));
-        TopProductsDisplay = new(summary.TopProducts.Select(BuildTopProductDisplay));
         TopProductsTodayDisplay = new(summary.TopProductsToday.Select(BuildTopProductDisplay));
 
         // #398 Monthly sales trend
@@ -299,15 +363,6 @@ public sealed partial class WorkspaceViewModel(
                 regional.FormatCurrency(d.TotalSales),
                 d.TransactionCount,
                 maxDaySales > 0 ? (double)(d.TotalSales / maxDaySales) : 0)));
-
-        // #401 Payment method breakdown
-        var totalPayments = summary.PaymentMethodBreakdown.Sum(p => p.Amount);
-        PaymentMethodDisplay = new(summary.PaymentMethodBreakdown.Select(p =>
-            new PaymentMethodDisplayItem(
-                p.Method,
-                regional.FormatCurrency(p.Amount),
-                totalPayments > 0 ? Math.Round(p.Amount / totalPayments * 100, 1) : 0,
-                p.Count)));
 
         _lastRefreshedAt = regional.Now;
 

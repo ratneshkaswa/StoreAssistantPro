@@ -2,16 +2,32 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using NSubstitute;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
+using StoreAssistantPro.Modules.Authentication.Views;
+using StoreAssistantPro.Modules.BarcodeLabels.Services;
+using StoreAssistantPro.Modules.BarcodeLabels.ViewModels;
+using StoreAssistantPro.Modules.BarcodeLabels.Views;
+using StoreAssistantPro.Modules.Billing.Views;
+using StoreAssistantPro.Modules.Brands.Views;
+using StoreAssistantPro.Modules.Categories.Views;
+using StoreAssistantPro.Modules.Customers.Views;
+using StoreAssistantPro.Modules.GRN.Views;
+using StoreAssistantPro.Modules.Inventory.Views;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
 using StoreAssistantPro.Modules.MainShell.Views;
+using StoreAssistantPro.Modules.Products.Views;
+using StoreAssistantPro.Modules.PurchaseOrders.Views;
+using StoreAssistantPro.Modules.Quotations.Views;
+using StoreAssistantPro.Modules.Reports.Views;
 using StoreAssistantPro.Modules.Settings.Services;
 using StoreAssistantPro.Modules.Settings.ViewModels;
 using StoreAssistantPro.Modules.Settings.Views;
+using StoreAssistantPro.Modules.Vendors.Views;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
@@ -37,7 +53,8 @@ public sealed class ViewBitmapSmokeTests : IDisposable
             regional.FormatDate(Arg.Any<DateTime>())
                 .Returns(call => ((DateTime)call[0]).ToString("dd-MMM-yyyy"));
 
-            var viewModel = new WorkspaceViewModel(dashboardService, regional);
+            var eventBus = Substitute.For<IEventBus>();
+            var viewModel = new WorkspaceViewModel(dashboardService, regional, eventBus);
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
 
             var view = new WorkspaceView
@@ -73,7 +90,8 @@ public sealed class ViewBitmapSmokeTests : IDisposable
                 settingsService,
                 Substitute.For<ILoginService>(),
                 Substitute.For<IDialogService>(),
-                Substitute.For<IUiDensityService>());
+                Substitute.For<IUiDensityService>(),
+                Substitute.For<IEventBus>());
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
 
             var view = new SystemSettingsView
@@ -87,6 +105,73 @@ public sealed class ViewBitmapSmokeTests : IDisposable
         });
 
         Assert.True(differentPixels > 4000, $"SystemSettingsView rendered only {differentPixels} non-background pixels.");
+    }
+
+    [Fact]
+    public void BarcodeLabelView_Should_Render_NonBlank_Bitmap()
+    {
+        var differentPixels = WpfTestApplication.Run(() =>
+        {
+            var barcodeService = Substitute.For<IBarcodeLabelService>();
+            barcodeService.GetProductsForLabelAsync(Arg.Any<CancellationToken>()).Returns(
+            [
+                new BarcodeLabelProduct(1, "Blue Shirt", "8901234567890", 499m, 300m, "SKU-001", "Shirts", "Acme"),
+                new BarcodeLabelProduct(2, "Black Jeans", "8901234567891", 899m, 540m, "SKU-002", "Jeans", "Acme")
+            ]);
+            barcodeService.GetFirmNameAsync(Arg.Any<CancellationToken>()).Returns("My Store");
+
+            var regional = Substitute.For<IRegionalSettingsService>();
+            regional.FormatCurrency(Arg.Any<decimal>())
+                .Returns(call => $"Rs. {((decimal)call[0]):0.00}");
+
+            var viewModel = new BarcodeLabelViewModel(barcodeService, regional);
+            viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+            viewModel.AddAllToBatchCommand.Execute(null);
+
+            var view = new BarcodeLabelView
+            {
+                DataContext = viewModel,
+                Width = 1360,
+                Height = 920
+            };
+
+            return CountDifferentPixels(view, 1360, 920);
+        });
+
+        Assert.True(differentPixels > 4000, $"BarcodeLabelView rendered only {differentPixels} non-background pixels.");
+    }
+
+    [Fact]
+    public void NavigationViews_WithSharedConverters_Should_Construct_And_Layout()
+    {
+        WpfTestApplication.Run(() =>
+        {
+            FrameworkElement[] views =
+            [
+                new LoginView(),
+                new BillingView(),
+                new SaleHistoryView(),
+                new BrandManagementView(),
+                new CategoryManagementView(),
+                new CustomerManagementView(),
+                new GRNManagementView(),
+                new InventoryManagementView(),
+                new ProductManagementView(),
+                new PurchaseOrderView(),
+                new QuotationManagementView(),
+                new ReportsView(),
+                new VendorManagementView()
+            ];
+
+            foreach (var view in views)
+            {
+                view.Width = 1280;
+                view.Height = 900;
+                view.Measure(new Size(view.Width, view.Height));
+                view.Arrange(new Rect(0, 0, view.Width, view.Height));
+                view.UpdateLayout();
+            }
+        });
     }
 
     private static int CountDifferentPixels(FrameworkElement element, double width, double height)

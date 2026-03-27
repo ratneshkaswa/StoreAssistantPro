@@ -14,6 +14,8 @@ public sealed class UiStandardizationStandardsTests
             Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
         var globalStyles = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+        var appXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "App.xaml"));
 
         Assert.Contains("<Thickness x:Key=\"CommandPaletteItemPadding\">14,12</Thickness>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<Thickness x:Key=\"OverlayMenuItemPadding\">12,10</Thickness>", designSystem, StringComparison.Ordinal);
@@ -42,8 +44,8 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<sys:Double x:Key=\"LoginHeroAccentSecondaryBlurRadius\">96</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"LoginHeroOutlineSize\">520</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<Thickness x:Key=\"LoginHeroOutlineMargin\">0,60,0,0</Thickness>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"LoginHeroOutlineCornerRadius\">260</sys:Double>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"SettingsFieldColumnWidth\">192</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<CornerRadius x:Key=\"LoginHeroOutlineCornerRadius\">260</CornerRadius>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<GridLength x:Key=\"SettingsFieldColumnWidth\">192</GridLength>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"ReportDateRangeWidth\">344</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"QuickActionOverflowButtonSize\">40</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"QuickActionOverflowMenuWidth\">260</sys:Double>", designSystem, StringComparison.Ordinal);
@@ -55,18 +57,18 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<sys:Double x:Key=\"DashboardTrendRegionMaxHeight\">280</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"WorkspaceHeroAccentLeftWidth\">320</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"WorkspaceHeroAccentLeftHeight\">176</sys:Double>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"WorkspaceHeroAccentLeftCornerRadius\">160</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<CornerRadius x:Key=\"WorkspaceHeroAccentLeftCornerRadius\">160</CornerRadius>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"WorkspaceHeroAccentRightWidth\">220</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"WorkspaceHeroAccentRightHeight\">136</sys:Double>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"WorkspaceHeroAccentRightCornerRadius\">110</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<CornerRadius x:Key=\"WorkspaceHeroAccentRightCornerRadius\">110</CornerRadius>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<GridLength x:Key=\"MasterDetailListPaneWidth\">3*</GridLength>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<GridLength x:Key=\"MasterDetailPaneGapWidth\">12</GridLength>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<GridLength x:Key=\"MasterDetailEditorPaneWidth\">2*</GridLength>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"ReadOnlyInspectionGridMaxHeight\">240</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"SubordinateDetailRegionMaxHeight\">320</sys:Double>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"CompactToolPaneGapWidth\">16</sys:Double>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"BarcodeToolQueuePaneWidth\">320</sys:Double>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"BarcodeToolTemplatePaneWidth\">300</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<GridLength x:Key=\"CompactToolPaneGapWidth\">16</GridLength>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<GridLength x:Key=\"BarcodeToolQueuePaneWidth\">320</GridLength>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<GridLength x:Key=\"BarcodeToolTemplatePaneWidth\">300</GridLength>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"CompactToolPrimaryActionMinWidth\">148</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"InlineQuantityFieldWidth\">56</sys:Double>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"ReportAnalyticalGridMaxHeight\">300</sys:Double>", designSystem, StringComparison.Ordinal);
@@ -85,6 +87,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<sys:String x:Key=\"EmptyStateSalaryIconGlyph\">", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:String x:Key=\"EmptyStateUserIconGlyph\">", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:String x:Key=\"EmptyStateVendorIconGlyph\">", designSystem, StringComparison.Ordinal);
+        Assert.DoesNotMatch("<sys:Double x:Key=\"[^\"]*CornerRadius\">", designSystem);
 
         Assert.Contains("<Style x:Key=\"PageSubtitleStyle\" TargetType=\"TextBlock\">", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"CancelButtonStyle\" TargetType=\"Button\"", globalStyles, StringComparison.Ordinal);
@@ -212,11 +215,81 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<Style x:Key=\"ConnectionStatusDotStyle\" TargetType=\"Ellipse\">", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"ShellConnectionPrimaryTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"ShellConnectionDetailTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<helpers:NullToAllConverter x:Key=\"NullToAllConverter\"/>", appXaml, StringComparison.Ordinal);
+        Assert.Contains("<helpers:NullToCollapsedConverter x:Key=\"NullToCollapsed\"/>", appXaml, StringComparison.Ordinal);
+        Assert.Contains("<helpers:PositiveToVisibilityConverter x:Key=\"PositiveToVisibility\"/>", appXaml, StringComparison.Ordinal);
+
+        var formCardStyleIndex = globalStyles.IndexOf("<Style x:Key=\"FormCardStyle\"", StringComparison.Ordinal);
+        var adminSectionCardStyleIndex = globalStyles.IndexOf("<Style x:Key=\"AdminSectionCardStyle\"", StringComparison.Ordinal);
+        var summaryPanelStyleIndex = globalStyles.IndexOf("<Style x:Key=\"SummaryPanelStyle\"", StringComparison.Ordinal);
+        var hintTextStyleIndex = globalStyles.IndexOf("<Style x:Key=\"HintTextStyle\"", StringComparison.Ordinal);
+        var firstHintBasedOnIndex = globalStyles.IndexOf("BasedOn=\"{StaticResource HintTextStyle}\"", StringComparison.Ordinal);
+        Assert.True(formCardStyleIndex >= 0, "GlobalStyles.xaml should define FormCardStyle.");
+        Assert.True(adminSectionCardStyleIndex > formCardStyleIndex,
+            "AdminSectionCardStyle must be declared after FormCardStyle to avoid XAML parse failures.");
+        Assert.True(summaryPanelStyleIndex > formCardStyleIndex,
+            "SummaryPanelStyle must be declared after FormCardStyle to avoid runtime resource resolution failures.");
+        Assert.True(hintTextStyleIndex >= 0, "GlobalStyles.xaml should define HintTextStyle.");
+        Assert.True(firstHintBasedOnIndex > hintTextStyleIndex,
+            "HintTextStyle must be declared before any style bases on it to avoid runtime resource resolution failures.");
 
         Assert.Contains("<Style x:Key=\"CountBadgePillStyle\" TargetType=\"Border\"", File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml")), StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"InfoBadgePillStyle\" TargetType=\"Border\"", File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml")), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GlobalStyles_Should_Not_Use_Forward_BasedOn_StaticResource_Style_References()
+    {
+        var globalStyles = File.ReadAllLines(
+            Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+
+        var styleDefinitionLines = new Dictionary<string, int>(StringComparer.Ordinal);
+        for (var index = 0; index < globalStyles.Length; index++)
+        {
+            var match = Regex.Match(globalStyles[index], "<Style x:Key=\"([^\"]+)\"");
+            if (match.Success)
+            {
+                styleDefinitionLines[match.Groups[1].Value] = index + 1;
+            }
+        }
+
+        var failures = new List<string>();
+        for (var index = 0; index < globalStyles.Length; index++)
+        {
+            var basedOnMatch = Regex.Match(globalStyles[index], "BasedOn=\"\\{StaticResource ([^}]+)\\}\"");
+            if (!basedOnMatch.Success)
+            {
+                continue;
+            }
+
+            string? currentStyle = null;
+            for (var searchIndex = index; searchIndex >= 0; searchIndex--)
+            {
+                var styleMatch = Regex.Match(globalStyles[searchIndex], "<Style x:Key=\"([^\"]+)\"");
+                if (styleMatch.Success)
+                {
+                    currentStyle = styleMatch.Groups[1].Value;
+                    break;
+                }
+            }
+
+            if (currentStyle is null)
+            {
+                continue;
+            }
+
+            var targetStyle = basedOnMatch.Groups[1].Value;
+            if (styleDefinitionLines.TryGetValue(targetStyle, out var targetLine) && targetLine > index + 1)
+            {
+                failures.Add($"{currentStyle} line {index + 1} -> {targetStyle} line {targetLine}");
+            }
+        }
+
+        Assert.True(failures.Count == 0,
+            "GlobalStyles.xaml should not forward-reference later style definitions via BasedOn. " +
+            string.Join("; ", failures));
     }
 
     [Fact]
@@ -258,6 +331,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.DoesNotContain("FontSize=\"12\"", reportsView, StringComparison.Ordinal);
         Assert.DoesNotContain("MaxHeight=\"300\"", reportsView, StringComparison.Ordinal);
         Assert.DoesNotContain("MaxHeight=\"200\"", reportsView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Text=\"Today's Sales\"", reportsView, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -370,7 +444,7 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("Icon=\"{StaticResource EmptyStateInvoiceIconGlyph}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Icon=\"{StaticResource EmptyStateProductIconGlyph}\"", workspaceView, StringComparison.Ordinal);
         Assert.Contains("Icon=\"{StaticResource EmptyStateCalendarIconGlyph}\"", workspaceView, StringComparison.Ordinal);
-        Assert.Contains("Icon=\"{StaticResource EmptyStatePaymentIconGlyph}\"", workspaceView, StringComparison.Ordinal);
+        Assert.Contains("Command=\"{Binding DataContext.OpenReportsCommand, RelativeSource={RelativeSource AncestorType=Window}}\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Width=\"320\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Width=\"220\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("MinWidth=\"168\"", workspaceView, StringComparison.Ordinal);
@@ -379,6 +453,8 @@ public sealed class UiStandardizationStandardsTests
         Assert.DoesNotContain("MaxHeight=\"280\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Padding=\"12,10\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("FontWeight=\"SemiBold\"", workspaceView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Text=\"Top Products\"", workspaceView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Text=\"Payment Methods\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Icon=\"📄\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Icon=\"🔥\"", workspaceView, StringComparison.Ordinal);
         Assert.DoesNotContain("Icon=\"📦\"", workspaceView, StringComparison.Ordinal);

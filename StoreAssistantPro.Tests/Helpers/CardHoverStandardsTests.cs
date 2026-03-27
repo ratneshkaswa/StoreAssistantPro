@@ -16,6 +16,19 @@ public sealed class CardHoverStandardsTests
         Assert.Contains("border.ClearValue(FrameworkElement.CursorProperty);", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Shared_Card_Styles_Should_Require_OptIn_For_Hover_Lift()
+    {
+        var styles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+
+        Assert.Contains("<Style x:Key=\"CardStyle\" TargetType=\"Border\">", styles, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"h:CardHover.IsEnabled\" Value=\"False\"/>", styles, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"InteractiveCardStyle\" TargetType=\"Border\"", styles, StringComparison.Ordinal);
+        Assert.Contains("BasedOn=\"{StaticResource CardStyle}\"", styles, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"h:CardHover.IsEnabled\" Value=\"True\"/>", styles, StringComparison.Ordinal);
+    }
+
     private static string FindSolutionRoot()
     {
         var dir = AppContext.BaseDirectory;

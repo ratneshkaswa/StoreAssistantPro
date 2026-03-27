@@ -11,8 +11,8 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class FluentExpander : HeaderedContentControl
 {
-    private const int ExpandDurationMs = 200;
-    private const int CollapseDurationMs = 150;
+    private const int ExpandDurationMs = 120;
+    private const int CollapseDurationMs = 100;
 
     private Button? _toggleButton;
     private Border? _contentArea;

@@ -15,7 +15,8 @@ public static class CustomersModule
         NavigationPageRegistry pageRegistry)
     {
         pageRegistry.Map<CustomerManagementViewModel>(CustomerManagementPage)
-            .RequireFeature(CustomerManagementPage, FeatureFlags.Customers);
+            .RequireFeature(CustomerManagementPage, FeatureFlags.Customers)
+            .CachePage(CustomerManagementPage);
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<CustomerManagementViewModel>();
         return services;

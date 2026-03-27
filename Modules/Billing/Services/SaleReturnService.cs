@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Data;
 using StoreAssistantPro.Models;
 using StoreAssistantPro.Modules.Authentication.Services;
+using StoreAssistantPro.Modules.Billing.Events;
 
 namespace StoreAssistantPro.Modules.Billing.Services;
 
@@ -13,9 +15,17 @@ public class SaleReturnService(
     ICashRegisterService cashRegisterService,
     Func<IBillingService> _billingServiceFactory,
     IPerformanceMonitor perf,
-    IRegionalSettingsService regional) : ISaleReturnService
+    IRegionalSettingsService regional,
+    IEventBus eventBus) : ISaleReturnService
 {
     public async Task<SaleReturn> ProcessReturnAsync(SaleReturnDto dto, CancellationToken ct = default)
+    {
+        var saleReturn = await ProcessReturnCoreAsync(dto, ct).ConfigureAwait(false);
+        await PublishSalesDataChangedAsync("SaleReturnProcessed").ConfigureAwait(false);
+        return saleReturn;
+    }
+
+    private async Task<SaleReturn> ProcessReturnCoreAsync(SaleReturnDto dto, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(dto);
 
@@ -149,12 +159,13 @@ public class SaleReturnService(
         using var _ = perf.BeginScope("SaleReturnService.ExchangeAsync");
 
         // 1. Process the return (validates PIN, restores stock, creates credit note)
-        var saleReturn = await ProcessReturnAsync(dto.Return, ct);
+        var saleReturn = await ProcessReturnCoreAsync(dto.Return, ct).ConfigureAwait(false);
 
         // 2. Complete the new sale (stock deduction, invoice creation)
         // The calling VM can adjust CashTendered to account for the credit
         var billingService = GetBillingService();
-        var newSale = await billingService.CompleteSaleAsync(dto.NewSale, ct);
+        var newSale = await billingService.CompleteSaleAsync(dto.NewSale, ct).ConfigureAwait(false);
+        await PublishSalesDataChangedAsync("SaleExchangeCompleted").ConfigureAwait(false);
 
         return new ExchangeResult(saleReturn, newSale, saleReturn.RefundAmount);
     }
@@ -268,7 +279,11 @@ public class SaleReturnService(
 
         await auditService.LogAsync("NoBillReturn", "SaleReturn", saleReturn.Id.ToString(),
             null, null, null, $"No-bill return: Product {dto.ProductId}, Qty {dto.QuantityReturned}, Refund {dto.RefundAmount}", ct);
+        await PublishSalesDataChangedAsync("NoBillReturnProcessed").ConfigureAwait(false);
 
         return saleReturn;
     }
+
+    private Task PublishSalesDataChangedAsync(string reason)
+        => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

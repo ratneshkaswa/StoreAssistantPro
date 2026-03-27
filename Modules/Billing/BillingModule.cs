@@ -17,9 +17,11 @@ public static class BillingModule
         NavigationPageRegistry pageRegistry)
     {
         pageRegistry.Map<BillingViewModel>(BillingPage)
-            .RequireFeature(BillingPage, FeatureFlags.Billing);
+            .RequireFeature(BillingPage, FeatureFlags.Billing)
+            .CachePage(BillingPage);
         pageRegistry.Map<SaleHistoryViewModel>(SaleHistoryPage)
-            .RequireFeature(SaleHistoryPage, FeatureFlags.SaleHistory);
+            .RequireFeature(SaleHistoryPage, FeatureFlags.SaleHistory)
+            .CachePage(SaleHistoryPage);
         pageRegistry.Map<CashRegisterViewModel>(CashRegisterPage)
             .RequireFeature(CashRegisterPage, FeatureFlags.CashRegister);
         services.AddTransient<IBillingService, BillingService>();

@@ -17,6 +17,7 @@ public class SystemSettingsServiceTests : IDisposable
 
     private readonly IPerformanceMonitor _perf =
         new PerformanceMonitor(NullLogger<PerformanceMonitor>.Instance);
+    private readonly IReferenceDataCache _referenceDataCache = new ReferenceDataCache();
 
     private ISystemSettingsService CreateSut()
     {
@@ -35,7 +36,8 @@ public class SystemSettingsServiceTests : IDisposable
             factory,
             configuration,
             _perf,
-            NullLogger<SystemSettingsService>.Instance);
+            NullLogger<SystemSettingsService>.Instance,
+            _referenceDataCache);
     }
 
     [Fact]

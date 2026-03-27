@@ -10,8 +10,12 @@ namespace StoreAssistantPro.Modules.Customers.Services;
 public class CustomerService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : ICustomerService
+    IPerformanceMonitor perf,
+    IReferenceDataCache referenceDataCache) : ICustomerService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveCustomersCacheKey = "Customers.Active";
+
     public async Task<IReadOnlyList<Customer>> GetAllAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("CustomerService.GetAllAsync");
@@ -51,13 +55,20 @@ public class CustomerService(
     public async Task<IReadOnlyList<Customer>> GetActiveAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("CustomerService.GetActiveAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Customers
-            .AsNoTracking()
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Customer>(
+            ActiveCustomersCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Customers
+                    .AsNoTracking()
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<Customer>> SearchAsync(string query, CancellationToken ct = default)
@@ -134,6 +145,7 @@ public class CustomerService(
             CreatedDate = regional.Now
         });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCustomersCacheKey);
     }
 
     public async Task UpdateAsync(int id, CustomerDto dto, CancellationToken ct = default)
@@ -174,6 +186,7 @@ public class CustomerService(
         entity.CreditLimit = dto.CreditLimit;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCustomersCacheKey);
     }
 
     public async Task ToggleActiveAsync(int id, CancellationToken ct = default)
@@ -187,6 +200,7 @@ public class CustomerService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCustomersCacheKey);
     }
 
     public async Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)

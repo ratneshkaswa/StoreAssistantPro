@@ -241,26 +241,7 @@
                                     Value="1"/>
                             <Setter TargetName="Bd" Property="BorderBrush"
                                     Value="{StaticResource FluentStrokeFocus}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="1"
-                                                         Duration="{StaticResource FluentDurationNormal}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FocusIndicator"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="0"
-                                                         Duration="{StaticResource FluentDurationNormal}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
+                            <Setter TargetName="FocusIndicator" Property="Opacity" Value="1"/>
                         </Trigger>
                         <Trigger Property="Text" Value="">
                             <Setter TargetName="PART_ClearButton" Property="Visibility"
@@ -294,22 +275,28 @@
         </Setter>
     </Style>
 
-    <Style x:Key="TeachingTipTooltipStyle" TargetType="ToolTip"
-           BasedOn="{StaticResource SmartTooltipStyle}">
+    <Style x:Key="TeachingTipTooltipStyle" TargetType="ToolTip">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Background" Value="{StaticResource TooltipBackground}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource TooltipBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="12,8,12,12"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="MaxWidth" Value="{StaticResource TooltipMaxWidth}"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
                     <Grid x:Name="Root"
                           Margin="0,0,0,4"
-                          Opacity="0"
+                          Opacity="1"
                           UseLayoutRounding="True"
                           SnapsToDevicePixels="True"
-                          RenderTransformOrigin="0.5,0"
                           Effect="{StaticResource TooltipShadow}">
-                        <Grid.RenderTransform>
-                            <TranslateTransform Y="8"/>
-                        </Grid.RenderTransform>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="10"/>
                             <RowDefinition Height="Auto"/>
@@ -345,46 +332,6 @@
                             </Border>
                         </Border>
                     </Grid>
-                    <ControlTemplate.Triggers>
-                        <EventTrigger RoutedEvent="Opened">
-                            <BeginStoryboard x:Name="OpenStoryboard">
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Root"
-                                                     Storyboard.TargetProperty="Opacity"
-                                                     From="0"
-                                                     To="1"
-                                                     Duration="{StaticResource FluentDurationNormal}">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseOut"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                    <DoubleAnimation Storyboard.TargetName="Root"
-                                                     Storyboard.TargetProperty="RenderTransform.Y"
-                                                     From="6"
-                                                     To="0"
-                                                     Duration="{StaticResource FluentDurationNormal}">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseOut"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                        <EventTrigger RoutedEvent="Closed">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="Root"
-                                                     Storyboard.TargetProperty="Opacity"
-                                                     To="0"
-                                                     Duration="0:0:0.12">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseIn"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -652,12 +599,7 @@
                            FontSize="{StaticResource FontSizeBody}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                           RenderTransformOrigin="0.5,0.5">
-                    <TextBlock.RenderTransform>
-                        <RotateTransform x:Name="CommandSpinnerRotate" Angle="0"/>
-                    </TextBlock.RenderTransform>
-                </TextBlock>
+                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
             </Grid>
             <TextBlock x:Name="CommandLabel"
                        Text="{Binding}"
@@ -669,20 +611,6 @@
                          Value="True">
                 <Setter TargetName="CommandIcon" Property="Visibility" Value="Collapsed"/>
                 <Setter TargetName="CommandSpinner" Property="Visibility" Value="Visible"/>
-                <DataTrigger.EnterActions>
-                    <BeginStoryboard x:Name="CommandSpinnerStoryboard">
-                        <Storyboard RepeatBehavior="Forever">
-                            <DoubleAnimation Storyboard.TargetName="CommandSpinnerRotate"
-                                             Storyboard.TargetProperty="Angle"
-                                             From="0"
-                                             To="360"
-                                             Duration="0:0:0.9"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </DataTrigger.EnterActions>
-                <DataTrigger.ExitActions>
-                    <StopStoryboard BeginStoryboardName="CommandSpinnerStoryboard"/>
-                </DataTrigger.ExitActions>
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
@@ -696,33 +624,8 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
                          Value="True">
+                <Setter Property="Opacity" Value="1"/>
                 <Setter Property="IsHitTestVisible" Value="True"/>
-                <DataTrigger.EnterActions>
-                    <BeginStoryboard>
-                        <Storyboard FillBehavior="HoldEnd">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             To="1"
-                                             Duration="0:0:0.10">
-                                <DoubleAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </DataTrigger.EnterActions>
-                <DataTrigger.ExitActions>
-                    <BeginStoryboard>
-                        <Storyboard FillBehavior="HoldEnd">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             To="0"
-                                             Duration="0:0:0.10">
-                                <DoubleAnimation.EasingFunction>
-                                    <QuadraticEase EasingMode="EaseIn"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </DataTrigger.ExitActions>
             </DataTrigger>
             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
                          Value="True">
@@ -786,13 +689,7 @@
                             Padding="{TemplateBinding Padding}"
                             Effect="{TemplateBinding Effect}"
                             UseLayoutRounding="True"
-                            SnapsToDevicePixels="True"
-                            RenderTransformOrigin="0.5,0.5">
-                        <Border.RenderTransform>
-                            <ScaleTransform x:Name="FabScale"
-                                            ScaleX="1"
-                                            ScaleY="1"/>
-                        </Border.RenderTransform>
+                            SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                     </Border>
@@ -800,67 +697,11 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="FabBorder" Property="Background"
                                     Value="{StaticResource FluentAccentGradientHover}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationNormal}"/>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationNormal}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleRest}"
-                                                         Duration="{StaticResource FluentDurationNormal}"/>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleRest}"
-                                                         Duration="{StaticResource FluentDurationNormal}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="FabBorder" Property="Background"
                                     Value="{StaticResource FluentAccentGradientPressed}"/>
                             <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccentPressed}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScalePressed}"
-                                                         Duration="{StaticResource FluentDurationFast}"/>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScalePressed}"
-                                                         Duration="{StaticResource FluentDurationFast}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationFast}"/>
-                                        <DoubleAnimation Storyboard.TargetName="FabScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationFast}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="FabBorder" Property="Background"
@@ -1046,6 +887,15 @@
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
+    <!-- Hint / info text (below fields, footnotes) -->
+    <Style x:Key="HintTextStyle" TargetType="TextBlock">
+        <Setter Property="Visibility" Value="Collapsed"/>
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
+        <Setter Property="Margin" Value="{StaticResource HintTextTopSpacing}"/>
+    </Style>
+
     <Style x:Key="PageToolbarContentRowStyle" TargetType="WrapPanel">
         <Setter Property="Orientation" Value="Horizontal"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -1090,6 +940,45 @@
         <Setter Property="Orientation" Value="Horizontal"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="Margin" Value="{StaticResource FormActionBarSpacing}"/>
+    </Style>
+
+    <!-- Inline form card border (inherits FluentCard and shadow) -->
+    <Style x:Key="FormCardStyle" TargetType="Border"
+           BasedOn="{StaticResource FluentCardStyle}">
+        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
+        <Setter Property="Margin" Value="{StaticResource FieldGroupSpacing}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+        <Setter Property="Effect" Value="{StaticResource ElevationEffectBase}"/>
+    </Style>
+
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background"  Value="{StaticResource LayerFillColorDefault}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerMedium}"/>
+        <Setter Property="Padding"     Value="{StaticResource CardPadding}"/>
+        <Setter Property="Margin"      Value="{StaticResource CardMargin}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
+        <Setter Property="Effect"      Value="{StaticResource ElevationEffectCard}"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="h:CardHover.IsEnabled" Value="False"/>
+        <Setter Property="h:PressStateTracker.IsEnabled" Value="True"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+            </Trigger>
+            <Trigger Property="h:PressStateTracker.IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource ControlAltFillColorSecondary}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="InteractiveCardStyle" TargetType="Border"
+           BasedOn="{StaticResource CardStyle}">
+        <Setter Property="h:CardHover.IsEnabled" Value="True"/>
     </Style>
 
     <Style x:Key="AdminSectionCardStyle" TargetType="Border"
@@ -1219,6 +1108,16 @@
         <Setter Property="Padding" Value="8,6"/>
         <Setter Property="Margin" Value="0,0,0,4"/>
         <Setter Property="Effect" Value="{StaticResource ElevationEffectFlyout}"/>
+    </Style>
+
+    <Style x:Key="ReportListPrimaryTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
     </Style>
 
     <Style x:Key="SearchSuggestionPrimaryTextStyle" TargetType="TextBlock"
@@ -1661,16 +1560,6 @@
         <Setter Property="Margin" Value="0,4,0,4"/>
     </Style>
 
-    <Style x:Key="ReportListPrimaryTextStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
-        <Setter Property="Margin" Value="0"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-    </Style>
-
     <Style x:Key="ReportListSecondaryTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
@@ -1693,30 +1582,6 @@
         <Setter Property="Margin" Value="0"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-
-    <Style x:Key="CardStyle" TargetType="Border">
-        <Setter Property="Background"  Value="{StaticResource LayerFillColorDefault}"/>
-        <Setter Property="CornerRadius" Value="{StaticResource FluentCornerMedium}"/>
-        <Setter Property="Padding"     Value="{StaticResource CardPadding}"/>
-        <Setter Property="Margin"      Value="{StaticResource CardMargin}"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
-        <Setter Property="Effect"      Value="{StaticResource ElevationEffectCard}"/>
-        <Setter Property="UseLayoutRounding" Value="True"/>
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="h:CardHover.IsEnabled" Value="True"/>
-        <Setter Property="h:PressStateTracker.IsEnabled" Value="True"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
-            </Trigger>
-            <Trigger Property="h:PressStateTracker.IsPressed" Value="True">
-                <Setter Property="Background" Value="{StaticResource ControlAltFillColorSecondary}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource SubtleFillColorTertiary}"/>
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <!-- Setup page card -->
@@ -1887,16 +1752,6 @@
         </Setter>
     </Style>
 
-    <!-- Inline form card border (inherits FluentCard and shadow) -->
-    <Style x:Key="FormCardStyle" TargetType="Border"
-           BasedOn="{StaticResource FluentCardStyle}">
-        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
-        <Setter Property="Margin" Value="{StaticResource FieldGroupSpacing}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeDefault}"/>
-        <Setter Property="BorderThickness" Value="{StaticResource FluentBorderThicknessThin}"/>
-        <Setter Property="Effect" Value="{StaticResource ElevationEffectBase}"/>
-    </Style>
-
     <!-- Section panel card (list panels, detail panels) -->
     <Style x:Key="SectionCardStyle" TargetType="Border"
            BasedOn="{StaticResource FluentCardStyle}">
@@ -1949,15 +1804,6 @@
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{StaticResource FluentSuccess}"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
-    </Style>
-
-    <!-- Hint / info text (below fields, footnotes) -->
-    <Style x:Key="HintTextStyle" TargetType="TextBlock">
-        <Setter Property="Visibility" Value="Collapsed"/>
-        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}"/>
-        <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-        <Setter Property="Margin" Value="{StaticResource HintTextTopSpacing}"/>
     </Style>
 
     <Style x:Key="DirtyStateHintTextStyle" TargetType="TextBlock"
@@ -2074,7 +1920,7 @@
         <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
         <Setter Property="h:DataGridRightClickSelection.IsEnabled" Value="True"/>
         <Setter Property="h:DataGridEmptyState.IsEnabled" Value="True"/>
-        <Setter Property="h:DataGridSortTransition.IsEnabled" Value="True"/>
+        <Setter Property="h:DataGridSortTransition.IsEnabled" Value="False"/>
         <Setter Property="h:DataGridStarColumnSizing.IsEnabled" Value="True"/>
         <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
         <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
@@ -2125,6 +1971,16 @@
         <Setter Property="ColumnHeaderStyle" Value="{StaticResource AnalyticalReportDataGridColumnHeaderStyle}"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="AlternationCount" Value="2"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+        <Setter Property="VirtualizingPanel.CacheLength" Value="1,1"/>
+        <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
+        <Setter Property="EnableRowVirtualization" Value="True"/>
+        <Setter Property="EnableColumnVirtualization" Value="True"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserDeleteRows" Value="False"/>
         <Setter Property="CanUserResizeRows" Value="False"/>
@@ -2447,24 +2303,7 @@
                             <Setter TargetName="RowBg" Property="Background"
                                     Value="{StaticResource SubtleFillColorTertiary}"/>
                             <Setter TargetName="RowGrip" Property="Opacity" Value="0.7"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SelectionIndicator"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="1" Duration="0:0:0.15"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="SelectionIndicator"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         To="0" Duration="0:0:0.15"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
+                            <Setter TargetName="SelectionIndicator" Property="Opacity" Value="1"/>
                         </Trigger>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=(h:DataGridMultiSelect.IsEnabled)}"
                                      Value="True">
@@ -2601,15 +2440,14 @@
     <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â
          PAGE VIEW FADE-IN
 
-         Every UserControl (page view) automatically fades in on
-         Loaded via the Motion.PageFadeIn attached behavior.
-         Duration: FluentDurationPageFade (150 ms), no movement,
-         zero layout cost (Opacity is GPU-composited).
+         Speed-first navigation keeps page switches instant by default.
+         Views that genuinely benefit from an entrance effect can opt-in
+         explicitly with Motion.PageFadeIn.
 
-         To opt-out on a specific view: h:Motion.PageFadeIn="False"
+         To opt-in on a specific view: h:Motion.PageFadeIn="True"
          ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â -->
     <Style TargetType="UserControl">
-        <Setter Property="h:Motion.PageFadeIn" Value="True"/>
+        <Setter Property="h:Motion.PageFadeIn" Value="False"/>
     </Style>
 
 
@@ -2664,11 +2502,7 @@
                             Effect="{StaticResource TooltipShadow}"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
-                            Opacity="0"
-                            RenderTransformOrigin="0.5,0">
-                        <Border.RenderTransform>
-                            <TranslateTransform Y="4"/>
-                        </Border.RenderTransform>
+                            Opacity="1">
 
                         <!-- Inner highlight ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 1 px white inset (Fluent smoke) -->
                         <Border CornerRadius="{StaticResource TooltipCornerRadius}"
@@ -2684,49 +2518,6 @@
                         </Border>
                     </Border>
 
-                    <ControlTemplate.Triggers>
-                        <!-- Entrance: fade-in + slide-up -->
-                        <EventTrigger RoutedEvent="Opened">
-                            <BeginStoryboard x:Name="OpenStoryboard">
-                                <Storyboard>
-                                    <DoubleAnimation
-                                        Storyboard.TargetName="Root"
-                                        Storyboard.TargetProperty="Opacity"
-                                        From="0" To="1"
-                                        Duration="{StaticResource FluentDurationNormal}">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseOut"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                    <DoubleAnimation
-                                        Storyboard.TargetName="Root"
-                                        Storyboard.TargetProperty="RenderTransform.Y"
-                                        From="4" To="0"
-                                        Duration="{StaticResource FluentDurationNormal}">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseOut"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-
-                        <!-- Exit: quick fade-out -->
-                        <EventTrigger RoutedEvent="Closed">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                        Storyboard.TargetName="Root"
-                                        Storyboard.TargetProperty="Opacity"
-                                        To="0" Duration="0:0:0.12">
-                                        <DoubleAnimation.EasingFunction>
-                                            <CubicEase EasingMode="EaseIn"/>
-                                        </DoubleAnimation.EasingFunction>
-                                    </DoubleAnimation>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

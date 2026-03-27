@@ -9,8 +9,13 @@ namespace StoreAssistantPro.Modules.Categories.Services;
 public class CategoryService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : ICategoryService
+    IPerformanceMonitor perf,
+    IReferenceDataCache referenceDataCache) : ICategoryService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveCategoryTypesCacheKey = "Categories.Types.Active";
+    private const string ActiveCategoriesCacheKey = "Categories.Active";
+
     // ── Category Types ───────────────────────────────────────────────
 
     public async Task<IReadOnlyList<CategoryType>> GetAllTypesAsync(CancellationToken ct = default)
@@ -28,13 +33,20 @@ public class CategoryService(
     public async Task<IReadOnlyList<CategoryType>> GetActiveTypesAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("CategoryService.GetActiveTypesAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.CategoryTypes
-            .AsNoTracking()
-            .Where(t => t.IsActive)
-            .OrderBy(t => t.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<CategoryType>(
+            ActiveCategoryTypesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.CategoryTypes
+                    .AsNoTracking()
+                    .Where(t => t.IsActive)
+                    .OrderBy(t => t.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task CreateTypeAsync(string name, CancellationToken ct = default)
@@ -50,6 +62,7 @@ public class CategoryService(
 
         context.CategoryTypes.Add(new CategoryType { Name = trimmed, IsActive = true, CreatedDate = regional.Now });
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCategoryTypesCacheKey);
     }
 
     public async Task UpdateTypeAsync(int id, string name, CancellationToken ct = default)
@@ -68,6 +81,7 @@ public class CategoryService(
 
         entity.Name = trimmed;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCategoryTypesCacheKey);
     }
 
     public async Task ToggleTypeActiveAsync(int id, CancellationToken ct = default)
@@ -80,6 +94,7 @@ public class CategoryService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCategoryTypesCacheKey);
     }
 
     // ── Categories ───────────────────────────────────────────────────
@@ -99,14 +114,21 @@ public class CategoryService(
     public async Task<IReadOnlyList<Category>> GetActiveAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("CategoryService.GetActiveAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Categories
-            .AsNoTracking()
-            .Include(c => c.CategoryType)
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Category>(
+            ActiveCategoriesCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Categories
+                    .AsNoTracking()
+                    .Include(c => c.CategoryType)
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<Category>> GetByTypeAsync(int categoryTypeId, CancellationToken ct = default)
@@ -158,6 +180,7 @@ public class CategoryService(
         });
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCategoriesCacheKey);
     }
 
     public async Task UpdateAsync(int id, CategoryDto dto, CancellationToken ct = default)
@@ -178,6 +201,7 @@ public class CategoryService(
         entity.Name = trimmed;
         entity.CategoryTypeId = dto.CategoryTypeId;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCategoriesCacheKey);
     }
 
     public async Task ToggleActiveAsync(int id, CancellationToken ct = default)
@@ -190,6 +214,7 @@ public class CategoryService(
 
         entity.IsActive = !entity.IsActive;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveCategoriesCacheKey);
     }
 
     public async Task<PagedResult<Category>> GetPagedAsync(PagedQuery query, string? search = null, CancellationToken ct = default)

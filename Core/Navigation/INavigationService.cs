@@ -10,6 +10,8 @@ public interface INavigationService : INotifyPropertyChanged
     void NavigateTo<TViewModel>() where TViewModel : ObservableObject;
     void NavigateTo(string pageKey);
     void RegisterPage<TViewModel>(string pageKey) where TViewModel : ObservableObject;
+    void CachePage(string pageKey);
+    void InvalidatePageCache(string pageKey);
 
     /// <summary>
     /// Associates a page key with a feature flag so <see cref="NavigateTo(string)"/>

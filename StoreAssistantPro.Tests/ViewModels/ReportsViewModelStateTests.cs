@@ -1,4 +1,5 @@
 using NSubstitute;
+using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Printing;
 using StoreAssistantPro.Modules.Reports.Services;
 using StoreAssistantPro.Modules.Reports.ViewModels;
@@ -12,6 +13,7 @@ namespace StoreAssistantPro.Tests.ViewModels;
 public sealed class ReportsViewModelStateTests : IDisposable
 {
     private readonly IReportsService _reportsService = Substitute.For<IReportsService>();
+    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
 
     public ReportsViewModelStateTests()
     {
@@ -80,7 +82,8 @@ public sealed class ReportsViewModelStateTests : IDisposable
         _reportsService,
         Substitute.For<IPrintReportService>(),
         Substitute.For<IPrintPreviewService>(),
-        Substitute.For<IAuditService>());
+        Substitute.For<IAuditService>(),
+        _eventBus);
 
     private void ConfigureDefaultReportsResponses()
     {

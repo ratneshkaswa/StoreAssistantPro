@@ -7,56 +7,77 @@ public sealed class ResponsiveContentTransitionStandardsTests
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void ResponsiveContentHost_Should_Use_Clipped_Snapshot_Overlay()
+    public void ResponsiveContentHost_Should_Use_Static_Scroll_Host_Template()
     {
         var app = File.ReadAllText(Path.Combine(SolutionRoot, "App.xaml"));
 
-        Assert.Contains("x:Name=\"PART_TransitionHost\"", app, StringComparison.Ordinal);
-        Assert.Contains("ClipToBounds=\"True\"", app, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"PART_PreviousSnapshot\"", app, StringComparison.Ordinal);
-        Assert.Contains("Source=\"{TemplateBinding PreviousSnapshot}\"", app, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"PART_CurrentPresenter\"", app, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"PART_ScrollViewer\"", app, StringComparison.Ordinal);
+        Assert.Contains("CanContentScroll=\"False\"", app, StringComparison.Ordinal);
         Assert.Contains("Content=\"{TemplateBinding Content}\"", app, StringComparison.Ordinal);
+        Assert.DoesNotContain("PART_TransitionHost", app, StringComparison.Ordinal);
+        Assert.DoesNotContain("PART_PreviousSnapshot", app, StringComparison.Ordinal);
+        Assert.DoesNotContain("PART_CurrentPresenter", app, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ResponsiveContentControl_Should_Animate_Snapshot_Page_Exit_With_Shared_Tokens()
+    public void ResponsiveContentControl_Should_Be_A_Static_Scroll_Aware_Content_Host()
     {
         var controlCode = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Controls", "ResponsiveContentControl.cs"));
-        var designSystem = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
 
-        Assert.Contains("PreviousSnapshotProperty", controlCode, StringComparison.Ordinal);
-        Assert.Contains("CaptureCurrentSnapshot", controlCode, StringComparison.Ordinal);
-        Assert.Contains("RenderTargetBitmap", controlCode, StringComparison.Ordinal);
-        Assert.Contains("FluentDurationPageExit", controlCode, StringComparison.Ordinal);
-        Assert.Contains("MotionSlideOffsetExitSmall", controlCode, StringComparison.Ordinal);
-        Assert.Contains("TranslateTransform.YProperty", controlCode, StringComparison.Ordinal);
-        Assert.Contains("PreviousSnapshot = snapshot;", controlCode, StringComparison.Ordinal);
-        Assert.Contains("PreviousSnapshot = null;", controlCode, StringComparison.Ordinal);
-
-        Assert.Contains("<Duration x:Key=\"FluentDurationPageExit\">0:0:0.10</Duration>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<sys:Double x:Key=\"MotionSlideOffsetExitSmall\">-8</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("VerticalScrollOffsetProperty", controlCode, StringComparison.Ordinal);
+        Assert.Contains("PART_ScrollViewer", controlCode, StringComparison.Ordinal);
+        Assert.Contains("ScrollOffsetChanged", controlCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("PreviousSnapshotProperty", controlCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("TransitionsEnabledProperty", controlCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("RenderTargetBitmap", controlCode, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ResponsiveContentControl_Should_Crossfade_New_Content_During_View_Switches()
+    public void ResponsiveContentControl_Should_Reset_Scroll_Position_On_Content_Change()
     {
         var controlCode = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Controls", "ResponsiveContentControl.cs"));
+
+        Assert.Contains("_scrollViewer?.ScrollToTop();", controlCode, StringComparison.Ordinal);
+        Assert.Contains("VerticalScrollOffset = 0;", controlCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("StartCurrentEnterTransition", controlCode, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainShell_Should_Not_Need_Transition_Disablement_When_Host_Is_Static()
+    {
+        var controlCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "ResponsiveContentControl.cs"));
+        var mainWindowCodeBehind = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
+
+        Assert.DoesNotContain("TransitionsEnabledProperty", controlCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("TransitionsEnabled", controlCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShellContentHost.TransitionsEnabled = false;", mainWindowCodeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DesignSystem_Should_Use_Speed_First_Motion_Tokens()
+    {
         var designSystem = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
 
-        Assert.Contains("StartCurrentEnterTransition", controlCode, StringComparison.Ordinal);
-        Assert.Contains("FluentDurationViewSwitchEnter", controlCode, StringComparison.Ordinal);
-        Assert.Contains("FluentDurationViewSwitchOverlap", controlCode, StringComparison.Ordinal);
-        Assert.Contains("_currentPresenter.Opacity = 0;", controlCode, StringComparison.Ordinal);
-        Assert.Contains("BeginTime = overlap", controlCode, StringComparison.Ordinal);
-        Assert.Contains("CompleteCurrentEnter", controlCode, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationFast\">0:0:0.05</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationNormal\">0:0:0.10</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationSlow\">0:0:0.14</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationPageFade\">0:0:0.14</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"MotionScaleHoverFrom\">0.992</sys:Double>", designSystem, StringComparison.Ordinal);
+    }
 
-        Assert.Contains("<Duration x:Key=\"FluentDurationViewSwitchEnter\">0:0:0.15</Duration>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<Duration x:Key=\"FluentDurationViewSwitchOverlap\">0:0:0.05</Duration>", designSystem, StringComparison.Ordinal);
+    [Fact]
+    public void Shared_UserControl_Style_Should_Keep_Page_Fade_Off_By_Default()
+    {
+        var globalStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
+
+        Assert.Contains("<Style TargetType=\"UserControl\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"h:Motion.PageFadeIn\" Value=\"False\"/>", globalStyles, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

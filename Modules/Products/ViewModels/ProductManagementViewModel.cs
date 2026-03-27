@@ -20,6 +20,7 @@ public partial class ProductManagementViewModel(
     IRegionalSettingsService regional,
     ProductContextHolder productContextHolder) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private List<Product> _allProducts = [];
     private bool _isRestoringViewState;
     private bool _isHydratingEditor;
@@ -238,10 +239,9 @@ public partial class ProductManagementViewModel(
     });
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
-    {
-        await ReloadProductsAsync(ct);
-    });
+    private Task LoadAsync() => LoadOnActivateAsync(
+        async ct => await ReloadProductsAsync(ct),
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private void NewProduct()
@@ -517,6 +517,7 @@ public partial class ProductManagementViewModel(
         SelectedProduct = selectedProductId.HasValue
             ? Products.FirstOrDefault(p => p.Id == selectedProductId.Value)
             : null;
+        MarkLoadCompleted();
     }
 
     private void RestoreViewState()

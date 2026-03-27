@@ -12,7 +12,7 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class ExpandableTextBlock : Control
 {
-    private const int ToggleDurationMs = 180;
+    private const int ToggleDurationMs = 120;
 
     private Border? _contentHost;
     private TextBlock? _textBlock;

@@ -7,7 +7,7 @@ public sealed class LoadingSkeletonStandardsTests
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void LoadingOverlay_Should_Render_Shimmer_Skeleton_Surface()
+    public void LoadingOverlay_Should_Render_Static_Skeleton_Surface_Without_Shimmer()
     {
         var fluentTheme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
@@ -19,8 +19,9 @@ public sealed class LoadingSkeletonStandardsTests
         Assert.Contains("<Style TargetType=\"{x:Type controls:LoadingOverlay}\">", fluentTheme, StringComparison.Ordinal);
         Assert.Contains("SkeletonPlaceholderBrush", designSystem, StringComparison.Ordinal);
         Assert.Contains("SkeletonPlaceholderSecondaryBrush", designSystem, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"SkeletonSheenTransform\"", fluentTheme, StringComparison.Ordinal);
-        Assert.Contains("RepeatBehavior=\"Forever\"", fluentTheme, StringComparison.Ordinal);
+        Assert.DoesNotContain("SkeletonSheenTransform", fluentTheme, StringComparison.Ordinal);
+        Assert.DoesNotContain("LoadingOverlaySheenStoryboard", fluentTheme, StringComparison.Ordinal);
+        Assert.DoesNotContain("RepeatBehavior=\"Forever\"", fluentTheme, StringComparison.Ordinal);
         Assert.Contains("Preparing content", loadingOverlay, StringComparison.Ordinal);
     }
 

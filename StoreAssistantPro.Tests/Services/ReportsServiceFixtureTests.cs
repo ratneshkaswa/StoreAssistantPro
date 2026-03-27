@@ -1,9 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
-using StoreAssistantPro.Modules.Expenses.Services;
 using StoreAssistantPro.Modules.Reports.Services;
 using StoreAssistantPro.Tests.Helpers;
 
@@ -12,7 +10,7 @@ namespace StoreAssistantPro.Tests.Services;
 public sealed class ReportsServiceFixtureTests : IDisposable
 {
     private readonly SqliteDbContextFactory _dbFactory = new();
-    private readonly IExpenseService _expenseService = Substitute.For<IExpenseService>();
+    private readonly IReferenceDataCache _cache = new ReferenceDataCache();
     private readonly IPerformanceMonitor _perf =
         new PerformanceMonitor(NullLogger<PerformanceMonitor>.Instance);
 
@@ -82,7 +80,7 @@ public sealed class ReportsServiceFixtureTests : IDisposable
             await seed.SaveChangesAsync();
         }
 
-        var sut = new ReportsService(_dbFactory, _expenseService, _perf);
+        var sut = new ReportsService(_dbFactory, _perf, _cache);
 
         var summary = await sut.GetDailySalesSummaryAsync(reportDate);
 
@@ -167,15 +165,7 @@ public sealed class ReportsServiceFixtureTests : IDisposable
             await seed.SaveChangesAsync();
         }
 
-        _expenseService.GetMonthlyExpenseReportAsync(2026, 3, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new MonthlyExpenseReport(
-                2026,
-                3,
-                40m,
-                1,
-                [new CategoryExpenseBreakdown("Rent", 40m, 1)])));
-
-        var sut = new ReportsService(_dbFactory, _expenseService, _perf);
+        var sut = new ReportsService(_dbFactory, _perf, _cache);
 
         var gross = await sut.GetGrossProfitReportAsync(from, to);
         var net = await sut.GetNetProfitReportAsync(from, to);
@@ -226,7 +216,7 @@ public sealed class ReportsServiceFixtureTests : IDisposable
             await seed.SaveChangesAsync();
         }
 
-        var sut = new ReportsService(_dbFactory, _expenseService, _perf);
+        var sut = new ReportsService(_dbFactory, _perf, _cache);
 
         var summary = await sut.GetSalesByPaymentMethodAsync(from, to);
 
@@ -245,6 +235,53 @@ public sealed class ReportsServiceFixtureTests : IDisposable
                 Assert.Equal(50m, upi.TotalAmount);
                 Assert.Equal(25m, upi.Percentage);
             });
+    }
+
+    [Fact]
+    public async Task InvalidateCache_ShouldForceReportsToSeeFreshSalesData()
+    {
+        var reportDate = new DateTime(2026, 3, 26);
+
+        await using (var seed = _dbFactory.CreateContext())
+        {
+            seed.Sales.Add(new Sale
+            {
+                InvoiceNumber = "INV-CACHE-001",
+                SaleDate = reportDate.AddHours(9),
+                TotalAmount = 100m,
+                PaymentMethod = "Cash",
+                IdempotencyKey = Guid.NewGuid()
+            });
+
+            await seed.SaveChangesAsync();
+        }
+
+        var sut = new ReportsService(_dbFactory, _perf, _cache);
+
+        var first = await sut.GetDailySalesSummaryAsync(reportDate);
+
+        await using (var mutate = _dbFactory.CreateContext())
+        {
+            mutate.Sales.Add(new Sale
+            {
+                InvoiceNumber = "INV-CACHE-002",
+                SaleDate = reportDate.AddHours(10),
+                TotalAmount = 50m,
+                PaymentMethod = "UPI",
+                IdempotencyKey = Guid.NewGuid()
+            });
+
+            await mutate.SaveChangesAsync();
+        }
+
+        var cached = await sut.GetDailySalesSummaryAsync(reportDate);
+        sut.InvalidateCache();
+        var refreshed = await sut.GetDailySalesSummaryAsync(reportDate);
+
+        Assert.Equal(1, first.SaleCount);
+        Assert.Equal(1, cached.SaleCount);
+        Assert.Equal(2, refreshed.SaleCount);
+        Assert.Equal(150m, refreshed.TotalSales);
     }
 
     public void Dispose()

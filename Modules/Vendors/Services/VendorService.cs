@@ -10,8 +10,12 @@ namespace StoreAssistantPro.Modules.Vendors.Services;
 public class VendorService(
     IDbContextFactory<AppDbContext> contextFactory,
     IRegionalSettingsService regional,
-    IPerformanceMonitor perf) : IVendorService
+    IPerformanceMonitor perf,
+    IReferenceDataCache referenceDataCache) : IVendorService
 {
+    private static readonly TimeSpan ReferenceDataTtl = TimeSpan.FromMinutes(5);
+    private const string ActiveVendorsCacheKey = "Vendors.Active";
+
     public async Task<IReadOnlyList<Vendor>> GetAllAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("VendorService.GetAllAsync");
@@ -81,13 +85,20 @@ public class VendorService(
     public async Task<IReadOnlyList<Vendor>> GetActiveAsync(CancellationToken ct = default)
     {
         using var _ = perf.BeginScope("VendorService.GetActiveAsync");
-        await using var context = await contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-        return await context.Vendors
-            .AsNoTracking()
-            .Where(v => v.IsActive)
-            .OrderBy(v => v.Name)
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+        return await referenceDataCache.GetOrCreateAsync<Vendor>(
+            ActiveVendorsCacheKey,
+            async innerCt =>
+            {
+                await using var context = await contextFactory.CreateDbContextAsync(innerCt).ConfigureAwait(false);
+                return await context.Vendors
+                    .AsNoTracking()
+                    .Where(v => v.IsActive)
+                    .OrderBy(v => v.Name)
+                    .ToListAsync(innerCt)
+                    .ConfigureAwait(false);
+            },
+            ReferenceDataTtl,
+            ct).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<Vendor>> SearchAsync(string query, CancellationToken ct = default)
@@ -170,6 +181,7 @@ public class VendorService(
 
         context.Vendors.Add(entity);
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveVendorsCacheKey);
     }
 
     public async Task UpdateAsync(int id, VendorDto dto, CancellationToken ct = default)
@@ -206,6 +218,7 @@ public class VendorService(
         entity.ModifiedDate = regional.Now;
 
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveVendorsCacheKey);
     }
 
     public async Task ToggleActiveAsync(int id, CancellationToken ct = default)
@@ -219,6 +232,7 @@ public class VendorService(
         entity.IsActive = !entity.IsActive;
         entity.ModifiedDate = regional.Now;
         await context.SaveChangesAsync(ct).ConfigureAwait(false);
+        referenceDataCache.Invalidate(ActiveVendorsCacheKey);
     }
 
     public async Task<int> ImportBulkAsync(IReadOnlyList<Dictionary<string, string>> rows, CancellationToken ct = default)
