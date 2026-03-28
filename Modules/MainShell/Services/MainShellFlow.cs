@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Modules.MainShell.ViewModels;
@@ -18,7 +19,18 @@ public class MainShellFlow(
             var mainVm = serviceProvider.GetRequiredService<MainViewModel>();
             mainWindow.DataContext = mainVm;
             await mainVm.PrepareStartupAsync();
-            mainWindow.Show();
+
+            Application.Current.MainWindow = mainWindow;
+
+            if (!mainWindow.IsVisible)
+                mainWindow.Show();
+
+            if (mainWindow.WindowState == WindowState.Minimized)
+                mainWindow.WindowState = WindowState.Normal;
+
+            mainWindow.WindowState = WindowState.Maximized;
+            mainWindow.Activate();
+            mainWindow.Focus();
         }
         catch (Exception ex)
         {

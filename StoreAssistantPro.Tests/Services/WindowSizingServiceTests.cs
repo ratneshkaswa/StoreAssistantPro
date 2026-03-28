@@ -75,6 +75,25 @@ public sealed class WindowSizingServiceTests
         });
     }
 
+    [Fact]
+    public void ConfigureMainWindow_Should_Open_Maximized_And_NonResizable()
+    {
+        RunOnStaThread(() =>
+        {
+            var service = new WindowSizingService();
+            var window = new TestWindow();
+            PrepareWindow(window);
+
+            service.ConfigureMainWindow(window);
+
+            Assert.True(window.ShowActivated);
+            Assert.Equal(SizeToContent.Manual, window.SizeToContent);
+            Assert.Equal(WindowStartupLocation.CenterScreen, window.WindowStartupLocation);
+            Assert.Equal(ResizeMode.NoResize, window.ResizeMode);
+            Assert.Equal(WindowState.Maximized, window.WindowState);
+        });
+    }
+
     private static void RunOnStaThread(Action action)
         => WpfTestApplication.Run(() =>
         {
