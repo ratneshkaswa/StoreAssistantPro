@@ -21,7 +21,7 @@ public class WindowSizingService : IWindowSizingService
         window.SizeToContent = SizeToContent.Manual;
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         window.ResizeMode = ResizeMode.NoResize;
-        window.WindowState = WindowState.Maximized;
+        ApplyMainWindowSizing(window);
         AttachVisibilityGuard(window);
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;
@@ -81,7 +81,20 @@ public class WindowSizingService : IWindowSizingService
         if (_mainWindow is null)
             return;
 
-        _mainWindow.WindowState = WindowState.Maximized;
+        ApplyMainWindowSizing(_mainWindow);
+    }
+
+    private static void ApplyMainWindowSizing(Window window)
+    {
+        var workArea = GetWorkArea(window);
+
+        window.WindowState = WindowState.Normal;
+        window.MaxWidth = workArea.Width;
+        window.MaxHeight = workArea.Height;
+        window.Width = workArea.Width;
+        window.Height = workArea.Height;
+        window.Left = workArea.Left;
+        window.Top = workArea.Top;
     }
 
     public void ConfigurePrimaryWindow(Window window)

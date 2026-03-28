@@ -28,7 +28,6 @@ public class MainShellFlow(
             if (mainWindow.WindowState == WindowState.Minimized)
                 mainWindow.WindowState = WindowState.Normal;
 
-            mainWindow.WindowState = WindowState.Maximized;
             mainWindow.Activate();
             mainWindow.Focus();
         }
