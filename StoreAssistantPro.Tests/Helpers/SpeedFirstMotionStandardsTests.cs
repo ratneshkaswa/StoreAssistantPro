@@ -44,7 +44,7 @@ public sealed class SpeedFirstMotionStandardsTests
     }
 
     [Fact]
-    public void Pos_Buttons_And_Navigation_Toggle_Should_Use_Static_State_Changes()
+    public void Pos_Buttons_And_Top_Shell_Quick_Actions_Should_Use_Static_State_Changes()
     {
         var posStyles = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml"));
@@ -69,11 +69,10 @@ public sealed class SpeedFirstMotionStandardsTests
         Assert.DoesNotContain("MotionButtonScale", toolbarLinkStyle, StringComparison.Ordinal);
         Assert.DoesNotContain("BeginStoryboard", toolbarLinkStyle, StringComparison.Ordinal);
 
-        Assert.Contains("<Style x:Key=\"NavigationRailToggleButtonStyle\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("<Style x:Key=\"QuickActionOverflowButtonStyle\"", mainWindow, StringComparison.Ordinal);
+        Assert.DoesNotContain("NavigationRailToggleButtonStyle", mainWindow, StringComparison.Ordinal);
         Assert.DoesNotContain("BeginStoryboard", mainWindow, StringComparison.Ordinal);
         Assert.DoesNotContain("RotateTransform", mainWindow, StringComparison.Ordinal);
-        Assert.Contains("<Setter TargetName=\"HamburgerGlyph\" Property=\"Opacity\" Value=\"0\"/>", mainWindow, StringComparison.Ordinal);
-        Assert.Contains("<Setter TargetName=\"BackGlyph\" Property=\"Opacity\" Value=\"1\"/>", mainWindow, StringComparison.Ordinal);
     }
 
     [Fact]

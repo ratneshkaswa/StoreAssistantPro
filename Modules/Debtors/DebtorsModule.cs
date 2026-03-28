@@ -16,6 +16,7 @@ public static class DebtorsModule
     {
         pageRegistry.Map<DebtorManagementViewModel>(DebtorManagementPage)
             .RequireFeature(DebtorManagementPage, FeatureFlags.Debtors);
+        pageRegistry.CachePage(DebtorManagementPage);
         services.AddTransient<IDebtorService, DebtorService>();
         services.AddTransient<DebtorManagementViewModel>();
         return services;

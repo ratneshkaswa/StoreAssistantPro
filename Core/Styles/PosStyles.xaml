@@ -353,6 +353,8 @@
     <Style x:Key="SemanticStatusPillStyle" TargetType="Border"
            BasedOn="{StaticResource StatusBadgePillStyle}">
         <Setter Property="Background" Value="{StaticResource LayerFillColorSecondary}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="8,3"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Pending">
@@ -392,13 +394,16 @@
                 <Setter Property="Background" Value="{StaticResource FluentSuccessBackground}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Cancelled">
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="{StaticResource FluentError}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Offline">
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="{StaticResource FluentError}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Disconnected">
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="{StaticResource FluentError}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -416,7 +421,7 @@
 
     <Style x:Key="SemanticStatusPillTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -478,7 +483,7 @@
 
     <Style x:Key="SemanticTagChipTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -572,6 +577,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource FluentCornerSmall}"
                             Padding="{TemplateBinding Padding}"
                             UseLayoutRounding="True"
@@ -580,11 +587,14 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+                            <Setter TargetName="Bd" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource FluentError}"/>
+                            <Setter Property="BorderThickness" Value="1"/>
                             <Setter Property="Foreground" Value="{StaticResource FluentError}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{StaticResource FluentError}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource FluentError}"/>
                             <Setter Property="Foreground" Value="{StaticResource FluentTextOnAccent}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>

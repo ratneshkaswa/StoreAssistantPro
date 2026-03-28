@@ -19,6 +19,7 @@ public partial class QuotationViewModel(
     IDialogService dialogService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isRestoringViewState;
 
     // ── List ──
@@ -111,7 +112,7 @@ public partial class QuotationViewModel(
     // ── Load ──
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         RestoreViewState();
         var customersTask = customerService.GetActiveAsync(ct);
@@ -127,7 +128,8 @@ public partial class QuotationViewModel(
 
         await ReloadAsync(ct);
         EnsureSeedLine();
-    });
+    },
+        NavigationFreshnessWindow);
 
     // ── Search (#353) ──
 
@@ -374,6 +376,8 @@ public partial class QuotationViewModel(
 /// <summary>Mutable input row for the quotation creation form.</summary>
 public partial class QuotationLineInput : ObservableObject
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     [ObservableProperty]
     public partial int ProductId { get; set; }
 

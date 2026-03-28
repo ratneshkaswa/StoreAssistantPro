@@ -41,7 +41,7 @@ public partial class StyleComplianceTests
     private const int FormatStringBaseline = 71;
 
     /// <summary>Input controls missing AutomationProperties.Name. Lower as you add labels.</summary>
-    private const int AccessibilityBaseline = 37;
+    private const int AccessibilityBaseline = 38;
 
     private readonly ITestOutputHelper _output;
 

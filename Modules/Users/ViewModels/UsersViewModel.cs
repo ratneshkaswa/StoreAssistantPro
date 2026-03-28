@@ -14,6 +14,8 @@ public partial class UsersViewModel(
     IUserService userService,
     ICommandBus commandBus) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     [NotifyCanExecuteChangedFor(nameof(ChangePinCommand))]
     [ObservableProperty]
     public partial ObservableCollection<UserCredential> Users { get; set; } = [];
@@ -48,11 +50,11 @@ public partial class UsersViewModel(
     }
 
     [RelayCommand]
-    private Task LoadUsersAsync() => RunLoadAsync(async ct =>
+    private Task LoadUsersAsync() => LoadOnActivateAsync(async ct =>
     {
         var users = await userService.GetAllUsersAsync(ct);
         Users = new ObservableCollection<UserCredential>(users);
-    });
+    }, NavigationFreshnessWindow);
 
     [RelayCommand(CanExecute = nameof(CanChangePin))]
     private Task ChangePinAsync() => RunAsync(async ct =>
@@ -103,15 +105,13 @@ public partial class UsersViewModel(
     // ── Export (#288) ──
 
     [RelayCommand]
-    private void ExportUsersCsv()
+    private Task ExportUsersCsv() => RunAsync(async ct =>
     {
-        if (Users.Count == 0) return;
-        var rows = Users.Select(u => new
-        {
-            u.Id, UserType = u.UserType.ToString(),
-            u.FailedAttempts, u.LockoutEndTime
-        });
+        if (Users.Count == 0)
+            return;
+
+        var rows = await userService.ExportUsersAsync(ct);
         if (CsvExporter.Export(rows, "Users.csv"))
             SuccessMessage = "User data exported.";
-    }
+    });
 }

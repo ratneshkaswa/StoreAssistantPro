@@ -16,6 +16,7 @@ public static class QuotationsModule
     {
         pageRegistry.Map<QuotationViewModel>(QuotationsPage)
             .RequireFeature(QuotationsPage, FeatureFlags.Quotations);
+        pageRegistry.CachePage(QuotationsPage);
         services.AddTransient<IQuotationService, QuotationService>();
         services.AddTransient<QuotationViewModel>();
         return services;

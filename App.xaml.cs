@@ -197,10 +197,7 @@ public partial class App : Application
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
             {
                 foreach (Window window in Windows)
-                {
                     window.InvalidateVisual();
-                    window.UpdateLayout();
-                }
             }));
 
             e.Handled = true;

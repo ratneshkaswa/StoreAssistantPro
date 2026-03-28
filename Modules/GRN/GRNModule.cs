@@ -16,6 +16,7 @@ public static class GRNModule
     {
         pageRegistry.Map<GRNViewModel>(GRNPage)
             .RequireFeature(GRNPage, FeatureFlags.GRN);
+        pageRegistry.CachePage(GRNPage);
         services.AddTransient<IGRNService, GRNService>();
         services.AddTransient<GRNViewModel>();
         return services;

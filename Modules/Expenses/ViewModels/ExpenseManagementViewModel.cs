@@ -14,6 +14,8 @@ public partial class ExpenseManagementViewModel(
     IExpenseService expenseService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isRestoringViewState;
 
     public string CurrencySymbol => regional.CurrencySymbol;
@@ -127,13 +129,14 @@ public partial class ExpenseManagementViewModel(
     private int? _editingId;
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         RestoreViewState();
         var categories = await expenseService.GetCategoriesAsync(ct);
         ExpenseCategoryList = new ObservableCollection<ExpenseCategory>(categories);
         await ReloadAsync(ct);
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>

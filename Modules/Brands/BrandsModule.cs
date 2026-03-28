@@ -16,6 +16,7 @@ public static class BrandsModule
     {
         pageRegistry.Map<BrandManagementViewModel>(BrandManagementPage)
             .RequireFeature(BrandManagementPage, FeatureFlags.Brands);
+        pageRegistry.CachePage(BrandManagementPage);
         services.AddTransient<IBrandService, BrandService>();
         services.AddTransient<BrandManagementViewModel>();
         return services;

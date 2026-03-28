@@ -108,7 +108,7 @@ public class UserService(
         return users.Select(u => new UserExportRow(
             u.UserType.ToString(),
             u.DisplayName,
-            u.LockoutEndTime == null || u.LockoutEndTime < DateTime.UtcNow,
+            true,
             u.Email,
             u.Phone)).ToList();
     }

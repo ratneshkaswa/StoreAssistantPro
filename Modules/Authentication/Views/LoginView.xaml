@@ -19,6 +19,11 @@
             <Setter Property="MinHeight" Value="{StaticResource LoginKeypadButtonMinSize}"/>
         </Style>
 
+        <Style x:Key="LoginKeypadTextButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource LoginKeypadButtonStyle}">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        </Style>
+
         <Style x:Key="LoginInteractiveRegionStyle" TargetType="FrameworkElement">
             <Setter Property="Opacity" Value="1"/>
             <Setter Property="IsHitTestVisible" Value="True"/>
@@ -115,7 +120,7 @@
                       MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                     <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>  <!-- 0: Branding -->
-                    <RowDefinition Height="Auto"/>  <!-- 1: Default PIN banner -->
+                    <RowDefinition Height="Auto"/>  <!-- 1: Reserved -->
                     <RowDefinition Height="Auto"/>  <!-- 2: Role buttons -->
                     <RowDefinition Height="Auto"/>  <!-- 3: PIN card -->
                     <RowDefinition Height="Auto"/>  <!-- 4: Footer -->
@@ -124,14 +129,6 @@
             <!-- Row 0: Logo + title -->
                 <controls:AppBranding Grid.Row="0" LogoSize="52" Subtitle="{Binding FirmName}"
                                       Margin="{StaticResource FieldLabelSpacing}"/>
-
-            <!-- Row 1: Default admin PIN warning banner -->
-                <controls:InfoBar Grid.Row="1"
-                                  Severity="Warning"
-                                  Title="Default admin PIN"
-                                  Message="Admin PIN is 1234. Please change it in User Management."
-                                  Visibility="{Binding IsDefaultAdminPin, Converter={StaticResource BoolToVisibility}}"
-                                  Margin="{StaticResource ItemSpacing}"/>
 
             <!-- Row 2: Role buttons -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal"
@@ -181,12 +178,6 @@
                     <!-- Normal PIN entry mode (Hidden, not Collapsed, to preserve card height) -->
                     <StackPanel Visibility="{Binding IsNormalMode, Converter={StaticResource BoolToHiddenVisibility}}"
                                 IsHitTestVisible="{Binding IsNormalMode}">
-                        <controls:InfoBar Severity="Success"
-                                          Title="PIN reset complete"
-                                          Message="{Binding ResetSuccessMessage}"
-                                          IsOpen="{Binding HasResetSuccessMessage}"
-                                          Margin="{StaticResource ItemSpacing}"/>
-
                         <StackPanel Style="{StaticResource LoginInteractiveRegionStyle}">
                             <!-- PIN dots -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
@@ -201,12 +192,6 @@
                                 <Ellipse Style="{StaticResource PinDotStyle}"
                                          Fill="{Binding PinPad.PinLength, Converter={StaticResource PinDotConverter}, ConverterParameter=3}"/>
                             </StackPanel>
-
-                            <controls:InfoBar Severity="Error"
-                                              Title="Login issue"
-                                              Message="{Binding ErrorMessage}"
-                                              IsOpen="{Binding HasError}"
-                                              Margin="{StaticResource ItemSpacing}"/>
 
                             <!-- Fixed square keypad -->
                             <UniformGrid Columns="3"
@@ -224,11 +209,31 @@
                                 <Button Content="7" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="7" Style="{StaticResource LoginKeypadButtonStyle}"/>
                                 <Button Content="8" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="8" Style="{StaticResource LoginKeypadButtonStyle}"/>
                                 <Button Content="9" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="9" Style="{StaticResource LoginKeypadButtonStyle}"/>
-                                <Button Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource LoginKeypadButtonStyle}" FontSize="{StaticResource FontSizeBody}"/>
+                                <Button Content="Clear" Command="{Binding PinPad.ClearCommand}" Style="{StaticResource LoginKeypadTextButtonStyle}"/>
                                 <Button Content="0" Command="{Binding PinPad.AddDigitCommand}" CommandParameter="0" Style="{StaticResource LoginKeypadButtonStyle}"/>
-                                <Button Content="Back" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource LoginKeypadButtonStyle}"
+                                <Button Content="Back" Command="{Binding PinPad.BackspaceCommand}" Style="{StaticResource LoginKeypadTextButtonStyle}"
                                         AutomationProperties.Name="Backspace"/>
                             </UniformGrid>
+
+                            <StackPanel Margin="{StaticResource CompactItemSpacing}">
+                                <controls:InfoBar Severity="Warning"
+                                                  Title="Default admin PIN"
+                                                  Message="Admin PIN is 1234. Please change it in User Management."
+                                                  Visibility="{Binding IsDefaultAdminPin, Converter={StaticResource BoolToVisibility}}"
+                                                  Margin="{StaticResource ItemSpacing}"/>
+
+                                <controls:InfoBar Severity="Success"
+                                                  Title="PIN reset complete"
+                                                  Message="{Binding ResetSuccessMessage}"
+                                                  IsOpen="{Binding HasResetSuccessMessage}"
+                                                  Margin="{StaticResource ItemSpacing}"/>
+
+                                <controls:InfoBar Severity="Error"
+                                                  Title="Login issue"
+                                                  Message="{Binding ErrorMessage}"
+                                                  IsOpen="{Binding HasError}"
+                                                  Margin="{StaticResource ItemSpacing}"/>
+                            </StackPanel>
 
                             <!-- Forgot PIN link -->
                             <Button Content="Forgot PIN?"
@@ -353,35 +358,5 @@
 
             </ScrollViewer>
         </Border>
-
-        <Grid Panel.ZIndex="20"
-              Background="{StaticResource LoadingOverlayScrim}"
-              Visibility="{Binding IsWorking, Converter={StaticResource BoolToVisibility}}">
-            <Border HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Padding="20"
-                    Background="{StaticResource FluentSurface}"
-                    BorderBrush="{StaticResource FluentSurfaceStroke}"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource FluentCornerLarge}">
-                <StackPanel Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <controls:ProgressRing IsActive="{Binding IsWorking}"
-                                           Diameter="28"
-                                           StrokeThickness="3"
-                                           VerticalAlignment="Center"/>
-                    <StackPanel Margin="16,0,0,0"
-                                VerticalAlignment="Center">
-                        <TextBlock Text="{Binding WorkingMessage}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource FluentTextPrimary}"/>
-                        <TextBlock Text="Please wait a moment."
-                                   Margin="{StaticResource HintTextSpacing}"
-                                   Foreground="{StaticResource FluentTextSecondary}"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Grid>
     </Grid>
 </UserControl>

@@ -59,14 +59,13 @@ public sealed class ShellScrollChromeStandardsTests
     }
 
     [Fact]
-    public void MainWindow_CodeBehind_Should_Apply_Navigation_Rail_Width_Instantly()
+    public void MainWindow_CodeBehind_Should_Not_Maintain_Side_Rail_Sizing_Paths()
     {
         var source = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
 
-        Assert.Contains("ApplyNavigationRailWidth", source, StringComparison.Ordinal);
-        Assert.Contains("NavigationRailHost.BeginAnimation(FrameworkElement.WidthProperty, null);", source, StringComparison.Ordinal);
-        Assert.Contains("NavigationRailHost.Width = targetWidth;", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("ApplyNavigationRailWidth", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("NavigationRailHost", source, StringComparison.Ordinal);
         Assert.DoesNotContain("new DoubleAnimation(targetWidth", source, StringComparison.Ordinal);
     }
 

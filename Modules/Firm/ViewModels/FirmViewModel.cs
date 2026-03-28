@@ -16,6 +16,8 @@ namespace StoreAssistantPro.Modules.Firm.ViewModels;
 
 public partial class FirmViewModel : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     private static readonly HashSet<string> DirtyTrackedProperties =
     [
         nameof(FirmName),
@@ -122,7 +124,7 @@ public partial class FirmViewModel : BaseViewModel
         : "Business Settings";
 
     public string PageSubtitleText => IsInitialSetupMode
-        ? "Set your store name to finish setup. You can add tax, invoice, and contact details later."
+        ? "Enter your store name to finish setup. Add the rest later."
         : "Maintain business identity, tax details, and defaults used across the app.";
 
     public string ProfileSectionTitleText => IsInitialSetupMode
@@ -130,7 +132,7 @@ public partial class FirmViewModel : BaseViewModel
         : "Business Profile";
 
     public string ProfileSectionDescriptionText => IsInitialSetupMode
-        ? "Enter the name that should appear across billing, receipts, and reports."
+        ? "This name appears on bills, receipts, and reports."
         : "Maintain the core business identity and contact details printed across billing and reporting surfaces.";
 
     public string SaveButtonText => IsInitialSetupMode
@@ -184,6 +186,9 @@ public partial class FirmViewModel : BaseViewModel
     partial void OnStateChanged(string value)
     {
         OnEditableFieldChanged();
+        if (!IsExtendedBusinessDetailsVisible)
+            return;
+
         ValidateProperty(State, nameof(State));
         ValidateProperty(GSTNumber, nameof(GSTNumber));
     }
@@ -227,6 +232,9 @@ public partial class FirmViewModel : BaseViewModel
         }
 
         OnEditableFieldChanged();
+        if (!IsExtendedBusinessDetailsVisible)
+            return;
+
         ValidateProperty(GSTNumber, nameof(GSTNumber));
         ValidateProperty(State, nameof(State));
     }
@@ -247,6 +255,9 @@ public partial class FirmViewModel : BaseViewModel
         }
 
         OnEditableFieldChanged();
+        if (!IsExtendedBusinessDetailsVisible)
+            return;
+
         ValidateProperty(PANNumber, nameof(PANNumber));
     }
 
@@ -258,6 +269,9 @@ public partial class FirmViewModel : BaseViewModel
     partial void OnSelectedGstRegistrationTypeChanged(string value)
     {
         OnEditableFieldChanged();
+        if (!IsExtendedBusinessDetailsVisible)
+            return;
+
         ValidateProperty(CompositionRate, nameof(CompositionRate));
     }
 
@@ -274,6 +288,9 @@ public partial class FirmViewModel : BaseViewModel
     partial void OnCompositionRateChanged(string value)
     {
         OnEditableFieldChanged();
+        if (!IsExtendedBusinessDetailsVisible)
+            return;
+
         ValidateProperty(CompositionRate, nameof(CompositionRate));
     }
 
@@ -573,7 +590,7 @@ public partial class FirmViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private Task LoadFirmAsync() => RunLoadAsync(async ct =>
+    private Task LoadFirmAsync() => LoadOnActivateAsync(async ct =>
     {
         SuccessMessage = string.Empty;
 
@@ -625,24 +642,25 @@ public partial class FirmViewModel : BaseViewModel
 
         ClearErrors();
         ValidationErrors = [];
-        ValidateProperty(FirmName, nameof(FirmName));
-        ValidateProperty(Address, nameof(Address));
-        ValidateProperty(State, nameof(State));
-        ValidateProperty(Pincode, nameof(Pincode));
-        ValidateProperty(Phone, nameof(Phone));
-        ValidateProperty(Email, nameof(Email));
-        ValidateProperty(GSTNumber, nameof(GSTNumber));
-        ValidateProperty(PANNumber, nameof(PANNumber));
-        ValidateProperty(CompositionRate, nameof(CompositionRate));
+        ValidateVisibleFields();
         IsDirty = false;
         FirstErrorFieldKey = string.Empty;
-    });
+    }, NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SaveFirmAsync() => RunAsync(async ct =>
     {
         SuccessMessage = string.Empty;
-        ValidateAllProperties();
+        ClearErrors();
+        ValidationErrors = [];
+        if (IsInitialSetupMode)
+        {
+            ValidateVisibleFields();
+        }
+        else
+        {
+            ValidateAllProperties();
+        }
 
         var validSelections = Validate(v => v
             .Rule(TaxModes.Contains(SelectedTaxMode), "Select a valid billing tax mode.", nameof(SelectedTaxMode))
@@ -665,7 +683,7 @@ public partial class FirmViewModel : BaseViewModel
                 FirstErrorFieldKey = GetFirstInvalidFieldKey();
 
             if (string.IsNullOrEmpty(ErrorMessage))
-                ErrorMessage = "Review the highlighted business fields before saving.";
+                ErrorMessage = "Check highlighted fields before saving.";
             return;
         }
 
@@ -753,6 +771,23 @@ public partial class FirmViewModel : BaseViewModel
             FirstErrorFieldKey = string.Empty;
 
         ValidationErrors = [];
+    }
+
+    private void ValidateVisibleFields()
+    {
+        ValidateProperty(FirmName, nameof(FirmName));
+
+        if (IsInitialSetupMode)
+            return;
+
+        ValidateProperty(Address, nameof(Address));
+        ValidateProperty(State, nameof(State));
+        ValidateProperty(Pincode, nameof(Pincode));
+        ValidateProperty(Phone, nameof(Phone));
+        ValidateProperty(Email, nameof(Email));
+        ValidateProperty(GSTNumber, nameof(GSTNumber));
+        ValidateProperty(PANNumber, nameof(PANNumber));
+        ValidateProperty(CompositionRate, nameof(CompositionRate));
     }
 
     private List<string> CollectObservableValidationErrors()

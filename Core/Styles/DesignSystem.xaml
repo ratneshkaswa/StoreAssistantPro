@@ -168,6 +168,7 @@
     <SolidColorBrush x:Key="FluentErrorHover"          Color="#D13438"/>
     <SolidColorBrush x:Key="FluentErrorPressed"        Color="#A4262C"/>
     <SolidColorBrush x:Key="FluentErrorBackground"     Color="#FDE7E9"/>
+    <SolidColorBrush x:Key="FluentErrorDark1"          Color="#A4262C"/>
     <SolidColorBrush x:Key="FluentInfo"                Color="#005FB8"/>
     <SolidColorBrush x:Key="FluentInfoBackground"      Color="#D6EBFF"/>
 
@@ -265,8 +266,8 @@
     <sys:Double x:Key="FontSizeBody">14</sys:Double>
     <sys:Double x:Key="FontSizeSubtitle">16</sys:Double>
     <sys:Double x:Key="FontSizeLabel">12</sys:Double>
-    <sys:Double x:Key="FontSizeCaption">11</sys:Double>
-    <sys:Double x:Key="FontSizeStatusBar">10</sys:Double>
+    <sys:Double x:Key="FontSizeCaption">12</sys:Double>
+    <sys:Double x:Key="FontSizeStatusBar">12</sys:Double>
     <sys:Double x:Key="FontSizeIconSmall">14</sys:Double>
     <sys:Double x:Key="FontSizeIconMedium">18</sys:Double>
     <sys:Double x:Key="FontSizeIconLarge">40</sys:Double>

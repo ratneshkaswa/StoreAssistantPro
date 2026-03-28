@@ -29,8 +29,8 @@ public sealed class ConnectedAnimationStandardsTests
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
 
         Assert.Contains("QuickActionOverflowItemStyle", mainWindow, StringComparison.Ordinal);
-        Assert.Contains("NavigationRailActionButtonStyle", mainWindow, StringComparison.Ordinal);
         Assert.Contains("CommandPaletteResultItemStyle", mainWindow, StringComparison.Ordinal);
+        Assert.DoesNotContain("NavigationRailActionButtonStyle", mainWindow, StringComparison.Ordinal);
         Assert.DoesNotContain("h:ConnectedNavigationSource.IsEnabled\" Value=\"True\"", posStyles, StringComparison.Ordinal);
         Assert.DoesNotContain("h:ConnectedNavigationSource.IsEnabled\" Value=\"True\"", mainWindow, StringComparison.Ordinal);
     }

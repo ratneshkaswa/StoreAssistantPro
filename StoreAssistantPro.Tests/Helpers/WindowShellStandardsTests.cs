@@ -62,7 +62,8 @@ public sealed class WindowShellStandardsTests
 
         Assert.DoesNotContain("Margin=\"{StaticResource ItemSpacing}\"", content, StringComparison.Ordinal);
         Assert.Contains("CornerRadius=\"0\"", content, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"NavigationRailHost\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("x:Name=\"NavigationRailHost\"", content, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"ShellContentPanel\"", content, StringComparison.Ordinal);
     }
 
     [Fact]

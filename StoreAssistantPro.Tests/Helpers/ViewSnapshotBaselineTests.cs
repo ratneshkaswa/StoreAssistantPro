@@ -426,7 +426,7 @@ public sealed class ViewSnapshotBaselineTests : IDisposable
                 .Returns(Task.FromResult(new DebtorReport(6, 42000, [new TopDebtor("Rahul Traders", 18000), new TopDebtor("Meera Boutique", 9500)])));
 
             var eventBus3 = Substitute.For<IEventBus>();
-            var viewModel = new ReportsViewModel(reportsService, printReportService, printPreviewService, auditService, eventBus3);
+            var viewModel = new ReportsViewModel(reportsService, printReportService, printPreviewService, auditService, eventBus3, Substitute.For<IRegionalSettingsService>());
             viewModel.LoadCommand.ExecuteAsync(null).GetAwaiter().GetResult();
             viewModel.ActivePreset = "This Quarter";
             viewModel.DateFrom = new DateTime(2026, 1, 1);

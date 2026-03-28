@@ -222,7 +222,7 @@
                                 <Button Content="Remove Line"
                                         Command="{Binding RemoveLineItemCommand}"
                                         Style="{StaticResource InlineCollectionRemoveButtonStyle}"/>
-                                <controls:SplitButton Content="Create Purchase Order"
+                                <controls:SplitButton Content="Create PO"
                                                       Command="{Binding CreateOrderCommand}">
                                     <controls:SplitButton.ContextMenu>
                                         <ContextMenu>

@@ -13,6 +13,8 @@ public partial class BranchManagementViewModel(
     IBranchBillService branchService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private List<BranchBill> _allItems = [];
     private bool _isRestoringViewState;
 
@@ -72,11 +74,12 @@ public partial class BranchManagementViewModel(
     private int? _editingId;
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         RestoreViewState();
         await ReloadAsync(ct);
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>

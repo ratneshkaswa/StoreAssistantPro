@@ -149,6 +149,7 @@ public sealed class ProductManagementViewModelTests
         Assert.True(sut.HasValidationErrors);
         Assert.Contains("Sale price must be a valid positive number.", sut.ValidationErrors);
         Assert.Equal(nameof(ProductManagementViewModel.SalePriceText), sut.FirstErrorFieldKey);
+        Assert.False(sut.HasNonValidationError);
     }
 
     [Fact]

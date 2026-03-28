@@ -16,6 +16,7 @@ public static class PaymentsModule
     {
         pageRegistry.Map<PaymentManagementViewModel>(PaymentManagementPage)
             .RequireFeature(PaymentManagementPage, FeatureFlags.Payments);
+        pageRegistry.CachePage(PaymentManagementPage);
         services.AddTransient<IPaymentService, PaymentService>();
         services.AddTransient<PaymentManagementViewModel>();
         return services;

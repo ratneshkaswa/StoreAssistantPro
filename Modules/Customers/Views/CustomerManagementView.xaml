@@ -34,7 +34,7 @@
             <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search customers"
-                     h:Watermark.Text="Search customers by name or phone"/>
+                     h:Watermark.Text="e.g. Aarav or 9876543210"/>
         </Grid>
 
         <!-- DataGrid + Form + Details share the * row -->

@@ -20,6 +20,8 @@ public sealed class QuickActionOverflowStandardsTests
         Assert.Contains("Style=\"{StaticResource ToolbarLinkButtonStyle}\"", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("MaxWidth=\"104\"", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("MaxWidth=\"156\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("MaxHeight=\"420\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", mainWindowXaml, StringComparison.Ordinal);
         Assert.Contains("TextTrimming=\"CharacterEllipsis\"", mainWindowXaml, StringComparison.Ordinal);
     }
 
@@ -39,15 +41,18 @@ public sealed class QuickActionOverflowStandardsTests
     }
 
     [Fact]
-    public void MainViewModel_Should_Separate_QuickAccess_Utilities_From_Rail_Navigation()
+    public void MainViewModel_Should_Surface_All_Accessible_Actions_In_Top_QuickAccess()
     {
         var mainViewModel = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "ViewModels", "MainViewModel.cs"));
 
+        Assert.Contains("QuickActions.Clear();", mainViewModel, StringComparison.Ordinal);
         Assert.Contains("QuickAccessActions", mainViewModel, StringComparison.Ordinal);
-        Assert.Contains("ShouldShowInQuickAccessBar", mainViewModel, StringComparison.Ordinal);
-        Assert.Contains("ShouldShowInNavigationRail", mainViewModel, StringComparison.Ordinal);
-        Assert.Contains("QuickAccessHelpKeys", mainViewModel, StringComparison.Ordinal);
+        Assert.Contains("GetVisibleActions(AppState.CurrentUserType, _features)", mainViewModel, StringComparison.Ordinal);
+        Assert.Contains("Where(IsQuickActionAccessible)", mainViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShouldShowInQuickAccessBar", mainViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("ShouldShowInNavigationRail", mainViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuickAccessHelpKeys", mainViewModel, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

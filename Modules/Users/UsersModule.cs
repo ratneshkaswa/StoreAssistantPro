@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Commands;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Navigation;
@@ -18,6 +18,7 @@ public static class UsersModule
     {
         pageRegistry.Map<UsersViewModel>(UserManagementPage)
             .RequireFeature(UserManagementPage, FeatureFlags.UserManagement);
+        pageRegistry.CachePage(UserManagementPage);
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<IPermissionService, PermissionService>();
         services.AddTransient<ICommandRequestHandler<ChangePinCommand, Unit>, ChangePinHandler>();

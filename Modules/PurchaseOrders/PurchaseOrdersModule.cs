@@ -16,6 +16,7 @@ public static class PurchaseOrdersModule
     {
         pageRegistry.Map<PurchaseOrderViewModel>(PurchaseOrdersPage)
             .RequireFeature(PurchaseOrdersPage, FeatureFlags.PurchaseOrders);
+        pageRegistry.CachePage(PurchaseOrdersPage);
         services.AddTransient<IPurchaseOrderService, PurchaseOrderService>();
         services.AddTransient<PurchaseOrderViewModel>();
         return services;

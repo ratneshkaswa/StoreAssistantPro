@@ -52,17 +52,15 @@ public sealed class MainViewModelRestoreTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_Should_Restore_NavigationRail_And_Recent_CommandPalette_Items()
+    public void Constructor_Should_Restore_Recent_CommandPalette_Items()
     {
         UserPreferencesStore.Update(state =>
         {
-            state.IsNavigationRailExpanded = true;
             state.RecentCommandPaletteItemIds = ["Reports", "Billing"];
         });
 
         var sut = CreateSut();
 
-        Assert.True(sut.IsNavigationRailExpanded);
         sut.ToggleCommandPaletteCommand.Execute(null);
         Assert.Contains(sut.CommandPaletteItems, item => item.Title == "Reports" && item.IsRecent);
         Assert.Contains(sut.CommandPaletteItems, item => item.Title == "Billing" && item.IsRecent);

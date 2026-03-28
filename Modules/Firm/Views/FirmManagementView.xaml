@@ -39,7 +39,7 @@
                 Style="{StaticResource ValidationSummaryCardStyle}"
                 Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
-                <TextBlock Text="Review these items before saving."
+                <TextBlock Text="Fix these before saving."
                            Style="{StaticResource ValidationSummaryTitleTextStyle}"/>
                 <ItemsControl ItemsSource="{Binding ValidationErrors}">
                     <ItemsControl.ItemTemplate>
@@ -443,9 +443,9 @@
               MinHeight="{StaticResource MessageAreaMinHeight}"
               Margin="{StaticResource FieldLabelSpacing}">
             <controls:InfoBar Severity="Error"
-                              Title="Business issue"
+                              Title=""
                               Message="{Binding ErrorMessage}"
-                              IsOpen="{Binding HasError}"
+                              IsOpen="{Binding HasNonValidationError}"
                               AutomationProperties.LiveSetting="Assertive"
                               AutomationProperties.HelpText="{Binding ErrorMessage}"/>
             <controls:InfoBar Severity="Success"

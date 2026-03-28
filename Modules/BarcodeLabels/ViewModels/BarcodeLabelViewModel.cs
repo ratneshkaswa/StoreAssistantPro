@@ -16,6 +16,8 @@ public partial class BarcodeLabelViewModel(
     IBarcodeLabelService labelService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     // ── Product list ──
 
     [ObservableProperty]
@@ -79,12 +81,13 @@ public partial class BarcodeLabelViewModel(
     // ── Load ──
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         _allProducts = await labelService.GetProductsForLabelAsync(ct);
         FirmName = await labelService.GetFirmNameAsync(ct);
         ApplyFilter();
-    });
+    },
+        NavigationFreshnessWindow);
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
 
@@ -434,6 +437,8 @@ public partial class BarcodeLabelViewModel(
 /// <summary>A product+quantity entry in the batch print queue.</summary>
 public partial class LabelBatchItem : ObservableObject
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     public int ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public string Barcode { get; set; } = string.Empty;

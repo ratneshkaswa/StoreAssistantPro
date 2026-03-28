@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -11,9 +11,12 @@ namespace StoreAssistantPro.Modules.Categories.ViewModels;
 
 public partial class CategoryManagementViewModel(ICategoryService categoryService) : BaseViewModel
 {
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
+    // ═══════════════════════════════════════════════════════════════
     //  Tab Navigation (Types / Categories)
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════════════════════════
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsTabTypes))]
@@ -30,9 +33,9 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         ClearMessages();
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  Tab 0 â€” Category Types
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════════════════════════
+    //  Tab 0 — Category Types
+    // ═══════════════════════════════════════════════════════════════
 
     [ObservableProperty]
     public partial ObservableCollection<CategoryType> CategoryTypes { get; set; } = [];
@@ -95,9 +98,9 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
         await ReloadTypesAsync(ct);
     });
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    //  Tab 1 â€” Categories
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════════════════════════
+    //  Tab 1 — Categories
+    // ═══════════════════════════════════════════════════════════════
 
     [ObservableProperty]
     public partial ObservableCollection<Category> Categories { get; set; } = [];
@@ -117,7 +120,7 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
     [ObservableProperty]
     public partial bool IsEditingCategory { get; set; }
 
-    // ── Paging ──
+    // -- Paging --
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
@@ -252,17 +255,18 @@ public partial class CategoryManagementViewModel(ICategoryService categoryServic
             SuccessMessage = "Category types exported to CSV.";
     }
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════════════════════════
     //  Load
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ═══════════════════════════════════════════════════════════════
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         await Task.WhenAll(
             ReloadTypesAsync(ct),
             ReloadCategoriesAsync(ct));
-    });
+    },
+        NavigationFreshnessWindow);
 
     private async Task ReloadTypesAsync(CancellationToken ct)
     {

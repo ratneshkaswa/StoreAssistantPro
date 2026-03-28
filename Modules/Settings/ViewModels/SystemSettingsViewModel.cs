@@ -19,6 +19,8 @@ public partial class SystemSettingsViewModel(
     IUiDensityService uiDensityService,
     IEventBus eventBus) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isHydrating;
 
     [ObservableProperty]
@@ -227,7 +229,7 @@ public partial class SystemSettingsViewModel(
     partial void OnMinimumNotificationLevelChanged(AppNotificationLevel value) => MarkDirtyFromEditableChange();
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         _isHydrating = true;
         try
@@ -255,7 +257,8 @@ public partial class SystemSettingsViewModel(
 
         IsDirty = false;
         ValidationErrors = [];
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private void SetDensityMode(string? mode) =>

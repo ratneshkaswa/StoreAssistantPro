@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -16,9 +16,11 @@ public partial class InwardEntryViewModel(
     IProductService productService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     public string CurrencySymbol => regional.CurrencySymbol;
 
-    // â”€â”€ Step tracking â”€â”€
+    // ── Step tracking ──
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStep1))]
@@ -36,7 +38,7 @@ public partial class InwardEntryViewModel(
     public bool CanGoNext => CurrentStep < 3;
     public bool IsLastStep => CurrentStep == 3;
 
-    // â”€â”€ Step 1: Parcel count â”€â”€
+    // ── Step 1: Parcel count ──
 
     [ObservableProperty]
     public partial int ParcelCount { get; set; } = 1;
@@ -44,12 +46,12 @@ public partial class InwardEntryViewModel(
     public ObservableCollection<int> ParcelCounts { get; } =
         new(Enumerable.Range(1, 10));
 
-    // â”€â”€ Step 2: Transport charges â”€â”€
+    // ── Step 2: Transport charges ──
 
     [ObservableProperty]
     public partial string TransportCharges { get; set; } = "0";
 
-    // â”€â”€ Step 3: Parcels â”€â”€
+    // ── Step 3: Parcels ──
 
     [ObservableProperty]
     public partial ObservableCollection<ParcelEntryModel> Parcels { get; set; } = [];
@@ -76,7 +78,7 @@ public partial class InwardEntryViewModel(
     public partial IReadOnlyList<string> ParcelNumbers { get; set; } = [];
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         var vendorsTask = vendorService.GetActiveAsync(ct);
         var productsTask = productService.GetActiveAsync(ct);
@@ -93,7 +95,8 @@ public partial class InwardEntryViewModel(
         Sizes = new ObservableCollection<ProductSize>(sizesTask.Result);
         Patterns = new ObservableCollection<ProductPattern>(patternsTask.Result);
         VariantTypes = new ObservableCollection<ProductVariantType>(variantTypesTask.Result);
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private async Task NextAsync()
@@ -237,6 +240,8 @@ public partial class InwardEntryViewModel(
 /// <summary>UI model for a single parcel entry in the wizard.</summary>
 public partial class ParcelEntryModel : ObservableObject
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     [ObservableProperty]
     public partial string ParcelNumber { get; set; } = string.Empty;
 
@@ -292,6 +297,8 @@ public partial class ParcelEntryModel : ObservableObject
 /// <summary>UI model for a single product row within a parcel.</summary>
 public partial class ProductRowModel : ObservableObject
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     internal ParcelEntryModel? Owner { get; set; }
 
     [ObservableProperty]

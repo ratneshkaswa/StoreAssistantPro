@@ -16,6 +16,7 @@ public static class CategoriesModule
     {
         pageRegistry.Map<CategoryManagementViewModel>(CategoryManagementPage)
             .RequireFeature(CategoryManagementPage, FeatureFlags.Categories);
+        pageRegistry.CachePage(CategoryManagementPage);
         services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<CategoryManagementViewModel>();
         return services;

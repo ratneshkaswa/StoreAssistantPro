@@ -36,6 +36,7 @@ public class BaseViewModelTests
         var sut = new TestViewModel();
 
         Assert.Equal(string.Empty, sut.ErrorMessage);
+        Assert.False(sut.HasNonValidationError);
     }
 
     [Fact]
@@ -143,6 +144,33 @@ public class BaseViewModelTests
         sut.ErrorMessage = "test";
 
         Assert.Contains(nameof(BaseViewModel.ErrorMessage), changed);
+    }
+
+    [Fact]
+    public void HasNonValidationError_IsFalse_WhenValidationSummaryExists()
+    {
+        var sut = new TestViewModel
+        {
+            ErrorMessage = "Check highlighted fields before saving.",
+            ValidationErrors = ["Firm name is required."]
+        };
+
+        Assert.True(sut.HasError);
+        Assert.True(sut.HasValidationErrors);
+        Assert.False(sut.HasNonValidationError);
+    }
+
+    [Fact]
+    public void HasNonValidationError_IsTrue_ForStandaloneErrors()
+    {
+        var sut = new TestViewModel
+        {
+            ErrorMessage = "Database restore failed."
+        };
+
+        Assert.True(sut.HasError);
+        Assert.False(sut.HasValidationErrors);
+        Assert.True(sut.HasNonValidationError);
     }
 
     [Fact]

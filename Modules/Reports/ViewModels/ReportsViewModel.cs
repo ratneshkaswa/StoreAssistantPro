@@ -18,7 +18,8 @@ public partial class ReportsViewModel(
     IPrintReportService printReportService,
     IPrintPreviewService printPreviewService,
     IAuditService auditService,
-    IEventBus eventBus) : BaseViewModel
+    IEventBus eventBus,
+    IRegionalSettingsService regional) : BaseViewModel
 {
     private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isRestoringViewState;
@@ -571,7 +572,7 @@ public partial class ReportsViewModel(
         DebtorCount = debtor.Count;
         DebtorOutstanding = debtor.TotalOutstanding;
         TopDebtors = new ObservableCollection<TopDebtor>(debtor.TopDebtors);
-        LastRefreshedAt = DateTime.Now;
+        LastRefreshedAt = regional.Now;
         MarkLoadCompleted();
     }
 

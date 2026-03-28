@@ -13,6 +13,8 @@ public partial class PaymentManagementViewModel(
     IPaymentService paymentService,
     IRegionalSettingsService regional) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private List<Payment> _allItems = [];
     private bool _isRestoringViewState;
 
@@ -75,13 +77,14 @@ public partial class PaymentManagementViewModel(
     private int? _editingId;
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         RestoreViewState();
         var customers = await paymentService.GetCustomersAsync(ct);
         Customers = new ObservableCollection<Customer>(customers);
         await ReloadAsync(ct);
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>

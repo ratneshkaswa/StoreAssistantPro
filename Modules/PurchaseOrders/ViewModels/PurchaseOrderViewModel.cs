@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoreAssistantPro.Core;
@@ -15,6 +15,8 @@ public partial class PurchaseOrderViewModel(
     IPurchaseOrderService poService,
     IProductService productService) : BaseViewModel
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     private bool _isRestoringViewState;
 
     [ObservableProperty]
@@ -52,7 +54,7 @@ public partial class PurchaseOrderViewModel(
         PurchaseOrderStatus.Cancelled
     ];
 
-    // ── Paging ──
+    // -- Paging --
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPreviousPage))]
@@ -109,7 +111,7 @@ public partial class PurchaseOrderViewModel(
     partial void OnSelectedLineItemChanged(PurchaseOrderLineInput? value) => UpdateLineItemCommandStates();
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         RestoreViewState();
         var suppliersTask = poService.GetActiveSuppliersAsync(ct);
@@ -122,7 +124,8 @@ public partial class PurchaseOrderViewModel(
 
         await ReloadOrdersAsync(ct);
         EnsureSeedLine();
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SearchAsync() => RunAsync(async ct =>
@@ -356,7 +359,7 @@ public partial class PurchaseOrderViewModel(
     private static bool IsLineEntered(PurchaseOrderLineInput line) =>
         line.ProductId > 0 || line.Quantity > 0 || line.UnitCost > 0;
 
-    // ── Export (#224) ──
+    // -- Export (#224) --
 
     [RelayCommand]
     private void ExportPurchaseOrdersCsv()
@@ -373,7 +376,7 @@ public partial class PurchaseOrderViewModel(
             SuccessMessage = "Purchase orders exported.";
     }
 
-    // ── Duplicate / Reorder (#221) ──
+    // -- Duplicate / Reorder (#221) --
 
     [RelayCommand]
     private Task DuplicateOrderAsync() => RunAsync(async ct =>
@@ -385,7 +388,7 @@ public partial class PurchaseOrderViewModel(
         await ReloadOrdersAsync(ct, clone.Id);
     });
 
-    // ── Auto-generate from low stock (#222) ──
+    // -- Auto-generate from low stock (#222) --
 
     [ObservableProperty]
     public partial ObservableCollection<LowStockPOSuggestion> LowStockSuggestions { get; set; } = [];
@@ -442,6 +445,8 @@ public partial class PurchaseOrderViewModel(
 
 public partial class PurchaseOrderLineInput : ObservableObject
 {
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     internal PurchaseOrderViewModel? Owner { get; set; }
 
     [ObservableProperty]

@@ -8,63 +8,17 @@
     <!-- =================================================================
          VALIDATION ERROR TEMPLATE
          ================================================================= -->
-    <Thickness x:Key="InlineValidationTextPadding">12,8,32,8</Thickness>
-    <Thickness x:Key="InlineValidationTrailingChromePadding">12,8,36,8</Thickness>
     <h:DoubleGreaterThanConverter x:Key="DoubleGreaterThanConverter"/>
 
-    <!-- ErrorTemplate = adorner layer. Keep the border on the control
-         itself, then overlay a small inline error badge inside the
-         field rather than outside the layout slot. -->
+    <!-- ErrorTemplate = adorner pass-through only.
+         The control border itself carries the error state so validation
+         never paints outer layout chrome around the page. -->
     <ControlTemplate x:Key="InlineValidationErrorTemplate">
-        <Grid UseLayoutRounding="True"
-              SnapsToDevicePixels="True">
-            <AdornedElementPlaceholder/>
-            <Border Width="16"
-                    Height="16"
-                    Margin="0,0,8,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Background="{StaticResource FluentErrorBackground}"
-                    BorderBrush="{StaticResource FluentStrokeError}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    IsHitTestVisible="False"
-                    UseLayoutRounding="True"
-                    SnapsToDevicePixels="True">
-                <TextBlock Text="!"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource FluentError}"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </Border>
-        </Grid>
+        <AdornedElementPlaceholder/>
     </ControlTemplate>
 
     <ControlTemplate x:Key="InlineValidationTrailingChromeErrorTemplate">
-        <Grid UseLayoutRounding="True"
-              SnapsToDevicePixels="True">
-            <AdornedElementPlaceholder/>
-            <Border Width="16"
-                    Height="16"
-                    Margin="0,0,40,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Background="{StaticResource FluentErrorBackground}"
-                    BorderBrush="{StaticResource FluentStrokeError}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    IsHitTestVisible="False"
-                    UseLayoutRounding="True"
-                    SnapsToDevicePixels="True">
-                <TextBlock Text="!"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource FluentError}"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </Border>
-        </Grid>
+        <AdornedElementPlaceholder/>
     </ControlTemplate>
 
 
@@ -126,8 +80,7 @@
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
                 <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
-                <Setter Property="Padding" Value="{StaticResource InlineValidationTextPadding}"/>
+                <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="ToolTip"
                         Value="{Binding RelativeSource={RelativeSource Self},
                                         Path=(Validation.Errors)[0].ErrorContent}"/>
@@ -249,8 +202,7 @@
                         </Trigger>
                         <Trigger Property="Validation.HasError" Value="True">
                             <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
-                            <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
-                            <Setter Property="Padding" Value="{StaticResource InlineValidationTrailingChromePadding}"/>
+                            <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="ToolTip"
                                     Value="{Binding RelativeSource={RelativeSource Self},
                                                     Path=(Validation.Errors)[0].ErrorContent}"/>
@@ -349,8 +301,7 @@
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
                 <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
-                <Setter Property="Padding" Value="{StaticResource InlineValidationTextPadding}"/>
+                <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="ToolTip"
                         Value="{Binding RelativeSource={RelativeSource Self},
                                         Path=(Validation.Errors)[0].ErrorContent}"/>
@@ -372,8 +323,7 @@
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
                 <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
-                <Setter Property="Padding" Value="{StaticResource InlineValidationTrailingChromePadding}"/>
+                <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="ToolTip"
                         Value="{Binding RelativeSource={RelativeSource Self},
                                         Path=(Validation.Errors)[0].ErrorContent}"/>
@@ -418,8 +368,7 @@
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
                 <Setter Property="BorderBrush" Value="{StaticResource FluentStrokeError}"/>
-                <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
-                <Setter Property="Padding" Value="{StaticResource InlineValidationTrailingChromePadding}"/>
+                <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="ToolTip"
                         Value="{Binding RelativeSource={RelativeSource Self},
                                         Path=(Validation.Errors)[0].ErrorContent}"/>
@@ -1033,7 +982,7 @@
     </Style>
 
     <Style x:Key="WarningCalloutCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource FluentErrorBackground}"/>
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="{StaticResource FluentError}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="{StaticResource FluentCornerMedium}"/>
@@ -1356,13 +1305,13 @@
 
     <Style x:Key="PaginatorNavButtonStyle" TargetType="Button"
            BasedOn="{StaticResource SecondaryButtonStyle}">
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="Padding" Value="8,4"/>
     </Style>
 
     <Style x:Key="PaginatorInfoTextStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Margin" Value="4,0"/>
@@ -1515,7 +1464,7 @@
 
     <Style x:Key="ReportMetricLabelTextStyle" TargetType="TextBlock"
            BasedOn="{StaticResource CaptionLabelStyle}">
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
@@ -1936,6 +1885,29 @@
         <Setter Property="AlternatingRowBackground" Value="{StaticResource FluentBackgroundSecondary}"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="True"/>
+    </Style>
+
+    <!-- Baseline virtualisation for list-heavy surfaces -->
+    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+        <Setter Property="VirtualizingPanel.CacheLength" Value="1,1"/>
+        <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
+    </Style>
+
+    <Style TargetType="ListView" BasedOn="{StaticResource {x:Type ListView}}">
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+        <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+        <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+        <Setter Property="VirtualizingPanel.CacheLength" Value="1,1"/>
+        <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
     </Style>
 
     <!-- Full enterprise optimisation for primary data grids -->
@@ -2844,7 +2816,7 @@
                                 Margin="24"
                                 Padding="32"
                                 Background="{StaticResource FluentSurfaceElevated}"
-                                BorderBrush="{StaticResource FluentErrorBackground}"
+                                BorderBrush="{StaticResource FluentError}"
                                 BorderThickness="1"
                                 CornerRadius="{StaticResource FluentCornerLarge}"
                                 Effect="{StaticResource ElevationEffectFlyout}">

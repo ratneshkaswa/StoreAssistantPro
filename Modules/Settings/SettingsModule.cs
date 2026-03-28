@@ -16,6 +16,7 @@ public static class SettingsModule
     {
         pageRegistry.Map<SystemSettingsViewModel>(SystemSettingsPage)
             .RequireFeature(SystemSettingsPage, FeatureFlags.SystemSettings);
+        pageRegistry.CachePage(SystemSettingsPage);
         services.AddTransient<ISystemSettingsService, SystemSettingsService>();
         services.AddTransient<SystemSettingsViewModel>();
         return services;

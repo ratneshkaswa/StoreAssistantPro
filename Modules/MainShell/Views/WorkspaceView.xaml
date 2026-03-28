@@ -667,6 +667,8 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Style="{StaticResource ResponsiveSidebarGapColumnStyle}"/>
+                <ColumnDefinition Style="{StaticResource ResponsiveSidebarColumnStyle}"/>
             </Grid.ColumnDefinitions>
 
             <Border Style="{StaticResource CardStyle}"
@@ -749,6 +751,41 @@
                                                     ItemCount="{Binding DailySalesTrendDisplay.Count}"/>
                     </Grid>
                 </Grid>
+            </Border>
+
+            <Border Style="{StaticResource ResponsiveSidebarCardStyle}"
+                    Padding="{StaticResource CardPadding}"
+                    h:Motion.StaggerIndex="14">
+                <StackPanel>
+                    <TextBlock Text="Quick Summary"
+                               Style="{StaticResource DashboardSectionTitleStyle}"/>
+                    <TextBlock Text="Key metrics at a glance."
+                               Style="{StaticResource DashboardSectionDescriptionStyle}"/>
+                    <StackPanel Margin="0,12,0,0">
+                        <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                BorderThickness="0,0,0,1"
+                                Padding="{StaticResource DashboardListItemSpacing}">
+                            <DockPanel>
+                                <TextBlock Text="Total Sales" Style="{StaticResource DashboardListPrimaryTextStyle}"/>
+                                <TextBlock Text="{Binding TodaySalesFormatted}" Style="{StaticResource DashboardListAccentTextStyle}" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                        </Border>
+                        <Border BorderBrush="{StaticResource DividerStrokeColorDefault}"
+                                BorderThickness="0,0,0,1"
+                                Padding="{StaticResource DashboardListItemSpacing}">
+                            <DockPanel>
+                                <TextBlock Text="Returns" Style="{StaticResource DashboardListPrimaryTextStyle}"/>
+                                <TextBlock Text="{Binding TodayReturnsFormatted}" Style="{StaticResource DashboardListAccentTextStyle}" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                        </Border>
+                        <Border Padding="{StaticResource DashboardListItemSpacing}">
+                            <DockPanel>
+                                <TextBlock Text="Net Sales" Style="{StaticResource DashboardListPrimaryTextStyle}"/>
+                                <TextBlock Text="{Binding TodayNetSalesFormatted}" Style="{StaticResource DashboardListAccentTextStyle}" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
             </Border>
         </Grid>
         </Grid>

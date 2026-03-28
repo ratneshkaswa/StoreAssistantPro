@@ -16,6 +16,7 @@ public static class BranchModule
     {
         pageRegistry.Map<BranchManagementViewModel>(BranchManagementPage)
             .RequireFeature(BranchManagementPage, FeatureFlags.Branch);
+        pageRegistry.CachePage(BranchManagementPage);
         services.AddTransient<IBranchBillService, BranchBillService>();
         services.AddTransient<BranchManagementViewModel>();
         return services;

@@ -83,7 +83,8 @@ public sealed class ReportsViewModelStateTests : IDisposable
         Substitute.For<IPrintReportService>(),
         Substitute.For<IPrintPreviewService>(),
         Substitute.For<IAuditService>(),
-        _eventBus);
+        _eventBus,
+        Substitute.For<IRegionalSettingsService>());
 
     private void ConfigureDefaultReportsResponses()
     {

@@ -241,5 +241,6 @@ public class SystemSettingsViewModelTests : IDisposable
         Assert.True(sut.HasValidationErrors);
         Assert.Contains("Backup time must use HH:mm format.", sut.ValidationErrors);
         Assert.Equal(nameof(SystemSettingsViewModel.BackupTime), sut.FirstErrorFieldKey);
+        Assert.False(sut.HasNonValidationError);
     }
 }

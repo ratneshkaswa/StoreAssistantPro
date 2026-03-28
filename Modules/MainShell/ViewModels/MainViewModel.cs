@@ -18,7 +18,6 @@ using StoreAssistantPro.Modules.Authentication.ViewModels;
 using StoreAssistantPro.Modules.Firm.Events;
 using StoreAssistantPro.Modules.MainShell.Models;
 using StoreAssistantPro.Modules.MainShell.Services;
-using StoreAssistantPro.Modules.UIPolish.Services;
 using StoreAssistantPro.Modules.Users.Services;
 
 namespace StoreAssistantPro.Modules.MainShell.ViewModels;
@@ -29,14 +28,6 @@ public partial class MainViewModel : BaseViewModel
     private const double QuickActionSlotWidth = 86;
     private const double QuickActionOverflowButtonWidth = 52;
     private static readonly IconService ShellIconService = new();
-    private static readonly HashSet<string> QuickAccessHelpKeys = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Refresh",
-        "Search",
-        "Shortcuts",
-        "Logout",
-        CommandPaletteHelpKey
-    };
     private readonly INavigationService _navigationService;
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
@@ -151,9 +142,6 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsQuickActionOverflowOpen { get; set; }
 
-    [ObservableProperty]
-    public partial bool IsNavigationRailExpanded { get; set; }
-
     /// <summary>Raised when Ctrl+F is pressed to focus the search box (#420).</summary>
     public event EventHandler? SearchFocusRequested;
 
@@ -171,10 +159,8 @@ public partial class MainViewModel : BaseViewModel
     public ObservableCollection<string> ShellBreadcrumbItems { get; } = [];
     public bool HasCommandPaletteItems => CommandPaletteItems.Count > 0;
     public bool HasOverflowQuickActions => OverflowQuickActions.Count > 0;
-    public double NavigationRailWidth => IsNavigationRailExpanded ? 320 : 56;
     public bool IsLoginPageActive => string.Equals(_currentPage, LoginPage, StringComparison.Ordinal);
-   public bool IsShellChromeVisible => AppState.IsLoggedIn && !IsLoginPageActive;
-    public bool IsNavigationRailBackMode => !string.Equals(_currentPage, MainWorkspacePage, StringComparison.Ordinal);
+    public bool IsShellChromeVisible => AppState.IsLoggedIn && !IsLoginPageActive;
 
     // ── Feature-gated visibility ──
 
@@ -261,7 +247,6 @@ public partial class MainViewModel : BaseViewModel
         ToastService = toastService;
         DashboardSummary = new DashboardViewModel(appState, eventBus, dashboardService, regionalSettings);
         var preferences = UserPreferencesStore.GetSnapshot();
-        IsNavigationRailExpanded = preferences.IsNavigationRailExpanded;
         _recentCommandPaletteItemIds.AddRange(preferences.RecentCommandPaletteItemIds);
 
         ((ObservableObject)_navigationService).PropertyChanged += OnNavigationPropertyChanged;
@@ -445,18 +430,6 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private void CloseQuickActionOverflow() =>
         IsQuickActionOverflowOpen = false;
-
-    [RelayCommand]
-    private void ToggleNavigationRailOrNavigateBack()
-    {
-        if (IsNavigationRailBackMode)
-        {
-            NavigateToMainWorkspace();
-            return;
-        }
-
-        IsNavigationRailExpanded = !IsNavigationRailExpanded;
-    }
 
     /// <summary>Returns all registered shortcuts for the cheat sheet overlay.</summary>
     public IReadOnlyList<ShortcutEntry> GetShortcutEntries()
@@ -1129,13 +1102,12 @@ public partial class MainViewModel : BaseViewModel
     {
         QuickActions.Clear();
         foreach (var action in (_quickActionService.GetVisibleActions(AppState.CurrentUserType, _features) ?? [])
-                     .Where(ShouldShowInNavigationRail))
+                     .OrderBy(action => action.SortOrder))
             QuickActions.Add(action);
 
         QuickAccessActions.Clear();
         foreach (var action in (_quickActionService.GetActions() ?? [])
                      .Where(IsQuickActionAccessible)
-                     .Where(ShouldShowInQuickAccessBar)
                      .OrderBy(action => action.SortOrder))
         {
             QuickAccessActions.Add(action);
@@ -1265,13 +1237,6 @@ public partial class MainViewModel : BaseViewModel
 
         return action.Command is not null;
     }
-
-    private static bool ShouldShowInQuickAccessBar(QuickAction action) =>
-        !string.IsNullOrWhiteSpace(action.HelpKey) &&
-        QuickAccessHelpKeys.Contains(action.HelpKey);
-
-    private static bool ShouldShowInNavigationRail(QuickAction action) =>
-        !ShouldShowInQuickAccessBar(action);
 
     private CommandPaletteItem CreateCommandPaletteItem(QuickAction action)
     {
@@ -1406,14 +1371,7 @@ public partial class MainViewModel : BaseViewModel
         UpdateShellBreadcrumbs();
         OnPropertyChanged(nameof(IsLoginPageActive));
         OnPropertyChanged(nameof(IsShellChromeVisible));
-        OnPropertyChanged(nameof(IsNavigationRailBackMode));
         OnPropertyChanged(nameof(WindowTitle));
-    }
-
-    partial void OnIsNavigationRailExpandedChanged(bool value)
-    {
-        UserPreferencesStore.Update(state => state.IsNavigationRailExpanded = value);
-        OnPropertyChanged(nameof(NavigationRailWidth));
     }
 
     [RelayCommand]

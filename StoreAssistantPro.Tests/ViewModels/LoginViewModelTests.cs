@@ -304,7 +304,7 @@ public class LoginViewModelTests
 
         Assert.True(sut.IsBusy);
         Assert.True(sut.IsWorking);
-        Assert.Equal("Verifying login...", sut.WorkingMessage);
+        Assert.Equal("Working...", sut.WorkingMessage);
 
         pendingLogin.SetResult(CommandResult.Failure("Invalid PIN."));
         await Task.Delay(50);
@@ -332,7 +332,7 @@ public class LoginViewModelTests
 
         Assert.True(sut.IsBusy);
         Assert.True(sut.IsWorking);
-        Assert.Equal("Resetting PIN...", sut.WorkingMessage);
+        Assert.Equal("Working...", sut.WorkingMessage);
 
         pendingReset.SetResult(CommandResult.Success());
         await resetTask;

@@ -16,6 +16,7 @@ public static class OrdersModule
     {
         pageRegistry.Map<OrderManagementViewModel>(OrderManagementPage)
             .RequireFeature(OrderManagementPage, FeatureFlags.Orders);
+        pageRegistry.CachePage(OrderManagementPage);
         services.AddTransient<IOrderService, OrderService>();
         services.AddTransient<OrderManagementViewModel>();
         return services;

@@ -16,6 +16,7 @@ public static class SalariesModule
     {
         pageRegistry.Map<SalaryManagementViewModel>(SalaryManagementPage)
             .RequireFeature(SalaryManagementPage, FeatureFlags.Salaries);
+        pageRegistry.CachePage(SalaryManagementPage);
         services.AddTransient<ISalaryService, SalaryService>();
         services.AddTransient<SalaryManagementViewModel>();
         return services;

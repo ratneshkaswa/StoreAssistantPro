@@ -36,7 +36,6 @@ public partial class MainWindow : Window
         SourceInitialized += OnSourceInitialized;
         Loaded += (_, _) => UpdateNotificationsPopupLayout();
         Loaded += (_, _) => InitializeQuickActionBarChrome();
-        Loaded += (_, _) => ApplyNavigationRailWidth(animate: false);
         SizeChanged += (_, _) => UpdateNotificationsPopupLayout();
         LocationChanged += (_, _) => UpdateNotificationsPopupLayout();
         NotificationBellButton.SizeChanged += (_, _) => UpdateNotificationsPopupLayout();
@@ -172,7 +171,6 @@ public partial class MainWindow : Window
             newVm.PropertyChanged += OnMainViewModelPropertyChanged;
             newVm.ApplyShortcuts(this);
             newVm.QuickActionBarViewportWidth = QuickActionsViewport.ActualWidth;
-            ApplyNavigationRailWidth(animate: false);
             FocusCommandPaletteSearchBoxIfVisible();
         }
         else
@@ -186,9 +184,6 @@ public partial class MainWindow : Window
     {
         if (e.PropertyName == nameof(MainViewModel.IsCommandPaletteVisible))
             FocusCommandPaletteSearchBoxIfVisible();
-
-        if (e.PropertyName == nameof(MainViewModel.IsNavigationRailExpanded))
-            ApplyNavigationRailWidth(animate: true);
     }
 
     private void FocusCommandPaletteSearchBoxIfVisible()
@@ -205,13 +200,6 @@ public partial class MainWindow : Window
             Keyboard.Focus(CommandPaletteSearchBox);
             CommandPaletteSearchBox.SelectAll();
         }));
-    }
-
-    private void ApplyNavigationRailWidth(bool animate)
-    {
-        var targetWidth = _boundViewModel?.NavigationRailWidth ?? 56d;
-        NavigationRailHost.BeginAnimation(FrameworkElement.WidthProperty, null);
-        NavigationRailHost.Width = targetWidth;
     }
 
     private void OnCommandPalettePreviewKeyDown(object sender, KeyEventArgs e)

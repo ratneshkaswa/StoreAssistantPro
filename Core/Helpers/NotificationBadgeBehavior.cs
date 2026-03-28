@@ -139,7 +139,7 @@ public static class NotificationBadgeBehavior
 
         var textBlock = new TextBlock
         {
-            FontSize = 9,
+            FontSize = GetMinimumTextFontSize(panel),
             FontWeight = FontWeights.Bold,
             Foreground = GetBadgeForeground(panel),
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -216,12 +216,20 @@ public static class NotificationBadgeBehavior
         else
         {
             badge.ClearValue(FrameworkElement.WidthProperty);
-            badge.CornerRadius = new CornerRadius(8);
-            badge.MinWidth = 16;
-            badge.Height = 16;
-            badge.Padding = new Thickness(4, 0, 4, 0);
+            badge.CornerRadius = new CornerRadius(10);
+            badge.MinWidth = 20;
+            badge.Height = 20;
+            badge.Padding = new Thickness(5, 0, 5, 0);
             badge.Margin = new Thickness(0, -4, -4, 0);
         }
+    }
+
+    private static double GetMinimumTextFontSize(FrameworkElement element)
+    {
+        if (element.TryFindResource("FontSizeLabel") is double fontSize)
+            return fontSize;
+
+        return 12;
     }
 
 }

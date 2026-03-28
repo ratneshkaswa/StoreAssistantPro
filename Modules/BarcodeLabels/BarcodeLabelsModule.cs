@@ -16,6 +16,7 @@ public static class BarcodeLabelsModule
     {
         pageRegistry.Map<BarcodeLabelViewModel>(BarcodeLabelsPage)
             .RequireFeature(BarcodeLabelsPage, FeatureFlags.Products);
+        pageRegistry.CachePage(BarcodeLabelsPage);
         services.AddTransient<IBarcodeLabelService, BarcodeLabelService>();
         services.AddTransient<BarcodeLabelViewModel>();
         return services;

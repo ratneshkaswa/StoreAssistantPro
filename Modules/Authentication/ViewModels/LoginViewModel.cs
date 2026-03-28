@@ -81,10 +81,6 @@ public partial class LoginViewModel : BaseViewModel
     public string AppVersion { get; } =
         System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
 
-    public override string WorkingMessage => IsForgotPinMode
-        ? "Resetting PIN..."
-        : "Verifying login...";
-
     // ── L9: Clock ──
     [ObservableProperty]
     public partial string CurrentTime { get; set; }
@@ -314,8 +310,6 @@ public partial class LoginViewModel : BaseViewModel
     public partial bool IsForgotPinMode { get; set; }
 
     public bool IsNormalMode => !IsForgotPinMode;
-
-    partial void OnIsForgotPinModeChanged(bool value) => OnPropertyChanged(nameof(WorkingMessage));
 
     public string MasterPassword { get; set; } = string.Empty;
     public string NewPin { get; set; } = string.Empty;

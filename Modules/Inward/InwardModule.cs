@@ -16,6 +16,7 @@ public static class InwardModule
     {
         pageRegistry.Map<InwardEntryViewModel>(InwardEntryPage)
             .RequireFeature(InwardEntryPage, FeatureFlags.InwardEntry);
+        pageRegistry.CachePage(InwardEntryPage);
         services.AddTransient<IInwardService, InwardService>();
         services.AddTransient<InwardEntryViewModel>();
         return services;

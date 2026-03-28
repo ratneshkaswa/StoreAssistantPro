@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Features;
 using StoreAssistantPro.Core.Navigation;
 using StoreAssistantPro.Modules.Firm.Services;
@@ -16,6 +16,7 @@ public static class FirmModule
     {
         pageRegistry.Map<FirmViewModel>(FirmManagementPage)
             .RequireFeature(FirmManagementPage, FeatureFlags.FirmManagement);
+        pageRegistry.CachePage(FirmManagementPage);
         services.AddTransient<IFirmService, FirmService>();
         services.AddTransient<FirmViewModel>();
         return services;

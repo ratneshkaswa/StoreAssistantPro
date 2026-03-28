@@ -375,6 +375,6 @@ public class InventoryService(
             .ConfigureAwait(false);
     }
 
-    private Task PublishInventoryDataChangedAsync(string reason)
+    private Task PublishInventoryDataChangedAsync(string reason, CancellationToken ct = default)
         => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

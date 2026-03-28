@@ -16,6 +16,8 @@ public partial class GRNViewModel(
     IPurchaseOrderService poService,
     IDialogService dialogService) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     private bool _isRestoringViewState;
 
     // ── List ──
@@ -103,7 +105,7 @@ public partial class GRNViewModel(
     // ── Load ──
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         RestoreViewState();
         var posResult = await poService.GetPagedAsync(
@@ -119,7 +121,8 @@ public partial class GRNViewModel(
 
         EnsureDirectSeedLine();
         await ReloadAsync(ct);
-    });
+    },
+        NavigationFreshnessWindow);
 
     // ── Search (#369) ──
 

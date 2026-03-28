@@ -188,6 +188,53 @@ public class FirmViewModelTests
     }
 
     [Fact]
+    public async Task LoadFirm_WhenInitialSetupPending_ValidatesOnlyVisibleSetupField()
+    {
+        _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(
+            FirmName: string.Empty,
+            Address: string.Empty,
+            State: string.Empty,
+            Pincode: string.Empty,
+            Phone: string.Empty,
+            Email: string.Empty,
+            GSTNumber: null,
+            PANNumber: null,
+            GstRegistrationType: "Regular",
+            CompositionSchemeRate: 0m,
+            StateCode: null,
+            FinancialYearStartMonth: 4,
+            FinancialYearEndMonth: 3,
+            CurrencySymbol: "\u20B9",
+            DateFormat: "dd/MM/yyyy",
+            NumberFormat: "Indian",
+            DefaultTaxMode: "Exclusive",
+            RoundingMethod: "None",
+            NegativeStockAllowed: false,
+            NumberToWordsLanguage: "English",
+            InvoicePrefix: "INV",
+            ReceiptFooterText: "Thank you! Visit again!",
+            LogoPath: string.Empty,
+            BankName: string.Empty,
+            BankAccountNumber: string.Empty,
+            BankIFSC: string.Empty,
+            ReceiptHeaderText: string.Empty,
+            InvoiceResetPeriod: "Never",
+            IsInitialSetupPending: true));
+
+        var sut = CreateSut();
+
+        await sut.LoadFirmCommand.ExecuteAsync(null);
+
+        Assert.True(sut.HasErrors);
+        Assert.Contains("Firm name is required.", sut.GetErrors(nameof(FirmViewModel.FirmName)).Cast<object>().Select(static error => error.ToString()));
+        Assert.Empty(sut.GetErrors(nameof(FirmViewModel.State)).Cast<object>());
+        Assert.Empty(sut.GetErrors(nameof(FirmViewModel.Phone)).Cast<object>());
+        Assert.Empty(sut.GetErrors(nameof(FirmViewModel.Email)).Cast<object>());
+        Assert.Empty(sut.GetErrors(nameof(FirmViewModel.GSTNumber)).Cast<object>());
+        Assert.Empty(sut.GetErrors(nameof(FirmViewModel.PANNumber)).Cast<object>());
+    }
+
+    [Fact]
     public async Task SaveFirm_EmptyName_BlocksSave()
     {
         var sut = CreateSut();
@@ -199,7 +246,8 @@ public class FirmViewModelTests
         Assert.True(sut.HasValidationErrors);
         Assert.Contains("Firm name is required.", sut.ValidationErrors);
         Assert.Equal(nameof(FirmViewModel.FirmName), sut.FirstErrorFieldKey);
-        Assert.Equal("Review the highlighted business fields before saving.", sut.ErrorMessage);
+        Assert.Equal("Check highlighted fields before saving.", sut.ErrorMessage);
+        Assert.False(sut.HasNonValidationError);
         await _firmService.DidNotReceive().UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>());
     }
 
@@ -309,6 +357,31 @@ public class FirmViewModelTests
         Assert.True(sut.HasCompletedInitialSetup);
         Assert.Equal("Store name saved. Setup complete.", sut.SuccessMessage);
         Assert.False(sut.CanSaveFirm);
+    }
+
+    [Fact]
+    public async Task SaveFirm_WhenInitialSetupPending_IgnoresHiddenBusinessDetailValidation()
+    {
+        _appState.IsInitialSetupPending.Returns(true);
+        _firmService.UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        _eventBus.PublishAsync(Arg.Any<FirmUpdatedEvent>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut();
+        sut.FirmName = "My Store";
+        sut.State = "Invalid state";
+        sut.Phone = "123";
+        sut.Email = "not-an-email";
+        sut.GSTNumber = "BADGST";
+        sut.PANNumber = "BADPAN";
+
+        await sut.SaveFirmCommand.ExecuteAsync(null);
+
+        await _firmService.Received(1).UpdateFirmAsync(Arg.Any<FirmUpdateDto>(), Arg.Any<CancellationToken>());
+        Assert.Equal("Store name saved. Setup complete.", sut.SuccessMessage);
+        Assert.Empty(sut.ValidationErrors);
+        Assert.False(sut.HasErrors);
     }
 
     [Fact]

@@ -130,6 +130,12 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("<Style x:Key=\"WarningCalloutIconStyle\" TargetType=\"TextBlock\">", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"WarningCalloutTitleTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"WarningCalloutBodyTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<ControlTemplate x:Key=\"InlineValidationErrorTemplate\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<ControlTemplate x:Key=\"InlineValidationTrailingChromeErrorTemplate\">", globalStyles, StringComparison.Ordinal);
+        Assert.Contains("<AdornedElementPlaceholder/>", globalStyles, StringComparison.Ordinal);
+        Assert.DoesNotContain("<TextBlock Text=\"!\"", globalStyles, StringComparison.Ordinal);
+        Assert.DoesNotContain("InlineValidationTextPadding", globalStyles, StringComparison.Ordinal);
+        Assert.DoesNotContain("InlineValidationTrailingChromePadding", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"ValidationSummaryCardStyle\" TargetType=\"Border\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"ValidationSummaryTitleTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("<Style x:Key=\"ValidationSummaryItemTextStyle\" TargetType=\"TextBlock\"", globalStyles, StringComparison.Ordinal);
@@ -240,25 +246,34 @@ public sealed class UiStandardizationStandardsTests
     }
 
     [Fact]
-    public void LoginView_Should_Use_Lightweight_Progress_State_Not_Shared_Skeleton_LoadingOverlay()
+    public void LoginView_Should_Not_Show_A_Blocking_Verification_Overlay()
     {
         var loginView = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginView.xaml"));
 
         Assert.DoesNotContain("<controls:LoadingOverlay IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
-        Assert.Contains("<controls:ProgressRing IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
-        Assert.Contains("Please wait a moment.", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<controls:ProgressRing IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Please wait a moment.", loginView, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void InfoBar_Template_Should_Provide_Default_Background_And_BorderBrush_Before_Severity_Triggers()
+    public void InfoBar_Template_Should_Render_NonSuccess_Statuses_As_MessageOnly_Feedback()
     {
         var fluentTheme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
 
         Assert.Contains("<Border x:Name=\"Root\"", fluentTheme, StringComparison.Ordinal);
-        Assert.Contains("Background=\"{StaticResource InfoBarInfoFill}\"", fluentTheme, StringComparison.Ordinal);
-        Assert.Contains("BorderBrush=\"{StaticResource InfoBarInfoBorder}\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("Background=\"Transparent\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("BorderBrush=\"Transparent\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"MessageText\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"TitleText\" Property=\"Visibility\" Value=\"Collapsed\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"Root\" Property=\"BorderThickness\" Value=\"0\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"Root\" Property=\"Background\" Value=\"{StaticResource InfoBarSuccessFill}\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"Root\" Property=\"BorderBrush\" Value=\"{StaticResource InfoBarSuccessBorder}\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"MessageText\" Property=\"Foreground\" Value=\"{StaticResource FluentWarning}\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"MessageText\" Property=\"Foreground\" Value=\"{StaticResource FluentError}\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"MessageText\" Property=\"Foreground\" Value=\"{StaticResource FluentAccentDefault}\"/>", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"MessageText\" Property=\"Foreground\" Value=\"{StaticResource FluentSuccess}\"/>", fluentTheme, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -671,8 +686,8 @@ public sealed class UiStandardizationStandardsTests
             Path.Combine(SolutionRoot, "Modules", "MainShell", "ViewModels", "MainViewModel.cs"));
         var quickActionModel = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Models", "QuickAction.cs"));
-        var uiPolishServices = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Modules", "UIPolish", "Services", "UIPolishServices.cs"));
+        var iconService = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Services", "IconService.cs"));
 
         Assert.Contains("private static readonly IconService ShellIconService = new();", mainViewModel, StringComparison.Ordinal);
 
@@ -687,7 +702,7 @@ public sealed class UiStandardizationStandardsTests
                  })
         {
             Assert.Contains($"ShellIconService.GetGlyph(\"{iconName}\")", mainViewModel, StringComparison.Ordinal);
-            Assert.Contains($"[\"{iconName}\"] =", uiPolishServices, StringComparison.Ordinal);
+            Assert.Contains($"[\"{iconName}\"]", iconService, StringComparison.Ordinal);
         }
 
         foreach (var emojiIcon in new[]
@@ -1883,9 +1898,17 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("[NotifyPropertyChangedFor(nameof(HasResetSuccessMessage))]", loginViewModel, StringComparison.Ordinal);
         Assert.Contains("public bool HasResetSuccessMessage => !string.IsNullOrEmpty(ResetSuccessMessage);", loginViewModel, StringComparison.Ordinal);
 
-        foreach (var xaml in new[] { backupView, billingView, cashRegisterView, firmView, productView, settingsView })
+        foreach (var xaml in new[] { backupView, billingView, cashRegisterView })
         {
             Assert.Contains("IsOpen=\"{Binding HasError}\"", xaml, StringComparison.Ordinal);
+            Assert.Contains("IsOpen=\"{Binding HasSuccess}\"", xaml, StringComparison.Ordinal);
+            Assert.DoesNotContain("Visibility=\"{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}\"", xaml, StringComparison.Ordinal);
+            Assert.DoesNotContain("Visibility=\"{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}\"", xaml, StringComparison.Ordinal);
+        }
+
+        foreach (var xaml in new[] { firmView, productView, settingsView })
+        {
+            Assert.Contains("IsOpen=\"{Binding HasNonValidationError}\"", xaml, StringComparison.Ordinal);
             Assert.Contains("IsOpen=\"{Binding HasSuccess}\"", xaml, StringComparison.Ordinal);
             Assert.DoesNotContain("Visibility=\"{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVisibility}}\"", xaml, StringComparison.Ordinal);
             Assert.DoesNotContain("Visibility=\"{Binding SuccessMessage, Converter={StaticResource NonEmptyStringToVisibility}}\"", xaml, StringComparison.Ordinal);
@@ -3096,14 +3119,18 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("OnPropertyChanged(nameof(IsWorking));", baseViewModel, StringComparison.Ordinal);
         Assert.Contains("OnPropertyChanged(nameof(WorkingMessage));", baseViewModel, StringComparison.Ordinal);
 
-        Assert.Contains("<controls:ProgressRing IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
-        Assert.Contains("Text=\"{Binding WorkingMessage}\"", loginView, StringComparison.Ordinal);
-        Assert.Contains("Please wait a moment.", loginView, StringComparison.Ordinal);
         Assert.DoesNotContain("<controls:LoadingOverlay IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<controls:ProgressRing IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Text=\"{Binding WorkingMessage}\"", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("Please wait a moment.", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Condition Binding=\"{Binding IsForgotPinMode}\" Value=\"True\"/>", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Condition Binding=\"{Binding IsWorking}\" Value=\"True\"/>", loginView, StringComparison.Ordinal);
         Assert.DoesNotContain("IsActive=\"{Binding IsVerifying}\"", loginView, StringComparison.Ordinal);
         Assert.DoesNotContain("Message=\"Verifying login...\"", loginView, StringComparison.Ordinal);
-        Assert.Contains("public override string WorkingMessage => IsForgotPinMode", loginViewModel, StringComparison.Ordinal);
-        Assert.Contains("partial void OnIsForgotPinModeChanged(bool value) => OnPropertyChanged(nameof(WorkingMessage));", loginViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("Verifying login...", loginViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("Resetting PIN...", loginViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("public override string WorkingMessage", loginViewModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("partial void OnIsForgotPinModeChanged(bool value) => OnPropertyChanged(nameof(WorkingMessage));", loginViewModel, StringComparison.Ordinal);
         Assert.DoesNotContain("public partial bool IsVerifying { get; set; }", loginViewModel, StringComparison.Ordinal);
 
         Assert.Contains("LoadingOverlay IsActive=\"{Binding IsWorking}\"", firmView, StringComparison.Ordinal);

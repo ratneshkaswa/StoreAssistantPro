@@ -80,8 +80,8 @@
                 Style="{StaticResource ValidationSummaryCardStyle}"
                 Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
-                <TextBlock Text="Review these items before saving."
-                           Style="{StaticResource ValidationSummaryTitleTextStyle}"/>
+                        <TextBlock Text="Fix these before saving."
+                                   Style="{StaticResource ValidationSummaryTitleTextStyle}"/>
                 <ItemsControl ItemsSource="{Binding ValidationErrors}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -333,7 +333,7 @@
             <controls:InfoBar Severity="Error"
                               Title="Product issue"
                               Message="{Binding ErrorMessage}"
-                              IsOpen="{Binding HasError}"
+                              IsOpen="{Binding HasNonValidationError}"
                               AutomationProperties.LiveSetting="Assertive"
                               AutomationProperties.HelpText="{Binding ErrorMessage}"/>
             <controls:InfoBar Severity="Success"

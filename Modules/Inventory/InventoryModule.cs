@@ -16,6 +16,7 @@ public static class InventoryModule
     {
         pageRegistry.Map<InventoryViewModel>(InventoryPage)
             .RequireFeature(InventoryPage, FeatureFlags.Inventory);
+        pageRegistry.CachePage(InventoryPage);
         services.AddTransient<IInventoryService, InventoryService>();
         services.AddTransient<IStockTakeService, StockTakeService>();
         services.AddTransient<InventoryViewModel>();

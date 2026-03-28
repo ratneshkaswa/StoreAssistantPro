@@ -16,6 +16,7 @@ public static class SalesPurchaseModule
     {
         pageRegistry.Map<SalesPurchaseViewModel>(SalesPurchasePage)
             .RequireFeature(SalesPurchasePage, FeatureFlags.SalesPurchase);
+        pageRegistry.CachePage(SalesPurchasePage);
         services.AddTransient<ISalesPurchaseService, SalesPurchaseService>();
         services.AddTransient<SalesPurchaseViewModel>();
         return services;

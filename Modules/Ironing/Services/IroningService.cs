@@ -271,6 +271,6 @@ public class IroningService(
             activeBatches);
     }
 
-    private Task PublishBusinessDataChangedAsync(string reason)
+    private Task PublishBusinessDataChangedAsync(string reason, CancellationToken ct = default)
         => eventBus.PublishAsync(new SalesDataChangedEvent(reason, DateTime.UtcNow));
 }

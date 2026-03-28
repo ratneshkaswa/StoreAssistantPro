@@ -13,6 +13,8 @@ public partial class FinancialYearViewModel(
     IRegionalSettingsService regional,
     IDialogService dialogService) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
     [ObservableProperty]
     public partial ObservableCollection<FinancialYear> FinancialYears { get; set; } = [];
 
@@ -23,12 +25,13 @@ public partial class FinancialYearViewModel(
     public partial FinancialYear? SelectedYear { get; set; }
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         var years = await fyService.GetAllAsync(ct);
         FinancialYears = new ObservableCollection<FinancialYear>(years);
         CurrentYear = await fyService.GetCurrentAsync(ct);
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task CreateNewYearAsync() => RunAsync(async ct =>

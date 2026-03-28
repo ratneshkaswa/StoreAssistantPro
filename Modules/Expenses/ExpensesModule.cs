@@ -16,6 +16,7 @@ public static class ExpensesModule
     {
         pageRegistry.Map<ExpenseManagementViewModel>(ExpenseManagementPage)
             .RequireFeature(ExpenseManagementPage, FeatureFlags.Expenses);
+        pageRegistry.CachePage(ExpenseManagementPage);
         services.AddTransient<IExpenseService, ExpenseService>();
         services.AddTransient<ExpenseManagementViewModel>();
         return services;

@@ -16,6 +16,7 @@ public static class IroningModule
     {
         pageRegistry.Map<IroningManagementViewModel>(IroningManagementPage)
             .RequireFeature(IroningManagementPage, FeatureFlags.Ironing);
+        pageRegistry.CachePage(IroningManagementPage);
         services.AddTransient<IIroningService, IroningService>();
         services.AddTransient<IroningManagementViewModel>();
         return services;

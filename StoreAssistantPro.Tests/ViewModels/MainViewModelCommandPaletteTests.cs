@@ -137,22 +137,20 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
     }
 
     [Fact]
-    public void QuickAccessBar_Should_Show_Global_Utilities_Without_Duplicating_Rail_Navigation()
+    public void QuickAccessBar_Should_Surface_Navigation_And_Global_Utilities_Together()
     {
         var sut = CreateSut();
 
         Assert.Contains(sut.QuickActions, action => action.Title == "Reports");
         Assert.Contains(sut.QuickActions, action => action.Title == "Billing");
-        Assert.DoesNotContain(sut.QuickActions, action => action.Title == "Refresh");
-        Assert.DoesNotContain(sut.QuickActions, action => action.Title == "Logout");
 
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Reports");
+        Assert.Contains(sut.QuickAccessActions, action => action.Title == "Billing");
         Assert.Contains(sut.QuickAccessActions, action => action.Title == "Refresh");
         Assert.Contains(sut.QuickAccessActions, action => action.Title == "Search");
         Assert.Contains(sut.QuickAccessActions, action => action.Title == "Command Palette");
         Assert.Contains(sut.QuickAccessActions, action => action.Title == "Shortcuts");
         Assert.Contains(sut.QuickAccessActions, action => action.Title == "Logout");
-        Assert.DoesNotContain(sut.QuickAccessActions, action => action.Title == "Reports");
-        Assert.DoesNotContain(sut.QuickAccessActions, action => action.Title == "Billing");
     }
 
     [Fact]
@@ -162,33 +160,21 @@ public sealed class MainViewModelCommandPaletteTests : IDisposable
 
         sut.OpenReportsCommand.Execute(null);
 
-        Assert.True(sut.QuickActions.Single(action => action.Title == "Reports").IsActive);
-        Assert.False(sut.QuickActions.Single(action => action.Title == "Home").IsActive);
-        Assert.False(sut.QuickActions.Single(action => action.Title == "Billing").IsActive);
+        Assert.True(sut.QuickAccessActions.Single(action => action.Title == "Reports").IsActive);
+        Assert.False(sut.QuickAccessActions.Single(action => action.Title == "Home").IsActive);
+        Assert.False(sut.QuickAccessActions.Single(action => action.Title == "Billing").IsActive);
     }
 
     [Fact]
-    public void NavigationRail_Toggle_Should_Expand_On_Home_And_Go_Back_From_Inner_Page()
+    public void NavigateToMainWorkspace_Should_Return_To_Home_From_An_Inner_Page()
     {
         var sut = CreateSut();
 
+        sut.OpenReportsCommand.Execute(null);
         sut.NavigateToMainWorkspaceCommand.Execute(null);
 
-        Assert.False(sut.IsNavigationRailBackMode);
-
-        sut.ToggleNavigationRailOrNavigateBackCommand.Execute(null);
-
-        Assert.True(sut.IsNavigationRailExpanded);
-        Assert.Equal(320, sut.NavigationRailWidth);
-
-        sut.OpenReportsCommand.Execute(null);
-
-        Assert.True(sut.IsNavigationRailBackMode);
-
-        sut.ToggleNavigationRailOrNavigateBackCommand.Execute(null);
-
-        Assert.False(sut.IsNavigationRailBackMode);
         Assert.Contains("Home", sut.WindowTitle);
+        Assert.True(sut.QuickAccessActions.Single(action => action.Title == "Home").IsActive);
     }
 
     private MainViewModel CreateSut()

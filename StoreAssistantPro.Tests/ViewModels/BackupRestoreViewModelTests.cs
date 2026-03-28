@@ -2,6 +2,7 @@ using NSubstitute;
 using StoreAssistantPro.Core.Events;
 using StoreAssistantPro.Core.Services;
 using StoreAssistantPro.Models;
+using StoreAssistantPro.Modules.Backup.Models;
 using StoreAssistantPro.Modules.Billing.Events;
 using StoreAssistantPro.Modules.Backup.Services;
 using StoreAssistantPro.Modules.Backup.ViewModels;

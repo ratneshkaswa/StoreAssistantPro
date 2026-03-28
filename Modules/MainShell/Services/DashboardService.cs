@@ -37,6 +37,7 @@ public class DashboardService(
     {
         using var _ = perf.BeginScope("DashboardService.GetSummaryAsync");
         await using var db = await dbFactory.CreateDbContextAsync(ct);
+        db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         var nextDay = today.AddDays(1);
         var yesterday = today.AddDays(-1);
         var monthStart = new DateTime(today.Year, today.Month, 1);
@@ -45,27 +46,24 @@ public class DashboardService(
         var previousMonthLimit = previousMonthStart.AddMonths(1);
         if (previousMonthPeriodEnd > previousMonthLimit)
             previousMonthPeriodEnd = previousMonthLimit;
+        var lastBackupDateTask = GetLastBackupDateSafeAsync(ct);
 
         // ── Sales KPIs ──
-        var todaySales = await db.Sales
-            .Where(s => s.SaleDate >= today)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var todaySalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= today),
+            ct);
 
-        var monthSales = await db.Sales
-            .Where(s => s.SaleDate >= monthStart)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var monthSalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= monthStart),
+            ct);
 
-        var previousDaySales = await db.Sales
-            .Where(s => s.SaleDate >= yesterday && s.SaleDate < today)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var previousDaySalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= yesterday && s.SaleDate < today),
+            ct);
 
-        var previousMonthSales = await db.Sales
-            .Where(s => s.SaleDate >= previousMonthStart && s.SaleDate < previousMonthPeriodEnd)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var previousMonthSalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= previousMonthStart && s.SaleDate < previousMonthPeriodEnd),
+            ct);
 
         // ── Today's returns (#389) ──
         var todayReturns = await db.SaleReturns
@@ -81,32 +79,30 @@ public class DashboardService(
             .Where(si => si.Sale!.SaleDate >= today)
             .SumAsync(si => si.Product!.CostPrice * si.Quantity, ct);
 
-        var todaySalesTotal = todaySales.Sum(s => s.TotalAmount);
+        var todaySalesTotal = todaySalesAggregate.TotalAmount;
         var todayNet = todaySalesTotal - todayReturns;
-        var todayTxCount = todaySales.Count;
+        var todayTxCount = todaySalesAggregate.TransactionCount;
         var todayProfit = todayNet - todayCost;
         var averageBill = todayTxCount > 0 ? todaySalesTotal / todayTxCount : 0;
-        var previousDaySalesTotal = previousDaySales.Sum(s => s.TotalAmount);
+        var previousDaySalesTotal = previousDaySalesAggregate.TotalAmount;
         var previousDayNet = previousDaySalesTotal - previousDayReturns;
-        var previousDayTxCount = previousDaySales.Count;
+        var previousDayTxCount = previousDaySalesAggregate.TransactionCount;
         var previousDayAverageBill = previousDayTxCount > 0 ? previousDaySalesTotal / previousDayTxCount : 0;
 
         // ── Inventory KPIs ──
-        var productStats = await db.Products
-            .Select(p => new { p.Quantity, p.MinStockLevel })
-            .ToListAsync(ct);
-
-        int totalProducts = productStats.Count;
-        int outOfStock = productStats.Count(p => p.Quantity <= 0);
-        int lowStock = productStats.Count(p => p.MinStockLevel > 0 && p.Quantity > 0 && p.Quantity <= p.MinStockLevel);
+        var totalProducts = await db.Products.CountAsync(ct);
+        var outOfStock = await db.Products.CountAsync(p => p.Quantity <= 0, ct);
+        var lowStock = await db.Products.CountAsync(
+            p => p.MinStockLevel > 0 && p.Quantity > 0 && p.Quantity <= p.MinStockLevel,
+            ct);
 
         // ── Orders ──
-        var pendingOrders = await db.Orders
-            .Where(o => o.Status == "Pending")
-            .Select(o => new { o.DeliveryDate })
-            .ToListAsync(ct);
-
-        int overdueOrders = pendingOrders.Count(o => o.DeliveryDate.HasValue && o.DeliveryDate.Value.Date < today);
+        var pendingOrdersCount = await db.Orders.CountAsync(o => o.Status == "Pending", ct);
+        var overdueOrders = await db.Orders.CountAsync(
+            o => o.Status == "Pending"
+                && o.DeliveryDate.HasValue
+                && o.DeliveryDate.Value.Date < today,
+            ct);
 
         // ── Receivables ──
         var receivables = await db.Debtors
@@ -133,88 +129,68 @@ public class DashboardService(
         var recentSales = await recentSalesQuery.ToListAsync(ct);
 
         // ── Top products today (#394) ──
-        var topProductsTodayRows = await db.SaleItems
+        var topProductsToday = await db.SaleItems
             .Where(si => si.Sale!.SaleDate >= today)
-            .Select(si => new
-            {
-                ProductName = si.Product!.Name,
-                si.Quantity,
-                Revenue = si.UnitPrice * si.Quantity
-            })
-            .ToListAsync(ct);
-
-        var topProductsToday = topProductsTodayRows
-            .GroupBy(si => si.ProductName)
+            .GroupBy(si => si.Product!.Name)
             .Select(g => new TopProductItem(
                 g.Key ?? "Unnamed product",
                 g.Sum(si => si.Quantity),
-                g.Sum(si => si.Revenue)))
+                g.Sum(si => si.UnitPrice * si.Quantity)))
             .OrderByDescending(t => t.QuantitySold)
             .Take(5)
-            .ToList();
+            .ToListAsync(ct);
 
         // ── Last backup date (#332) ──
-        DateTime? lastBackupDate = null;
-        try { lastBackupDate = await backupService.GetLastBackupDateAsync(ct); }
-        catch { /* non-critical — don't fail dashboard for backup check */ }
+        var lastBackupDate = await lastBackupDateTask.ConfigureAwait(false);
 
         // ── Monthly sales trend (#398) — daily totals for last 30 days ──
         var thirtyDaysAgo = today.AddDays(-29);
         var trendSalesRows = await db.Sales
             .Where(s => s.SaleDate >= thirtyDaysAgo)
-            .Select(s => new { s.SaleDate, s.TotalAmount })
+            .GroupBy(s => s.SaleDate.Date)
+            .Select(g => new
+            {
+                Date = g.Key,
+                TotalSales = g.Sum(s => s.TotalAmount),
+                TransactionCount = g.Count()
+            })
+            .OrderBy(g => g.Date)
             .ToListAsync(ct);
 
         var trendRaw = trendSalesRows
-            .GroupBy(s => s.SaleDate.Date)
-            .Select(g => new DailySalesTrendItem(g.Key, g.Sum(s => s.TotalAmount), g.Count()))
-            .OrderBy(t => t.Date)
+            .Select(row => new DailySalesTrendItem(row.Date, row.TotalSales, row.TransactionCount))
             .ToList();
-
-        // Fill missing days with zero
-        var trendFilled = new List<DailySalesTrendItem>();
-        for (var d = thirtyDaysAgo; d <= today; d = d.AddDays(1))
-        {
-            var existing = trendRaw.FirstOrDefault(t => t.Date.Date == d);
-            trendFilled.Add(existing ?? new DailySalesTrendItem(d, 0, 0));
-        }
+        var trendFilled = FillDailySalesTrend(trendRaw, thirtyDaysAgo, today);
 
         // ── Monthly expense trend (#399) ──
         var expenseTrendRows = await db.Expenses
             .Where(e => e.Date >= thirtyDaysAgo)
-            .Select(e => new { e.Date, e.Amount })
+            .GroupBy(e => e.Date.Date)
+            .Select(g => new
+            {
+                Date = g.Key,
+                TotalExpenses = g.Sum(e => e.Amount),
+                ExpenseCount = g.Count()
+            })
+            .OrderBy(g => g.Date)
             .ToListAsync(ct);
 
         var expenseTrendRaw = expenseTrendRows
-            .GroupBy(e => e.Date.Date)
-            .Select(g => new DailyExpenseTrendItem(g.Key, g.Sum(e => e.Amount), g.Count()))
-            .OrderBy(t => t.Date)
+            .Select(row => new DailyExpenseTrendItem(row.Date, row.TotalExpenses, row.ExpenseCount))
             .ToList();
-
-        var expenseTrendFilled = new List<DailyExpenseTrendItem>();
-        for (var d = thirtyDaysAgo; d <= today; d = d.AddDays(1))
-        {
-            var existing = expenseTrendRaw.FirstOrDefault(t => t.Date.Date == d);
-            expenseTrendFilled.Add(existing ?? new DailyExpenseTrendItem(d, 0, 0));
-        }
+        var expenseTrendFilled = FillDailyExpenseTrend(expenseTrendRaw, thirtyDaysAgo, today);
 
         // ── Category sales breakdown (#400) ──
-        var categorySalesRows = await db.SaleItems
+        var categorySales = await db.SaleItems
             .Where(si => si.Sale!.SaleDate >= monthStart)
-            .Select(si => new
-            {
-                CategoryName = si.Product!.Category!.Name,
-                si.Quantity,
-                Revenue = si.UnitPrice * si.Quantity
-            })
-            .ToListAsync(ct);
-
-        var categorySales = categorySalesRows
-            .GroupBy(si => si.CategoryName ?? "Uncategorized")
-            .Select(g => new CategorySalesBreakdownItem(g.Key, g.Sum(si => si.Revenue), g.Sum(si => si.Quantity)))
+            .GroupBy(si => si.Product!.Category!.Name)
+            .Select(g => new CategorySalesBreakdownItem(
+                g.Key ?? "Uncategorized",
+                g.Sum(si => si.UnitPrice * si.Quantity),
+                g.Sum(si => si.Quantity)))
             .OrderByDescending(c => c.Revenue)
             .Take(10)
-            .ToList();
+            .ToListAsync(ct);
 
         // ── Year-over-year comparison (#402) ──
         var lastYearMonthStart = monthStart.AddYears(-1);
@@ -244,17 +220,17 @@ public class DashboardService(
             TodayNetSales = todayNet,
             TodayProfit = todayProfit,
             AverageBillValue = averageBill,
-            ThisMonthSales = monthSales.Sum(s => s.TotalAmount),
-            ThisMonthTransactions = monthSales.Count,
+            ThisMonthSales = monthSalesAggregate.TotalAmount,
+            ThisMonthTransactions = monthSalesAggregate.TransactionCount,
             PreviousDaySales = previousDaySalesTotal,
             PreviousDayReturns = previousDayReturns,
             PreviousDayNetSales = previousDayNet,
             PreviousDayAverageBillValue = previousDayAverageBill,
-            PreviousMonthSales = previousMonthSales.Sum(s => s.TotalAmount),
+            PreviousMonthSales = previousMonthSalesAggregate.TotalAmount,
             TotalProducts = totalProducts,
             LowStockCount = lowStock,
             OutOfStockCount = outOfStock,
-            PendingOrdersCount = pendingOrders.Count,
+            PendingOrdersCount = pendingOrdersCount,
             OverdueOrdersCount = overdueOrders,
             OutstandingReceivables = receivables,
             PendingPaymentsCount = pendingPayments,
@@ -285,6 +261,7 @@ public class DashboardService(
     {
         using var _ = perf.BeginScope("DashboardService.GetSummaryForDateAsync");
         await using var db = await dbFactory.CreateDbContextAsync(ct);
+        db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         var monthStart = new DateTime(targetDate.Year, targetDate.Month, 1);
         var nextDay = targetDate.AddDays(1);
         var previousDayStart = targetDate.AddDays(-1);
@@ -293,27 +270,24 @@ public class DashboardService(
         var previousMonthLimit = previousMonthStart.AddMonths(1);
         if (previousMonthPeriodEnd > previousMonthLimit)
             previousMonthPeriodEnd = previousMonthLimit;
+        var lastBackupDateTask = GetLastBackupDateSafeAsync(ct);
 
         // ── Sales KPIs for target date ──
-        var daySales = await db.Sales
-            .Where(s => s.SaleDate >= targetDate && s.SaleDate < nextDay)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var daySalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= targetDate && s.SaleDate < nextDay),
+            ct);
 
-        var monthSales = await db.Sales
-            .Where(s => s.SaleDate >= monthStart && s.SaleDate < nextDay)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var monthSalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= monthStart && s.SaleDate < nextDay),
+            ct);
 
-        var previousDaySales = await db.Sales
-            .Where(s => s.SaleDate >= previousDayStart && s.SaleDate < targetDate)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var previousDaySalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= previousDayStart && s.SaleDate < targetDate),
+            ct);
 
-        var previousMonthSales = await db.Sales
-            .Where(s => s.SaleDate >= previousMonthStart && s.SaleDate < previousMonthPeriodEnd)
-            .Select(s => new { s.TotalAmount })
-            .ToListAsync(ct);
+        var previousMonthSalesAggregate = await GetSalesAggregateAsync(
+            db.Sales.Where(s => s.SaleDate >= previousMonthStart && s.SaleDate < previousMonthPeriodEnd),
+            ct);
 
         var dayReturns = await db.SaleReturns
             .Where(r => r.ReturnDate >= targetDate && r.ReturnDate < nextDay)
@@ -327,31 +301,30 @@ public class DashboardService(
             .Where(si => si.Sale!.SaleDate >= targetDate && si.Sale.SaleDate < nextDay)
             .SumAsync(si => si.Product!.CostPrice * si.Quantity, ct);
 
-        var daySalesTotal = daySales.Sum(s => s.TotalAmount);
+        var daySalesTotal = daySalesAggregate.TotalAmount;
         var dayNet = daySalesTotal - dayReturns;
-        var dayTxCount = daySales.Count;
+        var dayTxCount = daySalesAggregate.TransactionCount;
         var dayProfit = dayNet - dayCost;
         var avgBill = dayTxCount > 0 ? daySalesTotal / dayTxCount : 0;
-        var previousDaySalesTotal = previousDaySales.Sum(s => s.TotalAmount);
+        var previousDaySalesTotal = previousDaySalesAggregate.TotalAmount;
         var previousDayNet = previousDaySalesTotal - previousDayReturns;
-        var previousDayTxCount = previousDaySales.Count;
+        var previousDayTxCount = previousDaySalesAggregate.TransactionCount;
         var previousDayAverageBill = previousDayTxCount > 0 ? previousDaySalesTotal / previousDayTxCount : 0;
 
         // ── Inventory KPIs (always current) ──
-        var productStats = await db.Products
-            .Select(p => new { p.Quantity, p.MinStockLevel })
-            .ToListAsync(ct);
-
-        int totalProducts = productStats.Count;
-        int outOfStock = productStats.Count(p => p.Quantity <= 0);
-        int lowStock = productStats.Count(p => p.MinStockLevel > 0 && p.Quantity > 0 && p.Quantity <= p.MinStockLevel);
+        var totalProducts = await db.Products.CountAsync(ct);
+        var outOfStock = await db.Products.CountAsync(p => p.Quantity <= 0, ct);
+        var lowStock = await db.Products.CountAsync(
+            p => p.MinStockLevel > 0 && p.Quantity > 0 && p.Quantity <= p.MinStockLevel,
+            ct);
 
         // ── Orders (current) ──
-        var pendingOrders = await db.Orders
-            .Where(o => o.Status == "Pending")
-            .Select(o => new { o.DeliveryDate })
-            .ToListAsync(ct);
-        int overdueOrders = pendingOrders.Count(o => o.DeliveryDate.HasValue && o.DeliveryDate.Value.Date < targetDate);
+        var pendingOrdersCount = await db.Orders.CountAsync(o => o.Status == "Pending", ct);
+        var overdueOrders = await db.Orders.CountAsync(
+            o => o.Status == "Pending"
+                && o.DeliveryDate.HasValue
+                && o.DeliveryDate.Value.Date < targetDate,
+            ct);
 
         // ── Receivables (current) ──
         var receivables = await db.Debtors.SumAsync(d => d.TotalAmount - d.PaidAmount, ct);
@@ -368,48 +341,35 @@ public class DashboardService(
                 s.InvoiceNumber, s.SaleDate, s.TotalAmount, s.PaymentMethod, s.Items.Count))
             .ToListAsync(ct);
 
-        var topProductsDayRows = await db.SaleItems
+        var topProductsDay = await db.SaleItems
             .Where(si => si.Sale!.SaleDate >= targetDate && si.Sale.SaleDate < nextDay)
-            .Select(si => new
-            {
-                ProductName = si.Product!.Name,
-                si.Quantity,
-                Revenue = si.UnitPrice * si.Quantity
-            })
-            .ToListAsync(ct);
-
-        var topProductsDay = topProductsDayRows
-            .GroupBy(si => si.ProductName)
+            .GroupBy(si => si.Product!.Name)
             .Select(g => new TopProductItem(
                 g.Key ?? "Unnamed product",
                 g.Sum(si => si.Quantity),
-                g.Sum(si => si.Revenue)))
+                g.Sum(si => si.UnitPrice * si.Quantity)))
             .OrderByDescending(t => t.QuantitySold)
             .Take(5)
-            .ToList();
-
-        DateTime? lastBackupDate = null;
-        try { lastBackupDate = await backupService.GetLastBackupDateAsync(ct); }
-        catch { /* non-critical */ }
+            .ToListAsync(ct);
+        var lastBackupDate = await lastBackupDateTask.ConfigureAwait(false);
 
         // ── Monthly sales trend for the target month (#398) ──
         var trendSalesRows = await db.Sales
             .Where(s => s.SaleDate >= monthStart && s.SaleDate < nextDay)
-            .Select(s => new { s.SaleDate, s.TotalAmount })
+            .GroupBy(s => s.SaleDate.Date)
+            .Select(g => new
+            {
+                Date = g.Key,
+                TotalSales = g.Sum(s => s.TotalAmount),
+                TransactionCount = g.Count()
+            })
+            .OrderBy(g => g.Date)
             .ToListAsync(ct);
 
         var trendRaw = trendSalesRows
-            .GroupBy(s => s.SaleDate.Date)
-            .Select(g => new DailySalesTrendItem(g.Key, g.Sum(s => s.TotalAmount), g.Count()))
-            .OrderBy(t => t.Date)
+            .Select(row => new DailySalesTrendItem(row.Date, row.TotalSales, row.TransactionCount))
             .ToList();
-
-        var trendFilled = new List<DailySalesTrendItem>();
-        for (var d = monthStart; d <= targetDate; d = d.AddDays(1))
-        {
-            var existing = trendRaw.FirstOrDefault(t => t.Date.Date == d);
-            trendFilled.Add(existing ?? new DailySalesTrendItem(d, 0, 0));
-        }
+        var trendFilled = FillDailySalesTrend(trendRaw, monthStart, targetDate);
 
         // ── Same month last year (#402) ──
         var lastYearMonthStart = monthStart.AddYears(-1);
@@ -430,17 +390,17 @@ public class DashboardService(
             TodayNetSales = dayNet,
             TodayProfit = dayProfit,
             AverageBillValue = avgBill,
-            ThisMonthSales = monthSales.Sum(s => s.TotalAmount),
-            ThisMonthTransactions = monthSales.Count,
+            ThisMonthSales = monthSalesAggregate.TotalAmount,
+            ThisMonthTransactions = monthSalesAggregate.TransactionCount,
             PreviousDaySales = previousDaySalesTotal,
             PreviousDayReturns = previousDayReturns,
             PreviousDayNetSales = previousDayNet,
             PreviousDayAverageBillValue = previousDayAverageBill,
-            PreviousMonthSales = previousMonthSales.Sum(s => s.TotalAmount),
+            PreviousMonthSales = previousMonthSalesAggregate.TotalAmount,
             TotalProducts = totalProducts,
             LowStockCount = lowStock,
             OutOfStockCount = outOfStock,
-            PendingOrdersCount = pendingOrders.Count,
+            PendingOrdersCount = pendingOrdersCount,
             OverdueOrdersCount = overdueOrders,
             OutstandingReceivables = receivables,
             PendingPaymentsCount = pendingPayments,
@@ -460,4 +420,78 @@ public class DashboardService(
 
     private TimeSpan ResolveTtl(DateTime date) =>
         date.Date < regional.Now.Date ? HistoricalSummaryTtl : LiveSummaryTtl;
+
+    private async Task<DateTime?> GetLastBackupDateSafeAsync(CancellationToken ct)
+    {
+        try
+        {
+            return await backupService.GetLastBackupDateAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static async Task<SalesAggregate> GetSalesAggregateAsync(
+        IQueryable<Sale> salesQuery,
+        CancellationToken ct)
+    {
+        var aggregate = await salesQuery
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                TotalAmount = g.Sum(s => s.TotalAmount),
+                TransactionCount = g.Count()
+            })
+            .FirstOrDefaultAsync(ct)
+            .ConfigureAwait(false);
+
+        return aggregate is null
+            ? SalesAggregate.Empty
+            : new SalesAggregate(aggregate.TotalAmount, aggregate.TransactionCount);
+    }
+
+    private static List<DailySalesTrendItem> FillDailySalesTrend(
+        IReadOnlyList<DailySalesTrendItem> trendRaw,
+        DateTime startDate,
+        DateTime endDate)
+    {
+        var byDate = trendRaw.ToDictionary(item => item.Date.Date);
+        var filled = new List<DailySalesTrendItem>((endDate - startDate).Days + 1);
+
+        for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+        {
+            if (byDate.TryGetValue(date, out var existing))
+                filled.Add(existing);
+            else
+                filled.Add(new DailySalesTrendItem(date, 0, 0));
+        }
+
+        return filled;
+    }
+
+    private static List<DailyExpenseTrendItem> FillDailyExpenseTrend(
+        IReadOnlyList<DailyExpenseTrendItem> trendRaw,
+        DateTime startDate,
+        DateTime endDate)
+    {
+        var byDate = trendRaw.ToDictionary(item => item.Date.Date);
+        var filled = new List<DailyExpenseTrendItem>((endDate - startDate).Days + 1);
+
+        for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+        {
+            if (byDate.TryGetValue(date, out var existing))
+                filled.Add(existing);
+            else
+                filled.Add(new DailyExpenseTrendItem(date, 0, 0));
+        }
+
+        return filled;
+    }
+
+    private sealed record SalesAggregate(decimal TotalAmount, int TransactionCount)
+    {
+        public static readonly SalesAggregate Empty = new(0, 0);
+    }
 }

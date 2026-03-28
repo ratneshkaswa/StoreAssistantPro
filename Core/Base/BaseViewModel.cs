@@ -79,6 +79,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
+    [NotifyPropertyChangedFor(nameof(HasNonValidationError))]
     public partial string ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
@@ -114,6 +115,12 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     /// <summary>
+    /// <c>true</c> when a non-validation error should be shown inline.
+    /// Validation-summary pages use this to avoid repeating the same save issue twice.
+    /// </summary>
+    public bool HasNonValidationError => HasError && !HasValidationErrors;
+
+    /// <summary>
     /// <c>true</c> when <see cref="SuccessMessage"/> is non-empty.
     /// </summary>
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
@@ -129,6 +136,7 @@ public abstract partial class BaseViewModel : ObservableValidator, IDisposable
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasValidationErrors))]
+    [NotifyPropertyChangedFor(nameof(HasNonValidationError))]
     public partial IReadOnlyList<string> ValidationErrors { get; set; } = [];
 
     /// <summary>

@@ -205,7 +205,7 @@
             </WrapPanel>
 
             <TextBlock Text="{Binding FilterCountText}"
-                       FontSize="11"
+                       FontSize="{StaticResource FontSizeLabel}"
                        Margin="0,8,0,0"
                        Foreground="{StaticResource FluentTextTertiary}"/>
         </StackPanel>
@@ -267,7 +267,7 @@
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="{StaticResource FluentTextTertiary}"/>
-                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>

@@ -16,6 +16,7 @@ public static class TaxModule
     {
         pageRegistry.Map<TaxManagementViewModel>(TaxManagementPage)
             .RequireFeature(TaxManagementPage, FeatureFlags.TaxManagement);
+        pageRegistry.CachePage(TaxManagementPage);
         services.AddTransient<ITaxService, TaxService>();
         services.AddTransient<ITaxGroupService, TaxGroupService>();
         services.AddTransient<TaxManagementViewModel>();

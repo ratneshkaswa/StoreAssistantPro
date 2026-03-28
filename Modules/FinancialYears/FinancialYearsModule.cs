@@ -16,6 +16,7 @@ public static class FinancialYearsModule
     {
         pageRegistry.Map<FinancialYearViewModel>(FinancialYearPage)
             .RequireFeature(FinancialYearPage, FeatureFlags.FinancialYear);
+        pageRegistry.CachePage(FinancialYearPage);
         services.AddTransient<IFinancialYearService, FinancialYearService>();
         services.AddTransient<FinancialYearViewModel>();
         return services;

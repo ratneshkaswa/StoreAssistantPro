@@ -11,6 +11,9 @@ namespace StoreAssistantPro.Modules.Brands.ViewModels;
 
 public partial class BrandManagementViewModel(IBrandService brandService) : BaseViewModel
 {
+
+    private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+
     [ObservableProperty]
     public partial ObservableCollection<Brand> Brands { get; set; } = [];
 
@@ -67,11 +70,12 @@ public partial class BrandManagementViewModel(IBrandService brandService) : Base
     }
 
     [RelayCommand]
-    private Task LoadAsync() => RunLoadAsync(async ct =>
+    private Task LoadAsync() => LoadOnActivateAsync(async ct =>
     {
         var brands = await brandService.GetAllAsync(ct);
         Brands = new ObservableCollection<Brand>(brands);
-    });
+    },
+        NavigationFreshnessWindow);
 
     [RelayCommand]
     private Task SaveAsync() => RunAsync(async ct =>
