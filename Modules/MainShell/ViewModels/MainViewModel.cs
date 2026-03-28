@@ -154,6 +154,9 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsNavigationRailExpanded { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsShellTransitioning { get; set; }
+
     /// <summary>Raised when Ctrl+F is pressed to focus the search box (#420).</summary>
     public event EventHandler? SearchFocusRequested;
 
@@ -172,7 +175,12 @@ public partial class MainViewModel : BaseViewModel
     public bool HasCommandPaletteItems => CommandPaletteItems.Count > 0;
     public bool HasOverflowQuickActions => OverflowQuickActions.Count > 0;
     public double NavigationRailWidth => IsNavigationRailExpanded ? 320 : 56;
+    public bool IsLoginPageActive => string.Equals(_currentPage, LoginPage, StringComparison.Ordinal);
+    public bool IsShellChromeVisible => AppState.IsLoggedIn && !IsLoginPageActive && !IsShellTransitioning;
     public bool IsNavigationRailBackMode => !string.Equals(_currentPage, MainWorkspacePage, StringComparison.Ordinal);
+    public string ShellTransitionMessage => AppState.IsInitialSetupPending
+        ? "Opening first-time setup..."
+        : "Signing in...";
 
     // ── Feature-gated visibility ──
 
@@ -335,39 +343,44 @@ public partial class MainViewModel : BaseViewModel
 
     private async Task OnLoginSucceededAsync(UserType userType)
     {
-        await _sessionService.LoginAsync(userType);
+        IsShellTransitioning = true;
+        try
+        {
+            await _sessionService.LoginAsync(userType);
 
-        var startupPage = ResolveStartupPage();
-        var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
-        var destinationPage = string.Equals(startupPage, FirmManagementPage, StringComparison.Ordinal)
-            ? startupPage
-            : !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
-            ? activationRequest.PageKey!
-            : startupPage;
+            var startupPage = ResolveStartupPage();
+            var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
+            var destinationPage = string.Equals(startupPage, FirmManagementPage, StringComparison.Ordinal)
+                ? startupPage
+                : !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
+                ? activationRequest.PageKey!
+                : startupPage;
 
-        _navigationService.NavigateTo(destinationPage);
-        SetCurrentPage(destinationPage);
-        _statusBar.SetPersistent(
-            string.Equals(destinationPage, MainWorkspacePage, StringComparison.Ordinal)
-                ? (IsBillingVisible ? "Billing ready" : "Workspace")
-                : GetPageDisplayName(destinationPage));
+            _navigationService.NavigateTo(destinationPage);
+            _statusBar.SetPersistent(
+                string.Equals(destinationPage, MainWorkspacePage, StringComparison.Ordinal)
+                    ? (IsBillingVisible ? "Billing ready" : "Workspace")
+                    : GetPageDisplayName(destinationPage));
 
-        if (activationRequest?.OpenNotificationsRequested == true)
-            IsNotificationsPanelVisible = true;
+            if (activationRequest?.OpenNotificationsRequested == true)
+                IsNotificationsPanelVisible = true;
 
-        RequestQuickActionRefresh();
+            await WaitForShellTransitionAsync();
+        }
+        finally
+        {
+            IsShellTransitioning = false;
+            RefreshQuickActionsCore();
+        }
     }
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(INavigationService.CurrentPageKey)
-            && !string.IsNullOrWhiteSpace(_navigationService.CurrentPageKey))
-        {
-            SetCurrentPage(_navigationService.CurrentPageKey!);
-        }
-
         if (e.PropertyName == nameof(INavigationService.CurrentView))
         {
+            if (!string.IsNullOrWhiteSpace(_navigationService.CurrentPageKey))
+                SetCurrentPage(_navigationService.CurrentPageKey!);
+
             OnPropertyChanged(nameof(CurrentView));
             OnPropertyChanged(nameof(WindowTitle));
         }
@@ -379,6 +392,9 @@ public partial class MainViewModel : BaseViewModel
         {
             case nameof(IAppStateService.FirmName):
                 OnPropertyChanged(nameof(WindowTitle));
+                break;
+            case nameof(IAppStateService.IsLoggedIn):
+                OnPropertyChanged(nameof(IsShellChromeVisible));
                 break;
             case nameof(IAppStateService.CurrentUserType):
                 OnPropertyChanged(nameof(IsAdmin));
@@ -535,7 +551,6 @@ public partial class MainViewModel : BaseViewModel
     private void NavigateToMainWorkspace()
     {
         _navigationService.NavigateTo(MainWorkspacePage);
-        SetCurrentPage(MainWorkspacePage);
         _statusBar.SetPersistent(IsBillingVisible ? "Billing ready" : "Workspace");
     }
 
@@ -754,7 +769,6 @@ public partial class MainViewModel : BaseViewModel
             await _commandBus.SendAsync(new LogoutCommand(currentRole));
 
             _navigationService.NavigateTo(LoginPage);
-            SetCurrentPage(LoginPage);
             _statusBar.SetPersistent(string.Empty);
 
             if (_navigationService.CurrentView is LoginViewModel loginVm)
@@ -802,7 +816,6 @@ public partial class MainViewModel : BaseViewModel
 
         // Navigate back to login page
         _navigationService.NavigateTo(LoginPage);
-        SetCurrentPage(LoginPage);
         _statusBar.SetPersistent(string.Empty);
         WireLoginCallback();
     }
@@ -1114,7 +1127,6 @@ public partial class MainViewModel : BaseViewModel
         try
         {
             _navigationService.NavigateTo(LoginPage);
-            SetCurrentPage(LoginPage);
             WireLoginCallback();
         }
         catch
@@ -1123,7 +1135,32 @@ public partial class MainViewModel : BaseViewModel
         }
     }
 
-    private void RequestQuickActionRefresh() => RefreshQuickActionsCore();
+    private void RequestQuickActionRefresh()
+    {
+        if (IsShellTransitioning)
+            return;
+
+        RefreshQuickActionsCore();
+    }
+
+    partial void OnIsShellTransitioningChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsShellChromeVisible));
+        OnPropertyChanged(nameof(ShellTransitionMessage));
+    }
+
+    private static async Task WaitForShellTransitionAsync()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            await Task.Yield();
+            return;
+        }
+
+        await dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+        await dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+    }
 
     private void RefreshQuickActionsCore()
     {
@@ -1395,7 +1432,6 @@ public partial class MainViewModel : BaseViewModel
     private void NavigateToPage(string pageKey, string displayName)
     {
         _navigationService.NavigateTo(pageKey);
-        SetCurrentPage(pageKey);
         _statusBar.SetPersistent(displayName);
     }
 
@@ -1405,6 +1441,8 @@ public partial class MainViewModel : BaseViewModel
         PersistCurrentPage(pageKey);
         UpdateQuickActionActiveState();
         UpdateShellBreadcrumbs();
+        OnPropertyChanged(nameof(IsLoginPageActive));
+        OnPropertyChanged(nameof(IsShellChromeVisible));
         OnPropertyChanged(nameof(IsNavigationRailBackMode));
         OnPropertyChanged(nameof(WindowTitle));
     }

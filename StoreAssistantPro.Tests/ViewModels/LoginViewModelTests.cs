@@ -249,6 +249,32 @@ public class LoginViewModelTests
     }
 
     [Fact]
+    public async Task Login_WhenAlreadyBusy_Ignores_SecondSubmit()
+    {
+        var pendingLogin = new TaskCompletionSource<CommandResult>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _commandBus.SendAsync(Arg.Any<LoginUserCommand>())
+            .Returns(_ => pendingLogin.Task);
+
+        var sut = CreateSut();
+        sut.SelectUserCommand.Execute(UserType.Admin);
+        sut.PinPad.AddDigitCommand.Execute("1");
+        sut.PinPad.AddDigitCommand.Execute("2");
+        sut.PinPad.AddDigitCommand.Execute("3");
+        sut.PinPad.AddDigitCommand.Execute("4");
+
+        await Task.Yield();
+
+        await sut.LoginCommand.ExecuteAsync(null);
+
+        await _commandBus.Received(1).SendAsync(
+            Arg.Is<LoginUserCommand>(c => c.UserType == UserType.Admin && c.Pin == "1234"));
+
+        pendingLogin.SetResult(CommandResult.Success());
+        await Task.Delay(50);
+    }
+
+    [Fact]
     public void Dispose_ClearsLoginSucceeded()
     {
         var sut = CreateSut();

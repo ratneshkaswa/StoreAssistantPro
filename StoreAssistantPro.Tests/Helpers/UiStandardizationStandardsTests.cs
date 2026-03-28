@@ -240,6 +240,17 @@ public sealed class UiStandardizationStandardsTests
     }
 
     [Fact]
+    public void LoginView_Should_Use_Lightweight_Progress_State_Not_Shared_Skeleton_LoadingOverlay()
+    {
+        var loginView = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "Authentication", "Views", "LoginView.xaml"));
+
+        Assert.DoesNotContain("<controls:LoadingOverlay IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("<controls:ProgressRing IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Please wait a moment.", loginView, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GlobalStyles_Should_Not_Use_Forward_BasedOn_StaticResource_Style_References()
     {
         var globalStyles = File.ReadAllLines(
@@ -3074,8 +3085,10 @@ public sealed class UiStandardizationStandardsTests
         Assert.Contains("OnPropertyChanged(nameof(IsWorking));", baseViewModel, StringComparison.Ordinal);
         Assert.Contains("OnPropertyChanged(nameof(WorkingMessage));", baseViewModel, StringComparison.Ordinal);
 
-        Assert.Contains("LoadingOverlay IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
-        Assert.Contains("Message=\"{Binding WorkingMessage}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("<controls:ProgressRing IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Text=\"{Binding WorkingMessage}\"", loginView, StringComparison.Ordinal);
+        Assert.Contains("Please wait a moment.", loginView, StringComparison.Ordinal);
+        Assert.DoesNotContain("<controls:LoadingOverlay IsActive=\"{Binding IsWorking}\"", loginView, StringComparison.Ordinal);
         Assert.DoesNotContain("IsActive=\"{Binding IsVerifying}\"", loginView, StringComparison.Ordinal);
         Assert.DoesNotContain("Message=\"Verifying login...\"", loginView, StringComparison.Ordinal);
         Assert.Contains("public override string WorkingMessage => IsForgotPinMode", loginViewModel, StringComparison.Ordinal);

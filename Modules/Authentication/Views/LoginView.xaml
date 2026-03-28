@@ -313,8 +313,6 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <controls:LoadingOverlay IsActive="{Binding IsWorking}"
-                                             Message="{Binding WorkingMessage}"/>
                 </Grid>
                 </Border>
 
@@ -355,5 +353,35 @@
 
             </ScrollViewer>
         </Border>
+
+        <Grid Panel.ZIndex="20"
+              Background="{StaticResource LoadingOverlayScrim}"
+              Visibility="{Binding IsWorking, Converter={StaticResource BoolToVisibility}}">
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Padding="20"
+                    Background="{StaticResource FluentSurface}"
+                    BorderBrush="{StaticResource FluentSurfaceStroke}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource FluentCornerLarge}">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <controls:ProgressRing IsActive="{Binding IsWorking}"
+                                           Diameter="28"
+                                           StrokeThickness="3"
+                                           VerticalAlignment="Center"/>
+                    <StackPanel Margin="16,0,0,0"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding WorkingMessage}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextPrimary}"/>
+                        <TextBlock Text="Please wait a moment."
+                                   Margin="{StaticResource HintTextSpacing}"
+                                   Foreground="{StaticResource FluentTextSecondary}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

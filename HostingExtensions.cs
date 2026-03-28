@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -91,6 +92,8 @@ internal static class HostingExtensions
                             maxRetryDelay: TimeSpan.FromSeconds(5),
                             errorNumbersToAdd: null)
                         .CommandTimeout(30))
+                .ConfigureWarnings(warnings =>
+                    warnings.Log(RelationalEventId.PendingModelChangesWarning))
                 .EnableDetailedErrors(isDevelopment)
                 .EnableSensitiveDataLogging(false));
 

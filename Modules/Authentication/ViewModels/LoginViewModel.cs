@@ -166,7 +166,7 @@ public partial class LoginViewModel : BaseViewModel
 
     private void OnPinCompleted()
     {
-        if (SelectedUserType is not null)
+        if (!IsBusy && SelectedUserType is not null)
             LoginCommand.Execute(null);
     }
 
@@ -231,6 +231,9 @@ public partial class LoginViewModel : BaseViewModel
     /// <summary>Direct login for User role (no PIN required).</summary>
     private async Task LoginUserDirectAsync()
     {
+        if (IsBusy)
+            return;
+
         ClearMessages();
         IsBusy = true;
         try
@@ -258,6 +261,9 @@ public partial class LoginViewModel : BaseViewModel
     [RelayCommand]
     private async Task LoginAsync()
     {
+        if (IsBusy)
+            return;
+
         if (SelectedUserType is null)
         {
             ErrorMessage = "Please select a user.";
@@ -348,6 +354,9 @@ public partial class LoginViewModel : BaseViewModel
     [RelayCommand]
     private async Task ResetPinAsync()
     {
+        if (IsBusy)
+            return;
+
         if (SelectedUserType is null) return;
 
         if (!Validate(v => v

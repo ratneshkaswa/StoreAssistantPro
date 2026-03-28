@@ -2229,334 +2229,44 @@
                           SnapsToDevicePixels="True">
                         <Border Background="{StaticResource LoadingOverlayScrim}"/>
 
-                        <Border HorizontalAlignment="Stretch"
+                        <Border HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Margin="24"
-                                MaxWidth="820"
-                                Padding="24"
-                                Background="{StaticResource FluentSurface}"
+                                MaxWidth="360"
+                                Padding="20"
+                                Background="{StaticResource FluentSurfaceElevated}"
                                 BorderBrush="{StaticResource FluentSurfaceStroke}"
                                 BorderThickness="1"
                                 CornerRadius="{StaticResource FluentCornerLarge}"
                                 Effect="{StaticResource ElevationEffectFlyout}">
-                            <Grid ClipToBounds="True">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                            <Grid MinWidth="240">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                                <StackPanel>
-                                    <Border Width="232"
-                                            Height="18"
-                                            HorizontalAlignment="Left"
-                                            Background="{StaticResource SkeletonPlaceholderBrush}"
-                                            CornerRadius="4"/>
-                                    <Border Width="168"
-                                            Height="12"
-                                            Margin="0,12,0,0"
-                                            HorizontalAlignment="Left"
-                                            Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                            CornerRadius="4"/>
-                                </StackPanel>
+                                <controls:ProgressRing IsActive="True"
+                                                       Diameter="28"
+                                                       StrokeThickness="3"
+                                                       VerticalAlignment="Center"/>
 
-                                <Grid Grid.Row="1" Margin="0,24,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Border Grid.Column="0"
-                                            Height="36"
-                                            Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                            CornerRadius="6"/>
-                                    <Border Grid.Column="2"
-                                            Width="136"
-                                            Height="36"
-                                            Background="{StaticResource SkeletonPlaceholderBrush}"
-                                            CornerRadius="18"/>
-                                </Grid>
-
-                                <Grid Grid.Row="2" Margin="0,24,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Border Grid.Column="0"
-                                            Padding="16"
-                                            Background="{StaticResource FluentBackgroundSecondary}"
-                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource FluentCornerMedium}">
-                                        <StackPanel>
-                                            <Border Width="96"
-                                                    Height="10"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Width="72"
-                                                    Height="18"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Width="120"
-                                                    Height="10"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <Border Grid.Column="2"
-                                            Padding="16"
-                                            Background="{StaticResource FluentBackgroundSecondary}"
-                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource FluentCornerMedium}">
-                                        <StackPanel>
-                                            <Border Width="88"
-                                                    Height="10"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Width="84"
-                                                    Height="18"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Width="104"
-                                                    Height="10"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <Border Grid.Column="4"
-                                            Padding="16"
-                                            Background="{StaticResource FluentBackgroundSecondary}"
-                                            BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                            BorderThickness="1"
-                                            CornerRadius="{StaticResource FluentCornerMedium}">
-                                        <StackPanel>
-                                            <Border Width="78"
-                                                    Height="10"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Width="68"
-                                                    Height="18"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Width="132"
-                                                    Height="10"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Left"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                        </StackPanel>
-                                    </Border>
-                                </Grid>
-
-                                <Border Grid.Row="3"
-                                        Margin="0,24,0,0"
-                                        Padding="16"
-                                        Background="{StaticResource FluentBackgroundSecondary}"
-                                        BorderBrush="{StaticResource DividerStrokeColorDefault}"
-                                        BorderThickness="1"
-                                        CornerRadius="{StaticResource FluentCornerMedium}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="1"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="96"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="88"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Grid.Column="0"
-                                                    Height="10"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="2"
-                                                    Height="10"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="4"
-                                                    Height="10"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="6"
-                                                    Height="10"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                        </Grid>
-
-                                        <Border Grid.Row="1"
-                                                Margin="0,16,0,16"
-                                                Height="1"
-                                                Background="{StaticResource DividerStrokeColorDefault}"/>
-
-                                        <Grid Grid.Row="2" Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="104"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="80"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="64"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Grid.Column="0"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="2"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="4"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="6"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                        </Grid>
-
-                                        <Grid Grid.Row="3" Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="88"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="72"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Grid.Column="0"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="2"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="4"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="6"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                        </Grid>
-
-                                        <Grid Grid.Row="4" Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="96"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="84"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="76"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Grid.Column="0"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="2"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="4"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="6"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderBrush}"
-                                                    CornerRadius="4"/>
-                                        </Grid>
-
-                                        <Grid Grid.Row="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="112"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="92"/>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition Width="70"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border Grid.Column="0"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="2"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="4"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                            <Border Grid.Column="6"
-                                                    Height="12"
-                                                    Background="{StaticResource SkeletonPlaceholderSecondaryBrush}"
-                                                    CornerRadius="4"/>
-                                        </Grid>
-                                    </Grid>
-                                </Border>
-
-                                <StackPanel Grid.Row="4"
-                                            Margin="0,20,0,0"
-                                            Orientation="Horizontal"
-                                            HorizontalAlignment="Left"
+                                <StackPanel Grid.Column="2"
+                                            MinWidth="0"
                                             VerticalAlignment="Center">
-                                    <controls:ProgressRing IsActive="{TemplateBinding IsActive}"
-                                                           Diameter="18"
-                                                           StrokeThickness="2"
-                                                           HorizontalAlignment="Center"/>
                                     <TextBlock Text="{TemplateBinding Message}"
-                                               Margin="12,0,0,0"
-                                               VerticalAlignment="Center"
+                                               FontFamily="{StaticResource FluentFontFamily}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextPrimary}"
+                                               TextWrapping="Wrap"/>
+                                    <TextBlock Margin="0,4,0,0"
+                                               Text="Please wait a moment."
                                                FontFamily="{StaticResource FluentFontFamily}"
                                                FontSize="{StaticResource FontSizeCaption}"
-                                               Foreground="{StaticResource FluentTextSecondary}"/>
+                                               Foreground="{StaticResource FluentTextSecondary}"
+                                               TextWrapping="Wrap"/>
                                 </StackPanel>
-
                             </Grid>
                         </Border>
                     </Grid>

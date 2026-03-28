@@ -130,9 +130,60 @@ public sealed class MainViewModelRestoreTests : IDisposable
         Assert.Contains("Sign in", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task ShellChrome_Should_Remain_Hidden_On_Login_Page_Even_When_Session_Is_Already_Marked_LoggedIn()
+    {
+        _appState.IsLoggedIn.Returns(true);
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(false);
+        var sut = CreateSut();
+
+        await InvokePrepareStartupAsync(sut);
+
+        Assert.False(sut.IsShellChromeVisible);
+
+        await InvokeLoginSucceededAsync(sut, UserType.Admin);
+
+        Assert.True(sut.IsShellChromeVisible);
+    }
+
+    [Fact]
+    public async Task ShellChrome_Should_Wait_For_View_Swap_Before_Leaving_Login_State()
+    {
+        _appState.IsLoggedIn.Returns(true);
+        _userService.HasUserRoleAsync(Arg.Any<CancellationToken>()).Returns(false);
+        var navigation = new StubNavigationService();
+        var sut = CreateSut(navigation);
+
+        await InvokePrepareStartupAsync(sut);
+
+        navigation.PublishPageKeyOnly("FirmManagement");
+        Assert.False(sut.IsShellChromeVisible);
+        Assert.Contains("Sign in", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
+
+        navigation.PublishViewOnly();
+        Assert.True(sut.IsShellChromeVisible);
+        Assert.Contains("Firm", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ShellChrome_Should_Hide_While_ShellTransition_Is_Active()
+    {
+        _appState.IsLoggedIn.Returns(true);
+        var sut = CreateSut();
+
+        sut.IsShellTransitioning = true;
+
+        Assert.False(sut.IsShellChromeVisible);
+        Assert.Equal("Signing in...", sut.ShellTransitionMessage);
+    }
+
     private MainViewModel CreateSut()
     {
-        var navigation = new StubNavigationService();
+        return CreateSut(new StubNavigationService());
+    }
+
+    private MainViewModel CreateSut(StubNavigationService navigation)
+    {
         return new MainViewModel(
             navigation,
             _sessionService,
@@ -189,6 +240,16 @@ public sealed class MainViewModelRestoreTests : IDisposable
         public void NavigateTo(string pageKey)
         {
             CurrentPageKey = pageKey;
+            CurrentView = new StubView();
+        }
+
+        public void PublishPageKeyOnly(string pageKey)
+        {
+            CurrentPageKey = pageKey;
+        }
+
+        public void PublishViewOnly()
+        {
             CurrentView = new StubView();
         }
 

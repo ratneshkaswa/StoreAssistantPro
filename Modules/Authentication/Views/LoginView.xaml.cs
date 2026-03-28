@@ -104,7 +104,7 @@ public partial class LoginView : UserControl
                 ClearResetFields();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Enter && vm.ResetPinCommand.CanExecute(null))
+            else if (e.Key == Key.Enter && !vm.IsBusy && vm.ResetPinCommand.CanExecute(null))
             {
                 vm.ResetPinCommand.Execute(null);
                 e.Handled = true;
@@ -178,7 +178,7 @@ public partial class LoginView : UserControl
                 vm.PinPad.ClearCommand.Execute(null);
                 e.Handled = true;
                 break;
-            case Key.Enter when vm.LoginCommand.CanExecute(null):
+            case Key.Enter when !vm.IsBusy && vm.LoginCommand.CanExecute(null):
                 vm.LoginCommand.Execute(null);
                 e.Handled = true;
                 break;

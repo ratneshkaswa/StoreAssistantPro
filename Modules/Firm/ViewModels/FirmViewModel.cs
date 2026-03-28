@@ -90,6 +90,7 @@ public partial class FirmViewModel : BaseViewModel
         BankIFSC = string.Empty;
         ReceiptHeaderText = string.Empty;
         SelectedInvoiceResetPeriod = "Never";
+        IsInitialSetupMode = _appState.IsInitialSetupPending;
         PropertyChanged += OnFirmPropertyChanged;
     }
 

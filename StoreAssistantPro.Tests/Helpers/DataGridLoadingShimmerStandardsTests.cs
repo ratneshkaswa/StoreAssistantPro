@@ -2,21 +2,22 @@ using Xunit;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
-public sealed class DataGridLoadingShimmerStandardsTests
+public sealed class LoadingOverlayPresentationStandardsTests
 {
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void LoadingOverlay_Should_Contain_Table_Header_And_Row_Placeholders()
+    public void LoadingOverlay_Should_Use_Compact_Progress_Surface_Instead_Of_Skeleton_Frame()
     {
         var theme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
 
-        Assert.Contains("<Border Grid.Row=\"3\"", theme, StringComparison.Ordinal);
-        Assert.Contains("<Grid Grid.Row=\"2\" Margin=\"0,24,0,0\">", theme, StringComparison.Ordinal);
-        Assert.Contains("<Grid Grid.Row=\"4\" Margin=\"0,0,0,12\">", theme, StringComparison.Ordinal);
-        Assert.Contains("SkeletonPlaceholderSecondaryBrush", theme, StringComparison.Ordinal);
-        Assert.Contains("SkeletonPlaceholderBrush", theme, StringComparison.Ordinal);
+        Assert.Contains("<Style TargetType=\"{x:Type controls:LoadingOverlay}\">", theme, StringComparison.Ordinal);
+        Assert.Contains("<controls:ProgressRing IsActive=\"True\"", theme, StringComparison.Ordinal);
+        Assert.Contains("Text=\"{TemplateBinding Message}\"", theme, StringComparison.Ordinal);
+        Assert.Contains("Please wait a moment.", theme, StringComparison.Ordinal);
+        Assert.DoesNotContain("SkeletonPlaceholderSecondaryBrush", theme, StringComparison.Ordinal);
+        Assert.DoesNotContain("SkeletonPlaceholderBrush", theme, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

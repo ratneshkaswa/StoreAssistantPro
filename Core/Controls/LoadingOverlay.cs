@@ -5,8 +5,8 @@ using System.Windows.Controls;
 namespace StoreAssistantPro.Core.Controls;
 
 /// <summary>
-/// Semi-transparent overlay with shimmering skeleton placeholders and a
-/// supporting <see cref="ProgressRing"/> that covers its parent when
+/// Semi-transparent overlay with a compact progress surface and supporting
+/// <see cref="ProgressRing"/> that covers its parent when
 /// <see cref="IsActive"/> is <c>true</c>.
 /// <para>
 /// Place as the last child inside a <see cref="Grid"/> so it layers on top.

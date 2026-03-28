@@ -2,26 +2,28 @@ using Xunit;
 
 namespace StoreAssistantPro.Tests.Helpers;
 
-public sealed class LoadingSkeletonStandardsTests
+public sealed class LoadingOverlayStandardsTests
 {
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void LoadingOverlay_Should_Render_Static_Skeleton_Surface_Without_Shimmer()
+    public void LoadingOverlay_Should_Render_Compact_Progress_Surface_Without_Shimmer()
     {
         var fluentTheme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
-        var designSystem = File.ReadAllText(
-            Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
         var loadingOverlay = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Controls", "LoadingOverlay.cs"));
 
         Assert.Contains("<Style TargetType=\"{x:Type controls:LoadingOverlay}\">", fluentTheme, StringComparison.Ordinal);
-        Assert.Contains("SkeletonPlaceholderBrush", designSystem, StringComparison.Ordinal);
-        Assert.Contains("SkeletonPlaceholderSecondaryBrush", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<controls:ProgressRing IsActive=\"True\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("Text=\"{TemplateBinding Message}\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("Please wait a moment.", fluentTheme, StringComparison.Ordinal);
+        Assert.DoesNotContain("SkeletonPlaceholderBrush", fluentTheme, StringComparison.Ordinal);
+        Assert.DoesNotContain("SkeletonPlaceholderSecondaryBrush", fluentTheme, StringComparison.Ordinal);
         Assert.DoesNotContain("SkeletonSheenTransform", fluentTheme, StringComparison.Ordinal);
         Assert.DoesNotContain("LoadingOverlaySheenStoryboard", fluentTheme, StringComparison.Ordinal);
         Assert.DoesNotContain("RepeatBehavior=\"Forever\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("compact progress surface", loadingOverlay, StringComparison.Ordinal);
         Assert.Contains("Preparing content", loadingOverlay, StringComparison.Ordinal);
     }
 

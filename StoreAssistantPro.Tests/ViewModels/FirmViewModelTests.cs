@@ -17,6 +17,19 @@ public class FirmViewModelTests
     private FirmViewModel CreateSut() => new(_firmService, _eventBus, _appState);
 
     [Fact]
+    public void Constructor_WhenInitialSetupPending_StartsInSetupMode()
+    {
+        _appState.IsInitialSetupPending.Returns(true);
+
+        var sut = CreateSut();
+
+        Assert.True(sut.IsInitialSetupMode);
+        Assert.False(sut.IsExtendedBusinessDetailsVisible);
+        Assert.Equal("First-time setup", sut.PageTitleText);
+        Assert.Equal("Save setup", sut.SaveButtonText);
+    }
+
+    [Fact]
     public async Task LoadFirm_PopulatesUnifiedFields()
     {
         _firmService.GetFirmAsync(Arg.Any<CancellationToken>()).Returns(new FirmManagementSnapshot(

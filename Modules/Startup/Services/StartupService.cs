@@ -48,12 +48,31 @@ public class StartupService(
         {
             logger.LogWarning(
                 ex,
-                "Skipping EF migration apply due to pending model-change warning and continuing with compatibility patches");
+                "EF reported pending model changes while applying migrations; continuing only because the database is already reachable");
+
+            if (!await CanConnectSafelyAsync(context, ct).ConfigureAwait(false))
+            {
+                throw new InvalidOperationException(
+                    "Database creation was blocked by EF pending-model validation before the first-run schema could be created.",
+                    ex);
+            }
         }
 
         await EnsureLegacyColumnsAsync(context, ct).ConfigureAwait(false);
 
         logger.LogInformation("All migrations applied successfully");
+    }
+
+    private static async Task<bool> CanConnectSafelyAsync(AppDbContext context, CancellationToken ct)
+    {
+        try
+        {
+            return await context.Database.CanConnectAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private async Task EnsureLegacyColumnsAsync(AppDbContext context, CancellationToken ct)

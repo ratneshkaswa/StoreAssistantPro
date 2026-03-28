@@ -385,7 +385,7 @@
 
         <!-- TOP MENU BAR -->
         <Menu Grid.Row="0"
-              Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}"
+              Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}"
               Margin="{StaticResource ItemSpacing}"
               Style="{StaticResource FluentMenuBarStyle}"
               ItemContainerStyle="{StaticResource FluentMenuBarItemStyle}">
@@ -532,7 +532,7 @@
         <Grid x:Name="QuickActionBarHost"
               Grid.Row="1"
               ClipToBounds="True"
-              Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
+              Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}">
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="QuickActionBarTransform"/>
             </Grid.RenderTransform>
@@ -889,7 +889,7 @@
                     <Setter Property="BorderThickness" Value="1"/>
                     <Setter Property="CornerRadius" Value="{StaticResource FluentCornerXLarge}"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding AppState.IsLoggedIn}" Value="False">
+                        <DataTrigger Binding="{Binding IsShellChromeVisible}" Value="False">
                             <Setter Property="Margin" Value="0"/>
                             <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="BorderThickness" Value="0"/>
@@ -913,7 +913,7 @@
                         BorderBrush="{StaticResource DividerStrokeColorDefault}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource FluentCornerXLarge}"
-                        Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
+                        Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -997,6 +997,12 @@
                 </Grid>
             </Grid>
         </Border>
+
+        <controls:LoadingOverlay Grid.Row="0"
+                                 Grid.RowSpan="4"
+                                 Panel.ZIndex="150"
+                                 IsActive="{Binding IsShellTransitioning}"
+                                 Message="{Binding ShellTransitionMessage}"/>
 
         <Grid Grid.Row="0"
               Grid.RowSpan="4"
@@ -1189,7 +1195,7 @@
         </Grid>
         <!-- BOTTOM STATUS BAR -->
         <Border Grid.Row="3"
-                Visibility="{Binding AppState.IsLoggedIn, Converter={StaticResource BoolToVisibility}}"
+                Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}"
                 Margin="{StaticResource ItemSpacing}"
                 Background="{StaticResource ChromeAltFillColorSecondary}"
                 BorderBrush="{StaticResource DividerStrokeColorDefault}"
