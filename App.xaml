@@ -61,7 +61,7 @@
              xmlns:grnViews="clr-namespace:StoreAssistantPro.Modules.GRN.Views"
              xmlns:bclVm="clr-namespace:StoreAssistantPro.Modules.BarcodeLabels.ViewModels"
              xmlns:bclViews="clr-namespace:StoreAssistantPro.Modules.BarcodeLabels.Views"
-             ShutdownMode="OnExplicitShutdown">
+             ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

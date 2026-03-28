@@ -1,6 +1,4 @@
 using System.Windows;
-using System.Windows.Input;
-
 namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
@@ -27,18 +25,10 @@ public static class ClickRipple
         if (d is not FrameworkElement element)
             return;
 
-        if ((bool)e.NewValue)
-        {
-            element.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
-        }
-        else
-        {
-            element.PreviewMouseLeftButtonDown -= OnPreviewMouseLeftButtonDown;
-        }
-    }
+        _ = element;
+        _ = e;
 
-    private static void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        // Intentionally no-op: speed-first mode disables decorative click ripples.
+        // Intentionally no-op: speed-first mode disables decorative click ripples
+        // and avoids attaching any mouse handlers for them.
     }
 }

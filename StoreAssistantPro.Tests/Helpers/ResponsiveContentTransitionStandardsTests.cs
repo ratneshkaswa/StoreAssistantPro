@@ -62,12 +62,17 @@ public sealed class ResponsiveContentTransitionStandardsTests
     {
         var designSystem = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
+        var motionSystem = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "MotionSystem.xaml"));
 
-        Assert.Contains("<Duration x:Key=\"FluentDurationFast\">0:0:0.05</Duration>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<Duration x:Key=\"FluentDurationNormal\">0:0:0.10</Duration>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<Duration x:Key=\"FluentDurationSlow\">0:0:0.14</Duration>", designSystem, StringComparison.Ordinal);
-        Assert.Contains("<Duration x:Key=\"FluentDurationPageFade\">0:0:0.14</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationFast\">0:0:0</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationNormal\">0:0:0</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationSlow\">0:0:0</Duration>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<Duration x:Key=\"FluentDurationPageFade\">0:0:0</Duration>", designSystem, StringComparison.Ordinal);
         Assert.Contains("<sys:Double x:Key=\"MotionScaleHoverFrom\">0.992</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.DoesNotContain("<Storyboard", motionSystem, StringComparison.Ordinal);
+        Assert.DoesNotContain("<BeginStoryboard", motionSystem, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", motionSystem, StringComparison.Ordinal);
     }
 
     [Fact]

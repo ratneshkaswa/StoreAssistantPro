@@ -44,10 +44,25 @@ public sealed class WindowShellStandardsTests
     {
         var content = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+        var appXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "App.xaml"));
 
         Assert.Contains("Background=\"{StaticResource AppBackgroundBrush}\"", content, StringComparison.Ordinal);
+        Assert.Contains("WindowStyle=\"None\"", content, StringComparison.Ordinal);
         Assert.Contains("Value=\"{StaticResource FluentSurface}\"", content, StringComparison.Ordinal);
         Assert.Contains("BorderBrush=\"{StaticResource FluentSurfaceStroke}\"", content, StringComparison.Ordinal);
+        Assert.Contains("ShutdownMode=\"OnMainWindowClose\"", appXaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainWindow_Should_Render_EdgeToEdge_Without_Outer_Shell_Gaps()
+    {
+        var content = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+
+        Assert.DoesNotContain("Margin=\"{StaticResource ItemSpacing}\"", content, StringComparison.Ordinal);
+        Assert.Contains("CornerRadius=\"0\"", content, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"NavigationRailHost\"", content, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -104,17 +119,49 @@ public sealed class WindowShellStandardsTests
         var content = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
 
-        Assert.Contains("ScrollViewer.HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
-        Assert.Contains("HorizontalScrollBarVisibility=\"Auto\"", content, StringComparison.Ordinal);
         Assert.Contains("ExpandableTextBlock", content, StringComparison.Ordinal);
+        Assert.Contains("CollapsedLineCount=\"2\"", content, StringComparison.Ordinal);
+        Assert.Contains("ScrollViewer.HorizontalScrollBarVisibility=\"Disabled\"", content, StringComparison.Ordinal);
     }
     [Fact]
     public void TopLevelWindows_Should_Use_Shared_WindowSizingService()
     {
         var mainWindowCode = File.ReadAllText(
             Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
+        var sizingServiceCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Services", "WindowSizingService.cs"));
 
         Assert.Contains("sizingService.ConfigureMainWindow(this);", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("window.ResizeMode = ResizeMode.CanMinimize;", sizingServiceCode, StringComparison.Ordinal);
+        Assert.DoesNotContain("AttachVisibilityGuard(window);", sizingServiceCode[
+            sizingServiceCode.IndexOf("public void ConfigureMainWindow(Window window)", StringComparison.Ordinal)..
+            sizingServiceCode.IndexOf("public void ConfigureDialogWindow(Window dialog, double width, double height)", StringComparison.Ordinal)],
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainWindow_Should_Block_Native_TitleBar_Dragging_And_Move_Commands()
+    {
+        var mainWindowCode = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml.cs"));
+        var mainWindowXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+
+        Assert.Contains("SourceInitialized += OnSourceInitialized;", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("source.AddHook(WndProc);", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("WmNcLButtonDown", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("WmNcLButtonDblClk", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("WmSysCommand", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("ScMove", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("wParam == HtCaption", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"ShellMinimizeButton\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"ShellCloseButton\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"Width\" Value=\"46\"/>", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"Height\" Value=\"30\"/>", mainWindowXaml, StringComparison.Ordinal);
+        Assert.Contains("OnMinimizeWindowClick", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("OnCloseWindowClick", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("Application.Current?.Shutdown();", mainWindowCode, StringComparison.Ordinal);
+        Assert.Contains("window.Close();", mainWindowCode, StringComparison.Ordinal);
     }
 
     [Fact]

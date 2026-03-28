@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using StoreAssistantPro.Core.Helpers;
 using StoreAssistantPro.Core.Services;
@@ -13,6 +14,11 @@ namespace StoreAssistantPro.Modules.MainShell.Views;
 
 public partial class MainWindow : Window
 {
+    private const int WmNcLButtonDown = 0x00A1;
+    private const int WmNcLButtonDblClk = 0x00A3;
+    private const int WmSysCommand = 0x0112;
+    private const int ScMove = 0xF010;
+    private static readonly IntPtr HtCaption = new(2);
     private const double NotificationPanelEdgeMargin = 16;
     private const double NotificationPanelVerticalMargin = 24;
     private MainViewModel? _boundViewModel;
@@ -27,7 +33,7 @@ public partial class MainWindow : Window
         WindowIconHelper.Apply(this);
         sizingService.ConfigureMainWindow(this);
 
-        SourceInitialized += (_, _) => Win11Backdrop.Apply(this);
+        SourceInitialized += OnSourceInitialized;
         Loaded += (_, _) => UpdateNotificationsPopupLayout();
         Loaded += (_, _) => InitializeQuickActionBarChrome();
         Loaded += (_, _) => ApplyNavigationRailWidth(animate: false);
@@ -38,6 +44,34 @@ public partial class MainWindow : Window
 
         DataContextChanged += OnDataContextChanged;
         Closed += OnClosed;
+    }
+
+    private void OnSourceInitialized(object? sender, EventArgs e)
+    {
+        Win11Backdrop.Apply(this);
+
+        if (PresentationSource.FromVisual(this) is HwndSource source)
+            source.AddHook(WndProc);
+    }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WmNcLButtonDown || msg == WmNcLButtonDblClk)
+        {
+            if (wParam == HtCaption)
+            {
+                handled = true;
+                return IntPtr.Zero;
+            }
+        }
+
+        if (msg == WmSysCommand && ((wParam.ToInt64() & 0xFFF0) == ScMove))
+        {
+            handled = true;
+            return IntPtr.Zero;
+        }
+
+        return IntPtr.Zero;
     }
 
     private void OnNotificationsPopupOpened(object sender, EventArgs e) =>
@@ -238,6 +272,18 @@ public partial class MainWindow : Window
         _boundViewModel?.CloseQuickActionOverflowCommand.Execute(null);
     }
 
+    private void OnMinimizeWindowClick(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+        e.Handled = true;
+    }
+
+    private void OnCloseWindowClick(object sender, RoutedEventArgs e)
+    {
+        Application.Current?.Shutdown();
+        e.Handled = true;
+    }
+
     private void OnClosed(object? sender, EventArgs e)
     {
         ShellContentHost.ScrollOffsetChanged -= OnShellContentScrollChanged;
@@ -249,9 +295,34 @@ public partial class MainWindow : Window
             _boundViewModel = null;
         }
 
-        (DataContext as IDisposable)?.Dispose();
+        try
+        {
+            (DataContext as IDisposable)?.Dispose();
+        }
+        catch
+        {
+            // Closing the shell must still terminate the app even if disposal fails.
+        }
+        finally
+        {
+            var app = Application.Current;
+            if (app is not null)
+            {
+                foreach (var window in app.Windows.OfType<Window>().Where(window => window != this).ToList())
+                {
+                    try
+                    {
+                        window.Close();
+                    }
+                    catch
+                    {
+                        // Best-effort close during app shutdown.
+                    }
+                }
 
-        // Single-window architecture: closing the main window shuts down the app
-        Application.Current?.Shutdown();
+                if (!app.Dispatcher.HasShutdownStarted && !app.Dispatcher.HasShutdownFinished)
+                    app.Shutdown();
+            }
+        }
     }
 }

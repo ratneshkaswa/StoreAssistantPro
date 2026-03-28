@@ -7,7 +7,7 @@ public sealed class SmoothScrollComplianceTests
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void SmoothScroll_Should_Use_Immediate_PixelScrolling_And_SystemWheelSettings()
+    public void SmoothScroll_Should_Retain_Attached_Property_But_Avoid_Custom_Wheel_Handling()
     {
         var content = File.ReadAllText(Path.Combine(
             SolutionRoot,
@@ -15,17 +15,13 @@ public sealed class SmoothScrollComplianceTests
             "Helpers",
             "SmoothScroll.cs"));
 
-        Assert.Contains("sv.CanContentScroll = false;", content, StringComparison.Ordinal);
-        Assert.Contains("OriginalCanContentScrollProperty", content, StringComparison.Ordinal);
-        Assert.Contains("SystemParameters.WheelScrollLines", content, StringComparison.Ordinal);
-        Assert.Contains("Mouse.MouseWheelDeltaForOneLine", content, StringComparison.Ordinal);
-        Assert.Contains("PixelsPerScrollLine", content, StringComparison.Ordinal);
-        Assert.Contains("MinimumScrollAmount", content, StringComparison.Ordinal);
-        Assert.Contains("ViewportHeight * 0.35", content, StringComparison.Ordinal);
-        Assert.Contains("sv.ScrollToVerticalOffset(newTarget);", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("ScrollViewerOffsetMediator", content, StringComparison.Ordinal);
+        Assert.Contains("IsEnabledProperty", content, StringComparison.Ordinal);
+        Assert.Contains("OnNoOpChanged", content, StringComparison.Ordinal);
+        Assert.Contains("speed-first mode leaves scrolling fully native", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("PreviewMouseWheel += OnPreviewMouseWheel", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("ScrollToVerticalOffset", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("SystemParameters.WheelScrollLines", content, StringComparison.Ordinal);
         Assert.DoesNotContain("DoubleAnimation", content, StringComparison.Ordinal);
-        Assert.DoesNotContain("private const double ScrollAmount = 80;", content, StringComparison.Ordinal);
     }
 
     [Fact]

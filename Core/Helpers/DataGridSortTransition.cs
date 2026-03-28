@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace StoreAssistantPro.Core.Helpers;
@@ -11,9 +10,6 @@ namespace StoreAssistantPro.Core.Helpers;
 /// </summary>
 public static class DataGridSortTransition
 {
-    private const double StartingOpacity = 0.72;
-    private static readonly Duration TransitionDuration = new(TimeSpan.FromMilliseconds(60));
-
     public static readonly DependencyProperty IsEnabledProperty =
         DependencyProperty.RegisterAttached(
             "IsEnabled",
@@ -85,14 +81,7 @@ public static class DataGridSortTransition
 
         UIElement target = rowsPresenter ?? dataGrid;
         target.BeginAnimation(UIElement.OpacityProperty, null);
-        target.Opacity = StartingOpacity;
-
-        var fadeAnimation = new DoubleAnimation(StartingOpacity, 1d, TransitionDuration)
-        {
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-        };
-
-        target.BeginAnimation(UIElement.OpacityProperty, fadeAnimation, HandoffBehavior.SnapshotAndReplace);
+        target.Opacity = 1d;
     }
 
     private static T? FindVisualChild<T>(DependencyObject? parent) where T : DependencyObject

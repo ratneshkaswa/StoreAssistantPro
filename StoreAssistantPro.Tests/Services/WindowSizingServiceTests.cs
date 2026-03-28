@@ -76,7 +76,7 @@ public sealed class WindowSizingServiceTests
     }
 
     [Fact]
-    public void ConfigureMainWindow_Should_Fill_WorkArea_And_Remain_NonResizable()
+    public void ConfigureMainWindow_Should_Fill_WorkArea_And_Remain_NonResizable_With_Minimize_Available()
     {
         RunOnStaThread(() =>
         {
@@ -90,8 +90,10 @@ public sealed class WindowSizingServiceTests
             Assert.True(window.ShowActivated);
             Assert.Equal(SizeToContent.Manual, window.SizeToContent);
             Assert.Equal(WindowStartupLocation.CenterScreen, window.WindowStartupLocation);
-            Assert.Equal(ResizeMode.NoResize, window.ResizeMode);
+            Assert.Equal(ResizeMode.CanMinimize, window.ResizeMode);
             Assert.Equal(WindowState.Normal, window.WindowState);
+            Assert.Equal(workArea.Width, window.MinWidth);
+            Assert.Equal(workArea.Height, window.MinHeight);
             Assert.Equal(workArea.Width, window.Width);
             Assert.Equal(workArea.Height, window.Height);
             Assert.Equal(workArea.Left, window.Left);

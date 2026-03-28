@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
         Background="{StaticResource AppBackgroundBrush}"
+        WindowStyle="None"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
 
@@ -23,6 +24,52 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ShellCaptionButtonStyle" TargetType="Button" BasedOn="{x:Null}">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="CaptionButtonBorder"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CaptionButtonBorder" Property="Background" Value="{StaticResource FluentSubtleHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="CaptionButtonBorder" Property="Background" Value="{StaticResource FluentSubtlePressed}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Tag" Value="Close"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="CaptionButtonBorder" Property="Background" Value="{StaticResource FluentError}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Tag" Value="Close"/>
+                                    <Condition Property="IsPressed" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="CaptionButtonBorder" Property="Background" Value="{StaticResource FluentErrorDark1}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -331,10 +378,43 @@
                 UseLayoutRounding="True"
                 SnapsToDevicePixels="True"/>
 
+        <StackPanel Grid.Row="0"
+                    Grid.RowSpan="4"
+                    Panel.ZIndex="250"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top">
+            <Button x:Name="ShellMinimizeButton"
+                    Style="{StaticResource ShellCaptionButtonStyle}"
+                    Click="OnMinimizeWindowClick"
+                    AutomationProperties.Name="Minimize window"
+                    ToolTip="Minimize">
+                <TextBlock Text="&#xE921;"
+                           FontFamily="{StaticResource FluentIconFont}"
+                           FontSize="10"
+                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Button>
+            <Button x:Name="ShellCloseButton"
+                    Style="{StaticResource ShellCaptionButtonStyle}"
+                    Tag="Close"
+                    Click="OnCloseWindowClick"
+                    AutomationProperties.Name="Close window"
+                    ToolTip="Close">
+                <TextBlock Text="&#xE8BB;"
+                           FontFamily="{StaticResource FluentIconFont}"
+                           FontSize="10"
+                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Button>
+        </StackPanel>
+
         <!-- TOP MENU BAR -->
         <Menu Grid.Row="0"
               Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}"
-              Margin="{StaticResource ItemSpacing}"
+              Margin="0,0,92,0"
               Style="{StaticResource FluentMenuBarStyle}"
               ItemContainerStyle="{StaticResource FluentMenuBarItemStyle}">
 
@@ -486,7 +566,7 @@
             </Grid.RenderTransform>
             <Border x:Name="QuickActionBar"
                     Style="{StaticResource FluentToolbarStyle}"
-                    Margin="{StaticResource ItemSpacing}">
+                    Margin="0">
                 <DockPanel>
                 <!-- Notification bell + indicators (right-docked) -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
@@ -819,7 +899,7 @@
                 </DockPanel>
             </Border>
             <Border x:Name="QuickActionBarShadow"
-                    Margin="16,0,16,0"
+                    Margin="0"
                     VerticalAlignment="Bottom"
                     Height="1"
                     Background="{StaticResource CommandBarScrollShadowBrush}"
@@ -831,11 +911,11 @@
         <Border Grid.Row="2">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Margin" Value="{StaticResource ItemSpacing}"/>
+                    <Setter Property="Margin" Value="0"/>
                     <Setter Property="Background" Value="{StaticResource FluentSurface}"/>
                     <Setter Property="BorderBrush" Value="{StaticResource FluentSurfaceStroke}"/>
                     <Setter Property="BorderThickness" Value="1"/>
-                    <Setter Property="CornerRadius" Value="{StaticResource FluentCornerXLarge}"/>
+                    <Setter Property="CornerRadius" Value="0"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsShellChromeVisible}" Value="False">
                             <Setter Property="Margin" Value="0"/>
@@ -854,13 +934,13 @@
                 <Border x:Name="NavigationRailHost"
                         Grid.Column="0"
                         Width="56"
-                        Margin="8"
+                        Margin="0"
                         Padding="8"
                         VerticalAlignment="Stretch"
                         Background="{StaticResource ChromeAltFillColorSecondary}"
                         BorderBrush="{StaticResource DividerStrokeColorDefault}"
                         BorderThickness="1"
-                        CornerRadius="{StaticResource FluentCornerXLarge}"
+                        CornerRadius="0"
                         Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -1138,11 +1218,11 @@
         <!-- BOTTOM STATUS BAR -->
         <Border Grid.Row="3"
                 Visibility="{Binding IsShellChromeVisible, Converter={StaticResource BoolToVisibility}}"
-                Margin="{StaticResource ItemSpacing}"
+                Margin="0"
                 Background="{StaticResource ChromeAltFillColorSecondary}"
                 BorderBrush="{StaticResource DividerStrokeColorDefault}"
                 BorderThickness="1"
-                CornerRadius="{StaticResource FluentCornerLarge}"
+                CornerRadius="0"
                 Padding="{StaticResource ButtonPadding}">
             <Grid>
                 <Grid.ColumnDefinitions>

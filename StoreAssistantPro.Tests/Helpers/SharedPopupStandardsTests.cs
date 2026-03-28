@@ -37,9 +37,10 @@ public sealed class SharedPopupStandardsTests
         Assert.Contains("FlyoutPopupSurfaceStyle", fluentTheme, StringComparison.Ordinal);
         Assert.Contains("FlyoutMenuSurfaceStyle", fluentTheme, StringComparison.Ordinal);
         Assert.Contains("h:PopupFlyoutMotion.IsEnabled", fluentTheme, StringComparison.Ordinal);
-        Assert.Contains("ResetPopupChildState", popupMotion, StringComparison.Ordinal);
-        Assert.Contains("child.Opacity = 1;", popupMotion, StringComparison.Ordinal);
-        Assert.DoesNotContain("ResolveOriginOffset", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("OnNoOpChanged", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("speed-first mode avoids popup event hooks", popupMotion, StringComparison.Ordinal);
+        Assert.DoesNotContain("popup.Opened +=", popupMotion, StringComparison.Ordinal);
+        Assert.DoesNotContain("popup.Closed +=", popupMotion, StringComparison.Ordinal);
         Assert.DoesNotContain("DoubleAnimation", popupMotion, StringComparison.Ordinal);
     }
 

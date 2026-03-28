@@ -20,9 +20,8 @@ public class WindowSizingService : IWindowSizingService
         window.ShowActivated = true;
         window.SizeToContent = SizeToContent.Manual;
         window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        window.ResizeMode = ResizeMode.NoResize;
+        window.ResizeMode = ResizeMode.CanMinimize;
         ApplyMainWindowSizing(window);
-        AttachVisibilityGuard(window);
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;
         window.Closed += (_, _) =>
@@ -89,6 +88,8 @@ public class WindowSizingService : IWindowSizingService
         var workArea = GetWorkArea(window);
 
         window.WindowState = WindowState.Normal;
+        window.MinWidth = workArea.Width;
+        window.MinHeight = workArea.Height;
         window.MaxWidth = workArea.Width;
         window.MaxHeight = workArea.Height;
         window.Width = workArea.Width;

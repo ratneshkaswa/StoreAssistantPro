@@ -13,7 +13,9 @@ public sealed class DataGridSortTransitionStandardsTests
         Assert.Contains("class DataGridSortTransition", helperSource, StringComparison.Ordinal);
         Assert.Contains("IsEnabledProperty", helperSource, StringComparison.Ordinal);
         Assert.Contains("dataGrid.Sorting += OnDataGridSorting", helperSource, StringComparison.Ordinal);
-        Assert.Contains("TimeSpan.FromMilliseconds(60)", helperSource, StringComparison.Ordinal);
+        Assert.Contains("target.Opacity = 1d;", helperSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", helperSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("TimeSpan.FromMilliseconds(60)", helperSource, StringComparison.Ordinal);
     }
 
     [Fact]

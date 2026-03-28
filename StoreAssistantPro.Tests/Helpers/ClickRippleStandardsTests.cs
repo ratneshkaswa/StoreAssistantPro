@@ -13,11 +13,12 @@ public sealed class ClickRippleStandardsTests
         var source = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Helpers", "ClickRipple.cs"));
 
-        Assert.Contains("PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;", source, StringComparison.Ordinal);
+        Assert.Contains("OnIsEnabledChanged", source, StringComparison.Ordinal);
         Assert.Contains("Intentionally no-op", source, StringComparison.Ordinal);
         Assert.DoesNotContain("AdornerLayer.GetAdornerLayer", source, StringComparison.Ordinal);
         Assert.DoesNotContain("RippleAdorner", source, StringComparison.Ordinal);
         Assert.DoesNotContain("DoubleAnimation", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PreviewMouseLeftButtonDown +=", source, StringComparison.Ordinal);
     }
 
     [Fact]
