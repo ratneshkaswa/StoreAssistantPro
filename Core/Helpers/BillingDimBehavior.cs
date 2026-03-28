@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -22,10 +21,8 @@ namespace StoreAssistantPro.Core.Helpers;
 /// billing workspace.
 /// </para>
 /// <para>
-/// All animations use <c>DesignSystem.xaml</c> tokens
-/// (<c>FluentDurationNormal</c>, <c>PanelDimEase</c>) resolved at
-/// runtime.  The animation targets <c>RenderTransform</c>-free
-/// <c>Opacity</c> — zero layout cost, GPU-composited.
+/// The behavior applies direct opacity states so shell changes feel
+/// immediate and avoid extra composition work.
 /// </para>
 ///
 /// <para><b>Usage (MainWindow.xaml):</b></para>
@@ -154,59 +151,17 @@ public static class BillingDimBehavior
         if (!isDim && !isHighlight)
             return;
 
-        var duration = ResolveDuration(fe);
-        var ease = ResolveEase(fe);
-
         if (isDim)
         {
             var target = locked ? GetDimOpacity(fe) : 1.0;
-            AnimateOpacity(fe, target, duration, ease);
+            fe.BeginAnimation(UIElement.OpacityProperty, null);
+            fe.Opacity = target;
         }
 
         if (isHighlight)
         {
-            if (locked)
-            {
-                // Quick pop: briefly lower then animate to full
-                var from = GetHighlightFromOpacity(fe);
-                AnimateOpacity(fe, 1.0, duration, ease, from);
-            }
-            else
-            {
-                // Return to full opacity (no-op if already 1.0, but
-                // clears any running animation cleanly)
-                AnimateOpacity(fe, 1.0, duration, ease);
-            }
+            fe.BeginAnimation(UIElement.OpacityProperty, null);
+            fe.Opacity = 1.0;
         }
     }
-
-    // ── Animation helper ─────────────────────────────────────────────
-
-    private static void AnimateOpacity(
-        FrameworkElement fe,
-        double to,
-        Duration duration,
-        IEasingFunction? ease,
-        double? from = null)
-    {
-        var anim = from.HasValue
-            ? new DoubleAnimation(from.Value, to, duration)
-            : new DoubleAnimation(to, duration);
-
-        anim.EasingFunction = ease;
-        anim.Freeze();
-        fe.BeginAnimation(UIElement.OpacityProperty, anim);
-    }
-
-    // ── Token resolution ─────────────────────────────────────────────
-
-    private static Duration ResolveDuration(FrameworkElement fe)
-    {
-        if (fe.TryFindResource("FluentDurationNormal") is Duration d && d.HasTimeSpan)
-            return d;
-        return new Duration(TimeSpan.FromMilliseconds(167));
-    }
-
-    private static IEasingFunction? ResolveEase(FrameworkElement fe) =>
-        fe.TryFindResource("PanelDimEase") as IEasingFunction;
 }

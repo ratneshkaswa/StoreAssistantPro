@@ -2,7 +2,6 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -14,9 +13,8 @@ namespace StoreAssistantPro.Core.Helpers;
 /// (MenuBar, Toolbar, Content, StatusBar) and binds
 /// <see cref="EmphasisProperty"/> to the emphasis level computed by
 /// <c>ICalmUIService</c>. When the emphasis level changes, the behavior
-/// animates a smooth 200 ms transition on the element's <c>Foreground</c>
-/// color (for text softening) and a subtle <c>RenderTransform.ScaleX/Y</c>
-/// reduction (for chrome shrinking).
+/// applies an immediate emphasis state on the element's
+/// <c>RenderTransform.ScaleX/Y</c> without additional animation work.
 /// </para>
 ///
 /// <para><b>Activity detection:</b></para>
@@ -179,10 +177,7 @@ public static class CalmTransition
             return;
 
         var level = (int)e.NewValue;
-        var duration = ResolveDuration(fe, "FluentDurationSlow", 200);
-        var ease = ResolveEase(fe);
-
-        AnimateScale(fe, level, duration, ease);
+        ApplyScale(fe, level);
     }
 
     // ── Activity tracking wiring ─────────────────────────────────
@@ -262,10 +257,10 @@ public static class CalmTransition
         timer.Start();
     }
 
-    // ── Scale animation ──────────────────────────────────────────
+    // ── Scale state ──────────────────────────────────────────────
 
-    private static void AnimateScale(
-        FrameworkElement fe, int emphasisLevel, Duration duration, IEasingFunction? ease)
+    private static void ApplyScale(
+        FrameworkElement fe, int emphasisLevel)
     {
         var targetScale = emphasisLevel switch
         {
@@ -274,8 +269,6 @@ public static class CalmTransition
             _ => ScaleFull
         };
 
-        // Use RenderTransform so we don't conflict with
-        // AdaptiveWorkspace's LayoutTransform
         if (fe.RenderTransform is not ScaleTransform st)
         {
             st = new ScaleTransform(1, 1);
@@ -283,31 +276,7 @@ public static class CalmTransition
             fe.RenderTransformOrigin = new Point(0.5, 0.5);
         }
 
-        var animX = new DoubleAnimation(targetScale, duration) { EasingFunction = ease };
-        var animY = new DoubleAnimation(targetScale, duration) { EasingFunction = ease };
-        animX.Freeze();
-        animY.Freeze();
-
-        st.BeginAnimation(ScaleTransform.ScaleXProperty, animX);
-        st.BeginAnimation(ScaleTransform.ScaleYProperty, animY);
+        st.ScaleX = targetScale;
+        st.ScaleY = targetScale;
     }
-
-    // ── Token resolution ─────────────────────────────────────────
-
-    private static Duration ResolveDuration(FrameworkElement fe, string key, double fallbackMs)
-    {
-        var baseDuration = fe.TryFindResource(key) is Duration d && d.HasTimeSpan
-            ? d.TimeSpan
-            : TimeSpan.FromMilliseconds(fallbackMs);
-
-        if (baseDuration == TimeSpan.Zero)
-            return new Duration(TimeSpan.Zero);
-
-        var flowState = Models.FlowState.Calm;
-        var adapted = FlowMotionAdapter.GetAdaptedDuration(flowState, baseDuration);
-        return new Duration(adapted);
-    }
-
-    private static IEasingFunction? ResolveEase(FrameworkElement fe) =>
-        fe.TryFindResource("PanelDimEase") as IEasingFunction;
 }

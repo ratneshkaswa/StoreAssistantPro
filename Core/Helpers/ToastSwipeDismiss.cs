@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using Microsoft.Extensions.DependencyInjection;
 using StoreAssistantPro.Core.Services;
 
@@ -187,8 +186,8 @@ public static class ToastSwipeDismiss
         state.IsDragging = true;
 
         var translate = EnsureTranslateTransform(element);
-        translate.BeginAnimation(TranslateTransform.XProperty, null);
-        element.BeginAnimation(UIElement.OpacityProperty, null);
+        translate.X = 0;
+        element.Opacity = 1;
     }
 
     private static void UpdateInteraction(FrameworkElement element, Point currentPoint)
@@ -226,16 +225,8 @@ public static class ToastSwipeDismiss
     private static void ResetInteraction(FrameworkElement element)
     {
         var translate = EnsureTranslateTransform(element);
-        var duration = TimeSpan.FromMilliseconds(150);
-        var ease = element.TryFindResource("FluentEaseDecelerate") as IEasingFunction;
-
-        translate.BeginAnimation(
-            TranslateTransform.XProperty,
-            new DoubleAnimation(0, duration) { EasingFunction = ease });
-
-        element.BeginAnimation(
-            UIElement.OpacityProperty,
-            new DoubleAnimation(1, duration) { EasingFunction = ease });
+        translate.X = 0;
+        element.Opacity = 1;
     }
 
     private static void DismissWithAnimation(FrameworkElement element, double currentDelta)
@@ -253,27 +244,10 @@ public static class ToastSwipeDismiss
             return;
         }
 
-        var direction = currentDelta >= 0 ? 1 : -1;
-        var targetX = direction * Math.Max(element.ActualWidth + 48, 180);
-        var duration = TimeSpan.FromMilliseconds(150);
-        var ease = element.TryFindResource("FluentEaseAccelerate") as IEasingFunction;
         var translate = EnsureTranslateTransform(element);
-
-        var dismissAnimation = new DoubleAnimation(targetX, duration)
-        {
-            EasingFunction = ease
-        };
-        dismissAnimation.Completed += (_, _) =>
-        {
-            service.Dismiss(toast.Id);
-            element.Opacity = 1;
-            translate.X = 0;
-        };
-
-        translate.BeginAnimation(TranslateTransform.XProperty, dismissAnimation);
-        element.BeginAnimation(
-            UIElement.OpacityProperty,
-            new DoubleAnimation(0, duration) { EasingFunction = ease });
+        service.Dismiss(toast.Id);
+        element.Opacity = 1;
+        translate.X = 0;
     }
 
     private static IToastService? ResolveToastService()

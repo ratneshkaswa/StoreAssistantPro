@@ -642,7 +642,6 @@
         <Setter Property="UseLayoutRounding"       Value="True"/>
         <Setter Property="SnapsToDevicePixels"     Value="True"/>
         <Setter Property="h:AutomationNameFallback.UseToolTipFallback" Value="True"/>
-        <Setter Property="h:ClickRipple.IsEnabled" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">

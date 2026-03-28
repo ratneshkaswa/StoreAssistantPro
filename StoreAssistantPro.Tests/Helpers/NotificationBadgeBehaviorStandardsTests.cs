@@ -5,16 +5,16 @@ public sealed class NotificationBadgeBehaviorStandardsTests
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void NotificationBadgeBehavior_Should_Use_Badge_Bounce_For_Count_Updates()
+    public void NotificationBadgeBehavior_Should_Update_Quietly_Without_Badge_Bounce()
     {
         var source = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Helpers", "NotificationBadgeBehavior.cs"));
 
-        Assert.Contains("PlayBadgeBounce", source, StringComparison.Ordinal);
-        Assert.Contains("1.0 → 1.2 → 1.0", source, StringComparison.Ordinal);
-        Assert.Contains("if (wasHidden)", source, StringComparison.Ordinal);
-        Assert.Contains("PlayBadgeEntrance(badge);", source, StringComparison.Ordinal);
-        Assert.Contains("PlayBadgeBounce(badge);", source, StringComparison.Ordinal);
+        Assert.Contains("UpdateBadge(badge, newCount, panel);", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PlayBellPulse", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PlayBadgeEntrance", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PlayBadgeBounce", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", source, StringComparison.Ordinal);
     }
 
     private static string FindSolutionRoot()

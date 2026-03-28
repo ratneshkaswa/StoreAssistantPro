@@ -43,6 +43,117 @@ public sealed class SpeedFirstMotionStandardsTests
         Assert.DoesNotContain("MotionButtonScale", chipStyle, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Pos_Buttons_And_Navigation_Toggle_Should_Use_Static_State_Changes()
+    {
+        var posStyles = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml"));
+        var mainWindow = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Modules", "MainShell", "Views", "MainWindow.xaml"));
+
+        var quickActionStyle = GetStyleBlock(posStyles, "<Style x:Key=\"QuickActionButtonStyle\" TargetType=\"Button\">");
+        var enterpriseActionStyle = GetStyleBlock(posStyles, "<Style x:Key=\"EnterpriseActionButtonStyle\" TargetType=\"Button\">");
+        var segmentedFilterStyle = GetStyleBlock(posStyles, "<Style x:Key=\"SegmentedFilterButtonStyle\" TargetType=\"Button\">");
+        var toolbarLinkStyle = GetStyleBlock(posStyles, "<Style x:Key=\"ToolbarLinkButtonStyle\" TargetType=\"Button\">");
+
+        Assert.DoesNotContain("RootScale", quickActionStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("MotionButtonScale", quickActionStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginStoryboard", quickActionStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BdScale", enterpriseActionStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("MotionButtonScale", enterpriseActionStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginStoryboard", enterpriseActionStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BdScale", segmentedFilterStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("MotionButtonScale", segmentedFilterStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginStoryboard", segmentedFilterStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BdScale", toolbarLinkStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("MotionButtonScale", toolbarLinkStyle, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginStoryboard", toolbarLinkStyle, StringComparison.Ordinal);
+
+        Assert.Contains("<Style x:Key=\"NavigationRailToggleButtonStyle\"", mainWindow, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginStoryboard", mainWindow, StringComparison.Ordinal);
+        Assert.DoesNotContain("RotateTransform", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"HamburgerGlyph\" Property=\"Opacity\" Value=\"0\"/>", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("<Setter TargetName=\"BackGlyph\" Property=\"Opacity\" Value=\"1\"/>", mainWindow, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Shared_Helper_Behaviors_Should_Avoid_Runtime_Animation_Paths()
+    {
+        var activeAreaHighlight = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "ActiveAreaHighlight.cs"));
+        var adaptiveWorkspace = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "AdaptiveWorkspace.cs"));
+        var calmTransition = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "CalmTransition.cs"));
+        var billingDimBehavior = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "BillingDimBehavior.cs"));
+        var animatedNumberText = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "AnimatedNumberText.cs"));
+        var inlineTipBanner = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "InlineTipBanner.cs"));
+        var autoGrowTextBox = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "AutoGrowTextBox.cs"));
+        var fluentExpander = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "FluentExpander.cs"));
+        var expandableText = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "ExpandableTextBlock.cs"));
+        var cardHover = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "CardHover.cs"));
+        var notificationBadge = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "NotificationBadgeBehavior.cs"));
+        var popupFlyoutMotion = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "PopupFlyoutMotion.cs"));
+        var toastSwipeDismiss = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "ToastSwipeDismiss.cs"));
+        var validationFeedback = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "ValidationFeedback.cs"));
+        var motion = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "Motion.cs"));
+        var progressRing = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Controls", "ProgressRing.cs"));
+        var smoothScroll = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "SmoothScroll.cs"));
+        var fluentTheme = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
+
+        Assert.DoesNotContain("DoubleAnimation", activeAreaHighlight, StringComparison.Ordinal);
+        Assert.DoesNotContain("ColorAnimation", activeAreaHighlight, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", adaptiveWorkspace, StringComparison.Ordinal);
+        Assert.DoesNotContain("ColorAnimation", adaptiveWorkspace, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", calmTransition, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResolveDuration(", calmTransition, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResolveEase(", calmTransition, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", billingDimBehavior, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateOpacity(", billingDimBehavior, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", animatedNumberText, StringComparison.Ordinal);
+        Assert.DoesNotContain("PendingTargetValueProperty", animatedNumberText, StringComparison.Ordinal);
+        Assert.Contains("DismissImmediately()", inlineTipBanner, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateDismiss()", inlineTipBanner, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", autoGrowTextBox, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateExpand()", fluentExpander, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateCollapse()", fluentExpander, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateMeasuredState(", expandableText, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", cardHover, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginAnimation", cardHover, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", notificationBadge, StringComparison.Ordinal);
+        Assert.DoesNotContain("PlayBellPulse", notificationBadge, StringComparison.Ordinal);
+        Assert.DoesNotContain("PlayBadgeEntrance", notificationBadge, StringComparison.Ordinal);
+        Assert.DoesNotContain("PlayBadgeBounce", notificationBadge, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", popupFlyoutMotion, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResolveOriginOffset", popupFlyoutMotion, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", toastSwipeDismiss, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginAnimation", toastSwipeDismiss, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimationUsingKeyFrames", validationFeedback, StringComparison.Ordinal);
+        Assert.Contains("private static void OnNoOpChanged", motion, StringComparison.Ordinal);
+        Assert.Contains("speed-first mode disables all decorative motion behaviors", motion, StringComparison.Ordinal);
+        Assert.DoesNotContain("Storyboard", progressRing, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", progressRing, StringComparison.Ordinal);
+        Assert.Contains("ApplyActiveState();", progressRing, StringComparison.Ordinal);
+        Assert.DoesNotContain("ScrollViewerOffsetMediator", smoothScroll, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", smoothScroll, StringComparison.Ordinal);
+        Assert.DoesNotContain("h:ClickRipple.IsEnabled", fluentTheme, StringComparison.Ordinal);
+    }
+
     private static string GetStyleBlock(string source, string marker)
     {
         var start = source.IndexOf(marker, StringComparison.Ordinal);

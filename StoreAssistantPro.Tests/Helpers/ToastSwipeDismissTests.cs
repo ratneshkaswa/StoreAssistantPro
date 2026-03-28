@@ -35,6 +35,19 @@ public sealed class ToastSwipeDismissTests
         Assert.Contains("h:ToastSwipeDismiss.IsEnabled=\"True\"", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ToastSwipeDismiss_Should_Reset_And_Dismiss_Without_Storyboard_Animation()
+    {
+        var source = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "ToastSwipeDismiss.cs"));
+
+        Assert.DoesNotContain("DoubleAnimation", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginAnimation", source, StringComparison.Ordinal);
+        Assert.Contains("service.Dismiss(toast.Id);", source, StringComparison.Ordinal);
+        Assert.Contains("translate.X = 0;", source, StringComparison.Ordinal);
+        Assert.Contains("element.Opacity = 1;", source, StringComparison.Ordinal);
+    }
+
     private static string FindSolutionRoot()
     {
         var dir = AppContext.BaseDirectory;

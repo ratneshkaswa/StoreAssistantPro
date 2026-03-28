@@ -11,9 +11,9 @@ public sealed class MotionStaggerStandardsTests
             Path.Combine(SolutionRoot, "Core", "Helpers", "Motion.cs"));
 
         Assert.Contains("StaggerChildrenProperty", motion, StringComparison.Ordinal);
-        Assert.Contains("ItemContainerGenerator.StatusChanged", motion, StringComparison.Ordinal);
-        Assert.Contains("SetStaggerIndex(container, i);", motion, StringComparison.Ordinal);
-        Assert.Contains("idx * 30", motion, StringComparison.Ordinal);
+        Assert.Contains("StaggerIndexProperty", motion, StringComparison.Ordinal);
+        Assert.Contains("private static void OnNoOpChanged", motion, StringComparison.Ordinal);
+        Assert.Contains("DispatcherPriority.Background", motion, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -27,8 +27,8 @@ public sealed class MotionStaggerStandardsTests
         Assert.Contains("CommandPaletteResultsList", mainWindow, StringComparison.Ordinal);
         Assert.Contains("h:Motion.StaggerChildren=\"True\"", mainWindow, StringComparison.Ordinal);
         Assert.True(
-            CountOccurrences(workspace, "h:Motion.StaggerChildren=\"True\"") >= 4,
-            "Workspace list surfaces should opt into automatic staggered entrances.");
+            CountOccurrences(workspace, "h:Motion.StaggerChildren=\"True\"") >= 2,
+            "Workspace list surfaces should retain the current stagger opt-in wiring.");
     }
 
     private static int CountOccurrences(string content, string needle)

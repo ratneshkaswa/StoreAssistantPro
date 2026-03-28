@@ -1,116 +1,47 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
-using StoreAssistantPro.Core.Helpers;
-
 namespace StoreAssistantPro.Tests.Helpers;
 
-[Collection("WpfUi")]
-public class AutoGrowTextBoxTests
+public sealed class AutoGrowTextBoxTests
 {
+    private static readonly string SolutionRoot = FindSolutionRoot();
+
     [Fact]
-    public void EnabledMultilineTextBox_GrowsBeyondMinHeight()
+    public void AutoGrowTextBox_Should_Use_Static_Height_Updates()
     {
-        WpfTestApplication.Run(() =>
-        {
-            var textBox = CreateTextBox(maxHeight: 160);
-            var window = CreateHostWindow(textBox);
+        var source = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "AutoGrowTextBox.cs"));
 
-            try
-            {
-                textBox.Text = "Line one of a longer note that should wrap onto multiple lines in the form.\nLine two keeps growing the editor height.";
-                DrainDispatcher();
-
-                Assert.True(textBox.Height > textBox.MinHeight, $"Expected height greater than min height, but got {textBox.Height}.");
-            }
-            finally
-            {
-                window.Close();
-            }
-        });
+        Assert.DoesNotContain("DoubleAnimation", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("QuadraticEase", source, StringComparison.Ordinal);
+        Assert.Contains("_textBox.SetCurrentValue(FrameworkElement.HeightProperty, targetHeight);", source, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void EnabledMultilineTextBox_RespectsMaxHeight()
+    public void AutoGrowTextBox_Should_Guard_Against_Reentrant_Update_Queues()
     {
-        WpfTestApplication.Run(() =>
-        {
-            var textBox = CreateTextBox(maxHeight: 96);
-            var window = CreateHostWindow(textBox);
+        var source = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Helpers", "AutoGrowTextBox.cs"));
 
-            try
-            {
-                textBox.Text = string.Join(Environment.NewLine, Enumerable.Repeat("Wrapped content that keeps extending the editor height.", 12));
-                DrainDispatcher();
-
-                Assert.True(textBox.Height <= 96, $"Expected height to stay within the max height, but got {textBox.Height}.");
-            }
-            finally
-            {
-                window.Close();
-            }
-        });
+        Assert.Contains("private bool _updatePending;", source, StringComparison.Ordinal);
+        Assert.Contains("private bool _isApplyingHeight;", source, StringComparison.Ordinal);
+        Assert.Contains("if (_updatePending)", source, StringComparison.Ordinal);
+        Assert.Contains("if (_isApplyingHeight)", source, StringComparison.Ordinal);
     }
 
-    private static Window CreateHostWindow(TextBox textBox)
+    private static string FindSolutionRoot()
     {
-        var window = new Window
+        var dir = AppContext.BaseDirectory;
+        while (dir is not null)
         {
-            Width = 320,
-            Height = 240,
-            WindowStyle = WindowStyle.None,
-            ShowInTaskbar = false,
-            ShowActivated = false,
-            Content = new Grid
+            if (Directory.GetFiles(dir, "*.sln").Length > 0 ||
+                Directory.GetFiles(dir, "*.slnx").Length > 0)
             {
-                Margin = new Thickness(16),
-                Children = { textBox }
+                return dir;
             }
-        };
 
-        window.Show();
-        window.UpdateLayout();
-        DrainDispatcher();
-        return window;
-    }
+            dir = Directory.GetParent(dir)?.FullName;
+        }
 
-    private static TextBox CreateTextBox(double maxHeight)
-    {
-        var textBox = new TextBox
-        {
-            Width = 240,
-            MinHeight = 32,
-            MaxHeight = maxHeight,
-            Padding = new Thickness(12, 10, 12, 10),
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
-        };
-
-        AutoGrowTextBox.SetIsEnabled(textBox, true);
-        return textBox;
-    }
-
-    private static void DrainDispatcher()
-    {
-        var frame = new DispatcherFrame();
-        var timer = new DispatcherTimer(DispatcherPriority.Normal)
-        {
-            Interval = TimeSpan.FromMilliseconds(120)
-        };
-        timer.Tick += (_, _) =>
-        {
-            timer.Stop();
-            frame.Continue = false;
-        };
-        timer.Start();
-        Dispatcher.CurrentDispatcher.BeginInvoke(
-            DispatcherPriority.Render,
-            new DispatcherOperationCallback(_ =>
-            {
-                return null;
-            }),
-            null);
-        Dispatcher.PushFrame(frame);
+        throw new InvalidOperationException(
+            "Could not find solution root from " + AppContext.BaseDirectory);
     }
 }

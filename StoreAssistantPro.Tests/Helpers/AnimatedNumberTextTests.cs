@@ -67,4 +67,19 @@ public class AnimatedNumberTextTests
             Assert.Equal("$58K", textBlock.Text);
         });
     }
+
+    [Fact]
+    public void ChangingValue_ReformatsImmediately_Without_Intermediate_State()
+    {
+        RunOnSta(() =>
+        {
+            var textBlock = new TextBlock();
+
+            AnimatedNumberText.SetFormatMode(textBlock, AnimatedNumberFormatMode.CompactNumber);
+            AnimatedNumberText.SetValue(textBlock, 1200d);
+            AnimatedNumberText.SetValue(textBlock, 54000d);
+
+            Assert.Equal("54K", textBlock.Text);
+        });
+    }
 }

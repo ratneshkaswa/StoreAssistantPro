@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -52,6 +51,8 @@ public static class AutoGrowTextBox
     private sealed class TextBoxObserver : IDisposable
     {
         private readonly TextBox _textBox;
+        private bool _updatePending;
+        private bool _isApplyingHeight;
 
         public TextBoxObserver(TextBox textBox)
         {
@@ -67,21 +68,38 @@ public static class AutoGrowTextBox
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            if (_isApplyingHeight)
+                return;
+
             if (Math.Abs(e.WidthChanged ? e.NewSize.Width - e.PreviousSize.Width : 0) > 0.5)
                 QueueUpdate(false);
         }
 
-        private void OnUnloaded(object sender, RoutedEventArgs e) => _textBox.BeginAnimation(FrameworkElement.HeightProperty, null);
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            _updatePending = false;
+            _textBox.BeginAnimation(FrameworkElement.HeightProperty, null);
+        }
 
         private void QueueUpdate(bool animate)
         {
+            if (_updatePending)
+                return;
+
+            _updatePending = true;
+
             if (!_textBox.Dispatcher.CheckAccess())
             {
-                _ = _textBox.Dispatcher.InvokeAsync(() => UpdateHeight(animate));
+                _ = _textBox.Dispatcher.InvokeAsync(() =>
+                {
+                    _updatePending = false;
+                    UpdateHeight(animate);
+                });
                 return;
             }
 
-            _ = _textBox.Dispatcher.InvokeAsync(() => UpdateHeight(animate), System.Windows.Threading.DispatcherPriority.Background);
+            _updatePending = false;
+            UpdateHeight(animate);
         }
 
         private void UpdateHeight(bool animate)
@@ -101,28 +119,28 @@ public static class AutoGrowTextBox
             if (Math.Abs(currentHeight - targetHeight) < 0.5)
             {
                 _textBox.BeginAnimation(FrameworkElement.HeightProperty, null);
-                _textBox.SetCurrentValue(FrameworkElement.HeightProperty, targetHeight);
-                return;
-            }
-
-            if (!animate)
-            {
-                _textBox.BeginAnimation(FrameworkElement.HeightProperty, null);
-                _textBox.SetCurrentValue(FrameworkElement.HeightProperty, targetHeight);
-                return;
-            }
-
-            _textBox.SetCurrentValue(FrameworkElement.HeightProperty, currentHeight);
-            _textBox.BeginAnimation(
-                FrameworkElement.HeightProperty,
-                new DoubleAnimation
+                _isApplyingHeight = true;
+                try
                 {
-                    From = currentHeight,
-                    To = targetHeight,
-                    Duration = TimeSpan.FromMilliseconds(100),
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                },
-                HandoffBehavior.SnapshotAndReplace);
+                    _textBox.SetCurrentValue(FrameworkElement.HeightProperty, targetHeight);
+                }
+                finally
+                {
+                    _isApplyingHeight = false;
+                }
+                return;
+            }
+
+            _textBox.BeginAnimation(FrameworkElement.HeightProperty, null);
+            _isApplyingHeight = true;
+            try
+            {
+                _textBox.SetCurrentValue(FrameworkElement.HeightProperty, targetHeight);
+            }
+            finally
+            {
+                _isApplyingHeight = false;
+            }
         }
 
         private double MeasureDesiredHeight()

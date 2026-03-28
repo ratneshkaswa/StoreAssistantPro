@@ -8,28 +8,27 @@ public sealed class ClickRippleStandardsTests
     private static readonly string SolutionRoot = FindSolutionRoot();
 
     [Fact]
-    public void ClickRipple_Should_Use_An_Adorner_And_Short_Ripple_Timing()
+    public void ClickRipple_Should_Retain_Attached_Property_But_Avoid_Ripple_Animation()
     {
         var source = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Helpers", "ClickRipple.cs"));
 
         Assert.Contains("PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;", source, StringComparison.Ordinal);
-        Assert.Contains("AdornerLayer.GetAdornerLayer", source, StringComparison.Ordinal);
-        Assert.Contains("new RippleAdorner", source, StringComparison.Ordinal);
-        Assert.Contains("TimeSpan.FromMilliseconds(120)", source, StringComparison.Ordinal);
-        Assert.Contains("DrawEllipse", source, StringComparison.Ordinal);
+        Assert.Contains("Intentionally no-op", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("AdornerLayer.GetAdornerLayer", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("RippleAdorner", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", source, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Shared_Button_Styles_Should_Reserve_Click_Ripples_For_Primary_Actions()
+    public void Shared_Button_Styles_Should_Not_Opt_Into_Click_Ripples()
     {
         var theme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
 
         Assert.Contains("x:Key=\"FluentAccentButtonStyle\"", theme, StringComparison.Ordinal);
         Assert.Contains("x:Key=\"FluentStandardButtonStyle\"", theme, StringComparison.Ordinal);
-        Assert.Contains("<Setter Property=\"h:ClickRipple.IsEnabled\" Value=\"True\"/>", theme, StringComparison.Ordinal);
-        Assert.Single(
+        Assert.Empty(
             Regex.Matches(theme, "h:ClickRipple\\.IsEnabled").Cast<Match>());
     }
 

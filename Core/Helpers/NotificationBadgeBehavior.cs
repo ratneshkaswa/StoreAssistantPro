@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -13,22 +12,6 @@ namespace StoreAssistantPro.Core.Helpers;
 /// <b>Auto-update:</b> Bind <see cref="CountProperty"/> to
 /// <c>AppState.UnreadNotificationCount</c>. The badge automatically
 /// collapses when count reaches zero and reappears when count &gt; 0.
-/// </para>
-/// <para>
-/// <b>Animation:</b> When the count <em>increases</em>, two
-/// non-repeating micro-animations play:
-/// <list type="bullet">
-///   <item><b>Bell pulse</b> — the parent panel scales 1.0 → 1.15 → 1.0
-///         (FluentDurationSlow, FluentEasePoint). A single pulse to
-///         draw the eye without sustained motion.</item>
-///   <item><b>Badge entrance</b> — when the badge first appears
-///         (count was 0), it fades + scales in from 0 → 1
-///         (FluentDurationNormal, FluentEaseDecelerate). When the count
-///         merely changes (already visible), the badge performs a short
-///         1.0 → 1.2 → 1.0 scale bounce over 200 ms.</item>
-/// </list>
-/// No animation plays when the count decreases or stays the same —
-/// dismissals should feel quiet.
 /// </para>
 /// <para><b>Usage:</b></para>
 /// <code>
@@ -128,22 +111,10 @@ public static class NotificationBadgeBehavior
         if (d is not Panel panel)
             return;
 
-        var oldCount = (int)e.OldValue;
         var newCount = (int)e.NewValue;
         var badge = GetOrCreateBadge(panel);
 
         UpdateBadge(badge, newCount, panel);
-
-        // Animate only when count *increases* — dismissals stay quiet
-        if (newCount > oldCount && newCount > 0)
-        {
-            var wasHidden = oldCount == 0;
-            PlayBellPulse(panel);
-            if (wasHidden)
-                PlayBadgeEntrance(badge);
-            else
-                PlayBadgeBounce(badge);
-        }
     }
 
     private static void OnAppearanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -191,8 +162,6 @@ public static class NotificationBadgeBehavior
             Padding = new Thickness(4, 0, 4, 0),
             IsHitTestVisible = false,
             Child = textBlock,
-            RenderTransformOrigin = new Point(0.5, 0.5),
-            RenderTransform = new ScaleTransform(1, 1),
             UseLayoutRounding = true,
             SnapsToDevicePixels = true
         };
@@ -255,135 +224,4 @@ public static class NotificationBadgeBehavior
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    //  ANIMATIONS
-    // ═══════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Single scale pulse on the parent panel (the bell icon container):
-    /// 1.0 → 1.15 → 1.0 over FluentDurationSlow with FluentEasePoint.
-    /// </summary>
-    private static void PlayBellPulse(Panel panel)
-    {
-        EnsurePanelScaleTransform(panel);
-        if (panel.RenderTransform is not ScaleTransform st)
-            return;
-
-        var duration = ResolveDuration(panel, "FluentDurationSlow", 250);
-        var ease = ResolveEase(panel, "FluentEasePoint");
-
-        // Two-keyframe: rest → peak → rest
-        var halfDuration = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / 2);
-
-        var animX = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
-        animX.KeyFrames.Add(new EasingDoubleKeyFrame(1.15, KeyTime.FromTimeSpan(halfDuration), ease));
-        animX.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
-        animX.Freeze();
-
-        var animY = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
-        animY.KeyFrames.Add(new EasingDoubleKeyFrame(1.15, KeyTime.FromTimeSpan(halfDuration), ease));
-        animY.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
-        animY.Freeze();
-
-        st.BeginAnimation(ScaleTransform.ScaleXProperty, animX);
-        st.BeginAnimation(ScaleTransform.ScaleYProperty, animY);
-    }
-
-    /// <summary>
-    /// Badge entrance: scale + fade from 0 → 1 for first appearance.
-    /// </summary>
-    private static void PlayBadgeEntrance(Border badge)
-    {
-        if (badge.RenderTransform is not ScaleTransform badgeSt)
-            return;
-
-        var duration = ResolveDuration(badge, "FluentDurationNormal", 167);
-        var ease = ResolveEase(badge, "FluentEaseDecelerate");
-
-        // Scale from 0 → 1
-        var scaleX = new DoubleAnimation(0, 1, new Duration(duration))
-        {
-            EasingFunction = ease,
-            FillBehavior = FillBehavior.Stop
-        };
-        scaleX.Freeze();
-        var scaleY = new DoubleAnimation(0, 1, new Duration(duration))
-        {
-            EasingFunction = ease,
-            FillBehavior = FillBehavior.Stop
-        };
-        scaleY.Freeze();
-
-        // Fade from 0 → 1
-        var fade = new DoubleAnimation(0, 1, new Duration(duration))
-        {
-            EasingFunction = ease,
-            FillBehavior = FillBehavior.Stop
-        };
-        fade.Freeze();
-
-        badgeSt.BeginAnimation(ScaleTransform.ScaleXProperty, scaleX);
-        badgeSt.BeginAnimation(ScaleTransform.ScaleYProperty, scaleY);
-        badge.BeginAnimation(UIElement.OpacityProperty, fade);
-    }
-
-    /// <summary>
-    /// Animated count-badge update confirmation:
-    /// scale 1.0 → 1.2 → 1.0 over 200 ms.
-    /// </summary>
-    private static void PlayBadgeBounce(Border badge)
-    {
-        if (badge.RenderTransform is not ScaleTransform badgeSt)
-            return;
-
-        var duration = TimeSpan.FromMilliseconds(200);
-        var ease = ResolveEase(badge, "FluentEasePoint");
-        var half = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / 2);
-
-        var scaleX = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
-        scaleX.KeyFrames.Add(new EasingDoubleKeyFrame(1.2, KeyTime.FromTimeSpan(half), ease));
-        scaleX.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
-        scaleX.Freeze();
-
-        var scaleY = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
-        scaleY.KeyFrames.Add(new EasingDoubleKeyFrame(1.2, KeyTime.FromTimeSpan(half), ease));
-        scaleY.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(duration), ease));
-        scaleY.Freeze();
-
-        badgeSt.BeginAnimation(ScaleTransform.ScaleXProperty, scaleX);
-        badgeSt.BeginAnimation(ScaleTransform.ScaleYProperty, scaleY);
-    }
-
-    // ── Transform helpers ─────────────────────────────────────────
-
-    private static void EnsurePanelScaleTransform(Panel panel)
-    {
-        panel.RenderTransformOrigin = new Point(0.5, 0.5);
-
-        if (panel.RenderTransform is ScaleTransform)
-            return;
-
-        if (panel.RenderTransform is null or MatrixTransform)
-        {
-            panel.RenderTransform = new ScaleTransform(1, 1);
-            return;
-        }
-
-        var group = new TransformGroup();
-        group.Children.Add(panel.RenderTransform);
-        group.Children.Add(new ScaleTransform(1, 1));
-        panel.RenderTransform = group;
-    }
-
-    // ── Token resolution ──────────────────────────────────────────
-
-    private static TimeSpan ResolveDuration(FrameworkElement fe, string key, double fallbackMs)
-    {
-        if (fe.TryFindResource(key) is Duration d && d.HasTimeSpan)
-            return d.TimeSpan;
-        return TimeSpan.FromMilliseconds(fallbackMs);
-    }
-
-    private static IEasingFunction? ResolveEase(FrameworkElement fe, string key) =>
-        fe.TryFindResource(key) as IEasingFunction;
 }

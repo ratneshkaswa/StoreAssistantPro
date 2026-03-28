@@ -26,7 +26,7 @@ public sealed class SharedPopupStandardsTests
     }
 
     [Fact]
-    public void FlyoutPopups_Should_Use_Shared_Anchored_Motion_And_Chrome()
+    public void FlyoutPopups_Should_Use_Shared_Static_Chrome_Without_Animated_Entrance()
     {
         var fluentTheme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
@@ -37,10 +37,10 @@ public sealed class SharedPopupStandardsTests
         Assert.Contains("FlyoutPopupSurfaceStyle", fluentTheme, StringComparison.Ordinal);
         Assert.Contains("FlyoutMenuSurfaceStyle", fluentTheme, StringComparison.Ordinal);
         Assert.Contains("h:PopupFlyoutMotion.IsEnabled", fluentTheme, StringComparison.Ordinal);
-        Assert.Contains("ResolveOriginOffset", popupMotion, StringComparison.Ordinal);
-        Assert.Contains("PlacementMode.Bottom => (0, -offset)", popupMotion, StringComparison.Ordinal);
-        Assert.Contains("PlacementMode.Right => (-offset, 0)", popupMotion, StringComparison.Ordinal);
-        Assert.Contains("TranslateTransform", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("ResetPopupChildState", popupMotion, StringComparison.Ordinal);
+        Assert.Contains("child.Opacity = 1;", popupMotion, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResolveOriginOffset", popupMotion, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", popupMotion, StringComparison.Ordinal);
     }
 
     [Fact]

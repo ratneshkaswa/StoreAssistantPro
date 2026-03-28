@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
 namespace StoreAssistantPro.Core.Helpers;
@@ -14,7 +13,8 @@ namespace StoreAssistantPro.Core.Helpers;
 /// (drop shadow) deepens from Level 1 (resting) to Level 2 (active), and
 /// a faint white overlay tints the <see cref="Panel.Background"/> to create
 /// a perceived brightness lift. Both transitions are smooth and subtle —
-/// the intent is to draw focus without drama.
+/// the intent is to draw focus without drama, using direct state
+/// changes instead of transition-heavy animations.
 /// </para>
 ///
 /// <para><b>Layering with other behaviors:</b></para>
@@ -161,49 +161,37 @@ public static class ActiveAreaHighlight
             return;
 
         var active = (bool)e.NewValue;
-        var duration = ResolveDuration(fe);
-        var ease = ResolveEase(fe);
 
         if (GetEnableElevation(fe))
-            AnimateElevation(fe, active, duration, ease);
+            ApplyElevation(fe, active);
 
         if (GetEnableBrightness(fe))
-            AnimateBrightness(fe, active, duration, ease);
+            ApplyBrightness(fe, active);
     }
 
-    // ── Elevation animation ──────────────────────────────────────
+    // ── Elevation state ──────────────────────────────────────────
 
-    private static void AnimateElevation(
-        FrameworkElement fe, bool active, Duration duration, IEasingFunction? ease)
+    private static void ApplyElevation(
+        FrameworkElement fe, bool active)
     {
-        // Ensure we have a mutable shadow to animate
         if (fe.Effect is not DropShadowEffect shadow || shadow.IsFrozen)
         {
             shadow = CreateRestingShadow();
             fe.Effect = shadow;
         }
 
-        var targetBlur = active ? ActiveBlur : RestingBlur;
-        var targetDepth = active ? ActiveDepth : RestingDepth;
-        var targetOpacity = active ? ActiveOpacity : RestingOpacity;
-
-        var blurAnim = new DoubleAnimation(targetBlur, duration) { EasingFunction = ease };
-        var depthAnim = new DoubleAnimation(targetDepth, duration) { EasingFunction = ease };
-        var opacityAnim = new DoubleAnimation(targetOpacity, duration) { EasingFunction = ease };
-
-        blurAnim.Freeze();
-        depthAnim.Freeze();
-        opacityAnim.Freeze();
-
-        shadow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, blurAnim);
-        shadow.BeginAnimation(DropShadowEffect.ShadowDepthProperty, depthAnim);
-        shadow.BeginAnimation(DropShadowEffect.OpacityProperty, opacityAnim);
+        shadow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, null);
+        shadow.BeginAnimation(DropShadowEffect.ShadowDepthProperty, null);
+        shadow.BeginAnimation(DropShadowEffect.OpacityProperty, null);
+        shadow.BlurRadius = active ? ActiveBlur : RestingBlur;
+        shadow.ShadowDepth = active ? ActiveDepth : RestingDepth;
+        shadow.Opacity = active ? ActiveOpacity : RestingOpacity;
     }
 
-    // ── Brightness animation ─────────────────────────────────────
+    // ── Brightness state ─────────────────────────────────────────
 
-    private static void AnimateBrightness(
-        FrameworkElement fe, bool active, Duration duration, IEasingFunction? ease)
+    private static void ApplyBrightness(
+        FrameworkElement fe, bool active)
     {
         var brush = fe switch
         {
@@ -221,11 +209,8 @@ public static class ActiveAreaHighlight
                 p.Background = brush;
         }
 
-        var targetColor = active ? ActiveTint : Colors.Transparent;
-
-        var colorAnim = new ColorAnimation(targetColor, duration) { EasingFunction = ease };
-        colorAnim.Freeze();
-        brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+        brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+        brush.Color = active ? ActiveTint : Colors.Transparent;
     }
 
     // ── Factory ──────────────────────────────────────────────────
@@ -242,15 +227,4 @@ public static class ActiveAreaHighlight
         };
     }
 
-    // ── Token resolution ─────────────────────────────────────────
-
-    private static Duration ResolveDuration(FrameworkElement fe)
-    {
-        if (fe.TryFindResource("FluentDurationNormal") is Duration d && d.HasTimeSpan)
-            return d;
-        return new Duration(TimeSpan.FromMilliseconds(167));
-    }
-
-    private static IEasingFunction? ResolveEase(FrameworkElement fe) =>
-        fe.TryFindResource("PanelDimEase") as IEasingFunction;
 }

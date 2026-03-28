@@ -154,9 +154,6 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsNavigationRailExpanded { get; set; }
 
-    [ObservableProperty]
-    public partial bool IsShellTransitioning { get; set; }
-
     /// <summary>Raised when Ctrl+F is pressed to focus the search box (#420).</summary>
     public event EventHandler? SearchFocusRequested;
 
@@ -176,11 +173,8 @@ public partial class MainViewModel : BaseViewModel
     public bool HasOverflowQuickActions => OverflowQuickActions.Count > 0;
     public double NavigationRailWidth => IsNavigationRailExpanded ? 320 : 56;
     public bool IsLoginPageActive => string.Equals(_currentPage, LoginPage, StringComparison.Ordinal);
-    public bool IsShellChromeVisible => AppState.IsLoggedIn && !IsLoginPageActive && !IsShellTransitioning;
+   public bool IsShellChromeVisible => AppState.IsLoggedIn && !IsLoginPageActive;
     public bool IsNavigationRailBackMode => !string.Equals(_currentPage, MainWorkspacePage, StringComparison.Ordinal);
-    public string ShellTransitionMessage => AppState.IsInitialSetupPending
-        ? "Opening first-time setup..."
-        : "Signing in...";
 
     // ── Feature-gated visibility ──
 
@@ -343,35 +337,26 @@ public partial class MainViewModel : BaseViewModel
 
     private async Task OnLoginSucceededAsync(UserType userType)
     {
-        IsShellTransitioning = true;
-        try
-        {
-            await _sessionService.LoginAsync(userType);
+       await _sessionService.LoginAsync(userType);
 
-            var startupPage = ResolveStartupPage();
-            var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
-            var destinationPage = string.Equals(startupPage, FirmManagementPage, StringComparison.Ordinal)
-                ? startupPage
-                : !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
-                ? activationRequest.PageKey!
-                : startupPage;
+       var startupPage = ResolveStartupPage();
+       var activationRequest = AppLaunchActivationStore.TryConsumeRequest();
+       var destinationPage = string.Equals(startupPage, FirmManagementPage, StringComparison.Ordinal)
+           ? startupPage
+           : !string.IsNullOrWhiteSpace(activationRequest?.PageKey)
+           ? activationRequest.PageKey!
+           : startupPage;
 
-            _navigationService.NavigateTo(destinationPage);
-            _statusBar.SetPersistent(
-                string.Equals(destinationPage, MainWorkspacePage, StringComparison.Ordinal)
-                    ? (IsBillingVisible ? "Billing ready" : "Workspace")
-                    : GetPageDisplayName(destinationPage));
+       _navigationService.NavigateTo(destinationPage);
+       _statusBar.SetPersistent(
+           string.Equals(destinationPage, MainWorkspacePage, StringComparison.Ordinal)
+               ? (IsBillingVisible ? "Billing ready" : "Workspace")
+               : GetPageDisplayName(destinationPage));
 
-            if (activationRequest?.OpenNotificationsRequested == true)
-                IsNotificationsPanelVisible = true;
+       if (activationRequest?.OpenNotificationsRequested == true)
+           IsNotificationsPanelVisible = true;
 
-            await WaitForShellTransitionAsync();
-        }
-        finally
-        {
-            IsShellTransitioning = false;
-            RefreshQuickActionsCore();
-        }
+       RefreshQuickActionsCore();
     }
 
     private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -1137,29 +1122,7 @@ public partial class MainViewModel : BaseViewModel
 
     private void RequestQuickActionRefresh()
     {
-        if (IsShellTransitioning)
-            return;
-
         RefreshQuickActionsCore();
-    }
-
-    partial void OnIsShellTransitioningChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsShellChromeVisible));
-        OnPropertyChanged(nameof(ShellTransitionMessage));
-    }
-
-    private static async Task WaitForShellTransitionAsync()
-    {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null)
-        {
-            await Task.Yield();
-            return;
-        }
-
-        await dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
-        await dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
     }
 
     private void RefreshQuickActionsCore()

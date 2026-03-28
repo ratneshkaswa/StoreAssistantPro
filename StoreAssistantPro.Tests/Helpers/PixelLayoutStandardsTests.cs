@@ -417,7 +417,6 @@ public sealed class PixelLayoutStandardsTests
             "<Style x:Key=\"EnterpriseActionButtonStyle\" TargetType=\"Button\">",
             "<Setter Property=\"UseLayoutRounding\" Value=\"True\"/>",
             "<Setter Property=\"SnapsToDevicePixels\" Value=\"True\"/>",
-            "<Grid RenderTransformOrigin=\"0.5,0.5\"",
             "UseLayoutRounding=\"True\"",
             "SnapsToDevicePixels=\"True\"");
 

@@ -2,7 +2,6 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace StoreAssistantPro.Core.Controls;
@@ -20,7 +19,6 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class ProgressRing : Control
 {
-    private Storyboard? _spinStoryboard;
     private Path? _arcPath;
 
     static ProgressRing()
@@ -142,45 +140,33 @@ public class ProgressRing : Control
         if (IsActive)
         {
             Visibility = Visibility.Visible;
-            StartSpinAnimation();
+            ApplyActiveState();
         }
         else
         {
-            StopSpinAnimation();
+            ApplyInactiveState();
             Visibility = Visibility.Collapsed;
         }
     }
 
-    private void StartSpinAnimation()
+    private void ApplyActiveState()
     {
         if (_arcPath is null)
             return;
 
-        StopSpinAnimation();
-
-        _arcPath.RenderTransformOrigin = new Point(0.5, 0.5);
-        _arcPath.RenderTransform = new RotateTransform(0);
-
-        var animation = new DoubleAnimation
-        {
-            From = 0,
-            To = 360,
-            Duration = new Duration(TimeSpan.FromMilliseconds(1100)),
-            RepeatBehavior = RepeatBehavior.Forever
-        };
-
-        _spinStoryboard = new Storyboard();
-        Storyboard.SetTarget(animation, _arcPath);
-        Storyboard.SetTargetProperty(animation,
-            new PropertyPath("(UIElement.RenderTransform).(RotateTransform.Angle)"));
-        _spinStoryboard.Children.Add(animation);
-        _spinStoryboard.Begin();
+        _arcPath.ClearValue(UIElement.RenderTransformProperty);
+        _arcPath.ClearValue(UIElement.RenderTransformOriginProperty);
+        _arcPath.Opacity = 1;
     }
 
-    private void StopSpinAnimation()
+    private void ApplyInactiveState()
     {
-        _spinStoryboard?.Stop();
-        _spinStoryboard = null;
+        if (_arcPath is null)
+            return;
+
+        _arcPath.ClearValue(UIElement.RenderTransformProperty);
+        _arcPath.ClearValue(UIElement.RenderTransformOriginProperty);
+        _arcPath.Opacity = 1;
     }
 
     private sealed class ProgressRingAutomationPeer(ProgressRing owner) : FrameworkElementAutomationPeer(owner)

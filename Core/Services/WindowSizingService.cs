@@ -19,14 +19,9 @@ public class WindowSizingService : IWindowSizingService
 
         window.ShowActivated = true;
         window.SizeToContent = SizeToContent.Manual;
-        window.WindowStartupLocation = WindowStartupLocation.Manual;
-        window.WindowState = WindowState.Maximized;
+        window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         window.ResizeMode = ResizeMode.NoResize;
-        window.Loaded += (_, _) =>
-        {
-            if (window.WindowState != WindowState.Maximized)
-                window.WindowState = WindowState.Maximized;
-        };
+        window.WindowState = WindowState.Maximized;
         AttachVisibilityGuard(window);
 
         SystemParameters.StaticPropertyChanged += OnDisplayChanged;

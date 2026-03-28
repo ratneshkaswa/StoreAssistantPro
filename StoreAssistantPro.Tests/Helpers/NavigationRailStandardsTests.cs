@@ -17,6 +17,8 @@ public sealed class NavigationRailStandardsTests
         Assert.Contains("NotificationBadgeBehavior.Count", source, StringComparison.Ordinal);
         Assert.Contains("DataContext.IsNavigationRailExpanded", source, StringComparison.Ordinal);
         Assert.Contains("TextTrimming=\"CharacterEllipsis\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("<BeginStoryboard>", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("RotateTransform", source, StringComparison.Ordinal);
     }
 
     [Fact]

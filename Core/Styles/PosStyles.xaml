@@ -15,28 +15,6 @@
         <Setter Property="Width" Value="{StaticResource PinDotSize}"/>
         <Setter Property="Height" Value="{StaticResource PinDotSize}"/>
         <Setter Property="Margin" Value="8,0"/>
-        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-        <Setter Property="RenderTransform">
-            <Setter.Value>
-                <ScaleTransform ScaleX="1" ScaleY="1"/>
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-            <EventTrigger RoutedEvent="Binding.TargetUpdated">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
-                                         From="1.3" To="1.0"
-                                         Duration="{StaticResource FluentDurationFast}"
-                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                                         From="1.3" To="1.0"
-                                         Duration="{StaticResource FluentDurationFast}"
-                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </Style.Triggers>
     </Style>
 
     <!-- ===============================================================
@@ -198,12 +176,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid RenderTransformOrigin="0.5,0.5"
-                          UseLayoutRounding="True"
+                    <Grid UseLayoutRounding="True"
                           SnapsToDevicePixels="True">
-                        <Grid.RenderTransform>
-                            <ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1"/>
-                        </Grid.RenderTransform>
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -236,44 +210,7 @@
                     <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Bd" Property="Background"
                                     Value="{StaticResource FluentSubtleHover}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="AccentIndicator"
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="1" Duration="{StaticResource FluentDurationFast}"/>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="AccentIndicator"
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="0" Duration="{StaticResource FluentDurationFast}"/>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleRest}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleRest}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
+                            <Setter TargetName="AccentIndicator" Property="Opacity" Value="1"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Bd" Property="Background"
@@ -281,38 +218,6 @@
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextSecondary}"/>
                             <Setter TargetName="AccentIndicator" Property="Opacity" Value="1"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScalePressed}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScalePressed}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="RootScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="Tag" Value="True">
                             <Setter TargetName="Bd" Property="Background"
@@ -377,89 +282,16 @@
                             CornerRadius="{StaticResource FluentCornerMedium}"
                             Padding="{TemplateBinding Padding}"
                             UseLayoutRounding="True"
-                            SnapsToDevicePixels="True"
-                            RenderTransformOrigin="0.5,0.5">
-                        <Border.RenderTransform>
-                            <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
-                        </Border.RenderTransform>
+                            SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Bd"
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="0.88" Duration="{StaticResource FluentDurationFast}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Bd"
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="1" Duration="{StaticResource FluentDurationFast}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleRest}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleRest}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Bd" Property="Opacity" Value="0.76"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScalePressed}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScalePressed}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
@@ -700,11 +532,7 @@
                             CornerRadius="{StaticResource FluentCornerSmall}"
                             Padding="{TemplateBinding Padding}"
                             UseLayoutRounding="True"
-                            SnapsToDevicePixels="True"
-                            RenderTransformOrigin="0.5,0.5">
-                        <Border.RenderTransform>
-                            <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
-                        </Border.RenderTransform>
+                            SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                     </Border>
@@ -714,74 +542,10 @@
                                     Value="{StaticResource FluentSubtleHover}"/>
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextPrimary}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleRest}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleRest}"
-                                            Duration="{StaticResource FluentDurationNormal}"
-                                            EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Bd" Property="Background"
                                     Value="{StaticResource FluentSubtlePressed}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScalePressed}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScalePressed}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleX"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                            Storyboard.TargetProperty="ScaleY"
-                                            To="{StaticResource MotionButtonScaleHover}"
-                                            Duration="{StaticResource FluentDurationFast}"
-                                            EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -951,12 +715,8 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="12"
                                 Padding="{TemplateBinding Padding}"
-                                RenderTransformOrigin="0.5,0.5"
                                 UseLayoutRounding="True"
                                 SnapsToDevicePixels="True">
-                            <Border.RenderTransform>
-                                <ScaleTransform x:Name="BdScale" ScaleX="1" ScaleY="1"/>
-                            </Border.RenderTransform>
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
@@ -980,38 +740,6 @@
                                     Value="{StaticResource SubtleFillColorTertiary}"/>
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextPrimary}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleRest}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleRest}"
-                                                         Duration="{StaticResource FluentDurationNormal}"
-                                                         EasingFunction="{StaticResource FluentEasePoint}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
@@ -1019,38 +747,6 @@
                                     Value="{StaticResource SubtleFillColorTertiary}"/>
                             <Setter Property="Foreground"
                                     Value="{StaticResource FluentTextPrimary}"/>
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScalePressed}"
-                                                         Duration="{StaticResource FluentDurationFast}"
-                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScalePressed}"
-                                                         Duration="{StaticResource FluentDurationFast}"
-                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleX"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationFast}"
-                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                        <DoubleAnimation Storyboard.TargetName="BdScale"
-                                                         Storyboard.TargetProperty="ScaleY"
-                                                         To="{StaticResource MotionButtonScaleHover}"
-                                                         Duration="{StaticResource FluentDurationFast}"
-                                                         EasingFunction="{StaticResource FluentEaseDecelerate}"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                         </Trigger>
 
                         <Trigger Property="Tag" Value="True">

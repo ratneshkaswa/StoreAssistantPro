@@ -38,7 +38,7 @@ public sealed class ControlTemplateWiringTests
     }
 
     [Fact]
-    public void FluentExpander_Should_Wire_ContentArea_And_Animate_Height()
+    public void FluentExpander_Should_Wire_ContentArea_And_Apply_Immediate_State()
     {
         var code = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Controls", "FluentExpander.cs"));
@@ -46,9 +46,10 @@ public sealed class ControlTemplateWiringTests
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
 
         Assert.Contains("_contentArea = GetTemplateChild(\"PART_ContentArea\") as Border;", code, StringComparison.Ordinal);
-        Assert.Contains("AnimateExpand();", code, StringComparison.Ordinal);
-        Assert.Contains("AnimateCollapse();", code, StringComparison.Ordinal);
-        Assert.Contains("BeginAnimation(HeightProperty", code, StringComparison.Ordinal);
+        Assert.Contains("UpdateExpandedState();", code, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateExpand();", code, StringComparison.Ordinal);
+        Assert.DoesNotContain("AnimateCollapse();", code, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginAnimation(HeightProperty", code, StringComparison.Ordinal);
         Assert.Contains("Height = double.NaN;", code, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"PART_ContentArea\"", style, StringComparison.Ordinal);
         Assert.Contains("Height=\"0\"", style, StringComparison.Ordinal);

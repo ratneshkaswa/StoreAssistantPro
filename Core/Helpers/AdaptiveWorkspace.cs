@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -20,10 +19,9 @@ namespace StoreAssistantPro.Core.Helpers;
 /// across all chrome elements, default padding on the workspace.
 /// </para>
 /// <para>
-/// All transitions are animated using <c>FluentDurationNormal</c>
-/// (133 ms) with <c>PanelDimEase</c> for smooth, non-jarring
-/// layout shifts. The animations target only <c>Opacity</c>,
-/// <c>LayoutTransform.ScaleY</c>, and <c>BorderBrush</c> — no
+/// The behavior now uses direct state changes so billing mode can
+/// switch immediately without extra animation work. The state targets
+/// only <c>LayoutTransform.ScaleY</c> and <c>BorderBrush</c> — no
 /// sudden visibility toggles that would cause layout jumps.
 /// </para>
 ///
@@ -144,10 +142,10 @@ public static class AdaptiveWorkspace
         var billing = (bool)e.NewValue;
 
         if (GetCompactChrome(fe))
-            AnimateChromeScale(fe, billing);
+            ApplyChromeScale(fe, billing);
 
         if (GetWorkspaceGlow(fe))
-            AnimateGlow(fe, billing);
+            ApplyGlow(fe, billing);
     }
 
     // ── WorkspaceGlow initialization ───────────────────────────────
@@ -167,40 +165,28 @@ public static class AdaptiveWorkspace
         }
     }
 
-    // ── Chrome scale animation ─────────────────────────────────────
+    // ── Chrome scale state ────────────────────────────────────────
 
-    private static void AnimateChromeScale(FrameworkElement fe, bool billing)
+    private static void ApplyChromeScale(FrameworkElement fe, bool billing)
     {
         var target = billing ? GetChromeScale(fe) : 1.0;
-        var duration = ResolveDuration(fe);
-        var ease = ResolveEase(fe);
 
-        // Ensure LayoutTransform is a ScaleTransform
         if (fe.LayoutTransform is not ScaleTransform st)
         {
             st = new ScaleTransform(1, 1);
             fe.LayoutTransform = st;
         }
 
-        var anim = new DoubleAnimation(target, duration)
-        {
-            EasingFunction = ease
-        };
-        anim.Freeze();
-        st.BeginAnimation(ScaleTransform.ScaleYProperty, anim);
+        st.ScaleY = target;
     }
 
-    // ── Workspace glow animation ───────────────────────────────────
+    // ── Workspace glow state ──────────────────────────────────────
 
-    private static void AnimateGlow(FrameworkElement fe, bool billing)
+    private static void ApplyGlow(FrameworkElement fe, bool billing)
     {
         if (fe is not Control ctrl)
             return;
 
-        var duration = ResolveDuration(fe);
-        var ease = ResolveEase(fe);
-
-        // Resolve accent color from design system
         var accentColor = Colors.Transparent;
         if (billing)
         {
@@ -217,23 +203,6 @@ public static class AdaptiveWorkspace
             ctrl.BorderBrush = brush;
         }
 
-        var colorAnim = new ColorAnimation(accentColor, duration)
-        {
-            EasingFunction = ease
-        };
-        colorAnim.Freeze();
-        brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+        brush.Color = accentColor;
     }
-
-    // ── Token resolution ───────────────────────────────────────────
-
-    private static Duration ResolveDuration(FrameworkElement fe)
-    {
-        if (fe.TryFindResource("FluentDurationNormal") is Duration d && d.HasTimeSpan)
-            return d;
-        return new Duration(TimeSpan.FromMilliseconds(133));
-    }
-
-    private static IEasingFunction? ResolveEase(FrameworkElement fe) =>
-        fe.TryFindResource("PanelDimEase") as IEasingFunction;
 }

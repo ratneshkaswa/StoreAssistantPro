@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
@@ -27,6 +28,9 @@ public class ResponsiveContentControl : ContentControl
         FocusableProperty.OverrideMetadata(
             typeof(ResponsiveContentControl),
             new FrameworkPropertyMetadata(false));
+        AutomationProperties.NameProperty.OverrideMetadata(
+            typeof(ResponsiveContentControl),
+            new FrameworkPropertyMetadata("Page content"));
     }
 
     public double VerticalScrollOffset
@@ -77,5 +81,11 @@ public class ResponsiveContentControl : ContentControl
         protected override string GetClassNameCore() => nameof(ResponsiveContentControl);
 
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Pane;
+
+        protected override string GetNameCore()
+        {
+            var explicitName = base.GetNameCore();
+            return string.IsNullOrWhiteSpace(explicitName) ? "Page content" : explicitName;
+        }
     }
 }

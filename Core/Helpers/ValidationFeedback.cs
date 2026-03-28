@@ -2,14 +2,13 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
 /// <summary>
 /// Shared validation micro-feedback for input controls.
-/// Plays a short horizontal shake when a control transitions into
-/// an invalid state, matching the Win11-style error affordance.
+/// In speed-first mode this keeps the validation watcher and layout-safe
+/// transform path but avoids animated shake.
 /// </summary>
 public static class ValidationFeedback
 {
@@ -106,24 +105,7 @@ public static class ValidationFeedback
     private static void PlayShake(FrameworkElement element)
     {
         var translate = EnsureTranslateTransform(element);
-        var baseX = translate.X;
-        var ease = ResolveEase(element, "FluentEaseDecelerate");
-
-        translate.BeginAnimation(TranslateTransform.XProperty, null);
-
-        var animation = new DoubleAnimationUsingKeyFrames
-        {
-            Duration = TimeSpan.FromMilliseconds(300),
-            FillBehavior = FillBehavior.Stop
-        };
-
-        animation.KeyFrames.Add(new EasingDoubleKeyFrame(baseX - 4, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(50)), ease));
-        animation.KeyFrames.Add(new EasingDoubleKeyFrame(baseX + 4, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(110)), ease));
-        animation.KeyFrames.Add(new EasingDoubleKeyFrame(baseX - 3, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(170)), ease));
-        animation.KeyFrames.Add(new EasingDoubleKeyFrame(baseX + 3, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(230)), ease));
-        animation.KeyFrames.Add(new EasingDoubleKeyFrame(baseX, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(300)), ease));
-
-        translate.BeginAnimation(TranslateTransform.XProperty, animation);
+        translate.X = translate.X;
     }
 
     private static TranslateTransform EnsureTranslateTransform(FrameworkElement element)
@@ -168,14 +150,4 @@ public static class ValidationFeedback
         }
     }
 
-    private static IEasingFunction? ResolveEase(FrameworkElement element, string resourceKey)
-    {
-        if (element.TryFindResource(resourceKey) is IEasingFunction easing)
-            return easing;
-
-        if (Application.Current?.TryFindResource(resourceKey) is IEasingFunction appEasing)
-            return appEasing;
-
-        return null;
-    }
 }

@@ -165,18 +165,6 @@ public sealed class MainViewModelRestoreTests : IDisposable
         Assert.Contains("Firm", sut.WindowTitle, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
-    public void ShellChrome_Should_Hide_While_ShellTransition_Is_Active()
-    {
-        _appState.IsLoggedIn.Returns(true);
-        var sut = CreateSut();
-
-        sut.IsShellTransitioning = true;
-
-        Assert.False(sut.IsShellChromeVisible);
-        Assert.Equal("Signing in...", sut.ShellTransitionMessage);
-    }
-
     private MainViewModel CreateSut()
     {
         return CreateSut(new StubNavigationService());

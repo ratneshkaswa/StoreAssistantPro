@@ -14,6 +14,8 @@ public sealed class CardHoverStandardsTests
 
         Assert.Contains("border.Cursor = Cursors.Hand;", content, StringComparison.Ordinal);
         Assert.Contains("border.ClearValue(FrameworkElement.CursorProperty);", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("DoubleAnimation", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("BeginAnimation", content, StringComparison.Ordinal);
     }
 
     [Fact]

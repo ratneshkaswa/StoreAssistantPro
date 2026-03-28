@@ -3,7 +3,6 @@ using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Controls;
 
@@ -110,51 +109,23 @@ public class InlineTipBanner : Control
         }
     }
 
-    private void OnCloseButtonClick(object sender, RoutedEventArgs e) => AnimateDismiss();
+    private void OnCloseButtonClick(object sender, RoutedEventArgs e) => DismissImmediately();
 
-    private void AnimateDismiss()
+    private void DismissImmediately()
     {
         if (_isDismissing)
             return;
 
-        if (_root is null)
+        _isDismissing = true;
+        if (_root is not null)
         {
-            FinaliseDismiss();
-            return;
+            _root.BeginAnimation(OpacityProperty, null);
+            _root.BeginAnimation(HeightProperty, null);
+            _root.Opacity = 1;
+            _root.Height = double.NaN;
         }
 
-        _isDismissing = true;
-        var currentHeight = _root.ActualHeight;
-
-        var fadeOut = new DoubleAnimation(1, 0, ResolveDuration(fast: false))
-        {
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-        };
-
-        fadeOut.Completed += (_, _) =>
-        {
-            if (currentHeight > 0)
-            {
-                var collapse = new DoubleAnimation(currentHeight, 0, ResolveDuration(fast: true))
-                {
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-
-                collapse.Completed += (_, _) =>
-                {
-                    _root.BeginAnimation(HeightProperty, null);
-                    FinaliseDismiss();
-                };
-
-                _root.BeginAnimation(HeightProperty, collapse);
-            }
-            else
-            {
-                FinaliseDismiss();
-            }
-        };
-
-        _root.BeginAnimation(OpacityProperty, fadeOut);
+        FinaliseDismiss();
     }
 
     private void FinaliseDismiss()
@@ -170,15 +141,6 @@ public class InlineTipBanner : Control
         RaiseEvent(new RoutedEventArgs(DismissedEvent, this));
     }
 
-    private Duration ResolveDuration(bool fast)
-    {
-        var key = fast ? "FluentDurationFast" : "FluentDurationNormal";
-        if (TryFindResource(key) is Duration duration)
-            return duration;
-
-        return new Duration(TimeSpan.FromMilliseconds(fast ? 83 : 167));
-    }
-
     private static void OnIsDismissedChanged(
         DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -188,7 +150,7 @@ public class InlineTipBanner : Control
         if (e.NewValue is true)
         {
             if (!banner._isDismissing)
-                banner.AnimateDismiss();
+                banner.DismissImmediately();
         }
         else
         {
@@ -199,6 +161,7 @@ public class InlineTipBanner : Control
                 banner._root.BeginAnimation(OpacityProperty, null);
                 banner._root.BeginAnimation(HeightProperty, null);
                 banner._root.Opacity = 1;
+                banner._root.Height = double.NaN;
             }
 
             banner.Visibility = Visibility.Visible;

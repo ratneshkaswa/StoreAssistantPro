@@ -287,12 +287,7 @@
                                            FontSize="{StaticResource FontSizeIconMedium}"
                                            Foreground="{TemplateBinding Foreground}"
                                            HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           RenderTransformOrigin="0.5,0.5">
-                                    <TextBlock.RenderTransform>
-                                        <RotateTransform Angle="0"/>
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
+                                           VerticalAlignment="Center"/>
                                 <TextBlock x:Name="BackGlyph"
                                            Text="&#xE72B;"
                                            FontFamily="{StaticResource FluentIconFont}"
@@ -300,12 +295,7 @@
                                            Foreground="{TemplateBinding Foreground}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
-                                           Opacity="0"
-                                           RenderTransformOrigin="0.5,0.5">
-                                    <TextBlock.RenderTransform>
-                                        <RotateTransform Angle="-90"/>
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
+                                           Opacity="0"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -316,50 +306,8 @@
                                 <Setter TargetName="RailToggleBorder" Property="Background" Value="{StaticResource SubtleFillColorTertiary}"/>
                             </Trigger>
                             <Trigger Property="Tag" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0"
-                                                             Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="1"
-                                                             Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
-                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
-                                                             To="90"
-                                                             Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
-                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
-                                                             To="0"
-                                                             Duration="0:0:0.2"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="1"
-                                                             Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0"
-                                                             Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetName="HamburgerGlyph"
-                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
-                                                             To="0"
-                                                             Duration="0:0:0.2"/>
-                                            <DoubleAnimation Storyboard.TargetName="BackGlyph"
-                                                             Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
-                                                             To="-90"
-                                                             Duration="0:0:0.2"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
+                                <Setter TargetName="HamburgerGlyph" Property="Opacity" Value="0"/>
+                                <Setter TargetName="BackGlyph" Property="Opacity" Value="1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -997,12 +945,6 @@
                 </Grid>
             </Grid>
         </Border>
-
-        <controls:LoadingOverlay Grid.Row="0"
-                                 Grid.RowSpan="4"
-                                 Panel.ZIndex="150"
-                                 IsActive="{Binding IsShellTransitioning}"
-                                 Message="{Binding ShellTransitionMessage}"/>
 
         <Grid Grid.Row="0"
               Grid.RowSpan="4"

@@ -58,6 +58,17 @@ public class ValidationFeedbackTests
         });
     }
 
+    [Fact]
+    public void ValidationFeedback_Should_Avoid_Shake_Storyboard_Animation()
+    {
+        var source = File.ReadAllText(
+            Path.Combine(FindSolutionRoot(), "Core", "Helpers", "ValidationFeedback.cs"));
+
+        Assert.DoesNotContain("DoubleAnimationUsingKeyFrames", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("EasingDoubleKeyFrame", source, StringComparison.Ordinal);
+        Assert.Contains("translate.X = translate.X;", source, StringComparison.Ordinal);
+    }
+
     private static TextBox CreateInvalidatingTextBox()
     {
         var textBox = new TextBox();
@@ -87,6 +98,24 @@ public class ValidationFeedbackTests
             TransformGroup group => group.Children.OfType<TranslateTransform>().FirstOrDefault(),
             _ => null
         };
+
+    private static string FindSolutionRoot()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (dir is not null)
+        {
+            if (Directory.GetFiles(dir, "*.sln").Length > 0 ||
+                Directory.GetFiles(dir, "*.slnx").Length > 0)
+            {
+                return dir;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new InvalidOperationException(
+            "Could not find solution root from " + AppContext.BaseDirectory);
+    }
 
     private sealed class TestInput
     {

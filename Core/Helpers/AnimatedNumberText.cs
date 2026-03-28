@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
 
 namespace StoreAssistantPro.Core.Helpers;
 
@@ -12,8 +11,8 @@ public enum AnimatedNumberFormatMode
 }
 
 /// <summary>
-/// Animates numeric transitions on a <see cref="TextBlock"/> and formats
-/// the intermediate value using the app's compact KPI number style.
+/// Formats numeric transitions on a <see cref="TextBlock"/> using the
+/// app's compact KPI number style without intermediate animation.
 /// </summary>
 public static class AnimatedNumberText
 {
@@ -70,31 +69,13 @@ public static class AnimatedNumberText
             typeof(AnimatedNumberText),
             new PropertyMetadata(false));
 
-    private static readonly DependencyProperty PendingTargetValueProperty =
-        DependencyProperty.RegisterAttached(
-            "PendingTargetValue",
-            typeof(double),
-            typeof(AnimatedNumberText),
-            new PropertyMetadata(0d));
-
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not TextBlock textBlock)
             return;
 
-        var target = (double)e.NewValue;
-        if (!textBlock.IsLoaded || IsMotionDisabled(textBlock))
-        {
-            textBlock.SetValue(HasAnimatedValueProperty, true);
-            textBlock.SetCurrentValue(AnimatedValueProperty, target);
-            return;
-        }
-
-        var from = (bool)textBlock.GetValue(HasAnimatedValueProperty)
-            ? (double)textBlock.GetValue(AnimatedValueProperty)
-            : (double)e.OldValue;
-
-        AnimateValue(textBlock, from, target);
+        textBlock.SetValue(HasAnimatedValueProperty, true);
+        textBlock.SetCurrentValue(AnimatedValueProperty, (double)e.NewValue);
     }
 
     private static void OnFormattingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -112,36 +93,6 @@ public static class AnimatedNumberText
 
         textBlock.SetValue(HasAnimatedValueProperty, true);
         UpdateText(textBlock, (double)e.NewValue);
-    }
-
-    private static void AnimateValue(TextBlock textBlock, double from, double to)
-    {
-        textBlock.SetValue(PendingTargetValueProperty, to);
-
-        var duration = GetDuration(textBlock, "FluentDurationSlow", TimeSpan.FromMilliseconds(140));
-        if (duration == TimeSpan.Zero || Math.Abs(from - to) < 0.01d)
-        {
-            textBlock.BeginAnimation(AnimatedValueProperty, null);
-            textBlock.SetCurrentValue(AnimatedValueProperty, to);
-            return;
-        }
-
-        var animation = new DoubleAnimation(from, to, new Duration(duration))
-        {
-            EasingFunction = TryFindEase(textBlock, "FluentEaseDecelerate"),
-            FillBehavior = FillBehavior.Stop
-        };
-
-        animation.Completed += (_, _) =>
-        {
-            if (!Equals(textBlock.GetValue(PendingTargetValueProperty), to))
-                return;
-
-            textBlock.BeginAnimation(AnimatedValueProperty, null);
-            textBlock.SetCurrentValue(AnimatedValueProperty, to);
-        };
-
-        textBlock.BeginAnimation(AnimatedValueProperty, animation, HandoffBehavior.SnapshotAndReplace);
     }
 
     private static void UpdateText(TextBlock textBlock, double value)
@@ -186,17 +137,4 @@ public static class AnimatedNumberText
         return compact.ToString(format, CultureInfo.InvariantCulture) + suffix;
     }
 
-    private static bool IsMotionDisabled(FrameworkElement element) =>
-        GetDuration(element, "FluentDurationSlow", TimeSpan.FromMilliseconds(140)) == TimeSpan.Zero;
-
-    private static TimeSpan GetDuration(FrameworkElement element, string key, TimeSpan fallback)
-    {
-        if (element.TryFindResource(key) is Duration duration && duration.HasTimeSpan)
-            return duration.TimeSpan;
-
-        return fallback;
-    }
-
-    private static IEasingFunction? TryFindEase(FrameworkElement element, string key) =>
-        element.TryFindResource(key) as IEasingFunction;
 }

@@ -2,7 +2,6 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace StoreAssistantPro.Core.Controls;
@@ -12,8 +11,6 @@ namespace StoreAssistantPro.Core.Controls;
 /// </summary>
 public class ExpandableTextBlock : Control
 {
-    private const int ToggleDurationMs = 120;
-
     private Border? _contentHost;
     private TextBlock? _textBlock;
     private Button? _toggleButton;
@@ -132,7 +129,7 @@ public class ExpandableTextBlock : Control
 
     private void OnLoaded(object sender, RoutedEventArgs e) => ScheduleVisualStateRefresh();
 
-    private void OnUnloaded(object sender, RoutedEventArgs e) => StopAnimations();
+    private void OnUnloaded(object sender, RoutedEventArgs e) => _contentHost?.BeginAnimation(HeightProperty, null);
 
     private void OnToggleButtonClick(object sender, RoutedEventArgs e) => IsExpanded = !IsExpanded;
 
@@ -148,7 +145,7 @@ public class ExpandableTextBlock : Control
     {
         if (d is ExpandableTextBlock control)
         {
-            control.UpdateVisualState(useTransitions: true);
+            control.UpdateVisualState(useTransitions: false);
         }
     }
 
@@ -211,13 +208,7 @@ public class ExpandableTextBlock : Control
             return;
         }
 
-        if (!useTransitions || !IsLoaded)
-        {
-            ApplyMeasuredState(fullHeight, collapsedHeight);
-            return;
-        }
-
-        AnimateMeasuredState(fullHeight, collapsedHeight);
+        ApplyMeasuredState(fullHeight, collapsedHeight);
     }
 
     private void ApplyUnboundedState()
@@ -227,7 +218,7 @@ public class ExpandableTextBlock : Control
             return;
         }
 
-        StopAnimations();
+        _contentHost.BeginAnimation(HeightProperty, null);
         _textBlock.TextTrimming = TextTrimming.None;
         _contentHost.Height = double.NaN;
     }
@@ -239,8 +230,6 @@ public class ExpandableTextBlock : Control
             return;
         }
 
-        StopAnimations();
-
         if (IsExpanded)
         {
             _textBlock.TextTrimming = TextTrimming.None;
@@ -250,56 +239,6 @@ public class ExpandableTextBlock : Control
 
         _textBlock.TextTrimming = TextTrimming.CharacterEllipsis;
         _contentHost.Height = collapsedHeight;
-    }
-
-    private void AnimateMeasuredState(double fullHeight, double collapsedHeight)
-    {
-        if (_contentHost is null || _textBlock is null)
-        {
-            return;
-        }
-
-        StopAnimations();
-
-        var targetHeight = IsExpanded ? fullHeight : collapsedHeight;
-        var startingHeight = _contentHost.ActualHeight;
-
-        if (startingHeight <= 0 || double.IsNaN(startingHeight))
-        {
-            startingHeight = IsExpanded ? collapsedHeight : fullHeight;
-        }
-
-        if (Math.Abs(startingHeight - targetHeight) < 0.5)
-        {
-            ApplyMeasuredState(fullHeight, collapsedHeight);
-            return;
-        }
-
-        _textBlock.TextTrimming = TextTrimming.None;
-        _contentHost.Height = startingHeight;
-
-        var animation = new DoubleAnimation(startingHeight, targetHeight, TimeSpan.FromMilliseconds(ToggleDurationMs))
-        {
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-        };
-
-        animation.Completed += (_, _) =>
-        {
-            if (_contentHost is null || _textBlock is null)
-            {
-                return;
-            }
-
-            StopAnimations();
-            ApplyMeasuredState(fullHeight, collapsedHeight);
-        };
-
-        _contentHost.BeginAnimation(HeightProperty, animation, HandoffBehavior.SnapshotAndReplace);
-    }
-
-    private void StopAnimations()
-    {
-        _contentHost?.BeginAnimation(HeightProperty, null);
     }
 
     private double GetAvailableTextWidth()
