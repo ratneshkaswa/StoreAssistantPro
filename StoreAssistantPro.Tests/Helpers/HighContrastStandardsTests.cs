@@ -27,7 +27,8 @@ public sealed class HighContrastStandardsTests
         Assert.Contains("SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;", helperCode, StringComparison.Ordinal);
         Assert.Contains("nameof(SystemParameters.HighContrast)", helperCode, StringComparison.Ordinal);
         Assert.Contains("Application.LoadComponent", helperCode, StringComparison.Ordinal);
-        Assert.Contains("HighContrastOverrides.xaml", helperCode, StringComparison.Ordinal);
+        Assert.Contains(";component/Core/Styles/HighContrastOverrides.xaml", helperCode, StringComparison.Ordinal);
+        Assert.Contains("typeof(HighContrastSync).Assembly.GetName().Name", helperCode, StringComparison.Ordinal);
         Assert.Contains("case (DrawingBrush targetDrawing, DrawingBrush sourceDrawing):", helperCode, StringComparison.Ordinal);
     }
 

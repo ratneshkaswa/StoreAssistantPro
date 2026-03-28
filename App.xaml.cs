@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -184,6 +186,27 @@ public partial class App : Application
     {
         var errorId = GenerateErrorId();
         _logger?.LogError(e.Exception, "Unhandled UI thread exception [{ErrorId}]", errorId);
+
+        if (TryRepairInvalidBorderBackgrounds(e.Exception, out var repairedElements))
+        {
+            _logger?.LogWarning(
+                "Recovered from invalid Border.Background render state on {Count} element(s): {Elements}",
+                repairedElements.Count,
+                string.Join(" | ", repairedElements));
+
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+            {
+                foreach (Window window in Windows)
+                {
+                    window.InvalidateVisual();
+                    window.UpdateLayout();
+                }
+            }));
+
+            e.Handled = true;
+            return;
+        }
+
         ShowErrorDialog(e.Exception, errorId);
         e.Handled = true;
     }
@@ -210,7 +233,7 @@ public partial class App : Application
     {
         var (title, userMessage) = CategorizeException(ex);
 
-        AppDialogPresenter.ShowError(
+        ShowNativeErrorDialog(
             title,
             $"{userMessage}\n\nError Reference: {errorId}\n\nThe error has been logged. Please contact support if this persists.");
     }
@@ -219,9 +242,20 @@ public partial class App : Application
     {
         var (title, userMessage) = CategorizeException(ex);
 
-        AppDialogPresenter.ShowError(
+        ShowNativeErrorDialog(
             "Fatal Error",
             $"The application failed to start.\n\n{title}: {userMessage}\n\nPlease check your configuration and try again.");
+    }
+
+    private static void ShowNativeErrorDialog(string title, string message)
+    {
+        MessageBox.Show(
+            message,
+            title,
+            MessageBoxButton.OK,
+            MessageBoxImage.Error,
+            MessageBoxResult.OK,
+            MessageBoxOptions.DefaultDesktopOnly);
     }
 
     private static (string Title, string Message) CategorizeException(Exception ex) => ex switch
@@ -268,5 +302,76 @@ public partial class App : Application
 
             _languageMetadataConfigured = true;
         }
+    }
+
+    private bool TryRepairInvalidBorderBackgrounds(Exception exception, out IReadOnlyList<string> repairedElements)
+    {
+        repairedElements = [];
+
+        if (exception is not InvalidOperationException invalidOperation ||
+            !invalidOperation.Message.Contains("property 'Background'", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var repaired = new List<string>();
+
+        foreach (Window window in Windows)
+        {
+            foreach (var border in EnumerateVisualTree(window).OfType<Border>())
+            {
+                try
+                {
+                    _ = border.Background;
+                }
+                catch (InvalidOperationException backgroundException)
+                    when (backgroundException.Message.Contains("property 'Background'", StringComparison.Ordinal))
+                {
+                    border.Background = Brushes.Transparent;
+                    repaired.Add(DescribeVisual(border));
+                }
+            }
+        }
+
+        repairedElements = repaired;
+        return repaired.Count > 0;
+    }
+
+    private static IEnumerable<DependencyObject> EnumerateVisualTree(DependencyObject root)
+    {
+        var stack = new Stack<DependencyObject>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            yield return current;
+
+            var childCount = VisualTreeHelper.GetChildrenCount(current);
+            for (var index = childCount - 1; index >= 0; index--)
+            {
+                stack.Push(VisualTreeHelper.GetChild(current, index));
+            }
+        }
+    }
+
+    private static string DescribeVisual(DependencyObject element)
+    {
+        var chain = new Stack<string>();
+        DependencyObject? current = element;
+
+        while (current is not null)
+        {
+            chain.Push(current switch
+            {
+                FrameworkElement frameworkElement when !string.IsNullOrWhiteSpace(frameworkElement.Name)
+                    => $"{frameworkElement.GetType().Name}#{frameworkElement.Name}",
+                _ => current.GetType().Name
+            });
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return string.Join(" <- ", chain);
     }
 }

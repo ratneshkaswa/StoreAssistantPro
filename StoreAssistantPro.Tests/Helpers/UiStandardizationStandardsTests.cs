@@ -251,6 +251,17 @@ public sealed class UiStandardizationStandardsTests
     }
 
     [Fact]
+    public void InfoBar_Template_Should_Provide_Default_Background_And_BorderBrush_Before_Severity_Triggers()
+    {
+        var fluentTheme = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
+
+        Assert.Contains("<Border x:Name=\"Root\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("Background=\"{StaticResource InfoBarInfoFill}\"", fluentTheme, StringComparison.Ordinal);
+        Assert.Contains("BorderBrush=\"{StaticResource InfoBarInfoBorder}\"", fluentTheme, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GlobalStyles_Should_Not_Use_Forward_BasedOn_StaticResource_Style_References()
     {
         var globalStyles = File.ReadAllLines(

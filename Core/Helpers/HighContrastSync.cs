@@ -10,7 +10,9 @@ namespace StoreAssistantPro.Core.Helpers;
 /// </summary>
 public static class HighContrastSync
 {
-    private const string HighContrastOverridesPath = "Core/Styles/HighContrastOverrides.xaml";
+    private static readonly Uri HighContrastOverridesUri = new(
+        $"/{typeof(HighContrastSync).Assembly.GetName().Name};component/Core/Styles/HighContrastOverrides.xaml",
+        UriKind.Relative);
 
     private static Application? _application;
     private static bool _isAttached;
@@ -101,7 +103,7 @@ public static class HighContrastSync
             return _highContrastPalette;
 
         var dictionary = (ResourceDictionary)Application.LoadComponent(
-            new Uri(HighContrastOverridesPath, UriKind.Relative));
+            HighContrastOverridesUri);
 
         _highContrastPalette = dictionary
             .Keys
