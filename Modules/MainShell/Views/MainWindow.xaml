@@ -261,7 +261,7 @@
                     ToolTip="Minimize">
                 <TextBlock Text="&#xE921;"
                            FontFamily="{StaticResource FluentIconFont}"
-                           FontSize="10"
+                           FontSize="{StaticResource FontSizeLabel}"
                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
@@ -274,7 +274,7 @@
                     ToolTip="Close">
                 <TextBlock Text="&#xE8BB;"
                            FontFamily="{StaticResource FluentIconFont}"
-                           FontSize="10"
+                           FontSize="{StaticResource FontSizeLabel}"
                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>

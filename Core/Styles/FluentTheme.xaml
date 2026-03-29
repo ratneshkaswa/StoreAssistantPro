@@ -1210,7 +1210,7 @@
         <Setter Property="Background"         Value="{StaticResource ChromeAltFillColorSecondary}"/>
         <Setter Property="BorderBrush"        Value="{StaticResource DividerStrokeColorDefault}"/>
         <Setter Property="BorderThickness"    Value="0,0,0,1"/>
-        <Setter Property="Padding"            Value="16,10"/>
+        <Setter Property="Padding"            Value="16,12"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
@@ -1301,6 +1301,7 @@
         <Setter Property="UseLayoutRounding"    Value="True"/>
         <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
         <Setter Property="TextOptions.TextRenderingMode"  Value="ClearType"/>
+        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}"/>
     </Style>
 
 
@@ -2137,7 +2138,7 @@
                             <Button x:Name="PART_CloseButton" Grid.Column="2"
                                     Content="&#xE711;"
                                     FontFamily="{StaticResource FluentIconFont}"
-                                    FontSize="10"
+                                    FontSize="{StaticResource FontSizeLabel}"
                                     Background="Transparent" BorderThickness="0"
                                     AutomationProperties.Name="Dismiss message"
                                     Cursor="Hand" Padding="6"
@@ -2379,7 +2380,7 @@
                                     <Button x:Name="PART_UpButton"
                                             Content="&#xE70E;"
                                             FontFamily="{StaticResource FluentIconFont}"
-                                            FontSize="10" Padding="8,4"
+                                            FontSize="{StaticResource FontSizeLabel}" Padding="8,4"
                                             Background="Transparent" BorderThickness="0"
                                             ToolTip="Increase value"
                                             AutomationProperties.Name="Increase value"
@@ -2387,7 +2388,7 @@
                                     <Button x:Name="PART_DownButton"
                                             Content="&#xE70D;"
                                             FontFamily="{StaticResource FluentIconFont}"
-                                            FontSize="10" Padding="8,4"
+                                            FontSize="{StaticResource FontSizeLabel}" Padding="8,4"
                                             Background="Transparent" BorderThickness="0"
                                             ToolTip="Decrease value"
                                             AutomationProperties.Name="Decrease value"
@@ -2490,7 +2491,7 @@
                                     <TextBlock x:Name="Chevron" Grid.Column="2"
                                                Text="&#xE70D;"
                                                FontFamily="{StaticResource FluentIconFont}"
-                                               FontSize="12"
+                                               FontSize="{StaticResource FontSizeMinimum}"
                                                Foreground="{StaticResource FluentTextTertiary}"
                                                VerticalAlignment="Center"/>
                                 </Grid>
@@ -2675,7 +2676,7 @@
                         <TextBlock x:Name="Chevron"
                                    Text="&#xE76C;"
                                    FontFamily="{StaticResource FluentIconFont}"
-                                   FontSize="10"
+                                   FontSize="{StaticResource FontSizeLabel}"
                                    Foreground="{StaticResource FluentTextTertiary}"
                                    VerticalAlignment="Center"
                                    Margin="4,0"/>

@@ -133,6 +133,15 @@ public partial class LoginViewModel : BaseViewModel
         PinPad.PropertyChanged += OnPinPadPropertyChanged;
         _clockTimer.Start();
 
+        // Synchronous pre-check: during initial setup only Admin is available.
+        // Set this before the async refinement to avoid a brief flash of the
+        // User role button that disappears a frame later.
+        if (_appState.IsInitialSetupPending)
+        {
+            IsUserRoleVisible = false;
+            SelectedUserType ??= UserType.Admin;
+        }
+
         // L2: Pre-select last user if a previous login has occurred
         if (_appState.LastLoggedInUserType == UserType.Admin)
         {

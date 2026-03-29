@@ -32,14 +32,17 @@
 
     <!-- Button inherits FluentStandardButtonStyle (rounded, animated hover) -->
     <Style TargetType="Button" BasedOn="{StaticResource FluentStandardButtonStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource FluentFocusVisualStyle}"/>
-        <Setter Property="h:AsyncCommandVisualState.IsEnabled" Value="True"/>
-        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
     </Style>
 
     <Style TargetType="TextBlock">
-        <Setter Property="h:TrimmedTextToolTip.IsEnabled" Value="True"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
     </Style>
 
     <Style x:Key="DialogHeaderBackdropStyle" TargetType="Border">
@@ -49,12 +52,6 @@
         <Setter Property="CornerRadius" Value="{StaticResource FluentCornerLargeTop}"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Effect">
-            <Setter.Value>
-                <BlurEffect Radius="8"
-                            RenderingBias="Performance"/>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <Style x:Key="DialogHeaderContentSurfaceStyle" TargetType="Border">
@@ -68,14 +65,13 @@
 
     <!-- TextBox inherits FluentTextBoxStyle (rounded, accent-focus) -->
     <Style TargetType="TextBox" BasedOn="{StaticResource FluentTextBoxStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="TextAlignment" Value="Left"/>
         <Setter Property="h:BringFocusedFieldIntoView.IsEnabled" Value="True"/>
         <Setter Property="h:SelectOnFocus.IsEnabled" Value="True"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
-        <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
-        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
@@ -115,7 +111,6 @@
         <Setter Property="h:BringFocusedFieldIntoView.IsEnabled" Value="True"/>
         <Setter Property="h:SelectOnFocus.IsEnabled" Value="True"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
-        <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationTrailingChromeErrorTemplate}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -167,7 +162,7 @@
                                         VerticalAlignment="Center">
                                     <TextBlock Text="&#xE711;"
                                                FontFamily="{StaticResource FluentIconFont}"
-                                               FontSize="10"
+                                               FontSize="{StaticResource FontSizeLabel}"
                                                Foreground="{StaticResource FluentTextTertiary}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"/>
@@ -243,47 +238,18 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
-                    <Grid x:Name="Root"
-                          Margin="0,0,0,4"
-                          Opacity="1"
-                          UseLayoutRounding="True"
-                          SnapsToDevicePixels="True"
-                          Effect="{StaticResource TooltipShadow}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="10"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0"
-                              Width="18"
-                              Height="10"
-                              HorizontalAlignment="Center"
-                              Margin="0,0,0,-1">
-                            <Polygon Points="9,0 18,10 0,10"
-                                     Fill="{TemplateBinding Background}"
-                                     Stroke="{TemplateBinding BorderBrush}"
-                                     StrokeThickness="1"
-                                     StrokeLineJoin="Round"/>
-                        </Grid>
-                        <Border Grid.Row="1"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="{StaticResource TooltipCornerRadius}"
-                                UseLayoutRounding="True"
-                                SnapsToDevicePixels="True">
-                            <Border CornerRadius="{StaticResource TooltipCornerRadius}"
-                                    BorderBrush="{StaticResource TooltipInnerHighlight}"
-                                    BorderThickness="1"
-                                    Padding="{TemplateBinding Padding}"
-                                    UseLayoutRounding="True"
-                                    SnapsToDevicePixels="True">
-                                <ContentPresenter
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                    RecognizesAccessKey="True"/>
-                            </Border>
-                        </Border>
-                    </Grid>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource TooltipCornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            UseLayoutRounding="True"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True"/>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -291,12 +257,12 @@
 
     <!-- PasswordBox inherits FluentPasswordBoxStyle (rounded, accent-focus) -->
     <Style TargetType="PasswordBox" BasedOn="{StaticResource FluentPasswordBoxStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="h:BringFocusedFieldIntoView.IsEnabled" Value="True"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
         <Setter Property="h:PasswordReveal.IsEnabled" Value="True"/>
-        <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
@@ -313,12 +279,11 @@
 
     <!-- ComboBox inherits FluentComboBoxStyle (rounded, accent-focus, Fluent dropdown) -->
     <Style TargetType="ComboBox" BasedOn="{StaticResource FluentComboBoxStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="h:BringFocusedFieldIntoView.IsEnabled" Value="True"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
-        <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
-        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationTrailingChromeErrorTemplate}"/>
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
@@ -334,24 +299,34 @@
     </Style>
 
     <!-- ComboBoxItem inherits FluentComboBoxItemStyle (subtle hover/selection) -->
-    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource FluentComboBoxItemStyle}"/>
+    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource FluentComboBoxItemStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+    </Style>
 
     <!-- CheckBox inherits FluentCheckBoxStyle (accent fill, rounded box, glyph) -->
     <Style TargetType="CheckBox" BasedOn="{StaticResource FluentCheckBoxStyle}">
-        <Setter Property="h:AccessibilityHelper.AutoLabel" Value="True"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
     </Style>
 
     <!-- GroupBox inherits FluentGroupBoxStyle (card container, header region) -->
-    <Style TargetType="GroupBox" BasedOn="{StaticResource FluentGroupBoxStyle}"/>
+    <Style TargetType="GroupBox" BasedOn="{StaticResource FluentGroupBoxStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+    </Style>
 
     <!-- ToolTip - Win11 rounded frosted card globally -->
-    <Style TargetType="ToolTip" BasedOn="{StaticResource FluentToolTipStyle}"/>
+    <Style TargetType="ToolTip" BasedOn="{StaticResource FluentToolTipStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+    </Style>
 
     <!-- ContextMenu - Win11 rounded flyout globally -->
-    <Style TargetType="ContextMenu" BasedOn="{StaticResource FluentContextMenuStyle}"/>
+    <Style TargetType="ContextMenu" BasedOn="{StaticResource FluentContextMenuStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+    </Style>
 
     <!-- RadioButton inherits FluentRadioButtonStyle (accent circle, dot indicator) -->
-    <Style TargetType="RadioButton" BasedOn="{StaticResource FluentRadioButtonStyle}"/>
+    <Style TargetType="RadioButton" BasedOn="{StaticResource FluentRadioButtonStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+    </Style>
 
     <!-- ProgressBar inherits FluentProgressBarStyle (thin accent bar) -->
     <Style TargetType="ProgressBar" BasedOn="{StaticResource FluentProgressBarStyle}"/>
@@ -360,10 +335,10 @@
 
 
     <Style TargetType="DatePicker" BasedOn="{StaticResource FluentDatePickerStyle}">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="h:BringFocusedFieldIntoView.IsEnabled" Value="True"/>
         <Setter Property="h:Watermark.UseFallbackText" Value="True"/>
-        <Setter Property="h:ValidationFeedback.ShakeOnError" Value="True"/>
         <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationTrailingChromeErrorTemplate}"/>
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="True">
@@ -441,14 +416,6 @@
     </Style>
 
     <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Field label (12 px semi-bold, sits above its control) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ -->
-    <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
-        <Setter Property="FontWeight" Value="Normal"/>
-        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
-        <Setter Property="Margin" Value="{StaticResource FieldLabelSpacing}"/>
-    </Style>
-
     <!-- Inline form-row label (left-aligned, vertically centered) -->
     <Style x:Key="FormRowLabelStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
@@ -459,6 +426,15 @@
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="TextAlignment" Value="Left"/>
         <Setter Property="Margin" Value="{StaticResource FormColumnGap}"/>
+    </Style>
+
+    <!-- Field label (12 px, sits above its control) -->
+    <Style x:Key="FieldLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource FormRowLabelStyle}">
+        <Setter Property="FontFamily" Value="{StaticResource FluentFontFamily}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+        <Setter Property="Margin" Value="{StaticResource FieldLabelSpacing}"/>
     </Style>
 
     <Style x:Key="RequiredFieldIndicatorRunStyle" TargetType="Run">
@@ -2327,12 +2303,7 @@
                                 Opacity="0"
                                 IsHitTestVisible="False"
                                 UseLayoutRounding="True"
-                                SnapsToDevicePixels="True">
-                            <Border.Effect>
-                                <BlurEffect Radius="10"
-                                            RenderingBias="Performance"/>
-                            </Border.Effect>
-                        </Border>
+                                SnapsToDevicePixels="True"/>
                         <Border x:Name="CellRoot"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -2403,10 +2374,13 @@
                      h:PredictiveFocusBehavior.IsEnabled="False"
          ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â -->
     <Style TargetType="Window" BasedOn="{StaticResource FluentWindowStyle}">
+        <Setter Property="Background" Value="{StaticResource AppBackgroundBrush}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="h:KeyboardNav.IsEnabled" Value="True"/>
         <Setter Property="h:PredictiveFocusBehavior.IsEnabled" Value="True"/>
         <Setter Property="h:LayoutDiagnostics.IsEnabled" Value="False"/>
         <Setter Property="h:StyleComplianceDiagnostics.IsEnabled" Value="False"/>
+        <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
     <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â
@@ -2419,7 +2393,9 @@
          To opt-in on a specific view: h:Motion.PageFadeIn="True"
          ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â -->
     <Style TargetType="UserControl">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLabel}"/>
         <Setter Property="h:Motion.PageFadeIn" Value="False"/>
+        <Setter Property="Validation.ErrorTemplate" Value="{StaticResource InlineValidationErrorTemplate}"/>
     </Style>
 
 
@@ -2471,23 +2447,13 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{StaticResource TooltipCornerRadius}"
-                            Effect="{StaticResource TooltipShadow}"
                             UseLayoutRounding="True"
                             SnapsToDevicePixels="True"
-                            Opacity="1">
-
-                        <!-- Inner highlight ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 1 px white inset (Fluent smoke) -->
-                        <Border CornerRadius="{StaticResource TooltipCornerRadius}"
-                                BorderBrush="{StaticResource TooltipInnerHighlight}"
-                                BorderThickness="1"
-                                UseLayoutRounding="True"
-                                SnapsToDevicePixels="True"
-                                Padding="{TemplateBinding Padding}">
+                            Padding="{TemplateBinding Padding}">
                             <ContentPresenter
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                 RecognizesAccessKey="True"/>
-                        </Border>
                     </Border>
 
                 </ControlTemplate>

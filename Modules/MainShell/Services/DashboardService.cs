@@ -129,16 +129,20 @@ public class DashboardService(
         var recentSales = await recentSalesQuery.ToListAsync(ct);
 
         // ── Top products today (#394) ──
-        var topProductsToday = await db.SaleItems
+        var topProductsToday = (await db.SaleItems
             .Where(si => si.Sale!.SaleDate >= today)
             .GroupBy(si => si.Product!.Name)
-            .Select(g => new TopProductItem(
-                g.Key ?? "Unnamed product",
-                g.Sum(si => si.Quantity),
-                g.Sum(si => si.UnitPrice * si.Quantity)))
+            .Select(g => new
+            {
+                ProductName = g.Key ?? "Unnamed product",
+                QuantitySold = g.Sum(si => si.Quantity),
+                Revenue = g.Sum(si => si.UnitPrice * si.Quantity)
+            })
             .OrderByDescending(t => t.QuantitySold)
             .Take(5)
-            .ToListAsync(ct);
+            .ToListAsync(ct))
+            .Select(t => new TopProductItem(t.ProductName, t.QuantitySold, t.Revenue))
+            .ToList();
 
         // ── Last backup date (#332) ──
         var lastBackupDate = await lastBackupDateTask.ConfigureAwait(false);
@@ -181,16 +185,20 @@ public class DashboardService(
         var expenseTrendFilled = FillDailyExpenseTrend(expenseTrendRaw, thirtyDaysAgo, today);
 
         // ── Category sales breakdown (#400) ──
-        var categorySales = await db.SaleItems
+        var categorySales = (await db.SaleItems
             .Where(si => si.Sale!.SaleDate >= monthStart)
             .GroupBy(si => si.Product!.Category!.Name)
-            .Select(g => new CategorySalesBreakdownItem(
-                g.Key ?? "Uncategorized",
-                g.Sum(si => si.UnitPrice * si.Quantity),
-                g.Sum(si => si.Quantity)))
+            .Select(g => new
+            {
+                CategoryName = g.Key ?? "Uncategorized",
+                Revenue = g.Sum(si => si.UnitPrice * si.Quantity),
+                QuantitySold = g.Sum(si => si.Quantity)
+            })
             .OrderByDescending(c => c.Revenue)
             .Take(10)
-            .ToListAsync(ct);
+            .ToListAsync(ct))
+            .Select(c => new CategorySalesBreakdownItem(c.CategoryName, c.Revenue, c.QuantitySold))
+            .ToList();
 
         // ── Year-over-year comparison (#402) ──
         var lastYearMonthStart = monthStart.AddYears(-1);

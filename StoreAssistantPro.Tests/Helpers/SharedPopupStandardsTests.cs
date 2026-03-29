@@ -73,7 +73,6 @@ public sealed class SharedPopupStandardsTests
             Path.Combine(SolutionRoot, "Core", "Helpers", "HelpHint.cs"));
 
         Assert.Contains("TeachingTipTooltipStyle", globalStyles, StringComparison.Ordinal);
-        Assert.Contains("<Polygon Points=\"9,0 18,10 0,10\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("UseCalloutStyle", smartTooltip, StringComparison.Ordinal);
         Assert.Contains("SetUseCalloutStyle(fe, helpText is not null);", helpHint, StringComparison.Ordinal);
     }

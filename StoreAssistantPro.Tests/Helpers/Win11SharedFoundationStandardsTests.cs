@@ -71,12 +71,82 @@ public sealed class Win11SharedFoundationStandardsTests
     [Fact]
     public void SharedTypography_Should_Keep_Titles_Emphasized_And_Command_Text_Regular()
     {
+        var designSystem = File.ReadAllText(
+            Path.Combine(SolutionRoot, "Core", "Styles", "DesignSystem.xaml"));
         var globalStyles = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "GlobalStyles.xaml"));
         var posStyles = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "PosStyles.xaml"));
         var fluentTheme = File.ReadAllText(
             Path.Combine(SolutionRoot, "Core", "Styles", "FluentTheme.xaml"));
+        var appXaml = File.ReadAllText(
+            Path.Combine(SolutionRoot, "App.xaml"));
+
+        Assert.Contains("<sys:Double x:Key=\"FontSizeLabel\">13</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"FontSizeCaption\">13</sys:Double>", designSystem, StringComparison.Ordinal);
+        Assert.Contains("<sys:Double x:Key=\"FontSizeStatusBar\">13</sys:Double>", designSystem, StringComparison.Ordinal);
+
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"Button\" BasedOn=\"{StaticResource FluentStandardButtonStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"TextBlock\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"Label\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"TextBox\" BasedOn=\"{StaticResource FluentTextBoxStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"PasswordBox\" BasedOn=\"{StaticResource FluentPasswordBoxStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"ComboBox\" BasedOn=\"{StaticResource FluentComboBoxStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"ComboBoxItem\" BasedOn=\"{StaticResource FluentComboBoxItemStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"DatePicker\" BasedOn=\"{StaticResource FluentDatePickerStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"CheckBox\" BasedOn=\"{StaticResource FluentCheckBoxStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"RadioButton\" BasedOn=\"{StaticResource FluentRadioButtonStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"GroupBox\" BasedOn=\"{StaticResource FluentGroupBoxStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"ToolTip\" BasedOn=\"{StaticResource FluentToolTipStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"ContextMenu\" BasedOn=\"{StaticResource FluentContextMenuStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"Window\" BasedOn=\"{StaticResource FluentWindowStyle}\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        AssertStyleBlockContains(
+            globalStyles,
+            "<Style TargetType=\"UserControl\">",
+            "<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>");
+        Assert.Contains("<Setter Property=\"FontSize\" Value=\"{StaticResource FontSizeLabel}\"/>", appXaml, StringComparison.Ordinal);
 
         AssertStyleBlockContains(
             globalStyles,
@@ -145,6 +215,55 @@ public sealed class Win11SharedFoundationStandardsTests
             globalStyles,
             "<Style x:Key=\"SplitButtonPrimarySegmentStyle\" TargetType=\"Button\" BasedOn=\"{x:Null}\">",
             "<Setter Property=\"FontWeight\" Value=\"Normal\"/>");
+    }
+
+    [Fact]
+    public void SharedTypography_Should_Not_Use_Sub12_FontSizes_In_App_Source()
+    {
+        var fontPatterns = new[]
+        {
+            "FontSize\\s*=\\s*\"(?<num>\\d+(?:\\.\\d+)?)\"",
+            "<Setter\\s+Property=\"FontSize\"\\s+Value=\"(?<num>\\d+(?:\\.\\d+)?)\"\\s*/>",
+            "<sys:Double\\s+x:Key=\"[^\"]*FontSize[^\"]*\">(?<num>\\d+(?:\\.\\d+)?)</sys:Double>",
+            "FontSize\\s*=\\s*(?<num>\\d+(?:\\.\\d+)?)\\b",
+            "const\\s+double\\s+[A-Za-z0-9_]*FontSize[A-Za-z0-9_]*\\s*=\\s*(?<num>\\d+(?:\\.\\d+)?)\\b",
+            "static\\s+readonly\\s+double\\s+[A-Za-z0-9_]*FontSize[A-Za-z0-9_]*\\s*=\\s*(?<num>\\d+(?:\\.\\d+)?)\\b"
+        };
+
+        var sourceFiles = Directory
+            .EnumerateFiles(SolutionRoot, "*.*", SearchOption.AllDirectories)
+            .Where(path =>
+                path.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase) ||
+                path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .Where(path =>
+                !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase) &&
+                !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase) &&
+                !path.Contains($"{Path.DirectorySeparatorChar}codex_tmp{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase));
+
+        var violations = new List<string>();
+        foreach (var file in sourceFiles)
+        {
+            var relativePath = Path.GetRelativePath(SolutionRoot, file);
+            var lineNumber = 0;
+            foreach (var line in File.ReadLines(file))
+            {
+                lineNumber++;
+                foreach (var pattern in fontPatterns)
+                {
+                    foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(line, pattern))
+                    {
+                        if (double.TryParse(match.Groups["num"].Value, out var size) && size < 13)
+                        {
+                            violations.Add($"{relativePath}:{lineNumber}: {line.Trim()}");
+                        }
+                    }
+                }
+            }
+        }
+
+        Assert.True(
+            violations.Count == 0,
+            "Found font sizes below 13:" + Environment.NewLine + string.Join(Environment.NewLine, violations));
     }
 
     [Fact]

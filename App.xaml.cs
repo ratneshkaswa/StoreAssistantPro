@@ -246,13 +246,7 @@ public partial class App : Application
 
     private static void ShowNativeErrorDialog(string title, string message)
     {
-        MessageBox.Show(
-            message,
-            title,
-            MessageBoxButton.OK,
-            MessageBoxImage.Error,
-            MessageBoxResult.OK,
-            MessageBoxOptions.DefaultDesktopOnly);
+        AppDialogPresenter.ShowError(title, message);
     }
 
     private static (string Title, string Message) CategorizeException(Exception ex) => ex switch

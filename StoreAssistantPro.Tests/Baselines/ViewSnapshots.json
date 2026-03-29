@@ -1,26 +1,26 @@
 {
   "WorkspaceView": {
-    "AverageHash": "0000000000004202",
-    "DifferentPixels": 143129
+    "AverageHash": "5E005E5E047A4000",
+    "DifferentPixels": 676344
   },
   "SystemSettingsView": {
     "AverageHash": "00003C3C3C3C3C00",
     "DifferentPixels": 674293
   },
   "SaleHistoryView": {
-    "AverageHash": "007E7E7E7E7E1E00",
-    "DifferentPixels": 972095
+    "AverageHash": "007E7E7E7E1E0600",
+    "DifferentPixels": 848516
   },
   "ProductManagementView": {
-    "AverageHash": "0002007E7E7E7E00",
+    "AverageHash": "0000027E7E7E0E00",
     "DifferentPixels": 732390
   },
   "PaymentManagementView": {
-    "AverageHash": "007E7E7E7E7E0200",
-    "DifferentPixels": 833926
+    "AverageHash": "007E7E7E7E7E0600",
+    "DifferentPixels": 762119
   },
   "ReportsView": {
-    "AverageHash": "007E7E7E7E000000",
+    "AverageHash": "007E7E7E7E001800",
     "DifferentPixels": 1174299
   }
 }

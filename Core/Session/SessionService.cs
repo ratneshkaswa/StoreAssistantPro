@@ -45,6 +45,7 @@ public class SessionService(
         appState.SetFirmInfo(FirmName);
         appState.SetCurrentUser(userType);
         appState.SetLoggedIn(true);
+        appState.SetDefaultPinFlag(config?.IsDefaultAdminPin ?? false);
 
         regionalSettings.UpdateSettings(
             config?.CurrencySymbol ?? "₹",

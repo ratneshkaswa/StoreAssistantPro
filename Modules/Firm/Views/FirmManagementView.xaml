@@ -172,7 +172,6 @@
                                            Style="{StaticResource FormRowLabelStyle}"/>
                                 <TextBox x:Name="AddressBox"
                                          Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                                         Style="{StaticResource FluentMultilineTextBoxStyle}"
                                          AutomationProperties.Name="Address"
                                          AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}"
                                          MaxLength="200"

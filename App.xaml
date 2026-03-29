@@ -73,11 +73,6 @@
                 <ResourceDictionary Source="Core/Styles/PosStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Global Window background -->
-            <Style TargetType="Window">
-                <Setter Property="Background" Value="{StaticResource AppBackgroundBrush}"/>
-            </Style>
-
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
             <helpers:EqualityConverter x:Key="EqualityConverter"/>
             <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>

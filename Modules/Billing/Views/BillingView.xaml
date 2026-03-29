@@ -122,7 +122,7 @@
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search products"
-                     h:Watermark.Text="e.g. Black T-shirt"/>
+                     h:Watermark.Text="Search products by name"/>
             <Button Grid.Column="1" Content="Search" Command="{Binding SearchProductsCommand}"
                     Style="{StaticResource SearchButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
             <Button Grid.Column="2" Content="Add Selected"
@@ -134,7 +134,7 @@
                      Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
                      AutomationProperties.Name="Barcode input"
                      Width="{StaticResource FieldWidthStandard}"
-                     h:Watermark.Text="e.g. 8901234567890"/>
+                     h:Watermark.Text="Scan or enter barcode"/>
             <Button Grid.Column="5" Content="Scan" Command="{Binding ScanBarcodeCommand}"
                     Style="{StaticResource UtilityButtonStyle}" Margin="{StaticResource InlineControlSpacing}"/>
         </Grid>
@@ -373,7 +373,7 @@
                                              Margin="{StaticResource InlineControlSpacing}"
                                              AutomationProperties.Name="Split reference"
                                              h:Watermark.Text="Payment reference"
-                                             MaxLength="50"
+                                             MaxLength="100"
                                              Visibility="{Binding RequiresReference, Converter={StaticResource BoolToVisibility}}"/>
                                     <Button Grid.Column="3" Content="Remove" ToolTip="Remove line"
                                             Command="{Binding DataContext.RemoveSplitLineCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"

@@ -12,8 +12,8 @@ public static class ReportPrintHelper
 {
     private const double DefaultMargin = 40;
     private static readonly Typeface MonoTypeface = new("Consolas");
-    private const double FontSize = 12;
-    private const double LineHeight = 16;
+    private const double FontSize = 13;
+    private const double LineHeight = 17;
 
     /// <summary>Creates a <see cref="FixedDocument"/> from plain text report content.</summary>
     public static FixedDocument CreateDocument(string reportText, double pageWidth = 816, double pageHeight = 1056)

@@ -809,7 +809,7 @@
                             <ContentPresenter VerticalAlignment="Center"/>
                             <TextBlock Text="&#xE711;"
                                        FontFamily="{StaticResource FluentIconFont}"
-                                       FontSize="10"
+                                       FontSize="{StaticResource FontSizeLabel}"
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Foreground="{TemplateBinding Foreground}"/>

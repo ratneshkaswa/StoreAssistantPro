@@ -243,8 +243,8 @@ public class NotificationBadgeBehaviorTests
 
             var badge = FindBadge(panel);
             Assert.NotNull(badge);
-            Assert.Equal(new CornerRadius(8), badge.CornerRadius);
-            Assert.Equal(16, badge.Height);
+            Assert.Equal(new CornerRadius(10), badge.CornerRadius);
+            Assert.Equal(20, badge.Height);
 
             var tb = badge.Child as TextBlock;
             Assert.NotNull(tb);

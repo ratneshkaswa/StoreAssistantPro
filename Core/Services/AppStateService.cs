@@ -251,7 +251,9 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
     {
         RunOnDispatcher(() =>
         {
-            FirmName = string.Empty;
+            // FirmName and IsDefaultAdminPin are store-level state (not session-level)
+            // and must survive logout so the login screen still shows the store name
+            // and the default-PIN warning.
             CurrentUserType = default;
             IsLoggedIn = false;
             CurrentMode = OperationalMode.Management;
@@ -260,7 +262,6 @@ public partial class AppStateService : ObservableObject, IAppStateService, IDisp
             LastConnectionCheck = null;
             SmartTooltipsEnabled = false;
             SmartTooltip.GlobalEnabled = false;
-            IsDefaultAdminPin = false;
             Notifications.Clear();
         });
     }

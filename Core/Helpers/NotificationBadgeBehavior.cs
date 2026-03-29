@@ -229,7 +229,7 @@ public static class NotificationBadgeBehavior
         if (element.TryFindResource("FontSizeLabel") is double fontSize)
             return fontSize;
 
-        return 12;
+        return 13;
     }
 
 }

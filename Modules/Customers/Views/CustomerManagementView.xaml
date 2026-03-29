@@ -34,7 +34,7 @@
             <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search customers"
-                     h:Watermark.Text="e.g. Aarav or 9876543210"/>
+                     h:Watermark.Text="Search customers by name or phone"/>
         </Grid>
 
         <!-- DataGrid + Form + Details share the * row -->
@@ -130,7 +130,7 @@
                         </TextBlock>
                         <TextBox Grid.Row="0" Grid.Column="1"
                                  Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
-                                 MaxLength="200"
+                                 MaxLength="100"
                                  AutomationProperties.Name="Customer name"
                                  h:Watermark.Text="Customer name"/>
 
@@ -148,7 +148,7 @@
                                    Style="{StaticResource FormRowLabelStyle}"/>
                         <TextBox Grid.Row="4" Grid.Column="1"
                                  Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                                 MaxLength="200"
+                                 MaxLength="100"
                                  AutomationProperties.Name="Customer email"
                                  h:Watermark.Text="Email address"/>
 
@@ -156,8 +156,7 @@
                                    Style="{StaticResource FormRowLabelStyle}"/>
                         <TextBox Grid.Row="6" Grid.Column="1"
                                  Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource FluentMultilineTextBoxStyle}"
-                                 MaxLength="500"
+                                 MaxLength="256"
                                  AutomationProperties.Name="Customer address"
                                  h:Watermark.Text="Street address"/>
 
@@ -222,9 +221,9 @@
                                       EnableRowVirtualization="True"
                                       MaxHeight="{StaticResource ReadOnlyInspectionGridMaxHeight}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="120"/>
-                                    <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="100"/>
-                                    <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="100"/>
+                                    <DataGridTextColumn Header="INVOICE" Binding="{Binding InvoiceNumber}" Width="{StaticResource ColumnWidthDate}"/>
+                                    <DataGridTextColumn Header="DATE" Binding="{Binding SaleDate, StringFormat=dd-MMM-yy}" Width="{StaticResource ColumnWidthStatus}"/>
+                                    <DataGridTextColumn Header="AMOUNT" Binding="{Binding TotalAmount, StringFormat={}{0:C}}" Width="{StaticResource ColumnWidthPrice}"/>
                                     <DataGridTemplateColumn Header="PAYMENT" SortMemberPath="PaymentMethod" Width="*">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

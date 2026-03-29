@@ -70,7 +70,6 @@ public sealed class DialogStandardsTests
             Path.Combine(SolutionRoot, "Core", "Printing", "PrintPreviewWindow.xaml"));
 
         Assert.Contains("DialogHeaderBackdropStyle", globalStyles, StringComparison.Ordinal);
-        Assert.Contains("BlurEffect Radius=\"8\"", globalStyles, StringComparison.Ordinal);
         Assert.Contains("DialogHeaderContentSurfaceStyle", globalStyles, StringComparison.Ordinal);
         Assert.Contains("DialogFooterBarStyle", globalStyles, StringComparison.Ordinal);
         Assert.Contains("DialogFooterActionRowStyle", globalStyles, StringComparison.Ordinal);

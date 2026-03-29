@@ -35,7 +35,7 @@
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource FluentSearchTextBoxStyle}"
                      AutomationProperties.Name="Search vendors"
-                     h:Watermark.Text="e.g. Jaipur Textiles or 08ABCDE1234F1Z5"/>
+                     h:Watermark.Text="Search vendors by name or GSTIN"/>
         </Grid>
 
         <!-- Two-column layout: list + form -->
@@ -156,14 +156,12 @@
                     <TextBlock Grid.Row="8" Grid.Column="0" Text="Address" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="8" Grid.Column="1"
                              Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"
-                             Style="{StaticResource FluentMultilineTextBoxStyle}"
                              AutomationProperties.Name="Vendor address"
                              h:Watermark.Text="Address line 1"/>
 
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Address Line 2" Style="{StaticResource FormRowLabelStyle}"/>
                     <TextBox Grid.Row="10" Grid.Column="1"
                              Text="{Binding AddressLine2, UpdateSourceTrigger=PropertyChanged}" MaxLength="300"
-                             Style="{StaticResource FluentMultilineTextBoxStyle}"
                              AutomationProperties.Name="Vendor address line 2"
                              h:Watermark.Text="Address line 2 (optional)"/>
 

@@ -17,6 +17,7 @@ public partial class BarcodeLabelViewModel(
     IRegionalSettingsService regional) : BaseViewModel
 {
     private static readonly TimeSpan NavigationFreshnessWindow = TimeSpan.FromMinutes(2);
+    private const double MinimumLabelFontSize = 13;
 
     // ── Product list ──
 
@@ -251,7 +252,7 @@ public partial class BarcodeLabelViewModel(
             content.Children.Add(new TextBlock
             {
                 Text = item.ProductName,
-                FontSize = 7,
+                FontSize = MinimumLabelFontSize,
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.SemiBold,
@@ -264,7 +265,7 @@ public partial class BarcodeLabelViewModel(
             content.Children.Add(new TextBlock
             {
                 Text = $"|||  {item.Barcode}  |||",
-                FontSize = 8,
+                FontSize = MinimumLabelFontSize,
                 FontFamily = new FontFamily("Consolas"),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 2, 0, 0),
@@ -274,7 +275,7 @@ public partial class BarcodeLabelViewModel(
             content.Children.Add(new TextBlock
             {
                 Text = item.Barcode,
-                FontSize = 6,
+                FontSize = MinimumLabelFontSize,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Foreground = Brushes.Black
             });
@@ -285,7 +286,7 @@ public partial class BarcodeLabelViewModel(
             content.Children.Add(new TextBlock
             {
                 Text = item.SalePrice,
-                FontSize = 7,
+                FontSize = MinimumLabelFontSize,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 1, 0, 0),
@@ -298,7 +299,7 @@ public partial class BarcodeLabelViewModel(
             content.Children.Add(new TextBlock
             {
                 Text = $"MRP: {item.MRP}",
-                FontSize = 6,
+                FontSize = MinimumLabelFontSize,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Foreground = Brushes.Black
             });
@@ -309,7 +310,7 @@ public partial class BarcodeLabelViewModel(
             content.Children.Add(new TextBlock
             {
                 Text = item.SizeColor,
-                FontSize = 6,
+                FontSize = MinimumLabelFontSize,
                 FontStyle = FontStyles.Italic,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 1, 0, 0),

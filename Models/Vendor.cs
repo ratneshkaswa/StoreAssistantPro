@@ -35,7 +35,7 @@ public class Vendor
     public string? State { get; set; }
 
     /// <summary>PIN code for delivery/dispatch routing.</summary>
-    [MaxLength(10)]
+    [MaxLength(6)]
     public string? PinCode { get; set; }
 
     /// <summary>
